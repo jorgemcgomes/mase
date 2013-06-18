@@ -1,0 +1,141 @@
+# with elman: (input + hidden + 1) * hidden + (hidden + 1) * output
+# feed-forward (input + 1) * hidden + (hidden + 1) * output
+
+# ECJ options
+evalthreads = 				auto
+breedthreads = 				auto
+checkpoint =				false
+checkpoint-modulo =                     1
+checkpoint-prefix = 			ec
+
+# Generational configuration
+state = 				ec.simple.SimpleEvolutionState
+init = 					ec.simple.SimpleInitializer
+finish = 	        		ec.simple.SimpleFinisher
+exch = 					ec.simple.SimpleExchanger
+breed =					ec.simple.SimpleBreeder
+eval =					ec.simple.SimpleEvaluator
+stat =					ec.simple.SimpleStatistics
+pop = 					ec.Population
+
+generations =				250
+quit-on-run-complete =			false
+
+# Coevolution parameters
+eval =                                  ec.coevolve.MultiPopCoevolutionaryEvaluator2
+eval.fitness-only-elite =               false
+eval.num-current=			1
+eval.num-elites =			1
+eval.num-prev =				0
+eval.num-shuffled =                     0
+eval.select-current =			ec.select.RandomSelection
+eval.select-prev = 			ec.select.RandomSelection
+
+# Task parameters
+eval.problem =                          mase.novelty.NoveltyProblem
+eval.problem.ns-k =                     15
+eval.problem.ns-archive-prob =          0.01
+eval.problem.ns-archive-size =          1000
+eval.problem.ns-blend =                 1
+
+eval.problem.sim =                      mase.app.pred.PredatorPreySimulator
+eval.problem.group-controller =         mase.controllers.NeuralGroupDecoder
+
+eval.problem.trials-merge =             best
+
+eval.problem.sim.repetitions =              10
+eval.problem.sim.max-steps =                500
+eval.problem.sim.size =                     100
+eval.problem.sim.discretization =           15
+eval.problem.sim.n-preys =                  5
+eval.problem.sim.prey-placement =           random
+eval.problem.sim.prey-margin =              20
+eval.problem.sim.prey-speed =               1
+eval.problem.sim.escape-distance =          5
+eval.problem.sim.n-predators =              3
+eval.problem.sim.predator-separation =      10
+eval.problem.sim.predator-speed =           1
+eval.problem.sim.predator-rotate-speed =    1.57
+eval.problem.sim.capture-distance =         1
+eval.problem.sim.escape-strategy =          mean-vector
+eval.problem.sim.sensor-mode =              arcs
+eval.problem.sim.n-arcs =                   4
+eval.problem.sim.collisions =               TRUE
+
+eval.problem.sim.number-evals =             2
+eval.problem.sim.eval.0 =             mase.app.pred.MultiPreyFitness
+eval.problem.sim.eval.0.combination = harmonic
+eval.problem.sim.eval.0.update-freq = 0
+eval.problem.sim.eval.1 =             mase.app.pred.MultiPreyGroupEval
+eval.problem.sim.eval.1.update-freq = 1
+
+# Individual representation
+ec.subpop.species = 			ec.vector.FloatVectorSpecies
+pop.default-subpop.species.fitness = 		mase.novelty.NoveltyFitness
+pop.default-subpop.species.fitness.fitness-index =  0
+pop.default-subpop.species.fitness.novelty-index =  1
+pop.default-subpop.species.genome-size =            63
+pop.default-subpop.species.min-gene =               -1
+pop.default-subpop.species.max-gene =               1
+pop.default-subpop.species.ind =                    mase.controllers.NeuralControllerIndividual
+neural.input =                          8
+neural.hidden =                         5
+neural.output =                         3
+neural.structure =                      feed-forward
+neural.tanh =                           false
+
+# Populations configuration
+pop.subpops =                           3
+pop.default-subpop = 			ec.Subpopulation
+ec.subpop.duplicate-retries =           10
+ec.subpop.size = 			150
+
+# Elitism configuration (pre-breeding)
+breed.elite.0 =				10
+breed.reevaluate-elites.0 =             true
+breed.elite.1 =				10
+breed.reevaluate-elites.1 =             true
+breed.elite.2 =                         10
+breed.reevaluate-elites.2 =             true
+
+# Breeding
+vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline
+vector.mutate.source.0 =              ec.select.TournamentSelection
+#vector.mutate.source.0 =                ec.vector.breed.VectorCrossoverPipeline
+vector.species.mutation-type =          gauss
+vector.species.mutation-stdev =         0.50
+vector.species.mutation-prob =          0.05
+vector.species.mutation-bounded =       TRUE
+#vector.xover.source.0 =                 ec.select.TournamentSelection
+#vector.xover.source.1 =                 ec.select.TournamentSelection
+#vector.species.crossover-type = 	one
+select.tournament.size =                7
+
+# Statistics
+stat =                                  ec.simple.SimpleStatistics
+stat.file =				$simple.stat
+stat.num-children = 			9
+stat.child.0 =                          mase.stat.ETAStats
+stat.child.1 = 				ec.simple.SimpleShortStatistics
+stat.child.1.file =			$extended.stat
+stat.child.1.do-time =                  true
+stat.child.1.do-size =                  false
+stat.child.1.do-subpops =               true
+stat.child.2 =                          mase.stat.BestEverSolutionStat
+stat.child.2.file =                     $best.ind
+stat.child.3 =                          mase.stat.EvaluationsStat
+stat.child.3.file =                     $behaviours.stat
+stat.child.4 =                          mase.stat.BestSolutionGenStat
+stat.child.4.file =                     $bests.tar.gz
+stat.child.4.compress =                 true
+stat.child.5 =                          mase.stat.SampleSolutionsStat
+stat.child.5.file =                     $sample.tar.gz
+stat.child.5.compress =                 true
+stat.child.5.sample-size =              10
+stat.child.6 =                          mase.stat.FitnessStat
+stat.child.6.file =			$fitness.stat
+stat.child.6.do-subpops =               true
+stat.child.7 =                          mase.novelty.NoveltyPopStat
+stat.child.7.file =			$noveltypop.stat
+stat.child.8 =                          mase.novelty.NoveltyIndividualsStat
+stat.child.8.file =			$noveltyind.stat
