@@ -128,34 +128,34 @@ public class SimpleBreeder extends Breeder
         for(int x=0;x<size;x++)
             {
             // get elites
-            if (state.parameters.exists(base.push(P_ELITE).push(""+x),null))
+            if (state.parameters.exists(base.push(P_ELITE).push(""+x),base.push(P_ELITE)))
                 {
-                if (state.parameters.exists(base.push(P_ELITE_FRAC).push(""+x),null))
-                    state.output.error("Both elite and elite-frac specified for subpouplation " + x + ".", base.push(P_ELITE_FRAC).push(""+x), base.push(P_ELITE_FRAC).push(""+x));
+                if (state.parameters.exists(base.push(P_ELITE_FRAC).push(""+x),base.push(P_ELITE_FRAC)))
+                    state.output.error("Both elite and elite-frac specified for subpouplation " + x + ".", base.push(P_ELITE).push(""+x), base.push(P_ELITE_FRAC).push(""+x));
                 else 
                     {
-                    elite[x] = state.parameters.getIntWithDefault(base.push(P_ELITE).push(""+x),null,0);
+                    elite[x] = state.parameters.getIntWithDefault(base.push(P_ELITE).push(""+x),base.push(P_ELITE),0);
                     if (elite[x] < 0)
-                        state.output.error("Elites for subpopulation " + x + " must be an integer >= 0", base.push(P_ELITE).push(""+x));
+                        state.output.error("Elites for subpopulation " + x + " must be an integer >= 0", base.push(P_ELITE).push(""+x), base.push(P_ELITE));
                     }
                 }
-            else if (state.parameters.exists(base.push(P_ELITE_FRAC).push(""+x),null))
+            else if (state.parameters.exists(base.push(P_ELITE_FRAC).push(""+x),base.push(P_ELITE_FRAC)))
                 {
-                eliteFrac[x] = state.parameters.getDoubleWithMax(base.push(P_ELITE_FRAC).push(""+x),null,0.0, 1.0);
+                eliteFrac[x] = state.parameters.getDoubleWithMax(base.push(P_ELITE_FRAC).push(""+x),base.push(P_ELITE_FRAC),0.0, 1.0);
                 if (eliteFrac[x] < 0.0)
-                    state.output.error("Elite Fraction of subpopulation " + x + " must be a real value between 0.0 and 1.0 inclusive", base.push(P_ELITE_FRAC).push(""+x));
+                    state.output.error("Elite Fraction of subpopulation " + x + " must be a real value between 0.0 and 1.0 inclusive", base.push(P_ELITE_FRAC).push(""+x), base.push(P_ELITE_FRAC));
                 }
             else if (defaultSubpop >= 0)
                 {
-                if (state.parameters.exists(base.push(P_ELITE).push(""+defaultSubpop),null))
+                if (state.parameters.exists(base.push(P_ELITE).push(""+defaultSubpop),base.push(P_ELITE)))
                     {
-                    elite[x] = state.parameters.getIntWithDefault(base.push(P_ELITE).push(""+defaultSubpop),null,0);
+                    elite[x] = state.parameters.getIntWithDefault(base.push(P_ELITE).push(""+defaultSubpop),base.push(P_ELITE),0);
                     if (elite[x] < 0)
                         state.output.warning("Invalid default subpopulation elite value.");  // we'll fail later
                     }
-                else if (state.parameters.exists(base.push(P_ELITE_FRAC).push(""+defaultSubpop),null))
+                else if (state.parameters.exists(base.push(P_ELITE_FRAC).push(""+defaultSubpop),base.push(P_ELITE_FRAC)))
                     {
-                    eliteFrac[x] = state.parameters.getDoubleWithMax(base.push(P_ELITE_FRAC).push(""+defaultSubpop),null,0.0, 1.0);
+                    eliteFrac[x] = state.parameters.getDoubleWithMax(base.push(P_ELITE_FRAC).push(""+defaultSubpop),base.push(P_ELITE_FRAC),0.0, 1.0);
                     if (eliteFrac[x] < 0.0)
                         state.output.warning("Invalid default subpopulation elite-frac value.");  // we'll fail later
                     }
@@ -170,15 +170,15 @@ public class SimpleBreeder extends Breeder
                 }
                                         
             // get reevaluation
-            if (defaultSubpop >= 0 && !state.parameters.exists(base.push(P_REEVALUATE_ELITES).push(""+x),null))
+            if (defaultSubpop >= 0 && !state.parameters.exists(base.push(P_REEVALUATE_ELITES).push(""+x),base.push(P_REEVALUATE_ELITES)))
                 {
-                reevaluateElites[x] = state.parameters.getBoolean(base.push(P_REEVALUATE_ELITES).push(""+defaultSubpop), null, false);
+                reevaluateElites[x] = state.parameters.getBoolean(base.push(P_REEVALUATE_ELITES).push(""+defaultSubpop), base.push(P_REEVALUATE_ELITES), false);
                 if (reevaluateElites[x])
                     state.output.warning("Elite reevaluation not specified for subpopulation " + x + ".  Using values for default subpopulation " + defaultSubpop + ": " + reevaluateElites[x]);
                 }
             else
                 {
-                reevaluateElites[x] = state.parameters.getBoolean(base.push(P_REEVALUATE_ELITES).push(""+x), null, false);
+                reevaluateElites[x] = state.parameters.getBoolean(base.push(P_REEVALUATE_ELITES).push(""+x), base.push(P_REEVALUATE_ELITES), false);
                 }
             }
 
