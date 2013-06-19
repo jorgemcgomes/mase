@@ -18,6 +18,11 @@ public class ExpandedFitness extends SimpleFitness {
 
     public static final String P_FITNESS_EVAL_INDEX = "fitness-index";
     protected int fitnessIndex;
+
+    @Override
+    public Parameter defaultBase() {
+        return new Parameter(P_FITNESS);
+    }
     
     protected EvaluationResult[] evalResults;
     protected float fitnessScore;
@@ -26,8 +31,7 @@ public class ExpandedFitness extends SimpleFitness {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        
-         this.fitnessIndex = state.parameters.getIntWithDefault(base.push(P_FITNESS_EVAL_INDEX), defaultBase().push(P_FITNESS_EVAL_INDEX), 0);
+        this.fitnessIndex = state.parameters.getIntWithDefault(base.push(P_FITNESS_EVAL_INDEX), defaultBase().push(P_FITNESS_EVAL_INDEX), 0);
     }
 
     public void setCorrespondingSubpop(int n) {

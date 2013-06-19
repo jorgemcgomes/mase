@@ -32,6 +32,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
+        base = defaultBase();
 
         /* evaluation */
         if (!state.parameters.exists(base.push(P_EVAL_NUMBER), null)) {

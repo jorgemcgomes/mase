@@ -26,7 +26,8 @@ public abstract class MasonSimulator extends SimulationProblem {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        
+        base = defaultBase();
+
         /* Generic simulation parameters */
         if (!state.parameters.exists(base.push(P_MAX_STEPS), null)) {
             state.output.fatal("Parameter not found.", base.push(P_MAX_STEPS));

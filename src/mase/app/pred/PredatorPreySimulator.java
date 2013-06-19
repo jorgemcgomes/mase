@@ -23,6 +23,7 @@ public class PredatorPreySimulator extends MasonSimulator {
         super.setup(state, base);
         par = new PredParams();
         /* Mandatory parameters */
+        base = defaultBase();
         par.size = state.parameters.getDouble(base.push(PredParams.P_SIZE), null);
         par.discretization = state.parameters.getDouble(base.push(PredParams.P_DISCRETIZATION), null);
         par.preySpeed = state.parameters.getDouble(base.push(PredParams.P_PREY_SPEED), null);
