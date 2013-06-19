@@ -5,25 +5,25 @@
 package mase;
 
 import ec.EvolutionState;
-import ec.Fitness;
 import ec.Individual;
 import ec.Population;
 import ec.Problem;
 import ec.coevolve.GroupedProblemForm;
+import ec.simple.SimpleProblemForm;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import mase.controllers.HeterogeneousGroupController;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class SimulationProblem extends Problem implements GroupedProblemForm {
+public abstract class SimulationProblem extends Problem implements GroupedProblemForm, SimpleProblemForm {
 
-    public static final String P_DECODER = "group-controller";
-    public static final String P_SIMULATOR = "sim";
-    protected ControllerDecoder decoder;
-    protected Simulator sim;
+    public static final String P_EVAL_NUMBER = "number-evals";
+    public static final String P_EVAL = "eval";
+    protected EvaluationFunction[] evalFunctions;
     public static final String P_TRIALS_MERGE = "trials-merge";
     public static final String V_BEST = "best", V_MEAN = "mean", V_MEDIAN = "median";
     public static final int MERGE_BEST = 0, MERGE_MEAN = 1, MERGE_MEDIAN = 2;
@@ -33,12 +33,18 @@ public class SimulationProblem extends Problem implements GroupedProblemForm {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
 
-        sim = (Simulator) state.parameters.getInstanceForParameter(base.push(P_SIMULATOR), null, Simulator.class);
-        sim.setup(state, base.push(P_SIMULATOR));
+        /* evaluation */
+        if (!state.parameters.exists(base.push(P_EVAL_NUMBER), null)) {
+            state.output.warning("Parameter not exists. Going to use just 1 evaluation.", base.push(P_EVAL_NUMBER));
+        }
+        int nEvals = state.parameters.getIntWithDefault(base.push(P_EVAL_NUMBER), null, 1);
+        evalFunctions = new EvaluationFunction[nEvals];
+        for (int i = 0; i < nEvals; i++) {
+            evalFunctions[i] = (EvaluationFunction) state.parameters.getInstanceForParameter(base.push(P_EVAL).push("" + i), base.push(P_EVAL), EvaluationFunction.class);
+            evalFunctions[i].setup(state, base.push(P_EVAL).push("" + i));
+        }
 
-        decoder = (ControllerDecoder) state.parameters.getInstanceForParameter(base.push(P_DECODER), null, ControllerDecoder.class);
-        decoder.setup(state, base.push(P_DECODER));
-
+        /* trial merge */
         if (!state.parameters.exists(base.push(P_TRIALS_MERGE), null)) {
             mergeMode = MERGE_BEST;
             state.output.warning("Parameter not found. Going with mean.", base.push(P_TRIALS_MERGE));
@@ -55,6 +61,7 @@ public class SimulationProblem extends Problem implements GroupedProblemForm {
             }
         }
     }
+    
 
     @Override
     public void preprocessPopulation(EvolutionState state, Population pop, boolean[] prepareForFitnessAssessment, boolean countVictoriesOnly) {
@@ -93,26 +100,29 @@ public class SimulationProblem extends Problem implements GroupedProblemForm {
     @Override
     public void evaluate(EvolutionState state, Individual[] ind, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
         /* Perform simulation */
-        GroupController controller = decoder.decodeController(ind);
-        EvaluationResult[] eval = sim.evaluateSolution(controller, state.random[threadnum].nextLong());
+        AgentController[] acs = new AgentController[ind.length];
+        for (int i = 0; i < ind.length; i++) {
+            acs[i] = ((AgentControllerIndividual) ind[i]).decodeController();
+        }
+        HeterogeneousGroupController controller = new HeterogeneousGroupController(acs);
+        EvaluationResult[] eval = evaluateSolution(controller, state.random[threadnum].nextLong());
 
         /* Save results */
         for (int i = 0; i < ind.length; i++) {
             if (updateFitness[i]) {
                 ExpandedFitness trial = (ExpandedFitness) ind[i].fitness.clone();
-                trial.setEvaluations(eval);
-                trial.setFitness(state, trial.fitnessScore(), false);
+                trial.setEvaluationResults(eval);
+                trial.setFitness(state, trial.getFitnessScore(), false);
                 trial.setContext(ind);
                 ind[i].fitness.trials.add(trial);
             }
         }
     }
 
-    public ControllerDecoder getControllerDecoder() {
-        return decoder;
+    @Override
+    public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public Simulator getSimulator() {
-        return sim;
-    }
+    public abstract EvaluationResult[] evaluateSolution(GroupController gc, long seed);
 }

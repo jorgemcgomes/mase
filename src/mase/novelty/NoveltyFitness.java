@@ -31,7 +31,7 @@ public class NoveltyFitness extends ExpandedFitness {
     }
     
     public BehaviourResult getNoveltyBehaviour() {
-        EvaluationResult er = super.chars[noveltyIndex];
+        EvaluationResult er = super.evalResults[noveltyIndex];
         BehaviourResult br;
         if(er instanceof AgentEvaluationResult) {
             AgentEvaluationResult aer = (AgentEvaluationResult) er;

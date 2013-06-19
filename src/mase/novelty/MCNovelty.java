@@ -14,7 +14,7 @@ import ec.util.Parameter;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class MCNovelty extends NoveltyProblem {
+public class MCNovelty extends NoveltyEvaluation {
     
     public static final String P_NOVELTY_THRESHOLD = "novelty-threshold";
     protected double noveltyThreshold;
@@ -34,7 +34,7 @@ public class MCNovelty extends NoveltyProblem {
             for(Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;
                 avgNovelty += nf.noveltyScore;
-                maxFit = Math.max(maxFit, nf.fitnessScore());
+                maxFit = Math.max(maxFit, nf.getFitnessScore());
             }
             avgNovelty /= sub.individuals.length;
             
@@ -42,9 +42,9 @@ public class MCNovelty extends NoveltyProblem {
             for(Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;
                 if(nf.noveltyScore > avgNovelty * noveltyThreshold) {
-                    nf.setFitness(state, maxFit + nf.fitnessScore(), false);
+                    nf.setFitness(state, maxFit + nf.getFitnessScore(), false);
                 } else {
-                    nf.setFitness(state, nf.fitnessScore(), false);
+                    nf.setFitness(state, nf.getFitnessScore(), false);
                 }
             }
         }

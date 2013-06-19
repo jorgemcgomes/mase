@@ -11,11 +11,11 @@ import mase.GroupController;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class StaticGroupController implements GroupController {
+public class HeterogeneousGroupController implements GroupController {
 
     private AgentController[] controllers;
     
-    public StaticGroupController(AgentController[] controllers) {
+    public HeterogeneousGroupController(AgentController[] controllers) {
         this.controllers = controllers;
     }
     

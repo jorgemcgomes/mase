@@ -44,7 +44,7 @@ public class MCNoveltyStat extends Statistics {
             DescriptiveStatistics dsNov = new DescriptiveStatistics(sub.individuals.length);
             for (Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;
-                maxFit = Math.max(maxFit, nf.fitnessScore());
+                maxFit = Math.max(maxFit, nf.getFitnessScore());
                 dsNov.addValue(nf.noveltyScore);
             }
             int boostCount = 0;

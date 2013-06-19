@@ -14,7 +14,7 @@ import ec.util.Parameter;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class StochasticNovelty extends NoveltyProblem {
+public class StochasticNovelty extends NoveltyEvaluation {
 
     public static final String P_NOVELTY_PROB = "novelty-prob";
     protected double noveltyProb;
@@ -28,13 +28,13 @@ public class StochasticNovelty extends NoveltyProblem {
     @Override
     protected void setFinalScores(EvolutionState state, Population pop) {
         for(Subpopulation sub : pop.subpops) {
-            boolean novelty = random.nextBoolean(noveltyProb);
+            boolean novelty = state.random[0].nextBoolean(noveltyProb);
             for(Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;
                 if(novelty) {
                     nf.setFitness(state, (float) nf.noveltyScore, false);
                 } else {
-                    nf.setFitness(state, nf.fitnessScore(), false);
+                    nf.setFitness(state, nf.getFitnessScore(), false);
                 }
             }
         }

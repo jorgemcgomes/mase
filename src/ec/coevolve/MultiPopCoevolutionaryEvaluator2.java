@@ -8,7 +8,6 @@ package ec.coevolve;
 import ec.*;
 import ec.util.Parameter;
 import ec.util.QuickSort;
-import ec.util.SortComparator;
 import ec.util.SortComparatorL;
 import mase.ExpandedFitness;
 
@@ -241,7 +240,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
             Individual[] oldinds = subpop.individuals;
             for (int x = 1; x < oldinds.length; x++) {
                 if ((eliteFitness && 
-                        ((ExpandedFitness) oldinds[x].fitness).fitnessScore() > ((ExpandedFitness) oldinds[x].fitness).fitnessScore()) || 
+                        ((ExpandedFitness) oldinds[x].fitness).getFitnessScore() > ((ExpandedFitness) oldinds[x].fitness).getFitnessScore()) || 
                         (!eliteFitness && oldinds[x].fitness.betterThan(oldinds[best].fitness))) {
                     best = x;
                 }
@@ -258,7 +257,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
                 @Override
                 public boolean lt(long a, long b) {
                     if(eliteFitness) {
-                        return ((ExpandedFitness) subInds[(int) a].fitness).fitnessScore() >  ((ExpandedFitness) subInds[(int) b].fitness).fitnessScore();
+                        return ((ExpandedFitness) subInds[(int) a].fitness).getFitnessScore() >  ((ExpandedFitness) subInds[(int) b].fitness).getFitnessScore();
                     } else {
                         return subInds[(int) a].fitness.betterThan(subInds[(int) b].fitness);
                     }
@@ -267,7 +266,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
                 @Override
                 public boolean gt(long a, long b) {
                     if(eliteFitness) {
-                        return ((ExpandedFitness) subInds[(int) a].fitness).fitnessScore() <  ((ExpandedFitness) subInds[(int) b].fitness).fitnessScore();
+                        return ((ExpandedFitness) subInds[(int) a].fitness).getFitnessScore() <  ((ExpandedFitness) subInds[(int) b].fitness).getFitnessScore();
                     } else {
                         return subInds[(int) b].fitness.betterThan(subInds[(int) a].fitness);
                     }

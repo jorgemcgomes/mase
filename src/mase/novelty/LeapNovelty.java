@@ -13,7 +13,7 @@ import ec.util.Parameter;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class LeapNovelty extends NoveltyProblem {
+public class LeapNovelty extends NoveltyEvaluation {
 
     public static final String P_CHANGE_PROB = "change-prob";
     protected double changeProb;
@@ -29,11 +29,11 @@ public class LeapNovelty extends NoveltyProblem {
 
     @Override
     protected void setFinalScores(EvolutionState state, Population pop) {
-        boolean change = currentNovelty == -1 ? true : random.nextBoolean(changeProb);
+        boolean change = currentNovelty == -1 ? true : state.random[0].nextBoolean(changeProb);
         if (change) {
             int previousNovelty = currentNovelty;
             do {
-                currentNovelty = random.nextInt(pop.subpops.length);
+                currentNovelty = state.random[0].nextInt(pop.subpops.length);
             } while(currentNovelty == previousNovelty);
         }
 
@@ -43,7 +43,7 @@ public class LeapNovelty extends NoveltyProblem {
                 if (s == currentNovelty) {
                     nf.setFitness(state, (float) nf.noveltyScore, false);
                 } else {
-                    nf.setFitness(state, nf.fitnessScore(), false);
+                    nf.setFitness(state, nf.getFitnessScore(), false);
                 }
             }
         }

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.novelty;
+package mase.tests;
 
 import java.util.ArrayList;
 

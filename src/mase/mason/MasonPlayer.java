@@ -4,10 +4,8 @@
  */
 package mase.mason;
 
-import ec.Evaluator;
 import ec.EvolutionState;
 import ec.Evolve;
-import ec.util.Parameter;
 import ec.util.ParameterDatabase;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.EvaluationResult;
 import mase.GroupController;
-import mase.SimulationProblem;
 import sim.display.GUIState;
 
 /**
@@ -48,20 +45,13 @@ public class MasonPlayer {
         List<String> list = new ArrayList<String>(Arrays.asList(args));
         list.removeAll(Collections.singleton(null));
         String[] parArgs = list.toArray(new String[list.size()]);
-        MasonSimulator sim = createSimulator(parArgs);
+        ParameterDatabase db = Evolve.loadParameterDatabase(parArgs);
+        EvolutionState state = Evolve.initialize(db, 0);
+        MasonSimulator sim = (MasonSimulator) state.evaluator.p_problem;
 
         GroupController controller = loadController(gc);
         GUIState gui = sim.createSimStateWithUI(controller, 0);
         gui.createController();
-    }
-
-    public static MasonSimulator createSimulator(String[] args) {
-        ParameterDatabase db = Evolve.loadParameterDatabase(args);
-        EvolutionState state = Evolve.initialize(db, 0);
-        Parameter base = new Parameter(EvolutionState.P_EVALUATOR).push(Evaluator.P_PROBLEM).push(SimulationProblem.P_SIMULATOR);
-        MasonSimulator sim = (MasonSimulator) db.getInstanceForParameter(base, null, MasonSimulator.class);
-        sim.setup(state, base);
-        return sim;
     }
 
     public static GroupController loadController(File gc) {

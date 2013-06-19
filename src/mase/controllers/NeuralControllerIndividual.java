@@ -8,6 +8,9 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import ec.vector.DoubleVectorIndividual;
 import ec.vector.FloatVectorSpecies;
+import java.util.Arrays;
+import mase.AgentController;
+import mase.AgentControllerIndividual;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.engine.network.activation.ActivationLinear;
 import org.encog.engine.network.activation.ActivationSigmoid;
@@ -19,7 +22,7 @@ import org.encog.neural.flat.FlatNetwork;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class NeuralControllerIndividual extends DoubleVectorIndividual {
+public class NeuralControllerIndividual extends DoubleVectorIndividual implements AgentControllerIndividual {
 
     public static final String DEFAULT_BASE = "neural";
     public static final String P_INPUTS = "input";
@@ -35,7 +38,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-
+        
         Parameter def = defaultBase();
 
         // Create network
@@ -81,9 +84,41 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual {
         return new Parameter(DEFAULT_BASE);
     }
 
-    public FlatNetwork decodeNetwork() {
+    @Override
+    public AgentController decodeController() {
         FlatNetwork network = prototypeNetwork.clone();
         network.decodeNetwork(genome);
-        return network;
+        return new NeuralAgentController(network);
+    }
+
+    public static class NeuralAgentController implements AgentController {
+
+        private FlatNetwork network;
+
+        public NeuralAgentController(FlatNetwork net) {
+            this.network = net;
+        }
+
+        @Override
+        public void reset() {
+            network.clearContext();
+        }
+
+        @Override
+        public double[] processInputs(double[] input) {
+            double[] output = new double[network.getOutputCount()];
+            network.compute(input, output);
+            return output;
+        }
+
+        @Override
+        public String toString() {
+            return Arrays.toString(network.encodeNetwork());
+        }
+
+        @Override
+        public AgentController clone() {
+            return new NeuralAgentController(network.clone());
+        }
     }
 }

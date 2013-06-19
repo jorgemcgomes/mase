@@ -164,17 +164,17 @@ public class FitnessStat extends Statistics {
 
                     // update fitness
                     if (bestOfGeneration[x] == null
-                            || ((ExpandedFitness) state.population.subpops[x].individuals[y].fitness).fitnessScore()
-                            > ((ExpandedFitness) bestOfGeneration[x].fitness).fitnessScore()) {
+                            || ((ExpandedFitness) state.population.subpops[x].individuals[y].fitness).getFitnessScore()
+                            > ((ExpandedFitness) bestOfGeneration[x].fitness).getFitnessScore()) {
                         bestOfGeneration[x] = state.population.subpops[x].individuals[y];
-                        if (bestSoFar[x] == null || ((ExpandedFitness) bestOfGeneration[x].fitness).fitnessScore()
-                                > ((ExpandedFitness) bestSoFar[x].fitness).fitnessScore()) {
+                        if (bestSoFar[x] == null || ((ExpandedFitness) bestOfGeneration[x].fitness).getFitnessScore()
+                                > ((ExpandedFitness) bestSoFar[x].fitness).getFitnessScore()) {
                             bestSoFar[x] = (Individual) (bestOfGeneration[x].clone());
                         }
                     }
 
                     // sum up mean fitness for population
-                    totalFitnessThisGen[x] += ((ExpandedFitness) state.population.subpops[x].individuals[y].fitness).fitnessScore();
+                    totalFitnessThisGen[x] += ((ExpandedFitness) state.population.subpops[x].individuals[y].fitness).getFitnessScore();
                 }
             }
             // compute mean fitness stats
@@ -183,8 +183,8 @@ public class FitnessStat extends Statistics {
             // print out fitness information
             if (doSubpops) {
                 state.output.print("" + meanFitnessThisGen[x] + " ", statisticslog);
-                state.output.print("" + ((ExpandedFitness) bestOfGeneration[x].fitness).fitnessScore() + " ", statisticslog);
-                state.output.print("" + ((ExpandedFitness) bestSoFar[x].fitness).fitnessScore() + " ", statisticslog);
+                state.output.print("" + ((ExpandedFitness) bestOfGeneration[x].fitness).getFitnessScore() + " ", statisticslog);
+                state.output.print("" + ((ExpandedFitness) bestSoFar[x].fitness).getFitnessScore() + " ", statisticslog);
             }
         }
 
@@ -198,10 +198,10 @@ public class FitnessStat extends Statistics {
         for (int x = 0; x < subpops; x++) {
             popTotalInds += totalIndsThisGen[x];
             popTotalFitness += totalFitnessThisGen[x];
-            if (bestOfGeneration[x] != null && (popBestOfGeneration == null || ((ExpandedFitness) bestOfGeneration[x].fitness).fitnessScore() > ((ExpandedFitness) popBestOfGeneration.fitness).fitnessScore())) {
+            if (bestOfGeneration[x] != null && (popBestOfGeneration == null || ((ExpandedFitness) bestOfGeneration[x].fitness).getFitnessScore() > ((ExpandedFitness) popBestOfGeneration.fitness).getFitnessScore())) {
                 popBestOfGeneration = bestOfGeneration[x];
             }
-            if (bestSoFar[x] != null && (popBestSoFar == null || ((ExpandedFitness) bestSoFar[x].fitness).fitnessScore() > ((ExpandedFitness) popBestSoFar.fitness).fitnessScore())) {
+            if (bestSoFar[x] != null && (popBestSoFar == null || ((ExpandedFitness) bestSoFar[x].fitness).getFitnessScore() > ((ExpandedFitness) popBestSoFar.fitness).getFitnessScore())) {
                 popBestSoFar = bestSoFar[x];
             }
         }
@@ -211,8 +211,8 @@ public class FitnessStat extends Statistics {
 
         // print out fitness info
         state.output.print("" + popMeanFitness + " ", statisticslog);                                                                                  // mean fitness of pop this gen
-        state.output.print("" + (double) ((ExpandedFitness) popBestOfGeneration.fitness).fitnessScore() + " ", statisticslog);                 // best fitness of pop this gen
-        state.output.print("" + (double) ((ExpandedFitness) popBestSoFar.fitness).fitnessScore() + " ", statisticslog);                // best fitness of pop so far
+        state.output.print("" + (double) ((ExpandedFitness) popBestOfGeneration.fitness).getFitnessScore() + " ", statisticslog);                 // best fitness of pop this gen
+        state.output.print("" + (double) ((ExpandedFitness) popBestSoFar.fitness).getFitnessScore() + " ", statisticslog);                // best fitness of pop so far
 
         // we're done!
         state.output.println("", statisticslog);

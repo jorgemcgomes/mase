@@ -1,4 +1,4 @@
-ECJ_HOME <- "/home/jorge/Dropbox/ECJ"
+ECJ_HOME <- "/home/jorge/Dropbox/MASE"
 CP <- paste0("\"",ECJ_HOME, "/build/classes:",ECJ_HOME,"/lib/*\"")
 OUTPUT_BASE <- "/home/jorge/Dropbox/ECJ/experiments"
 

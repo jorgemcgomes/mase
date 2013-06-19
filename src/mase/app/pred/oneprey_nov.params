@@ -22,7 +22,7 @@ generations =				500
 quit-on-run-complete =			false
 
 # Coevolution parameters
-eval =                                  ec.coevolve.MultiPopCoevolutionaryEvaluator2
+eval =                                  mase.novelty.NoveltyEvaluation
 eval.fitness-only-elite =               false
 eval.num-current=			1
 eval.num-elites =			1
@@ -30,50 +30,49 @@ eval.num-prev =				0
 eval.num-shuffled =                     0
 eval.select-current =			ec.select.RandomSelection
 eval.select-prev = 			ec.select.RandomSelection
+# Novelty parameters
+eval.ns-k =                     15
+eval.ns-archive-prob =          0.01
+eval.ns-archive-size =          1000
+eval.ns-blend =                 1
 
 # Task parameters
-eval.problem =                          mase.novelty.NoveltyProblem
-eval.problem.ns-k =                     15
-eval.problem.ns-archive-prob =          0.01
-eval.problem.ns-archive-size =          1000
-eval.problem.ns-blend =                 1
-
-eval.problem.group-controller =         mase.controllers.NeuralGroupDecoder
+eval.problem =                          mase.app.pred.PredatorPreySimulator
 eval.problem.trials-merge =             best
+eval.problem.number-evals =             3
+eval.problem.eval.0 =             mase.app.pred.OnePreyFitness
+eval.problem.eval.0.combination = harmonic
+eval.problem.eval.0.update-freq = 0
+eval.problem.eval.1 =             mase.app.pred.OnePreyIndividualEval
+eval.problem.eval.1.update-freq = 1
+eval.problem.eval.2 =             mase.app.pred.OnePreyGroupEval
+eval.problem.eval.2.update-freq = 1
 
-eval.problem.sim =                      mase.app.pred.PredatorPreySimulator
-eval.problem.sim.repetitions =              10
-eval.problem.sim.max-steps =                300
-eval.problem.sim.size =                     100
-eval.problem.sim.discretization =           15
-eval.problem.sim.n-preys =                  1
-eval.problem.sim.prey-placement =           random
-eval.problem.sim.prey-margin =              20
-eval.problem.sim.prey-speed =               1
-eval.problem.sim.escape-distance =          5
-eval.problem.sim.n-predators =              3
-eval.problem.sim.predator-separation =      10
-eval.problem.sim.predator-speed =           1
-eval.problem.sim.predator-rotate-speed =    1.57
-eval.problem.sim.capture-distance =         1
-eval.problem.sim.escape-strategy =          mean-vector
-eval.problem.sim.sensor-mode =              closest
-eval.problem.sim.collisions =               FALSE
+eval.problem.repetitions =              10
+eval.problem.max-steps =                300
+eval.problem.size =                     100
+eval.problem.discretization =           15
+eval.problem.n-preys =                  1
+eval.problem.prey-placement =           random
+eval.problem.prey-margin =              20
+eval.problem.prey-speed =               1
+eval.problem.escape-distance =          5
+eval.problem.n-predators =              3
+eval.problem.predator-separation =      10
+eval.problem.predator-speed =           1
+eval.problem.predator-rotate-speed =    1.57
+eval.problem.capture-distance =         1
+eval.problem.escape-strategy =          mean-vector
+eval.problem.sensor-mode =              closest
+eval.problem.collisions =               FALSE
 
-eval.problem.sim.number-evals =             3
-eval.problem.sim.eval.0 =             mase.app.pred.OnePreyFitness
-eval.problem.sim.eval.0.combination = harmonic
-eval.problem.sim.eval.0.update-freq = 0
-eval.problem.sim.eval.1 =             mase.app.pred.OnePreyIndividualEval
-eval.problem.sim.eval.1.update-freq = 1
-eval.problem.sim.eval.2 =             mase.app.pred.OnePreyGroupEval
-eval.problem.sim.eval.2.update-freq = 1
-
-# Individual representation
-ec.subpop.species = 			ec.vector.FloatVectorSpecies
+# Fitness
 pop.default-subpop.species.fitness = 		mase.novelty.NoveltyFitness
 pop.default-subpop.species.fitness.fitness-index =  0
 pop.default-subpop.species.fitness.novelty-index =  2
+
+# Individual representation
+ec.subpop.species = 			ec.vector.FloatVectorSpecies
 pop.default-subpop.species.genome-size =            33
 pop.default-subpop.species.min-gene =               -1
 pop.default-subpop.species.max-gene =               1
@@ -91,12 +90,8 @@ ec.subpop.duplicate-retries =           10
 ec.subpop.size = 			150
 
 # Elitism configuration (pre-breeding)
-breed.elite.0 =				10
-breed.reevaluate-elites.0 =             true
-breed.elite.1 =				10
-breed.reevaluate-elites.1 =             true
-breed.elite.2 =                         10
-breed.reevaluate-elites.2 =             true
+breed.elite =				10
+breed.reevaluate-elites =             true
 
 # Breeding
 vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline

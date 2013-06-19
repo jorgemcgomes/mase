@@ -8,7 +8,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.EvaluationResult;
 import mase.GroupController;
-import mase.Simulator;
+import mase.SimulationProblem;
 import sim.display.GUIState;
 import sim.engine.SimState;
 
@@ -16,11 +16,8 @@ import sim.engine.SimState;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class MasonSimulator implements Simulator {
+public abstract class MasonSimulator extends SimulationProblem {
 
-    public static final String P_EVAL_NUMBER = "number-evals";
-    public static final String P_EVAL = "eval";
-    protected MasonEvaluation[] evalProtos;
     public static final String P_MAX_STEPS = "max-steps";
     public static final String P_REPETITIONS = "repetitions";
     protected int maxSteps;
@@ -28,9 +25,10 @@ public abstract class MasonSimulator implements Simulator {
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
-        /* Generic simulation parameters */
+        super.setup(state, base);
         
-        if (!state.parameters.exists(base.push(P_MAX_STEPS))) {
+        /* Generic simulation parameters */
+        if (!state.parameters.exists(base.push(P_MAX_STEPS), null)) {
             state.output.fatal("Parameter not found.", base.push(P_MAX_STEPS));
         }
         maxSteps = state.parameters.getInt(base.push(P_MAX_STEPS), null);
@@ -38,28 +36,16 @@ public abstract class MasonSimulator implements Simulator {
         if (repetitions < 1) {
             state.output.fatal("Parameter invalid value. Must be > 0.", base.push(P_REPETITIONS));
         }
-
-        /* Evaluation */
-
-        if(!state.parameters.exists(base.push(P_EVAL_NUMBER), null)) {
-            state.output.warning("Parameter not exists. Going to use just 1 evaluation.", base.push(P_EVAL_NUMBER));
-        }
-        int nEvals = state.parameters.getIntWithDefault(base.push(P_EVAL_NUMBER), null, 1);
-        evalProtos = new MasonEvaluation[nEvals];
-        for (int i = 0; i < nEvals; i++) {
-            evalProtos[i] = (MasonEvaluation) state.parameters.getInstanceForParameter(base.push(P_EVAL).push("" + i), base.push(P_EVAL), MasonEvaluation.class);
-            evalProtos[i].setup(state, base.push(P_EVAL).push("" + i));
-        }
     }
 
     @Override
     public EvaluationResult[] evaluateSolution(GroupController gc, long seed) {
         SimState sim = createSimState(gc, seed);
-        EvaluationResult[][] evalResults = new EvaluationResult[evalProtos.length][repetitions];
+        EvaluationResult[][] evalResults = new EvaluationResult[evalFunctions.length][repetitions];
         for (int r = 0; r < repetitions; r++) {
-            MasonEvaluation[] evals = new MasonEvaluation[evalProtos.length];
-            for (int i = 0; i < evalProtos.length; i++) {
-                evals[i] = (MasonEvaluation) evalProtos[i].clone();
+            MasonEvaluation[] evals = new MasonEvaluation[evalFunctions.length];
+            for (int i = 0; i < evalFunctions.length; i++) {
+                evals[i] = (MasonEvaluation) evalFunctions[i].clone();
                 evals[i].setSimulationModel(sim);
             }
 
@@ -83,8 +69,8 @@ public abstract class MasonSimulator implements Simulator {
             sim.finish();
         }
 
-        EvaluationResult[] mergedResult = new EvaluationResult[evalProtos.length];
-        for (int i = 0; i < evalProtos.length; i++) {
+        EvaluationResult[] mergedResult = new EvaluationResult[evalFunctions.length];
+        for (int i = 0; i < evalFunctions.length; i++) {
             mergedResult[i] = evalResults[i][0].mergeEvaluations(evalResults[i]);
         }
         return mergedResult;

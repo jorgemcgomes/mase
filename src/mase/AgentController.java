@@ -16,4 +16,6 @@ public interface AgentController extends Serializable {
     
     public void reset();
     
+    public AgentController clone();
+    
 }

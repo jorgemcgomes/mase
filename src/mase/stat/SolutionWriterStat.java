@@ -12,17 +12,18 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
-import mase.ControllerDecoder;
+import mase.AgentController;
+import mase.AgentControllerIndividual;
 import mase.GroupController;
-import mase.SimulationProblem;
 import mase.ExpandedFitness;
+import mase.controllers.HeterogeneousGroupController;
+import mase.controllers.HomogeneousGroupController;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
@@ -50,13 +51,22 @@ public abstract class SolutionWriterStat extends Statistics {
     }
 
     protected void writeSolution(Individual ind, File out) {
-        ControllerDecoder decoder = ((SimulationProblem) state.evaluator.p_problem).getControllerDecoder();
-        GroupController controller = decoder.decodeController(ind.fitness.getContext());
+        GroupController gc = null;
+        if (ind.fitness.getContext() == null) {
+            gc = new HomogeneousGroupController(((AgentControllerIndividual) ind).decodeController());
+        } else {
+            Individual[] inds = ind.fitness.getContext();
+            AgentController[] acs = new AgentController[inds.length];
+            for (int i = 0; i < inds.length; i++) {
+                acs[i] = ((AgentControllerIndividual) inds[i]).decodeController();
+            }
+            gc = new HeterogeneousGroupController(acs);
+        }
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(out));
-            oos.writeObject(controller);
-            oos.writeObject(fit.evaluations());
+            oos.writeObject(gc);
+            oos.writeObject(fit.getEvaluationResults());
             oos.flush();
             oos.close();
         } catch (IOException ex) {

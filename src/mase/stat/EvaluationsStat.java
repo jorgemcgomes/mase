@@ -44,7 +44,7 @@ public class EvaluationsStat extends Statistics {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;
                 state.output.print(state.generation + " " + i + " " + j, log);
-                for (EvaluationResult er : nf.evaluations()) {
+                for (EvaluationResult er : nf.getEvaluationResults()) {
                     if (er instanceof AgentEvaluationResult) {
                         AgentEvaluationResult aer = (AgentEvaluationResult) er;
                         state.output.print(" " + aer.getAgentEvaluation(i).toString(), log);

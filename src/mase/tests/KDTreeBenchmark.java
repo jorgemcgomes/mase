@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase;
+package mase.tests;
 
 import edu.wlu.cs.levy.CG.KDTree;
 import java.util.ArrayList;

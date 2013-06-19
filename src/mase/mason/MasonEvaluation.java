@@ -5,16 +5,19 @@
 package mase.mason;
 
 import ec.EvolutionState;
-import ec.Prototype;
 import ec.util.Parameter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import mase.EvaluationFunction;
 import mase.EvaluationResult;
+import mase.SimulationProblem;
 import sim.engine.SimState;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class MasonEvaluation implements Prototype {
+public abstract class MasonEvaluation implements EvaluationFunction {
 
     public static final String P_COMBINATION = "combination";
     public static final String P_DEFAULT = "mason-eval";
@@ -30,8 +33,7 @@ public abstract class MasonEvaluation implements Prototype {
         if (updateFrequency < 0) {
             state.output.fatal("Update frequency must be >= 0", base.push(P_FREQUENCY), defaultBase().push(P_FREQUENCY));
         }
-
-        int maxSteps = state.parameters.getInt(base.pop().push(MasonSimulator.P_MAX_STEPS), base.pop().pop().push(MasonSimulator.P_MAX_STEPS));
+        int maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
         this.maxEvaluationSteps = updateFrequency == 0 ? 0 : maxSteps / updateFrequency;
     }
 
@@ -44,8 +46,9 @@ public abstract class MasonEvaluation implements Prototype {
     public Object clone() {
         try {
             return super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError();
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(MasonEvaluation.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
     }
 
@@ -79,6 +82,4 @@ public abstract class MasonEvaluation implements Prototype {
      */
     protected void postSimulation() {
     }
-
-    protected abstract EvaluationResult getResult();
 }

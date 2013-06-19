@@ -37,7 +37,7 @@ public class NoveltyPopStat extends Statistics {
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
                 
-        NoveltyProblem prob = (NoveltyProblem) state.evaluator.p_problem;
+        NoveltyEvaluation prob = (NoveltyEvaluation) state.evaluator;
         state.output.print(state.generation + " " + prob.archive.size(), log);
         
         for (int i = 0; i < state.population.subpops.length; i++) {
