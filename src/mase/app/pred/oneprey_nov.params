@@ -1,6 +1,3 @@
-# with elman: (input + hidden + 1) * hidden + (hidden + 1) * output
-# feed-forward (input + 1) * hidden + (hidden + 1) * output
-
 # ECJ options
 evalthreads = 				auto
 breedthreads = 				auto
@@ -82,6 +79,8 @@ neural.hidden =                         5
 neural.output =                         3
 neural.structure =                      feed-forward
 neural.tanh =                           false
+# with elman: (input + hidden + 1) * hidden + (hidden + 1) * output
+# feed-forward (input + 1) * hidden + (hidden + 1) * output
 
 # Populations configuration
 pop.subpops =                           3
@@ -107,30 +106,29 @@ vector.species.mutation-bounded =       TRUE
 select.tournament.size =                7
 
 # Statistics
-stat =                                  ec.simple.SimpleStatistics
-stat.file =				$simple.stat
-stat.num-children = 			9
-stat.child.0 =                          mase.stat.ETAStats
-stat.child.1 = 				ec.simple.SimpleShortStatistics
-stat.child.1.file =			$extended.stat
-stat.child.1.do-time =                  true
-stat.child.1.do-size =                  false
-stat.child.1.do-subpops =               true
-stat.child.2 =                          mase.stat.BestEverSolutionStat
-stat.child.2.file =                     $best.ind
-stat.child.3 =                          mase.stat.EvaluationsStat
-stat.child.3.file =                     $behaviours.stat
-stat.child.4 =                          mase.stat.BestSolutionGenStat
-stat.child.4.file =                     $bests.tar.gz
+stat =                                  mase.stat.ConsoleStat
+stat.num-children = 			8
+stat.child.0 = 				ec.simple.SimpleShortStatistics
+stat.child.0.file =			$extended.stat
+stat.child.0.do-time =                  true
+stat.child.0.do-size =                  false
+stat.child.0.do-subpops =               true
+stat.child.1 =                          mase.stat.BestEverSolutionStat
+stat.child.1.file =                     $best.ind
+stat.child.2 =                          mase.stat.EvaluationsStat
+stat.child.2.do-behaviours =            true
+stat.child.2.file =                     $behaviours.stat
+stat.child.3 =                          mase.stat.BestSolutionGenStat
+stat.child.3.file =                     $bests.tar.gz
+stat.child.3.compress =                 true
+stat.child.4 =                          mase.stat.SampleSolutionsStat
+stat.child.4.file =                     $sample.tar.gz
 stat.child.4.compress =                 true
-stat.child.5 =                          mase.stat.SampleSolutionsStat
-stat.child.5.file =                     $sample.tar.gz
-stat.child.5.compress =                 true
-stat.child.5.sample-size =              10
-stat.child.6 =                          mase.stat.FitnessStat
-stat.child.6.file =			$fitness.stat
-stat.child.6.do-subpops =               true
-stat.child.7 =                          mase.novelty.NoveltyPopStat
-stat.child.7.file =			$noveltypop.stat
-stat.child.8 =                          mase.novelty.NoveltyIndividualsStat
-stat.child.8.file =			$noveltyind.stat
+stat.child.4.sample-size =              10
+stat.child.5 =                          mase.stat.FitnessStat
+stat.child.5.file =			$fitness.stat
+stat.child.5.do-subpops =               true
+stat.child.6 =                          mase.novelty.NoveltyPopStat
+stat.child.6.file =			$noveltypop.stat
+stat.child.7 =                          mase.novelty.NoveltyIndividualsStat
+stat.child.7.file =			$noveltyind.stat

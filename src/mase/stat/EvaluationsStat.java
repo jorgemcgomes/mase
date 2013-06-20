@@ -20,10 +20,12 @@ import mase.ExpandedFitness;
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
 public class EvaluationsStat extends Statistics {
-    
+
     public static final String P_BEHAVIOURS_FILE = "file";
+    public static final String P_DO_BEHAVS = "do-behaviours";
     public int log;
-    
+    public boolean doBehaviours;
+
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
@@ -36,21 +38,26 @@ public class EvaluationsStat extends Statistics {
                 state.output.fatal("An IOException occurred while trying to create the log " + statisticsFile + ":\n" + i);
             }
         }
+        doBehaviours = state.parameters.getBoolean(base.push(P_DO_BEHAVS), null, true);
     }
-    
+
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         for (int i = 0; i < state.population.subpops.length; i++) {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;
                 state.output.print(state.generation + " " + i + " " + j, log);
-                for (EvaluationResult er : nf.getEvaluationResults()) {
-                    if (er instanceof AgentEvaluationResult) {
-                        AgentEvaluationResult aer = (AgentEvaluationResult) er;
-                        state.output.print(" " + aer.getAgentEvaluation(i).toString(), log);
-                    } else {
-                        state.output.print(" " + er.toString(), log);
+                if (doBehaviours) {
+                    for (EvaluationResult er : nf.getEvaluationResults()) {
+                        if (er instanceof AgentEvaluationResult) {
+                            AgentEvaluationResult aer = (AgentEvaluationResult) er;
+                            state.output.print(" " + aer.getAgentEvaluation(i).toString(), log);
+                        } else {
+                            state.output.print(" " + er.toString(), log);
+                        }
                     }
+                } else {
+                    state.output.print(" " + nf.getFitnessScore(), log);
                 }
                 state.output.print("\n", log);
             }
