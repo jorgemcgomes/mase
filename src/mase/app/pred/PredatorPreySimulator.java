@@ -7,9 +7,11 @@ package mase.app.pred;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.GroupController;
+import mase.mason.Mason2dUI;
 import mase.mason.MasonSimulator;
 import sim.display.GUIState;
 import sim.engine.SimState;
+import sim.portrayal.continuous.ContinuousPortrayal2D;
 
 /**
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
@@ -67,13 +69,13 @@ public class PredatorPreySimulator extends MasonSimulator {
     }
 
     @Override
-    public SimState createSimState(GroupController gc, long seed) {
+    public PredatorPrey createSimState(GroupController gc, long seed) {
         return new PredatorPrey(seed, par, gc);
     }
 
     @Override
     public GUIState createSimStateWithUI(GroupController cs, long seed) {
-        return new PredatorPreyWithUI(createSimState(cs, seed));
+        return new Mason2dUI(createSimState(cs, seed), "Predator-prey", 500, 500);
     }
 }
 

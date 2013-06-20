@@ -36,7 +36,7 @@ public class ConsoleStat extends Statistics {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         jobs = state.parameters.getIntWithDefault(new Parameter("jobs"), null, 1);
-        currentJob = (Integer) state.job[0];
+        currentJob = state.job != null ? (Integer) state.job[0] : 0;
         df = new SimpleDateFormat("dd-HH:mm:ss");
         nf = new DecimalFormat("0.0000");
     }
@@ -73,23 +73,23 @@ public class ConsoleStat extends Statistics {
         super.postEvaluationStatistics(state);
         // print best fitness and min / 1st quartile / median / 3rd quartile / max per subpop
         double maxGen = Double.NEGATIVE_INFINITY;
-        for(int s = 0 ; s < state.population.subpops.length ; s++)  {
+        for (int s = 0; s < state.population.subpops.length; s++) {
             DescriptiveStatistics ds = new DescriptiveStatistics(state.population.subpops[s].individuals.length);
-            for(Individual ind : state.population.subpops[s].individuals) {
+            for (Individual ind : state.population.subpops[s].individuals) {
                 ds.addValue(((ExpandedFitness) ind.fitness).getFitnessScore());
             }
-            state.output.message("Subpop " + s + ": " + nf.format(ds.getMin()) + " | " +
-                    nf.format(ds.getPercentile(25)) + " | " + nf.format(ds.getMean()) + " | " +
-                    nf.format(ds.getPercentile(75)) + " | " + nf.format(ds.getMax()));
-            if(ds.getMax() > maxGen) {
+            state.output.message("Subpop " + s + ": " + nf.format(ds.getMin()) + " | "
+                    + nf.format(ds.getPercentile(25)) + " | " + nf.format(ds.getMean()) + " | "
+                    + nf.format(ds.getPercentile(75)) + " | " + nf.format(ds.getMax()));
+            if (ds.getMax() > maxGen) {
                 maxGen = ds.getMax();
             }
-            if(ds.getMax() > bestFitness) {
+            if (ds.getMax() > bestFitness) {
                 bestFitness = ds.getMax();
             }
         }
-        state.output.message("Best gen: " + nf.format(maxGen) + " | " +
-                "Best so far: " + nf.format(bestFitness));
+        state.output.message("Best gen: " + nf.format(maxGen) + " | "
+                + "Best so far: " + nf.format(bestFitness));
     }
 
     @Override

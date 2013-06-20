@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.app.pred;
+package mase.mason;
 
 import java.awt.Color;
 import javax.swing.JFrame;
@@ -10,6 +10,7 @@ import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
+import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.Inspector;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
 
@@ -17,14 +18,20 @@ import sim.portrayal.continuous.ContinuousPortrayal2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredatorPreyWithUI extends GUIState {
+public class Mason2dUI extends GUIState {
 
-    public Display2D display;
-    public JFrame displayFrame;
-    ContinuousPortrayal2D portrayal = new ContinuousPortrayal2D();
+    protected Display2D display;
+    protected JFrame displayFrame;
+    protected String title;
+    protected int w, h;
+    protected FieldPortrayal2D portrayal;
 
-    public PredatorPreyWithUI(SimState state) {
+    public Mason2dUI(PortrayableSimState state, String title, int w, int h) {
         super(state);
+        this.title = title;
+        this.w = w;
+        this.h = h;
+        this.portrayal = new ContinuousPortrayal2D();
     }
 
     @Override
@@ -38,12 +45,10 @@ public class PredatorPreyWithUI extends GUIState {
         super.load(state);
         setupPortrayals();
     }
-    
-    
 
     public void setupPortrayals() {
-        PredatorPrey predPrey = (PredatorPrey) state;
-        portrayal.setField(predPrey.field);
+        PortrayableSimState pss = (PortrayableSimState) state;
+        portrayal.setField(pss.getField());
         // reschedule the displayer
         display.reset();
         display.setBackdrop(Color.white);
@@ -68,10 +73,10 @@ public class PredatorPreyWithUI extends GUIState {
         super.init(c);
 
         // make the displayer
-        display = new Display2D(500, 500, this);
+        display = new Display2D(w, h, this);
         displayFrame = display.createFrame();
         displayFrame.setTitle("Predator Prey");
-        c.registerFrame(displayFrame);   // register the frame so it appears in the "Display" list
+        c.registerFrame(displayFrame);
         displayFrame.setVisible(true);
         display.attach(portrayal, "Simulation");
     }

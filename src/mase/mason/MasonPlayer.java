@@ -45,13 +45,18 @@ public class MasonPlayer {
         List<String> list = new ArrayList<String>(Arrays.asList(args));
         list.removeAll(Collections.singleton(null));
         String[] parArgs = list.toArray(new String[list.size()]);
-        ParameterDatabase db = Evolve.loadParameterDatabase(parArgs);
-        EvolutionState state = Evolve.initialize(db, 0);
-        MasonSimulator sim = (MasonSimulator) state.evaluator.p_problem;
-
+        MasonSimulator sim = createSimulator(parArgs);
         GroupController controller = loadController(gc);
         GUIState gui = sim.createSimStateWithUI(controller, 0);
         gui.createController();
+    }
+
+    public static MasonSimulator createSimulator(String[] args) {
+        ParameterDatabase db = Evolve.loadParameterDatabase(args);
+        EvolutionState state = Evolve.initialize(db, 0);
+        state.setup(state, null);
+        MasonSimulator sim = (MasonSimulator) state.evaluator.p_problem;
+        return sim;
     }
 
     public static GroupController loadController(File gc) {

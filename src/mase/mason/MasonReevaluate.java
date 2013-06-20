@@ -4,9 +4,6 @@
  */
 package mase.mason;
 
-import ec.EvolutionState;
-import ec.Evolve;
-import ec.util.ParameterDatabase;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,9 +46,7 @@ public class MasonReevaluate {
         list.removeAll(Collections.singleton(null));
         String[] parArgs = list.toArray(new String[list.size()]);
 
-        ParameterDatabase db = Evolve.loadParameterDatabase(parArgs);
-        EvolutionState state = Evolve.initialize(db, 0);
-        MasonSimulator sim = (MasonSimulator) state.evaluator.p_problem;
+        MasonSimulator sim = MasonPlayer.createSimulator(parArgs);
         GroupController controller = MasonPlayer.loadController(gc);
 
         Random rand = new Random();

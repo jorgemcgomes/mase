@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import mase.AgentController;
 import mase.GroupController;
-import sim.engine.SimState;
+import mase.mason.PortrayableSimState;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
 import sim.util.Double2D;
@@ -18,7 +18,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredatorPrey extends SimState {
+public class PredatorPrey extends PortrayableSimState {
 
     protected PredParams par;
     protected Continuous2D field;
@@ -89,7 +89,7 @@ public class PredatorPrey extends SimState {
     }
 
     protected Predator newPredator(AgentController ac) {
-        if(par.sensorMode == PredParams.V_ARCS) {
+        if (par.sensorMode == PredParams.V_ARCS) {
             return new MultiPredator(this, field, ac);
         } else {
             return new Predator(this, field, ac);
@@ -124,5 +124,10 @@ public class PredatorPrey extends SimState {
 
     public int getCaptureCount() {
         return captureCount;
+    }
+
+    @Override
+    public Object getField() {
+        return field;
     }
 }

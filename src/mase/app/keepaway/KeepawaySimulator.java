@@ -24,12 +24,22 @@ public class KeepawaySimulator extends MasonSimulator {
 
     @Override
     public SimState createSimState(GroupController gc, long seed) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new Keepaway(gc, seed);
     }
 
     @Override
     public GUIState createSimStateWithUI(GroupController gc, long seed) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public class Keepaway extends SimState {
+
+        public Keepaway(GroupController gc, long seed) {
+            super(seed);
+        }
+        
+        
+        
     }
     
 }
