@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.ExpandedFitness;
-import org.apache.commons.io.FileUtils;
 
 /**
  *

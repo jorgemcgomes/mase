@@ -20,6 +20,8 @@ public class KeepawayParams {
     public static final String P_BALL_SPEED = "ball-speed";
     public static final String P_BALL_DECAY = "ball-decay"; // linear decay
     public static final String P_TAKERS_PLACEMENT = "takers-placement";
+    public static final String V_RANDOM = "random-center", V_CENTER = "center";
+    public static final String P_PLACE_RADIUS = "placement-radius";
     public static final String P_KEEPERS_PLACEMENT = "keepers-placement";
     public static final String P_BALL_PLACEMENT = "ball-placement";
     public static final String P_COLLISIONS = "collisions";
@@ -32,5 +34,7 @@ public class KeepawayParams {
     protected int numKeepers;
     protected double ballSpeed;
     protected double ballDecay;
+    protected String takersPlacement;
+    protected double placeRadius;
     
 }

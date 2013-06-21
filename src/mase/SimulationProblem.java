@@ -14,6 +14,7 @@ import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import mase.controllers.HeterogeneousGroupController;
+import mase.controllers.HomogeneousGroupController;
 
 /**
  *
@@ -122,7 +123,13 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
 
     @Override
     public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        AgentControllerIndividual aci = (AgentControllerIndividual) ind;
+        HomogeneousGroupController hc = new HomogeneousGroupController(aci.decodeController());
+        EvaluationResult[] eval = evaluateSolution(hc, state.random[threadnum].nextLong());
+        ExpandedFitness fit = (ExpandedFitness) ind.fitness;
+        fit.setEvaluationResults(eval);
+        fit.setFitness(state, fit.getFitnessScore(), false);
+        ind.evaluated = true;
     }
 
     public abstract EvaluationResult[] evaluateSolution(GroupController gc, long seed);

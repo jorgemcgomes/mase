@@ -37,7 +37,7 @@ public class ConsoleStat extends Statistics {
         super.setup(state, base);
         jobs = state.parameters.getIntWithDefault(new Parameter("jobs"), null, 1);
         currentJob = state.job != null ? (Integer) state.job[0] : 0;
-        df = new SimpleDateFormat("dd-HH:mm:ss");
+        df = new SimpleDateFormat("HH:mm:ss[dd]");
         nf = new DecimalFormat("0.0000");
     }
 

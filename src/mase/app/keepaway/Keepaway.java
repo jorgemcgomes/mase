@@ -70,7 +70,15 @@ public class Keepaway extends PortrayableSimState {
     protected void placeTakers() {
         takers = new ArrayList<Taker>(1);
         Taker t = new Taker(this, field);
-        t.setLocation(center);
+        if(par.takersPlacement == KeepawayParams.V_CENTER) {
+            t.setLocation(center);
+        } else if(par.takersPlacement == KeepawayParams.V_RANDOM) {
+            double q = random.nextDouble() * Math.PI *  2;
+            double r = Math.sqrt(random.nextDouble());
+            double x = (par.placeRadius * r) * Math.cos(q) + center.getX();
+            double y = (par.placeRadius * r) * Math.sin(q) + center.getY();
+            t.setLocation(new Double2D(x,y));
+        }
         t.setStopper(schedule.scheduleRepeating(t));
         takers.add(t);
     }

@@ -15,11 +15,13 @@ eval =					ec.simple.SimpleEvaluator
 stat =					ec.simple.SimpleStatistics
 pop = 					ec.Population
 
-generations =				250
+generations =				1000
 quit-on-run-complete =			false
 
 # Coevolution parameters
 eval =                                  ec.coevolve.MultiPopCoevolutionaryEvaluator2
+#eval = ec.simple.SimpleEvaluator
+
 eval.fitness-only-elite =               false
 eval.num-current=			1
 eval.num-elites =			1
@@ -36,31 +38,33 @@ problem.eval.0 =             mase.app.keepaway.KeepawayFitness
 problem.eval.0.combination = harmonic
 problem.eval.0.update-freq = 0
 
-problem.repetitions =              5
+problem.repetitions =              10
 problem.max-steps =                500
 problem.view-size =                 100
-problem.ring-size =                75
+problem.ring-size =                100
 problem.discretization =            15
 problem.keeper-speed =              1
 problem.taker-speed =               0.5
 problem.ball-speed =                4
-problem.ball-decay =                0.1
+problem.ball-decay =                0.05
 problem.n-keepers =               3
+problem.takers-placement = random-center
+problem.placement-radius =  10
 # displacement = ball-speed^2 / ball-decay       
 
 # Fitness
-pop.default-subpop.species.fitness = 		mase.novelty.NoveltyFitness
+pop.default-subpop.species.fitness = 		mase.ExpandedFitness
 fitness.fitness-index =  0
 
 # Individual representation
 ec.subpop.species = 			ec.vector.FloatVectorSpecies
-vector.species.genome-size =            74
+vector.species.genome-size =            102
 vector.species.min-gene =               -1
 vector.species.max-gene =               1
 vector.species.ind =                    mase.controllers.NeuralControllerIndividual
 neural.input =                          9
 # 3 + 2 * (keepers-1) + 2 * takers
-neural.hidden =                         5
+neural.hidden =                         7
 neural.output =                         4
 neural.structure =                      feed-forward
 neural.tanh =                           false
@@ -69,9 +73,11 @@ neural.tanh =                           false
 
 # Populations configuration
 pop.subpops =                           3
+#pop.subpops = 1
 pop.default-subpop = 			ec.Subpopulation
 ec.subpop.duplicate-retries =           10
-ec.subpop.size = 			150
+ec.subpop.size = 			200
+#ec.subpop.size = 600
 
 # Elitism configuration (pre-breeding)
 breed.elite =				5

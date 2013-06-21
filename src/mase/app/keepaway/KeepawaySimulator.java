@@ -34,6 +34,16 @@ public class KeepawaySimulator extends MasonSimulator {
         par.size = state.parameters.getDouble(base.push(KeepawayParams.P_SIZE), df.push(KeepawayParams.P_SIZE));
         par.takerSpeed = state.parameters.getDouble(base.push(KeepawayParams.P_TAKER_SPEED), df.push(KeepawayParams.P_TAKER_SPEED));
         par.numKeepers = state.parameters.getInt(base.push(KeepawayParams.P_NUM_KEEPERS), df.push(KeepawayParams.P_NUM_KEEPERS));
+        String placement = state.parameters.getString(base.push(KeepawayParams.P_TAKERS_PLACEMENT), df.push(KeepawayParams.P_TAKERS_PLACEMENT));
+        
+        if(placement.equalsIgnoreCase(KeepawayParams.V_CENTER)) {
+            par.takersPlacement = KeepawayParams.V_CENTER;
+        } else if(placement.equalsIgnoreCase(KeepawayParams.V_RANDOM)) {
+            par.takersPlacement = KeepawayParams.V_RANDOM;
+            par.placeRadius = state.parameters.getDouble(base.push(KeepawayParams.P_PLACE_RADIUS), df.push(KeepawayParams.P_PLACE_RADIUS));
+        } else {
+            state.output.fatal("Unknown takers placement", base.push(KeepawayParams.P_TAKERS_PLACEMENT), df.push(KeepawayParams.P_TAKERS_PLACEMENT));
+        }
     }
 
     @Override
