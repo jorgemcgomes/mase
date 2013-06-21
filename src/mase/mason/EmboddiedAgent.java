@@ -22,14 +22,14 @@ import sim.util.Double2D;
 public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Steppable, Oriented2D {
 
     protected Continuous2D field;
-    protected Double2D pos;
-    protected Double2D direction;
-    protected double orientation;
-    protected double radius;
-    protected double currentSpeed;
-    protected boolean collisionStatus;
-    protected Stoppable stopper;
-    protected boolean detectCollisions;
+    private Double2D pos;
+    private Double2D direction;
+    private double orientation;
+    private double radius;
+    private double speed;
+    private boolean collisionStatus;
+    private Stoppable stopper;
+    private boolean detectCollisions;
     protected SimState sim;
     public static final double SAFETY_MARGIN = 0.1;
 
@@ -39,7 +39,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.radius = radius;
         this.field = field;
         this.collisionStatus = false;
-        this.currentSpeed = 0;
+        this.speed = 0;
         this.detectCollisions = false;
         this.setLocation(new Double2D(0, 0));
         this.setOrientation(0);
@@ -63,16 +63,16 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         return true;
     }
 
-    protected boolean attemptMove(Double2D direction, double speed) {
+    private boolean attemptMove(Double2D direction, double speed) {
         Double2D newPos = direction.normalize().resize(speed).add(pos);
         if (isValidMove(newPos)) {
             this.collisionStatus = false;
-            this.currentSpeed = speed;
+            this.speed = speed;
             setLocation(newPos);
             return true;
         } else {
             this.collisionStatus = true;
-            this.currentSpeed = 0;
+            this.speed = 0;
             return false;
         }
     }
@@ -116,6 +116,11 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.orientation = angle;
         this.direction = new Double2D(Math.sin(orientation), Math.cos(orientation));
     }
+    
+    public void setDirection(Double2D dir) {
+        this.direction = dir.normalize();
+        this.orientation = dir.angle();
+    }
 
     public Double2D getLocation() {
         return pos;
@@ -130,8 +135,8 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         return collisionStatus;
     }
 
-    public double getCurrentSpeed() {
-        return currentSpeed;
+    public double getSpeed() {
+        return speed;
     }
 
     /**

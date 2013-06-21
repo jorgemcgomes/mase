@@ -24,14 +24,16 @@ public class Mason2dUI extends GUIState {
     protected JFrame displayFrame;
     protected String title;
     protected int w, h;
+    protected Color background;
     protected FieldPortrayal2D portrayal;
 
-    public Mason2dUI(PortrayableSimState state, String title, int w, int h) {
+    public Mason2dUI(PortrayableSimState state, String title, int w, int h, Color background) {
         super(state);
         this.title = title;
         this.w = w;
         this.h = h;
         this.portrayal = new ContinuousPortrayal2D();
+        this.background = background;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class Mason2dUI extends GUIState {
         portrayal.setField(pss.getField());
         // reschedule the displayer
         display.reset();
-        display.setBackdrop(Color.white);
+        display.setBackdrop(background);
         // redraw the display
         display.repaint();
     }

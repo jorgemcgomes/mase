@@ -80,7 +80,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
             }
             double[] sens = pred.getLastSensors();
             angle[i] += (sens[1] + 1) / 2; // normalize from -1,1 to 0,1
-            movement[i] += pred.getCurrentSpeed();
+            movement[i] += pred.getSpeed();
             float closest = Float.POSITIVE_INFINITY;
             for(Predator pOther : simState.predators) {
                 if(pred != pOther) {

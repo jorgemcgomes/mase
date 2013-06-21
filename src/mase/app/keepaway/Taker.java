@@ -8,6 +8,7 @@ import java.awt.Color;
 import mase.mason.EmboddiedAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
+import sim.util.Double2D;
 
 /**
  *
@@ -15,12 +16,30 @@ import sim.field.continuous.Continuous2D;
  */
 public class Taker extends EmboddiedAgent {
 
-    public Taker(SimState sim, Continuous2D field, double radius, Color c) {
-        super(sim, field, radius, c);
+    public static final double RADIUS = 2;
+    private boolean caughtBall = false;
+    
+    public Taker(SimState sim, Continuous2D field) {
+        super(sim, field, RADIUS, Color.RED);
     }
     
     @Override
     public void step(SimState state) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Keepaway kw = (Keepaway) sim;
+        // check if it caught the ball
+        if(this.distanceTo(kw.ball) == 0) {
+            this.caughtBall = true;
+            kw.caught = true;
+            kw.terminate();
+            return;
+        }
+        
+        // naive behaviour -- go towards the ball
+        Double2D dir = kw.ball.getLocation().subtract(this.getLocation());
+        super.move(dir, kw.par.takerSpeed);
+    }
+    
+    public boolean hasCaughtBall() {
+        return caughtBall;
     }
 }
