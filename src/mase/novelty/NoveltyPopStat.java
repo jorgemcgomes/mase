@@ -9,7 +9,7 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import mase.MaseEvolutionState;
+import mase.MetaEvaluator;
 import mase.PostEvaluator;
 
 /**
@@ -39,7 +39,7 @@ public class NoveltyPopStat extends Statistics {
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
         NoveltyEvaluation ne = null;
-        for(PostEvaluator pe : ((MaseEvolutionState) state).postEvaluators) {
+        for(PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
             if(pe instanceof NoveltyEvaluation) {
                 ne = (NoveltyEvaluation) pe;
                 break;

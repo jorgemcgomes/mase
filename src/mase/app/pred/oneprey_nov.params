@@ -6,7 +6,7 @@ checkpoint-modulo =                     1
 checkpoint-prefix = 			ec
 
 # Generational configuration
-state = 				mase.MaseEvolutionState
+state = 				ec.simple.SimpleEvolutionState
 init = 					ec.simple.SimpleInitializer
 finish = 	        		ec.simple.SimpleFinisher
 exch = 					ec.simple.SimpleExchanger
@@ -19,25 +19,27 @@ generations =				500
 quit-on-run-complete =			false
 
 # Coevolution parameters
-eval =                                  ec.coevolve.MultiPopCoevolutionaryEvaluator2
-eval.fitness-only-elite =               false
-eval.num-current=			1
-eval.num-elites =			1
-eval.num-prev =				0
-eval.num-shuffled =                     0
-eval.select-current =			ec.select.RandomSelection
-eval.select-prev = 			ec.select.RandomSelection
+eval =                                  mase.MetaEvaluator
+eval.base = ec.coevolve.MultiPopCoevolutionaryEvaluator2
+eval.base.fitness-only-elite =               false
+eval.base.num-current=			1
+eval.base.num-elites =			1
+eval.base.num-prev =				0
+eval.base.num-shuffled =                     0
+eval.base.select-current =			ec.select.RandomSelection
+eval.base.select-prev = 			ec.select.RandomSelection
 
-num-post-eval = 2
-post-eval.0 = mase.novelty.NoveltyEvaluation
-post-eval.0.ns-k =                     15
-post-eval.0.ns-archive-prob =          0.01
-post-eval.0.ns-archive-size =          1000
-post-eval.1 = mase.novelty.LinearScalarization
-post-eval.1.ns-blend = 0.7
+# Novelty parameters
+eval.num-post = 2
+eval.post.0 = mase.novelty.NoveltyEvaluation
+eval.post.0.ns-k =                     15
+eval.post.0.ns-archive-prob =          0.01
+eval.post.0.ns-archive-size =          1000
+eval.post.1 = mase.novelty.LinearScalarization
+eval.post.1.ns-blend = 0.7
 
 # Task parameters
-eval.problem =                          mase.app.pred.PredatorPreySimulator
+eval.base.problem =                          mase.app.pred.PredatorPreySimulator
 problem.trials-merge =             best
 problem.number-evals =             3
 problem.eval.0 =             mase.app.pred.OnePreyFitness

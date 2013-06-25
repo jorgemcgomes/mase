@@ -9,7 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import mase.AgentController;
 import mase.GroupController;
-import mase.mason.PortrayableSimState;
+import mase.mason.MaseSimState;
+import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
 import sim.util.Double2D;
@@ -18,7 +19,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredatorPrey extends PortrayableSimState {
+public class PredatorPrey extends MaseSimState  {
 
     protected PredParams par;
     protected Continuous2D field;
@@ -100,19 +101,6 @@ public class PredatorPrey extends PortrayableSimState {
         return new Prey(this, field);
     }
 
-    /*protected void placeTestPredators() {
-     double w = par.predatorSeparation * (par.nPredators - 1);
-     double y = par.predatorSeparation;
-     double startX = (field.width - w) / 2;
-     predators = new ArrayList<Predator>(par.nPredators);
-     for (int i = 0; i < par.nPredators; i++) {
-     double x = startX + i * par.predatorSeparation;
-     Predator newPred = new TestPredator(this,field, x, y, 0);
-     predators.add(newPred);
-     field.setObjectLocation(newPred, newPred.getLocation());
-     newPred.setStopper(schedule.scheduleRepeating(newPred));
-     }
-     }*/
     protected void terminate() {
         for (Prey p : preys) {
             p.stop();
@@ -129,5 +117,10 @@ public class PredatorPrey extends PortrayableSimState {
     @Override
     public Object getField() {
         return field;
+    }
+
+    @Override
+    public List<? extends SmartAgent> getSmartAgents() {
+        return predators;
     }
 }

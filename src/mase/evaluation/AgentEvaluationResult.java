@@ -21,6 +21,10 @@ public class AgentEvaluationResult implements EvaluationResult {
     public EvaluationResult getAgentEvaluation(int index) {
         return evals[index];
     }
+    
+    public EvaluationResult[] getAllEvaluations() {
+        return evals;
+    }
 
     @Override
     public Object value() {
@@ -33,7 +37,6 @@ public class AgentEvaluationResult implements EvaluationResult {
         for (int a = 0; a < merged.length; a++) {
             EvaluationResult[] agentEvals = new EvaluationResult[results.length];
             for (int i = 0; i < results.length; i++) {
-                AgentEvaluationResult r = (AgentEvaluationResult) results[i];
                 agentEvals[i] = ((AgentEvaluationResult) results[i]).evals[a];
             }
             merged[a] = agentEvals[0].mergeEvaluations(agentEvals);

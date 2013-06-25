@@ -4,18 +4,21 @@
  */
 package mase.mason;
 
+import java.util.List;
 import sim.engine.SimState;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class PortrayableSimState extends SimState {
+public abstract class MaseSimState extends SimState {
 
-    public PortrayableSimState(long seed) {
+    public MaseSimState(long seed) {
         super(seed);
     }
     
     public abstract Object getField();
+    
+    public abstract List<? extends SmartAgent> getSmartAgents();
     
 }

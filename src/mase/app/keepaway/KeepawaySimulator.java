@@ -8,9 +8,9 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
 import mase.GroupController;
+import mase.mason.MaseSimState;
 import mase.mason.Mason2dUI;
 import mase.mason.MasonSimulator;
-import mase.mason.PortrayableSimState;
 import sim.display.GUIState;
 
 /**
@@ -47,7 +47,7 @@ public class KeepawaySimulator extends MasonSimulator {
     }
 
     @Override
-    public PortrayableSimState createSimState(GroupController gc, long seed) {
+    public MaseSimState createSimState(GroupController gc, long seed) {
         return new Keepaway(seed, par, gc);
     }
 

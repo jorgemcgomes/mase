@@ -27,7 +27,7 @@ public class Mason2dUI extends GUIState {
     protected Color background;
     protected FieldPortrayal2D portrayal;
 
-    public Mason2dUI(PortrayableSimState state, String title, int w, int h, Color background) {
+    public Mason2dUI(MaseSimState state, String title, int w, int h, Color background) {
         super(state);
         this.title = title;
         this.w = w;
@@ -49,7 +49,7 @@ public class Mason2dUI extends GUIState {
     }
 
     public void setupPortrayals() {
-        PortrayableSimState pss = (PortrayableSimState) state;
+        MaseSimState pss = (MaseSimState) state;
         portrayal.setField(pss.getField());
         // reschedule the displayer
         display.reset();

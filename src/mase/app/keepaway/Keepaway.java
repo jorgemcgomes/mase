@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.AgentController;
 import mase.GroupController;
-import mase.mason.PortrayableSimState;
+import mase.mason.MaseSimState;
+import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 
@@ -16,7 +17,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Keepaway extends PortrayableSimState {
+public class Keepaway extends MaseSimState {
 
     protected GroupController gc;
     protected KeepawayParams par;
@@ -99,5 +100,10 @@ public class Keepaway extends PortrayableSimState {
             t.stop();
         }
         ball.stop();
+    }
+
+    @Override
+    public List<? extends SmartAgent> getSmartAgents() {
+        return keepers;
     }
 }
