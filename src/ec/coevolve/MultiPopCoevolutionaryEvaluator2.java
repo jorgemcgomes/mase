@@ -160,6 +160,11 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         }
     }
 
+    @Override
+    public void afterCoevolutionaryEvaluation(EvolutionState state, Population population, GroupedProblemForm prob) {
+        super.afterCoevolutionaryEvaluation(state, population, prob);
+    }
+
     class EvaluatorThread implements Runnable {
 
         public int[] numinds;

@@ -41,8 +41,8 @@ public class NoveltyIndividualsStat extends Statistics {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 NoveltyFitness nf = (NoveltyFitness) state.population.subpops[i].individuals[j].fitness;
                 state.output.print(state.generation + " " + i + " " + j + " " +
-                        nf.getFitnessScore() + " " + nf.normalizedFitnessScore + " " +
-                        nf.noveltyScore + " " + nf.normalizedNoveltyScore + " " +
+                        nf.getFitnessScore() + " " +
+                        nf.noveltyScore + " " + 
                         nf.repoComparisons + " " + nf.fitness() + "\n", log);
             }
         }

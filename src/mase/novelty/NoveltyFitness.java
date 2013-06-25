@@ -19,9 +19,7 @@ public class NoveltyFitness extends ExpandedFitness {
     
     public static final String P_NOVELTY_EVAL_INDEX = "novelty-index";    
     protected int noveltyIndex;
-    protected double normalizedFitnessScore;
     protected double noveltyScore;
-    protected double normalizedNoveltyScore;
     protected int repoComparisons;
 
     @Override

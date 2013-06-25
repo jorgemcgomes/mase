@@ -6,7 +6,7 @@ checkpoint-modulo =                     1
 checkpoint-prefix = 			ec
 
 # Generational configuration
-state = 				ec.simple.SimpleEvolutionState
+state = 				mase.MaseEvolutionState
 init = 					ec.simple.SimpleInitializer
 finish = 	        		ec.simple.SimpleFinisher
 exch = 					ec.simple.SimpleExchanger
@@ -19,7 +19,7 @@ generations =				500
 quit-on-run-complete =			false
 
 # Coevolution parameters
-eval =                                  mase.novelty.NoveltyEvaluation
+eval =                                  ec.coevolve.MultiPopCoevolutionaryEvaluator2
 eval.fitness-only-elite =               false
 eval.num-current=			1
 eval.num-elites =			1
@@ -27,11 +27,14 @@ eval.num-prev =				0
 eval.num-shuffled =                     0
 eval.select-current =			ec.select.RandomSelection
 eval.select-prev = 			ec.select.RandomSelection
-# Novelty parameters
-eval.ns-k =                     15
-eval.ns-archive-prob =          0.01
-eval.ns-archive-size =          1000
-eval.ns-blend =                 1
+
+num-post-eval = 2
+post-eval.0 = mase.novelty.NoveltyEvaluation
+post-eval.0.ns-k =                     15
+post-eval.0.ns-archive-prob =          0.01
+post-eval.0.ns-archive-size =          1000
+post-eval.1 = mase.novelty.LinearScalarization
+post-eval.1.ns-blend = 0.7
 
 # Task parameters
 eval.problem =                          mase.app.pred.PredatorPreySimulator

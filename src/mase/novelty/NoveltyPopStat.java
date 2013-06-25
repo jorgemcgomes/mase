@@ -9,6 +9,8 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import mase.MaseEvolutionState;
+import mase.PostEvaluator;
 
 /**
  *
@@ -36,9 +38,15 @@ public class NoveltyPopStat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
+        NoveltyEvaluation ne = null;
+        for(PostEvaluator pe : ((MaseEvolutionState) state).postEvaluators) {
+            if(pe instanceof NoveltyEvaluation) {
+                ne = (NoveltyEvaluation) pe;
+                break;
+            }
+        }
                 
-        NoveltyEvaluation prob = (NoveltyEvaluation) state.evaluator;
-        state.output.print(state.generation + " " + prob.archive.size(), log);
+        state.output.print(state.generation + " " + ne.archive.size(), log);
         
         for (int i = 0; i < state.population.subpops.length; i++) {
             double averageNovScore = 0;
