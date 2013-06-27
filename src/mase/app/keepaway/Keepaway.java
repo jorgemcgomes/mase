@@ -64,6 +64,7 @@ public class Keepaway extends MaseSimState {
             k.setLocation(v.add(center));
             k.setDirection(v.negate());
             k.setStopper(schedule.scheduleRepeating(k));
+            k.enableCollisionDetection(par.collisions);
             keepers.add(k);
         }
     }
@@ -80,6 +81,7 @@ public class Keepaway extends MaseSimState {
             double y = (par.placeRadius * r) * Math.sin(q) + center.getY();
             t.setLocation(new Double2D(x,y));
         }
+        t.enableCollisionDetection(par.collisions);
         t.setStopper(schedule.scheduleRepeating(t));
         takers.add(t);
     }

@@ -15,7 +15,7 @@ import mase.mason.MasonSimulator;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class KeepawayFitness extends MasonEvaluation {
+public class KeepawayTimeFitness extends MasonEvaluation {
 
     private FitnessResult fitnessResult;
     private int maxSteps;

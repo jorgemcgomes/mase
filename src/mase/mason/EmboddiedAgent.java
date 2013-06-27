@@ -86,8 +86,9 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     protected boolean isValidMove(Double2D target) {
         if (detectCollisions) {
             Bag objects = field.getNeighborsExactlyWithinDistance(target, radius * 2);
+            
             for (Object o : objects) {
-                if (o != this) {
+                if (o != this && o instanceof EmboddiedAgent && ((EmboddiedAgent) o).detectCollisions) {
                     return false;
                 }
             }

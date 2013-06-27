@@ -20,73 +20,88 @@ quit-on-run-complete =			false
 
 # Coevolution parameters
 eval =                                  mase.MetaEvaluator
-eval.base =                             ec.simple.SimpleEvaluator
+eval.base = ec.coevolve.MultiPopCoevolutionaryEvaluator2
+eval.base.fitness-only-elite =               false
+eval.base.num-current=			1
+eval.base.num-elites =			1
+eval.base.num-prev =				0
+eval.base.num-shuffled =                     0
+eval.base.select-current =			ec.select.RandomSelection
+eval.base.select-prev = 			ec.select.RandomSelection
 
-eval.fitness-only-elite =               false
-eval.num-current=			1
-eval.num-elites =			1
-eval.num-prev =				0
-eval.num-shuffled =                     0
-eval.select-current =			ec.select.RandomSelection
-eval.select-prev = 			ec.select.RandomSelection
+# Novelty parameters
+eval.num-post = 3
+eval.post.0 = mase.generic.StateCountPostEvaluator
+eval.post.0.filter-threshold = 0.05
+eval.post.0.do-cluster = FALSE
+eval.post.0.do-filter = FALSE
+eval.post.1 = mase.novelty.NoveltyEvaluation
+eval.post.1.ns-k =                     15
+eval.post.1.ns-archive-prob =          0.01
+eval.post.1.ns-archive-size =          1000
+eval.post.2 = mase.novelty.LinearScalarization
+eval.post.2.ns-blend = 0.7
 
 # Task parameters
-eval.base.problem =                          mase.app.keepaway.KeepawaySimulator
+eval.base.problem =                          mase.app.pred.PredatorPreySimulator
 problem.trials-merge =             best
-problem.number-evals =             2
-problem.eval.0 =             mase.app.keepaway.KeepawayPassesFitness
+problem.number-evals =             4
+problem.eval.0 =             mase.app.pred.OnePreyFitness
 problem.eval.0.combination = harmonic
-problem.eval.0.update-freq = 1
-problem.eval.0.pass-length = 5
-problem.eval.1 =             mase.app.keepaway.KeepawayTimeFitness
-problem.eval.1.combination = harmonic
-problem.eval.1.update-freq = 0
+problem.eval.0.update-freq = 0
+problem.eval.1 = mase.generic.CombinedStateCountFunction
+problem.eval.1.discretisation = 3
+problem.eval.1.update-freq = 5
+problem.eval.2 =             mase.app.pred.OnePreyIndividualEval
+problem.eval.2.update-freq = 1
+problem.eval.3 =             mase.app.pred.OnePreyGroupEval
+problem.eval.3.update-freq = 1
 
 problem.repetitions =              10
-problem.max-steps =                1000
-problem.view-size =                 100
-problem.ring-size =                100
-problem.discretization =            15
-problem.keeper-speed =              1
-problem.taker-speed =               1
-problem.ball-speed =                4
-problem.ball-decay =                0.05
-problem.n-keepers =               3
-problem.collisions =                true
-problem.takers-placement = random-center
-problem.placement-radius =  10
-# displacement = ball-speed^2 / ball-decay       
+problem.max-steps =                300
+problem.size =                     100
+problem.discretization =           15
+problem.n-preys =                  1
+problem.prey-placement =           random
+problem.prey-margin =              20
+problem.prey-speed =               1
+problem.escape-distance =          5
+problem.n-predators =              3
+problem.predator-separation =      10
+problem.predator-speed =           1
+problem.predator-rotate-speed =    1.57
+problem.capture-distance =         1
+problem.escape-strategy =          mean-vector
+problem.sensor-mode =              closest
+problem.collisions =               FALSE
 
 # Fitness
-pop.default-subpop.species.fitness = 		mase.ExpandedFitness
+pop.default-subpop.species.fitness = 		mase.novelty.NoveltyFitness
 fitness.fitness-index =  0
+fitness.novelty-index =  1
 
 # Individual representation
 ec.subpop.species = 			ec.vector.FloatVectorSpecies
-vector.species.genome-size =            130
+vector.species.genome-size =            33
 vector.species.min-gene =               -1
 vector.species.max-gene =               1
 vector.species.ind =                    mase.controllers.NeuralControllerIndividual
-neural.input =                          9
-# 3 + 2 * (keepers-1) + 2 * takers
-neural.hidden =                         9
-neural.output =                         4
+neural.input =                          2
+neural.hidden =                         5
+neural.output =                         3
 neural.structure =                      feed-forward
 neural.tanh =                           false
 # with elman: (input + hidden + 1) * hidden + (hidden + 1) * output
 # feed-forward (input + 1) * hidden + (hidden + 1) * output
-# 7-102, 5-74, 9-130
 
 # Populations configuration
-#pop.subpops =                           3
-pop.subpops = 1
+pop.subpops =                           3
 pop.default-subpop = 			ec.Subpopulation
 ec.subpop.duplicate-retries =           10
-ec.subpop.size = 			400
-#ec.subpop.size = 600
+ec.subpop.size = 			150
 
 # Elitism configuration (pre-breeding)
-breed.elite =				5
+breed.elite =				10
 breed.reevaluate-elites =             true
 
 # Breeding
@@ -100,11 +115,11 @@ vector.species.mutation-bounded =       TRUE
 #vector.xover.source.0 =                 ec.select.TournamentSelection
 #vector.xover.source.1 =                 ec.select.TournamentSelection
 #vector.species.crossover-type = 	one
-select.tournament.size =                2
+select.tournament.size =                7
 
 # Statistics
 stat =                                  mase.stat.ConsoleStat
-stat.num-children = 			6
+stat.num-children = 			9
 stat.child.0 = 				ec.simple.SimpleShortStatistics
 stat.child.0.file =			$extended.stat
 stat.child.0.do-time =                  true
@@ -125,7 +140,10 @@ stat.child.4.sample-size =              10
 stat.child.5 =                          mase.stat.FitnessStat
 stat.child.5.file =			$fitness.stat
 stat.child.5.do-subpops =               true
-#stat.child.6 =                          mase.novelty.NoveltyPopStat
-#stat.child.6.file =			$noveltypop.stat
-#stat.child.7 =                          mase.novelty.NoveltyIndividualsStat
-#stat.child.7.file =			$noveltyind.stat
+stat.child.6 =                          mase.generic.StateCountStat
+stat.child.6.log-file =                 $genericlog.stat
+stat.child.6.states-file =              $genericstates.stat
+stat.child.7 =                          mase.novelty.NoveltyPopStat
+stat.child.7.file =			$noveltypop.stat
+stat.child.8 =                          mase.novelty.NoveltyIndividualsStat
+stat.child.8.file =			$noveltyind.stat

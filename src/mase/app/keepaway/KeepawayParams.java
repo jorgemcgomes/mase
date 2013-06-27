@@ -36,5 +36,6 @@ public class KeepawayParams {
     protected double ballDecay;
     protected String takersPlacement;
     protected double placeRadius;
+    protected boolean collisions;
     
 }

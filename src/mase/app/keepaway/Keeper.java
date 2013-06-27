@@ -23,6 +23,7 @@ public class Keeper extends SmartAgent {
     public static final double RADIUS = 2;
     public static final double KICK_DISTANCE = 0.5;
     private List<EmboddiedAgent> agents;
+    protected boolean hasPossession = false;
 
     public Keeper(SimState sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.BLUE, ac);
@@ -60,10 +61,12 @@ public class Keeper extends SmartAgent {
     public void action(double[] output) {
         Keepaway kw = (Keepaway) sim;
         if(kw.ball.distanceTo(this) < KICK_DISTANCE) {
+            this.hasPossession = true;
             double kickPower = output[2] * kw.par.ballSpeed;
             Double2D kickDir = getDirection().rotate(output[3] * Math.PI * 2 - 1);
             kw.ball.kick(kickDir, kickPower);
         } else {
+            this.hasPossession = false;
             double dashPower = output[0] * kw.par.keeperSpeed;
             Double2D dashDir = getDirection().rotate(output[1] * Math.PI * 2 - Math.PI);
             super.move(dashDir, dashPower);

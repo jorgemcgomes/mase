@@ -212,7 +212,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
                             tUpdates[ind] = true;
                         } else {
                             tInds[ind] = produceCurrent(ind, state, 0);
-                            tUpdates[ind] = true;
+                            tUpdates[ind] = false;
                         }
                     }
                     prob.evaluate(state, tInds, tUpdates, false, subpops, 0);

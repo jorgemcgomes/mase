@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.EvaluationResult;
 import mase.GroupController;
+import mase.MetaEvaluator;
 import mase.SimulationProblem;
 import sim.display.GUIState;
 
@@ -58,11 +59,19 @@ public class MasonPlayer {
         ParameterDatabase db = Evolve.loadParameterDatabase(args);
         EvolutionState state = Evolve.initialize(db, 0);
         /*state.setup(state, null);
-        MasonSimulator sim = (MasonSimulator) state.evaluator.p_problem;*/
+         MasonSimulator sim = (MasonSimulator) state.evaluator.p_problem;*/
         Parameter base = new Parameter(EvolutionState.P_EVALUATOR).push(Evaluator.P_PROBLEM);
-        MasonSimulator sim = (MasonSimulator) db.getInstanceForParameter(base, null, MasonSimulator.class);
-        sim.setup(state, base);
-        return sim;
+        if (state.parameters.exists(base, null)) {
+            MasonSimulator sim = (MasonSimulator) db.getInstanceForParameter(base, null, MasonSimulator.class);
+            sim.setup(state, base);
+            return sim;
+        } else {
+            base = new Parameter(EvolutionState.P_EVALUATOR).push(MetaEvaluator.P_BASE_EVAL).push(Evaluator.P_PROBLEM);
+            MasonSimulator sim = (MasonSimulator) db.getInstanceForParameter(base, null, MasonSimulator.class);
+            sim.setup(state, base);
+            return sim;
+        }
+
     }
 
     public static GroupController loadController(File gc) {
