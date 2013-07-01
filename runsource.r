@@ -35,7 +35,7 @@ defaultCall <- function(file=NULL, outBase=OUTPUT_BASE, out=NULL, params=c()) {
     lines <- readLines(con)
     close(con)
     for(l in lines) {
-        if(grepl("\\$",l)) {
+        if(substr(l,1,1) != "#" & grepl("\\$",l)) {
             split <- strsplit(l, "=")[[1]]
             trim <- function (x) gsub("^\\s+|\\s+$", "", x)
             key <- trim(split[1])
