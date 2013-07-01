@@ -1,5 +1,5 @@
 # ECJ options
-evalthreads = 				auto
+evalthreads =   			auto
 breedthreads = 				auto
 checkpoint =				false
 checkpoint-modulo =                     1
@@ -33,14 +33,18 @@ eval.select-prev = 			ec.select.RandomSelection
 # Task parameters
 eval.base.problem =                          mase.app.keepaway.KeepawaySimulator
 problem.trials-merge =             best
-problem.number-evals =             2
-problem.eval.0 =             mase.app.keepaway.KeepawayPassesFitness
+problem.number-evals =             3
+problem.eval.0 =            mase.app.keepaway.KeepawayFitness
 problem.eval.0.combination = harmonic
 problem.eval.0.update-freq = 1
-problem.eval.0.pass-length = 5
-problem.eval.1 =             mase.app.keepaway.KeepawayTimeFitness
+problem.eval.0.pass-length = 10
+problem.eval.1 =             mase.app.keepaway.KeepawayPassesFitness
 problem.eval.1.combination = harmonic
-problem.eval.1.update-freq = 0
+problem.eval.1.update-freq = 1
+problem.eval.1.pass-length = 10
+problem.eval.2 =             mase.app.keepaway.KeepawayTimeFitness
+problem.eval.2.combination = harmonic
+problem.eval.2.update-freq = 0
 
 problem.repetitions =              10
 problem.max-steps =                1000
@@ -48,12 +52,12 @@ problem.view-size =                 100
 problem.ring-size =                100
 problem.discretization =            15
 problem.keeper-speed =              1
-problem.taker-speed =               1
+problem.taker-speed =               0.5
 problem.ball-speed =                4
 problem.ball-decay =                0.05
-problem.n-keepers =               3
+problem.n-keepers =                 3
 problem.collisions =                true
-problem.takers-placement = random-center
+problem.takers-placement =          center
 problem.placement-radius =  10
 # displacement = ball-speed^2 / ball-decay       
 
@@ -63,13 +67,13 @@ fitness.fitness-index =  0
 
 # Individual representation
 ec.subpop.species = 			ec.vector.FloatVectorSpecies
-vector.species.genome-size =            130
+vector.species.genome-size =            102
 vector.species.min-gene =               -1
 vector.species.max-gene =               1
 vector.species.ind =                    mase.controllers.NeuralControllerIndividual
 neural.input =                          9
 # 3 + 2 * (keepers-1) + 2 * takers
-neural.hidden =                         9
+neural.hidden =                         7
 neural.output =                         4
 neural.structure =                      feed-forward
 neural.tanh =                           false
