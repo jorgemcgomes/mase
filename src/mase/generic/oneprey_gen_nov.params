@@ -1,5 +1,5 @@
 # ECJ options
-evalthreads = 				auto
+evalthreads =   			auto
 breedthreads = 				auto
 checkpoint =				false
 checkpoint-modulo =                     1
@@ -52,6 +52,7 @@ problem.eval.0.update-freq = 0
 problem.eval.1 = mase.generic.CombinedStateCountFunction
 problem.eval.1.discretisation = 3
 problem.eval.1.update-freq = 5
+problem.eval.1.distance = cosine
 problem.eval.2 =             mase.app.pred.OnePreyIndividualEval
 problem.eval.2.update-freq = 1
 problem.eval.3 =             mase.app.pred.OnePreyGroupEval
@@ -128,7 +129,7 @@ stat.child.0.do-subpops =               true
 stat.child.1 =                          mase.stat.BestEverSolutionStat
 stat.child.1.file =                     $best.ind
 stat.child.2 =                          mase.stat.EvaluationsStat
-stat.child.2.do-behaviours =            true
+stat.child.2.do-behaviours =            false
 stat.child.2.file =                     $behaviours.stat
 stat.child.3 =                          mase.stat.BestSolutionGenStat
 stat.child.3.file =                     $bests.tar.gz
