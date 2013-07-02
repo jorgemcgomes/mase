@@ -54,7 +54,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.orientation = direction.angle();
 
         if (!attemptMove(direction, speed)) { // cannot move
-            double angle = sim.random.nextBoolean() ? Math.PI / 4 : -Math.PI / 4;
+            double angle = sim.random.nextBoolean() ? Math.PI / 2 : -Math.PI / 2;
             if (!attemptMove(direction.rotate(angle), speed)
                     && !attemptMove(direction.rotate(angle), speed)) {
                 return false;

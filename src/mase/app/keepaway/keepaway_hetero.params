@@ -20,33 +20,30 @@ quit-on-run-complete =			false
 
 # Coevolution parameters
 eval =                                  mase.MetaEvaluator
-eval.base =                             ec.simple.SimpleEvaluator
+eval.base =                             ec.coevolve.MultiPopCoevolutionaryEvaluator2
 
-eval.fitness-only-elite =               false
-eval.num-current=			1
-eval.num-elites =			1
-eval.num-prev =				0
-eval.num-shuffled =                     0
-eval.select-current =			ec.select.RandomSelection
-eval.select-prev = 			ec.select.RandomSelection
+eval.base.fitness-only-elite =               false
+eval.base.num-current=			1
+eval.base.num-elites =			1
+eval.base.num-prev =				0
+eval.base.num-shuffled =                     0
+eval.base.select-current =			ec.select.RandomSelection
+eval.base.select-prev = 			ec.select.RandomSelection
 
 # Task parameters
 eval.base.problem =                          mase.app.keepaway.KeepawaySimulator
 problem.trials-merge =             best
-problem.number-evals =             3
+problem.number-evals =             2
 problem.eval.0 =            mase.app.keepaway.KeepawayFitness
 problem.eval.0.combination = harmonic
 problem.eval.0.update-freq = 1
 problem.eval.0.pass-length = 10
-problem.eval.1 =             mase.app.keepaway.KeepawayPassesFitness
-problem.eval.1.combination = harmonic
+problem.eval.1 =             mase.app.keepaway.KeepawayBehaviourEval
 problem.eval.1.update-freq = 1
 problem.eval.1.pass-length = 10
-problem.eval.2 =             mase.app.keepaway.KeepawayTimeFitness
-problem.eval.2.combination = harmonic
-problem.eval.2.update-freq = 0
+problem.eval.1.pass-normalization = 10
 
-problem.repetitions =              10
+problem.repetitions =              5
 problem.max-steps =                1000
 problem.view-size =                 100
 problem.ring-size =                100
@@ -82,12 +79,10 @@ neural.tanh =                           false
 # 7-102, 5-74, 9-130
 
 # Populations configuration
-#pop.subpops =                           3
-pop.subpops = 1
+pop.subpops =                           3
 pop.default-subpop = 			ec.Subpopulation
 ec.subpop.duplicate-retries =           10
-ec.subpop.size = 			400
-#ec.subpop.size = 600
+ec.subpop.size = 			150
 
 # Elitism configuration (pre-breeding)
 breed.elite =				5
@@ -129,7 +124,3 @@ stat.child.4.sample-size =              10
 stat.child.5 =                          mase.stat.FitnessStat
 stat.child.5.file =			$fitness.stat
 stat.child.5.do-subpops =               true
-#stat.child.6 =                          mase.novelty.NoveltyPopStat
-#stat.child.6.file =			$noveltypop.stat
-#stat.child.7 =                          mase.novelty.NoveltyIndividualsStat
-#stat.child.7.file =			$noveltyind.stat

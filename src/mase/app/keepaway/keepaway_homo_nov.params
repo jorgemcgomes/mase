@@ -1,0 +1,131 @@
+# ECJ options
+evalthreads =   			auto
+breedthreads = 				auto
+checkpoint =				false
+checkpoint-modulo =                     1
+checkpoint-prefix = 			ec
+
+# Generational configuration
+state = 				ec.simple.SimpleEvolutionState
+init = 					ec.simple.SimpleInitializer
+finish = 	        		ec.simple.SimpleFinisher
+exch = 					ec.simple.SimpleExchanger
+breed =					ec.simple.SimpleBreeder
+eval =					ec.simple.SimpleEvaluator
+stat =					ec.simple.SimpleStatistics
+pop = 					ec.Population
+
+generations =				500
+quit-on-run-complete =			false
+
+# Coevolution parameters
+eval =                                  mase.MetaEvaluator
+eval.base =                             ec.simple.SimpleEvaluator
+
+eval.num-post = 2
+eval.post.0 = mase.novelty.NoveltyEvaluation
+eval.post.0.ns-k =                     15
+eval.post.0.ns-archive-prob =          0.01
+eval.post.0.ns-archive-size =          1000
+eval.post.1 = mase.novelty.LinearScalarization
+eval.post.1.ns-blend = 0.7
+
+# Task parameters
+eval.base.problem =                          mase.app.keepaway.KeepawaySimulator
+problem.trials-merge =             best
+problem.number-evals =             2
+problem.eval.0 =            mase.app.keepaway.KeepawayFitness
+problem.eval.0.combination = harmonic
+problem.eval.0.update-freq = 1
+problem.eval.0.pass-length = 10
+problem.eval.1 =             mase.app.keepaway.KeepawayBehaviourEval
+problem.eval.1.update-freq = 1
+problem.eval.1.pass-length = 10
+problem.eval.1.pass-normalization = 10
+
+problem.repetitions =              5
+problem.max-steps =                1000
+problem.view-size =                 100
+problem.ring-size =                100
+problem.discretization =            15
+problem.keeper-speed =              1
+problem.taker-speed =               0.5
+problem.ball-speed =                4
+problem.ball-decay =                0.05
+problem.n-keepers =                 3
+problem.collisions =                true
+problem.takers-placement =          center
+problem.placement-radius =  10
+# displacement = ball-speed^2 / ball-decay       
+
+# Fitness
+pop.default-subpop.species.fitness = 		mase.novelty.NoveltyFitness
+fitness.fitness-index =  0
+fitness.novelty-index = 1
+
+# Individual representation
+ec.subpop.species = 			ec.vector.FloatVectorSpecies
+vector.species.genome-size =            102
+vector.species.min-gene =               -1
+vector.species.max-gene =               1
+vector.species.ind =                    mase.controllers.NeuralControllerIndividual
+neural.input =                          9
+# 3 + 2 * (keepers-1) + 2 * takers
+neural.hidden =                         7
+neural.output =                         4
+neural.structure =                      feed-forward
+neural.tanh =                           false
+# with elman: (input + hidden + 1) * hidden + (hidden + 1) * output
+# feed-forward (input + 1) * hidden + (hidden + 1) * output
+# 7-102, 5-74, 9-130
+
+# Populations configuration
+pop.subpops = 1
+pop.default-subpop = 			ec.Subpopulation
+ec.subpop.duplicate-retries =           10
+ec.subpop.size = 			400
+
+# Elitism configuration (pre-breeding)
+breed.elite =				5
+breed.reevaluate-elites =             true
+
+# Breeding
+vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline
+vector.mutate.source.0 =              ec.select.TournamentSelection
+#vector.mutate.source.0 =                ec.vector.breed.VectorCrossoverPipeline
+vector.species.mutation-type =          gauss
+vector.species.mutation-stdev =         0.50
+vector.species.mutation-prob =          0.05
+vector.species.mutation-bounded =       TRUE
+#vector.xover.source.0 =                 ec.select.TournamentSelection
+#vector.xover.source.1 =                 ec.select.TournamentSelection
+#vector.species.crossover-type = 	one
+select.tournament.size =                2
+
+# Statistics
+stat =                                  mase.stat.ConsoleStat
+stat.num-children = 			8
+stat.child.0 = 				ec.simple.SimpleShortStatistics
+stat.child.0.file =			$extended.stat
+stat.child.0.do-time =                  true
+stat.child.0.do-size =                  false
+stat.child.0.do-subpops =               true
+stat.child.1 =                          mase.stat.BestEverSolutionStat
+stat.child.1.file =                     $best.ind
+stat.child.2 =                          mase.stat.EvaluationsStat
+stat.child.2.do-behaviours =            true
+stat.child.2.file =                     $behaviours.stat
+stat.child.3 =                          mase.stat.BestSolutionGenStat
+stat.child.3.file =                     $bests.tar.gz
+stat.child.3.compress =                 true
+stat.child.4 =                          mase.stat.SampleSolutionsStat
+stat.child.4.file =                     $sample.tar.gz
+stat.child.4.compress =                 true
+stat.child.4.sample-size =              10
+stat.child.5 =                          mase.stat.FitnessStat
+stat.child.5.file =			$fitness.stat
+stat.child.5.do-subpops =               true
+stat.child.6 =                          mase.novelty.NoveltyPopStat
+stat.child.6.file =			$noveltypop.stat
+stat.child.7 =                          mase.novelty.NoveltyIndividualsStat
+stat.child.7.file =			$noveltyind.stat

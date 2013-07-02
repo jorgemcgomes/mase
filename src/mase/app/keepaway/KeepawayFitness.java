@@ -48,9 +48,9 @@ public class KeepawayFitness extends MasonEvaluation {
                 if ((lastKeeper == null || k != lastKeeper)
                         && (lastBallPos == null || lastBallPos.distance(kw.ball.getLocation()) > passLength)) {
                     numPasses++;
-                    lastBallPos = kw.ball.getLocation();
-                    lastKeeper = k;
                 }
+                lastKeeper = k;
+                lastBallPos = kw.ball.getLocation();
                 return;
             }
         }

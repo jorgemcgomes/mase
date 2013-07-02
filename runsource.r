@@ -1,6 +1,6 @@
-ECJ_HOME <- "/home/jorge/Dropbox/MASE"
+ECJ_HOME <- "/home/jorge/ToDrop/MASE/mase"
 CP <- paste0("\"",ECJ_HOME, "/build/classes:",ECJ_HOME,"/lib/*\"")
-OUTPUT_BASE <- "/home/jorge/Dropbox/ECJ/experiments"
+OUTPUT_BASE <- "/home/jorge/ToDrop/experiments"
 
 paramsToString <- function(params) {
     paramString <- ""

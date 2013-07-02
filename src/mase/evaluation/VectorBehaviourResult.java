@@ -15,8 +15,8 @@ public class VectorBehaviourResult implements BehaviourResult {
 
     protected float[] behaviour;
     
-    public VectorBehaviourResult(float[] b) {
-        this.behaviour = b;
+    public VectorBehaviourResult(float... bs) {
+        this.behaviour = bs;
     }
     
     @Override

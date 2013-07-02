@@ -20,7 +20,7 @@ public class Taker extends EmboddiedAgent {
     private boolean caughtBall = false;
     
     public Taker(SimState sim, Continuous2D field) {
-        super(sim, field, RADIUS, Color.RED);
+        super(sim, field, RADIUS, Color.ORANGE);
     }
     
     @Override
