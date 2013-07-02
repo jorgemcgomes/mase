@@ -15,12 +15,13 @@ import sim.field.continuous.Continuous2D;
  * @author jorge
  */
 public class AggregationAgent extends SmartAgent {
+    
+    public static final double RADIUS = 2;
 
-    public AggregationAgent(SimState sim, Continuous2D field, double radius, Color c, AgentController ac) {
-        super(sim, field, radius, c, ac);
+    public AggregationAgent(SimState sim, Continuous2D field, AgentController ac) {
+        super(sim, field, RADIUS, Color.BLUE, ac);
+        this.enableCollisionDetection(true);
     }
-    
-    
 
     @Override
     public double[] readNormalisedSensors() {

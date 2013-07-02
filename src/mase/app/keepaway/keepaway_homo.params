@@ -47,7 +47,7 @@ problem.ball-decay =                0.05
 problem.n-keepers =                 3
 problem.collisions =                true
 problem.takers-placement =          center
-problem.placement-radius =  10
+problem.placement-radius =  15
 # displacement = ball-speed^2 / ball-decay       
 
 # Fitness
@@ -88,9 +88,9 @@ vector.species.mutation-type =          gauss
 vector.species.mutation-stdev =         0.50
 vector.species.mutation-prob =          0.05
 vector.species.mutation-bounded =       TRUE
-#vector.xover.source.0 =                 ec.select.TournamentSelection
-#vector.xover.source.1 =                 ec.select.TournamentSelection
-#vector.species.crossover-type = 	one
+vector.xover.source.0 =                 ec.select.TournamentSelection
+vector.xover.source.1 =                 ec.select.TournamentSelection
+vector.species.crossover-type = 	one
 select.tournament.size =                2
 
 # Statistics
