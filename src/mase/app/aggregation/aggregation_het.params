@@ -30,57 +30,41 @@ eval.base.num-shuffled =                     0
 eval.base.select-current =			ec.select.RandomSelection
 eval.base.select-prev = 			ec.select.RandomSelection
 
-eval.num-post = 2
-eval.post.0 = mase.novelty.NoveltyEvaluation
-eval.post.0.ns-k =                     15
-eval.post.0.ns-archive-prob =          0.01
-eval.post.0.ns-archive-size =          1000
-eval.post.1 = mase.novelty.LinearScalarization
-eval.post.1.ns-blend = 0.7
-
 # Task parameters
-eval.base.problem =                          mase.app.keepaway.KeepawaySimulator
+eval.base.problem =                          mase.app.aggregation.AggregationSimulator
 problem.trials-merge =             best
-problem.number-evals =             2
-problem.eval.0 =            mase.app.keepaway.KeepawayFitness
+problem.number-evals =             1
+problem.eval.0 =            mase.app.aggregation.AggregationFitness
 problem.eval.0.combination = harmonic
 problem.eval.0.update-freq = 1
 problem.eval.0.pass-length = 10
-problem.eval.1 =             mase.app.keepaway.KeepawayBehaviourEval
-problem.eval.1.update-freq = 1
-problem.eval.1.pass-length = 10
-problem.eval.1.pass-normalization = 10
 
-problem.repetitions =              5
-problem.max-steps =                1000
-problem.view-size =                 100
-problem.ring-size =                100
-problem.discretization =            15
-problem.keeper-speed =              1
-problem.taker-speed =               0.5
-problem.ball-speed =                4
-problem.ball-decay =                0.05
-problem.n-keepers =                 3
-problem.collisions =                true
-problem.takers-placement =          center
-problem.placement-radius =  15
-# displacement = ball-speed^2 / ball-decay       
+problem.repetitions =              10
+problem.max-steps =                500
+problem.size =  70
+problem.discretization = 15
+problem.num-agents = 5
+problem.agent-radius = 10
+problem.agent-arcs = 4
+problem.agent-speed = 1
+problem.agent-rotation = 1.57
+problem.wall-radius = 5
+problem.wall-rays = 4
 
 # Fitness
-pop.default-subpop.species.fitness = 		mase.novelty.NoveltyFitness
+pop.default-subpop.species.fitness = 		mase.ExpandedFitness
 fitness.fitness-index =  0
-fitness.novelty-index = 1
 
 # Individual representation
 ec.subpop.species = 			ec.vector.FloatVectorSpecies
-vector.species.genome-size =            102
+vector.species.genome-size =            68
 vector.species.min-gene =               -1
 vector.species.max-gene =               1
 vector.species.ind =                    mase.controllers.NeuralControllerIndividual
 neural.input =                          9
 # 3 + 2 * (keepers-1) + 2 * takers
-neural.hidden =                         7
-neural.output =                         4
+neural.hidden =                         5
+neural.output =                         3
 neural.structure =                      feed-forward
 neural.tanh =                           false
 # with elman: (input + hidden + 1) * hidden + (hidden + 1) * output
@@ -88,10 +72,10 @@ neural.tanh =                           false
 # 7-102, 5-74, 9-130
 
 # Populations configuration
-pop.subpops = 3
+pop.subpops =                           5
 pop.default-subpop = 			ec.Subpopulation
 ec.subpop.duplicate-retries =           10
-ec.subpop.size = 			150
+ec.subpop.size = 			100
 
 # Elitism configuration (pre-breeding)
 breed.elite =				5
@@ -108,11 +92,11 @@ vector.species.mutation-bounded =       TRUE
 #vector.xover.source.0 =                 ec.select.TournamentSelection
 #vector.xover.source.1 =                 ec.select.TournamentSelection
 #vector.species.crossover-type = 	one
-select.tournament.size =                2
+select.tournament.size =                5
 
 # Statistics
 stat =                                  mase.stat.ConsoleStat
-stat.num-children = 			8
+stat.num-children = 			6
 stat.child.0 = 				ec.simple.SimpleShortStatistics
 stat.child.0.file =			$extended.stat
 stat.child.0.do-time =                  true
@@ -133,7 +117,3 @@ stat.child.4.sample-size =              10
 stat.child.5 =                          mase.stat.FitnessStat
 stat.child.5.file =			$fitness.stat
 stat.child.5.do-subpops =               true
-stat.child.6 =                          mase.novelty.NoveltyPopStat
-stat.child.6.file =			$noveltypop.stat
-stat.child.7 =                          mase.novelty.NoveltyIndividualsStat
-stat.child.7.file =			$noveltyind.stat

@@ -19,6 +19,7 @@ public class AggregationParams {
     public static final String P_WALL_RADIUS = "wall-radius";
     public static final String P_WALL_RAYS = "wall-rays";
     public static final String P_AGENT_SPEED = "agent-speed";
+    public static final String P_AGENT_ROTATION = "agent-rotation";
     
     
     protected double size;
@@ -30,5 +31,6 @@ public class AggregationParams {
     protected int agentArcs;
     protected double wallRadius;
     protected int wallRays;
+    protected double agentRotation;
     
 }
