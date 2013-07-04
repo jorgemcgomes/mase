@@ -13,6 +13,7 @@ eval.post.2.ns-blend =                 0.7
 pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
 
 stat.num-children = 		       9
+stat.child.3.do-behaviours =           false
 stat.child.6 =                         mase.novelty.NoveltyPopStat
 stat.child.6.file =		       $noveltypop.stat
 stat.child.7 =                         mase.novelty.NoveltyIndividualsStat
@@ -25,3 +26,4 @@ problem.number-evals =                 1
 problem.eval.0 =                       mase.generic.CombinedStateCountFunction
 statecount.discretisation =            3
 statecount.update-freq =               5
+statecount.distance =                  cosine

@@ -1,6 +1,27 @@
-ECJ_HOME <- "/home/jorge/ToDrop/MASE/mase"
+ECJ_HOME <- "/home/jorge/Dropbox/mase"
 CP <- paste0("\"",ECJ_HOME, "/build/classes:",ECJ_HOME,"/lib/*\"")
-OUTPUT_BASE <- "/home/jorge/ToDrop/experiments"
+OUTPUT_BASE <- "/home/jorge/Dropbox/experiments"
+
+defaultPlayerCall <- function(args) {
+    # no file specified -- use the experiments file
+    if(!("-file" %in% args)) {
+        i <- which(args == "-gc")
+        gc <- file.path(args[i + 1])
+        conf <- file.path(dirname(gc), "config.params")
+        if(!file.exists(conf)) {
+            cat("Config file not found!", conf)
+        } else {
+            args <- c(args, "-file", conf)
+        }
+    }
+    callPlayer(args)
+}
+
+callPlayer <- function(args) {
+    command <- paste("java -cp", CP, "mase.mason.MasonPlayer", paste(args, collapse=" "))
+    cat(command,"\n")
+    system(command)
+}
 
 callEvolve <- function(file, extraString="") {
     command <- paste("java -cp", CP, "ec.Evolve", "-file", file, extraString)
