@@ -30,8 +30,10 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     private boolean collisionStatus;
     private Stoppable stopper;
     private boolean detectCollisions;
+    private boolean boundedArena;
     protected SimState sim;
-    public static final double SAFETY_MARGIN = 0.1;
+    public static final double COLLISION_SPEED_DECAY = 0.5;
+    public static final double COLLISION_DIRECTION = Math.PI / 2;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
         super(new OvalPortrayal2D(c, radius * 2, true), 0, 1);
@@ -41,6 +43,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.collisionStatus = false;
         this.speed = 0;
         this.detectCollisions = false;
+        this.boundedArena = false;
         this.setLocation(new Double2D(0, 0));
         this.setOrientation(0);
     }
@@ -49,14 +52,19 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.detectCollisions = enable;
     }
 
+    public void enableBoundedArena(boolean enable) {
+        this.boundedArena = enable;
+    }
+
     protected boolean move(Double2D direction, double speed) {
         this.direction = direction.normalize();
         this.orientation = direction.angle();
 
         if (!attemptMove(direction, speed)) { // cannot move
-            double angle = sim.random.nextBoolean() ? Math.PI / 2 : -Math.PI / 2;
-            if (!attemptMove(direction.rotate(angle), speed)
-                    && !attemptMove(direction.rotate(angle), speed)) {
+            // try to escape to both sides with a random order
+            double angle = sim.random.nextBoolean() ? COLLISION_DIRECTION : -COLLISION_DIRECTION;
+            if (!attemptMove(direction.rotate(angle), speed * COLLISION_SPEED_DECAY)
+                    && !attemptMove(direction.rotate(-angle), COLLISION_SPEED_DECAY)) {
                 return false;
             }
         }
@@ -84,9 +92,16 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
      * @return
      */
     protected boolean isValidMove(Double2D target) {
+        if (boundedArena) {
+            boolean inside = target.x >= radius && target.x <= field.width - radius && target.y >= radius && target.y <= field.height - radius;
+            if (!inside) {
+                return false;
+            }
+        }
+
         if (detectCollisions) {
             Bag objects = field.getNeighborsExactlyWithinDistance(target, radius * 2);
-            
+
             for (Object o : objects) {
                 if (o != this && o instanceof EmboddiedAgent && ((EmboddiedAgent) o).detectCollisions) {
                     return false;
@@ -117,7 +132,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.orientation = angle;
         this.direction = new Double2D(Math.sin(orientation), Math.cos(orientation));
     }
-    
+
     public void setDirection(Double2D dir) {
         this.direction = dir.normalize();
         this.orientation = dir.angle();

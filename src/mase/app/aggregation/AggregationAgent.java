@@ -31,6 +31,7 @@ public class AggregationAgent extends SmartAgent {
     public AggregationAgent(Aggregation sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.BLUE, ac);
         this.enableCollisionDetection(true);
+        this.enableBoundedArena(true);
 
         // aux variables for agent sensors
         even = sim.par.agentArcs % 2 == 0;
@@ -149,11 +150,5 @@ public class AggregationAgent extends SmartAgent {
         double r = output[2] * par.agentRotation;
         Double2D dir = super.getDirection().rotate(r - l);
         super.move(dir, forward);
-    }
-
-    @Override
-    protected boolean isValidMove(Double2D target) {
-        boolean inside = target.x >= RADIUS && target.x <= field.width - RADIUS && target.y >= RADIUS && target.y <= field.height - RADIUS;
-        return inside && super.isValidMove(target);
     }
 }
