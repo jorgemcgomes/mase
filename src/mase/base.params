@@ -1,0 +1,75 @@
+# ECJ options
+evalthreads =   			auto
+breedthreads = 				auto
+checkpoint =				false
+checkpoint-modulo =                     1
+checkpoint-prefix = 			ec
+
+# Generational configuration
+state = 				ec.simple.SimpleEvolutionState
+init = 					ec.simple.SimpleInitializer
+finish = 	        		ec.simple.SimpleFinisher
+exch = 					ec.simple.SimpleExchanger
+breed =					ec.simple.SimpleBreeder
+pop = 					ec.Population
+generations =				500
+quit-on-run-complete =			false
+
+# Evaluation config
+eval =                                  mase.MetaEvaluator
+eval.base =                             ec.simple.SimpleEvaluator
+pop.default-subpop.species.fitness = 	mase.ExpandedFitness
+
+# Individual representation
+ec.subpop.species = 			ec.vector.FloatVectorSpecies
+vector.species.min-gene =               -1
+vector.species.max-gene =               1
+vector.species.ind =                    mase.controllers.NeuralControllerIndividual
+
+# Populations configuration
+pop.subpops =                           1
+pop.default-subpop = 			ec.Subpopulation
+ec.subpop.duplicate-retries =           10
+ec.subpop.size = 			300
+
+# Elitism configuration (pre-breeding)
+breed.elite =				5
+breed.reevaluate-elites =               true
+
+# Breeding
+vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline
+vector.mutate.source.0 =                ec.select.TournamentSelection
+vector.species.mutation-type =          gauss
+vector.species.mutation-stdev =         0.50
+vector.species.mutation-prob =          0.05
+vector.species.mutation-bounded =       TRUE
+select.tournament.size =                5
+
+# Statistics
+stat =                                  mase.stat.ConsoleStat
+stat.num-children = 			6
+stat.child.0 = 				ec.simple.SimpleShortStatistics
+stat.child.0.file =			$extended.stat
+stat.child.0.do-time =                  true
+stat.child.0.do-size =                  false
+stat.child.0.do-subpops =               true
+stat.child.1 =                          mase.stat.FitnessStat
+stat.child.1.file =			$fitness.stat
+stat.child.1.do-subpops =               true
+stat.child.2 =                          mase.stat.BestEverSolutionStat
+stat.child.2.file =                     $best.ind
+stat.child.3 =                          mase.stat.EvaluationsStat
+stat.child.3.do-behaviours =            true
+stat.child.3.file =                     $behaviours.stat
+stat.child.4 =                          mase.stat.BestSolutionGenStat
+stat.child.4.file =                     $bests.tar.gz
+stat.child.4.compress =                 true
+stat.child.5 =                          mase.stat.SampleSolutionsStat
+stat.child.5.file =                     $sample.tar.gz
+stat.child.5.compress =                 true
+stat.child.5.sample-size =              10
+
+#vector.mutate.source.0 =                ec.vector.breed.VectorCrossoverPipeline
+#vector.xover.source.0 =                 ec.select.TournamentSelection
+#vector.xover.source.1 =                 ec.select.TournamentSelection
+#vector.species.crossover-type =         one

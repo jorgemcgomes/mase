@@ -1,0 +1,15 @@
+eval.num-post =                         1
+eval.post.0 =                           mase.generic.StateCountPostEvaluator
+statecount.filter-threshold =           0.05
+statecount.do-cluster =                 FALSE
+statecount.do-filter =                  TRUE
+
+problem.number-evals =                  1
+problem.eval.0 =                        mase.generic.CombinedStateCountFunction
+statecount.discretisation =             3
+statecount.update-freq =                5
+
+stat.num-children = 		        7
+stat.child.6 =                          mase.generic.StateCountStat
+statecount.log-file =                   $genericlog.stat
+statecount.states-file =                $genericstates.stat

@@ -2,5 +2,5 @@
 
 source("runsource.r")
 cmdArgs <- commandArgs(TRUE)
-print(cmdArgs)
-runCommandLine(cmdArgs)
+call <- paste(c("./evolve.r",cmdArgs), collapse=" ")
+runCommandLine(cmdArgs, call)

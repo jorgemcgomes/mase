@@ -1,0 +1,13 @@
+parent.0 = base.params
+
+eval.base =                             ec.coevolve.MultiPopCoevolutionaryEvaluator2
+eval.base.fitness-only-elite =          false
+eval.base.num-current=			1
+eval.base.num-elites =			1
+eval.base.num-prev =			0
+eval.base.num-shuffled =                0
+eval.base.select-current =		ec.select.RandomSelection
+eval.base.select-prev = 		ec.select.RandomSelection
+
+pop.subpops =                           1
+ec.subpop.size = 			150

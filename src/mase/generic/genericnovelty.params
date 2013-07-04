@@ -1,0 +1,27 @@
+eval.num-post = 3
+eval.post.0 =                          mase.generic.StateCountPostEvaluator
+eval.post.0.filter-threshold =         0.05
+eval.post.0.do-cluster =               FALSE
+eval.post.0.do-filter =                TRUE
+eval.post.1 =                          mase.novelty.NoveltyEvaluation
+eval.post.1.ns-k =                     15
+eval.post.1.ns-archive-prob =          0.01
+eval.post.1.ns-archive-size =          1000
+eval.post.2 =                          mase.novelty.LinearScalarization
+eval.post.2.ns-blend =                 0.7
+
+pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
+
+stat.num-children = 		       9
+stat.child.6 =                         mase.novelty.NoveltyPopStat
+stat.child.6.file =		       $noveltypop.stat
+stat.child.7 =                         mase.novelty.NoveltyIndividualsStat
+stat.child.7.file =		       $noveltyind.stat
+stat.child.8 =                         mase.generic.StateCountStat
+stat.child.8.log-file =                $genericlog.stat
+stat.child.8.states-file =             $genericstates.stat
+
+problem.number-evals =                 1
+problem.eval.0 =                       mase.generic.CombinedStateCountFunction
+statecount.discretisation =            3
+statecount.update-freq =               5
