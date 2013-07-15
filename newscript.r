@@ -1,4 +1,44 @@
+data <- read.table("~/GECCO/Energy/Centroid_70/2013-01-19_00-29-44/population.csv", sep="\t", header=FALSE, fill=TRUE, stringsAsFactors=FALSE)
+data <- data[-1,-1]
+data[,1] <- as.numeric(data[,1])
+corrs <- c()
+for(i in 2:ncol(data)) {
+    corrs <- c(corrs, cor(data[,1], data[,i], method="pearson"))
+}
+plot(corrs, xlab="Feature index", ylab="Correlation", main="RS - Corr of SAS features with fitness (Pearson)", ylim=c(-1,1))
+corrs <- c()
+for(i in 2:ncol(data)) {
+    corrs <- c(corrs, cor(data[,1], data[,i], method="spearman"))
+}
+plot(corrs, xlab="Feature index", ylab="Correlation", main="RS - Corr of SAS features with fitness (Spearman)", ylim=c(-1,1))
+
+data <- read.table("~/GECCO/Aggregation/Centroid_70_10/2013-01-23_15-30-11/population.csv", sep="\t", header=FALSE, fill=TRUE, stringsAsFactors=FALSE)
+data <- data[-1,-1]
+data[,1] <- as.numeric(data[,1])
+corrs <- c()
+for(i in 2:ncol(data)) {
+    corrs <- c(corrs, cor(data[,1], data[,i], method="pearson"))
+}
+plot(corrs, xlab="Feature index", ylab="Correlation", main="AGG - Corr of SAS features with fitness (Pearson)", ylim=c(-1,1))
+corrs <- c()
+for(i in 2:ncol(data)) {
+    corrs <- c(corrs, cor(data[,1], data[,i], method="spearman"))
+}
+plot(corrs, xlab="Feature index", ylab="Correlation", main="AGG - Corr of SAS features with fitness (Spearman)", ylim=c(-1,1))
+
+
+
 setwd("~/ToDrop/experiments/")
+
+
+
+
+
+data.hom <- loadData("kw_hom_nov_k7", expname="Keepaway", jobs=10, subpops=3, load.behavs=T, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), fitlim=c(0,40), behavs.sample=0.1)
+bs <- extractBehaviours(data.hom)
+cor(bs[,c("fitness",data.hom$vars.group)])
+
+
 datas <- metaLoadData("kw_hom_fit","kw_hom_nov","kw_het_fit","kw_het_nov", params=list(fitlim=c(0,50), jobs=10, load.behavs=F))
 do.call(fitnessComparisonPlots, c(datas, list(snapshots=c(100,250,499))))
 datas2 <- metaLoadData("kw_hom_fit","kw_hom_nov","kw_hom_fit_rnd","kw_hom_nov_rnd", params=list(fitlim=c(0,50), jobs=10, load.behavs=F))

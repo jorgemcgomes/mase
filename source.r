@@ -86,7 +86,7 @@ plotListToPDF <- function(plotlist, title="", nrow=NULL, ncol=NULL, width=DEF_WI
 }
 
 
-# Data loading #################################################################
+# Data manipulation ############################################################
 
 metaLoadData <- function(..., params) {
     folderList <- list(...)
@@ -168,6 +168,26 @@ filterJobs <- function(data, jobs=c()) {
     data$njobs <- length(jobs)
     data$jobs <- jobs
     return(data)
+}
+
+extractBehaviours <- function(...) {
+    datas <- list(...)
+    behav <- NULL
+    for(d in datas) {
+        print(d$expname)
+        for(j in d$jobs) {
+            print(j)
+            for(s in d$subpops) {
+                print(s)
+                if(is.null(behav)) {
+                    behav <- d[[j]][[s]]
+                } else {
+                    behav <- rbind(behav, d[[j]][[s]])
+                }
+            }
+        }
+    }
+    return(behav)
 }
 
 expandGeneric <- function(data, var, keyfile) {

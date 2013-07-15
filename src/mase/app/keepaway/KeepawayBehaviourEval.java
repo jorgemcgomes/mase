@@ -77,7 +77,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         
         // keeper movement
         for (Keeper k : kw.keepers) {
-            keeperMovement += Math.abs(k.getSpeed());
+            keeperMovement += Math.abs(k.getSpeed() / k.moveSpeed);
         }
 
         // ball-taker distance
@@ -95,7 +95,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
                 numPasses / (float) passesNormalization,
                 steps / maxSteps,
                 (float) (keeperDispersion / kw.keepers.size() / steps / kw.par.ringSize / 2),
-                (float) (keeperMovement / kw.keepers.size() / steps / kw.par.keeperSpeed),
+                (float) (keeperMovement / kw.keepers.size() / steps),
                 (float) (ballTakerDistance / kw.takers.size() / steps / kw.par.ringSize / 2));
     }
 

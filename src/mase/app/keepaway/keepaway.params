@@ -18,14 +18,16 @@ problem.max-steps =                 1000
 problem.view-size =                 100
 problem.ring-size =                 100
 problem.discretization =            15
-problem.keeper-speed =              1
-problem.taker-speed =               0.5
-problem.ball-speed =                4
-problem.ball-decay =                0.05
-problem.n-keepers =                 3
 problem.collisions =                true
+problem.ball-decay =                0.05
+
+problem.taker-speed =               0.5
 problem.takers-placement =          center
 problem.placement-radius =          15
+
+problem.n-keepers =                 3
+problem.keeper.move-speed =         1
+problem.keeper.pass-speed =         4
 # displacement = ball-speed^2 / ball-decay       
 
 vector.species.genome-size =        102
