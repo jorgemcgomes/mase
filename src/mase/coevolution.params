@@ -1,4 +1,4 @@
-parent.0 = base.params
+parent.0 = homogeneous.params
 
 eval.base =                             ec.coevolve.MultiPopCoevolutionaryEvaluator2
 eval.base.fitness-only-elite =          false

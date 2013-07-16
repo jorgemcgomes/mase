@@ -1,0 +1,14 @@
+parent.0 =                          keepaway.params
+problem.n-keepers =                 3
+# passer
+problem.keeper.0.color =            blue
+problem.keeper.0.move-speed =       0.5
+problem.keeper.0.pass-speed =       4
+# runner
+problem.keeper.1.color =            red
+problem.keeper.1.move-speed =       1.5
+problem.keeper.1.pass-speed =       2
+# all around
+problem.keeper.2.color =            magenta
+problem.keeper.2.move-speed =       1
+problem.keeper.2.pass-speed =       3   

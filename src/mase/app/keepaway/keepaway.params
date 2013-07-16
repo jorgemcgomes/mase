@@ -13,8 +13,8 @@ problem.eval.1.pass-normalization = 10
 fitness.fitness-index =             0
 fitness.novelty-index =             1
 
-problem.repetitions =               5
-problem.max-steps =                 1000
+problem.repetitions =               10
+problem.max-steps =                 500
 problem.view-size =                 100
 problem.ring-size =                 100
 problem.discretization =            15
@@ -22,12 +22,13 @@ problem.collisions =                true
 problem.ball-decay =                0.05
 
 problem.taker-speed =               0.5
-problem.takers-placement =          center
+problem.takers-placement =          random-center
 problem.placement-radius =          15
 
 problem.n-keepers =                 3
 problem.keeper.move-speed =         1
 problem.keeper.pass-speed =         4
+problem.keeper.color =              blue
 # displacement = ball-speed^2 / ball-decay       
 
 vector.species.genome-size =        102

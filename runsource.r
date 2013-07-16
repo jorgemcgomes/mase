@@ -1,8 +1,12 @@
 ECJ_HOME <- "/home/jorge/Dropbox/mase"
 CP <- paste0("\"",ECJ_HOME, "/build/classes:",ECJ_HOME,"/lib/*\"")
-OUTPUT_BASE <- "/home/jorge/Dropbox/experiments"
+OUTPUT_BASE <- "/home/jorge/exps"
 
 defaultPlayerCall <- function(args) {
+    if(length(args) == 1) {
+        args <- strsplit(args, split=" ")[[1]]
+    }
+    
     # no file specified -- use the experiments file
     if(!("-file" %in% args)) {
         i <- which(args == "-gc")
@@ -14,6 +18,7 @@ defaultPlayerCall <- function(args) {
             args <- c(args, "-file", conf)
         }
     }
+    
     callPlayer(args)
 }
 
@@ -139,7 +144,11 @@ defaultCall <- function(file=NULL, outBase=OUTPUT_BASE, out=NULL, params=list(),
     callEvolve(configPath)
 }
 
-runCommandLine <- function(args, originalCall) {
+runCommandLine <- function(args) {
+    if(length(args) == 1) {
+        args <- strsplit(args, split=" ")[[1]]
+    }
+        
     file <- NULL
     out <- NULL
     params <- list()
@@ -153,5 +162,5 @@ runCommandLine <- function(args, originalCall) {
             params[[split[1]]] <- split[2]
         }
     }
-    defaultCall(file=file, out=out, params=params, consoleCall=originalCall)
+    defaultCall(file=file, out=out, params=params, consoleCall=paste(args, collapse=" "))
 }

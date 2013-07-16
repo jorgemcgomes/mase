@@ -1,0 +1,10 @@
+parent.0 = novelty.params
+
+eval.post.0 =                           mase.novelty.WeightedNovelty
+eval.post.0.correlation =               spearman
+eval.post.0.min-weight =                0.1
+eval.post.0.smooth =                    0.5
+
+stat.num-children =                     9
+stat.child.8 =                          mase.novelty.WeightedNoveltyStat
+stat.child.8.file =                     $weights.stat

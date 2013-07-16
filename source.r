@@ -94,6 +94,7 @@ metaLoadData <- function(..., params) {
     for(f in folderList) {
         datas[[length(datas)+1]] <- do.call(loadData, c(folder=f, params))
     }
+    names(datas) <- folderList
     return(datas)
 }
 
@@ -255,6 +256,10 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     
     if(is.null(gens)) {
         gens <- data[[1]][[1]]$gen
+    }
+    
+    if(analyse %in% vars.sub) {
+        analyse <- paste(analyse, "mean", sep=".")
     }
         
     # mean plots
@@ -834,6 +839,9 @@ fullStatistics <- function(..., fit.ind=TRUE, fit.comp=TRUE, behav.mean=TRUE, so
                            fit.ind.par=list(), fit.comp.par=list(), behav.mean.par=list(), som.ind.par=list(), som.group.par=list(), 
                            expset.name="", show.only=FALSE) {
     datalist <- list(...)
+    if(length(datalist) == 1 & is.null(datalist[[1]]$folder)) {
+        datalist <- datalist[[1]]
+    }
     ksoms <- NULL
     args <- NULL
     if(fit.ind) {

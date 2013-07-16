@@ -137,7 +137,7 @@ public class FitnessStat extends Statistics {
     @Override
     public void postBreedingStatistics(final EvolutionState state) {
         super.postBreedingStatistics(state);
-        state.output.print("" + (state.generation + 1) + " ", statisticslog); // 1 because we're putting the breeding info on the same line as the generation it *produces*, and the generation number is increased *after* breeding occurs, and statistics for it
+        state.output.print((state.generation + 1) + " ", statisticslog); // 1 because we're putting the breeding info on the same line as the generation it *produces*, and the generation number is increased *after* breeding occurs, and statistics for it
     }
 
     /**

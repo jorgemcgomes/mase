@@ -45,6 +45,11 @@ public class MasonPlayer {
         }
         if (gc == null) {
             System.out.println("Missing argument -gc.");
+            return;
+        }
+        if(!gc.exists()) {
+            System.out.println("File does not exist: " + gc.getAbsolutePath());
+            return;
         }
         List<String> list = new ArrayList<String>(Arrays.asList(args));
         list.removeAll(Collections.singleton(null));

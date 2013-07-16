@@ -1,3 +1,6 @@
+
+
+
 data <- read.table("~/GECCO/Energy/Centroid_70/2013-01-19_00-29-44/population.csv", sep="\t", header=FALSE, fill=TRUE, stringsAsFactors=FALSE)
 data <- data[-1,-1]
 data[,1] <- as.numeric(data[,1])
@@ -27,9 +30,19 @@ for(i in 2:ncol(data)) {
 plot(corrs, xlab="Feature index", ylab="Correlation", main="AGG - Corr of SAS features with fitness (Spearman)", ylim=c(-1,1))
 
 
+setwd("~/exps/")
 
-setwd("~/ToDrop/experiments/")
+datas <- metaLoadData("kw_ph_fit","kw_ph_nov50","kw_ph_nov70","kw_ph_mcn10","kw_ph_mcn15", list(fitlim=c(0,30), jobs=10, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3))
+fullStatistics(datas, fit.comp.par=list(snapshots=c(100,250,499)), expset.name="KW_PH1", fit.ind=T, fit.comp=T, behav.mean=T, som.ind=F, som.group=T, som.alljobs=T, show.only=F)
+analyse("kw_ph_fit","kw_ph_nov50","kw_ph_nov70","kw_ph_mcn10","kw_ph_mcn15", filename="fitness.stat", vars.pre=c("gen"),vars.sub=c("meansub","bestgensub","bestfarsub"), vars.post=c("meanall","bestall","bestfarall"), analyse="bestall", smooth=10)
+analyse("kw_ph_mcn10","kw_ph_mcn15", filename="mcn.stat", vars.pre=c("gen"),vars.sub=c("novmean","novsd","novmax","boosted"), analyse="boosted", smooth=10)
 
+
+datas <- metaLoadData("kw_ph_fit","kw_ph_nov50","kw_ph_nov70","kw_ph_mcn10","kw_ph_mcn15", params=list(fitlim=c(0,30), jobs=10, load.behavs=F))
+do.call(fitnessComparisonPlots, c(datas, list(snapshots=c(100,250,499))))
+
+hard <- loadData("kw_ph_hard_mcn10", fitlim=c(0,30), jobs=10, load.behavs=F)
+fitnessComparisonPlots(hard, snapshots=c(100,250,499))
 
 
 

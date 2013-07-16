@@ -38,6 +38,14 @@ public class NoveltyEvaluation implements PostEvaluator {
         this.archive = new ArrayList<BehaviourResult>(sizeLimit);
     }
 
+    @Override
+    public void processPopulation(EvolutionState state) {
+        // calculate novelty
+        setNoveltyScores(state, state.population);
+        // update archive
+        updateArchive(state, state.population);
+    }
+
     protected void setNoveltyScores(EvolutionState state, Population pop) {
         for (int p = 0; p < pop.subpops.length; p++) {
             // calculate novelty scores
@@ -53,14 +61,14 @@ public class NoveltyEvaluation implements PostEvaluator {
                     if (ind != i) {
                         BehaviourResult er1 = ((NoveltyFitness) i.fitness).getNoveltyBehaviour();
                         BehaviourResult er2 = indFit.getNoveltyBehaviour();
-                        distances.add(Pair.of(er1.distanceTo(er2), false));
+                        distances.add(Pair.of(distance(er1, er2), false));
                     }
                 }
 
                 // from repo
                 for (BehaviourResult er : archive) {
-                    BehaviourResult erInd = (BehaviourResult) ((NoveltyFitness) ind.fitness).getNoveltyBehaviour();
-                    distances.add(Pair.of(er.distanceTo(erInd), true));
+                    BehaviourResult erInd = (BehaviourResult) indFit.getNoveltyBehaviour();
+                    distances.add(Pair.of(distance(er, erInd), true));
                 }
 
                 // sort the distances
@@ -85,6 +93,10 @@ public class NoveltyEvaluation implements PostEvaluator {
             }
         }
     }
+    
+    protected float distance(BehaviourResult br1, BehaviourResult br2) {
+        return br1.distanceTo(br2);
+    }
 
     protected void updateArchive(EvolutionState state, Population pop) {
         for (int i = 0; i < pop.subpops.length; i++) {
@@ -101,13 +113,5 @@ public class NoveltyEvaluation implements PostEvaluator {
                 }
             }
         }
-    }
-
-    @Override
-    public void processPopulation(EvolutionState state) {
-        // calculate novelty
-        setNoveltyScores(state, state.population);
-        // update archive
-        updateArchive(state, state.population);
     }
 }

@@ -7,6 +7,8 @@ package mase.app.keepaway;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.GroupController;
 import mase.mason.MaseSimState;
 import mase.mason.Mason2dUI;
@@ -42,7 +44,11 @@ public class KeepawaySimulator extends MasonSimulator {
         for(int i = 0 ; i < par.numKeepers ; i++) {
             String c = state.parameters.getString(df.push(KeepawayParams.P_KEEPER).push(i+"").push(KeepawayParams.P_COLOR), 
                     df.push(KeepawayParams.P_KEEPER).push(KeepawayParams.P_COLOR));
-            par.color[i] = Color.getColor(c);
+            try {
+                par.color[i] = (Color) Color.class.getDeclaredField(c).get(null);
+            } catch (Exception ex) {
+                Logger.getLogger(KeepawaySimulator.class.getName()).log(Level.SEVERE, null, ex);
+            }
             par.moveSpeed[i] = state.parameters.getDouble(df.push(KeepawayParams.P_KEEPER).push(i+"").push(KeepawayParams.P_MOVE_SPEED), 
                     df.push(KeepawayParams.P_KEEPER).push(KeepawayParams.P_MOVE_SPEED));
             par.passSpeed[i] = state.parameters.getDouble(df.push(KeepawayParams.P_KEEPER).push(i+"").push(KeepawayParams.P_PASS_SPEED), 
@@ -71,4 +77,5 @@ public class KeepawaySimulator extends MasonSimulator {
     public GUIState createSimStateWithUI(GroupController gc, long seed) {
         return new Mason2dUI(createSimState(gc, seed), "Keepaway", 500, 500, new Color(0, 150, 0));
     }
+    
 }

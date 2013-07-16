@@ -36,7 +36,8 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     public static final double COLLISION_DIRECTION = Math.PI / 2;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
-        super(new OvalPortrayal2D(c, radius * 2, true), 0, 1);
+        super(new OvalPortrayal2D(c, radius * 2, true), 0, 1, 
+                new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
         this.sim = sim;
         this.radius = radius;
         this.field = field;

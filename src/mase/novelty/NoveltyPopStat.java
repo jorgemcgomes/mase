@@ -20,6 +20,7 @@ public class NoveltyPopStat extends Statistics {
 
     public static final String P_STATISTICS_FILE = "file";
     public int log = 0;  // stdout by default
+    protected NoveltyEvaluation ne = null;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -33,21 +34,20 @@ public class NoveltyPopStat extends Statistics {
                 state.output.fatal("An IOException occurred while trying to create the log " + statisticsFile + ":\n" + i);
             }
         }
+
+        for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
+            if (pe instanceof NoveltyEvaluation) {
+                ne = (NoveltyEvaluation) pe;
+                break;
+            }
+        }
     }
 
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        NoveltyEvaluation ne = null;
-        for(PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
-            if(pe instanceof NoveltyEvaluation) {
-                ne = (NoveltyEvaluation) pe;
-                break;
-            }
-        }
-                
         state.output.print(state.generation + " " + ne.archive.size(), log);
-        
+
         for (int i = 0; i < state.population.subpops.length; i++) {
             double averageNovScore = 0;
             double maxNovScore = Double.NEGATIVE_INFINITY;
@@ -55,7 +55,7 @@ public class NoveltyPopStat extends Statistics {
             double avgFromRepo = 0;
             double maxFromRepo = Double.NEGATIVE_INFINITY;
             double minFromRepo = Double.POSITIVE_INFINITY;
-            
+
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 NoveltyFitness nf = (NoveltyFitness) state.population.subpops[i].individuals[j].fitness;
                 averageNovScore += nf.noveltyScore;
@@ -65,13 +65,13 @@ public class NoveltyPopStat extends Statistics {
                 maxFromRepo = Math.max(maxFromRepo, nf.repoComparisons);
                 minFromRepo = Math.min(minFromRepo, nf.repoComparisons);
             }
-            
+
             avgFromRepo /= state.population.subpops[i].individuals.length;
             averageNovScore /= state.population.subpops[i].individuals.length;
-            
-            state.output.print(" " + averageNovScore + " " + maxNovScore + " " + minNovScore + " " +
-                    avgFromRepo + " " + maxFromRepo + " " + minFromRepo, log);
+
+            state.output.print(" " + averageNovScore + " " + maxNovScore + " " + minNovScore + " "
+                    + avgFromRepo + " " + maxFromRepo + " " + minFromRepo, log);
         }
-        state.output.print("\n", log);
+        state.output.println("", log);
     }
 }
