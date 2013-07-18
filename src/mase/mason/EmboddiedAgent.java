@@ -5,6 +5,7 @@
 package mase.mason;
 
 import java.awt.Color;
+import java.util.Arrays;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
@@ -161,12 +162,20 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
      * @return From -PI to PI.
      */
     public double angleTo(Double2D point) {
+        // atan2 returns between -PI and PI
         Double2D agentToPoint = point.subtract(pos).normalize();
-        double angle = Math.atan2(agentToPoint.y, agentToPoint.x) - Math.atan2(direction.y, direction.x);
-        if (Math.abs(angle) > Math.PI) {
-            angle -= Math.PI * 2;
+        Double2D agentDir = direction.normalize();
+        return Math.atan2( agentDir.x*agentToPoint.y - agentDir.y*agentToPoint.x, agentDir.x*agentToPoint.x + agentDir.y*agentToPoint.y );
+    }
+    
+    public static void main(String[] args) {
+        double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
+        for(int i = 0 ; i < 10000000 ; i++) {
+            double a = Math.atan2(Math.random() * 2 - 1, Math.random() * 2 - 1);
+            min = Math.min(min, a);
+            max = Math.max(max, a);
         }
-        return angle;
+        System.out.println(min + " , " + max);
     }
 
     public double distanceTo(EmboddiedAgent other) {

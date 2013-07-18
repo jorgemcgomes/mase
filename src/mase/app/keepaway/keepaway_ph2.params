@@ -14,4 +14,3 @@ problem.keeper.2.move-speed =       0.75
 problem.keeper.2.pass-speed =       4
 
 problem.taker-speed =               0.5   
-problem.eval.1.pass-normalization = 5

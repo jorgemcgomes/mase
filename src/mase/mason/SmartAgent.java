@@ -31,29 +31,36 @@ public abstract class SmartAgent extends EmboddiedAgent {
         lastAction = ac.processInputs(lastSensors);
         action(lastAction);
     }
-    
+
     public abstract double[] readNormalisedSensors();
-    
+
     public abstract void action(double[] output);
-    
+
     public double[] getLastAction() {
         return lastAction;
     }
-    
+
     public double[] getLastSensors() {
         return lastSensors;
     }
-    
+
     public String getActionReport() {
         return Arrays.toString(lastAction);
     }
-    
+
     public String getSensorsReport() {
         return Arrays.toString(lastSensors);
     }
-    
+
     public AgentController getAgentController() {
         return ac;
     }
-    
+
+    public String getRawSensors() {
+        return Arrays.toString(lastSensors);
+    }
+
+    public String getRawActions() {
+        return Arrays.toString(lastAction);
+    }
 }

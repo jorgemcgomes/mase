@@ -94,9 +94,9 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         this.res = new VectorBehaviourResult(
                 numPasses / (float) passesNormalization,
                 steps / maxSteps,
-                (float) (keeperDispersion / kw.keepers.size() / steps / kw.par.ringSize),
-                (float) (keeperMovement / kw.keepers.size() / steps),
-                (float) (ballTakerDistance / kw.takers.size() / steps / (kw.par.ringSize / 2)));
+                (float) (keeperDispersion / kw.keepers.size() / currentEvaluationStep / kw.par.size),
+                (float) (keeperMovement / kw.keepers.size() / currentEvaluationStep),
+                (float) (ballTakerDistance / kw.takers.size() / currentEvaluationStep / (kw.par.size / 2)));
     }
 
     @Override
