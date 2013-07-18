@@ -78,7 +78,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
                 avgDistance[i] += d;
                 avgDistanceSteps++;
             }
-            double[] sens = pred.getLastSensors();
+            double[] sens = pred.lastInputs();
             angle[i] += (sens[1] + 1) / 2; // normalize from -1,1 to 0,1
             movement[i] += pred.getSpeed();
             float closest = Float.POSITIVE_INFINITY;

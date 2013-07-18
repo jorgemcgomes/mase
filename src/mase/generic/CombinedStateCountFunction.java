@@ -58,8 +58,8 @@ public class CombinedStateCountFunction extends MasonEvaluation {
         MaseSimState mss = (MaseSimState) sim;
         List<? extends SmartAgent> agents = mss.getSmartAgents();
         for (SmartAgent a : agents) {
-            double[] lastSensors = a.getLastSensors();
-            double[] lastAction = a.getLastAction();
+            double[] lastSensors = a.lastInputs();
+            double[] lastAction = a.lastOutputs();
             byte[] d = discretise(lastSensors, lastAction);
             int h = hashVector(d);
             Float c = count.get(h);
