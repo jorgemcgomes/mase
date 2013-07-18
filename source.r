@@ -354,7 +354,7 @@ fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE) {
         avg.best <- rowMeans(frame[,-1])
         bestfar[[data$expname]] <- avg.best
     }
-    plots[[length(plots)+1]] <- plotMultiline(bestfar, ylim=fitlim, title="Best so far")
+    plots[[length(plots)+1]] <- plotMultiline(bestfar, ylim=NULL, title="Best so far")
     
     if(is.null(snapshots)) {
         snapshots <- c(max(bestfar$gen))
@@ -571,9 +571,8 @@ frameFusion <- function(framelist) {
 
 # Som stats ####################################################################
 
-buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE) {
+sampleData <- function(dataList, sample.size) {
     sample <- data.frame()
-    dataList <- list(...)
     data.sample.size <- sample.size / length(dataList)
     for(data in dataList) {
         each.sample <- round(data.sample.size / data$njobs / data$nsubs)
@@ -585,6 +584,12 @@ buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.
             }
         }
     }
+    return(sample)
+}
+
+buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE) {
+    dataList <- list(...)
+    sample <- sampleData(dataList, sample.size)
     
     rm(dataList)
     gc()
@@ -835,7 +840,7 @@ fitnessSomPlot <- function(som, data, mapping, ...) {
 
 # Batch analysis functions #####################################################
 
-fullStatistics <- function(..., fit.ind=TRUE, fit.comp=TRUE, behav.mean=TRUE, som.ind=TRUE, som.group=TRUE, som.alljobs=TRUE,
+fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE, som.ind=FALSE, som.group=FALSE, som.alljobs=FALSE,
                            fit.ind.par=list(), fit.comp.par=list(), behav.mean.par=list(), som.ind.par=list(), som.group.par=list(), 
                            expset.name="", show.only=FALSE) {
     datalist <- list(...)

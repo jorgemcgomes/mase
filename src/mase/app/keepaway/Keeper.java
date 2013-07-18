@@ -26,6 +26,7 @@ public class Keeper extends SmartAgent {
     protected boolean hasPossession = false;
     protected double passSpeed;
     protected double moveSpeed;
+    private boolean justKicked = false;
 
     public Keeper(SimState sim, Continuous2D field, AgentController ac, double passSpeed, double moveSpeed, Color color) {
         super(sim, field, RADIUS, color, ac);
@@ -51,12 +52,13 @@ public class Keeper extends SmartAgent {
         double[] input = new double[agents.size() * 2 + 1];
         int index = 0;
         // relative positions and angles of the ball, keepers and takers
-        for(EmboddiedAgent a : agents) {
-            input[index++] = (this.distanceTo(a) / (kw.par.ringSize)) * 2 - 1;
+        for (EmboddiedAgent a : agents) {
+            input[index++] = (this.distanceTo(a) / (kw.par.size)) * 2 - 1;
             input[index++] = this.angleTo(a.getLocation()) / Math.PI;
         }
-        
+
         // distance of the ball to the centre
+        //input[index] = (kw.ball.distanceToCenter / (kw.par.size / 2)) * 2 - 1;
         input[index] = (kw.ball.distanceToCenter / (kw.par.ringSize / 2)) * 2 - 1;
         return input;
     }
@@ -64,15 +66,21 @@ public class Keeper extends SmartAgent {
     @Override
     public void action(double[] output) {
         Keepaway kw = (Keepaway) sim;
-        if(kw.ball.distanceTo(this) < KICK_DISTANCE) {
+        if (justKicked
+                && (kw.ball.getSpeed() < 0.0001
+                || kw.ball.getLocation().distance(getLocation()) > Keeper.RADIUS + Ball.RADIUS)) {
+            justKicked = false;
+        }
+        if (!justKicked && kw.ball.distanceTo(this) < KICK_DISTANCE) {
             this.hasPossession = true;
+            justKicked = true;
             double kickPower = output[2] * passSpeed;
             Double2D kickDir = getDirection().rotate(output[3] * Math.PI * 2 - 1);
             kw.ball.kick(kickDir, kickPower);
         } else {
             this.hasPossession = false;
             double dashPower = output[0] * moveSpeed;
-            Double2D dashDir = getDirection().rotate(output[1] * Math.PI * 2 - Math.PI);
+            Double2D dashDir = getDirection().rotate(output[1] * Math.PI - Math.PI / 2);
             super.move(dashDir, dashPower);
         }
     }

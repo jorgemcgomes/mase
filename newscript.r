@@ -1,4 +1,27 @@
+setwd("~/exps")
 
+phnew <- metaLoadData("kw_phnew_fit","kw_phnew_nov50","kw_phnew_nov75", params=list(fitlim=c(0,10), jobs=10, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3))
+fullStatistics(phnew, expset.name="kw_small", fit.ind=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)), behav.mean=T, som.group=T, som.alljobs=T, show.only=F)
+
+sample <- sampleData(phnew, 100000)
+cor(sample[,c(-1,-2,-3)], method="spearman")
+
+phs <- loadData("kw_phnew_nov50short", jobs=5, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion"), subpops=3)
+sample <- sampleData(list(phs), 100000)
+summary(sample)
+cor(sample[,c(-1,-2,-3)], method="pearson")
+
+ph3e <- metaLoadData("kw_ph3_fit","kw_ph3_nov50","kw_ph3_mcn15", params=list(fitlim=c(0,20), jobs=10, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3))
+ph3h <- metaLoadData("kw_ph3_hard_fit","kw_ph3_hard_nov50","kw_ph3_hard_mcn15", params=list(fitlim=c(0,20), jobs=10, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3))
+fullStatistics(ph3e, expset.name="KW_PH3_E", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), fit.ind=T, behav.mean=T, som.group=T, som.alljobs=T)
+fullStatistics(ph3h, expset.name="KW_PH3_H", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), fit.ind=T, behav.mean=T, som.group=T, som.alljobs=T)
+
+
+
+ph5fit <- loadData("kw_ph5_fit", jobs=10, load.behavs=F, fitlim=c(0,10))
+ph5mcn <- loadData("kw_ph5_mcn15", jobs=9, load.behavs=F, fitlim=c(0,10))
+fullStatistics(ph5fit, ph5mcn, expset.name="KW_PH5", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)))
+fullStatistics(ph5mcn, expset.name="KW_PH5", fit.ind=T)
 
 
 data <- read.table("~/GECCO/Energy/Centroid_70/2013-01-19_00-29-44/population.csv", sep="\t", header=FALSE, fill=TRUE, stringsAsFactors=FALSE)
@@ -32,8 +55,8 @@ plot(corrs, xlab="Feature index", ylab="Correlation", main="AGG - Corr of SAS fe
 
 setwd("~/exps/")
 
-datas <- metaLoadData("kw_ph_fit","kw_ph_nov50","kw_ph_nov70","kw_ph_mcn10","kw_ph_mcn15", list(fitlim=c(0,30), jobs=10, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3))
-fullStatistics(datas, fit.comp.par=list(snapshots=c(100,250,499)), expset.name="KW_PH1", fit.ind=T, fit.comp=T, behav.mean=T, som.ind=F, som.group=T, som.alljobs=T, show.only=F)
+datas <- metaLoadData("kw_ph_fit","kw_ph_nov50","kw_ph_nov70","kw_ph_mcn10","kw_ph_mcn15", params=list(fitlim=c(0,30), jobs=10, load.behavs=F, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3))
+fullStatistics(datas, fit.comp.par=list(snapshots=c(100,250,499)), expset.name="KW_PH1", fit.ind=F, fit.comp=T, behav.mean=F, som.ind=F, som.group=F, som.alljobs=F, show.only=F)
 analyse("kw_ph_fit","kw_ph_nov50","kw_ph_nov70","kw_ph_mcn10","kw_ph_mcn15", filename="fitness.stat", vars.pre=c("gen"),vars.sub=c("meansub","bestgensub","bestfarsub"), vars.post=c("meanall","bestall","bestfarall"), analyse="bestall", smooth=10)
 analyse("kw_ph_mcn10","kw_ph_mcn15", filename="mcn.stat", vars.pre=c("gen"),vars.sub=c("novmean","novsd","novmax","boosted"), analyse="boosted", smooth=10)
 
@@ -44,7 +67,9 @@ do.call(fitnessComparisonPlots, c(datas, list(snapshots=c(100,250,499))))
 hard <- loadData("kw_ph_hard_mcn10", fitlim=c(0,30), jobs=10, load.behavs=F)
 fitnessComparisonPlots(hard, snapshots=c(100,250,499))
 
-
+mcn15 <- loadData("kw_ph3_mcn15", fitlim=c(0,20), jobs=10, load.behavs=F)
+fit <- loadData("kw_ph3_fit", fitlim=c(0,20), jobs=8, load.behavs=F)
+fullStatistics(mcn15, fit, fit.comp.par=list(snapshots=c(100,250,499)), expset.name="KW_PH3", fit.comp=T)
 
 
 data.hom <- loadData("kw_hom_nov_k7", expname="Keepaway", jobs=10, subpops=3, load.behavs=T, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), fitlim=c(0,40), behavs.sample=0.1)

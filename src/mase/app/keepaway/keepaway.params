@@ -1,7 +1,7 @@
 eval.base.problem =                 mase.app.keepaway.KeepawaySimulator
 problem.trials-merge =              best
 problem.number-evals =              2
-problem.eval.0 =                    mase.app.keepaway.KeepawayFitness
+problem.eval.0 =                    mase.app.keepaway.KeepawayFitnessPasses
 problem.eval.0.combination =        harmonic
 problem.eval.0.update-freq =        1
 problem.eval.0.pass-length =        10

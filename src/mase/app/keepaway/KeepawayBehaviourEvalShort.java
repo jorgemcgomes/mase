@@ -17,7 +17,7 @@ import sim.util.MutableDouble2D;
  *
  * @author jorge
  */
-public class KeepawayBehaviourEval extends MasonEvaluation {
+public class KeepawayBehaviourEvalShort extends MasonEvaluation {
 
     private VectorBehaviourResult res;
     public static final String P_PASS_LENGTH = "pass-length";
@@ -27,8 +27,6 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
     private transient Keeper lastKeeper;
     private Double2D lastBallPos;
     private float keeperDispersion;
-    private float ballTakerDistance;
-    private float keeperMovement;
     private int maxSteps;
     private int passesNormalization;
 
@@ -45,8 +43,6 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         this.numPasses = 0;
         this.lastKeeper = null;
         this.keeperDispersion = 0;
-        this.ballTakerDistance = 0;
-        this.keeperMovement = 0;
     }
 
     @Override
@@ -74,17 +70,6 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         for (Keeper k : kw.keepers) {
             keeperDispersion += k.getLocation().distance(centre.x, centre.y);
         }
-        
-        // keeper movement
-        for (Keeper k : kw.keepers) {
-            keeperMovement += Math.abs(k.getSpeed() / k.moveSpeed);
-        }
-
-        // ball-taker distance
-        for (Taker t : kw.takers) {
-            ballTakerDistance += t.getLocation().distance(kw.ball.getLocation());
-        }
-
     }
 
     @Override
@@ -94,9 +79,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         this.res = new VectorBehaviourResult(
                 numPasses / (float) passesNormalization,
                 steps / maxSteps,
-                (float) (keeperDispersion / kw.keepers.size() / steps / kw.par.ringSize),
-                (float) (keeperMovement / kw.keepers.size() / steps),
-                (float) (ballTakerDistance / kw.takers.size() / steps / (kw.par.ringSize / 2)));
+                (float) (keeperDispersion / kw.keepers.size() / currentEvaluationStep / (kw.par.ringSize / 2)));
     }
 
     @Override
