@@ -88,8 +88,12 @@ public class Keepaway extends MaseSimState {
 
     protected void placeBall() {
         ball = new Ball(this, field);
-        Keeper k = keepers.get(0);
-        Double2D loc = k.getLocation().add(k.getDirection().resize(10));
+        int ag = par.ballPlacement;
+        if(ag == -1) {
+            ag = random.nextInt(keepers.size());
+        }
+        Keeper k = keepers.get(ag);
+        Double2D loc = k.getLocation().add(k.getDirection().resize(5));
         ball.setLocation(loc);
         ball.setStopper(schedule.scheduleRepeating(ball));
     }

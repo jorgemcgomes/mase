@@ -1,5 +1,35 @@
 setwd("~/exps")
 
+par <- list(fitlim=c(0,25), jobs=5, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3)
+all <- metaLoadData("k2_ph_easier_fit","k2_ph_easier_nov50","k2_ph_med_fit","k2_ph_med_nov50","k2_ph_med_nov70","k2_ph_medhard_fit","k2_ph_medhard_nov50","k2_ph_hard_fit","k2_ph_hard_nov50", params=par)
+fullStatistics(all, expset.name="kw_new", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), fit.ind=F)
+
+easy <- metaLoadData("k2_ph_easier_fit","k2_ph_easier_nov50", params=par)
+fullStatistics(easy, expset.name="kw_easy", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)))
+
+med <- metaLoadData("k2_ph_med_fit","k2_ph_med_nov50","k2_ph_med_nov70", params=par)
+fullStatistics(med, expset.name="kw_med", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), fit.ind=T, behav.mean=T, som.group=T, som.alljobs=T)
+
+medhard <- metaLoadData("k2_ph_medhard_fit","k2_ph_medhard_nov50", params=par)
+fullStatistics(medhard, expset.name="kw_medhard", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)))
+
+hard <- metaLoadData("k2_ph_hard_fit","k2_ph_hard_nov50", params=par)
+fullStatistics(hard, expset.name="kw_hard", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)))
+
+
+
+
+
+
+
+
+ph <- metaLoadData("k2_ph_medhard_nov50","k2_ph_medhard_fit", params=list(fitlim=c(0,25), jobs=5, load.behavs=F))
+fullStatistics(ph, expset.name="kw_new", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), fit.ind=T)
+
+d <- loadData("kw_ph_lp_nov50", fitlim=c(0,6), jobs=1, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3)
+s <- sampleData(list(d), 20000)
+summary(s)
+
 phnew <- metaLoadData("kw_phnew_fit","kw_phnew_nov50","kw_phnew_nov75", params=list(fitlim=c(0,10), jobs=10, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3))
 fullStatistics(phnew, expset.name="kw_small", fit.ind=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)), behav.mean=T, som.group=T, som.alljobs=T, show.only=F)
 

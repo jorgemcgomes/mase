@@ -6,8 +6,11 @@ package mase.app.keepaway;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import mase.AgentController;
+import mase.mason.EmboddiedAgent;
 import mase.mason.SmartAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
@@ -26,7 +29,8 @@ public class Keeper extends SmartAgent {
     protected double moveSpeed;
     private boolean justKicked = false;
     private DecimalFormat df;
-    private String sensorsReport = "";
+    private List<EmboddiedAgent> agents;
+    private double[] sensorValues;
 
     public Keeper(SimState sim, Continuous2D field, AgentController ac, double passSpeed, double moveSpeed, Color color) {
         super(sim, field, RADIUS, color, ac);
@@ -38,44 +42,33 @@ public class Keeper extends SmartAgent {
     @Override
     public double[] readNormalisedSensors() {
         Keepaway kw = (Keepaway) sim;
-
-        double[] input = new double[kw.keepers.size() * 2 + kw.takers.size() * 2 + 1];
-        int index = 0;
-        StringBuilder sb = new StringBuilder();
-
-        // Ball
-        double dist = this.distanceTo(kw.ball);
-        double ang = this.angleTo(kw.ball.getLocation());
-        input[index++] = (dist / kw.par.size) * 2 - 1;
-        input[index++] = ang / Math.PI;
-        sb.append("Ball: (" + df.format(dist) + "," + Math.round(ang / Math.PI * 180) + "\u00B0)");
-        
-        // Keepers
-        for (int i = 0; i < kw.keepers.size(); i++) {
-            Keeper k = kw.keepers.get(i);
-            if (k != this) {
-                dist = this.distanceTo(k);
-                ang = this.angleTo(k.getLocation());
-                input[index++] = (dist / kw.par.size) * 2 - 1;
-                input[index++] = ang / Math.PI;
-                sb.append(" | Keeper" + i + ": (" + df.format(dist) + "," + Math.round(ang / Math.PI * 180) + "\u00B0)");
+        // builds auxiliary list
+        if (agents == null) {
+            agents = new ArrayList<EmboddiedAgent>(kw.keepers.size() + kw.takers.size());
+            agents.add(kw.ball);
+            for (Keeper k : kw.keepers) {
+                if (k != this) {
+                    agents.add(k);
+                }
             }
-        }
-        
-        // Takers
-        for (int i = 0; i < kw.takers.size(); i++) {
-            Taker t = kw.takers.get(i);
-            dist = this.distanceTo(t);
-            ang = this.angleTo(t.getLocation());
-            input[index++] = (dist / kw.par.size) * 2 - 1;
-            input[index++] = ang / Math.PI;
-            sb.append(" | Taker" + i + ": (" + df.format(dist) + "," + Math.round(ang / Math.PI * 180) + "\u00B0)");
+            agents.addAll(kw.takers);
         }
 
-        // Distance of the ball to the centre
-        input[index] = (kw.ball.distanceToCenter / (kw.par.size / 2)) * 2 - 1;
-        sb.append(" | BallToCenter: " + df.format(kw.ball.distanceToCenter));
-        sensorsReport = sb.toString();
+        double[] input = new double[agents.size() * 2 + 1];
+        sensorValues = new double[input.length];
+        int index = 0;
+        // relative positions and angles of the ball, keepers and takers
+        for (EmboddiedAgent a : agents) {
+            sensorValues[index] = this.distanceTo(a);
+            input[index] = (sensorValues[index++] / (kw.par.size)) * 2 - 1;
+            sensorValues[index] = this.angleTo(a.getLocation());
+            input[index] = sensorValues[index++] / Math.PI;
+        }
+        
+
+        // distance of the ball to the centre
+        sensorValues[index] = kw.ball.distanceToCenter;
+        input[index] = (sensorValues[index] / (kw.par.size / 2)) * 2 - 1;
         return input;
     }
 
@@ -111,6 +104,27 @@ public class Keeper extends SmartAgent {
 
     @Override
     public String getSensorsReport() {
-        return sensorsReport;
+        StringBuilder sb = new StringBuilder();
+        Keepaway kw = (Keepaway) sim;
+
+        // Ball
+        sb.append("Ball: (" + df.format(sensorValues[0]) + ";" + Math.round(sensorValues[1] / Math.PI * 180) + "\u00B0)");
+        int index = 2;
+        // Keepers
+        for (int i = 0; i < kw.keepers.size(); i++) {
+            if (kw.keepers.get(i) != this) {
+                sb.append(" | Keeper" + i + ": (" + df.format(sensorValues[index++]));
+                sb.append(";" + Math.round(sensorValues[index++] / Math.PI * 180) + "\u00B0)");
+            }
+        }
+        // Takers
+        for (int i = 0; i < kw.takers.size(); i++) {
+            sb.append(" | Taker" + i + ": (" + df.format(sensorValues[index++]));
+            sb.append(";" + Math.round(sensorValues[index++] / Math.PI * 180) + "\u00B0)");
+        }
+        // Distance of the ball to the centre
+        sb.append(" | BallToCenter: " + df.format(sensorValues[index]));
+
+        return sb.toString();
     }
 }

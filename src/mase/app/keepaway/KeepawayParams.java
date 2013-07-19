@@ -18,11 +18,13 @@ public class KeepawayParams {
     public static final String P_DISCRETIZATION = "discretization";
     public static final String P_BALL_DECAY = "ball-decay"; // linear decay
     public static final String P_COLLISIONS = "collisions";
+    public static final String P_BALL_PLACEMENT = "ball-placement";
     protected double size;
     protected double discretization;
     protected double ringSize;
     protected double ballDecay;
     protected boolean collisions;
+    protected int ballPlacement;
     
     // Keepers
     public static final String P_NUM_KEEPERS = "n-keepers";

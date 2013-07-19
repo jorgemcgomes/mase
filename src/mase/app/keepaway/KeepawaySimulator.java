@@ -35,6 +35,7 @@ public class KeepawaySimulator extends MasonSimulator {
         par.discretization = state.parameters.getDouble(df.push(KeepawayParams.P_DISCRETIZATION), null);
         par.ballDecay = state.parameters.getDouble(df.push(KeepawayParams.P_BALL_DECAY), null);
         par.collisions = state.parameters.getBoolean(df.push(KeepawayParams.P_COLLISIONS), null, false);
+        par.ballPlacement = state.parameters.getInt(df.push(KeepawayParams.P_BALL_PLACEMENT), null, 0);
 
         // Keepers
         par.numKeepers = state.parameters.getInt(df.push(KeepawayParams.P_NUM_KEEPERS), null);
