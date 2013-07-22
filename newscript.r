@@ -10,10 +10,10 @@ cor(sample[,c("fitness","pass-length","steps","dispersion","passes")])
 s <- fullStatistics(k.med, expset.name="kmed", som.group=T, som.alljobs=T)
 
 
-par <- list(fitlim=c(0,25), jobs=10, load.behavs=F)
+par <- list(fitlim=c(0,30), jobs=10, load.behavs=F)
 
 all <- metaLoadData("k3_hom_easy_nov50","k3_hom_med_nov50","k3_hom_hard_nov50","k3_hom_easy_fit", params=par)
-fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.ind=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
 
 all <- metaLoadData("k3_ph_easy_fit","k3_ph_easy_nov50","k3_ph_medh_fit","k3_ph_medh_nov50","k3_ph_med_fit","k3_ph_med_nov50","k3_ph_hard_fit","k3_ph_hard_nov50", params=par)
 fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))

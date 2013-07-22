@@ -9,8 +9,10 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
+import mase.evaluation.BehaviourResult;
 
 /**
  *
@@ -46,8 +48,16 @@ public class NoveltyPopStat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        state.output.print(state.generation + " " + ne.archive.size(), log);
-
+        
+        state.output.print(state.generation + "", log);
+        if(ne.archiveMode == NoveltyEvaluation.V_SHARED) {
+            state.output.print(" " + ne.archives.get(0).size(), log);
+        } else if(ne.archiveMode == NoveltyEvaluation.V_MULTIPLE) {
+            for(List<BehaviourResult> arch : ne.archives) {
+                state.output.print(" " + arch.size(), log);
+            }
+        }
+        
         for (int i = 0; i < state.population.subpops.length; i++) {
             double averageNovScore = 0;
             double maxNovScore = Double.NEGATIVE_INFINITY;
