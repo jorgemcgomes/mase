@@ -1,5 +1,33 @@
 setwd("~/exps")
 
+par <- list(fitlim=c(0,30), jobs=10, load.behavs=T, subpops=3, behavs.sample=0.1, vars.group=c("passes","steps","dispersion","pass-length"), vars.ind=c("i.passes","i.pass-length","i.keeper-dist","i.movement"))
+
+k.med <- metaLoadData("k3_ph_med_nov50","k3_ph_med_fit", params=par)
+fullStatistics(k.med, expset.name="kmed", fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)), fit.ind=T, som.group=T, som.alljobs=T, som.ind=T, behav.mean=T )
+sample <- sampleData(k.med, 10000)
+cor(sample[,c("fitness","pass-length","steps","dispersion","passes")])
+
+s <- fullStatistics(k.med, expset.name="kmed", som.group=T, som.alljobs=T)
+
+
+par <- list(fitlim=c(0,25), jobs=10, load.behavs=F)
+
+all <- metaLoadData("k3_hom_easy_nov50","k3_hom_med_nov50","k3_hom_hard_nov50","k3_hom_easy_fit", params=par)
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
+
+all <- metaLoadData("k3_ph_easy_fit","k3_ph_easy_nov50","k3_ph_medh_fit","k3_ph_medh_nov50","k3_ph_med_fit","k3_ph_med_nov50","k3_ph_hard_fit","k3_ph_hard_nov50", params=par)
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
+
+all <- metaLoadData("k3_ph_med_fit","k3_ph_med_fit_noelite","k3_ph_med_fit_nocurrent", params=list(fitlim=c(0,25), jobs=10, load.behavs=F, gens=0:499))
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)))
+
+all <- metaLoadData("k3_hom_easy_nov50","k3_hom_med_nov50", params=par)
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
+
+all <- metaLoadData("k3_ph_med_fit","k3_ph_med_fit_mut10","k3_ph_med_fit_mut20", params=list(fitlim=c(0,25), jobs=10, load.behavs=F, gens=0:499))
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)))
+
+
 par <- list(fitlim=c(0,25), jobs=5, load.behavs=T, behavs.sample=0.1, vars.group=c("Passes","Steps","Dispersion","Movement","TakerDist"), subpops=3)
 all <- metaLoadData("k2_ph_easier_fit","k2_ph_easier_nov50","k2_ph_med_fit","k2_ph_med_nov50","k2_ph_med_nov70","k2_ph_medhard_fit","k2_ph_medhard_nov50","k2_ph_hard_fit","k2_ph_hard_nov50", params=par)
 fullStatistics(all, expset.name="kw_new", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), fit.ind=F)
@@ -15,6 +43,7 @@ fullStatistics(medhard, expset.name="kw_medhard", show.only=T, fit.comp=T, fit.c
 
 hard <- metaLoadData("k2_ph_hard_fit","k2_ph_hard_nov50", params=par)
 fullStatistics(hard, expset.name="kw_hard", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)))
+
 
 
 

@@ -99,7 +99,7 @@ metaLoadData <- function(..., params) {
 }
 
 loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c(), 
-                     vars.file=c(vars.ind, vars.group), vars.transform=list(),
+                     vars.file=c(vars.group, vars.ind), vars.transform=list(),
                      subpops=3, expname=folder, gens=NULL, load.behavs=TRUE, 
                      behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat") {
     data <- NULL
@@ -479,6 +479,38 @@ smoothFrame <- function(frame, window) {
     return(frame)
 } 
 
+euclideanDist <- function(x1, x2) {crossprod(x1-x2)} 
+
+groupDiversity <- function(data) {
+    result <- data.frame(gen=data$gens)
+    pb <- txtProgressBar(min=1, max=length(data$jobs)*length(data$gens), style=3)
+    pbindex <- 1
+    
+    for(j in data$jobs) {
+        div <- c()
+        for(g in data$gens) {
+            setTxtProgressBar(pb,pbindex)
+            pbindex <- pbindex + 1
+            
+            all <- NULL
+            for(s in data$subpops) {
+                sub <- subset(data[[j]][[s]], gen==g, select=data$vars.group)
+                if(is.null(all)) {
+                    all <- sub
+                } else {
+                    all <- rbind(all, sub)
+                }
+            }
+            centre <- colMeans(all)
+            dists <- apply(all, 1, euclideanDist, centre)
+            div <- c(div, mean(dists))
+        }
+        result[[j]] <- div
+    }
+    result[["mean"]] <- rowMeans(result[,-1])
+    return(result)
+}
+
 intraPopDiversity <- function(data, vars=data$vars.group) {
     result <- list()
     euclideanDist <- function(x1, x2) {crossprod(x1-x2)} 
@@ -664,6 +696,26 @@ fitnessMapMax <- function(som, data) {
         res[m[i]] <- max(res[m[i]], data[i,"fitness"])
     }
     return(res)
+}
+
+fitnessMapQuantile <- function(som, data, q=0.75) {
+    variables <- colnames(som$codes)
+    len = som$grid$xdim * som$grid$ydim
+    temp <- list()
+    temp[[len]] <- 0
+    m <- map2(som, as.matrix(data[,variables]))$unit.classif
+    for(i in 1:length(m)) {
+        temp[[m[i]]] <- c(temp[[m[i]]], data[i,"fitness"])
+    }
+    
+    for(i in 1:len) {
+        if(is.null(temp[[i]])) {
+            temp[[i]] <- 0
+        } else {
+            temp[[i]] <- quantile(temp[[i]], probs=q, names=F)
+        }
+    }
+    return(as.vector(temp, mode="numeric"))    
 }
 
 mapIndividualSubpops <- function(som, data, ...) {
