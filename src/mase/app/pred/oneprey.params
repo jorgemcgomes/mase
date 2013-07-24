@@ -2,16 +2,16 @@
 eval.base.problem =                mase.app.pred.PredatorPreySimulator
 problem.trials-merge =             best
 problem.number-evals =             3
-problem.eval.0 =                   mase.app.pred.OnePreyFitness
+problem.eval.0 =                   mase.app.pred.OnePreyFitness2
 problem.eval.0.combination =       harmonic
 problem.eval.0.update-freq =       0
-problem.eval.1 =                   mase.app.pred.OnePreyIndividualEval
+problem.eval.1 =                   mase.app.pred.OnePreyGroupEval2
 problem.eval.1.update-freq =       1
-problem.eval.2 =                   mase.app.pred.OnePreyGroupEval
+problem.eval.2 =                   mase.app.pred.OnePreyIndividualEval2
 problem.eval.2.update-freq =       1
 
 fitness.fitness-index =            0
-fitness.novelty-index =            2
+fitness.novelty-index =            1
 
 problem.repetitions =              10
 problem.max-steps =                300
@@ -26,14 +26,14 @@ problem.n-predators =              3
 problem.predator-separation =      10
 problem.predator-speed =           1
 problem.predator-rotate-speed =    1.57
-problem.capture-distance =         1
+problem.capture-distance =         0
 problem.escape-strategy =          mean-vector
 problem.sensor-mode =              closest
 problem.collisions =               FALSE
 
-vector.species.genome-size =       33
+vector.species.genome-size =       27
 neural.input =                     2
 neural.hidden =                    5
-neural.output =                    3
+neural.output =                    2
 neural.structure =                 feed-forward
 neural.tanh =                      false

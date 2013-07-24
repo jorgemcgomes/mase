@@ -100,6 +100,15 @@ defaultCall <- function(file=NULL, outBase=OUTPUT_BASE, out=NULL, params=list(),
     }
     if(!file.exists(out)) {
         dir.create(out)
+    } else {
+        cat("\n*************************************************************************************\n")
+        cat(out, " already exists!\n")
+        cat("*************************************************************************************\n")
+        for(i in 10:1) {
+            cat(i, "...\n")
+            Sys.sleep(1)
+        }
+        cat("\n")
     }
     
     # load parameters

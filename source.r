@@ -88,11 +88,14 @@ plotListToPDF <- function(plotlist, title="", nrow=NULL, ncol=NULL, width=DEF_WI
 
 # Data manipulation ############################################################
 
-metaLoadData <- function(..., params) {
+metaLoadData <- function(..., params, names=NULL) {
     folderList <- list(...)
+    if(is.null(names)) {
+        names <- folderList
+    }
     datas <- list()
-    for(f in folderList) {
-        datas[[length(datas)+1]] <- do.call(loadData, c(folder=f, params))
+    for(i in 1:length(folderList)) {
+        datas[[length(datas)+1]] <- do.call(loadData, c(folder=folderList[[i]], expname=names[[i]], params))
     }
     names(datas) <- folderList
     return(datas)

@@ -164,7 +164,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     public double angleTo(Double2D point) {
         // atan2 returns between -PI and PI
         Double2D agentToPoint = point.subtract(pos).normalize();
-        Double2D agentDir = direction.normalize();
+        Double2D agentDir = direction;
         return Math.atan2( agentDir.x*agentToPoint.y - agentDir.y*agentToPoint.x, agentDir.x*agentToPoint.x + agentDir.y*agentToPoint.y );
     }
     

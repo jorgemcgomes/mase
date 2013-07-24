@@ -1,6 +1,61 @@
+setwd("~/exps/")
+
+par <- list(fitlim=c(0,2), jobs=10, load.behavs=F)
+pred5 <- metaLoadData("pred5_nov50", "pred5_fit", params=par)
+fullStatistics(pred5, fit.comp=T, fit.comp.par=list(snapshots=c(50,150,249)), show.only=T)
+
+pred3m <- metaLoadData("pred3m_nov50", "pred3m_fit", params=par)
+fullStatistics(pred3m, fit.comp=T, fit.ind=T, fit.comp.par=list(snapshots=c(100,250,499)), show.only=T)
+
+pred5h <- metaLoadData("pred5h_nov50", params=par)
+fullStatistics(pred5h, fit.comp=T, fit.comp.par=list(snapshots=c(50,150,249)), show.only=T)
+
+
+
+par <- list(fitlim=c(0,30), jobs=10, load.behavs=T, subpops=3, behavs.sample=0.1, vars.group=c("g.passes","g.steps","g.dispersion","g.pass-length"), vars.ind=c("i.passes","i.pass-length","i.keeper-dist","i.movement"))
+k.med <- metaLoadData("k3_ph_med_fit","k3_ph_med_nov50","k3_ph_med_nov50_indmult","k3_ph_med_nov50_indshare","k3_ph_med_nov50_indnone", params=par, names=c("fit","nov","nov.ind.mult","nov.ind.shared","nov.ind.none"))
+fullStatistics(k.med, expset.name="kmed", fit.comp=T, fit.comp.par=list(snapshots=c(333,666,999)), fit.ind=T, som.group=T, som.alljobs=T, som.ind=T, behav.mean=T)
+
+k.hard <- metaLoadData("k3_ph_hard_fit","k3_ph_hard_nov50", params=par, names=c("fit","nov"))
+fullStatistics(k.hard, expset.name="khard", fit.comp=T, fit.comp.par=list(snapshots=c(333,666,999)), fit.ind=T, som.group=T, som.alljobs=T, som.ind=T, behav.mean=T)
+
+
+
+setwd("~/predator/")
+data.op.nov50 <- loadData("oneprey_nov50", 
+                          jobs=10, fitlim=c(0,3), vars.ind=c("avgdist","mindist","angle","captured","movement","partneravg","partnermin"), 
+                          vars.group=c("g.captured","g.time","g.finaldist","g.avgdist","g.dispersion","g.maxdispersion"), vars.file=c("avgdist","mindist","angle","captured","movement","partneravg","partnermin","g.captured","g.time","g.finaldist","g.avgdist","g.dispersion","g.maxdispersion"), subpops=3, expname="NS-50", load.behavs=TRUE, behavs.sample=0.25)
+sample <- sampleData(list(data.op.nov50), 100000)
+cor(sample[,c("fitness","g.captured","g.time","g.finaldist","g.avgdist","g.dispersion","g.maxdispersion")], method="spearman")
+                fitness g.captured  g.time g.finaldist g.avgdist g.dispersion g.maxdispersion
+fitness          1.0000     0.6852 -0.2951     -0.8997   -0.7049      -0.6959         -0.6819
+g.captured       0.6852     1.0000 -0.4193     -0.6293   -0.4278      -0.3590         -0.3497
+g.time          -0.2951    -0.4193  1.0000      0.2638    0.1941       0.3546          0.4129
+g.finaldist     -0.8997    -0.6293  0.2638      1.0000    0.8619       0.8041          0.7724
+g.avgdist       -0.7049    -0.4278  0.1941      0.8619    1.0000       0.8735          0.8206
+g.dispersion    -0.6959    -0.3590  0.3546      0.8041    0.8735       1.0000          0.9745
+g.maxdispersion -0.6819    -0.3497  0.4129      0.7724    0.8206       0.9745          1.0000
+cor(sample[,c("fitness","avgdist","mindist","angle","captured","movement","partneravg","partnermin")], method="spearman")
+            fitness avgdist mindist    angle captured movement partneravg partnermin
+fitness     1.00000 -0.6693 -0.7971 -0.03108  0.53830 -0.01836   -0.68383   -0.63726
+avgdist    -0.66931  1.0000  0.8565  0.15139 -0.35477 -0.11317    0.82976    0.86875
+mindist    -0.79713  0.8565  1.0000  0.16689 -0.56313 -0.13075    0.73531    0.73822
+angle      -0.03108  0.1514  0.1669  1.00000 -0.04276 -0.16979    0.03624    0.06585
+captured    0.53830 -0.3548 -0.5631 -0.04276  1.00000  0.21694   -0.24674   -0.22129
+movement   -0.01836 -0.1132 -0.1307 -0.16979  0.21694  1.00000    0.05415    0.02872
+partneravg -0.68383  0.8298  0.7353  0.03624 -0.24674  0.05415    1.00000    0.94793
+partnermin -0.63726  0.8688  0.7382  0.06585 -0.22129  0.02872    0.94793    1.00000
+
 setwd("~/exps")
 
-par <- list(fitlim=c(0,30), jobs=10, load.behavs=T, subpops=3, behavs.sample=0.1, vars.group=c("passes","steps","dispersion","pass-length"), vars.ind=c("i.passes","i.pass-length","i.keeper-dist","i.movement"))
+par <- list(fitlim=c(0,2), jobs=10, load.behavs=T, subpops=3, behavs.sample=0.1, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
+all <- metaLoadData("pred3_nov50","pred3_fit", params=par, names=c("nov","fit"))
+fullStatistics(all, expset.name="p3", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), fit.ind=T, behav.mean=T, som.ind=T, som.group=T, som.alljobs=T)
+soms <- fullStatistics(all, expset.name="p3", show.only=T, som.group=T)
+explorationVideo(soms$group, filterJobs(all[[1]], "job.1"), mergeSubpops=T, accumulate=F,  interval=10, fps=3)
+explorationVideo(soms$group, filterJobs(all[[2]], "job.0"), mergeSubpops=T, accumulate=F,  interval=10, fps=3)
+
+par <- list(fitlim=c(0,30), jobs=10, load.behavs=T, subpops=3, behavs.sample=0.1, vars.group=c("g.passes","g.steps","g.dispersion","g.pass-length"), vars.ind=c("i.passes","i.pass-length","i.keeper-dist","i.movement"))
 
 k.med <- metaLoadData("k3_ph_med_nov50","k3_ph_med_fit", params=par)
 fullStatistics(k.med, expset.name="kmed", fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)), fit.ind=T, som.group=T, som.alljobs=T, som.ind=T, behav.mean=T )
@@ -12,8 +67,11 @@ s <- fullStatistics(k.med, expset.name="kmed", som.group=T, som.alljobs=T)
 
 par <- list(fitlim=c(0,30), jobs=10, load.behavs=F)
 
-all <- metaLoadData("k3_hom_easy_nov50","k3_hom_med_nov50","k3_hom_hard_nov50","k3_hom_easy_fit", params=par)
-fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.ind=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
+all <- metaLoadData("k3_ph_med_nov50_indmult","k3_ph_med_nov50_indshare","k3_ph_med_nov50_indnone", params=par)
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.ind=F, fit.comp.par=list(snapshots=c(250,500,750,999)))
+
+all <- metaLoadData("k3_hom_easy_fit","k3_hom_easy_nov50","k3_hom_med_fit","k3_hom_med_nov50","k3_hom_hard_fit","k3_hom_hard_nov50", params=par)
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.ind=F, fit.comp.par=list(snapshots=c(250,500,750,999)))
 
 all <- metaLoadData("k3_ph_easy_fit","k3_ph_easy_nov50","k3_ph_medh_fit","k3_ph_medh_nov50","k3_ph_med_fit","k3_ph_med_nov50","k3_ph_hard_fit","k3_ph_hard_nov50", params=par)
 fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))

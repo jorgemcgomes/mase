@@ -58,9 +58,8 @@ public class Predator extends SmartAgent {
     @Override
     public void action(double[] output) {
         double forward = output[0] * predSim.par.predatorSpeed;
-        double l = output[1] * predSim.par.predatorRotateSpeed;
-        double r = output[2] * predSim.par.predatorRotateSpeed;
-        Double2D dir = super.getDirection().rotate(r - l);
+        double r = (output[1] * 2 - 1) * predSim.par.predatorRotateSpeed;
+        Double2D dir = super.getDirection().rotate(r);
         super.move(dir, forward);
 
         // capture preys
