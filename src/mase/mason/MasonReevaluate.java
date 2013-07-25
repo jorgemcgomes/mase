@@ -19,9 +19,10 @@ import mase.GroupController;
  */
 public class MasonReevaluate {
 
-    public static final String P_NREPS = "-n";
+    public static final String P_NREPS = "-r";
 
     public static void main(String[] args) {
+        // Parameter loading
         File gc = null;
         int x;
         int nreps = 0;
@@ -46,11 +47,13 @@ public class MasonReevaluate {
         list.removeAll(Collections.singleton(null));
         String[] parArgs = list.toArray(new String[list.size()]);
 
+        // Init
         MasonSimulator sim = MasonPlayer.createSimulator(parArgs);
         GroupController controller = MasonPlayer.loadController(gc);
-
         Random rand = new Random();
         long startSeed = rand.nextLong();
+        
+        // Make simulations
         ArrayList<EvaluationResult[]> results = new ArrayList<EvaluationResult[]>(nreps);
         long start = System.currentTimeMillis();
         for (int i = 0; i < nreps; i++) {
@@ -61,14 +64,14 @@ public class MasonReevaluate {
         System.out.println("Total time: " + (end - start) + " | Time per eval: " + (end - start) / (double) nreps);
 
         // merge fitness
-        float stdev = 0;
+        /*float stdev = 0;
         float mean = 0;
         for(EvaluationResult[] r : results) {
             float fit = (Float) r[0].value();
             mean += fit;
-        }
+        }*/
 
-        // merge behavs
+        // Merge evals
         EvaluationResult[] merged = new EvaluationResult[results.get(0).length];
         for (int i = 0; i < merged.length; i++) {
             EvaluationResult[] samples = new EvaluationResult[results.size()];
@@ -78,7 +81,7 @@ public class MasonReevaluate {
             merged[i] = samples[0].mergeEvaluations(samples);
         }
 
-        // print
+        // Print evaluations
         for (int i = 0; i < merged.length; i++) {
             System.out.println("Evaluation " + i + ":\n" + merged[i].toString() + "\n");
         }

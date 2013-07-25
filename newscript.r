@@ -1,6 +1,13 @@
 setwd("~/exps/")
-
 par <- list(fitlim=c(0,2), jobs=10, load.behavs=F)
+
+predm <- metaLoadData("pred3m_nov50", "pred3m_fit","pred5m_nov50", "pred5m_fit", params=par)
+fullStatistics(predm, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), show.only=T)
+
+par <- list(fitlim=c(0,2), jobs=10, load.behavs=T, subpops=3, behavs.sample=0.1, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
+pred3 <- metaLoadData("pred3_fit","pred3_nov50","pred3_nov50_indshare","pred3_nov50_indmult", params=par, names=c("fit","nov-group","nov-indshare","nov-indmult"))
+fullStatistics(pred3, expset.name="p3", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), fit.ind=T, som.group=T, som.alljobs=T, som.ind=T, behav.mean=T, show.only=F)
+
 pred5 <- metaLoadData("pred5_nov50", "pred5_fit", params=par)
 fullStatistics(pred5, fit.comp=T, fit.comp.par=list(snapshots=c(50,150,249)), show.only=T)
 
@@ -9,6 +16,7 @@ fullStatistics(pred3m, fit.comp=T, fit.ind=T, fit.comp.par=list(snapshots=c(100,
 
 pred5h <- metaLoadData("pred5h_nov50", params=par)
 fullStatistics(pred5h, fit.comp=T, fit.comp.par=list(snapshots=c(50,150,249)), show.only=T)
+
 
 
 
@@ -66,6 +74,15 @@ s <- fullStatistics(k.med, expset.name="kmed", som.group=T, som.alljobs=T)
 
 
 par <- list(fitlim=c(0,30), jobs=10, load.behavs=F)
+
+# Homogeneous vs heterogeneous
+all <- metaLoadData("k3_hom_med_fit","k3_hom_med_nov50","k3_ph_hard_fit","k3_ph_hard_nov50", params=par)
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
+
+# Het easy vs het hard
+all <- metaLoadData("k3_ph_med_fit","k3_ph_med_nov50","k3_ph_hard_fit","k3_ph_hard_nov50", params=par)
+fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
+
 
 all <- metaLoadData("k3_ph_med_nov50_indmult","k3_ph_med_nov50_indshare","k3_ph_med_nov50_indnone", params=par)
 fullStatistics(all, expset.name="k3", show.only=T, fit.comp=T, fit.ind=F, fit.comp.par=list(snapshots=c(250,500,750,999)))

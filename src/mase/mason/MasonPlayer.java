@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.EvaluationResult;
 import mase.GroupController;
 import mase.MetaEvaluator;
-import mase.SimulationProblem;
 import sim.display.GUIState;
 
 /**
@@ -33,6 +33,7 @@ public class MasonPlayer {
     public static final String P_CONTROLLER = "-gc";
 
     public static void main(String[] args) {
+        // Parameter loading
         File gc = null;
         int x;
         for (x = 0; x < args.length; x++) {
@@ -54,9 +55,14 @@ public class MasonPlayer {
         List<String> list = new ArrayList<String>(Arrays.asList(args));
         list.removeAll(Collections.singleton(null));
         String[] parArgs = list.toArray(new String[list.size()]);
+        
+        // Create controller
         MasonSimulator sim = createSimulator(parArgs);
         GroupController controller = loadController(gc);
-        GUIState gui = sim.createSimStateWithUI(controller, 0);
+        Random rand = new Random();
+        long startSeed = rand.nextLong();
+        
+        GUIState gui = sim.createSimStateWithUI(controller, startSeed);
         gui.createController();
     }
 

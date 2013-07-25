@@ -19,7 +19,17 @@ defaultPlayerCall <- function(args) {
         }
     }
     
-    callPlayer(args)
+    if(("-r" %in% args)) {
+        callReevaluate(args)
+    } else {
+        callPlayer(args)
+    }
+}
+
+callReevaluate <- function(args) {
+    command <- paste("java -cp", CP, "mase.mason.MasonReevaluate", paste(args, collapse=" "))
+    cat(command,"\n")
+    system(command)
 }
 
 callPlayer <- function(args) {
