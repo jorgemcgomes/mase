@@ -12,10 +12,6 @@ import ec.util.ParameterDatabase;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,30 +34,24 @@ public class MasonPlayer {
         int x;
         for (x = 0; x < args.length; x++) {
             if (args[x].equals(P_CONTROLLER)) {
-                gc = new File(args[x + 1]);
-                args[x] = null;
-                args[x + 1] = null;
-                x++;
+                gc = new File(args[1 + x++]);
             }
         }
         if (gc == null) {
             System.out.println("Missing argument -gc.");
             return;
         }
-        if(!gc.exists()) {
+        if (!gc.exists()) {
             System.out.println("File does not exist: " + gc.getAbsolutePath());
             return;
         }
-        List<String> list = new ArrayList<String>(Arrays.asList(args));
-        list.removeAll(Collections.singleton(null));
-        String[] parArgs = list.toArray(new String[list.size()]);
-        
+
         // Create controller
-        MasonSimulator sim = createSimulator(parArgs);
-        GroupController controller = loadController(gc);
+        MasonSimulator sim = createSimulator(args);
+        GroupController controller = loadController(gc, true);
         Random rand = new Random();
         long startSeed = rand.nextLong();
-        
+
         GUIState gui = sim.createSimStateWithUI(controller, startSeed);
         gui.createController();
     }
@@ -69,8 +59,6 @@ public class MasonPlayer {
     public static MasonSimulator createSimulator(String[] args) {
         ParameterDatabase db = Evolve.loadParameterDatabase(args);
         EvolutionState state = Evolve.initialize(db, 0);
-        /*state.setup(state, null);
-         MasonSimulator sim = (MasonSimulator) state.evaluator.p_problem;*/
         Parameter base = new Parameter(EvolutionState.P_EVALUATOR).push(Evaluator.P_PROBLEM);
         if (state.parameters.exists(base, null)) {
             MasonSimulator sim = (MasonSimulator) db.getInstanceForParameter(base, null, MasonSimulator.class);
@@ -85,16 +73,17 @@ public class MasonPlayer {
 
     }
 
-    public static GroupController loadController(File gc) {
+    public static GroupController loadController(File gc, boolean verbose) {
         GroupController controller = null;
         try {
             FileInputStream fis = new FileInputStream(gc);
             ObjectInputStream ois = new ObjectInputStream(fis);
             controller = (GroupController) ois.readObject();
-            //System.out.println("Group Controller:\n" + controller.toString());
-            EvaluationResult[] chars = (EvaluationResult[]) ois.readObject();
-            for (int i = 0; i < chars.length; i++) {
-                System.out.println("Evaluation " + i + ":\n" + chars[i].toString() + "\n");
+            if (verbose) {
+                EvaluationResult[] chars = (EvaluationResult[]) ois.readObject();
+                for (int i = 0; i < chars.length; i++) {
+                    System.out.println("Evaluation " + i + ":\n" + chars[i].toString() + "\n");
+                }
             }
         } catch (Exception ex) {
             Logger.getLogger(MasonPlayer.class.getName()).log(Level.FINE, null, ex);

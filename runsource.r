@@ -3,6 +3,18 @@ CP <- paste0("\"",ECJ_HOME, "/build/classes:",ECJ_HOME,"/lib/*\"")
 OUTPUT_BASE <- "/home/jorge/exps"
 
 defaultPlayerCall <- function(args) {
+    if(("-r" %in% args)) {
+        if("-tar" %in% args) {
+            callTarReevaluate(args)
+        } else {
+            callReevaluate(args)
+        }
+    } else {
+        callPlayer(args)
+    }
+}
+
+checkConfig <- function(args) {
     if(length(args) == 1) {
         args <- strsplit(args, split=" ")[[1]]
     }
@@ -17,22 +29,26 @@ defaultPlayerCall <- function(args) {
         } else {
             args <- c(args, "-file", conf)
         }
-    }
-    
-    if(("-r" %in% args)) {
-        callReevaluate(args)
-    } else {
-        callPlayer(args)
-    }
+    }    
+    return(args)
+}
+
+callTarReevaluate <- function(args) {
+    args <- checkConfig(args)
+    command <- paste("java -cp", CP, "mase.mason.BatchReevaluate", paste(args, collapse=" "))
+    cat(command,"\n")
+    system(command)    
 }
 
 callReevaluate <- function(args) {
+    args <- checkConfig(args)
     command <- paste("java -cp", CP, "mase.mason.MasonReevaluate", paste(args, collapse=" "))
     cat(command,"\n")
     system(command)
 }
 
 callPlayer <- function(args) {
+    args <- checkConfig(args)
     command <- paste("java -cp", CP, "mase.mason.MasonPlayer", paste(args, collapse=" "))
     cat(command,"\n")
     system(command)
