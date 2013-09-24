@@ -7,20 +7,28 @@ library(RColorBrewer)
 library(parallel)
 library(pbapply)
 
+SOURCE_DIR = "/home/jorge/Dropbox/mase/"
+source(file.path(SOURCE_DIR, "data.r"))
+source(file.path(SOURCE_DIR, "analytic.r"))
+source(file.path(SOURCE_DIR, "soms.r"))
+#source(file.path(SOURCE_DIR, "generic.r"))
+
 
 options("scipen"=100, "digits"=4)
 
 DEF_WIDTH = 7
 DEF_HEIGHT = 5
+theme_set(theme_grey(base_size = 12)) 
+
 
 # General purpose ##############################################################
 
 # data in typicall wide format
 # first column are the x values. the remaining columns are the y values.
-plotMultiline <- function(data, ylim=c(0,1), legend="right", title=NULL) {
+plotMultiline <- function(data, ylim=c(0,1), legend="right", title=NULL, ylabel="Fitness") {
     xlabel <- colnames(data)[1]
     data.long <- melt(data, id=xlabel)
-    g <- ggplot(data=data.long, aes_string(x=xlabel, y="value", colour="variable")) + geom_line() + theme(legend.position=legend)
+    g <- ggplot(data=data.long, aes_string(x=xlabel, y="value", colour="variable", linetype="variable")) + geom_line() + theme(legend.position=legend) + ylab(ylabel)
     if(!is.null(ylim)) {
         g <- g + ylim(ylim[1],ylim[2])
     }
@@ -28,33 +36,6 @@ plotMultiline <- function(data, ylim=c(0,1), legend="right", title=NULL) {
         g <- g + ggtitle(title)
     }
     return(g)
-}
-
-smooth <- function(data, window=5, weighted=TRUE) {
-    if(is.data.frame(data)) {
-        for(c in 2:ncol(data)) { # skip gen column
-            data[,c] <- smooth(data[,c], window=window, weighted=weighted)
-        }
-        return(data)
-    }
-    
-    newData <- c()
-    for(i in 1:length(data)) {
-        backInclusive <- max(i-window,1):i
-        wBack <- rev(((window+1):1)[1:length(backInclusive+1)])
-        front <- c()
-        wFront <- c()
-        if(i < length(data)) {
-            front <- (i+1):min(i+window,length(data))
-            wFront <- (window:1)[1:length(front)]
-        }
-        if(weighted) {
-            newData[i] <- weighted.mean(data[c(backInclusive, front)], c(wBack,wFront))
-        } else {
-            newData[i] <- mean(data[c(backInclusive, front)])
-        }
-    }
-    return(newData)
 }
 
 plotToPDF <- function(plot, width=DEF_WIDTH, height=DEF_HEIGHT, file=NULL, show=TRUE, ...) {
@@ -85,306 +66,48 @@ plotListToPDF <- function(plotlist, title="", nrow=NULL, ncol=NULL, width=DEF_WI
     }
 }
 
-
-# Data manipulation ############################################################
-
-metaLoadData <- function(..., params, names=NULL) {
-    folderList <- list(...)
-    if(is.null(names)) {
-        names <- folderList
-    }
-    datas <- list()
-    for(i in 1:length(folderList)) {
-        datas[[length(datas)+1]] <- do.call(loadData, c(folder=folderList[[i]], expname=names[[i]], params))
-    }
-    names(datas) <- folderList
-    return(datas)
-}
-
-loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c(), 
-                     vars.file=c(vars.group, vars.ind), vars.transform=list(),
-                     subpops=3, expname=folder, gens=NULL, load.behavs=TRUE, 
-                     behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat") {
-    data <- NULL
-    data$fitlim <- fitlim
-    if(is.character(jobs)) {
-        data$jobs <- jobs
-    } else {
-        data$jobs <- paste0("job.",0:(jobs-1))
-    }
-    data$njobs <- length(data$jobs)
-    data$vars.ind <- vars.ind
-    data$vars.group <- vars.group
-    data$subpops <- paste0("sub.",0:(subpops-1))
-    data$nsubs <- length(data$subpops)
-    data$folder <- folder
-    data$expname <- expname
-    data$gens <- gens
-    
-    progress <- txtProgressBar(min = 0, max = data$njobs, initial = 0, char = "=", style = 3)
-    prog <- 0
-    for(j in data$jobs) {
-        gc()
-        data[[j]] <- list()
-        ext <- read.table(file.path(folder, paste0(j,".",fitness.file)), header=FALSE, sep=" ")
-        if(is.null(data$gens)) {
-            data$gens <- ext[[1]]
-        } else {
-            ext <- ext[which(ext[[1]] %in% data$gens),]
-        }
-        data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)-1]], best.gen=ext[[ncol(ext)-2]], mean=ext[[ncol(ext)-3]])    
-        
-        if(load.behavs) {
-            tab <- read.table(file.path(folder,paste0(j,".",behavs.file)), header=FALSE, sep=" ", stringsAsFactors=FALSE)
-            fixedvars <- c("gen","subpop","index","fitness")
-            colnames(tab) <- c(fixedvars,vars.file)
-            for(s in 0:(data$nsubs-1)) {
-                sub <- subset(tab, subpop == s & gen %in% data$gens, select=c(fixedvars, data$vars.ind, data$vars.group))
-                if(behavs.sample < 1) {  # sample
-                    sub <- sub[sample(1:nrow(sub), round(nrow(sub) * behavs.sample)),]
-                } 
-                # apply transformations
-                for(v in names(vars.transform)) {
-                    if(v %in% colnames(sub)) {
-                        sub[,v] <- parSapply(NULL, sub[,v], transform, vars.transform[[v]])
-                    }
-                }
-                data[[j]][[data$subpops[s+1]]] <- sub           
-            }
-        }
-
-        prog <- prog + 1
-        setTxtProgressBar(progress, prog)
-    }
-    return(data)
-}
-
-transform <- function(v, t) {
-    return(min(max((v + t[1]) * t[2], t[3]), t[4]))
-}
-
-filterJobs <- function(data, jobs=c()) {
-    for(j in data$jobs) {
-        if(!(j %in% jobs)) {
-            data[[j]] <- NULL
-        }
-    }
-    data$njobs <- length(jobs)
-    data$jobs <- jobs
-    return(data)
-}
-
-extractBehaviours <- function(...) {
-    datas <- list(...)
-    behav <- NULL
-    for(d in datas) {
-        print(d$expname)
-        for(j in d$jobs) {
-            print(j)
-            for(s in d$subpops) {
-                print(s)
-                if(is.null(behav)) {
-                    behav <- d[[j]][[s]]
-                } else {
-                    behav <- rbind(behav, d[[j]][[s]])
-                }
-            }
-        }
-    }
-    return(behav)
-}
-
-expandGeneric <- function(data, var, keyfile) {
-    cl <- makeCluster(8)
-    # build key
-    keyf <- read.table(keyfile, header=F, sep=" ")
-    keys <- as.character(keyf[,1])
-
-    # update vars
-#     if(var %in% data$var.group) {
-#         data$var.group <- c(data$var.group, keys)
-#     } else if(var %in% data$var.ind) {
-#         data$var.ind <- c(data$var.ind, keys)
-#     } else {
-#         return(data)
-#     }
-    
-    # build vectors
-    for(j in data$jobs) {
-        for(s in data$subpops) {
-            # fill all positions with zeros 
-            temp <- data.frame(behavs=data[[j]][[s]][[var]], stringsAsFactors=FALSE)
-            for(k in keys) {
-                temp[[k]] <- 0
-            }
-            
-            # split the work
-            division <- rep(1:7, each=floor(nrow(temp)/8))
-            division <- c(division, rep(8, nrow(temp) - length(division)))
-            
-            # do the work
-            expandAux <- function(subframe) {
-                for(r in 1:nrow(subframe)) {
-                    split <- strsplit(subframe[r,1], "[;>]")[[1]]
-                    for(i in 1:(length(split)/2)) {
-                        # if there are clusters, an intermediate mapping must be used here, to map split[i] to the correct index
-                        subframe[r,split[i*2-1]] <- as.numeric(split[i*2])
-                    }
-                }
-                return(subframe)
-            }
-            res <- parLapply(cl, split(temp,division), expandAux)
-            res <- rbind(res)
-            return(res)
-        }
-    }
-    stopCluster(cl)
-    return(data)
-}
-
-# Generic generational data analysis
-
-analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, 
-                    checkpoints=NULL, splits=NULL, t.tests=TRUE, plot=TRUE, print=TRUE, smooth=0) {
-    
-    # data loading
-    print("Loading data...")
-    expsfolders <- list(...)
-    data <- list()
-    for(i in 1:length(expsfolders)) {
-        f <- expsfolders[[i]]
-        index <- ifelse(is.null(exp.names), basename(f), exp.names[i])
-        data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens)
-    }
-    
-    if(is.null(gens)) {
-        gens <- data[[1]][[1]]$gen
-    }
-    
-    if(analyse %in% vars.sub) {
-        analyse <- paste(analyse, "mean", sep=".")
-    }
-        
-    # mean plots
-    print("Assembling plot data...")
-    plotframe <- data.frame(gen=gens)
-    for(exp in names(data)) {
-        mean <- list()
-        for(job in names(data[[exp]])) {
-            mean[[job]] <- data[[exp]][[job]][[analyse]] 
-        }
-        plotframe[[exp]] <- rowMeans(as.data.frame(mean))
-    }
-    if(smooth > 0) {
-        plotframe <- smooth(plotframe, window=smooth)
-    }
-    print("Plotting...")
-    g <- plotMultiline(plotframe, title=analyse, ylim=NULL)
-    plotToPDF(g, show=T)
-}
-
-loadExp <- function(folder, filename, ...) {
-    files <- list.files(folder, pattern=filename, full.names=T)
-    exp <- list()
-    for(f in files) {
-        jobname <- basename(f)
-        exp[[jobname]] <- loadFile(f, ...)
-    }
-    return(exp)
-}
-
-loadFile <- function(file, vars.pre, vars.sub, vars.post, gens) {
-    f <- read.table(file, header=F, sep=" ")
-    subs <- (ncol(f) - length(vars.pre) - length(vars.post)) / length(vars.sub)
-    names <- vars.pre
-    for(i in 0:(subs-1)) {
-        names <- c(names, paste(vars.sub,i,sep="."))
-    }
-    names <- c(names, vars.post)
-    colnames(f) <- names
-    if(!is.null(gens)) {
-        f <- f[which(f$gen %in% gens),]
-    }
-    f <- addSubStats(f, vars.sub)
-    return(f)
-}
-
-addSubStats <- function(f, vars.sub) {
-    names <- colnames(f)
-    for(v in vars.sub) {
-        match <- names[sapply(names, function(x) grepl(v, x))]
-        m <- f[,match]
-        f[[paste(v,"mean",sep=".")]] <- rowMeans(m)
-        f[[paste(v,"max",sep=".")]] <- apply(m, 1, max)
-        f[[paste(v,"min",sep=".")]] <- apply(m, 1, min)
-    }
-    return(f)
-}
-
 # Fitness stats ################################################################
 
-batch.ttest <- function(sets, names, ...) {
-    for(i in 1:length(sets)) {
-        sets[[i]] <- as.numeric(sets[[i]])
-    }
-    matrix <- matrix(data = NA, nrow = length(sets), ncol=length(sets))
-    rownames(matrix) <- names
-    colnames(matrix) <- names
-    for(i in 1:length(sets)) {
-        for(j in 1:length(sets)) {
-            if(i != j) {
-                pvalue <- wilcox.test(as.numeric(sets[[i]]), as.numeric(sets[[j]]), ...)$p.value
-                matrix[i,j] <- pvalue
-            }
-        }
-    }
-    return(matrix)
-}
-
-fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE) {
+fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE, jitter=TRUE, ylim=NULL) {
     plots <- list()
     bestfar <- NULL
     datalist <- list(...)
     fitlim <- datalist[[1]]$fitlim
     for(data in datalist) {
         if(is.null(bestfar)) {
-            bestfar <- data.frame(gen=data$gens)
+            bestfar <- data.frame(Generation=data$gens)
         }
-        frame <- data.frame(gen=data$gens)
+        frame <- data.frame(Generation=data$gens)
         for(j in data$jobs) {
             frame[[j]] <- data[[j]]$fitness$best.sofar
         }
         avg.best <- rowMeans(frame[,-1])
         bestfar[[data$expname]] <- avg.best
     }
-    plots[[length(plots)+1]] <- plotMultiline(bestfar, ylim=NULL, title="Best so far")
+    plots[[length(plots)+1]] <- plotMultiline(bestfar, ylim=ylim, title="Best so far")
     
     if(is.null(snapshots)) {
         snapshots <- c(max(bestfar$gen))
     }
+    if(ttests) {
+        print(generational.ttest(datalist, snapshots))            
+    }
     for(s in snapshots) {
         frame <- NULL
-        sets <- list()
-        sets.names <- c()
         for(data in datalist) {
-            set <- c()
             for(job in data$jobs) {
                 frame <- rbind(frame, c(data$expname, data[[job]]$fitness$best.sofar[[s]]))
-                set <- c(set, data[[job]]$fitness$best.sofar[[s]])
             }
-            sets[[length(sets)+1]] <- set
-            sets.names <- c(sets.names, data$expname)
         }
-        if(ttests) {
-            print(paste("Snapshot",s))
-            print(batch.ttest(sets, sets.names))            
-        }
-        
         frame <- data.frame(exp=frame[,1], fit=as.numeric(frame[,2]))
-        plots[[length(plots)+1]] <- ggplot(frame, aes(factor(exp), fit)) + 
+        p <- ggplot(frame, aes(factor(exp), fit)) + 
             geom_boxplot(aes(fill=factor(exp))) + ylim(fitlim[1],fitlim[2]) + 
-            geom_jitter(colour="darkgrey") + ggtitle(paste("Generation",s)) + 
+            ggtitle(paste("Generation",s)) + xlab("") +
             theme(axis.text.x = element_text(angle = 22.5, hjust = 1))
+        if(jitter) {
+            p <- p + geom_jitter(colour="darkgrey")
+        }
+        plots[[length(plots)+1]] <- p
     }
     return(plots)
 }
@@ -418,44 +141,6 @@ individualFitnessPlots <- function(data) {
 
 # Behaviour stats ##############################################################
 
-reduceMean <- function(data) {
-    progress <- txtProgressBar(min = 0, max = data$njobs, initial = 0, char = "=", style = 3)
-    prog <- 0
-    for(j in data$jobs) {
-        if(length(data$vars.ind) > 0) {
-            data[[j]]$mean <- list()
-            for(s in data$subpops) {
-                res <- data.frame()
-                for(g in data$gens) {
-                    sub <- subset(data[[j]][[s]], gen==g, select=c("gen",data$vars.ind))
-                    sub <- colMeans(sub)
-                    res <- rbind(res, sub)
-                }
-                colnames(res) <- c("gen",data$vars.ind)
-                data[[j]]$mean[[s]] <- res
-            }
-        }
-        if(length(data$vars.group) > 0) {
-            res <- data.frame()
-            temp <- data.frame()
-            for(s in data$subpops) {
-                temp <- rbind(temp, data[[j]][[s]])
-            }
-            for(g in data$gens) {
-                sub <- subset(temp, gen==g, select=c("gen",data$vars.group))
-                sub <- colMeans(sub)
-                res <- rbind(res, sub)
-            }
-            colnames(res) <- c("gen",data$vars.group)            
-            data[[j]]$group.mean <- res
-        }
-        
-        prog <- prog + 1
-        setTxtProgressBar(progress, prog)
-    }
-    return(data)
-}
-
 meanBehaviourPlots <- function(data, vars.ind=data$vars.ind, vars.group=data$vars.group, smooth=10) {
     plots <- list()
     for(j in data$jobs) {
@@ -473,293 +158,8 @@ meanBehaviourPlots <- function(data, vars.ind=data$vars.ind, vars.group=data$var
     return(plots)
 }
 
-smoothFrame <- function(frame, window) {
-    if(window > 0) {
-        for(c in 2:ncol(frame)) {
-            frame[[c]] <- smooth(frame[[c]], window=window)
-        }
-    }
-    return(frame)
-} 
-
-euclideanDist <- function(x1, x2) {crossprod(x1-x2)} 
-
-groupDiversity <- function(data) {
-    result <- data.frame(gen=data$gens)
-    pb <- txtProgressBar(min=1, max=length(data$jobs)*length(data$gens), style=3)
-    pbindex <- 1
-    
-    for(j in data$jobs) {
-        div <- c()
-        for(g in data$gens) {
-            setTxtProgressBar(pb,pbindex)
-            pbindex <- pbindex + 1
-            
-            all <- NULL
-            for(s in data$subpops) {
-                sub <- subset(data[[j]][[s]], gen==g, select=data$vars.group)
-                if(is.null(all)) {
-                    all <- sub
-                } else {
-                    all <- rbind(all, sub)
-                }
-            }
-            centre <- colMeans(all)
-            dists <- apply(all, 1, euclideanDist, centre)
-            div <- c(div, mean(dists))
-        }
-        result[[j]] <- div
-    }
-    result[["mean"]] <- rowMeans(result[,-1])
-    return(result)
-}
-
-intraPopDiversity <- function(data, vars=data$vars.group) {
-    result <- list()
-    euclideanDist <- function(x1, x2) {crossprod(x1-x2)} 
-    pb <- txtProgressBar(min=1, max=length(data$jobs)*length(data$subpops), style=3)
-    pbindex <- 1
-    
-    for(j in data$jobs) {
-        result[[j]] <- data.frame(gen=data$gens)
-        result[[j]]$all.avg <- rep(0, length(data$gens))
-        result[[j]]$all.sd <- rep(0, length(data$gens))
-        for(s in data$subpops) {
-            setTxtProgressBar(pb,pbindex)
-            pbindex <- pbindex + 1
-            t.mean <- c()
-            t.sd <- c()
-            for(g in data$gens) {
-                sub <- subset(data[[j]][[s]], gen==g, select=vars)
-                centre <- colMeans(sub)
-                dists <- apply(sub, 1, euclideanDist, centre)
-                t.mean <- c(t.mean, mean(dists))
-                t.sd <- c(t.sd, sd(dists))
-            }
-            result[[j]][[paste0(s,".avg")]] <- t.mean
-            result[[j]][[paste0(s,".sd")]] <- t.sd
-            
-            result[[j]]$all.avg <- result[[j]]$all.avg + t.mean / data$nsubs
-            result[[j]]$all.sd <- result[[j]]$all.sd + t.sd / data$nsubs
-        }
-    }
-    return(result)
-}
-
-interPopDiversity <- function(data, vars=data$vars.ind) {
-    result <- list()
-    euclideanDist <- function(x1, x2) {crossprod(x1-x2)} 
-    pb <- txtProgressBar(min=1, max=length(data$jobs)*length(data$subpops)*length(data$gens), style=3)
-    pbindex <- 1
-    
-    for(j in data$jobs) {
-        result[[j]] <- list()
-        result[[j]]$gen <- data$gens
-        result[[j]]$all.avg <- c()
-        result[[j]]$all.sd <- c()
-        
-        for(g in data$gens) {
-            subdatas <- list()
-            subcentres <- list()
-            for(s in data$subpops) {
-                subdatas[[s]] <- subset(data[[j]][[s]], gen==g, select=vars)
-                subcentres[[s]] <- colMeans(subdatas[[s]])
-            }
-            t.mean <- c()
-            t.sd <- c()
-            for(s in data$subpops) {
-                setTxtProgressBar(pb,pbindex)
-                pbindex <- pbindex + 1
-                dists <- c()
-                for(s2 in data$subpops[!data$subpops == s]) {
-                    dists <- c(dists, apply(subdatas[[s]], 1, euclideanDist, subcentres[[s2]]))
-                }
-                t.mean <- c(t.mean, mean(dists))
-                t.sd <- c(t.sd, sd(dists))
-            }
-            result[[j]]$all.avg <- c(result[[j]]$all.avg, mean(t.mean))
-            result[[j]]$all.sd <- c(result[[j]]$all.sd, mean(t.sd))
-        }
-        result[[j]] <- as.data.frame(result[[j]])
-    }
-    return(result)    
-}
-
-# assumes that all frames in framelist have the same columns and same number of rows
-frameFusion <- function(framelist) {
-    result <- NULL
-    for(i in 1:ncol(framelist[[1]])) {
-        temp <- data.frame(framelist[[1]][[i]])
-        for(j in 2:length(framelist)) {
-            temp <- cbind(temp, framelist[[j]][[i]])
-        }
-        r <- rowMeans(temp)
-        if(is.null(result)) {
-            result <- data.frame(r)
-        } else {
-            result <- cbind(result, r)
-        }
-    }
-    colnames(result) <- colnames(framelist[[1]])
-    return(result)
-}
 
 # Som stats ####################################################################
-
-sampleData <- function(dataList, sample.size) {
-    sample <- data.frame()
-    data.sample.size <- sample.size / length(dataList)
-    for(data in dataList) {
-        each.sample <- round(data.sample.size / data$njobs / data$nsubs)
-        for(j in data$jobs) {
-            for(s in data$subpops) {
-                subsample <- data[[j]][[s]]
-                subsample <- subsample[sample(1:nrow(subsample), each.sample),]
-                sample <- rbind(sample, subsample)
-            }
-        }
-    }
-    return(sample)
-}
-
-buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE) {
-    dataList <- list(...)
-    sample <- sampleData(dataList, sample.size)
-    
-    rm(dataList)
-    gc()
-    
-    sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample
-    trainData <- sample[,variables]
-    if(scale) {
-        trainData <- scale(trainData)
-    }
-    
-    print("Sampling done...")
-    
-    som <- som(as.matrix(trainData), keep.data=FALSE, grid=somgrid(grid.size, grid.size, grid.type))
-    gc()
-    
-    print("Som done...")
-    
-    if(scale) {
-        som$scaled.center <- attr(trainData, "scaled:center")
-        som$scaled.scale <- attr(trainData, "scaled:scale")
-    }
-    if(compute.fitness) {
-        som$fitness.avg <- fitnessMapAvg(som, sample)
-        som$fitness.max <- fitnessMapMax(som, sample)
-    }
-    som$count <- countMap(som, sample)
-    
-    print("Done.")
-    return(som)
-}
-
-map2 <- function(som, data) {
-    if(!is.null(som$scaled.center)) {
-        data <- scale(data, center=som$scaled.center, scale=som$scaled.scale)
-    }
-    return(map(som, data))
-}
-
-countMap <- function(som, data) {
-    variables <- colnames(som$codes)
-    len = som$grid$xdim * som$grid$ydim
-    res <- mat.or.vec(len,1)
-    data <- as.matrix(data[,variables])
-    m <- map2(som, data)$unit.classif
-    for(i in 1:len) {
-        res[i] <- sum(m == i)
-    }
-    return(res)
-}
-
-fitnessMapAvg <- function(som, data) {
-    variables <- colnames(som$codes)
-    len = som$grid$xdim * som$grid$ydim
-    accum <- mat.or.vec(len,1)
-    count <- mat.or.vec(len,1)
-    m <- map2(som, as.matrix(data[,variables]))$unit.classif
-    for(i in 1:length(m)) {
-        accum[m[i]] <- accum[m[i]] + data[i,"fitness"]
-        count[m[i]] <- count[m[i]] + 1
-    }
-    res <- accum / count
-    res[is.nan(res)] <- 0
-    return(res)
-}
-
-fitnessMapMax <- function(som, data) {
-    variables <- colnames(som$codes)
-    len = som$grid$xdim * som$grid$ydim
-    res <- rep(0, len)
-    m <- map2(som, as.matrix(data[,variables]))$unit.classif
-    for(i in 1:length(m)) {
-        res[m[i]] <- max(res[m[i]], data[i,"fitness"])
-    }
-    return(res)
-}
-
-fitnessMapQuantile <- function(som, data, q=0.75) {
-    variables <- colnames(som$codes)
-    len = som$grid$xdim * som$grid$ydim
-    temp <- list()
-    temp[[len]] <- 0
-    m <- map2(som, as.matrix(data[,variables]))$unit.classif
-    for(i in 1:length(m)) {
-        temp[[m[i]]] <- c(temp[[m[i]]], data[i,"fitness"])
-    }
-    
-    for(i in 1:len) {
-        if(is.null(temp[[i]])) {
-            temp[[i]] <- 0
-        } else {
-            temp[[i]] <- quantile(temp[[i]], probs=q, names=F)
-        }
-    }
-    return(as.vector(temp, mode="numeric"))    
-}
-
-mapIndividualSubpops <- function(som, data, ...) {
-    mapping <- lapply(data$jobs, mapIndividualSubpopsAux, som, data, ...)
-    names(mapping) <- data$jobs
-    return(mapping)
-}
-
-mapMergeSubpops <- function(som, data, ...) {
-    mapping <- lapply(data$jobs, mapMergeSubpopsAux, som, data, ...)
-    names(mapping) <- data$jobs
-    return(mapping)  
-}
-
-mapIndividualSubpopsAux <- function(job, som, data, gen.from=data$gens[1], gen.to=data$gens[length(data$gens)], norm=NULL) {
-    mapping <- list()
-    for(s in data$subpops) {
-        d <- subset(data[[job]][[s]], gen >= gen.from & gen <= gen.to)
-        count <- countMap(som, d)
-        if(is.null(norm)) {
-            norm <- nrow(d)
-        }
-        count <- count / norm
-        mapping[[s]] <- data.frame(somx=som$grid$pts[,1], somy=som$grid$pts[,2], count=count, fitness.avg=som$fitness.avg, fitness.max=som$fitness.max)
-    }    
-    return(mapping)
-}
-
-mapMergeSubpopsAux <- function(job, som, data, gen.from=data$gens[1], gen.to=data$gens[length(data$gens)], norm=NULL) {
-    count <- rep(0, nrow(som$grid$pts))
-    for(s in data$subpops) {
-        d <- subset(data[[job]][[s]], gen >= gen.from & gen <= gen.to)
-        if(is.null(norm)) {
-            norm <- nrow(d)
-        }
-        count <- count + countMap(som, d) / norm
-    }
-    count <- count / data$nsubs
-    d <- data.frame(somx=som$grid$pts[,1], somy=som$grid$pts[,2], count=count, fitness.avg=som$fitness.avg, fitness.max=som$fitness.max)    
-    return(list(all=d))
-}
 
 individualSomPlots <- function(som, data, mapping, ...) {
     plots <- list()
@@ -837,7 +237,6 @@ explorationVideo <- function(som, data, mergeSubpops=TRUE, accumulate=TRUE, inte
     # make video with imagemagick
     cmd <- paste0("mogrify -path ",tmpdir, " -resize 50x50% ", tmpdir, "/*.png") ; cat(cmd) ; system(cmd)
     #  -morph 5
-    #cmd <- paste0("convert ", tmpdir, "/*.png -clone 5 ", tmpdir, "/clone%05d.png") ; print(cmd) ; system(cmd)
     cmd <- paste0("ffmpeg -r ",fps," -qscale 2 -i ", tmpdir, "/%05d.png -r 30 \"", out, "\"") ; cat(cmd) ; system(cmd)
 }
 

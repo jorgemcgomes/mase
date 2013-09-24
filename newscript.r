@@ -1,3 +1,42 @@
+setwd("~/exps/")
+par <- list(fitlim=c(0,30), jobs=10, load.behavs=F)
+all <- metaLoadData("k3_hom_easy_fit","k3_hom_easy_nov50","k3_hom_med_fit","k3_hom_med_nov50","k3_hom_hard_fit","k3_hom_hard_nov50", params=par)
+fullStatistics(all, expset.name="kw.hom", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(250,500,750,999)))
+
+setwd("~/Dropbox/exps_AAMAS/")
+
+
+
+
+par <- list(fitlim=c(0,2), jobs=5, load.behavs=T, subpops=3, behavs.sample=0.25, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
+data <- metaLoadData("pred3_fit","pred3_nov50","pred3_nov50_indshare","pred3_nov50_indmult", params=par, names=c("fit","nov-group","nov-indshare","nov-indmult"))
+
+par <- list(fitlim=c(0,2), jobs=5, load.behavs=T, subpops=5, behavs.sample=0.1, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
+data.p5 <- metaLoadData("pred5m_fit","pred5m_nov50", params=par, names=c("fit","nov-group"))
+par <- list(fitlim=c(0,2), jobs=5, load.behavs=T, subpops=3, behavs.sample=0.1, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
+data.p3 <- metaLoadData("pred3_fit","pred3_nov50", params=par, names=c("fit","nov-group"))
+par <- list(fitlim=c(0,30), jobs=5, load.behavs=T, subpops=3, behavs.sample=0.1, vars.group=c("g.passes","g.steps","g.dispersion","g.pass-length"), vars.ind=c("i.passes","i.pass-length","i.keeper-dist","i.movement"))
+data.km <- metaLoadData("k3_ph_med_fit","k3_ph_med_nov50", params=par, names=c("fit","nov-group"))
+data.kh <- metaLoadData("k3_ph_hard_fit","k3_ph_hard_nov50", params=par, names=c("fit","nov-group"))
+
+count <- exploration.count(data.p3, levels=5)
+
+
+count.p3 <- exploration.count(data.p3, levels=5)
+count.p5 <- exploration.count(data.p5, levels=5)
+count.km <- exploration.count(data.km, levels=5)
+count.kh <- exploration.count(data.kh, levels=5)
+
+counti.p3 <- exploration.count(data.p3, levels=5, vars=data.p3[[1]]$vars.ind)
+counti.p5 <- exploration.count(data.p5, levels=5, vars=data.p5[[1]]$vars.ind)
+counti.km <- exploration.count(data.km, levels=5, vars=data.km[[1]]$vars.ind)
+counti.kh <- exploration.count(data.kh, levels=5, vars=data.kh[[1]]$vars.ind)
+
+exploration.uniformity(count.p3, threshold=100)
+exploration.uniformity(count.p5, threshold=100)
+exploration.uniformity(count.km, threshold=100)
+exploration.uniformity(count.kh, threshold=100)
+
 setwd("~/Dropbox/exps_AAMAS/")
 par <- list(fitlim=c(0,2), jobs=20, load.behavs=T, subpops=5, behavs.sample=0.25, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
 data <- metaLoadData("pred5m_fit","pred5m_nov50","pred5m_nov50_indshare","pred5m_nov50_indmult", params=par, names=c("fit","nov-group","nov-indshare","nov-indmult"))
@@ -15,11 +54,16 @@ data <- metaLoadData("k3_ph_hard_fit","k3_ph_hard_nov50","k3_ph_hard_nov50_indsh
 fullStatistics(data, expset.name="kh", fit.comp=T, fit.comp.par=list(snapshots=c(333,666,999)), fit.ind=T, som.group=T, som.alljobs=T, som.ind=T, behav.mean=T, show.only=F)
 gc()
 
-par <- list(fitlim=c(0,2), jobs=20, load.behavs=T, subpops=5, behavs.sample=0.25, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
+par <- list(fitlim=c(0,2), jobs=20, load.behavs=T, subpops=5, behavs.sample=0.15, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
 data <- metaLoadData("pred5m_fit","pred5m_nov50","pred5m_nov50_indshare","pred5m_nov50_indmult", params=par, names=c("fit","nov-group","nov-indshare","nov-indmult"))
 fullStatistics(data, expset.name="p5", som.group=T, som.alljobs=T, show.only=F)
 
-
+nov.div <- groupDiversity(data$pred5m_nov50)
+fit.div <- groupDiversity(data$pred5m_fit)
+indmult.div <- groupDiversity(data$pred5m_nov50_indmult)
+indshare.div <- groupDiversity(data$pred5m_nov50_indshare)
+plotMultiline(smooth(data.frame(gen=nov.div$gen,nov=nov.div$mean, fit=fit.div$mean,indmult=indmult.div$mean,indhsare=indshare.div$mean)), ylim=NULL)
+    
 
 par <- list(fitlim=c(0,2), jobs=10, load.behavs=F)
 
