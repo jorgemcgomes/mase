@@ -9,9 +9,9 @@ import ec.Individual;
 import ec.util.Parameter;
 import mase.AgentController;
 import mase.AgentControllerIndividual;
-import org.encog.neural.neat.NEATCODEC;
-import org.encog.neural.neat.NEATNetwork;
-import org.encog.neural.neat.training.NEATGenome;
+import org.neat4j.neat.core.NEATNetDescriptor;
+import org.neat4j.neat.core.NEATNeuralNet;
+import org.neat4j.neat.ga.core.Chromosome;
 
 /**
  * NEATGenome wrapper
@@ -20,20 +20,18 @@ import org.encog.neural.neat.training.NEATGenome;
  */
 public class NEATIndividual extends Individual implements AgentControllerIndividual {
 
-    private NEATCODEC codec;
-    private NEATGenome genome;
+    private Chromosome genome;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        this.codec = new NEATCODEC();
     }
-    
-    public void setGenome(NEATGenome genome) {
+
+    public void setChromosome(Chromosome genome) {
         this.genome = genome;
     }
-    
-    public NEATGenome getGenome() {
+
+    public Chromosome getChromosome() {
         return genome;
     }
 
@@ -54,8 +52,12 @@ public class NEATIndividual extends Individual implements AgentControllerIndivid
 
     @Override
     public AgentController decodeController() {
-        NEATNetwork net = (NEATNetwork) codec.decode(genome);
-        NEATAgentController ac = new NEATAgentController(net);
-        return ac;
+        NEATNetDescriptor descr = new NEATNetDescriptor(0, null);
+        descr.updateStructure(genome);
+        NEATNeuralNet net = new NEATNeuralNet();
+        net.createNetStructure(descr);
+        net.updateNetStructure();
+        NEATAgentController nac = new NEATAgentController(net);
+        return nac;
     }
 }
