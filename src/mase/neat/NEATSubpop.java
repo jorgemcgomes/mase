@@ -5,9 +5,19 @@
 package mase.neat;
 
 import ec.EvolutionState;
+import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
+import javax.swing.tree.TreeModel;
+import org.neat4j.core.AIConfig;
+import org.neat4j.neat.applications.train.NEATGATrainingManager;
+import org.neat4j.neat.core.NEATConfig;
+import org.neat4j.neat.core.NEATGADescriptor;
 import org.neat4j.neat.core.NEATGeneticAlgorithm;
+import org.neat4j.neat.core.mutators.NEATMutator;
+import org.neat4j.neat.core.pselectors.TournamentSelector;
+import org.neat4j.neat.core.xover.NEATCrossover;
+import org.neat4j.neat.ga.core.Chromosome;
 
 /**
  *
@@ -15,14 +25,52 @@ import org.neat4j.neat.core.NEATGeneticAlgorithm;
  */
 public class NEATSubpop extends Subpopulation {
 
+    public static final String P_NEAT_BASE = "neat";
+    public static final String[] NEAT_PARAMETERS = {"PROBABILITY.MUTATION",
+        "PROBABILITY.CROSSOVER", "PROBABILITY.ADDLINK", "PROBABILITY.ADDNODE",
+        "PROBABILITY.MUTATEBIAS", "PROBABILITY.TOGGLELINK", "PROBABILITY.WEIGHT.REPLACED",
+        "EXCESS.COEFFICIENT", "DISJOINT.COEFFICIENT", "WEIGHT.COEFFICIENT", "COMPATABILITY.THRESHOLD",
+        "COMPATABILITY.CHANGE", "SPECIE.COUNT", "SURVIVAL.THRESHOLD", "SPECIE.AGE.THRESHOLD",
+        "SPECIE.YOUTH.THRESHOLD", "SPECIE.OLD.PENALTY", "SPECIE.YOUTH.BOOST", "SPECIE.FITNESS.MAX",
+        "OPERATOR.XOVER", "OPERATOR.FUNCTION", "OPERATOR.PSELECTOR", "OPERATOR.MUTATOR",
+        "MAX.PERTURB", "MAX.BIAS.PERTURB", "FEATURE.SELECTION", "RECURRENCY.ALLOWED",
+        "INPUT.NODES", "OUTPUT.NODES", "ELE.EVENTS", "ELE.SURVIVAL.COUNT", "ELE.EVENT.TIME",
+        "KEEP.BEST.EVER", "EXTRA.FEATURE.COUNT", "POP.SIZE", "NATURAL.ORDER.STRATEGY"};
     private NEATGeneticAlgorithm neat;
+    private NEATIndividual proto;
 
     // parameters
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         // load neat parameters
+        Parameter df = defaultBase();
+        AIConfig config = new NEATConfig();
+        for(String key : NEAT_PARAMETERS) {
+            if(state.parameters.exists(base.push(key), df.push(key))) {
+                String val = state.parameters.getString(base.push(key), df.push(key));
+                config.updateConfig(key, val);
+            } else {
+                state.output.warning("Parameter not found.", base.push(key), df.push(key));
+            }
+        }
 
+        NEATGATrainingManager gam = new NEATGATrainingManager();
+        neat = new NEATGeneticAlgorithm((NEATGADescriptor) gam.createDescriptor(config));
+
+        //train.pluginFitnessFunction(new SingleObjectiveFitnessFunction());
+        neat.pluginCrossOver(new NEATCrossover());
+        neat.pluginMutator(new NEATMutator());
+        neat.pluginParentSelector(new TournamentSelector());
+
+        // setup proto individual
+        proto = new NEATIndividual();
+        proto.setup(state, base);
+    }
+
+    @Override
+    public Parameter defaultBase() {
+        return new Parameter(P_NEAT_BASE);
     }
 
     public NEATGeneticAlgorithm getNEAT() {
@@ -32,11 +80,14 @@ public class NEATSubpop extends Subpopulation {
     @Override
     public void populate(EvolutionState state, int thread) {
         neat.createPopulation();
+        for (int j = 0; j < individuals.length; j++) {
+            individuals[j] = newIndividual(neat.population().genoTypes()[j]);
+        }
     }
 
-    public void breed() {   
-        // TODO
-        neat.runEpoch();
-        // TODO
+    public Individual newIndividual(Chromosome genotype) {
+        NEATIndividual ind = (NEATIndividual) proto.clone();
+        ind.setChromosome(genotype);
+        return ind;
     }
 }
