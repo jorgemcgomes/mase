@@ -21,6 +21,10 @@ public class NEATAgentController implements AgentController {
     public NEATAgentController(NEATNeuralNet network) {
         this.network = network;
     }
+    
+    public NEATNeuralNet getNetwork() {
+        return network;
+    }
 
     @Override
     public double[] processInputs(double[] input) {

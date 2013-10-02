@@ -29,8 +29,8 @@ vector.species.ind =                    mase.controllers.NeuralControllerIndivid
 # Populations configuration
 pop.subpops =                           1
 pop.default-subpop = 			ec.Subpopulation
-ec.subpop.duplicate-retries =           10
-ec.subpop.size = 			400
+pop.default-subpop.duplicate-retries =           10
+pop.default-subpop.size = 			400
 
 # Elitism configuration (pre-breeding)
 breed.elite =				5

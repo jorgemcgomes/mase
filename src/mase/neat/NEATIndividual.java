@@ -61,7 +61,7 @@ public class NEATIndividual extends Individual implements AgentControllerIndivid
     }
     
     @Override
-    public synchronized AgentController decodeController() {
+    public AgentController decodeController() {
         NEATAgentController nac = new NEATAgentController(network);
         return nac;
     }

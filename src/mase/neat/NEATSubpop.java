@@ -40,6 +40,7 @@ public class NEATSubpop extends Subpopulation {
     // parameters
     @Override
     public void setup(EvolutionState state, Parameter base) {
+        System.out.println("Subpop setup ***********************************");
         super.setup(state, base);
         // load neat parameters
         Parameter df = defaultBase();
@@ -74,6 +75,7 @@ public class NEATSubpop extends Subpopulation {
 
     @Override
     public void populate(EvolutionState state, int thread) {
+        System.out.println("creating population");
         neat.createPopulation();
         for (int j = 0; j < individuals.length; j++) {
             individuals[j] = species.newIndividual(state, 0);
