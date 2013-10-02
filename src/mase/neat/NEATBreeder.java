@@ -4,11 +4,10 @@
  */
 package mase.neat;
 
-import ec.Breeder;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.Population;
-import ec.util.Parameter;
+import ec.simple.SimpleBreeder;
 import java.util.HashMap;
 import java.util.Map;
 import org.neat4j.neat.core.NEATChromosome;
@@ -18,12 +17,7 @@ import org.neat4j.neat.ga.core.Chromosome;
  *
  * @author jorge
  */
-public class NEATBreeder extends Breeder {
-
-    @Override
-    public void setup(EvolutionState state, Parameter base) {
-        // DO nothing
-    }
+public class NEATBreeder extends SimpleBreeder {
 
     @Override
     public Population breedPopulation(EvolutionState state) {
