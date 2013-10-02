@@ -9,9 +9,9 @@ import ec.Individual;
 import ec.util.Parameter;
 import mase.AgentController;
 import mase.AgentControllerIndividual;
+import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATNetDescriptor;
 import org.neat4j.neat.core.NEATNeuralNet;
-import org.neat4j.neat.ga.core.Chromosome;
 
 /**
  * NEATGenome wrapper
@@ -20,19 +20,29 @@ import org.neat4j.neat.ga.core.Chromosome;
  */
 public class NEATIndividual extends Individual implements AgentControllerIndividual {
 
-    private Chromosome genome;
+    private NEATChromosome genome;
+    private NEATNeuralNet network;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
     }
 
-    public void setChromosome(Chromosome genome) {
+    public void setChromosome(NEATChromosome genome) {
         this.genome = genome;
+        NEATNetDescriptor descr = new NEATNetDescriptor(0, null);
+        descr.updateStructure(this.genome);
+        this.network = new NEATNeuralNet();
+        this.network.createNetStructure(descr);
+        this.network.updateNetStructure();
     }
 
-    public Chromosome getChromosome() {
+    public NEATChromosome getChromosome() {
         return genome;
+    }
+    
+    public NEATNeuralNet getNeuralNet() {
+        return network;
     }
 
     @Override
@@ -49,15 +59,10 @@ public class NEATIndividual extends Individual implements AgentControllerIndivid
     public Parameter defaultBase() {
         return defaultBase();
     }
-
+    
     @Override
-    public AgentController decodeController() {
-        NEATNetDescriptor descr = new NEATNetDescriptor(0, null);
-        descr.updateStructure(genome);
-        NEATNeuralNet net = new NEATNeuralNet();
-        net.createNetStructure(descr);
-        net.updateNetStructure();
-        NEATAgentController nac = new NEATAgentController(net);
+    public synchronized AgentController decodeController() {
+        NEATAgentController nac = new NEATAgentController(network);
         return nac;
     }
 }

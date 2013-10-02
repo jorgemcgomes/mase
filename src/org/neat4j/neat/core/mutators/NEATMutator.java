@@ -201,10 +201,6 @@ public class NEATMutator implements Mutator {
 				from = ((NEATNodeGene)nodes.get(rIdx));
 				rIdx = linkRand.nextInt(nodes.size());
 				to = ((NEATNodeGene)nodes.get(rIdx));
-				// TODO Remove
-				if (from.getInnovationNumber() == 2  && to.getInnovationNumber() == 5) {
-					System.out.println("a");
-				}
 				if (!this.linkIllegal(from, to, links)) {
 					// set it to a random value
 					newLink = InnovationDatabase.database().submitLinkInnovation(from.id(), to.id());

@@ -11,7 +11,7 @@ import ec.Population;
 import ec.util.Parameter;
 import java.util.HashMap;
 import java.util.Map;
-import org.neat4j.neat.core.NEATFitnessFunction;
+import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.ga.core.Chromosome;
 
 /**
@@ -46,30 +46,11 @@ public class NEATBreeder extends Breeder {
             
             // Create new population
             for(int j = 0 ; j < sub.individuals.length ; j++) {
-                newpop.subpops[i].individuals[j] = 
-                        sub.newIndividual(sub.getNEAT().population().genoTypes()[j]);
+                newpop.subpops[i].individuals[j] = sub.species.newIndividual(state, 0);
+                ((NEATIndividual) newpop.subpops[i].individuals[j])
+                        .setChromosome((NEATChromosome) sub.getNEAT().population().genoTypes()[j]);
             }
         }
         return newpop;
-    }
-
-    static class PreEvaluatedFitnessFunction extends NEATFitnessFunction {
-
-        private Map<Chromosome, Float> scores;
-
-        public PreEvaluatedFitnessFunction(Map<Chromosome, Float> scores) {
-            super(null, null);
-            this.scores = scores;
-        }
-
-        @Override
-        public double evaluate(Chromosome genoType) {
-            Float sc = scores.get(genoType);
-            if (sc == null) {
-                throw new RuntimeException("Genotype not previously evaluated!");
-            } else {
-                return sc;
-            }
-        }
     }
 }
