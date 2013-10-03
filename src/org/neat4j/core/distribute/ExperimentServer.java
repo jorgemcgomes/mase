@@ -15,7 +15,7 @@ import org.apache.log4j.Category;
 import org.neat4j.core.AIConfig;
 import org.neat4j.core.AIController;
 import org.neat4j.core.InitialisationFailedException;
-import org.neat4j.neat.applications.train.NEATGATrainingManager;
+import org.neat4j.neat.core.NEATGATrainingManager;
 import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATGeneticAlgorithm;
 import org.neat4j.neat.core.NEATLoader;

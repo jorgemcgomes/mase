@@ -9,7 +9,7 @@ import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.Collections;
 import org.neat4j.core.AIConfig;
-import org.neat4j.neat.applications.train.NEATGATrainingManager;
+import org.neat4j.neat.core.NEATGATrainingManager;
 import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATConfig;
 import org.neat4j.neat.core.NEATGADescriptor;

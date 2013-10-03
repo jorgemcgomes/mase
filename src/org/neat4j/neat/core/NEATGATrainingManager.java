@@ -1,4 +1,4 @@
-package org.neat4j.neat.applications.train;
+package org.neat4j.neat.core;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
