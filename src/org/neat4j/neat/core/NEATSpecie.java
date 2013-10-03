@@ -9,7 +9,6 @@ package org.neat4j.neat.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.log4j.Category;
 import org.neat4j.neat.ga.core.Chromosome;
 import org.neat4j.neat.ga.core.ChromosomeSet;
 import org.neat4j.neat.ga.core.CrossOver;
@@ -24,7 +23,6 @@ import org.neat4j.neat.ga.core.Specie;
  */
 public class NEATSpecie extends Specie {
 
-    private final Category cat = Category.getInstance(NEATSpecie.class);
     private double excessCoeff;
     private double disjointCoeff;
     private double weightCoeff;
@@ -151,7 +149,7 @@ public class NEATSpecie extends Specie {
             }
             this.specieAge++;
         } catch (Exception e) {
-            cat.error("produceOffspring produced error:count:" + count + ":current iteration:" + i + ":specie size:" + this.specieMembers().size());
+            System.err.println("produceOffspring produced error:count:" + count + ":current iteration:" + i + ":specie size:" + this.specieMembers().size());
             e.printStackTrace();
         }
 

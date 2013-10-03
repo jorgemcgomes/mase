@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Category;
 import org.neat4j.neat.data.core.DataLoader;
 import org.neat4j.neat.data.core.ExpectedOutputSet;
 import org.neat4j.neat.data.core.NetworkDataSet;
@@ -26,7 +25,6 @@ import org.neat4j.neat.data.core.NetworkOutput;
  *
  */
 public class CSVDataLoader implements DataLoader {
-	private static final Category cat = Category.getInstance(CSVDataLoader.class);
 	private String fileName;
 	private int opCols;
 	
@@ -38,12 +36,12 @@ public class CSVDataLoader implements DataLoader {
 	 * @see org.neat4j.ailibrary.nn.data.DataLoader#loadData()
 	 */
 	public NetworkDataSet loadData() {
-		cat.info("Loading data from " + this.fileName);
+		//cat.info("Loading data from " + this.fileName);
 		return (this.createDataSets());
 	}
 	
 	private NetworkDataSet createDataSets() {
-		cat.debug("Creating data sets");
+		//cat.debug("Creating data sets");
 		NetworkDataSet dataSet = new CSVDataSet();
 		File csvFile = new File(this.fileName);
 		FileInputStream fis;
@@ -65,17 +63,17 @@ public class CSVDataLoader implements DataLoader {
 			opSet = new CSVExpectedOutputSet(eOps);
 			dataSet = new CSVDataSet(ipSet, opSet);
 		} catch (FileNotFoundException e) {
-			cat.error(e.getMessage());
+			System.err.println(e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			cat.error(e.getMessage());
+			System.err.println(e.getMessage());
 			e.printStackTrace();
 		} catch (Exception e) {
-			cat.error(e.getMessage());
+			System.err.println(e.getMessage());
 			e.printStackTrace();
 		}
 		
-		cat.debug("Creating data sets...Done");
+		//cat.debug("Creating data sets...Done");
 		return (dataSet);
 	}
 	

@@ -8,7 +8,6 @@ package org.neat4j.neat.core.control;
 
 import java.lang.reflect.Constructor;
 
-import org.apache.log4j.Category;
 import org.neat4j.core.AIConfig;
 import org.neat4j.core.AIController;
 import org.neat4j.core.InitialisationFailedException;
@@ -27,7 +26,6 @@ import org.neat4j.neat.nn.core.NeuralNetFactory;
  * Mamages the initialisation and creation of a NEAT network
  */
 public class NEATNetManager implements AIController {
-	private final Category cat = Category.getInstance(NEATNetManager.class);
 	private NeuralNet net;
 	private AIConfig config;
 
@@ -69,7 +67,7 @@ public class NEATNetManager implements AIController {
 		Learnable learnable = null;
 		String learnableClassName = config.configElement("LEARNABLE");
 		if (learnableClassName != null) {
-			cat.debug("learnableClassName:" + learnableClassName);
+			System.err.println("learnableClassName:" + learnableClassName);
 			// learning env
 			LearningEnvironment le = new LearningEnvironment();
 			NetworkDataSet dSet = this.dataSet("TRAINING.SET", config, numOutputs);

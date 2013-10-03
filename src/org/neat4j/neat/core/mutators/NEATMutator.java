@@ -9,7 +9,6 @@ package org.neat4j.neat.core.mutators;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.apache.log4j.Category;
 import org.neat4j.neat.core.InnovationDatabase;
 import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATFeatureGene;
@@ -28,7 +27,6 @@ import org.neat4j.neat.utils.MathUtils;
  */
 public class NEATMutator implements Mutator {
 
-    private final Category cat = Category.getInstance(NEATMutator.class);
     private double pAddLink;
     private double pAddNode;
     private double pPerturb;

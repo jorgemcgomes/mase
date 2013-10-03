@@ -6,7 +6,6 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.log4j.Category;
 import org.neat4j.core.AIConfig;
 import org.neat4j.core.InitialisationFailedException;
 import org.neat4j.neat.core.InnovationDatabase;
@@ -36,7 +35,6 @@ import org.neat4j.neat.nn.core.NeuralNet;
  *
  */
 public class NEATGATrainingManager {
-	private static final Category cat = Category.getInstance(NEATGATrainingManager.class);
 	private GeneticAlgorithm ga;
 	private AIConfig config;
 	
@@ -89,7 +87,7 @@ public class NEATGATrainingManager {
 		int i = 0;
 		
 		while (i < epochs && !terminate) {
-			cat.info("Running Epoch[" + i + "]\r");
+			System.err.println("Running Epoch[" + i + "]\r");
 			this.ga.runEpoch();
 			this.saveBest();
 			if ((this.ga.discoverdBestMember().fitness() >= terminateVal && !nOrder) || (this.ga.discoverdBestMember().fitness() <= terminateVal && nOrder)) {
@@ -98,7 +96,7 @@ public class NEATGATrainingManager {
 			i++;
 		}
                 InnovationDatabase db = ((NEATGeneticAlgorithm) ga).innovationDatabase();
-		cat.debug("Innovation Database Stats - Hits:" + db.hits + " - misses:" + db.misses);
+		System.err.println("Innovation Database Stats - Hits:" + db.hits + " - misses:" + db.misses);
 	}
 	
 	/**

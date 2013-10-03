@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-import org.apache.log4j.Category;
 import org.neat4j.neat.core.mutators.NEATMutator;
 import org.neat4j.neat.ga.core.Chromosome;
 import org.neat4j.neat.ga.core.ChromosomeSet;
@@ -33,7 +32,6 @@ import org.neat4j.neat.ga.core.Species;
  */
 public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	private static final long serialVersionUID = 1L;
-	private final Category cat = Category.getInstance(NEATGeneticAlgorithm.class);
 	private NEATGADescriptor descriptor;
 	private NEATMutator mut;
 	private FitnessFunction func;
@@ -144,7 +142,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		
 		this.specieList.resetSpecies(this.descriptor.getThreshold());
 		
-		cat.info("Compat threshold:" + this.descriptor.getThreshold());
+		//cat.info("Compat threshold:" + this.descriptor.getThreshold());
 		for (i = 0; i < currentGen.length; i++) {
 			if (!memberAssigned) {
 				currentSpecieList = this.specieList.specieList();
@@ -164,20 +162,20 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 					specie = this.createNewSpecie(currentGen[i]);
 					this.specieList.addSpecie(specie);
 					//((NEATChromosome)currentGen[i]).setSpecieId(specie.id());
-					cat.info("Created new specie, member assigned to specie " + specie.id());
+					//cat.info("Created new specie, member assigned to specie " + specie.id());
 				}
 			}
 			memberAssigned = false;
 		}
 
-		if (cat.isDebugEnabled()) {
+		/*if (cat.isDebugEnabled()) {
 			for (i = 0; i < this.specieList.specieList().size(); i++) {
 				specie = (Specie)this.specieList.specieList().get(i);
 				if (!specie.isExtinct() && specie.specieMembers().size() > 0) {
 					cat.debug("Specie:" + specie.id() + ":size:" + specie.specieMembers().size() + ":age:" + ((NEATSpecie)specie).specieAge() + ":fAge:" + + specie.getCurrentFitnessAge() + ":best:" + specie.findBestMember().fitness());
 				}
 			}
-		}
+		}*/
 	}
 
 	/**
@@ -186,7 +184,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	public void runEpoch() {
 		Chromosome[] currentGen = this.pop.genoTypes();
 		this.setChromosomeNO(currentGen);
-		cat.debug("Evaluating pop");
+		//cat.debug("Evaluating pop");
 		this.evaluatePopulation(currentGen);
 		this.runEvolutionCycle(currentGen);
 	}
@@ -208,8 +206,8 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 			// copy best
 			this.discoveredBest = this.cloneChromosome(this.genBest);
 		}
-		cat.info("Best Ever Raw:" + (this.discoveredBest.fitness()) + ":from specie:" + ((NEATChromosome)this.discoveredBest).getSpecieId());		
-		cat.debug("Best of Generation is:" + (this.genBest.fitness()) + " specie " + ((NEATChromosome)this.genBest).getSpecieId());
+		//cat.info("Best Ever Raw:" + (this.discoveredBest.fitness()) + ":from specie:" + ((NEATChromosome)this.discoveredBest).getSpecieId());		
+		//cat.debug("Best of Generation is:" + (this.genBest.fitness()) + " specie " + ((NEATChromosome)this.genBest).getSpecieId());
 		// kill any extinct species
 		if (this.descriptor.keepBestEver()) {
 			champ = (NEATChromosome)this.discoveredBest;
@@ -217,12 +215,12 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 			champ = (NEATChromosome)this.genBest;
 		}
 		this.specieList.removeExtinctSpecies(champ);
-		cat.debug("Creating New Gen");
+		//cat.debug("Creating New Gen");
 		// spawn new pop	
 		this.pop.updatePopulation(this.spawn());
 		// Display specie stats
 		validSpecieList = this.specieList.validSpecieList(champ.getSpecieId());
-		cat.debug("Num species:" + validSpecieList.size());
+		//cat.debug("Num species:" + validSpecieList.size());
 		if (this.descriptor.getCompatabilityChange() > 0) {
 			if (validSpecieList.size() > this.descriptor.getSpecieCount()) {
 				this.descriptor.setThreshold(this.descriptor.getThreshold() + this.descriptor.getCompatabilityChange());
@@ -236,7 +234,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	private void runEle(Chromosome[] currentGen) {
 		if (this.descriptor.isEleEvents()) {
 			if ((this.eleCount % this.descriptor.getEleEventTime()) == 0 && this.eleCount != 0) {
-				cat.info("Runnig ELE");
+				//cat.info("Runnig ELE");
 				this.descriptor.setThreshold(this.descriptor.getThreshold() * 5);
 			} else if ((this.eleCount % this.descriptor.getEleEventTime()) == 1 && this.eleCount != 1) {
 				this.descriptor.setThreshold(this.descriptor.getThreshold() / 5.0);
@@ -272,7 +270,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		for (i = 0; i < species.size(); i++) {
 			specie = (Specie)species.get(i);
 			if (specie.specieMembers().size() == 0) {
-				cat.error("spawn produced error:");
+				System.err.println("spawn produced error:");
 			}
 			// ensure we have enough for next gen
 			if (i == (species.size() - 1)) {
@@ -292,7 +290,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 					}
 				}
 			} else {
-				cat.debug("Specie " + specie.id() + ":size:" + specie.specieMembers().size() + " produced no offspring.  Average fitness was " + specie.averageFitness() + " out of a total fitness of " + this.specieList.totalAvSpeciesFitness());
+				//cat.debug("Specie " + specie.id() + ":size:" + specie.specieMembers().size() + " produced no offspring.  Average fitness was " + specie.averageFitness() + " out of a total fitness of " + this.specieList.totalAvSpeciesFitness());
 				specie.setExtinct();
 			}
 		}
@@ -371,7 +369,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		ObjectOutputStream s = null;
 		try {
 			if (fileName != null) {
-				cat.debug("Saving Population " + fileName);
+				//cat.debug("Saving Population " + fileName);
 				out = new FileOutputStream(fileName);
 				s = new ObjectOutputStream(out);
 				s.writeObject(this.pop);
@@ -390,7 +388,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 			}
 		}
 		
-		cat.debug("Saving Population...Done");
+		//cat.debug("Saving Population...Done");
 	}
 
 	public Population population() {

@@ -8,7 +8,6 @@ package org.neat4j.neat.ga.core;
 
 import java.util.ArrayList;
 
-import org.apache.log4j.Category;
 import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATSpecie;
 
@@ -18,7 +17,6 @@ import org.neat4j.neat.core.NEATSpecie;
  * Generic specie handling
  */
 public class Species {
-	private static final Category cat = Category.getInstance(Species.class);
 	private ArrayList specieList;
 	
 	public Species() {
@@ -106,10 +104,10 @@ public class Species {
 			specie = (Specie)this.specieList.get(i);			
 			if (specie.isExtinct() || specie.specieMembers().size() == 0) {
 				if (!specie.containsMember(champion) && (this.specieList.size() > 1)) {
-					cat.info("Removing specie " + specie.id() + " size:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
+					//cat.info("Removing specie " + specie.id() + " size:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
 					this.specieList.remove(i);
 				} else {
-					cat.info("Specie " + specie.id() + " saved:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
+					//cat.info("Specie " + specie.id() + " saved:" + specie.specieMembers().size() + ":fage:" + specie.getCurrentFitnessAge() + ":age:" + ((NEATSpecie)specie).specieAge() + ":avF:" + specie.averageFitness());
 					specie.reprieve();
 					i++;
 				}

@@ -8,7 +8,6 @@ package org.neat4j.neat.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.apache.log4j.Category;
 
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
