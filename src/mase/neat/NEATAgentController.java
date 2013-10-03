@@ -9,6 +9,7 @@ import org.neat4j.neat.core.NEATNeuralNet;
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.data.csv.CSVInput;
+import org.neat4j.neat.nn.core.NeuralNetFactory;
 
 /**
  *
@@ -35,16 +36,13 @@ public class NEATAgentController implements AgentController {
 
     @Override
     public void reset() {
-        NEATNeuralNet newNet = new NEATNeuralNet();
-        newNet.createNetStructure(network.netDescriptor());
-        newNet.updateNetStructure();
-        this.network = newNet;
+        this.network = (NEATNeuralNet) NeuralNetFactory.getFactory().createNN(network.netDescriptor());
+        this.network.updateNetStructure();
     }
 
     @Override
     public AgentController clone() {
-        NEATNeuralNet newNet = new NEATNeuralNet();
-        newNet.createNetStructure(network.netDescriptor());
+        NEATNeuralNet newNet = (NEATNeuralNet) NeuralNetFactory.getFactory().createNN(network.netDescriptor());
         newNet.updateNetStructure();
         return new NEATAgentController(newNet);
     }
