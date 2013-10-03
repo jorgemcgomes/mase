@@ -81,12 +81,9 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         for (int i = 0; i < pop.subpops.length; i++) {
             for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
                 Individual ind = pop.subpops[i].individuals[j];
-                System.out.println("post processing individual");
-                System.out.println(ind.fitness.trials.size());
                 ExpandedFitness[] trials = Arrays.copyOf(ind.fitness.trials.toArray(), ind.fitness.trials.size(), ExpandedFitness[].class);
                 for (int k = 0; k < trials.length; k++) {
                     trials[k] = (ExpandedFitness) ind.fitness.trials.get(k);
-                    System.out.println(trials[k]);
                 }
                 switch (mergeMode) {
                     case MERGE_MEAN:
@@ -106,7 +103,6 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
 
     @Override
     public void evaluate(EvolutionState state, Individual[] ind, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
-        System.out.println("Evaluating");
         /* Perform simulation */
         AgentController[] acs = new AgentController[ind.length];
         for (int i = 0; i < ind.length; i++) {

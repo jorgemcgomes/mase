@@ -33,7 +33,7 @@ import org.neat4j.neat.ga.core.Species;
  */
 public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	private static final long serialVersionUID = 1L;
-	private static final Category cat = Category.getInstance(NEATGeneticAlgorithm.class);
+	private final Category cat = Category.getInstance(NEATGeneticAlgorithm.class);
 	private NEATGADescriptor descriptor;
 	private NEATMutator mut;
 	private FitnessFunction func;
@@ -43,8 +43,9 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	private Chromosome discoveredBest;
 	private Chromosome genBest;
 	private Species specieList;
-	private static int specieIdIdx = 1;
+	private int specieIdIdx = 1;
 	private int eleCount = 0;
+        private InnovationDatabase innov;
 
 	/**
 	 * Creates a NEAT GA with behaviour defined by the descriptor
@@ -52,8 +53,14 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 	 */
 	public NEATGeneticAlgorithm(NEATGADescriptor descriptor) {
 		this.descriptor = descriptor;
-		this.specieList = new Species();		
+		this.specieList = new Species();	
+                this.innov = new InnovationDatabase();
+
 	}
+        
+        public InnovationDatabase innovationDatabase() {
+            return innov;
+        }
 	
 	public FitnessFunction gaEvaluator() {
 		return (this.func);
@@ -82,7 +89,8 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		int popSize = this.descriptor.gaPopulationSize();
 		int initialChromoSize = this.func.requiredChromosomeSize() + this.descriptor.getExtraFeatureCount();
 		this.pop = new NEATPopulation(popSize, initialChromoSize, this.descriptor.getInputNodes(), this.descriptor.getOutputNodes(), this.descriptor.featureSelectionEnabled(), this.descriptor.getExtraFeatureCount());
-		this.pop.createPopulation();
+		((NEATPopulation) pop).setInnovationDatabase(innov);
+                this.pop.createPopulation();
 	}
 
 	/**
@@ -329,6 +337,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
 		this.mut.setPMutateBias(this.descriptor.getPMutateBias());
 		this.mut.setBiasPerturb(this.descriptor.getMaxBiasPerturb());
 		this.mut.setPerturb(this.descriptor.getMaxPerturb());
+                this.mut.setInnovationDatabase(innov);
 	}
 
 	/**

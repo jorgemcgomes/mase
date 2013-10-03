@@ -27,7 +27,7 @@ import org.neat4j.neat.nn.core.NeuralNetFactory;
  * Mamages the initialisation and creation of a NEAT network
  */
 public class NEATNetManager implements AIController {
-	private static final Category cat = Category.getInstance(NEATNetManager.class);
+	private final Category cat = Category.getInstance(NEATNetManager.class);
 	private NeuralNet net;
 	private AIConfig config;
 

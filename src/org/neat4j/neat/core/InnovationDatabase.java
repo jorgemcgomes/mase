@@ -33,9 +33,8 @@ public class InnovationDatabase implements Serializable {
     private int neuronId = 1;
     public int hits = 0;
     public int misses = 0;
-    private static InnovationDatabase database = new InnovationDatabase();
 
-    private InnovationDatabase() {
+    public InnovationDatabase() {
         this.innovations = new HashMap();
     }
 
@@ -44,21 +43,18 @@ public class InnovationDatabase implements Serializable {
      *
      * @return
      */
-    public static InnovationDatabase database() {
-        return database;
-    }
 
     public static void restoreInnovationDatabase(Object ser) {
-        if (ser instanceof InnovationDatabase) {
+        /*if (ser instanceof InnovationDatabase) {
             database = (InnovationDatabase) ser;
         } else {
             System.err.println("Unnable to restore innovation database. Starting with a new one instead.");
             database = new InnovationDatabase();
-        }
+        }*/
     }
     
     public static void resetInnovationDatabase() {
-        database = new InnovationDatabase();
+        //database = new InnovationDatabase();
     }
 
     private int nextInnovationNumber() {

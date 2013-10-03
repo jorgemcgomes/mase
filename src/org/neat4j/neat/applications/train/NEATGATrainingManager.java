@@ -97,7 +97,8 @@ public class NEATGATrainingManager {
 			}
 			i++;
 		}
-		cat.debug("Innovation Database Stats - Hits:" + InnovationDatabase.database().hits + " - misses:" + InnovationDatabase.database().misses);
+                InnovationDatabase db = ((NEATGeneticAlgorithm) ga).innovationDatabase();
+		cat.debug("Innovation Database Stats - Hits:" + db.hits + " - misses:" + db.misses);
 	}
 	
 	/**

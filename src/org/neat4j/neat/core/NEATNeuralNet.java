@@ -8,8 +8,8 @@ package org.neat4j.neat.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.log4j.Category;
+
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.ga.core.Chromosome;
@@ -32,7 +32,6 @@ import org.neat4j.neat.nn.core.functions.TanhFunction;
 public class NEATNeuralNet implements NeuralNet {
     
         private static final long serialVersionUID = -1L;
-	private static final Category cat = Category.getInstance(NEATNeuralNet.class); 
 	private NEATNetDescriptor descriptor;
 	private Synapse[] connections;
 	private NEATNeuron[] neurons;
@@ -58,7 +57,7 @@ public class NEATNeuralNet implements NeuralNet {
 		// trawl through the graph bacwards from each output node
 		Object[] outputNeurons = this.outputNeurons().toArray();
 		if (outputNeurons.length == 0) {
-			cat.debug("No output neurons");
+			System.err.println("No output neurons");
 		}
 		outputs = new double[outputNeurons.length];
 		

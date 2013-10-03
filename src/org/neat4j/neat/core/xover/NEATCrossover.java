@@ -25,8 +25,8 @@ import org.neat4j.neat.ga.core.CrossOver;
  */
 public class NEATCrossover implements CrossOver {
 	private static final long serialVersionUID = 1L;
-	private static final Category cat = Category.getInstance(NEATCrossover.class);
-	private static final Random rand = new Random();
+	private final Category cat = Category.getInstance(NEATCrossover.class);
+	private final Random rand = new Random();
 	private double pXOver;
 	
 	public void setProbability(double prob) {

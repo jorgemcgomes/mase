@@ -59,8 +59,8 @@ public class Keepaway extends MaseSimState {
         Double2D up = new Double2D(0, par.ringSize / 2);
         double rot = Math.PI * 2 / par.numKeepers;
         for(int i = 0 ; i < par.numKeepers ; i++) {
-            acs[i].reset();
-            Keeper k = new Keeper(this, field, acs[i], par.passSpeed[i], par.moveSpeed[i], par.color[i]);
+            //acs[i].reset();
+            Keeper k = new Keeper(this, field, acs[i].clone(), par.passSpeed[i], par.moveSpeed[i], par.color[i]);
             Double2D v = up.rotate(rot * i);
             k.setLocation(v.add(center));
             k.setDirection(v.negate());

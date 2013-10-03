@@ -24,7 +24,7 @@ import org.neat4j.neat.ga.core.Specie;
  */
 public class NEATSpecie extends Specie {
 
-    private static final Category cat = Category.getInstance(NEATSpecie.class);
+    private final Category cat = Category.getInstance(NEATSpecie.class);
     private double excessCoeff;
     private double disjointCoeff;
     private double weightCoeff;
