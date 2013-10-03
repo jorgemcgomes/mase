@@ -81,8 +81,7 @@ public class PredatorPrey extends MaseSimState  {
         AgentController[] controllers = gc.getAgentControllers(par.nPredators);
         for (int i = 0; i < par.nPredators; i++) {
             double x = startX + i * par.predatorSeparation;
-            controllers[i].reset();
-            Predator newPred = newPredator(controllers[i]);
+            Predator newPred = newPredator(controllers[i].clone());
             newPred.setLocation(new Double2D(x, y));
             newPred.setStopper(schedule.scheduleRepeating(newPred));
             predators.add(newPred);

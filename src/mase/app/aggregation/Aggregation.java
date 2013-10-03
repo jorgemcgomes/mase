@@ -51,8 +51,7 @@ public class Aggregation extends MaseSimState {
         agents = new ArrayList<AggregationAgent>(par.numAgents);
         AgentController[] acs = gc.getAgentControllers(par.numAgents);
         for (int i = 0; i < par.numAgents; i++) {
-            acs[i].reset();
-            AggregationAgent ag = new AggregationAgent(this, field, acs[i]);
+            AggregationAgent ag = new AggregationAgent(this, field, acs[i].clone());
             Double2D p;
             double margin = par.wallRadius + AggregationAgent.RADIUS + 1;
             do {

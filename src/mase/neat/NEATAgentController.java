@@ -35,7 +35,10 @@ public class NEATAgentController implements AgentController {
 
     @Override
     public void reset() {
-        network.updateNetStructure();
+        NEATNeuralNet newNet = new NEATNeuralNet();
+        newNet.createNetStructure(network.netDescriptor());
+        newNet.updateNetStructure();
+        this.network = newNet;
     }
 
     @Override
