@@ -14,11 +14,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import mase.EvaluationResult;
 import mase.ExpandedFitness;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
-import mase.evaluation.AgentEvaluationResult;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -31,6 +32,8 @@ public class SCStat extends Statistics {
     public static final String P_STATES_FILE = "states-file";
     private int genLog, statesLog;
     private SCPostEvaluator sc;
+    protected Map<Integer, byte[]> globalKey;
+    protected Map<Integer, Float> globalCount;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -55,6 +58,9 @@ public class SCStat extends Statistics {
         if (sc == null) {
             state.output.fatal("No StateCountPostEvaluator to log.");
         }
+
+        this.globalKey = new HashMap<Integer, byte[]>(1000);
+        this.globalCount = new HashMap<Integer, Float>(1000);
     }
 
     @Override
@@ -73,44 +79,50 @@ public class SCStat extends Statistics {
                         for (Float f : r.counts.values()) {
                             countDS.addValue(f);
                         }
-                    } 
-                    /*else if (er instanceof AgentEvaluationResult) {
-                        EvaluationResult[] ers = ((AgentEvaluationResult) er).getAllEvaluations();
-                        for (EvaluationResult suber : ers) {
-                            if (suber instanceof SCResult) {
-                                SCResult r = (SCResult) suber;
-                                filterDS.addValue((double) r.removedByFilter / (r.removedByFilter + r.counts.size()));
-                                sizeDS.addValue(r.counts.size());
-                                for (Float f : r.counts.values()) {
-                                    countDS.addValue(f);
-                                }
+                        for (Map.Entry<Integer, byte[]> e : r.getStates().entrySet()) {
+                            if (!globalKey.containsKey(e.getKey())) {
+                                globalKey.put(e.getKey(), e.getValue());
                             }
                         }
-                    }*/
+                        SCPostEvaluator.mergeCountMap(globalCount, r.getCounts());
+                    }
                 }
             }
         }
-        state.output.println(state.generation + " " + sc.globalCount.size() + " "
+        state.output.println(state.generation + " " + globalCount.size() + " "
                 + sizeDS.getMin() + " " + sizeDS.getMean() + " " + sizeDS.getMax() + " "
                 + filterDS.getMin() + " " + filterDS.getMean() + " " + filterDS.getMax() + " "
                 + countDS.getMin() + " " + countDS.getMean() + " " + countDS.getMax() + " " + countDS.getSkewness(), genLog);
     }
+    /*else if (er instanceof AgentEvaluationResult) {
+     EvaluationResult[] ers = ((AgentEvaluationResult) er).getAllEvaluations();
+     for (EvaluationResult suber : ers) {
+     if (suber instanceof SCResult) {
+     SCResult r = (SCResult) suber;
+     filterDS.addValue((double) r.removedByFilter / (r.removedByFilter + r.counts.size()));
+     sizeDS.addValue(r.counts.size());
+     for (Float f : r.counts.values()) {
+     countDS.addValue(f);
+     }
+     }
+     }
+     }*/
 
     @Override
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
         // Sort by frequency
-        ArrayList<Integer> hashes = new ArrayList<Integer>(sc.globalKey.keySet());
+        ArrayList<Integer> hashes = new ArrayList<Integer>(globalKey.keySet());
         Collections.sort(hashes, new Comparator<Integer>() {
             @Override
             public int compare(Integer h1, Integer h2) {
-                return Float.compare(sc.globalCount.get(h2), sc.globalCount.get(h1));
+                return Float.compare(globalCount.get(h2), globalCount.get(h1));
             }
         });
         // Print visited states
         for (Integer h : hashes) {
-            state.output.print(h + " " + sc.globalCount.get(h), statesLog);
-            for (byte b : sc.globalKey.get(h)) {
+            state.output.print(h + " " + globalCount.get(h), statesLog);
+            for (byte b : globalKey.get(h)) {
                 state.output.print(" " + b, statesLog);
             }
             state.output.print("\n", statesLog);

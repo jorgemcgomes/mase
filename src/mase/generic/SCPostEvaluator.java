@@ -8,8 +8,6 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +29,6 @@ public class SCPostEvaluator implements PostEvaluator {
     protected double filter;
     protected boolean doFilter;
     protected boolean doTfIdf;
-    protected Map<Integer, byte[]> globalKey;
-    protected Map<Integer, Float> globalCount; // TODO: se isto nao for usado aqui, passar para o Stat
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -40,8 +36,6 @@ public class SCPostEvaluator implements PostEvaluator {
         this.filter = state.parameters.getDouble(base.push(P_FILTER), df.push(P_FILTER));
         this.doFilter = state.parameters.getBoolean(base.push(P_DO_FILTER), df.push(P_DO_FILTER), false);
         this.doTfIdf = state.parameters.getBoolean(base.push(P_DO_TFIDF), df.push(P_DO_TFIDF), false);
-        this.globalKey = new HashMap<Integer, byte[]>(1000);
-        this.globalCount = new HashMap<Integer, Float>(1000);
     }
 
     @Override
@@ -50,25 +44,13 @@ public class SCPostEvaluator implements PostEvaluator {
             for (Individual ind : sub.individuals) {
                 for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
                     if (er instanceof SCResult) {
-                        processResult((SCResult) er);
+                        if (doFilter) {
+                            filter((SCResult) er);
+                        }
                     }
                 }
             }
         }
-    }
-
-    protected void processResult(SCResult res) {
-        if (doFilter) {
-            filter(res);
-        }
-        // if it contains new states, add them to globalKey
-        for (Entry<Integer, byte[]> e : res.getStates().entrySet()) {
-            if (!globalKey.containsKey(e.getKey())) {
-                globalKey.put(e.getKey(), e.getValue());
-            }
-        }
-        res.getStates().clear(); // res key is no longer necessary
-        mergeCountMap(globalCount, res.getCounts());
     }
 
     protected void filter(SCResult res) {
@@ -79,18 +61,18 @@ public class SCPostEvaluator implements PostEvaluator {
             total += f;
         }
         double threshold = total * filter;
-        
+
         List<Integer> toRemove = new LinkedList<Integer>();
         Entry<Integer, Float> highestCount = null;
-        for(Entry<Integer, Float> e : res.getCounts().entrySet()) {
-            if(e.getValue() < threshold) {
+        for (Entry<Integer, Float> e : res.getCounts().entrySet()) {
+            if (e.getValue() < threshold) {
                 toRemove.add(e.getKey());
             }
-            if(highestCount == null || e.getValue() > highestCount.getValue()) {
+            if (highestCount == null || e.getValue() > highestCount.getValue()) {
                 highestCount = e;
             }
         }
-        if(toRemove.size() < res.getCounts().size()) {
+        if (toRemove.size() < res.getCounts().size()) {
             res.getCounts().keySet().removeAll(toRemove);
             res.getStates().keySet().removeAll(toRemove);
         } else { // retain only the element with highest count
@@ -100,7 +82,7 @@ public class SCPostEvaluator implements PostEvaluator {
             res.getStates().clear();
             res.getStates().put(highestCount.getKey(), state);
         }
-        
+
         res.removedByFilter = numStates - res.getCounts().size();
     }
 
