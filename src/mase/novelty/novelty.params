@@ -1,13 +1,14 @@
+# This is directly compatible with homogeneous.params (+coevolution.params) and neat.params
+
 eval.num-post = 1
 eval.post.0 =                          mase.novelty.NoveltyEvaluation
 eval.post.0.ns-k =                     15
 eval.post.0.ns-archive-prob =          0.01
 eval.post.0.ns-archive-size =          1000
 
-stat.num-children = 		       8
-stat.child.6 =                         mase.novelty.NoveltyPopStat
-stat.child.6.file =		       $noveltypop.stat
-stat.child.7 =                         mase.novelty.NoveltyIndividualsStat
-stat.child.7.file =		       $noveltyind.stat
+stat.child.10 =                        mase.novelty.NoveltyPopStat
+stat.child.10.file =		       $noveltypop.stat
+stat.child.11 =                        mase.novelty.NoveltyIndividualsStat
+stat.child.11.file =		       $noveltyind.stat
 
 pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness

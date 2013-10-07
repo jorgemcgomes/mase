@@ -63,7 +63,7 @@ public class NEATStatistics extends Statistics {
             avgDescr[0] /= state.population.subpops[i].individuals.length;
             avgDescr[1] /= state.population.subpops[i].individuals.length;
             avgDescr[2] /= state.population.subpops[i].individuals.length;
-            state.output.print(" " + avgDescr[0] + " " + avgDescr[1] + " " + avgDescr[2] +
+            state.output.print(" " + avgDescr[0] + " " + avgDescr[1] + " " + avgDescr[2] + " " +
                     bestDescr[0] + " " + bestDescr[1] + " " + bestDescr[2], log);
         }
         state.output.println("", log);

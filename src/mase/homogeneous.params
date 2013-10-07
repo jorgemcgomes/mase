@@ -1,9 +1,4 @@
-# ECJ options
-evalthreads =   			auto
-breedthreads = 				auto
-checkpoint =				false
-checkpoint-modulo =                     1
-checkpoint-prefix = 			ec
+parent.0=base.params
 
 # Generational configuration
 state = 				ec.simple.SimpleEvolutionState
@@ -46,8 +41,6 @@ vector.species.mutation-bounded =       TRUE
 select.tournament.size =                5
 
 # Statistics
-stat =                                  mase.stat.ConsoleStat
-stat.num-children = 			6
 stat.child.0 = 				ec.simple.SimpleShortStatistics
 stat.child.0.file =			$extended.stat
 stat.child.0.do-time =                  true

@@ -1,3 +1,13 @@
+setwd("~/exps")
+par <- list(fitlim=c(0,60), jobs=10, load.behavs=F, subpops=3)
+data <- metaLoadData("kw_fit_neat","kw_ts_neat","kw_fit_ga","kw_ts_ga", params=par)
+fullStatistics(data, expset.name="kw.hom", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)))
+
+
+
+
+
+
 setwd("~/Dropbox/exps_AAMAS/")
 
 par <- list(fitlim=c(0,2), jobs=20, load.behavs=T, subpops=3, behavs.sample=0.25, vars.group=c("g.captured","g.time","g.finaldist","g.dispersion"), vars.ind=c("i.captured","i.preydist","i.movement","i.partnerdist"))
