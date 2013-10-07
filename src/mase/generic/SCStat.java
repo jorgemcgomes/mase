@@ -25,17 +25,18 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  * @author jorge
  */
-public class StateCountStat extends Statistics {
+public class SCStat extends Statistics {
 
     public static final String P_LOG_FILE = "log-file";
     public static final String P_STATES_FILE = "states-file";
     private int genLog, statesLog;
-    private StateCountPostEvaluator sc;
+    private SCPostEvaluator sc;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
+        System.out.println("");
         super.setup(state, base);
-        Parameter df = new Parameter(StateCountPostEvaluator.P_STATECOUNT_BASE);
+        Parameter df = new Parameter(SCPostEvaluator.P_STATECOUNT_BASE);
         File logFile = state.parameters.getFile(base.push(P_LOG_FILE), df.push(P_LOG_FILE));
         File statesFile = state.parameters.getFile(base.push(P_STATES_FILE), df.push(P_STATES_FILE));
         try {
@@ -46,8 +47,8 @@ public class StateCountStat extends Statistics {
         }
         PostEvaluator[] postEvals = ((MetaEvaluator) state.evaluator).getPostEvaluators();
         for (PostEvaluator pe : postEvals) {
-            if (pe instanceof StateCountPostEvaluator) {
-                sc = (StateCountPostEvaluator) pe;
+            if (pe instanceof SCPostEvaluator) {
+                sc = (SCPostEvaluator) pe;
                 break;
             }
         }
@@ -65,18 +66,19 @@ public class StateCountStat extends Statistics {
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
-                    if (er instanceof StateCountResult) {
-                        StateCountResult r = (StateCountResult) er;
-                        filterDS.addValue(r.removedByFilter / (r.removedByFilter + r.counts.size()));
+                    if (er instanceof SCResult) {
+                        SCResult r = (SCResult) er;
+                        filterDS.addValue(r.removedByFilter / (double) (r.removedByFilter + r.counts.size()));
                         sizeDS.addValue(r.counts.size());
                         for (Float f : r.counts.values()) {
                             countDS.addValue(f);
                         }
-                    } else if (er instanceof AgentEvaluationResult) {
+                    } 
+                    /*else if (er instanceof AgentEvaluationResult) {
                         EvaluationResult[] ers = ((AgentEvaluationResult) er).getAllEvaluations();
                         for (EvaluationResult suber : ers) {
-                            if (suber instanceof StateCountResult) {
-                                StateCountResult r = (StateCountResult) suber;
+                            if (suber instanceof SCResult) {
+                                SCResult r = (SCResult) suber;
                                 filterDS.addValue((double) r.removedByFilter / (r.removedByFilter + r.counts.size()));
                                 sizeDS.addValue(r.counts.size());
                                 for (Float f : r.counts.values()) {
@@ -84,14 +86,14 @@ public class StateCountStat extends Statistics {
                                 }
                             }
                         }
-                    }
+                    }*/
                 }
             }
         }
         state.output.println(state.generation + " " + sc.globalCount.size() + " "
                 + sizeDS.getMin() + " " + sizeDS.getMean() + " " + sizeDS.getMax() + " "
                 + filterDS.getMin() + " " + filterDS.getMean() + " " + filterDS.getMax() + " "
-                + countDS.getMax() + " " + countDS.getMean() + " " + countDS.getMin() + " " + countDS.getSkewness(), genLog);
+                + countDS.getMin() + " " + countDS.getMean() + " " + countDS.getMax() + " " + countDS.getSkewness(), genLog);
     }
 
     @Override

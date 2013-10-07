@@ -1,15 +1,18 @@
 eval.num-post =                         1
-eval.post.0 =                           mase.generic.StateCountPostEvaluator
-statecount.filter-threshold =           0.05
-statecount.do-cluster =                 FALSE
-statecount.do-filter =                  TRUE
+eval.post.0 =                           mase.generic.SCPostEvaluator
+statecount.filter-threshold =          0.01
+statecount.do-filter =                 TRUE
 
-problem.number-evals =                  1
-problem.eval.0 =                        mase.generic.CombinedStateCountFunction
+#problem.number-evals =                  1
+#problem.eval.0 =                        mase.generic.SCEvaluator
+
 statecount.discretisation =             3
 statecount.update-freq =                5
+statecount.distance =                   cosine
 
-stat.num-children = 		        7
-stat.child.6 =                          mase.generic.StateCountStat
-statecount.log-file =                   $genericlog.stat
-statecount.states-file =                $genericstates.stat
+# by default do not save all individuals
+stat.child.3.do-behaviours =            false
+
+stat.child.15 =                         mase.generic.SCStat
+stat.child.15.log-file =                $genericlog.stat
+stat.child.15.states-file =             $genericstates.stat

@@ -8,6 +8,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.HashMap;
 import java.util.List;
+import mase.generic.SCResult.Distance;
 import mase.mason.MaseSimState;
 import mase.mason.MasonEvaluation;
 import mase.mason.SmartAgent;
@@ -16,34 +17,40 @@ import mase.mason.SmartAgent;
  *
  * @author jorge
  */
-public class CombinedStateCountFunction extends MasonEvaluation {
+public class SCEvaluator extends MasonEvaluation {
 
     public static final String P_DISCRETIZATION = "discretisation";
     public static final String P_DISTANCE = "distance";
     public static final String V_BRAY_CURTIS = "bray-curtis", V_COSINE = "cosine";
     private int bins;
-    private String distance;
+    private Distance distance;
     private HashMap<Integer, byte[]> key;
     private HashMap<Integer, Float> count;
-    private StateCountResult res;
+    private SCResult res;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        Parameter df = new Parameter(StateCountPostEvaluator.P_STATECOUNT_BASE);
+        Parameter df = defaultBase();
         this.bins = state.parameters.getInt(base.push(P_DISCRETIZATION), df.push(P_DISCRETIZATION));
-        String d = state.parameters.getString(base.push(P_DISTANCE), df.push(P_DISTANCE));
-        if (d.equalsIgnoreCase(V_BRAY_CURTIS)) {
-            distance = V_BRAY_CURTIS;
-        } else if (d.equalsIgnoreCase(V_COSINE)) {
-            distance = V_COSINE;
-        } else {
+        String dist = state.parameters.getString(base.push(P_DISTANCE), df.push(P_DISTANCE));
+        for(Distance d : SCResult.Distance.values()) {
+            if(dist.equalsIgnoreCase(d.toString())) {
+                distance = d;
+            }
+        }
+        if(distance == null) {
             state.output.fatal("Unknown distance measure.", base.push(P_DISTANCE));
         }
     }
 
     @Override
-    public StateCountResult getResult() {
+    public Parameter defaultBase() {
+        return new Parameter(SCPostEvaluator.P_STATECOUNT_BASE);
+    }
+
+    @Override
+    public SCResult getResult() {
         return res;
     }
 
@@ -73,11 +80,7 @@ public class CombinedStateCountFunction extends MasonEvaluation {
 
     @Override
     protected void postSimulation() {
-        if (distance == V_BRAY_CURTIS) {
-            res = new StateCountResultBrayCurtis(count, key);
-        } else if (distance == V_COSINE) {
-            res = new StateCountResult(count, key);
-        }
+        res = new SCResult(count, key, distance);
     }
 
     protected byte[] discretise(double[] sensors, double[] actions) {

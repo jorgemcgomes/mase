@@ -12,31 +12,47 @@ import java.util.Map.Entry;
 import java.util.Set;
 import mase.EvaluationResult;
 import mase.evaluation.BehaviourResult;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
 /**
  *
  * @author jorge
  */
-public class StateCountResult implements BehaviourResult {
+public class SCResult implements BehaviourResult {
 
+    public enum Distance {
+
+        COSINE, BRAY_CURTIS
+    };
     protected Map<Integer, Float> counts;
     protected Map<Integer, byte[]> states;
-    protected double[] clusteredStateCount;
     protected int removedByFilter;
+    protected Distance dist;
+    private ArrayRealVector clustered;
 
-    public StateCountResult(Map<Integer, Float> counts, Map<Integer, byte[]> states) {
+    public SCResult(Map<Integer, Float> counts, Map<Integer, byte[]> states, Distance dist) {
         this.counts = counts;
         this.states = states;
         this.removedByFilter = 0;
+        this.dist = dist;
     }
 
     @Override
     public Object value() {
-        if (clusteredStateCount == null) {
-            throw new RuntimeException("The characterisation vector has not been set yet.");
+        if (clustered != null) {
+            return clustered;
+        } else {
+            return Pair.of(counts, states);
         }
-        return clusteredStateCount;
+    }
+
+    protected void setClustered(ArrayRealVector cl) {
+        this.clustered = cl;
+    }
+
+    protected ArrayRealVector getClustered() {
+        return clustered;
     }
 
     @Override
@@ -44,19 +60,18 @@ public class StateCountResult implements BehaviourResult {
         Map<Integer, Float> mergedCounts = new HashMap<Integer, Float>();
         Map<Integer, byte[]> mergedStates = new HashMap<Integer, byte[]>();
         for (EvaluationResult er : results) {
-            StateCountPostEvaluator.mergeCountMap(mergedCounts, ((StateCountResult) er).getCounts());
-            mergedStates.putAll(((StateCountResult) er).getStates());
+            SCPostEvaluator.mergeCountMap(mergedCounts, ((SCResult) er).getCounts());
+            mergedStates.putAll(((SCResult) er).getStates());
         }
-        return new StateCountResult(mergedCounts, mergedStates);
+        return new SCResult(mergedCounts, mergedStates, dist);
     }
 
     @Override
     public float distanceTo(BehaviourResult br) {
-        StateCountResult other = (StateCountResult) br;
-        ArrayRealVector v1 = null;
-        ArrayRealVector v2 = null;
-        if (clusteredStateCount == null) {
-            // make the vectors
+        ArrayRealVector v1, v2;
+        if (clustered == null) {
+            SCResult other = (SCResult) br;
+            // make the counts vectors -- aligned by the same states
             Set<Integer> shared = new HashSet<Integer>(this.counts.keySet());
             shared.retainAll(other.counts.keySet());
             int size = this.counts.size() + other.counts.size() - shared.size();
@@ -64,30 +79,44 @@ public class StateCountResult implements BehaviourResult {
             v2 = new ArrayRealVector(size);
             int index = 0;
             // shared elements
-            for(Integer h : shared) {
+            for (Integer h : shared) {
                 v1.setEntry(index, this.counts.get(h));
                 v2.setEntry(index, other.counts.get(h));
                 index++;
             }
             // only elements from this
-            for(Integer h : this.counts.keySet()) {
-                if(!shared.contains(h)) {
+            for (Integer h : this.counts.keySet()) {
+                if (!shared.contains(h)) {
                     v1.setEntry(index++, this.counts.get(h));
                 }
             }
             // only elements from other
-            for(Integer h : other.counts.keySet()) {
-                if(!shared.contains(h)) {
+            for (Integer h : other.counts.keySet()) {
+                if (!shared.contains(h)) {
                     v2.setEntry(index++, other.counts.get(h));
                 }
             }
         } else {
-            // vectors were already set, good to go
-            v1 = new ArrayRealVector(this.clusteredStateCount);
-            v2 = new ArrayRealVector(other.clusteredStateCount);
+            v1 = this.clustered;
+            v2 = ((SCResult) br).clustered;
         }
-        // cosine similarity
-        return (float) (1 - v1.cosine(v2));
+        return vectorDistance(v1, v2);
+    }
+
+    protected float vectorDistance(ArrayRealVector v1, ArrayRealVector v2) {
+        switch (dist) {
+            case BRAY_CURTIS:
+                float diffs = 0;
+                float total = 0;
+                for (int i = 0; i < v1.getDimension(); i++) {
+                    diffs += Math.abs(v1.getEntry(i) - v2.getEntry(i));
+                    total += v1.getEntry(i) + v2.getEntry(i);
+                }
+                return diffs / total;
+            default:
+            case COSINE:
+                return (float) (1 - v1.cosine(v2));
+        }
     }
 
     @Override
@@ -111,17 +140,5 @@ public class StateCountResult implements BehaviourResult {
 
     public Map<Integer, byte[]> getStates() {
         return states;
-    }
-
-    public void setClusteredStateCount(double[] vector) {
-        this.clusteredStateCount = vector;
-    }
-
-    public double[] getClusteredStateCount() {
-        return clusteredStateCount;
-    }
-
-    public void clearStates() {
-        this.states = null;
     }
 }
