@@ -1,0 +1,8 @@
+parent.0=genericnovelty.params
+
+eval.post.0 =                           mase.generic.ClusterSCPostEvaluator
+statecount.k-clusters =                 20
+
+stat.child.16 =                         mase.generic.ClusterSCStat
+stat.child.16.gen-clusters =            $genclusters.stat
+stat.child.16.final-clusters =          $finalclusters.stat

@@ -1,8 +1,10 @@
 setwd("~/exps")
-par <- list(fitlim=c(0,60), jobs=10, load.behavs=F, subpops=3)
-data <- metaLoadData("kw_fit_neat","kw_ts_neat","kw_fit_ga","kw_ts_ga", params=par)
+par <- list(fitlim=c(0,20), jobs=10, load.behavs=F, subpops=3)
+data <- metaLoadData("kw_fit_neat","kw_ts_neat","kw_ts75_neat","kw_gen_neat","kw_gen75_neat","kw_fit_ga","kw_ts_ga","kw_ts75_ga","kw_gen_ga","kw_gen75_ga", params=par)
 fullStatistics(data, expset.name="kw.hom", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)))
 
+data <- metaLoadData("kw_gen_neat","kw_cl5_neat","kw_cl10_neat","kw_cl20_neat","kw_cl50_neat","kw_cl100_neat","kw_cl500_neat", params=par)
+fullStatistics(data, expset.name="kw.gen", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)))
 
 
 

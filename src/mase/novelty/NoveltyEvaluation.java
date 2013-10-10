@@ -48,30 +48,28 @@ public class NoveltyEvaluation implements PostEvaluator {
         } else {
             state.output.fatal("Unknown archive mode", base.push(P_ARCHIVE_MODE));
         }
+        
+        int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this must be more flexible
+        this.archives = new ArrayList<List<BehaviourResult>>(nPops);
+        if (archiveMode == V_NONE) {
+            for (int i = 0; i < nPops; i++) {
+                archives.add(Collections.EMPTY_LIST);
+            }
+        } else if (archiveMode == V_SHARED) {
+            ArrayList<BehaviourResult> arch = new ArrayList<BehaviourResult>(sizeLimit);
+            for (int i = 0; i < nPops; i++) {
+                archives.add(arch);
+            }
+        } else if (archiveMode == V_MULTIPLE) {
+            for (int i = 0; i < nPops; i++) {
+                this.archives.add(new ArrayList<BehaviourResult>(sizeLimit));
+            }
+            this.addProb = this.addProb * nPops;
+        }
     }
 
     @Override
     public void processPopulation(EvolutionState state) {
-        if (archives == null) {
-            int nPops = state.population.subpops.length;
-            this.archives = new ArrayList<List<BehaviourResult>>(nPops);
-            if (archiveMode == V_NONE) {
-                for (int i = 0; i < nPops; i++) {
-                    archives.add(Collections.EMPTY_LIST);
-                }
-            } else if (archiveMode == V_SHARED) {
-                ArrayList<BehaviourResult> arch = new ArrayList<BehaviourResult>(sizeLimit);
-                for (int i = 0; i < nPops; i++) {
-                    archives.add(arch);
-                }
-            } else if (archiveMode == V_MULTIPLE) {
-                for (int i = 0; i < nPops; i++) {
-                    this.archives.add(new ArrayList<BehaviourResult>(sizeLimit));
-                }
-                this.addProb = this.addProb * nPops;
-            }
-        }
-
         // calculate novelty
         setNoveltyScores(state, state.population);
         // update archive
@@ -149,5 +147,9 @@ public class NoveltyEvaluation implements PostEvaluator {
                 }
             }
         }
+    }
+
+    public List<List<BehaviourResult>> getArchives() {
+        return archives;
     }
 }

@@ -130,7 +130,7 @@ defaultCall <- function(file=NULL, outBase=OUTPUT_BASE, out=NULL, params=list(),
         cat("\n*************************************************************************************\n")
         cat(out, " already exists!\n")
         cat("*************************************************************************************\n")
-        for(i in 10:1) {
+        for(i in 3:1) {
             cat(i, "...\n")
             Sys.sleep(1)
         }
