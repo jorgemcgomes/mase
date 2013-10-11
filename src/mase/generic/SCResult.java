@@ -12,47 +12,34 @@ import java.util.Map.Entry;
 import java.util.Set;
 import mase.EvaluationResult;
 import mase.evaluation.BehaviourResult;
+import mase.evaluation.VectorBehaviourResult;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.linear.ArrayRealVector;
 
 /**
  *
  * @author jorge
  */
-public class SCResult implements BehaviourResult {
+public class SCResult extends VectorBehaviourResult {
 
-    public enum Distance {
-
-        COSINE, BRAY_CURTIS
-    };
     protected Map<Integer, Float> counts;
     protected Map<Integer, byte[]> states;
     protected int removedByFilter;
-    protected Distance dist;
-    private ArrayRealVector clustered;
 
     public SCResult(Map<Integer, Float> counts, Map<Integer, byte[]> states, Distance dist) {
         this.counts = counts;
         this.states = states;
         this.removedByFilter = 0;
         this.dist = dist;
+        this.behaviour = null;
     }
 
     @Override
     public Object value() {
-        if (clustered != null) {
-            return clustered;
+        if (behaviour != null) {
+            return super.value();
         } else {
             return Pair.of(counts, states);
         }
-    }
-
-    protected void setClustered(ArrayRealVector cl) {
-        this.clustered = cl;
-    }
-
-    protected ArrayRealVector getClustered() {
-        return clustered;
     }
 
     @Override
@@ -68,56 +55,40 @@ public class SCResult implements BehaviourResult {
 
     @Override
     public float distanceTo(BehaviourResult br) {
-        ArrayRealVector v1, v2;
-        if (clustered == null) {
+        if (behaviour == null) {
             SCResult other = (SCResult) br;
             // make the counts vectors -- aligned by the same states
             Set<Integer> shared = new HashSet<Integer>(this.counts.keySet());
             shared.retainAll(other.counts.keySet());
             int size = this.counts.size() + other.counts.size() - shared.size();
-            v1 = new ArrayRealVector(size);
-            v2 = new ArrayRealVector(size);
+            float[] v1 = new float[size];
+            float[] v2 = new float[size];
             int index = 0;
             // shared elements
             for (Integer h : shared) {
-                v1.setEntry(index, this.counts.get(h));
-                v2.setEntry(index, other.counts.get(h));
+                v1[index] = this.counts.get(h);
+                v2[index] = other.counts.get(h);
                 index++;
             }
             // only elements from this
             for (Integer h : this.counts.keySet()) {
                 if (!shared.contains(h)) {
-                    v1.setEntry(index++, this.counts.get(h));
+                    v1[index] = this.counts.get(h);
                 }
             }
             // only elements from other
             for (Integer h : other.counts.keySet()) {
                 if (!shared.contains(h)) {
-                    v2.setEntry(index++, other.counts.get(h));
+                    v2[index] = other.counts.get(h);
                 }
             }
+            return super.vectorDistance(v1, v2);
         } else {
-            v1 = this.clustered;
-            v2 = ((SCResult) br).clustered;
+            return super.distanceTo(br);
         }
-        return vectorDistance(v1, v2);
     }
 
-    protected float vectorDistance(ArrayRealVector v1, ArrayRealVector v2) {
-        switch (dist) {
-            case BRAY_CURTIS:
-                float diffs = 0;
-                float total = 0;
-                for (int i = 0; i < v1.getDimension(); i++) {
-                    diffs += Math.abs(v1.getEntry(i) - v2.getEntry(i));
-                    total += v1.getEntry(i) + v2.getEntry(i);
-                }
-                return diffs / total;
-            default:
-            case COSINE:
-                return (float) (1 - v1.cosine(v2));
-        }
-    }
+
 
     @Override
     public String toString() {

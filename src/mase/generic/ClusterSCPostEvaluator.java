@@ -21,7 +21,6 @@ import mase.PostEvaluator;
 import mase.evaluation.BehaviourResult;
 import static mase.generic.SCPostEvaluator.mergeCountMap;
 import mase.novelty.NoveltyEvaluation;
-import org.apache.commons.math3.linear.ArrayRealVector;
 
 /**
  *
@@ -36,6 +35,8 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     protected Map<Integer, Integer> assignements;
     protected Map<Integer, byte[]> buffer;
     protected Map<Integer, Float> bufferCount;
+    protected List<BehaviourResult> archive;
+    //protected KDTree clusterTree;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -50,7 +51,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     @Override
     public void processPopulation(EvolutionState state) {
         super.processPopulation(state); // filter
-        
+
         HashMap<Integer, byte[]> genKey = new HashMap<Integer, byte[]>(1000);
 
         // Integrate the information from the evaluations of this generation
@@ -87,16 +88,16 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                 }
             }
         }
-
     }
 
     protected void computeClusteredCount(SCResult scr) {
-        double[] clusterCount = new double[clusters.length];
+        float[] clusterCount = new float[clusters.length];
+        Arrays.fill(clusterCount, 0);
         for (Entry<Integer, Float> e : scr.getCounts().entrySet()) {
             int clusterIndex = assignements.get(e.getKey());
             clusterCount[clusterIndex] += e.getValue();
         }
-        scr.setClustered(new ArrayRealVector(clusterCount));
+        scr.setBehaviour(clusterCount);
     }
 
     // TODO: replace with space partitioning tree
@@ -127,17 +128,18 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         if (clusters == null) {
             initializeClusters(state);
         }
+        assignements.clear();
+
         // do the incremental update
         for (Integer key : buffer.keySet()) {
             int cluster = closestCluster(buffer.get(key));
             updateCluster(cluster, buffer.get(key), bufferCount.get(key));
-            // TODO make the assignement of key to cluster ??
+            // TODO make the assignement of key to cluster?
         }
 
         // clear the structures
         buffer.clear();
         bufferCount.clear();
-        assignements.clear();
 
         // update individuals in novelty archive with the new clustering
         updateNoveltyArchive(state);
@@ -177,26 +179,32 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             //System.out.println(Arrays.toString(cl));
             clusters[clusterIndex++] = cl;
         }
+        /*clusterTree = new KDTree(clusters[0].length);
+        for(int i = 0 ; i < numClusters ; i++) {
+            clusterTree.insert(clusters[i], i);
+        }*/
     }
 
     protected void updateNoveltyArchive(EvolutionState state) {
-        PostEvaluator[] evals = ((MetaEvaluator) state.evaluator).getPostEvaluators();
-        for (PostEvaluator pe : evals) {
-            if (pe instanceof NoveltyEvaluation) {
-                NoveltyEvaluation ne = (NoveltyEvaluation) pe;
-                List<BehaviourResult> res = ne.getArchives().get(0); // TODO: only supports team-level evaluations
-                for (BehaviourResult br : res) {
-                    SCResult scr = (SCResult) br;
-                    // make the cluster assignements
-                    for (Entry<Integer, byte[]> e : scr.getStates().entrySet()) {
-                        if (!assignements.containsKey(e.getKey())) {
-                            assignements.put(e.getKey(), closestCluster(e.getValue()));
-                        }
-                    }
-                    // make cluster vector
-                    computeClusteredCount(scr);
+        if (archive == null) {
+            PostEvaluator[] evals = ((MetaEvaluator) state.evaluator).getPostEvaluators();
+            for (PostEvaluator pe : evals) {
+                if (pe instanceof NoveltyEvaluation) {
+                    NoveltyEvaluation ne = (NoveltyEvaluation) pe;
+                    archive = ne.getArchives().get(0);
                 }
             }
+        }
+        for (BehaviourResult br : archive) {
+            SCResult scr = (SCResult) br;
+            // make the cluster assignements
+            for (Entry<Integer, byte[]> e : scr.getStates().entrySet()) {
+                if (!assignements.containsKey(e.getKey())) {
+                    assignements.put(e.getKey(), closestCluster(e.getValue()));
+                }
+            }
+            // make cluster vector
+            computeClusteredCount(scr);
         }
     }
 }

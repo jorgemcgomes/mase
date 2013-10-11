@@ -1,0 +1,44 @@
+eval.num-post = 3
+
+eval.post.0 =                           mase.generic.ClusterSCPostEvaluator
+statecount.k-clusters =                 20
+statecount.filter-threshold =          0.01
+statecount.do-filter =                 TRUE
+statecount.discretisation =             3
+statecount.update-freq =                5
+statecount.distance =                   euclidean
+
+eval.post.1 =                           mase.novelty.WeightedNovelty
+eval.post.1.ns-k =                     15
+eval.post.1.ns-archive-prob =          0.01
+eval.post.1.ns-archive-size =          1000
+eval.post.1.correlation =               spearman
+eval.post.1.min-weight =                0.0
+eval.post.1.smooth =                    0.5
+eval.post.1.corr-exponent =             2
+pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
+neat.SPECIE.FITNESS.MAX =              1000
+
+eval.post.2 =                          mase.novelty.LinearScalarization
+eval.post.2.ns-blend =                 0.5
+
+
+stat.child.3.do-behaviours =            false
+
+stat.child.10 =                        mase.novelty.NoveltyPopStat
+stat.child.10.file =		       $noveltypop.stat
+stat.child.11 =                        mase.novelty.NoveltyIndividualsStat
+stat.child.11.file =		       $noveltyind.stat
+
+stat.child.12 =                          mase.novelty.WeightedNoveltyStat
+stat.child.12.weight-file =              $weights.stat
+stat.child.12.corr-file =                $corr.stat
+
+
+stat.child.15 =                         mase.generic.SCStat
+stat.child.15.log-file =                $genericlog.stat
+stat.child.15.states-file =             $genericstates.stat
+
+stat.child.16 =                         mase.generic.ClusterSCStat
+stat.child.16.gen-clusters =            $genclusters.stat
+stat.child.16.final-clusters =          $finalclusters.stat

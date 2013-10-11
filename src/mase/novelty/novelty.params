@@ -12,3 +12,5 @@ stat.child.11 =                        mase.novelty.NoveltyIndividualsStat
 stat.child.11.file =		       $noveltyind.stat
 
 pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
+
+neat.SPECIE.FITNESS.MAX =              1000

@@ -25,13 +25,15 @@ public class WeightedNovelty extends NoveltyEvaluation {
     public static final String V_PEARSON = "pearson", V_SPEARMAN = "spearman";
     public static final String P_MIN_WEIGHT = "min-weight";
     public static final String P_SMOOTH = "smooth";
-    protected double[] weights;
-    protected double[] instantCorrelation;
-    protected double[] smoothedCorrelation;
+    public static final String P_CORR_EXPONENT = "corr-exponent";
+    protected float[] weights;
+    protected float[] instantCorrelation;
+    protected float[] adjustedCorrelation;
     protected int nIndividuals;
     protected String correlation;
-    protected double smooth;
-    protected double minWeight;
+    protected float smooth;
+    protected float minWeight;
+    protected float corrExponent;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -44,8 +46,9 @@ public class WeightedNovelty extends NoveltyEvaluation {
         } else {
             state.output.fatal("Unknown correlation method.", base.push(P_CORRELATION));
         }
-        this.smooth = state.parameters.getDouble(base.push(P_SMOOTH), null);
-        this.minWeight = state.parameters.getDouble(base.push(P_MIN_WEIGHT), null);
+        this.smooth = state.parameters.getFloat(base.push(P_SMOOTH), null, 0.5);
+        this.minWeight = state.parameters.getFloat(base.push(P_MIN_WEIGHT), null, 0);
+        this.corrExponent = state.parameters.getFloat(base.push(P_CORR_EXPONENT), null, 1);
         this.nIndividuals = 0;
     }
 
@@ -57,27 +60,37 @@ public class WeightedNovelty extends NoveltyEvaluation {
 
     /*
      * Only works if the BehaviourResult's are VectorBehaviourResult's.
-     * Euclidean distance is used.
      */
     @Override
     protected float distance(BehaviourResult br1, BehaviourResult br2) {
         float[] v1 = (float[]) ((VectorBehaviourResult) br1).value();
         float[] v2 = (float[]) ((VectorBehaviourResult) br2).value();
 
-        if (weights == null) {
-            weights = new double[v1.length];
+        if (weights == null) { // TODO: mudar de sitio?
+            weights = new float[v1.length];
             Arrays.fill(weights, 1);
-            instantCorrelation = new double[weights.length];
+            instantCorrelation = new float[weights.length];
             Arrays.fill(instantCorrelation, 0);
-            smoothedCorrelation = new double[weights.length];
-            Arrays.fill(smoothedCorrelation, 0);
+            adjustedCorrelation = new float[weights.length];
+            Arrays.fill(adjustedCorrelation, 0);
         }
-
-        float d = 0;
-        for (int i = 0; i < weights.length; i++) {
-            d += Math.pow((v1[i] - v2[i]) * weights[i], 2);
+        
+        float[] w1 = new float[v1.length];
+        float[] w2 = new float[v2.length];
+        for(int i = 0 ; i < v1.length ; i++) {
+            w1[i] = v1[i] * weights[i];
+            w2[i] = v2[i] * weights[i];
+            
         }
-        return (float) Math.sqrt(d);
+        
+        float d = ((VectorBehaviourResult) br1).vectorDistance(w1, w2);
+        /*if(Float.isNaN(d) || Float.isInfinite(d)) {
+            System.out.println("Wrong distance: " + d + " V1: " + Arrays.toString(v1) + " | V2: " + Arrays.toString(v2) + " | W: " + Arrays.toString(weights));
+        }
+        if(d < 0.0001 && d > -0.0001) {
+            System.out.println("Zero distance: " + d + " V1: " + Arrays.toString(v1) + " | V2: " + Arrays.toString(v2) + " | W: " + Arrays.toString(weights));
+        }*/
+        return d;
     }
 
     /*
@@ -112,19 +125,23 @@ public class WeightedNovelty extends NoveltyEvaluation {
         if (correlation == V_PEARSON) {
             PearsonsCorrelation pearson = new PearsonsCorrelation();
             for (int i = 0; i < instantCorrelation.length; i++) {
-                instantCorrelation[i] = pearson.correlation(fitnessScores, behaviourFeatures[i]);
+                instantCorrelation[i] = (float) pearson.correlation(fitnessScores, behaviourFeatures[i]);
             }
         } else if (correlation == V_SPEARMAN) {
             SpearmansCorrelation spearman = new SpearmansCorrelation();
             for (int i = 0; i < instantCorrelation.length; i++) {
-                instantCorrelation[i] = spearman.correlation(fitnessScores, behaviourFeatures[i]);
+                instantCorrelation[i] = (float) spearman.correlation(fitnessScores, behaviourFeatures[i]);
             }
         }
 
         // abs and smooth
         for (int i = 0; i < instantCorrelation.length; i++) {
-            smoothedCorrelation[i] = Math.abs(instantCorrelation[i]) * (1 - smooth) + smoothedCorrelation[i] * smooth;
-            weights[i] = smoothedCorrelation[i] + minWeight - smoothedCorrelation[i] * minWeight;
+            if(Float.isNaN(instantCorrelation[i])) {
+                instantCorrelation[i] = 0;
+            }
+            adjustedCorrelation[i] = Math.abs(instantCorrelation[i]) * (1 - smooth) + adjustedCorrelation[i] * smooth;
+            adjustedCorrelation[i] = (float) Math.pow(adjustedCorrelation[i], corrExponent);
+            weights[i] = adjustedCorrelation[i] + minWeight - adjustedCorrelation[i] * minWeight;
         }
     }
 }

@@ -8,7 +8,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.HashMap;
 import java.util.List;
-import mase.generic.SCResult.Distance;
+import mase.evaluation.VectorBehaviourResult.Distance;
 import mase.mason.MaseSimState;
 import mase.mason.MasonEvaluation;
 import mase.mason.SmartAgent;

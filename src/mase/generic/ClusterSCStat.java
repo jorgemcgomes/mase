@@ -15,7 +15,6 @@ import mase.EvaluationResult;
 import mase.ExpandedFitness;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
-import org.apache.commons.math3.linear.ArrayRealVector;
 
 /**
  *
@@ -58,20 +57,22 @@ public class ClusterSCStat extends Statistics {
         super.postEvaluationStatistics(state);
         if (genLog != -1) {
             // cluster count
-            ArrayRealVector clusterCount = new ArrayRealVector(sc.numClusters);
+            float[] clusterCount = new float[sc.numClusters];
             for (Subpopulation sub : state.population.subpops) {
                 for (Individual ind : sub.individuals) {
                     for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
                         if (er instanceof SCResult) {
                             SCResult r = (SCResult) er;
-                            clusterCount = clusterCount.add(r.getClustered());
+                            for(int i = 0 ; i < sc.numClusters ; i++) {
+                                clusterCount[i] += r.getBehaviour()[i];
+                            }
                         }
                     }
                 }
             }
 
             for (int i = 0; i < sc.numClusters; i++) {
-                state.output.print(state.generation + " " + clusterCount.getEntry(i), genLog);
+                state.output.print(state.generation + " " + clusterCount[i], genLog);
                 for (int j = 0; j < sc.clusters[i].length; j++) {
                     state.output.print(" " + sc.clusters[i][j], genLog);
                 }
@@ -84,19 +85,21 @@ public class ClusterSCStat extends Statistics {
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
         // cluster count
-        ArrayRealVector clusterCount = new ArrayRealVector(sc.numClusters);
-        for (Subpopulation sub : state.population.subpops) {
-            for (Individual ind : sub.individuals) {
-                for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
-                    if (er instanceof SCResult) {
-                        SCResult r = (SCResult) er;
-                        clusterCount = clusterCount.add(r.getClustered());
+            float[] clusterCount = new float[sc.numClusters];
+            for (Subpopulation sub : state.population.subpops) {
+                for (Individual ind : sub.individuals) {
+                    for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
+                        if (er instanceof SCResult) {
+                            SCResult r = (SCResult) er;
+                            for(int i = 0 ; i < sc.numClusters ; i++) {
+                                clusterCount[i] += r.getBehaviour()[i];
+                            }
+                        }
                     }
                 }
             }
-        }
         for (int i = 0; i < sc.numClusters; i++) {
-            state.output.print(sc.counts[i] + " " + clusterCount.getEntry(i), finalLog);
+            state.output.print(sc.counts[i] + " " + clusterCount[i], finalLog);
             for (int j = 0; j < sc.clusters[i].length; j++) {
                 state.output.print(" " + sc.clusters[i][j], finalLog);
             }

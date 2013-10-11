@@ -19,23 +19,32 @@ import static mase.novelty.MCNoveltyStat.P_STATISTICS_FILE;
  */
 public class WeightedNoveltyStat extends Statistics {
 
-    public static final String P_FILE = "file";
-    protected int log = 0;
+    public static final String P_CORR_FILE = "corr-file";
+    public static final String P_WEIGHT_FILE = "weight-file";
+    protected int corrLog = 0, weightLog = 0;
     protected WeightedNovelty evaluator;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        File statisticsFile = state.parameters.getFile(base.push(P_STATISTICS_FILE), null);
-        if (statisticsFile != null) {
+        File corrFile = state.parameters.getFile(base.push(P_CORR_FILE), null);
+        if (corrFile != null) {
             try {
-                log = state.output.addLog(statisticsFile, true, false);
+                corrLog = state.output.addLog(corrFile, true, false);
             } catch (IOException i) {
-                state.output.fatal("An IOException occurred while trying to create the log " + statisticsFile + ":\n" + i);
+                state.output.fatal("An IOException occurred while trying to create the log " + corrFile + ":\n" + i);
+            }
+        }
+        File weightFile = state.parameters.getFile(base.push(P_WEIGHT_FILE), null);
+        if (weightFile != null) {
+            try {
+                weightLog = state.output.addLog(weightFile, true, false);
+            } catch (IOException i) {
+                state.output.fatal("An IOException occurred while trying to create the log " + weightFile + ":\n" + i);
             }
         }
         for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
-            if (pe instanceof NoveltyEvaluation) {
+            if (pe instanceof WeightedNovelty) {
                 evaluator = (WeightedNovelty) pe;
                 break;
             }
@@ -45,13 +54,18 @@ public class WeightedNoveltyStat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        state.output.print(state.generation + "", log);
-        for (int i = 0; i < evaluator.weights.length; i++) {
-            state.output.print(" " + evaluator.weights[i], log);
+        if (evaluator != null) {
+            state.output.print(state.generation + "", weightLog);
+            for (int i = 0; i < evaluator.weights.length; i++) {
+                state.output.print(" " + evaluator.weights[i], weightLog);
+            }
+            state.output.println("", weightLog);
+            state.output.print(state.generation + "", corrLog);
+            for (int i = 0; i < evaluator.weights.length; i++) {
+                state.output.print(" " + evaluator.instantCorrelation[i], corrLog);
+            }
+            state.output.println("", corrLog);
         }
-        for (int i = 0; i < evaluator.weights.length; i++) {
-            state.output.print(" " + evaluator.instantCorrelation[i], log);
-        }
-        state.output.println("", log);
+
     }
 }
