@@ -5,6 +5,7 @@
 package mase.app.aggregation;
 
 import java.awt.Color;
+import java.text.DecimalFormat;
 import mase.AgentController;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -17,12 +18,13 @@ import sim.util.Double2D;
  */
 public class AggregationAgent extends SmartAgent {
 
-    public static final double RADIUS = 1.5;
+    public static final double RADIUS = 2.5;
     private boolean even;
     private double slice;
     private double start;
     private Double2D[] rayStarts, rayEnds;
     private Double2D[] obsStarts, obsEnds;
+    private static DecimalFormat DF = new DecimalFormat("0.0");
 
     public static void main(String[] args) {
         System.out.println(new Double2D(1, 0).angle());
@@ -44,8 +46,8 @@ public class AggregationAgent extends SmartAgent {
         double ang = Math.PI * 2 / sim.par.wallRays;
         for (int i = 0; i < rayStarts.length; i++) {
             if (i == 0) {
-                rayStarts[i] = new Double2D(RADIUS, 0).rotate(-ang/2);
-                rayEnds[i] = new Double2D(RADIUS + sim.par.wallRadius, 0).rotate(-ang/2);
+                rayStarts[i] = new Double2D(RADIUS, 0).rotate(-ang / 2);
+                rayEnds[i] = new Double2D(RADIUS + sim.par.wallRadius, 0).rotate(-ang / 2);
             } else {
                 rayStarts[i] = rayStarts[i - 1].rotate(ang);
                 rayEnds[i] = rayEnds[i - 1].rotate(ang);
@@ -145,10 +147,25 @@ public class AggregationAgent extends SmartAgent {
     @Override
     public void action(double[] output) {
         AggregationParams par = ((Aggregation) sim).par;
-        double forward = output[0] * par.agentSpeed;
-        double l = output[1] * par.agentRotation;
-        double r = output[2] * par.agentRotation;
-        Double2D dir = super.getDirection().rotate(r - l);
-        super.move(dir, forward);
+        double speed = output[2] > 0.5 ? 0 : output[0] * par.agentSpeed;
+        double r = (output[1] * 2 - 1) * par.agentRotation;
+        Double2D dir = super.getDirection().rotate(r);
+        super.move(dir, speed);
+    }
+
+    @Override
+    public String getActionReport() {
+        AggregationParams par = ((Aggregation) sim).par;
+        return "Move speed: " + DF.format(lastAction[0] * par.agentSpeed)
+                + " | Move rot: " + Math.round((lastAction[1] * 2 - 1) * par.agentRotation * 180 / Math.PI) + "\u00B0"
+                + " | Stop: " + Boolean.toString(lastAction[2] > 0.5);
+    }
+
+    @Override
+    public String getSensorsReport() {
+        
+        
+        
+        return super.getSensorsReport(); //To change body of generated methods, choose Tools | Templates.
     }
 }
