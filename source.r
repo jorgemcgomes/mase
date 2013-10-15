@@ -68,11 +68,14 @@ plotListToPDF <- function(plotlist, title="", nrow=NULL, ncol=NULL, width=DEF_WI
 
 # Fitness stats ################################################################
 
-fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE, jitter=TRUE, ylim=NULL) {
+fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE, jitter=TRUE, ylim=FALSE) {
     plots <- list()
     bestfar <- NULL
     datalist <- list(...)
-    fitlim <- datalist[[1]]$fitlim
+    fitlim <- NULL
+    if(ylim) {
+        fitlim <- datalist[[1]]$fitlim
+    }
     for(data in datalist) {
         if(is.null(bestfar)) {
             bestfar <- data.frame(Generation=data$gens)
@@ -84,7 +87,7 @@ fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE, jitter=TRUE
         avg.best <- rowMeans(frame[,-1])
         bestfar[[data$expname]] <- avg.best
     }
-    plots[[length(plots)+1]] <- plotMultiline(bestfar, ylim=ylim, title="Best so far")
+    plots[[length(plots)+1]] <- plotMultiline(bestfar, ylim=fitlim, title="Best so far")
     
     if(is.null(snapshots)) {
         snapshots <- c(max(bestfar$gen))
@@ -101,11 +104,14 @@ fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE, jitter=TRUE
         }
         frame <- data.frame(exp=frame[,1], fit=as.numeric(frame[,2]))
         p <- ggplot(frame, aes(factor(exp), fit)) + 
-            geom_boxplot(aes(fill=factor(exp))) + ylim(fitlim[1],fitlim[2]) + 
+            geom_boxplot(aes(fill=factor(exp))) +
             ggtitle(paste("Generation",s)) + xlab("") +
             theme(axis.text.x = element_text(angle = 22.5, hjust = 1))
         if(jitter) {
             p <- p + geom_jitter(colour="darkgrey")
+        }
+        if(ylim) {
+            p <- p + ylim(fitlim[1],fitlim[2])
         }
         plots[[length(plots)+1]] <- p
     }

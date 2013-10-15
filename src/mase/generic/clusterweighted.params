@@ -15,15 +15,12 @@ eval.post.1.ns-archive-size =          1000
 eval.post.1.correlation =               spearman
 eval.post.1.min-weight =                0.0
 eval.post.1.smooth =                    0.5
-eval.post.1.corr-exponent =             2
+eval.post.1.corr-exponent =             1
 pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
 neat.SPECIE.FITNESS.MAX =              1000
 
 eval.post.2 =                          mase.novelty.LinearScalarization
 eval.post.2.ns-blend =                 0.5
-
-
-stat.child.3.do-behaviours =            false
 
 stat.child.10 =                        mase.novelty.NoveltyPopStat
 stat.child.10.file =		       $noveltypop.stat

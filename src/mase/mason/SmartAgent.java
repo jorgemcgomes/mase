@@ -45,11 +45,11 @@ public abstract class SmartAgent extends EmboddiedAgent {
     }
 
     public String getActionReport() {
-        return getRawSensors();
+        return getRawActions();
     }
 
     public String getSensorsReport() {
-        return getRawActions();
+        return getRawSensors();
     }
 
     public AgentController getAgentController() {
