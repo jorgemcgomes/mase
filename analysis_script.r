@@ -14,6 +14,10 @@ par <- list(fitlim=c(0,1), jobs=5, load.behavs=F, subpops=1)
 data <- metaLoadData("fit","ts_ls","cl_w_ls", params=par)
 fullStatistics(data, expset.name="agg.gen", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(75,150,249)))
 
+setwd("~/exps/generic/sharing")
+par <- list(fitlim=c(0,1), jobs=10, load.behavs=F, subpops=1)
+data <- metaLoadData("rs_fit","rs_ls75","rs_cl50_wls", params=par)
+fullStatistics(data, expset.name="shar.gen", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(75,150,299)))
 
 
 

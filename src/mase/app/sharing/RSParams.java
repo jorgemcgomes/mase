@@ -25,6 +25,7 @@ public class RSParams {
     public static final String P_MIN_ENERGY_DECAY = "min-energy-decay";
     public static final String P_MAX_ENERGY_DECAY = "max-energy-decay";
     public static final String P_RECHARGE_RATE = "recharge-rate";
+    public static final String P_RECHARGE_DELAY = "recharge-delay";
     
     protected double size;
     protected double discretization;
@@ -41,4 +42,5 @@ public class RSParams {
     protected double minEnergyDecay;
     protected double maxEnergyDecay;
     protected double rechargeRate;
+    protected int rechargeDelay;
 }

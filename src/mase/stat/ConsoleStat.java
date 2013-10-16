@@ -78,9 +78,13 @@ public class ConsoleStat extends Statistics {
             for (Individual ind : state.population.subpops[s].individuals) {
                 ds.addValue(((ExpandedFitness) ind.fitness).getFitnessScore());
             }
-            state.output.message("Subpop " + s + ": " + nf.format(ds.getMin()) + " | "
-                    + nf.format(ds.getPercentile(25)) + " | " + nf.format(ds.getMean()) + " | "
-                    + nf.format(ds.getPercentile(75)) + " | " + nf.format(ds.getMax()));
+            state.output.message("Subpop " + s + 
+                    " Mean: " + nf.format(ds.getMean()) + 
+                    " | Min: " + nf.format(ds.getMin()) + 
+                    " | Q1: "  + nf.format(ds.getPercentile(25)) + 
+                    " | Q2: " + nf.format(ds.getPercentile(50)) + 
+                    " | Q3: "+ nf.format(ds.getPercentile(75)) + 
+                    " | Max:" + nf.format(ds.getMax()));
             if (ds.getMax() > maxGen) {
                 maxGen = ds.getMax();
             }

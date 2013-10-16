@@ -39,6 +39,7 @@ public class ResourceSharingSimulator extends MasonSimulator {
         par.numAgents = state.parameters.getInt(base.push(RSParams.P_NUM_AGENTS), df.push(RSParams.P_NUM_AGENTS));
         par.discretization = state.parameters.getDouble(base.push(RSParams.P_DISCRETIZATION), df.push(RSParams.P_DISCRETIZATION));
         par.size = state.parameters.getDouble(base.push(RSParams.P_SIZE), df.push(RSParams.P_SIZE));
+        par.rechargeDelay = state.parameters.getInt(base.push(RSParams.P_RECHARGE_DELAY), df.push(RSParams.P_RECHARGE_DELAY));
     }
 
     @Override

@@ -60,7 +60,7 @@ public class RSAgent extends SmartAgent {
             }
         }
 
-        sens[rs.par.agentSensorArcs] = (this.distanceTo(rs.resource) / (rs.par.size / 2)) * 2 - 1;
+        sens[rs.par.agentSensorArcs] = (this.getLocation().distance(rs.resource.getLocation()) / (rs.par.size / 2)) * 2 - 1;
         sens[rs.par.agentSensorArcs + 1] = this.angleTo(rs.resource.getLocation()) / Math.PI;
         sens[rs.par.agentSensorArcs + 2] = (this.energyLevel / rs.par.maxEnergy) * 2 - 1;
         sens[rs.par.agentSensorArcs + 3] = inStation ? 1 : -1;
@@ -82,7 +82,7 @@ public class RSAgent extends SmartAgent {
     @Override
     public void action(double[] output) {
         ResourceSharing rs = (ResourceSharing) sim;
-        double speed = output[2] > 0.5 ? 0 : output[1];
+        double speed = output[2] > 0.5 ? 0 : output[0];
         Double2D dir = output[2] > 0.5 ? getDirection() : 
                 getDirection().rotate((output[1] * 2 - 1) * rs.par.agentRotation);
         super.move(dir, speed * rs.par.agentSpeed);
