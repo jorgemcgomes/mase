@@ -25,7 +25,7 @@ public class RSFitness extends MasonEvaluation {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        this.averageEnergy = state.parameters.getDouble(base.push(P_ENERGY_WEIGHT), defaultBase().push(P_ENERGY_WEIGHT));
+        this.weight = state.parameters.getDouble(base.push(P_ENERGY_WEIGHT), defaultBase().push(P_ENERGY_WEIGHT));
     }
 
     @Override
@@ -47,7 +47,9 @@ public class RSFitness extends MasonEvaluation {
         }
         survivors = count / (double) rs.par.numAgents;
         averageEnergy = averageEnergy / rs.par.numAgents / rs.par.maxEnergy / currentEvaluationStep;
-        result = new FitnessResult((float) (averageEnergy * weight + survivors * (1 - weight)));
+        float res = (float) (averageEnergy * weight + survivors * (1 - weight));
+        //System.out.println(survivors + " , " + averageEnergy + " = " + res);
+        result = new FitnessResult(res);
     }
     
     

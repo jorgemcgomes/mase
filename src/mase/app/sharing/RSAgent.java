@@ -82,19 +82,35 @@ public class RSAgent extends SmartAgent {
     @Override
     public void action(double[] output) {
         ResourceSharing rs = (ResourceSharing) sim;
+        // Movement
         double speed = output[2] > 0.5 ? 0 : output[0];
-        Double2D dir = output[2] > 0.5 ? getDirection() : 
-                getDirection().rotate((output[1] * 2 - 1) * rs.par.agentRotation);
+        Double2D dir = output[2] > 0.5 ? getDirection()
+                : getDirection().rotate((output[1] * 2 - 1) * rs.par.agentRotation);
         super.move(dir, speed * rs.par.agentSpeed);
+
+        /*double speed;
+         if (output[3] < 0.5) {
+         speed = output[2];
+         double rot = output[0] * rs.par.agentRotation - output[1] * rs.par.agentRotation;
+         Double2D dir = getDirection().rotate(rot);
+         super.move(dir, speed);
+         } else {
+         speed = 0;
+         super.move(getDirection(), 0); // stay put
+         }*/
+
+
+        // Update inner sensors        
         energyLevel = Math.max(0, energyLevel - rs.par.minEnergyDecay
                 - (rs.par.maxEnergyDecay - rs.par.minEnergyDecay) * speed);
         inStation = getLocation().distance(rs.resource.getLocation())
                 < rs.par.resourceRadius - rs.par.agentRadius;
-        
-        if(!isAlive()) {
+
+        // Death procedures
+        if (!isAlive()) {
             this.stop();
             int i = 0;
-            for(; i < rs.par.agentSensorArcs ; i++) {
+            for (; i < rs.par.agentSensorArcs; i++) {
                 lastSensors[i] = 1;
             }
             lastSensors[i++] = 1;
@@ -112,7 +128,7 @@ public class RSAgent extends SmartAgent {
     public boolean isInStation() {
         return inStation;
     }
-    
+
     public boolean isAlive() {
         return energyLevel > 0.0001;
     }

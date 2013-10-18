@@ -148,7 +148,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     /*
      * Complete memory -- all samples weight the same
      */
-    protected void updateCluster(int cl, byte[] candidate, float freq) {
+    private void updateCluster(int cl, byte[] candidate, float freq) {
         for (int i = 0; i < Math.round(freq); i++) {
             counts[cl]++;
             for (int j = 0; j < candidate.length; j++) {
@@ -176,13 +176,8 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             for (int i = 0; i < s.length; i++) {
                 cl[i] = s[i];
             }
-            //System.out.println(Arrays.toString(cl));
             clusters[clusterIndex++] = cl;
         }
-        /*clusterTree = new KDTree(clusters[0].length);
-        for(int i = 0 ; i < numClusters ; i++) {
-            clusterTree.insert(clusters[i], i);
-        }*/
     }
 
     protected void updateNoveltyArchive(EvolutionState state) {

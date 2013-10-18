@@ -11,14 +11,29 @@ fullStatistics(data, expset.name="kw.gen", show.only=F, fit.comp=T, fit.comp.par
 
 setwd("~/exps/generic/aggregation")
 par <- list(fitlim=c(0,1), jobs=5, load.behavs=F, subpops=1)
-data <- metaLoadData("fit","ts_ls","cl_w_ls", params=par)
+data <- metaLoadData("fit","ts_ls","cl50_w_ls", params=par)
 fullStatistics(data, expset.name="agg.gen", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(75,150,249)))
 
 setwd("~/exps/generic/sharing")
 par <- list(fitlim=c(0,1), jobs=10, load.behavs=F, subpops=1)
-data <- metaLoadData("rs_fit","rs_ls75","rs_cl50_wls", params=par)
-fullStatistics(data, expset.name="shar.gen", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(75,150,299)))
+data <- metaLoadData("rs9_fit","rs9_ls50","rs9_cl50_wls", params=par)
+fullStatistics(data, expset.name="shar.gen", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(75,150,299)))
 
+data <- metaLoadData("rs9_ls50","rs9_ls75","rs9_cl50_wls","rs9_cl50_wls75", params=par)
+fullStatistics(data, expset.name="shar.gen", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(75,150,299)))
+
+setwd("~/exps/generic/aggregation")
+
+ts <- loadData("ts_ls", jobs=10, fitlim=c(0,1), load.behavs=F)
+cl <- loadData("cl50_w_ls", jobs=8, fitlim=c(0,1), load.behavs=F)    
+fit <- loadData("fit", jobs=5, fitlim=c(0,1), load.behavs=F)
+fullStatistics(list(ts,cl,fit), expset.name="agg.gen", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(75,150,249)))
+
+setwd("~/exps/generic/sharing")
+ts <- loadData("rs9_ls50", jobs=10, fitlim=c(0,1), subpops=1, load.behavs=T, vars.ind=c(), vars.group=c("survivors","energy","movement","distance"), behavs.sample=0.2)
+cl <- loadData("rs9_cl50_wls", jobs=10, fitlim=c(0,1), subpops=1, load.behavs=T, vars.ind=c(), vars.group=c("survivors","energy","movement","distance"), vars.file=c("survivors","energy","movement","distance","SC"),behavs.sample=0.2)    
+fit <- loadData("rs9_fit", jobs=10, fitlim=c(0,1), subpops=1, load.behavs=T, vars.ind=c(), vars.group=c("survivors","energy","movement","distance"), behavs.sample=0.2)
+fullStatistics(list(ts,cl,fit), expset.name="shar.gen.b", show.only=F, som.group=T, som.alljobs=T)
 
 
 
