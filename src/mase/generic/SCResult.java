@@ -88,10 +88,10 @@ public class SCResult extends VectorBehaviourResult {
 
 
 
-    @Override
+    /*@Override
     public String toString() {
         return "SC";
-        /*StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (Iterator<Entry<Integer, Float>> iter = counts.entrySet().iterator(); iter.hasNext();) {
             Entry<Integer, Float> e = iter.next();
             sb.append(e.getKey());
@@ -101,8 +101,8 @@ public class SCResult extends VectorBehaviourResult {
                 sb.append(";");
             }
         }
-        return new String(sb);*/
-    }
+        return new String(sb);
+    }*/
 
     public Map<Integer, Float> getCounts() {
         return counts;

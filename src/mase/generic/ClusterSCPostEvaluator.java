@@ -88,6 +88,49 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                 }
             }
         }
+
+        if (super.doTfIdf) {
+            // cluster count totals
+            float[] clusterCount = new float[numClusters];
+            for (Subpopulation sub : state.population.subpops) {
+                for (Individual ind : sub.individuals) {
+                    for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
+                        if (er instanceof SCResult) {
+                            SCResult r = (SCResult) er;
+                            for (int i = 0; i < numClusters; i++) {
+                                clusterCount[i] += r.getBehaviour()[i];
+                            }
+                        }
+                    }
+                }
+            }
+
+            // adjust population counts
+            for (Subpopulation sub : state.population.subpops) {
+                for (Individual ind : sub.individuals) {
+                    for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
+                        if (er instanceof SCResult) {
+                            SCResult r = (SCResult) er;
+                            for (int i = 0; i < numClusters; i++) {
+                                if (r.getBehaviour()[i] > 0) {
+                                    r.getBehaviour()[i] = r.getBehaviour()[i] / clusterCount[i];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // adjust archive counts
+            for (BehaviourResult br : archive) {
+                SCResult scr = (SCResult) br;
+                for (int i = 0; i < numClusters; i++) {
+                    if (scr.getBehaviour()[i] > 0) {
+                        scr.getBehaviour()[i] = scr.getBehaviour()[i] / clusterCount[i];
+                    }
+                }
+            }
+        }
     }
 
     protected void computeClusteredCount(SCResult scr) {
@@ -112,7 +155,6 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                 closestCluster = i;
             }
         }
-        //System.out.println(closestCluster + "\t" + closestDist + "\t" + Arrays.toString(candidate));
         return closestCluster;
     }
 

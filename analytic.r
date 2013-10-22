@@ -252,7 +252,7 @@ uniformity.group <- function(count, threshold=100) {
         for(j in 1:length(count[[i]])) { # jobs
             job.counts <- merge.counts(count[[i]][[j]])[visited]
             job.counts <- job.counts / sum(job.counts)
-            chis <- c(chis, jsd(job.counts, ideal))
+            chis <- c(chis, 1 - jsd(job.counts, ideal))
         }
         setlist[[names(count)[i]]] <- chis
     }
@@ -291,7 +291,7 @@ uniformity.ind <- function(count, threshold=100) {
             for(s in 1:length(count[[i]][[j]])) { # subpops
                 subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
                 subcounts <- subcounts / sum(subcounts)
-                subchis <- c(subchis, jsd(subcounts , ideal))
+                subchis <- c(subchis, 1 - jsd(subcounts , ideal))
             }
             chis <- c(chis, mean(subchis))
         }
@@ -345,7 +345,7 @@ uniformity.gen <- function(count, threshold=100) {
                 }
                 gen.count <- merge.counts(templist)[visited]
                 gen.count <- gen.count / sum(gen.count)
-                subchis <- c(subchis, jsd(gen.count , ideal))
+                subchis <- c(subchis, 1 - jsd(gen.count , ideal))
             }
             chis <- c(chis, mean(subchis))
         }

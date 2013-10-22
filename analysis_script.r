@@ -36,6 +36,42 @@ fit <- loadData("rs9_fit", jobs=10, fitlim=c(0,1), subpops=1, load.behavs=T, var
 fullStatistics(list(ts,cl,fit), expset.name="shar.gen.b", show.only=F, som.group=T, som.alljobs=T)
 
 
+setwd("~/exps/generic/sharing")
+par <- list(fitlim=c(0,1), jobs=10, load.behavs=F, subpops=1)
+data <- metaLoadData("rs11_fit","rs11_ls50","rs11_cl50_wls","rs11_cl50_wls_d4","rs11_cl100_wls", params=par)
+fullStatistics(data, expset.name="shar.gen", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(75,200,399)))
+
+
+
+
+
+
+
+
+
+setwd("~/exps/generic/aggregation")
+ts <- loadData("ts_ls", jobs=10, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.2, expname="TS", vars.group=paste0("cm",1:20))
+cl <- loadData("agg_cl50_wls_d4_idf", jobs=7, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.2, expname="Gen", vars.group=paste0("cm",1:20), vars.file=c(paste0("cm",1:20),paste0("gen",1:50)))    
+fit <- loadData("fit", jobs=5, fitlim=c(0,1), load.behavs=T, behavs.sample=0.2, subpops=1, expname="Fit", vars.group=paste0("cm",1:20))
+fullStatistics(list(ts,cl,fit), expset.name="agg.gen", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(75,150,249)), som.group=T, som.alljobs=T)
+
+setwd("/media/jorge/8c7ef752-9201-42ca-b432-bf0ffe76aace/exps/generic/sharing")
+ts <- loadData("rs11_ls50", jobs=10, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.2, expname="TS", vars.group=c("survivors","energy","movement","distance"))
+cl <- loadData("rs11_cl50_wls_d4_idf", jobs=10, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.2, expname="Gen", vars.group=c("survivors","energy","movement","distance"), vars.file=c("survivors","energy","movement","distance",paste0("gen",1:50)))    
+fit <- loadData("rs11_fit", jobs=10, fitlim=c(0,1), load.behavs=T, behavs.sample=0.2, subpops=1, expname="Fit", vars.group=c("survivors","energy","movement","distance"))
+fullStatistics(list(ts,cl,fit), expset.name="shar.gen", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(75,200,399)), som.group=T, som.alljobs=T)
+counts <- exploration.count(list(ts,cl,fit))
+uniformity.group(counts)
+
+setwd("~/exps/generic/keepaway")
+ts <- loadData("ts_ls50_neat", jobs=10, fitlim=c(0,60), load.behavs=T, subpops=1, behavs.sample=0.2, expname="TS", vars.group=c("passes","steps","disp","passLength"))
+cl <- loadData("kw_cl50_wls_d4_idf", jobs=10, fitlim=c(0,60), load.behavs=T, subpops=1, behavs.sample=0.2, expname="Gen", vars.group=c("passes","steps","disp","passLength"), vars.file=c("passes","steps","disp","passLength",paste0("gen",1:50)))    
+fit <- loadData("fit_neat", jobs=10, fitlim=c(0,60), load.behavs=T, behavs.sample=0.2, subpops=1, expname="Fit", vars.group=c("passes","steps","disp","passLength"))
+fullStatistics(list(ts,cl,fit), expset.name="kw.gen", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,499)), som.group=T, som.alljobs=T)
+counts <- exploration.count(list(ts,cl,fit))
+uniformity.group(counts)
+
+
 
 setwd("~/exps")
 par <- list(fitlim=c(0,60), jobs=10, load.behavs=F, subpops=3)

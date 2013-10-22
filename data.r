@@ -5,6 +5,7 @@ metaLoadData <- function(..., params, names=NULL) {
     }
     datas <- list()
     for(i in 1:length(folderList)) {
+        cat(folderList[[i]])
         datas[[length(datas)+1]] <- do.call(loadData, c(folder=folderList[[i]], expname=names[[i]], params))
     }
     names(datas) <- names
