@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.generic;
+package mase.generic.deprecated;
 
 import ec.EvolutionState;
 import ec.Individual;
@@ -23,7 +23,8 @@ import mase.ExpandedFitness;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
 import mase.evaluation.BehaviourResult;
-import static mase.generic.SCPostEvaluator.mergeCountMap;
+import mase.generic.SCPostEvaluator;
+import mase.generic.SCResult;
 import mase.novelty.NoveltyEvaluation;
 
 /**

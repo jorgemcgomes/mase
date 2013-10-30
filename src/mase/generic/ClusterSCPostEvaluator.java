@@ -98,7 +98,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                         if (er instanceof SCResult) {
                             SCResult r = (SCResult) er;
                             for (int i = 0; i < numClusters; i++) {
-                                clusterCount[i] += r.getBehaviour()[i];
+                                clusterCount[i] += r.rawClusteredCount[i];
                             }
                         }
                     }
@@ -112,8 +112,8 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                         if (er instanceof SCResult) {
                             SCResult r = (SCResult) er;
                             for (int i = 0; i < numClusters; i++) {
-                                if (r.getBehaviour()[i] > 0) {
-                                    r.getBehaviour()[i] = r.getBehaviour()[i] / clusterCount[i];
+                                if (r.rawClusteredCount[i] > 0) {
+                                    r.getBehaviour()[i] = r.rawClusteredCount[i] / clusterCount[i];
                                 }
                             }
                         }
@@ -141,6 +141,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             clusterCount[clusterIndex] += e.getValue();
         }
         scr.setBehaviour(clusterCount);
+        scr.rawClusteredCount = Arrays.copyOf(clusterCount, clusterCount.length);
     }
 
     // TODO: replace with space partitioning tree

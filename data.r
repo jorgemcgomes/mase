@@ -14,8 +14,10 @@ metaLoadData <- function(..., params, names=NULL) {
 
 loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c(), 
                      vars.file=c(vars.group, vars.ind), vars.transform=list(),
-                     subpops=3, expname=folder, gens=NULL, load.behavs=TRUE, 
-                     behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat") {
+                     subpops=1, expname=folder, gens=NULL, load.behavs=TRUE, 
+                     load.clusters=FALSE, new.clusters=TRUE, load.weights=FALSE,
+                     behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat",
+                     clusters.file="genclusters.stat", weights.file="weights.stat") {
     data <- NULL
     data$fitlim <- fitlim
     if(is.character(jobs)) {
@@ -37,6 +39,8 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
     for(j in data$jobs) {
         gc()
         data[[j]] <- list()
+        
+        # Fitness
         ext <- read.table(file.path(folder, paste0(j,".",fitness.file)), header=FALSE, sep=" ")
         if(is.null(data$gens)) {
             data$gens <- ext[[1]]
@@ -45,6 +49,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         }
         data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)-1]], best.gen=ext[[ncol(ext)-2]], mean=ext[[ncol(ext)-3]])    
         
+        # Behaviours
         if(load.behavs) {
             tab <- read.table(file.path(folder,paste0(j,".",behavs.file)), header=FALSE, sep=" ", stringsAsFactors=FALSE)
             fixedvars <- c("gen","subpop","index","fitness")
@@ -62,6 +67,26 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
                 }
                 data[[j]][[data$subpops[s+1]]] <- sub           
             }
+        }
+        
+        # Clusters
+        if(load.clusters) {
+            cl <- read.table(file.path(folder, paste0(j,".",clusters.file)), header=FALSE, sep=" ")
+            if(new.clusters) {
+                data$clustervars <- paste0("c",1:(ncol(cl)-3))
+                colnames(cl) <- c("gen","count","frequency",data$clustervars)
+            } else {
+                data$clustervars <- paste0("c",1:(ncol(cl)-2))
+                colnames(cl) <- c("gen","frequency",data$clustervars)
+            }
+            data[[j]]$clusters <- cl
+        }
+        
+        # Weights
+        if(load.weights) {
+            wg <- read.table(file.path(folder, paste0(j,".",weights.file)), header=FALSE, sep=" ")
+            colnames(wg) <- c("gen",paste0("w",1:(ncol(wg)-1)))
+            data[[j]]$weights <- wg
         }
         
         prog <- prog + 1

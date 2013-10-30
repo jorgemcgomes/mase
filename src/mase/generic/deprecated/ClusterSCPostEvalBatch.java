@@ -2,17 +2,19 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.generic;
+package mase.generic.deprecated;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.Map;
+import mase.generic.ClusterSCPostEvaluator;
+import mase.generic.SCPostEvaluator;
 
 /**
  *
  * @author jorge
  */
-public class ClusterSCPostEvalForget extends ClusterSCPostEvaluator {
+public class ClusterSCPostEvalBatch extends ClusterSCPostEvaluator {
 
     public static final String P_UPDATE_INTERVAL = "update-interval";
     protected int updateInterval;

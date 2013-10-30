@@ -64,7 +64,7 @@ public class ClusterSCStat extends Statistics {
                         if (er instanceof SCResult) {
                             SCResult r = (SCResult) er;
                             for(int i = 0 ; i < sc.numClusters ; i++) {
-                                clusterCount[i] += r.getBehaviour()[i];
+                                clusterCount[i] += r.rawClusteredCount[i];
                             }
                         }
                     }
@@ -72,7 +72,7 @@ public class ClusterSCStat extends Statistics {
             }
 
             for (int i = 0; i < sc.numClusters; i++) {
-                state.output.print(state.generation + " " + clusterCount[i], genLog);
+                state.output.print(state.generation + " " + sc.counts[i] + " " + clusterCount[i], genLog);
                 for (int j = 0; j < sc.clusters[i].length; j++) {
                     state.output.print(" " + sc.clusters[i][j], genLog);
                 }
@@ -92,7 +92,7 @@ public class ClusterSCStat extends Statistics {
                         if (er instanceof SCResult) {
                             SCResult r = (SCResult) er;
                             for(int i = 0 ; i < sc.numClusters ; i++) {
-                                clusterCount[i] += r.getBehaviour()[i];
+                                clusterCount[i] += r.rawClusteredCount[i];
                             }
                         }
                     }

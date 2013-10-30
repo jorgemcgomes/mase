@@ -144,4 +144,16 @@ public class WeightedNovelty extends NoveltyEvaluation {
             weights[i] = adjustedCorrelation[i] + minWeight - adjustedCorrelation[i] * minWeight;
         }
     }
+
+    public float[] getWeights() {
+        return weights;
+    }
+
+    public float[] getInstantCorrelation() {
+        return instantCorrelation;
+    }
+
+    public float[] getAdjustedCorrelation() {
+        return adjustedCorrelation;
+    }
 }

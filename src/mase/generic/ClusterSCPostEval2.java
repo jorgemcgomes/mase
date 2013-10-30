@@ -15,7 +15,7 @@ public class ClusterSCPostEval2 extends ClusterSCPostEvaluator {
 
     @Override
     /**
-     * As in "Web-Scale K-Means Clustering"
+     * As in "Web-Scale K-Means Clustering
      */
     protected void updateClusters(EvolutionState state) {
         if (clusters == null) {

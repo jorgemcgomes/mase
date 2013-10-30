@@ -8,6 +8,7 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class SCPostEvaluator implements PostEvaluator {
     protected double filter;
     protected boolean doFilter;
     protected boolean doTfIdf;
+    //protected List<SCResult> currentPop;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -40,6 +42,10 @@ public class SCPostEvaluator implements PostEvaluator {
 
     @Override
     public void processPopulation(EvolutionState state) {
+        // auxiliary data structure
+        /*currentPop = new ArrayList<SCResult>(state.population.subpops.length * 
+                state.population.subpops[0].individuals.length);*/
+        
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {

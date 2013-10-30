@@ -474,3 +474,66 @@ addSubStats <- function(f, vars.sub) {
     }
     return(f)
 }
+
+#### Cluster analysis ##########################################################
+
+clusterAnalysis <- function(data) {
+    means <- data.frame(gen=data$gens[-1])
+    maxes <- data.frame(gen=data$gens[-1])
+    
+    for(j in data$jobs) {
+        print(j)
+        m <- c()
+        ma <- c()
+        clusters <- data[[j]]$clusters
+        oldcl <- subset(clusters, gen == data$gens[1])[data$clustervars]
+        for(g in data$gens[-1]) {
+            diffs <- c()
+            cl <- subset(clusters, gen == g)[data$clustervars]
+            for(r in 1:nrow(cl)) {
+                diffs <- c(diffs, euclideanDist(as.numeric(cl[r,]),as.numeric(oldcl[r,])))
+            }
+            m <- c(m, mean(diffs))
+            ma <- c(ma, max(diffs))
+            oldcl <- cl
+        } 
+        means[[j]] <- m
+        maxes[[j]] <- ma
+    }
+    res <- data.frame(gen=data$gens[-1])
+    if(ncol(means) == 2) {
+        res[["mean"]] <- means[,2]
+        res[["max"]] <- maxes[,2]
+    } else {
+        res[["mean"]] <- rowMeans(means[,-1])
+        res[["max"]] <- rowMeans(maxes[,-1])
+    }
+    return(res)
+}
+
+#### Weight analysis ###########################################################
+
+weightAnalysis <- function(data) {
+    means <- data.frame(gen=data$gens)
+    maxes <- data.frame(gen=data$gens)
+    for(j in data$jobs) {
+        weights <- data[[j]]$weights
+        m <- c()
+        ma <- c()
+        for(g in 1:nrow(weights)) {
+            m <- c(m, mean(as.numeric(weights[g,-1])))
+            ma <- c(ma, max(as.numeric(weights[g,-1]))) 
+        }
+        means[[j]] <- m
+        maxes[[j]] <- ma
+    }
+    res <- data.frame(gen=data$gens)
+    if(ncol(means) == 2) {
+        res[["mean"]] <- means[,2]
+        res[["max"]] <- maxes[,2]
+    } else {
+        res[["mean"]] <- rowMeans(means[,-1])
+        res[["max"]] <- rowMeans(maxes[,-1])
+    }
+    return(res)
+}
