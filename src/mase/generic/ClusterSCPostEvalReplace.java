@@ -15,7 +15,7 @@ import mase.novelty.WeightedNovelty;
  *
  * @author jorge
  */
-public class ClusterSCPostEvalReplace extends ClusterSCPostEval2 {
+public class ClusterSCPostEvalReplace extends ClusterSCPostEvalBatch {
 
     private WeightedNovelty wnov;
     protected int replaceRate;
@@ -29,7 +29,7 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEval2 {
     }
 
     @Override
-    protected void updateClusters(EvolutionState state) {
+    protected boolean updateClusters(EvolutionState state) {
         if (wnov == null) {
             for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
                 if (pe instanceof WeightedNovelty) {
@@ -41,7 +41,9 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEval2 {
             }
         }
 
+        boolean replaced = false;
         if (state.generation > 0 && state.generation % replaceRate == 0) {
+            replaced = true;
             // find the center with the lowest weight
             float[] weights = wnov.getWeights();
             int minW = 0;
@@ -92,11 +94,10 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEval2 {
             counts[minW] = 1;
             // get initial correlation from the parents
             wnov.getAdjustedCorrelation()[minW] = (weights[father] + weights[mother]) / 2; 
-            
-            System.out.println("Removed cluster " + minW + " and added new from " + father + " and " + mother);
+            state.output.message("Removed cluster " + minW + " and added new from " + father + " and " + mother);
         }
 
-        super.updateClusters(state);
+        return super.updateClusters(state) || replaced;
     }
 
     private float dist(float[] a, float[] b) {

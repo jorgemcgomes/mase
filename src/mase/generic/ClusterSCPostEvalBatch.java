@@ -11,16 +11,13 @@ import java.util.HashMap;
  *
  * @author jorge
  */
-public class ClusterSCPostEval2 extends ClusterSCPostEvaluator {
+public class ClusterSCPostEvalBatch extends ClusterSCPostEvaluator {
 
     @Override
     /**
      * As in "Web-Scale K-Means Clustering
      */
-    protected void updateClusters(EvolutionState state) {
-        if (clusters == null) {
-            initializeClusters(state);
-        }
+    protected boolean updateClusters(EvolutionState state) {
         assignements.clear();
         
         HashMap<Integer, Integer> centerCache = new HashMap<Integer, Integer>(buffer.size() * 2);
@@ -47,8 +44,6 @@ public class ClusterSCPostEval2 extends ClusterSCPostEvaluator {
         buffer.clear();
         bufferCount.clear();
 
-        // update individuals in novelty archive with the new clustering
-        updateNoveltyArchive(state);
-
+        return true;
     }
 }

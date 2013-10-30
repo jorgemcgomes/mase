@@ -13,7 +13,7 @@ import java.util.HashMap;
  *
  * @author jorge
  */
-public class ClusterSCPostEval3 extends ClusterSCPostEvaluator {
+public class ClusterSCPostEvalBalanced extends ClusterSCPostEvaluator {
 
     /*
     Meaning: The elements from this generation should account for at least 
@@ -30,10 +30,7 @@ public class ClusterSCPostEval3 extends ClusterSCPostEvaluator {
     }
 
     @Override
-    protected void updateClusters(EvolutionState state) {
-        if (clusters == null) {
-            initializeClusters(state);
-        }
+    protected boolean updateClusters(EvolutionState state) {
         assignements.clear();
 
         HashMap<Integer, Integer> centerCache = new HashMap<Integer, Integer>(buffer.size() * 2);
@@ -69,8 +66,6 @@ public class ClusterSCPostEval3 extends ClusterSCPostEvaluator {
         buffer.clear();
         bufferCount.clear();
 
-        // update individuals in novelty archive with the new clustering
-        updateNoveltyArchive(state);
-
+        return true;
     }
 }

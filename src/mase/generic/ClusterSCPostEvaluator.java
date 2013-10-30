@@ -5,8 +5,6 @@
 package mase.generic;
 
 import ec.EvolutionState;
-import ec.Individual;
-import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,8 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import mase.EvaluationResult;
-import mase.ExpandedFitness;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
 import mase.evaluation.BehaviourResult;
@@ -32,11 +28,10 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     protected int numClusters;
     protected float[][] clusters;
     protected int[] counts;
-    protected Map<Integer, Integer> assignements;
-    protected Map<Integer, byte[]> buffer;
-    protected Map<Integer, Float> bufferCount;
+    protected Map<Integer, Integer> assignements; // state-cluster assignments
+    protected Map<Integer, byte[]> buffer; // elements to be added to clusters
+    protected Map<Integer, Float> bufferCount; // counts of the above elements
     protected List<BehaviourResult> archive;
-    //protected KDTree clusterTree;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -50,26 +45,26 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
 
     @Override
     public void processPopulation(EvolutionState state) {
-        super.processPopulation(state); // filter
+        super.processPopulation(state); // Filter
 
         HashMap<Integer, byte[]> genKey = new HashMap<Integer, byte[]>(1000);
-
         // Integrate the information from the evaluations of this generation
-        for (Subpopulation sub : state.population.subpops) {
-            for (Individual ind : sub.individuals) {
-                for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
-                    if (er instanceof SCResult) {
-                        SCResult scr = (SCResult) er;
-                        genKey.putAll(scr.getStates());
-                        buffer.putAll(scr.getStates());
-                        mergeCountMap(bufferCount, scr.getCounts());
-                    }
-                }
-            }
+        for (SCResult scr : super.currentPop) {
+            genKey.putAll(scr.getStates());
+            buffer.putAll(scr.getStates());
+            mergeCountMap(bufferCount, scr.getCounts());
+        }
+        
+        // Initialize
+        if(clusters == null) {
+            initializeClusters(state);
         }
 
-        // Rebuild the clusters
-        updateClusters(state);
+        // Rebuild the clusters with the evaluations from this generation
+        if (updateClusters(state)) {
+            // update individuals in novelty archive with the new clustering
+            updateNoveltyArchive(state);
+        }
 
         // Make the assignements
         for (Entry<Integer, byte[]> e : genKey.entrySet()) {
@@ -78,45 +73,25 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             }
         }
 
-        // Calculate cluster state count
-        for (Subpopulation sub : state.population.subpops) {
-            for (Individual ind : sub.individuals) {
-                for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
-                    if (er instanceof SCResult) {
-                        computeClusteredCount((SCResult) er);
-                    }
-                }
-            }
+        // Calculate cluster state counts
+        for (SCResult scr : super.currentPop) {
+            computeClusteredCount(scr);
         }
 
         if (super.doTfIdf) {
             // cluster count totals
             float[] clusterCount = new float[numClusters];
-            for (Subpopulation sub : state.population.subpops) {
-                for (Individual ind : sub.individuals) {
-                    for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
-                        if (er instanceof SCResult) {
-                            SCResult r = (SCResult) er;
-                            for (int i = 0; i < numClusters; i++) {
-                                clusterCount[i] += r.rawClusteredCount[i];
-                            }
-                        }
-                    }
+            for (SCResult scr : super.currentPop) {
+                for (int i = 0; i < numClusters; i++) {
+                    clusterCount[i] += scr.rawClusteredCount[i];
                 }
             }
 
             // adjust population counts
-            for (Subpopulation sub : state.population.subpops) {
-                for (Individual ind : sub.individuals) {
-                    for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
-                        if (er instanceof SCResult) {
-                            SCResult r = (SCResult) er;
-                            for (int i = 0; i < numClusters; i++) {
-                                if (r.rawClusteredCount[i] > 0) {
-                                    r.getBehaviour()[i] = r.rawClusteredCount[i] / clusterCount[i];
-                                }
-                            }
-                        }
+            for (SCResult scr : super.currentPop) {
+                for (int i = 0; i < numClusters; i++) {
+                    if (scr.rawClusteredCount[i] > 0) {
+                        scr.getBehaviour()[i] = scr.rawClusteredCount[i] / clusterCount[i];
                     }
                 }
             }
@@ -126,84 +101,19 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                 SCResult scr = (SCResult) br;
                 for (int i = 0; i < numClusters; i++) {
                     if (scr.getBehaviour()[i] > 0) {
-                        scr.getBehaviour()[i] = scr.getBehaviour()[i] / clusterCount[i];
+                        scr.getBehaviour()[i] = scr.rawClusteredCount[i] / clusterCount[i];
                     }
                 }
             }
         }
     }
-
-    protected void computeClusteredCount(SCResult scr) {
-        float[] clusterCount = new float[clusters.length];
-        Arrays.fill(clusterCount, 0);
-        for (Entry<Integer, Float> e : scr.getCounts().entrySet()) {
-            int clusterIndex = assignements.get(e.getKey());
-            clusterCount[clusterIndex] += e.getValue();
-        }
-        scr.setBehaviour(clusterCount);
-        scr.rawClusteredCount = Arrays.copyOf(clusterCount, clusterCount.length);
-    }
-
-    // TODO: replace with space partitioning tree
-    protected int closestCluster(byte[] candidate) {
-        double closestDist = Double.POSITIVE_INFINITY;
-        int closestCluster = -1;
-        for (int i = 0; i < clusters.length; i++) {
-            float[] c = clusters[i];
-            double dist = distance(c, candidate);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closestCluster = i;
-            }
-        }
-        return closestCluster;
-    }
-
-    protected double distance(float[] clusters, byte[] candidate) {
-        double d = 0;
-        for (int i = 0; i < clusters.length; i++) {
-            d += Math.pow(clusters[i] - candidate[i], 2);
-        }
-        return d;
-    }
-
-    protected void updateClusters(EvolutionState state) {
-        if (clusters == null) {
-            initializeClusters(state);
-        }
-        assignements.clear();
-
-        // do the incremental update
-        for (Integer key : buffer.keySet()) {
-            int cluster = closestCluster(buffer.get(key));
-            updateCluster(cluster, buffer.get(key), bufferCount.get(key));
-            // TODO make the assignement of key to cluster?
-        }
-
-        // clear the structures
-        buffer.clear();
-        bufferCount.clear();
-
-        // update individuals in novelty archive with the new clustering
-        updateNoveltyArchive(state);
-    }
-
+    
     /*
-     * Complete memory -- all samples weight the same
-     */
-    private void updateCluster(int cl, byte[] candidate, float freq) {
-        for (int i = 0; i < Math.round(freq); i++) {
-            counts[cl]++;
-            for (int j = 0; j < candidate.length; j++) {
-                clusters[cl][j] += (1.0 / counts[cl]) * (candidate[j] - clusters[cl][j]);
-            }
-        }
-    }
-
+    Forgy method -- randomly chooses k observations from the data set and uses these as the initial means
+    */
     protected void initializeClusters(EvolutionState state) {
         this.clusters = new float[numClusters][];
         this.counts = new int[numClusters];
-        // Forgy method -- randomly chooses k observations from the data set and uses these as the initial means
         Object[] list = buffer.keySet().toArray();
         HashSet<Integer> randomKeys = new HashSet<Integer>(numClusters * 2);
         while (randomKeys.size() < numClusters) {
@@ -221,7 +131,64 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             }
             clusters[clusterIndex++] = cl;
         }
+    }    
+
+    protected void computeClusteredCount(SCResult scr) {
+        float[] clusterCount = new float[clusters.length];
+        Arrays.fill(clusterCount, 0);
+        for (Entry<Integer, Float> e : scr.getCounts().entrySet()) {
+            int clusterIndex = assignements.get(e.getKey());
+            clusterCount[clusterIndex] += e.getValue();
+        }
+        scr.setBehaviour(clusterCount);
+        scr.rawClusteredCount = Arrays.copyOf(clusterCount, clusterCount.length);
     }
+
+    // TODO: replace with space partitioning tree?
+    protected int closestCluster(byte[] candidate) {
+        double closestDist = Double.POSITIVE_INFINITY;
+        int closestCluster = -1;
+        for (int i = 0; i < clusters.length; i++) {
+            float[] c = clusters[i];
+            double dist = centerDistance(c, candidate);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestCluster = i;
+            }
+        }
+        return closestCluster;
+    }
+
+    protected double centerDistance(float[] cluster, byte[] candidate) {
+        double d = 0;
+        for (int i = 0; i < cluster.length; i++) {
+            d += Math.pow(cluster[i] - candidate[i], 2);
+        }
+        return d;
+    }
+
+    /*
+     * Returns TRUE if the clusters changed. FALSE otherwise.
+     */
+    protected boolean updateClusters(EvolutionState state) {
+        assignements.clear();
+
+        // do the incremental update
+        for (Integer key : buffer.keySet()) {
+            byte[] candidate = buffer.get(key);
+            int c = closestCluster(candidate);
+            counts[c]++;
+            for (int j = 0; j < candidate.length; j++) {
+                clusters[c][j] += (1.0 / counts[c]) * (candidate[j] - clusters[c][j]);
+            }
+        }
+
+        // clear the structures
+        buffer.clear();
+        bufferCount.clear();
+        return true;
+    }
+
 
     protected void updateNoveltyArchive(EvolutionState state) {
         if (archive == null) {
