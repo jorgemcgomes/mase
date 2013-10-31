@@ -54,8 +54,20 @@ public class WeightedNovelty extends NoveltyEvaluation {
 
     @Override
     public void processPopulation(EvolutionState state) {
-        super.processPopulation(state);
+        if (weights == null) {
+            for (Subpopulation sub : state.population.subpops) {
+                nIndividuals += sub.individuals.length;
+            }
+            int len = ((float[]) ((VectorBehaviourResult) ((NoveltyFitness) state.population.subpops[0].individuals[0].fitness).getNoveltyBehaviour()).value()).length;
+            weights = new float[len];
+            Arrays.fill(weights, 1);
+            instantCorrelation = new float[weights.length];
+            Arrays.fill(instantCorrelation, 0);
+            adjustedCorrelation = new float[weights.length];
+            Arrays.fill(adjustedCorrelation, 0);
+        }
         updateWeights(state, state.population);
+        super.processPopulation(state);
     }
 
     /*
@@ -66,30 +78,14 @@ public class WeightedNovelty extends NoveltyEvaluation {
         float[] v1 = (float[]) ((VectorBehaviourResult) br1).value();
         float[] v2 = (float[]) ((VectorBehaviourResult) br2).value();
 
-        if (weights == null) { // TODO: mudar de sitio?
-            weights = new float[v1.length];
-            Arrays.fill(weights, 1);
-            instantCorrelation = new float[weights.length];
-            Arrays.fill(instantCorrelation, 0);
-            adjustedCorrelation = new float[weights.length];
-            Arrays.fill(adjustedCorrelation, 0);
-        }
-        
         float[] w1 = new float[v1.length];
         float[] w2 = new float[v2.length];
-        for(int i = 0 ; i < v1.length ; i++) {
+        for (int i = 0; i < v1.length; i++) {
             w1[i] = v1[i] * weights[i];
             w2[i] = v2[i] * weights[i];
-            
         }
-        
+
         float d = ((VectorBehaviourResult) br1).vectorDistance(w1, w2);
-        /*if(Float.isNaN(d) || Float.isInfinite(d)) {
-            System.out.println("Wrong distance: " + d + " V1: " + Arrays.toString(v1) + " | V2: " + Arrays.toString(v2) + " | W: " + Arrays.toString(weights));
-        }
-        if(d < 0.0001 && d > -0.0001) {
-            System.out.println("Zero distance: " + d + " V1: " + Arrays.toString(v1) + " | V2: " + Arrays.toString(v2) + " | W: " + Arrays.toString(weights));
-        }*/
         return d;
     }
 
@@ -98,12 +94,6 @@ public class WeightedNovelty extends NoveltyEvaluation {
      * What behaviour features are relevant for fitness might change throughout evolution.
      */
     protected void updateWeights(EvolutionState state, Population pop) {
-        if (nIndividuals == 0) {
-            for (Subpopulation sub : state.population.subpops) {
-                nIndividuals += sub.individuals.length;
-            }
-        }
-
         int indIndex = 0;
         double[] fitnessScores = new double[nIndividuals];
         double[][] behaviourFeatures = new double[weights.length][nIndividuals];
@@ -136,7 +126,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
 
         // abs and smooth
         for (int i = 0; i < instantCorrelation.length; i++) {
-            if(Float.isNaN(instantCorrelation[i])) {
+            if (Float.isNaN(instantCorrelation[i])) {
                 instantCorrelation[i] = 0;
             }
             adjustedCorrelation[i] = Math.abs(instantCorrelation[i]) * (1 - smooth) + adjustedCorrelation[i] * smooth;

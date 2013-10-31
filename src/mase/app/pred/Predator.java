@@ -59,8 +59,7 @@ public class Predator extends SmartAgent {
     public void action(double[] output) {
         double forward = output[0] * predSim.par.predatorSpeed;
         double r = (output[1] * 2 - 1) * predSim.par.predatorRotateSpeed;
-        Double2D dir = super.getDirection().rotate(r);
-        super.move(dir, forward);
+        super.move(orientation2D() + r, forward);
 
         // capture preys
         Bag objects = field.getNeighborsExactlyWithinDistance(getLocation(), predSim.par.captureDistance + Predator.RADIUS + Prey.RADIUS, false);

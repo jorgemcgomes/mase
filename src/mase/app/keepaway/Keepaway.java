@@ -62,7 +62,7 @@ public class Keepaway extends MaseSimState {
             Keeper k = new Keeper(this, field, acs[i].clone(), par.passSpeed[i], par.moveSpeed[i], par.color[i]);
             Double2D v = up.rotate(rot * i);
             k.setLocation(v.add(center));
-            k.setDirection(v.negate());
+            k.setOrientation(v.negate().angle());
             k.setStopper(schedule.scheduleRepeating(k));
             k.enableCollisionDetection(par.collisions);
             keepers.add(k);
@@ -93,7 +93,7 @@ public class Keepaway extends MaseSimState {
             ag = random.nextInt(keepers.size());
         }
         Keeper k = keepers.get(ag);
-        Double2D loc = k.getLocation().add(k.getDirection().resize(5));
+        Double2D loc = k.getLocation().add(new Double2D(0,-5));
         ball.setLocation(loc);
         ball.setStopper(schedule.scheduleRepeating(ball));
     }

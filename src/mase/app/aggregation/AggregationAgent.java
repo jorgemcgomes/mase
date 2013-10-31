@@ -149,7 +149,7 @@ public class AggregationAgent extends SmartAgent {
         AggregationParams par = ((Aggregation) sim).par;
         double speed = output[2] > 0.5 ? 0 : output[0] * par.agentSpeed;
         double r = (output[1] * 2 - 1) * par.agentRotation;
-        Double2D dir = super.getDirection().rotate(r);
+        double dir = orientation2D() + r;
         super.move(dir, speed);
     }
 

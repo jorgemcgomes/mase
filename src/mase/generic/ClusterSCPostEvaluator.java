@@ -6,6 +6,7 @@ package mase.generic;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
+import edu.wlu.cs.levy.CG.KDTree;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import mase.PostEvaluator;
 import mase.evaluation.BehaviourResult;
 import static mase.generic.SCPostEvaluator.mergeCountMap;
 import mase.novelty.NoveltyEvaluation;
+import net.jafama.FastMath;
 
 /**
  *
@@ -26,8 +28,9 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
 
     public static final String P_NUM_CLUSTERS = "k-clusters";
     protected int numClusters;
-    protected float[][] clusters;
+    protected double[][] clusters;
     protected int[] counts;
+    protected KDTree<Integer> clusterTree;
     protected Map<Integer, Integer> assignements; // state-cluster assignments
     protected Map<Integer, byte[]> buffer; // elements to be added to clusters
     protected Map<Integer, Float> bufferCount; // counts of the above elements
@@ -54,16 +57,19 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             buffer.putAll(scr.getStates());
             mergeCountMap(bufferCount, scr.getCounts());
         }
-        
+
         // Initialize
-        if(clusters == null) {
+        if (clusters == null) {
             initializeClusters(state);
+            updateClusterTree();
         }
 
         // Rebuild the clusters with the evaluations from this generation
         if (updateClusters(state)) {
             // update individuals in novelty archive with the new clustering
             updateNoveltyArchive(state);
+            // update tree
+            updateClusterTree();
         }
 
         // Make the assignements
@@ -107,12 +113,12 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             }
         }
     }
-    
+
     /*
-    Forgy method -- randomly chooses k observations from the data set and uses these as the initial means
-    */
+     Forgy method -- randomly chooses k observations from the data set and uses these as the initial means
+     */
     protected void initializeClusters(EvolutionState state) {
-        this.clusters = new float[numClusters][];
+        this.clusters = new double[numClusters][];
         this.counts = new int[numClusters];
         Object[] list = buffer.keySet().toArray();
         HashSet<Integer> randomKeys = new HashSet<Integer>(numClusters * 2);
@@ -125,13 +131,13 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         int clusterIndex = 0;
         for (Integer key : randomKeys) {
             byte[] s = buffer.get(key);
-            float[] cl = new float[s.length];
+            double[] cl = new double[s.length];
             for (int i = 0; i < s.length; i++) {
                 cl[i] = s[i];
             }
             clusters[clusterIndex++] = cl;
         }
-    }    
+    }
 
     protected void computeClusteredCount(SCResult scr) {
         float[] clusterCount = new float[clusters.length];
@@ -144,25 +150,18 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         scr.rawClusteredCount = Arrays.copyOf(clusterCount, clusterCount.length);
     }
 
-    // TODO: replace with space partitioning tree?
     protected int closestCluster(byte[] candidate) {
-        double closestDist = Double.POSITIVE_INFINITY;
-        int closestCluster = -1;
-        for (int i = 0; i < clusters.length; i++) {
-            float[] c = clusters[i];
-            double dist = centerDistance(c, candidate);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closestCluster = i;
-            }
+        double[] cand = new double[candidate.length];
+        for (int i = 0; i < cand.length; i++) {
+            cand[i] = candidate[i];
         }
-        return closestCluster;
+        return clusterTree.nearest(cand);
     }
 
-    protected double centerDistance(float[] cluster, byte[] candidate) {
+    protected double centerDistance(double[] cluster, byte[] candidate) {
         double d = 0;
         for (int i = 0; i < cluster.length; i++) {
-            d += Math.pow(cluster[i] - candidate[i], 2);
+            d += FastMath.pow(cluster[i] - candidate[i], 2);
         }
         return d;
     }
@@ -173,13 +172,23 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     protected boolean updateClusters(EvolutionState state) {
         assignements.clear();
 
-        // do the incremental update
+        HashMap<Integer, Integer> centerCache = new HashMap<Integer, Integer>(buffer.size() * 2);
+
+        // Cache the centers nearest to the elements of buffer
         for (Integer key : buffer.keySet()) {
-            byte[] candidate = buffer.get(key);
-            int c = closestCluster(candidate);
-            counts[c]++;
-            for (int j = 0; j < candidate.length; j++) {
-                clusters[c][j] += (1.0 / counts[c]) * (candidate[j] - clusters[c][j]);
+            int cluster = closestCluster(buffer.get(key));
+            centerCache.put(key, cluster);
+        }
+
+        // Update clusters
+        for (Integer key : buffer.keySet()) {
+            int c = centerCache.get(key); // get cached center
+            counts[c]++; // update per-center counts
+            float learningRate = 1.0f / counts[c]; // per-center learning rate
+            double[] cluster = clusters[c];
+            byte[] x = buffer.get(key);
+            for (int i = 0; i < cluster.length; i++) {
+                cluster[i] = (1 - learningRate) * cluster[i] + learningRate * x[i]; // gradient step
             }
         }
 
@@ -189,6 +198,12 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         return true;
     }
 
+    protected void updateClusterTree() {
+        clusterTree = new KDTree<Integer>(clusters[0].length);
+        for (int i = 0; i < clusters.length; i++) {
+            clusterTree.insert(clusters[i], i);
+        }
+    }
 
     protected void updateNoveltyArchive(EvolutionState state) {
         if (archive == null) {

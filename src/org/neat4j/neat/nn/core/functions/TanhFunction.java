@@ -4,6 +4,7 @@
  */
 package org.neat4j.neat.nn.core.functions;
 
+import net.jafama.FastMath;
 import org.neat4j.neat.nn.core.ActivationFunction;
 
 /**
@@ -22,14 +23,14 @@ public class TanhFunction implements ActivationFunction {
 		} else if (neuronIp > 20) {
 			op = 1;
 		} else {
-			op = (1 - Math.exp(-2 * neuronIp)) / (1 + Math.exp(-2 * neuronIp));
+			op = (1 - FastMath.exp(-2 * neuronIp)) / (1 + FastMath.exp(-2 * neuronIp));
 		}
 		return (op);
 	}
 
 	public double derivative(double neuronIp) {
 		double deriv = 0;
-		deriv = (1 - Math.pow(neuronIp, 2));
+		deriv = (1 - FastMath.pow2(neuronIp));
 		return (deriv);
 	}
 }

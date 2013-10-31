@@ -4,6 +4,7 @@
  */
 package org.neat4j.neat.nn.core.functions;
 
+import net.jafama.FastMath;
 import org.neat4j.neat.nn.core.ActivationFunction;
 
 /**
@@ -26,7 +27,7 @@ public class SigmoidFunction implements ActivationFunction {
 	 * @see org.neat4j.ailibrary.nn.core.ActivationFunction#activate(double)
 	 */
 	public double activate(double neuronIp) {
-		return (1.0 / ( 1.0 + Math.exp(this.factor * neuronIp)));
+		return (1.0 / ( 1.0 + FastMath.exp(this.factor * neuronIp)));
 	}
 
 	public double derivative(double neuronIp) {

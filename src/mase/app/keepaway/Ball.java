@@ -18,7 +18,7 @@ public class Ball extends EmboddiedAgent {
 
     public static final double RADIUS = 1;
     private double nextKickPower;
-    private Double2D nextKickDirection;
+    private double nextKickDirection;
     protected double distanceToCenter;
     
     public Ball(SimState sim, Continuous2D field) {
@@ -31,9 +31,9 @@ public class Ball extends EmboddiedAgent {
         if(nextKickPower > 0) { // apply kick
             super.move(nextKickDirection, nextKickPower);
             nextKickPower = 0;
-        } else if(getSpeed() > 0) { // ball movement
+        } else if(getSpeed() > 0) { // continue ball movement
             // move
-            super.move(getDirection(), getSpeed() - kw.par.ballDecay);
+            super.move(orientation2D(), getSpeed() - kw.par.ballDecay);
         }
         distanceToCenter = kw.center.distance(getLocation());
         
@@ -44,7 +44,7 @@ public class Ball extends EmboddiedAgent {
         }
     }
     
-    public void kick(Double2D direction, double power) {
+    public void kick(double direction, double power) {
         nextKickPower = power;
         nextKickDirection = direction;
     }

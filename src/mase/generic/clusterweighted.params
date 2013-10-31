@@ -1,6 +1,6 @@
 eval.num-post = 3
 
-eval.post.0 =                           mase.generic.ClusterSCPostEval2
+eval.post.0 =                           mase.generic.ClusterSCPostEvaluator
 statecount.k-clusters =                 20
 statecount.filter-threshold =          0.01
 statecount.do-filter =                 TRUE

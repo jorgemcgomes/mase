@@ -56,7 +56,7 @@ public class TestPredator extends Predator {
         /* Chase nearest prey */
         //Double2D captureVec = closest.getLocation().subtract(pos);
         //super.move(captureVec, predatorSpeed);
-        super.move(new Double2D(0, 1), predSim.par.predatorSpeed);
+        super.move(0, predSim.par.predatorSpeed);
 
         // capture preys
         Bag objects = field.getObjectsExactlyWithinDistance(getLocation(), predSim.par.captureDistance, false);

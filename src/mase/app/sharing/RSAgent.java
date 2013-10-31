@@ -84,8 +84,8 @@ public class RSAgent extends SmartAgent {
         ResourceSharing rs = (ResourceSharing) sim;
         // Movement
         double speed = output[2] > 0.5 ? 0 : output[0];
-        Double2D dir = output[2] > 0.5 ? getDirection()
-                : getDirection().rotate((output[1] * 2 - 1) * rs.par.agentRotation);
+        double rot = (output[1] * 2 - 1) * rs.par.agentRotation; // [-AgentRot, AgentRot]
+        double dir = output[2] > 0.5 ? orientation2D() : orientation2D() + rot;
         super.move(dir, speed * rs.par.agentSpeed);
 
         /*double speed;
@@ -117,7 +117,7 @@ public class RSAgent extends SmartAgent {
             lastSensors[i++] = 0;
             lastSensors[i] = -1;
             Arrays.fill(lastAction, 0);
-            move(getDirection(), 0);
+            move(orientation2D(), 0);
         }
     }
 

@@ -15,7 +15,7 @@ import mase.novelty.WeightedNovelty;
  *
  * @author jorge
  */
-public class ClusterSCPostEvalReplace extends ClusterSCPostEvalBatch {
+public class ClusterSCPostEvalReplace extends ClusterSCPostEvaluator {
 
     private WeightedNovelty wnov;
     protected int replaceRate;
@@ -100,7 +100,7 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEvalBatch {
         return super.updateClusters(state) || replaced;
     }
 
-    private float dist(float[] a, float[] b) {
+    private float dist(double[] a, double[] b) {
         float d = 0;
         for (int i = 0; i < a.length; i++) {
             d += Math.pow(a[i] - b[i], 2);

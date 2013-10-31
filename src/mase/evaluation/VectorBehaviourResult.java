@@ -6,6 +6,7 @@ package mase.evaluation;
 
 import mase.EvaluationResult;
 import java.util.Arrays;
+import net.jafama.FastMath;
 
 /**
  *
@@ -32,12 +33,7 @@ public class VectorBehaviourResult implements BehaviourResult {
 
     @Override
     public float distanceTo(BehaviourResult other) {
-        float res = 0;
-        float[] otherB = (float[]) other.value();
-        for (int i = 0; i < behaviour.length; i++) {
-            res += Math.pow(behaviour[i] - otherB[i], 2);
-        }
-        return (float) Math.sqrt(res);
+        return vectorDistance(behaviour, (float[]) other.value());
     }
 
     @Override
@@ -92,9 +88,9 @@ public class VectorBehaviourResult implements BehaviourResult {
             case EUCLIDEAN:
                 float d = 0;
                 for (int i = 0; i < v1.length; i++) {
-                    d += Math.pow(v1[i] - v2[i], 2);
+                    d += FastMath.pow(v1[i] - v2[i], 2);
                 }
-                return (float) Math.sqrt(d);
+                return (float) FastMath.sqrtQuick(d);
         }
     }
 
@@ -105,11 +101,11 @@ public class VectorBehaviourResult implements BehaviourResult {
         float cosineSimilarity;
         for (int i = 0; i < docVector1.length; i++) {
             dotProduct += docVector1[i] * docVector2[i];  //a.b
-            magnitude1 += Math.pow(docVector1[i], 2);  //(a^2)
-            magnitude2 += Math.pow(docVector2[i], 2); //(b^2)
+            magnitude1 += FastMath.pow(docVector1[i], 2);  //(a^2)
+            magnitude2 += FastMath.pow(docVector2[i], 2); //(b^2)
         }
-        magnitude1 = (float) Math.sqrt(magnitude1);//sqrt(a^2)
-        magnitude2 = (float) Math.sqrt(magnitude2);//sqrt(b^2)
+        magnitude1 = (float) FastMath.sqrtQuick(magnitude1);//sqrt(a^2)
+        magnitude2 = (float) FastMath.sqrtQuick(magnitude2);//sqrt(b^2)
 
         if (magnitude1 != 0.0 | magnitude2 != 0.0) {
             cosineSimilarity = dotProduct / (magnitude1 * magnitude2);

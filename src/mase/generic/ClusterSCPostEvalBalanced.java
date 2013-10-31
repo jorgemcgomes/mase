@@ -55,7 +55,7 @@ public class ClusterSCPostEvalBalanced extends ClusterSCPostEvaluator {
         // Update clusters
         for (Integer key : buffer.keySet()) {
             int c = centerCache.get(key); // get cached center
-            float[] cluster = clusters[c];
+            double[] cluster = clusters[c];
             byte[] x = buffer.get(key);
             for (int i = 0; i < cluster.length; i++) {
                 cluster[i] = (1 - adjWeights[i]) * cluster[i] + adjWeights[i] * x[i]; // gradient step

@@ -5,7 +5,7 @@
 package mase.mason;
 
 import java.awt.Color;
-import java.util.Arrays;
+import net.jafama.FastMath;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
@@ -24,9 +24,8 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
 
     protected Continuous2D field;
     private Double2D pos;
-    private Double2D direction;
     private double orientation;
-    private double radius;
+    private final double radius;
     private double speed;
     private boolean collisionStatus;
     private Stoppable stopper;
@@ -37,7 +36,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     public static final double COLLISION_DIRECTION = Math.PI / 2;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
-        super(new OvalPortrayal2D(c, radius * 2, true), 0, 1, 
+        super(new OvalPortrayal2D(c, radius * 2, true), 0, radius,
                 new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
         this.sim = sim;
         this.radius = radius;
@@ -58,23 +57,33 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.boundedArena = enable;
     }
 
-    protected boolean move(Double2D direction, double speed) {
-        this.direction = direction.normalize();
-        this.orientation = direction.angle();
+    protected boolean move(double orientation, double speed) {
+        this.orientation = normalizeAngle(orientation);
 
-        if (!attemptMove(direction, speed)) { // cannot move
+        if (!attemptMove(orientation, speed)) { // cannot move
             // try to escape to both sides with a random order
             double angle = sim.random.nextBoolean() ? COLLISION_DIRECTION : -COLLISION_DIRECTION;
-            if (!attemptMove(direction.rotate(angle), speed * COLLISION_SPEED_DECAY)
-                    && !attemptMove(direction.rotate(-angle), COLLISION_SPEED_DECAY)) {
+            if (!attemptMove(normalizeAngle(orientation + angle), speed * COLLISION_SPEED_DECAY)
+                    && !attemptMove(normalizeAngle(orientation - angle), COLLISION_SPEED_DECAY)) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean attemptMove(Double2D direction, double speed) {
-        Double2D newPos = direction.normalize().resize(speed).add(pos);
+    // from anything to [-PI,PI]
+    protected double normalizeAngle(double ang) {
+        if (ang > Math.PI) {
+            ang = ang - Math.PI * 2;
+        } else if (ang < -Math.PI) {
+            ang = ang + Math.PI * 2;
+        }
+        return ang;
+    }
+
+    private boolean attemptMove(double ori, double speed) {
+        Double2D displacement = new Double2D(speed * FastMath.cos(ori), speed * FastMath.sin(ori));
+        Double2D newPos = getLocation().add(displacement);
         if (isValidMove(newPos)) {
             this.collisionStatus = false;
             this.speed = speed;
@@ -126,18 +135,8 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         return orientation;
     }
 
-    public Double2D getDirection() {
-        return direction;
-    }
-
     public void setOrientation(double angle) {
         this.orientation = angle;
-        this.direction = new Double2D(Math.sin(orientation), Math.cos(orientation));
-    }
-
-    public void setDirection(Double2D dir) {
-        this.direction = dir.normalize();
-        this.orientation = dir.angle();
     }
 
     public Double2D getLocation() {
@@ -162,15 +161,26 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
      * @return From -PI to PI.
      */
     public double angleTo(Double2D point) {
-        // atan2 returns between -PI and PI
         Double2D agentToPoint = point.subtract(pos).normalize();
-        Double2D agentDir = direction;
-        return Math.atan2( agentDir.x*agentToPoint.y - agentDir.y*agentToPoint.x, agentDir.x*agentToPoint.x + agentDir.y*agentToPoint.y );
+        Double2D agentDir = new Double2D(FastMath.cos(orientation), FastMath.sin(orientation));
+        return FastMath.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
+        //return Math.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
+
+        // atan2 returns between -PI and PI
+        /*double angleToPoint = point.subtract(pos).angle(); // [-PI, PI]
+         double agentOri = this.orientation; // [-PI, PI]
+         double a = angleToPoint - agentOri; // [-2PI,2PI]
+         if(a > Math.PI * 2) {
+         a = a - Math.PI * 2;
+         } else if(a < -Math.PI * 2) {
+         a = a + Math.PI * 2;
+         }
+         return a;*/
     }
-    
+
     public static void main(String[] args) {
         double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
-        for(int i = 0 ; i < 10000000 ; i++) {
+        for (int i = 0; i < 10000000; i++) {
             double a = Math.atan2(Math.random() * 2 - 1, Math.random() * 2 - 1);
             min = Math.min(min, a);
             max = Math.max(max, a);

@@ -84,12 +84,12 @@ public class Keeper extends SmartAgent {
             this.hasPossession = true;
             justKicked = true;
             double kickPower = output[2] * passSpeed;
-            Double2D kickDir = getDirection().rotate(output[3] * Math.PI * 2 - Math.PI);
+            double kickDir = orientation2D() + (output[3] * Math.PI * 2 - Math.PI);
             kw.ball.kick(kickDir, kickPower);
         } else {
             this.hasPossession = false;
             double dashPower = output[0] * moveSpeed;
-            Double2D dashDir = getDirection().rotate(output[1] * Math.PI - Math.PI / 2);
+            double dashDir = orientation2D() + (output[1] * Math.PI - Math.PI / 2);
             super.move(dashDir, dashPower);
         }
     }

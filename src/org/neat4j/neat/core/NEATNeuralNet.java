@@ -86,7 +86,6 @@ public class NEATNeuralNet implements NeuralNet {
 		double[] inputPattern;
 		// find its inputs
 		Object[] sourceNodes = neuron.sourceNeurons().toArray();
-		Object[] incomingSynapses = neuron.incomingSynapses().toArray();
 		int i;
 		
 		this.level++;

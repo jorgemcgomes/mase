@@ -74,7 +74,7 @@ public class Prey extends EmboddiedAgent {
         }
 
         if (escapeVec != null) {
-            move(escapeVec, predSim.par.preySpeed);
+            move(escapeVec.angle(), predSim.par.preySpeed);
         }
         if (getLocation().x > predSim.par.size || getLocation().y > predSim.par.size || getLocation().x < 0 || getLocation().y < 0) {
             disappear();
