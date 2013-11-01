@@ -6,6 +6,7 @@ package mase.app.keepaway;
 
 import java.awt.Color;
 import mase.mason.EmboddiedAgent;
+import net.jafama.FastMath;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
@@ -35,8 +36,9 @@ public class Taker extends EmboddiedAgent {
         }
         
         // naive behaviour -- go towards the ball
-        double dir = this.angleTo(kw.ball.getLocation());
-        super.move(dir, kw.par.takerSpeed);
+        Double2D d = kw.ball.getLocation().subtract(this.getLocation());
+        //double dir = this.angleTo(kw.ball.getLocation());
+        super.move(FastMath.atan2(d.y, d.x), kw.par.takerSpeed);
     }
     
     public boolean hasCaughtBall() {

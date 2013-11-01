@@ -9,6 +9,7 @@ import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class SCPostEvaluator implements PostEvaluator {
     protected boolean doFilter;
     protected boolean doTfIdf;
     protected List<SCResult> currentPop;
+    protected Map<Integer, byte[]> globalKey;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -38,6 +40,7 @@ public class SCPostEvaluator implements PostEvaluator {
         this.filter = state.parameters.getDouble(base.push(P_FILTER), df.push(P_FILTER));
         this.doFilter = state.parameters.getBoolean(base.push(P_DO_FILTER), df.push(P_DO_FILTER), false);
         this.doTfIdf = state.parameters.getBoolean(base.push(P_DO_TFIDF), df.push(P_DO_TFIDF), false);
+        this.globalKey = new HashMap<Integer, byte[]>(10000);
     }
 
     @Override
@@ -49,7 +52,10 @@ public class SCPostEvaluator implements PostEvaluator {
             for (Individual ind : sub.individuals) {
                 for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
                     if (er instanceof SCResult) {
-                        currentPop.add((SCResult) er);
+                        SCResult scr = (SCResult) er;
+                        currentPop.add(scr);
+                        globalKey.putAll(scr.getStates());
+                        scr.states = null;
                     }
                 }
             }
@@ -104,5 +110,9 @@ public class SCPostEvaluator implements PostEvaluator {
                 map.put(e.getKey(), map.get(e.getKey()) + e.getValue());
             }
         }
+    }
+
+    public Map<Integer, byte[]> getGlobalKey() {
+        return globalKey;
     }
 }

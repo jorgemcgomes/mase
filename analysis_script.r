@@ -177,6 +177,8 @@ w.cl100 <- weightAnalysis(cl100)
 plotMultiline(smoothFrame(data.frame(gen=w.cl25$gen,cl25=w.cl25$mean,cl50=w.cl50$mean,cl100=w.cl100$mean), window=10), ylim=NULL, ylabel="Fitness-correlation", title="Mean correlation RS-3")
 plotMultiline(smoothFrame(data.frame(gen=w.cl25$gen,cl25=w.cl25$max,cl50=w.cl50$max,cl100=w.cl100$max), window=10), ylim=NULL, ylabel="Fitness-correlation", title="Max correlation RS-3")
 
+data <- metaLoadData("rs11_cl50_bal25","rs11_cl50_bal25_d3", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(data, expset.name="disc", fit.comp=T, fit.comp.par=list(snapshots=c(75,200,399)), show.only=T)
 
 bal10 <- loadData("rs11_cl50_bal10", jobs=10, fitlim=c(0,1), load.behavs=F,load.weights=T,  load.clusters=T, subpops=1, behavs.sample=0.1, expname="BAL-10", vars.group=c("survivors","energy","movement","distance"), vars.file=c("survivors","energy","movement","distance",paste0("gen",1:50)))    
 w.bal10 <- weightAnalysis(bal10)

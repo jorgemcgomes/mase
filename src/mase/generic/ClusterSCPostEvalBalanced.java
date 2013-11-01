@@ -16,9 +16,9 @@ import java.util.HashMap;
 public class ClusterSCPostEvalBalanced extends ClusterSCPostEvaluator {
 
     /*
-    Meaning: The elements from this generation should account for at least 
-    min-learning-rate in the adjustment of the cluster centers
-    */
+     Meaning: The elements from this generation should account for at least 
+     min-learning-rate in the adjustment of the cluster centers
+     */
     protected float minLearningRate;
     public static final String P_MIN_LEARNING_RATE = "min-learning-rate";
 
@@ -31,40 +31,37 @@ public class ClusterSCPostEvalBalanced extends ClusterSCPostEvaluator {
 
     @Override
     protected boolean updateClusters(EvolutionState state) {
-        assignements.clear();
-
         HashMap<Integer, Integer> centerCache = new HashMap<Integer, Integer>(buffer.size() * 2);
 
         int[] genCounts = new int[clusters.length];
         // Cache the centers nearest to the elements of buffer
         for (Integer key : buffer.keySet()) {
-            int cluster = closestCluster(buffer.get(key));
+            int cluster = closestCluster(globalKey.get(key));
             centerCache.put(key, cluster);
             genCounts[cluster]++;
             counts[cluster]++;
         }
-        
+
         // calculate per-center adjustement rates
         float[] adjWeights = new float[clusters.length];
-        for(int i = 0 ; i < genCounts.length ; i++) {
-            if(genCounts[i] > 0) {
+        for (int i = 0; i < genCounts.length; i++) {
+            if (genCounts[i] > 0) {
                 adjWeights[i] = Math.max(1f / counts[i], minLearningRate / genCounts[i]);
             }
         }
-        
+
         // Update clusters
         for (Integer key : buffer.keySet()) {
             int c = centerCache.get(key); // get cached center
             double[] cluster = clusters[c];
-            byte[] x = buffer.get(key);
+            byte[] x = globalKey.get(key);
             for (int i = 0; i < cluster.length; i++) {
                 cluster[i] = (1 - adjWeights[i]) * cluster[i] + adjWeights[i] * x[i]; // gradient step
             }
         }
 
-        // clear the structures
         buffer.clear();
-        bufferCount.clear();
+        buffer.clear();
 
         return true;
     }

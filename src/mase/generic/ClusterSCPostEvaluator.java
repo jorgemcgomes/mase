@@ -32,8 +32,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     protected int[] counts;
     protected KDTree<Integer> clusterTree;
     protected Map<Integer, Integer> assignements; // state-cluster assignments
-    protected Map<Integer, byte[]> buffer; // elements to be added to clusters
-    protected Map<Integer, Float> bufferCount; // counts of the above elements
+    protected Map<Integer, Float> buffer; // counts of the above elements
     protected List<BehaviourResult> archive;
 
     @Override
@@ -41,21 +40,19 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         super.setup(state, base);
         this.numClusters = state.parameters.getInt(base.push(P_NUM_CLUSTERS),
                 new Parameter(P_STATECOUNT_BASE).push(P_NUM_CLUSTERS));
-        this.buffer = new HashMap<Integer, byte[]>(1000);
+        this.buffer = new HashMap<Integer, Float>(1000);
         this.assignements = new HashMap<Integer, Integer>(1000);
-        this.bufferCount = new HashMap<Integer, Float>(1000);
     }
 
     @Override
     public void processPopulation(EvolutionState state) {
         super.processPopulation(state); // Filter
 
-        HashMap<Integer, byte[]> genKey = new HashMap<Integer, byte[]>(1000);
+        HashSet<Integer> genKeys = new HashSet<Integer>(1000);
         // Integrate the information from the evaluations of this generation
         for (SCResult scr : super.currentPop) {
-            genKey.putAll(scr.getStates());
-            buffer.putAll(scr.getStates());
-            mergeCountMap(bufferCount, scr.getCounts());
+            genKeys.addAll(scr.getCounts().keySet());
+            mergeCountMap(buffer, scr.getCounts());
         }
 
         // Initialize
@@ -66,16 +63,18 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
 
         // Rebuild the clusters with the evaluations from this generation
         if (updateClusters(state)) {
-            // update individuals in novelty archive with the new clustering
-            updateNoveltyArchive(state);
+            // clear the assignements
+            assignements.clear();
             // update tree
             updateClusterTree();
+            // update individuals in novelty archive with the new clustering
+            updateNoveltyArchive(state);
         }
 
-        // Make the assignements
-        for (Entry<Integer, byte[]> e : genKey.entrySet()) {
-            if (!assignements.containsKey(e.getKey())) {
-                assignements.put(e.getKey(), closestCluster(e.getValue()));
+        // Make the assignements of the states in the current population
+        for (Integer id : genKeys) {
+            if (!assignements.containsKey(id)) {
+                assignements.put(id, closestCluster(globalKey.get(id)));
             }
         }
 
@@ -130,7 +129,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         }
         int clusterIndex = 0;
         for (Integer key : randomKeys) {
-            byte[] s = buffer.get(key);
+            byte[] s = globalKey.get(key);
             double[] cl = new double[s.length];
             for (int i = 0; i < s.length; i++) {
                 cl[i] = s[i];
@@ -170,13 +169,11 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
      * Returns TRUE if the clusters changed. FALSE otherwise.
      */
     protected boolean updateClusters(EvolutionState state) {
-        assignements.clear();
-
         HashMap<Integer, Integer> centerCache = new HashMap<Integer, Integer>(buffer.size() * 2);
 
         // Cache the centers nearest to the elements of buffer
         for (Integer key : buffer.keySet()) {
-            int cluster = closestCluster(buffer.get(key));
+            int cluster = closestCluster(globalKey.get(key));
             centerCache.put(key, cluster);
         }
 
@@ -186,15 +183,14 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             counts[c]++; // update per-center counts
             float learningRate = 1.0f / counts[c]; // per-center learning rate
             double[] cluster = clusters[c];
-            byte[] x = buffer.get(key);
+            byte[] x = globalKey.get(key);
             for (int i = 0; i < cluster.length; i++) {
                 cluster[i] = (1 - learningRate) * cluster[i] + learningRate * x[i]; // gradient step
             }
         }
 
-        // clear the structures
         buffer.clear();
-        bufferCount.clear();
+        buffer.clear();
         return true;
     }
 
@@ -218,9 +214,9 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         for (BehaviourResult br : archive) {
             SCResult scr = (SCResult) br;
             // make the cluster assignements
-            for (Entry<Integer, byte[]> e : scr.getStates().entrySet()) {
-                if (!assignements.containsKey(e.getKey())) {
-                    assignements.put(e.getKey(), closestCluster(e.getValue()));
+            for (Integer key : scr.getCounts().keySet()) {
+                if (!assignements.containsKey(key)) {
+                    assignements.put(key, closestCluster(globalKey.get(key)));
                 }
             }
             // make cluster vector
