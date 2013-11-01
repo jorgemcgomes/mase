@@ -173,7 +173,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
 
         // Cache the centers nearest to the elements of buffer
         for (Integer key : buffer.keySet()) {
-            int cluster = closestCluster(globalKey.get(key));
+            int cluster = assignements.containsKey(key) ? assignements.get(key) : closestCluster(globalKey.get(key));
             centerCache.put(key, cluster);
         }
 

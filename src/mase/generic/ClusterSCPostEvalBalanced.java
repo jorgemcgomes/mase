@@ -36,7 +36,7 @@ public class ClusterSCPostEvalBalanced extends ClusterSCPostEvaluator {
         int[] genCounts = new int[clusters.length];
         // Cache the centers nearest to the elements of buffer
         for (Integer key : buffer.keySet()) {
-            int cluster = closestCluster(globalKey.get(key));
+            int cluster = assignements.containsKey(key) ? assignements.get(key) : closestCluster(globalKey.get(key));
             centerCache.put(key, cluster);
             genCounts[cluster]++;
             counts[cluster]++;
