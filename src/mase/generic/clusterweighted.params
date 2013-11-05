@@ -1,11 +1,12 @@
 eval.num-post = 3
 
 eval.post.0 =                           mase.generic.ClusterSCPostEvaluator
-statecount.k-clusters =                 20
+statecount.k-clusters =                 50
 statecount.filter-threshold =          0.01
-statecount.do-filter =                 TRUE
+statecount.do-filter =                 FALSE
 statecount.discretisation =             3
 statecount.update-freq =                5
+statecount.do-tf-idf =					TRUE
 statecount.distance =                   euclidean
 
 eval.post.1 =                           mase.novelty.WeightedNovelty
@@ -34,7 +35,7 @@ stat.child.12.corr-file =                $corr.stat
 
 stat.child.15 =                         mase.generic.SCStat
 stat.child.15.log-file =                $genericlog.stat
-stat.child.15.states-file =             $genericstates.stat
+stat.child.15.save-states = 			FALSE
 
 stat.child.16 =                         mase.generic.ClusterSCStat
 stat.child.16.gen-clusters =            $genclusters.stat

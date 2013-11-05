@@ -24,6 +24,7 @@ public class VectorBehaviourResult implements BehaviourResult {
 
     public VectorBehaviourResult(float... bs) {
         this.behaviour = bs;
+        this.dist = Distance.EUCLIDEAN;
     }
     
     public VectorBehaviourResult(Distance dist, float... bs) {

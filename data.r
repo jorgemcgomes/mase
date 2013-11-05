@@ -15,9 +15,10 @@ metaLoadData <- function(..., params, names=NULL) {
 loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c(), 
                      vars.file=c(vars.group, vars.ind), vars.transform=list(),
                      subpops=1, expname=folder, gens=NULL, load.behavs=TRUE, 
-                     load.clusters=FALSE, new.clusters=TRUE, load.weights=FALSE,
+                     load.clusters=FALSE, new.clusters=TRUE, load.weights=FALSE, load.noveltyind=FALSE,
                      behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat",
-                     clusters.file="genclusters.stat", weights.file="weights.stat") {
+                     clusters.file="genclusters.stat", weights.file="weights.stat",
+                     noveltyind.file="noveltyind.stat") {
     data <- NULL
     data$fitlim <- fitlim
     if(is.character(jobs)) {
@@ -71,7 +72,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         
         # Clusters
         if(load.clusters) {
-            cl <- read.table(file.path(folder, paste0(j,".",clusters.file)), header=FALSE, sep=" ")
+            cl <- read.table(file.path(folder, paste0(j,".",clusters.file)), header=FALSE, sep=" ", stringsAsFactors=F)
             if(new.clusters) {
                 data$clustervars <- paste0("c",1:(ncol(cl)-3))
                 colnames(cl) <- c("gen","count","frequency",data$clustervars)
@@ -84,9 +85,16 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         
         # Weights
         if(load.weights) {
-            wg <- read.table(file.path(folder, paste0(j,".",weights.file)), header=FALSE, sep=" ")
+            wg <- read.table(file.path(folder, paste0(j,".",weights.file)), header=FALSE, sep=" ", stringsAsFactors=F)
             colnames(wg) <- c("gen",paste0("w",1:(ncol(wg)-1)))
             data[[j]]$weights <- wg
+        }
+        
+        # Individual novelty stats
+        if(load.noveltyind) {
+            ni <- read.table(file.path(folder, paste0(j,".",noveltyind.file)), header=FALSE, sep=" ", stringsAsFactors=F)
+            colnames(ni) <- c("gen","subpop","ind","fit","nov","repocomp","score")
+            data[[j]]$noveltyind <- ni
         }
         
         prog <- prog + 1

@@ -235,6 +235,89 @@ plotMultiline(smoothFrame(data.frame(gen=c.batch$gen,batch=c.batch$mean,f001=c.f
 plotMultiline(smoothFrame(data.frame(gen=c.batch$gen,batch=c.batch$mean,rep10=c.rep10$mean, bal25=c.bal25$mean), window=10), ylim=NULL, ylabel="Mean cluster change", title="Clusters change RS-3")
 
 
+setwd("~/exps/generic2/sharing/")
+shar.data <- metaLoadData("fit","ls50","cl50_batch_d3","cl50_bal25_d3", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(shar.data, expset.name="rs", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=T)
+
+fit <- loadData("fit", jobs=10, fitlim=c(0,1), load.behavs=T, behavs.sample=0.1, subpops=1, expname="Fit", vars.group=c("survivors","energy","movement","distance"))
+ts <- loadData("ls50", jobs=10, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.1, expname="TS", vars.group=c("survivors","energy","movement","distance"))
+batch <- loadData("cl50_batch_d3", jobs=10, fitlim=c(0,1), load.behavs=T,load.weights=T, load.clusters=T, subpops=1, behavs.sample=0.1, expname="CL-Batch", vars.group=c("survivors","energy","movement","distance"), vars.file=c("survivors","energy","movement","distance",paste0("gen",1:50)))    
+bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,1), load.behavs=T,load.weights=T, load.clusters=T, subpops=1, behavs.sample=0.1, expname="CL-Bal25", vars.group=c("survivors","energy","movement","distance"), vars.file=c("survivors","energy","movement","distance",paste0("gen",1:50)))
+fullStatistics(list(fit,ts,batch,bal25), expset.name="rs", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), som.group=T, som.alljobs=T)
+w.batch <- weightAnalysis(batch) ; w.bal25 <- weightAnalysis(bal25)
+plotMultiline(smoothFrame(data.frame(gen=w.batch$gen,batch=w.batch$mean,bal25=w.bal25$mean), window=5), ylim=NULL, ylabel="Fitness-correlation", title="Mean correlation")
+c.batch <- clusterAnalysis(batch) ; c.bal25 <- clusterAnalysis(bal25)
+plotMultiline(smoothFrame(data.frame(gen=c.batch$gen,batch=c.batch$mean,bal25=c.bal25$mean), window=5), ylim=NULL, ylabel="Mean cluster change", title="Mean Clusters change")
+
+
+setwd("~/exps/generic2/aggregation/")
+agg.data <- metaLoadData("fit","ls50","cl50_batch_d3","cl50_bal25_d3", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(agg.data, expset.name="agg", fit.comp=T, fit.comp.par=list(snapshots=c(50,100,199)), show.only=T)
+
+fit <- loadData("fit", jobs=10, fitlim=c(0,1), load.behavs=T, behavs.sample=0.1, subpops=1, expname="Fit", vars.group=paste0("cm",1:20))
+ts <- loadData("ls50", jobs=10, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.1, expname="TS", vars.group=paste0("cm",1:20))
+batch <- loadData("cl50_batch_d3", jobs=10, fitlim=c(0,1), load.behavs=T, load.weights=T, load.clusters=T, subpops=1, behavs.sample=0.1, expname="CL-Batch", vars.group=paste0("cm",1:20), vars.file=c(paste0("cm",1:20),paste0("gen",1:50)))    
+bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,1), load.behavs=T, load.weights=T, load.clusters=T, subpops=1, behavs.sample=0.1, expname="CL-Bal25", vars.group=paste0("cm",1:20), vars.file=c(paste0("cm",1:20),paste0("gen",1:50)))    
+fullStatistics(list(fit,ts,batch,bal25), expset.name="agg", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(50,100,199)), som.group=T, som.alljobs=T)
+w.batch <- weightAnalysis(batch) ; w.bal25 <- weightAnalysis(bal25)
+plotMultiline(smoothFrame(data.frame(gen=w.batch$gen,batch=w.batch$mean,bal25=w.bal25$mean), window=5), ylim=NULL, ylabel="Fitness-correlation", title="Mean correlation")
+c.batch <- clusterAnalysis(batch) ; c.bal25 <- clusterAnalysis(bal25)
+plotMultiline(smoothFrame(data.frame(gen=c.batch$gen,batch=c.batch$mean,bal25=c.bal25$mean), window=5), ylim=NULL, ylabel="Mean cluster change", title="Mean Clusters change")
+
+
+setwd("~/exps/generic2/keepaway/")
+shar.data <- metaLoadData("fit","ls50","cl50_batch_d3","cl50_bal25_d3", params=list(fitlim=c(0,60),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(shar.data, expset.name="ks", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=T)
+
+fit <- loadData("fit", jobs=10, fitlim=c(0,60), load.behavs=T, behavs.sample=0.1, subpops=1, expname="Fit", vars.group=c("passes","steps","disp","passLength"))
+ts <- loadData("ls50", jobs=10, fitlim=c(0,60), load.behavs=T, subpops=1, behavs.sample=0.1, expname="TS", vars.group=c("passes","steps","disp","passLength"))
+batch <- loadData("cl50_batch_d3", jobs=10, fitlim=c(0,60), load.behavs=T,load.weights=T, load.clusters=T, subpops=1, behavs.sample=0.1, expname="CL-Batch", vars.group=c("passes","steps","disp","passLength"), vars.file=c("passes","steps","disp","passLength",paste0("gen",1:50)))    
+bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), load.behavs=T,load.weights=T, load.clusters=T, subpops=1, behavs.sample=0.1, expname="CL-Bal25", vars.group=c("passes","steps","disp","passLength"), vars.file=c("passes","steps","disp","passLength",paste0("gen",1:50)))
+fullStatistics(list(fit,ts,batch,bal25), expset.name="ks", show.only=F, fit.comp=T, fit.comp.par=list(snapshots=c(150,300,499)), som.group=T, som.alljobs=T)
+w.batch <- weightAnalysis(batch) ; w.bal25 <- weightAnalysis(bal25)
+plotMultiline(smoothFrame(data.frame(gen=w.batch$gen,batch=w.batch$mean,bal25=w.bal25$mean), window=5), ylim=NULL, ylabel="Fitness-correlation", title="Mean correlation")
+c.batch <- clusterAnalysis(batch) ; c.bal25 <- clusterAnalysis(bal25)
+plotMultiline(smoothFrame(data.frame(gen=c.batch$gen,batch=c.batch$mean,bal25=c.bal25$mean), window=5), ylim=NULL, ylabel="Mean cluster change", title="Mean Clusters change")
+
+
+
+setwd("~/exps/generic2/keepaway/")
+ks.data <- metaLoadData("fit","ls50","cl50_batch_d3","cl50_bal25_d3","cl50_bal75_d3","cl50_bal25_d3_exp","cl100_bal25_d3","cl200_bal25_d3", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(ks.data, expset.name="ks", fit.comp=T, fit.comp.par=list(snapshots=c(150,300,499)), show.only=T)
+
+setwd("~/exps/generic2/keepaway/")
+ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
+p <- pressureAnalysis(ts, top=0.25)
+bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
+p.b <- pressureAnalysis(bal25, top=0.25)
+plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="KS pressure", ylabel="Novelty-fitness pressure")
+
+setwd("~/exps/generic2/sharing/")
+ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
+p <- pressureAnalysis(ts, top=0.25)
+bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
+p.b <- pressureAnalysis(bal25, top=0.25)
+plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="RS pressure", ylabel="Novelty-fitness pressure")
+
+setwd("~/exps/generic2/aggregation/")
+ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
+p <- pressureAnalysis(ts, top=1)
+bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
+p.b <- pressureAnalysis(bal25, top=1)
+plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="Agg pressure", ylabel="Novelty-fitness pressure")
+
+
+
+
+
+
+
+
+
+
+
+
+
 setwd("~/exps")
 par <- list(fitlim=c(0,60), jobs=10, load.behavs=F, subpops=3)
 data <- metaLoadData("kw_fit_neat","kw_ts_neat","kw_ts75_neat","kw_gen_neat","kw_gen75_neat","kw_fit_ga","kw_ts_ga","kw_ts75_ga","kw_gen_ga","kw_gen75_ga", params=par)
