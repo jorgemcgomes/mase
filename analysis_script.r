@@ -282,28 +282,30 @@ plotMultiline(smoothFrame(data.frame(gen=c.batch$gen,batch=c.batch$mean,bal25=c.
 
 
 setwd("~/exps/generic2/keepaway/")
-ks.data <- metaLoadData("fit","ls50","cl50_batch_d3","cl50_bal25_d3","cl50_bal75_d3","cl50_bal25_d3_exp","cl100_bal25_d3","cl200_bal25_d3", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+ks.data <- metaLoadData("fit","ls50","cl50_batch_d3","cl50_bal25_d3","cl50_bal75_d3","cl50_bal25_d3_exp","cl100_bal25_d3","cl200_bal25_d3","cl25_bal25_d3", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
 fullStatistics(ks.data, expset.name="ks", fit.comp=T, fit.comp.par=list(snapshots=c(150,300,499)), show.only=T)
 
 setwd("~/exps/generic2/keepaway/")
 ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
-p <- pressureAnalysis(ts, top=0.25)
+p <- pressureAnalysis(ts)
 bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
-p.b <- pressureAnalysis(bal25, top=0.25)
-plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="KS pressure", ylabel="Novelty-fitness pressure")
+p.b <- pressureAnalysis(bal25)
+cl25 <- loadData("cl25_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Cl25")
+p.c <- pressureAnalysis(cl25)
+plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff,cl=p.c$diff),10), ylim=NULL, title="KS pressure", ylabel="Novelty-fitness pressure")
 
 setwd("~/exps/generic2/sharing/")
 ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
-p <- pressureAnalysis(ts, top=0.25)
+p <- pressureAnalysis(ts)
 bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
-p.b <- pressureAnalysis(bal25, top=0.25)
+p.b <- pressureAnalysis(bal25)
 plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="RS pressure", ylabel="Novelty-fitness pressure")
 
 setwd("~/exps/generic2/aggregation/")
 ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
-p <- pressureAnalysis(ts, top=1)
+p <- pressureAnalysis(ts)
 bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
-p.b <- pressureAnalysis(bal25, top=1)
+p.b <- pressureAnalysis(bal25)
 plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="Agg pressure", ylabel="Novelty-fitness pressure")
 
 

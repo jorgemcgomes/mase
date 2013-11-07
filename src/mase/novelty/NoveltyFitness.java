@@ -39,5 +39,8 @@ public class NoveltyFitness extends ExpandedFitness {
         }
         return br;
     }
-    
+
+    public double getNoveltyScore() {
+        return noveltyScore;
+    }
 }

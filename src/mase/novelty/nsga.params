@@ -1,0 +1,6 @@
+parent.0 = novelty.params
+
+eval.num-post = 2
+eval.post.1 =                           mase.novelty.NSGA2
+stat.child.12 =                         mase.novelty.NSGA2Stat
+stat.child.12.file =                    $nsga.stat

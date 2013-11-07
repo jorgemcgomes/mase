@@ -564,26 +564,7 @@ pressureAnalysis <- function(data, ...) {
     return(res)
 }
 
-pressureAnalysisRun <- function(frame) {
-    totalFit <- c()
-    totalNov <- c()
-    totalDiff <- c()
-    gens <- unique(frame$gen)
-    for(g in gens) {
-        subgen <- subset(frame, gen == g, select=c("nov","fit","score"))
-        novRange <- range(subgen[["nov"]])
-        fitRange <- range(subgen[["fit"]])
-        normNov <- (subgen[["nov"]] - novRange[1]) / (novRange[2] - novRange[1])
-        normFit <- (subgen[["fit"]] - fitRange[1]) / (fitRange[2] - fitRange[1])
-        totalFit <- c(totalFit, mean(normFit))
-        totalNov <- c(totalNov, mean(normNov))
-        totalDiff <- c(totalDiff, weighted.mean(normNov - normFit, subgen[["score"]]))
-    }
-    res <- data.frame(gen=gens, fit=totalFit, nov=totalNov, diff=totalDiff)
-    return(res)
-}
-
-# pressureAnalysisRun <- function(frame, top=0.2) {
+# pressureAnalysisRun <- function(frame) {
 #     totalFit <- c()
 #     totalNov <- c()
 #     totalDiff <- c()
@@ -592,17 +573,36 @@ pressureAnalysisRun <- function(frame) {
 #         subgen <- subset(frame, gen == g, select=c("nov","fit","score"))
 #         novRange <- range(subgen[["nov"]])
 #         fitRange <- range(subgen[["fit"]])
-#         nTop <- ceiling(top * nrow(subgen))
-#         topIndx <- order(subgen[["score"]], decreasing=T)[1:nTop]
-#         normNov <- (subgen[topIndx,"nov"] - novRange[1]) / (novRange[2] - novRange[1])
-#         normFit <- (subgen[topIndx,"fit"] - fitRange[1]) / (fitRange[2] - fitRange[1])
+#         normNov <- (subgen[["nov"]] - novRange[1]) / (novRange[2] - novRange[1])
+#         normFit <- (subgen[["fit"]] - fitRange[1]) / (fitRange[2] - fitRange[1])
 #         totalFit <- c(totalFit, mean(normFit))
 #         totalNov <- c(totalNov, mean(normNov))
-#         totalDiff <- c(totalDiff, mean(normNov - normFit))
+#         totalDiff <- c(totalDiff, weighted.mean(normNov - normFit, subgen[["score"]]))
 #     }
 #     res <- data.frame(gen=gens, fit=totalFit, nov=totalNov, diff=totalDiff)
 #     return(res)
 # }
+
+pressureAnalysisRun <- function(frame, top=0.25) {
+    totalFit <- c()
+    totalNov <- c()
+    totalDiff <- c()
+    gens <- unique(frame$gen)
+    for(g in gens) {
+        subgen <- subset(frame, gen == g, select=c("nov","fit","score"))
+        novRange <- range(subgen[["nov"]])
+        fitRange <- range(subgen[["fit"]])
+        nTop <- ceiling(top * nrow(subgen))
+        topIndx <- order(subgen[["score"]], decreasing=T)[1:nTop]
+        normNov <- (subgen[topIndx,"nov"] - novRange[1]) / (novRange[2] - novRange[1])
+        normFit <- (subgen[topIndx,"fit"] - fitRange[1]) / (fitRange[2] - fitRange[1])
+        totalFit <- c(totalFit, mean(normFit))
+        totalNov <- c(totalNov, mean(normNov))
+        totalDiff <- c(totalDiff, mean(normNov - normFit))
+    }
+    res <- data.frame(gen=gens, fit=totalFit, nov=totalNov, diff=totalDiff)
+    return(res)
+}
 
 pressureAnalysisDiff <- function(file) {
     f <- read.table(file, header=F, sep=" ", stringsAsFactors=F)
