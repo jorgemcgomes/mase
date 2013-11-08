@@ -282,8 +282,15 @@ plotMultiline(smoothFrame(data.frame(gen=c.batch$gen,batch=c.batch$mean,bal25=c.
 
 
 setwd("~/exps/generic2/keepaway/")
-ks.data <- metaLoadData("fit","ls50","cl50_batch_d3","cl50_bal25_d3","cl50_bal75_d3","cl50_bal25_d3_exp","cl100_bal25_d3","cl200_bal25_d3","cl25_bal25_d3", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
-fullStatistics(ks.data, expset.name="ks", fit.comp=T, fit.comp.par=list(snapshots=c(150,300,499)), show.only=T)
+data.ks <- metaLoadData("fit","ls50","nsga","cl50_bal25_d3","cl50_bal25_d3_nsga", params=list(fitlim=c(0,60),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(data.ks, expset.name="ks.nsga", fit.comp=T, fit.comp.par=list(snapshots=c(150,300,499)), show.only=F)
+setwd("~/exps/generic2/sharing/")
+data.rs <- metaLoadData("fit","ls50","nsga","cl50_bal25_d3","cl50_bal25_d3_nsga","cl100_bal25_d3_nsga_el25", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(data.rs, expset.name="rs.nsga", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=T)
+setwd("~/exps/generic2/aggregation/")
+data.agg <- metaLoadData("fit","ls50","nsga","cl50_bal25_d3","cl50_bal25_d3_nsga", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(data.agg, expset.name="agg.nsga", fit.comp=T, fit.comp.par=list(snapshots=c(75,100,199)), show.only=F)
+
 
 setwd("~/exps/generic2/keepaway/")
 ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
@@ -309,7 +316,13 @@ p.b <- pressureAnalysis(bal25)
 plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="Agg pressure", ylabel="Novelty-fitness pressure")
 
 
+setwd("~/exps/generic2/keepaway/")
+shar.data <- metaLoadData("fit","nsga","cl50_bal25_d3/","cl100_bal25_d3_tou2/","cl100_bal25_d3_tou5/","cl100_bal25_d3_tr25/","cl100_bal25_d3_tr50/", params=list(fitlim=c(0,60),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(shar.data, expset.name="ks", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=T)
 
+setwd("~/exps/generic2/sharing/")
+shar.data <- metaLoadData("fit","nsga","cl50_bal25_d3/","cl100_bal25_d3_tou5/","cl100_bal25_d3_tr25/","cl100_bal25_d3_tr50/", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(shar.data, expset.name="rs", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=T)
 
 
 

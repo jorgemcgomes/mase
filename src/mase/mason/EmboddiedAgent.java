@@ -103,20 +103,20 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
      * @return
      */
     protected boolean isValidMove(Double2D target) {
-        if (boundedArena) {
-            boolean inside = target.x >= radius && target.x <= field.width - radius && target.y >= radius && target.y <= field.height - radius;
-            if (!inside) {
+        return (!boundedArena || checkEnvironmentValidty(target)) &&
+                (!detectCollisions || checkAgentCollisions(target));
+    }
+
+    protected boolean checkEnvironmentValidty(Double2D target) {
+        return target.x >= radius && target.x <= field.width - radius && target.y >= radius && target.y <= field.height - radius;
+    }
+
+    protected boolean checkAgentCollisions(Double2D target) {
+        Bag objects = field.getNeighborsExactlyWithinDistance(target, radius * 2);
+
+        for (Object o : objects) {
+            if (o != this && o instanceof EmboddiedAgent && ((EmboddiedAgent) o).detectCollisions) {
                 return false;
-            }
-        }
-
-        if (detectCollisions) {
-            Bag objects = field.getNeighborsExactlyWithinDistance(target, radius * 2);
-
-            for (Object o : objects) {
-                if (o != this && o instanceof EmboddiedAgent && ((EmboddiedAgent) o).detectCollisions) {
-                    return false;
-                }
             }
         }
         return true;

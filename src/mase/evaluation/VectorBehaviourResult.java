@@ -91,7 +91,7 @@ public class VectorBehaviourResult implements BehaviourResult {
                 for (int i = 0; i < v1.length; i++) {
                     d += FastMath.pow(v1[i] - v2[i], 2);
                 }
-                return (float) FastMath.sqrtQuick(d);
+                return (float) FastMath.sqrt(d);
         }
     }
 

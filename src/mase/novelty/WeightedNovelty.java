@@ -21,19 +21,24 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
  */
 public class WeightedNovelty extends NoveltyEvaluation {
 
+    public static enum SelectionMethod {
+
+        all, truncation, tournament, roulette
+    };
+
     public static final String P_CORRELATION = "correlation";
     public static final String V_PEARSON = "pearson", V_SPEARMAN = "spearman";
-    public static final String P_MIN_WEIGHT = "min-weight";
     public static final String P_SMOOTH = "smooth";
-    public static final String P_CORR_EXPONENT = "corr-exponent";
+    public static final String P_SELECTION_PRESSURE = "selection-pressure";
+    public static final String P_DIMENSION_SELECTION = "selection-method";
     protected float[] weights;
     protected float[] instantCorrelation;
     protected float[] adjustedCorrelation;
     protected int nIndividuals;
     protected String correlation;
     protected float smooth;
-    protected float minWeight;
-    protected float corrExponent;
+    protected SelectionMethod selection;
+    protected float selectionPressure;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -46,9 +51,13 @@ public class WeightedNovelty extends NoveltyEvaluation {
         } else {
             state.output.fatal("Unknown correlation method.", base.push(P_CORRELATION));
         }
+        String m = state.parameters.getString(base.push(P_DIMENSION_SELECTION), null);
+        SelectionMethod method = SelectionMethod.valueOf(m);
+        if (method == null) {
+            state.output.fatal("Unknown selection method: " + m, base.push(P_DIMENSION_SELECTION));
+        }
+        this.selectionPressure = state.parameters.getFloat(base.push(P_SELECTION_PRESSURE), null);
         this.smooth = state.parameters.getFloat(base.push(P_SMOOTH), null, 0.5);
-        this.minWeight = state.parameters.getFloat(base.push(P_MIN_WEIGHT), null, 0);
-        this.corrExponent = state.parameters.getFloat(base.push(P_CORR_EXPONENT), null, 1);
         this.nIndividuals = 0;
     }
 
@@ -124,15 +133,48 @@ public class WeightedNovelty extends NoveltyEvaluation {
             }
         }
 
-        // abs and smooth
+        // calculate base weight -- absolute value and smooth
         for (int i = 0; i < instantCorrelation.length; i++) {
             if (Float.isNaN(instantCorrelation[i])) {
                 instantCorrelation[i] = 0;
             }
             adjustedCorrelation[i] = Math.abs(instantCorrelation[i]) * (1 - smooth) + adjustedCorrelation[i] * smooth;
-            adjustedCorrelation[i] = (float) Math.pow(adjustedCorrelation[i], corrExponent);
-            weights[i] = adjustedCorrelation[i] + minWeight - adjustedCorrelation[i] * minWeight;
         }
+
+        if (selection == SelectionMethod.all) {
+            for (int i = 0; i < instantCorrelation.length; i++) {
+                weights[i] = (float) Math.pow(adjustedCorrelation[i], selectionPressure);
+            }
+        } else if (selection == SelectionMethod.truncation) {
+            float[] v = Arrays.copyOf(adjustedCorrelation, adjustedCorrelation.length);
+            Arrays.sort(v);
+            int nElites = (int) Math.ceil(selectionPressure * adjustedCorrelation.length);
+            double cutoff = v[adjustedCorrelation.length - nElites];
+            for (int i = 0; i < adjustedCorrelation.length; i++) {
+                weights[i] = adjustedCorrelation[i] >= cutoff ? adjustedCorrelation[i] : 0;
+            }
+        } else if (selection == SelectionMethod.tournament) {
+            Arrays.fill(weights, 0);
+            for(int i = 0 ; i < adjustedCorrelation.length ; i++) {
+                int idx = makeTournament(adjustedCorrelation);
+                weights[idx] += adjustedCorrelation[idx];
+            }
+        }
+    }
+
+    private int makeTournament(float[] weights) {
+        int k = (int) selectionPressure;
+        int[] players = new int[k];
+        for (int i = 0; i < k; i++) {
+            players[i] = (int) (Math.random() * weights.length);
+        }
+        int best = 0;
+        for (int i = 1; i < k; i++) {
+            if (weights[players[i]] > weights[best]) {
+                best = players[i];
+            }
+        }
+        return best;
     }
 
     public float[] getWeights() {
