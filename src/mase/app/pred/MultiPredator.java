@@ -15,8 +15,8 @@ import sim.field.continuous.Continuous2D;
  */
 public class MultiPredator extends Predator {
 
-    private double[] arcStart;
-    private double[] arcEnd;
+    private final double[] arcStart;
+    private final double[] arcEnd;
 
     public MultiPredator(PredatorPrey sim, Continuous2D field, AgentController ac) {
         super(sim, field, ac);
@@ -38,7 +38,7 @@ public class MultiPredator extends Predator {
     @Override
     public double[] readNormalisedSensors() {
         if (predSim.activePreys.isEmpty()) {
-            return new double[]{0, 0};
+            return new double[arcStart.length * 2];
         }
         // (numero de agentes, distancia do mais proximo) para cada arco
         // 4-8 arcos -- tem que ser testado        

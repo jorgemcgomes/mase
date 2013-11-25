@@ -9,7 +9,6 @@ import mase.AgentController;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
-import sim.util.Double2D;
 
 /**
  *

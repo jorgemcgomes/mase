@@ -1,4 +1,3 @@
-# Task parameters
 eval.base.problem =                mase.app.pred.PredatorPreySimulator
 problem.trials-merge =             best
 problem.number-evals =             3

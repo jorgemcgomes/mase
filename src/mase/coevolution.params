@@ -8,5 +8,5 @@ eval.base.num-shuffled =                0
 eval.base.select-current =		ec.select.RandomSelection
 eval.base.select-prev = 		ec.select.RandomSelection
 
-pop.subpops =                           1
+pop.subpops =                           3
 pop.default-subpop.size = 		150

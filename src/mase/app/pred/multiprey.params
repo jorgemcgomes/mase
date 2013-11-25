@@ -29,9 +29,14 @@ problem.sensor-mode =              arcs
 problem.n-arcs =                   4
 problem.collisions =               TRUE
 
+neat.INPUT.NODES =                 8
+neat.OUTPUT.NODES =                2
+
 vector.species.genome-size =       63
 neural.input =                     8
 neural.hidden =                    5
-neural.output =                    3
+neural.output =                    2
 neural.structure =                 feed-forward
 neural.tanh =                      false
+
+
