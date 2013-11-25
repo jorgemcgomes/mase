@@ -348,6 +348,11 @@ setwd("~/exps/generic2/aggregation/")
 data.agg <- metaLoadData("fit","nsga","cl50_bal25_d3_fixed", names=c("fit","ts","cl50"), params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
 fullStatistics(data.agg, expset.name="agg2", fit.comp=T, fit.comp.par=list(snapshots=c(50,100,199)), show.only=F)
 
+setwd("~/exps/generic2/indiana3")
+data <- metaLoadData("fit","nsga", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(data, expset.name="rs", fit.comp=T, fit.comp.par=list(snapshots=c(50,100,199)), show.only=T)
+
+
 
 ###
 
