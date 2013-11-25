@@ -27,6 +27,8 @@ import net.jafama.FastMath;
 public class ClusterSCPostEvaluator extends SCPostEvaluator {
 
     public static final String P_NUM_CLUSTERS = "k-clusters";
+    public static final String P_ALLOWED_CHANGE = "allowed-change";
+    public static final String P_MAX_FREQUENCY = "max-update-freq";
     protected int numClusters;
     protected double[][] clusters;
     protected int[] counts;
@@ -34,6 +36,10 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     protected Map<Integer, Integer> assignements; // state-cluster assignments
     protected Map<Integer, Float> buffer; // counts of the above elements
     protected List<BehaviourResult> archive;
+    protected int updateFrequency;
+    protected int maxUpdateFrequency;
+    protected int lastUpdate;
+    protected double allowedChange;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -42,12 +48,19 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                 new Parameter(P_STATECOUNT_BASE).push(P_NUM_CLUSTERS));
         this.buffer = new HashMap<Integer, Float>(1000);
         this.assignements = new HashMap<Integer, Integer>(1000);
+        this.updateFrequency = 1;
+        this.lastUpdate = 0;
+        this.allowedChange = state.parameters.getDouble(base.push(P_ALLOWED_CHANGE),
+                new Parameter(P_STATECOUNT_BASE).push(P_ALLOWED_CHANGE));
+        this.maxUpdateFrequency = state.parameters.getInt(base.push(P_MAX_FREQUENCY),
+                new Parameter(P_STATECOUNT_BASE).push(P_MAX_FREQUENCY));
     }
 
     @Override
     public void processPopulation(EvolutionState state) {
         super.processPopulation(state); // Filter
 
+        
         HashSet<Integer> genKeys = new HashSet<Integer>(1000);
         // Integrate the information from the evaluations of this generation
         for (SCResult scr : super.currentPop) {
@@ -61,8 +74,37 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             updateClusterTree();
         }
 
-        // Rebuild the clusters with the evaluations from this generation
-        if (updateClusters(state)) {
+        
+        if (state.generation == 0 || state.generation - lastUpdate == updateFrequency) {
+            // Make copy of the clusters
+            double[][] clusterCopy = new double[numClusters][];
+            for(int i = 0 ; i < numClusters ; i++) {
+                clusterCopy[i] = Arrays.copyOf(clusters[i], clusters[i].length);
+            }
+            
+            // Rebuild the clusters with the evaluations from this generation
+            updateClusters(state);        
+            
+            // Calculate difference from previous
+            double meanDiff = 0, maxDiff = 0;
+            for(int i = 0 ; i < numClusters ; i++) {
+                for(int j = 0 ; j < clusters[i].length ; j++) {
+                    meanDiff += Math.abs(clusters[i][j] - clusterCopy[i][j]) / clusters[i].length;
+                    maxDiff = Math.max(maxDiff, Math.abs(clusters[i][j] - clusterCopy[i][j]));
+                }
+            }
+            meanDiff /= numClusters;
+            
+            // Update update-frequency
+            if(meanDiff > allowedChange) {
+                updateFrequency = Math.max(1, updateFrequency - 1);
+            } else if(meanDiff < allowedChange) {
+                updateFrequency = Math.min(maxUpdateFrequency, updateFrequency + 1);
+            }
+            this.lastUpdate = state.generation;
+            
+            state.output.message("Clusters updated. Mean diff: " + meanDiff + " | Max diff: " + maxDiff + " | New update freq: " + updateFrequency);
+            
             // clear the assignements
             assignements.clear();
             // update tree
@@ -84,30 +126,38 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         }
 
         if (super.doTfIdf) {
-            // cluster count totals
             float[] clusterCount = new float[numClusters];
+            int[] visited = new int[numClusters];
             for (SCResult scr : super.currentPop) {
                 for (int i = 0; i < numClusters; i++) {
-                    clusterCount[i] += scr.rawClusteredCount[i];
+                    if (scr.rawClusteredCount[i] > 0) {
+                        clusterCount[i] += scr.rawClusteredCount[i];
+                        visited[i]++;
+                    }
                 }
             }
-
+            /*for (BehaviourResult br : archive) {
+                SCResult scr = (SCResult) br;
+                for (int i = 0; i < numClusters; i++) {
+                    if (scr.rawClusteredCount[i] > 0) {
+                        clusterCount[i] += scr.rawClusteredCount[i];
+                    }
+                }
+            }*/   
+            
             // adjust population counts
             for (SCResult scr : super.currentPop) {
                 for (int i = 0; i < numClusters; i++) {
                     if (scr.rawClusteredCount[i] > 0) {
-                        scr.getBehaviour()[i] = scr.rawClusteredCount[i] / clusterCount[i];
+                        scr.getBehaviour()[i] = clusterCount[i] > 0 ? scr.rawClusteredCount[i] / (clusterCount[i] / currentPop.size()) : 0;
                     }
                 }
             }
-
             // adjust archive counts
             for (BehaviourResult br : archive) {
                 SCResult scr = (SCResult) br;
                 for (int i = 0; i < numClusters; i++) {
-                    if (scr.getBehaviour()[i] > 0) {
-                        scr.getBehaviour()[i] = scr.rawClusteredCount[i] / clusterCount[i];
-                    }
+                    scr.getBehaviour()[i] = clusterCount[i] > 0 ? scr.rawClusteredCount[i] / (clusterCount[i] /currentPop.size()) : 0;
                 }
             }
         }
@@ -168,7 +218,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     /*
      * Returns TRUE if the clusters changed. FALSE otherwise.
      */
-    protected boolean updateClusters(EvolutionState state) {
+    protected void updateClusters(EvolutionState state) {
         HashMap<Integer, Integer> centerCache = new HashMap<Integer, Integer>(buffer.size() * 2);
 
         // Cache the centers nearest to the elements of buffer
@@ -191,7 +241,6 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
 
         buffer.clear();
         buffer.clear();
-        return true;
     }
 
     protected void updateClusterTree() {

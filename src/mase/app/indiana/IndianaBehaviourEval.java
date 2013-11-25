@@ -23,7 +23,6 @@ public class IndianaBehaviourEval extends MasonEvaluation {
     private VectorBehaviourResult res;
     private double avgDist = 0;
     private double avgDisp = 0;
-    private int openTime;
     private int maxSteps;
 
     @Override
@@ -43,7 +42,7 @@ public class IndianaBehaviourEval extends MasonEvaluation {
         Indiana ind = (Indiana) sim;
         MutableDouble2D centre = new MutableDouble2D(0, 0);
         for (IndianaAgent a : ind.agents) {
-            avgDist += a.getLocation().distance(ind.target);
+            avgDist += a.getLocation().distance(ind.gate.getLocation());
             centre.addIn(a.getLocation());
         }
         centre.multiplyIn(1.0 / ind.agents.size());
@@ -63,7 +62,7 @@ public class IndianaBehaviourEval extends MasonEvaluation {
         }
         res = new VectorBehaviourResult(
                 (float) count / ind.agents.size(),
-                ind.openTime == -1 ? 1 : (float) ind.openTime / maxSteps,
+                ind.gate.openTime == -1 ? 1 : (float) ind.gate.openTime / maxSteps,
                 (float) (avgDist / ind.agents.size() / currentEvaluationStep / ind.par.size),
                 (float) (avgDisp / ind.agents.size() / currentEvaluationStep / (ind.par.size / 2)));
     }

@@ -29,7 +29,7 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEvaluator {
     }
 
     @Override
-    protected boolean updateClusters(EvolutionState state) {
+    protected void updateClusters(EvolutionState state) {
         if (wnov == null) {
             for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
                 if (pe instanceof WeightedNovelty) {
@@ -96,8 +96,6 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEvaluator {
             wnov.getAdjustedCorrelation()[minW] = (weights[father] + weights[mother]) / 2; 
             state.output.message("Removed cluster " + minW + " and added new from " + father + " and " + mother);
         }
-
-        return super.updateClusters(state) || replaced;
     }
 
     private float dist(double[] a, double[] b) {

@@ -297,36 +297,111 @@ ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, ex
 p <- pressureAnalysis(ts)
 bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
 p.b <- pressureAnalysis(bal25)
-cl25 <- loadData("cl25_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Cl25")
-p.c <- pressureAnalysis(cl25)
-plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff,cl=p.c$diff),10), ylim=NULL, title="KS pressure", ylabel="Novelty-fitness pressure")
+plotMultiline(smoothFrame(data.frame(Generation=p$gen,TS=p$diff, Gen=p.b$diff),10), ylim=NULL, title="KS pressure", ylabel="Novelty-fitness pressure")
 
 setwd("~/exps/generic2/sharing/")
 ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
 p <- pressureAnalysis(ts)
 bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
 p.b <- pressureAnalysis(bal25)
-plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="RS pressure", ylabel="Novelty-fitness pressure")
+plotMultiline(smoothFrame(data.frame(Generation=p$gen,TS=p$diff, Gen=p.b$diff),10), ylim=NULL, title="RS pressure", ylabel="Novelty-fitness pressure")
 
 setwd("~/exps/generic2/aggregation/")
 ts <- loadData("ls50", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="TS")
 p <- pressureAnalysis(ts)
 bal25 <- loadData("cl50_bal25_d3", jobs=10, fitlim=c(0,60), subpops=1, load.noveltyind=T, expname="Bal25")
 p.b <- pressureAnalysis(bal25)
-plotMultiline(smoothFrame(data.frame(gen=p$gen,ts=p$diff, bal=p.b$diff),10), ylim=NULL, title="Agg pressure", ylabel="Novelty-fitness pressure")
+plotMultiline(smoothFrame(data.frame(Generation=p$gen,TS=p$diff, Gen=p.b$diff),10), ylim=NULL, title="Agg pressure", ylabel="Novelty-fitness pressure")
 
 
 setwd("~/exps/generic2/keepaway/")
-shar.data <- metaLoadData("fit","nsga","cl50_bal25_d3/","cl100_bal25_d3_tou2/","cl100_bal25_d3_tou5/","cl100_bal25_d3_tr25/","cl100_bal25_d3_tr50/", params=list(fitlim=c(0,60),jobs=10,load.behavs=F,subpops=1))
-fullStatistics(shar.data, expset.name="ks", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=T)
+kw.data <- metaLoadData("fit_species","nsga_species","cl50_bal25_d3_nsga/","cl50_bal25_d3_fixed","cl50_bal25_d3_fixed50", params=list(fitlim=c(0,60),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(shar.data, expset.name="ks.fix", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=F)
 
 setwd("~/exps/generic2/sharing/")
-shar.data <- metaLoadData("fit","nsga","cl50_bal25_d3/","cl100_bal25_d3_tou5/","cl100_bal25_d3_tr25/","cl100_bal25_d3_tr50/", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
-fullStatistics(shar.data, expset.name="rs", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=T)
+shar.data <- metaLoadData("fit","nsga","cl50_bal25_d3_nsga/","cl50_bal25_d3_fixed","cl50_bal25_d3_fixed50", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(shar.data, expset.name="rs.fix", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=F)
+
+setwd("~/exps/generic2/indiana4")
+ind.data <- metaLoadData("fit","nsga","cl50_bal25_d3","cl50_bal25_d3_fixed", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(ind.data, expset.name="ind.fix", fit.comp=T, fit.comp.par=list(snapshots=c(75,150,249)), show.only=F)
+
+setwd("~/exps/generic2/aggregation/")
+data.agg <- metaLoadData("fit","nsga","cl50_bal25_d3_nsga","cl50_bal25_d3_fixed", params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(data.agg, expset.name="agg.fix", fit.comp=T, fit.comp.par=list(snapshots=c(50,100,199)), show.only=F)
+
+# reuniao
+
+setwd("~/exps/generic2/keepaway/")
+kw.data <- metaLoadData("fit_species","nsga_species","cl50_bal25_d3_fixed", names=c("fit","ts","cl50"), params=list(fitlim=c(0,60),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(kw.data, expset.name="ks2", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=F)
+
+setwd("~/exps/generic2/sharing/")
+shar.data <- metaLoadData("fit","nsga","cl50_bal25_d3_fixed", names=c("fit","ts","cl50"), params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(shar.data, expset.name="rs2", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=F)
+
+setwd("~/exps/generic2/indiana4")
+ind.data <- metaLoadData("fit","nsga","cl50_bal25_d3_fixed", names=c("fit","ts","cl50"), params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(ind.data, expset.name="ind2", fit.comp=T, fit.comp.par=list(snapshots=c(75,150,249)), show.only=F)
+
+setwd("~/exps/generic2/aggregation/")
+data.agg <- metaLoadData("fit","nsga","cl50_bal25_d3_fixed", names=c("fit","ts","cl50"), params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(data.agg, expset.name="agg2", fit.comp=T, fit.comp.par=list(snapshots=c(50,100,199)), show.only=F)
 
 
+###
+
+setwd("~/exps/generic2/keepaway/")
+kw.data <- metaLoadData("fit_species","nsga_species","cl50_bal25_d3_fixed","cl50_spearman_norm/","cl50_brown_all/","cl50_brown_norm", names=c("fit","ts","sp-a","sp-n","br-a","br-n"), params=list(fitlim=c(0,60),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(kw.data, expset.name="ks.w", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=F)
+
+setwd("~/exps/generic2/indiana4")
+ind.data <- metaLoadData("fit/","nsga","cl50_bal25_d3_fixed","cl50_spearman_norm/","cl50_brown_all/","cl50_brown_norm", names=c("fit","ts","sp-a","sp-n","br-a","br-n"), params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(ind.data, expset.name="ind.w", fit.comp=T, fit.comp.par=list(snapshots=c(75,150,249)), show.only=F)
+
+###
+
+setwd("~/exps/generic2/sharing/")
+shar.data <- metaLoadData("fit2","nsga_fit2","cl50_brown_fit2", names=c("fit","ts","cl50"), params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(shar.data, expset.name="rs2", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=T)
+
+setwd("~/exps/generic2/aggregation/")
+data.agg <- metaLoadData("fit","nsga","cl50_brown", names=c("fit","ts","cl50"), params=list(fitlim=c(0,1),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(data.agg, expset.name="agg2", fit.comp=T, fit.comp.par=list(snapshots=c(50,100,199)), show.only=T)
+
+#### 
 
 
+setwd("~/exps/generic2/keepaway/")
+kw.data <- metaLoadData("cl50_bal25_d3_fixed/","cl100_bal25_d3/","cl100_bal25_d3_tr25/","cl100_bal25_d3_tr50/","cl200_bal25_d3/", params=list(fitlim=c(0,60),jobs=10,load.behavs=F,subpops=1))
+fullStatistics(kw.data, expset.name="ks.fix", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=T)
+
+
+setwd("~/exps/generic2/keepaway/")
+kw <- loadData("cl50_bal25_d3_fixed", jobs=10, fitlim=c(0,60), load.behavs=T, subpops=1, behavs.sample=0.1, expname="KW", vars.group=paste0("b",1:50), vars.file=c(NA,NA,NA,NA,paste0("b",1:50)))
+plotListToPDF(individualFitnessPlots(kw), show=T)
+kw <- filterJobs(kw, c("job.1","job.5","job.7"))
+z.kw <- characterisationStats(kw)
+plotMultiline(smoothFrame(z.kw,10), ylim=NULL, title="KS")
+
+setwd("~/exps/generic2/sharing/")
+rs <- loadData("cl50_bal25_d3_fixed", jobs=10, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.1, expname="RS", vars.group=paste0("b",1:50), vars.file=c(NA,NA,NA,NA,paste0("b",1:50)))
+plotListToPDF(individualFitnessPlots(rs), show=T)
+rs <- filterJobs(rs, c("job.0","job.3","job.5","job.7"))
+z.rs <- characterisationStats(rs)
+plotMultiline(smoothFrame(z.rs,10), ylim=NULL, title="RS")
+
+setwd("~/exps/generic2/indiana4")
+ind <- loadData("cl50_bal25_d3_fixed", jobs=10, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.1, expname="Ind", vars.group=paste0("b",1:50), vars.file=c(NA,NA,NA,NA,paste0("b",1:50)))
+plotListToPDF(individualFitnessPlots(ind), show=T)
+ind <- filterJobs(ind, c("job.2","job.3","job.6","job.7"))
+z.ind <- characterisationStats(ind)
+plotMultiline(smoothFrame(z.ind,10), ylim=NULL, title="Ind")
+
+setwd("~/exps/generic2/aggregation/")
+agg <- loadData("cl50_bal25_d3_fixed", jobs=10, fitlim=c(0,1), load.behavs=T, subpops=1, behavs.sample=0.1, expname="Agg", vars.group=paste0("b",1:50), vars.file=c(NA,NA,NA,NA,paste0("b",1:50)))
+z.agg <- characterisationStats(agg)
+plotMultiline(smoothFrame(z.agg,10), ylim=NULL, title="Agg")
 
 
 
@@ -349,6 +424,9 @@ fullStatistics(data, expset.name="kw.cl", show.only=F, fit.comp=T, fit.comp.par=
 
 data <- metaLoadData("kw_cl10_neat","kw_cl10_ls","kw_cl50_ls","kw_cl50_neat","kw_cl100_ls","kw_cl100_neat", params=par)
 fullStatistics(data, expset.name="kw.cl", show.only=T, fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)))
+
+
+
 
 
 setwd("~/Dropbox/exps_AAMAS/")

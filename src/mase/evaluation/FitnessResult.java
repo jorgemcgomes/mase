@@ -12,7 +12,7 @@ import mase.EvaluationResult;
  */
 public class FitnessResult implements EvaluationResult {
 
-    public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3;
+    public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3, MIN_PLUS = 4;
     public static final float FLOAT_THRESHOLD = 0.0001f;
     protected Float value;
     protected int combination;
@@ -63,6 +63,15 @@ public class FitnessResult implements EvaluationResult {
                     }
                 }
                 score = results.length / score;
+                break;
+            case MIN_PLUS:
+                float min = Float.MAX_VALUE;
+                float mean = 0;
+                for (EvaluationResult f : results) {
+                    mean += (Float) f.value();
+                    min = Math.min(min, (Float) f.value());
+                }
+                score = 0.01f * (mean / results.length) + 0.99f * min;
                 break;
         }
         FitnessResult fit = new FitnessResult(score);

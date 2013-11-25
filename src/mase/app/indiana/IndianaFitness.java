@@ -33,6 +33,7 @@ public class IndianaFitness extends MasonEvaluation {
             }
         }
         res = new FitnessResult((float) count / ind.agents.size());
+        res.setCombinationMethod(FitnessResult.HARMONIC);
     }
     
     

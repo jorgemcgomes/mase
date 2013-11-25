@@ -5,10 +5,12 @@
  */
 package mase.app.indiana;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import mase.AgentController;
 import mase.GroupController;
+import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
@@ -28,8 +30,7 @@ public class Indiana extends MaseSimState {
     protected List<IndianaAgent> agents;
     protected Continuous2D field;
     protected GroupController gc;
-    protected Double2D target;
-    long openTime = -1;
+    protected Gate gate;
 
     protected enum AgentPlacement {
 
@@ -40,10 +41,6 @@ public class Indiana extends MaseSimState {
         super(seed);
         this.par = par;
         this.gc = gc;
-    }
-
-    public Double2D getTarget() {
-        return target;
     }
 
     @Override
@@ -60,10 +57,11 @@ public class Indiana extends MaseSimState {
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
-        this.target = new Double2D(-IndianaAgent.RADIUS * 2, par.size / 2);
+        this.gate = new Gate(this, field);
+        gate.setLocation(new Double2D(-0.001, par.size / 2));
+        gate.setOrientation(Math.PI);
+        gate.setStopper(schedule.scheduleRepeating(gate));
         placeAgents();
-        IndianaMonitor m = new IndianaMonitor();
-        m.stop = schedule.scheduleRepeating(m);
     }
 
     protected void placeAgents() {
@@ -87,7 +85,7 @@ public class Indiana extends MaseSimState {
                 Double2D p = null;
                 while (p == null) {
                     double randAngle = this.random.nextDouble() * Math.PI * 2;
-                    Double2D candidate = new Double2D(FastMath.cos(randAngle) * radius, target.y + FastMath.sin(randAngle) * radius);
+                    Double2D candidate = new Double2D(FastMath.cos(randAngle) * radius, gate.getLocation().y + FastMath.sin(randAngle) * radius);
                     if (ag.checkEnvironmentValidty(candidate)) {
                         p = candidate;
                     }
@@ -100,19 +98,25 @@ public class Indiana extends MaseSimState {
         }
     }
 
-    private class IndianaMonitor implements Steppable {
+    protected static class Gate extends EmboddiedAgent {
+        
+        protected long openTime = -1;
 
-        Stoppable stop;
+        protected Gate(Indiana sim, Continuous2D field) {
+            super(sim, field, sim.par.gateSize / 2, Color.RED);
+            this.enableCollisionDetection(false);
+        }
 
         @Override
         public void step(SimState state) {
+            Indiana ind = (Indiana) sim;
             boolean anyInside = false;
-            for (IndianaAgent a : agents) {
+            for (IndianaAgent a : ind.agents) {
                 if (!a.escaped) {
                     anyInside = true;
                     if (a.passingGate && a.getLocation().x < 0) {
                         if (openTime == -1) {
-                            openTime = Indiana.this.schedule.getSteps();
+                            openTime = ind.schedule.getSteps();
                         }
                         a.stop();
                         a.escaped = true;
@@ -121,16 +125,16 @@ public class Indiana extends MaseSimState {
                 }
             }
             if (!anyInside) {
-                stop.stop();
+                stop();
                 return;
             }
-            if (openTime != -1 && schedule.getSteps() - openTime > par.gateInterval) {
-                for (IndianaAgent a : agents) {
+            if (openTime != -1 && ind.schedule.getSteps() - openTime > ind.par.gateInterval) {
+                for (IndianaAgent a : ind.agents) {
                     if (!a.escaped) {
                         a.stop();
                     }
                 }
-                stop.stop();
+                stop();
             }
         }
     }

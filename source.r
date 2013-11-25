@@ -300,6 +300,35 @@ fitnessSomPlot <- function(som, data, mapping, ...) {
 
 # Batch analysis functions #####################################################
 
+quickReport <- function(folder, jobs=NULL, snapshots=10) {
+    files <- list.files(folder, pattern="bests.tar.gz")
+    if(is.null(jobs)) {
+        jobs <- length(files)
+    }
+    
+    data <- loadData(folder, jobs=jobs, load.behavs=F, load.clusters=F, load.weights=F)
+    frame <- data.frame(gen=data$gens)
+    for(j in data$jobs) {
+        frame[[j]] <- data[[j]]$fitness$best.sofar
+    }
+    interval <- floor(length(data$gens) / snapshots)
+    snapshots <- c((0:(snapshots-1)) * floor(length(data$gens) / snapshots) + 1, length(data$gens))
+     means <- c()
+    sds <- c()
+    mins <- c()
+    maxs <- c()
+     for(s in snapshots) {
+         v <- as.numeric(frame[s,-1])
+         means <- c(means, mean(v))
+         sds <- c(sds, sd(v))
+         mins <- c(mins, min(v))
+         maxs <- c(maxs, max(v))
+     }
+    report <- data.frame(Gen=snapshots,Mean=means,SD=sds,Min=mins,Max=maxs)
+    print(paste("Complete jobs:",length(data$jobs)))
+    print(report)
+}
+
 fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE, som.ind=FALSE, som.group=FALSE, som.alljobs=FALSE,
                            fit.ind.par=list(), fit.comp.par=list(), behav.mean.par=list(), som.ind.par=list(), som.group.par=list(), 
                            expset.name="", show.only=FALSE) {

@@ -22,6 +22,10 @@ checkConfig <- function(args) {
     # no file specified -- use the experiments file
     if(!("-file" %in% args)) {
         i <- which(args == "-gc")
+        if(length(i) == 0) {
+            i <- which(args == "-tar")
+        }
+        print(i)
         gc <- file.path(args[i + 1])
         conf <- file.path(dirname(gc), "config.params")
         if(!file.exists(conf)) {

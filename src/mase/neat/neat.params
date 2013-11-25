@@ -65,7 +65,7 @@ neat.WEIGHT.COEFFICIENT =               0.4
 # Speciation control
 neat.COMPATABILITY.THRESHOLD =          0.5
 neat.COMPATABILITY.CHANGE =             0.05
-neat.SPECIE.COUNT =                     10
+neat.SPECIE.COUNT =                     5
 neat.SURVIVAL.THRESHOLD =               0.2
 neat.SPECIE.AGE.THRESHOLD =             80
 neat.SPECIE.YOUTH.THRESHOLD =           10

@@ -26,6 +26,7 @@ public class IndianaParams {
     public static final String P_GATE_SIZE = "gate-size";
     public static final String P_GATE_INTERVAL = "gate-interval";
     public static final String P_AGENT_PLACEMENT = "agent-placement";
+    public static final String P_GATE_SENSOR_RANGE = "gate-sensor-range";
 
     protected double size;
     protected double discretization;
@@ -39,5 +40,6 @@ public class IndianaParams {
     protected AgentPlacement agentPlacement;
     protected double gateSize;
     protected int gateInterval;
+    protected double gateSensorRange;
     
 }

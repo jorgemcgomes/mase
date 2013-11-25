@@ -1,9 +1,10 @@
 eval.base.problem =                mase.app.indiana.IndianaSimulator
 problem.number-evals =             2
 problem.trials-merge =             best
-problem.eval.0 =                   mase.app.indiana.IndianaFitness
+problem.eval.0 =                   mase.app.indiana.IndianaFitness3
 problem.eval.0.combination =       harmonic
 problem.eval.0.update-freq =       0
+problem.eval.0.weight =            0.1
 problem.eval.1 =                   mase.app.indiana.IndianaBehaviourEval
 problem.eval.1.update-freq =       1
 
@@ -11,8 +12,8 @@ fitness.fitness-index =            0
 fitness.novelty-index =            1
 
 problem.repetitions =              10
-problem.max-steps =                500
-problem.size =                     400
+problem.max-steps =                700
+problem.size =                     200
 problem.discretization =           30
 problem.num-agents =               5
 problem.agent-sensor-radius =      25
@@ -21,9 +22,10 @@ problem.agent-speed =              1
 problem.agent-rotation =           1.57
 problem.wall-radius =              5
 problem.wall-rays =                4
-problem.gate-size =                50
-problem.gate-interval =            50
+problem.gate-size =                25
+problem.gate-interval =            75
 problem.agent-placement =          CIRCLES
+problem.gate-sensor-range =        100
 
 neat.INPUT.NODES = 11
 neat.OUTPUT.NODES=3

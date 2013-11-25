@@ -6,6 +6,8 @@
 
 package sim.util;
 
+import net.jafama.FastMath;
+
 /** 
     Double2D is more or less the same class as java.awt.geom.Point2D.Double, but it is immutable: once the x and y values are set, they cannot be changed (they're final).  Why use this immutable class when you could just use Point2D?  Because Point2D is broken with respect to hash tables.  You use Point2D as a key in a hash table at your own peril.  Try this: hash an object by a Point2D as key.  Then change the x value of the original Point2D.  Ta-da!  The object is lost in the hash table.
 
@@ -179,7 +181,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point.    */
@@ -187,7 +189,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point.    */
@@ -195,7 +197,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point.    */
@@ -203,7 +205,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - p.getX();
         final double dy = (double)this.y - p.getY();
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point */
@@ -309,13 +311,13 @@ public final class Double2D implements java.io.Serializable
     /** Returns the vector length of the Double2D */
     public final double length()
         {
-        return Math.sqrt(x * x + y * y);
+        return FastMath.sqrt(x * x + y * y);
         }
         
     /** Returns the length of the vector between -Pi and Pi. */
     public final double angle()
         {
-        return Math.atan2(y,x);
+        return FastMath.atan2(y,x);
         }
 
     /** Returns the vector length of the Double2D */
@@ -404,8 +406,8 @@ public final class Double2D implements java.io.Serializable
         return new Double2D(cosTheta * this.x + -sinTheta * this.y, sinTheta * this.x + cosTheta * this.y);
         */
 
-        final double sinTheta = Math.sin(theta);
-        final double cosTheta = Math.cos(theta);
+        final double sinTheta = FastMath.sin(theta);
+        final double cosTheta = FastMath.cos(theta);
         final double x = this.x;
         final double y = this.y;
         return new Double2D(cosTheta * x + -sinTheta * y, sinTheta * x + cosTheta * y);

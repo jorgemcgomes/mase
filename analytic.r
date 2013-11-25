@@ -677,3 +677,28 @@ pressureAnalysisRate <- function(file, top=0.2) {
     res <- data.frame(gen=gens, novRate=res)
     return(res)    
 }
+
+
+###############
+
+characterisationStats <- function(data) {
+    zeros <- data.frame(gen=data$gens)
+    for(j in data$jobs) {
+        print(j)
+        z <- c()
+        for(g in data$gens) {
+            behavs <- subset(data[[j]][["sub.0"]], gen==g)
+            best <- which.max(behavs[["fitness"]])
+            char <- behavs[best,data$vars.group]
+            z <- c(z, sum(char != 0))
+        }
+        zeros[[j]] <- z
+    }
+    res <- data.frame(gen=data$gens)
+    if(ncol(zeros) == 2) {
+        res[["zeros"]] <- zeros[,2]
+    } else {
+        res[["zeros"]] <- rowMeans(zeros[,-1])
+    }    
+    return(res)    
+}

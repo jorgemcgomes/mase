@@ -102,11 +102,11 @@ public class VectorBehaviourResult implements BehaviourResult {
         float cosineSimilarity;
         for (int i = 0; i < docVector1.length; i++) {
             dotProduct += docVector1[i] * docVector2[i];  //a.b
-            magnitude1 += FastMath.pow(docVector1[i], 2);  //(a^2)
-            magnitude2 += FastMath.pow(docVector2[i], 2); //(b^2)
+            magnitude1 += FastMath.pow2(docVector1[i]);  //(a^2)
+            magnitude2 += FastMath.pow2(docVector2[i]); //(b^2)
         }
-        magnitude1 = (float) FastMath.sqrtQuick(magnitude1);//sqrt(a^2)
-        magnitude2 = (float) FastMath.sqrtQuick(magnitude2);//sqrt(b^2)
+        magnitude1 = (float) FastMath.sqrt(magnitude1);//sqrt(a^2)
+        magnitude2 = (float) FastMath.sqrt(magnitude2);//sqrt(b^2)
 
         if (magnitude1 != 0.0 | magnitude2 != 0.0) {
             cosineSimilarity = dotProduct / (magnitude1 * magnitude2);

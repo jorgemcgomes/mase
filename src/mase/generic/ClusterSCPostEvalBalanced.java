@@ -30,7 +30,7 @@ public class ClusterSCPostEvalBalanced extends ClusterSCPostEvaluator {
     }
 
     @Override
-    protected boolean updateClusters(EvolutionState state) {
+    protected void updateClusters(EvolutionState state) {
         HashMap<Integer, Integer> centerCache = new HashMap<Integer, Integer>(buffer.size() * 2);
 
         int[] genCounts = new int[clusters.length];
@@ -63,6 +63,5 @@ public class ClusterSCPostEvalBalanced extends ClusterSCPostEvaluator {
         buffer.clear();
         buffer.clear();
 
-        return true;
     }
 }

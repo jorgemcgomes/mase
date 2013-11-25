@@ -72,12 +72,10 @@ public class IndianaAgent extends SmartAgent {
     @Override
     protected boolean checkEnvironmentValidty(Double2D target) {
         IndianaParams par = ((Indiana) sim).par;
-        this.passingGate = target.x >= -RADIUS && target.x <= RADIUS && target.y > par.size / 2 - par.gateSize / 2 
+        this.passingGate = target.x >= -RADIUS && target.x <= RADIUS && target.y > par.size / 2 - par.gateSize / 2
                 && target.y < par.size / 2 + par.gateSize / 2;
         return passingGate || super.checkEnvironmentValidty(target);
     }
-    
-    
 
     @Override
     public double[] readNormalisedSensors() {
@@ -85,9 +83,15 @@ public class IndianaAgent extends SmartAgent {
         double[] sens = new double[3 + par.agentSensorArcs + par.wallRays];
 
         // target sensor
-        Double2D target = ((Indiana) sim).getTarget();
-        sens[0] = (this.getLocation().distance(target) / par.size) * 2 - 1;
-        sens[1] = this.angleTo(target) / Math.PI;
+        Double2D target = ((Indiana) sim).gate.getLocation();
+        double d = this.getLocation().distance(target);
+        if (d <= par.gateSensorRange) {
+            sens[0] = (this.getLocation().distance(target) / par.gateSensorRange) * 2 - 1;
+            sens[1] = this.angleTo(target) / Math.PI;
+        } else {
+            sens[0] = 1;
+            sens[1] = 0;
+        }
         // initialize distance sensors to the max value
         for (int i = 3; i < sens.length; i++) {
             sens[i] = 1;
@@ -96,7 +100,7 @@ public class IndianaAgent extends SmartAgent {
         int count = 0;
         Bag neighbours = field.getNeighborsWithinDistance(this.getLocation(), par.agentSensorRadius + RADIUS * 2);
         for (Object n : neighbours) {
-            if (n != this) {
+            if (n != this && n instanceof IndianaAgent) {
                 IndianaAgent aa = (IndianaAgent) n;
                 double dist = this.distanceTo(aa);
                 if (dist <= par.agentSensorRadius) {

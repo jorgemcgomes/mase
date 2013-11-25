@@ -43,3 +43,5 @@ neural.hidden =                     7
 neural.output =                     4
 neural.structure =                  feed-forward
 neural.tanh =                       false
+neat.INPUT.NODES =                  9
+neat.OUTPUT.NODES =                 4

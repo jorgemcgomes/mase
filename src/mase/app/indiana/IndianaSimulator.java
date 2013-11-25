@@ -40,6 +40,7 @@ public class IndianaSimulator extends MasonSimulator {
         par.agentPlacement = AgentPlacement.valueOf(state.parameters.getString(base.push(IndianaParams.P_AGENT_PLACEMENT), df.push(IndianaParams.P_AGENT_PLACEMENT)));
         par.gateInterval = state.parameters.getInt(base.push(IndianaParams.P_GATE_INTERVAL), df.push(IndianaParams.P_GATE_INTERVAL));
         par.gateSize = state.parameters.getDouble(base.push(IndianaParams.P_GATE_SIZE), df.push(IndianaParams.P_GATE_SIZE));
+        par.gateSensorRange = state.parameters.getDouble(base.push(IndianaParams.P_GATE_SENSOR_RANGE), df.push(IndianaParams.P_GATE_SENSOR_RANGE));
     }
 
     @Override

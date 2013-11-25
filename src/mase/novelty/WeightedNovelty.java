@@ -12,6 +12,7 @@ import ec.util.Parameter;
 import java.util.Arrays;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.VectorBehaviourResult;
+import net.jafama.FastMath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 
@@ -23,11 +24,11 @@ public class WeightedNovelty extends NoveltyEvaluation {
 
     public static enum SelectionMethod {
 
-        all, truncation, tournament, roulette
+        all, truncation, tournament, roulette, normalised
     };
 
     public static final String P_CORRELATION = "correlation";
-    public static final String V_PEARSON = "pearson", V_SPEARMAN = "spearman";
+    public static final String V_PEARSON = "pearson", V_SPEARMAN = "spearman", V_BROWNIAN = "brownian";
     public static final String P_SMOOTH = "smooth";
     public static final String P_SELECTION_PRESSURE = "selection-pressure";
     public static final String P_DIMENSION_SELECTION = "selection-method";
@@ -48,12 +49,14 @@ public class WeightedNovelty extends NoveltyEvaluation {
             this.correlation = V_PEARSON;
         } else if (corr.equalsIgnoreCase(V_SPEARMAN)) {
             this.correlation = V_SPEARMAN;
+        } else if (corr.equalsIgnoreCase(V_BROWNIAN)) {
+            this.correlation = V_BROWNIAN;
         } else {
             state.output.fatal("Unknown correlation method.", base.push(P_CORRELATION));
         }
         String m = state.parameters.getString(base.push(P_DIMENSION_SELECTION), null);
-        SelectionMethod method = SelectionMethod.valueOf(m);
-        if (method == null) {
+        selection = SelectionMethod.valueOf(m);
+        if (selection == null) {
             state.output.fatal("Unknown selection method: " + m, base.push(P_DIMENSION_SELECTION));
         }
         this.selectionPressure = state.parameters.getFloat(base.push(P_SELECTION_PRESSURE), null);
@@ -131,6 +134,10 @@ public class WeightedNovelty extends NoveltyEvaluation {
             for (int i = 0; i < instantCorrelation.length; i++) {
                 instantCorrelation[i] = (float) spearman.correlation(fitnessScores, behaviourFeatures[i]);
             }
+        } else if (correlation == V_BROWNIAN) {
+            for (int i = 0; i < instantCorrelation.length; i++) {
+                instantCorrelation[i] = (float) distanceCorrelation(fitnessScores, behaviourFeatures[i]);
+            }
         }
 
         // calculate base weight -- absolute value and smooth
@@ -142,8 +149,8 @@ public class WeightedNovelty extends NoveltyEvaluation {
         }
 
         if (selection == SelectionMethod.all) {
-            for (int i = 0; i < instantCorrelation.length; i++) {
-                weights[i] = (float) Math.pow(adjustedCorrelation[i], selectionPressure);
+            for (int i = 0; i < adjustedCorrelation.length; i++) {
+                weights[i] = (float) FastMath.pow(adjustedCorrelation[i], selectionPressure);
             }
         } else if (selection == SelectionMethod.truncation) {
             float[] v = Arrays.copyOf(adjustedCorrelation, adjustedCorrelation.length);
@@ -155,14 +162,95 @@ public class WeightedNovelty extends NoveltyEvaluation {
             }
         } else if (selection == SelectionMethod.tournament) {
             Arrays.fill(weights, 0);
-            for(int i = 0 ; i < adjustedCorrelation.length ; i++) {
+            for (int i = 0; i < adjustedCorrelation.length; i++) {
                 int idx = makeTournament(adjustedCorrelation);
                 weights[idx] += adjustedCorrelation[idx];
+            }
+        } else if (selection == SelectionMethod.normalised) {
+            float min = Float.POSITIVE_INFINITY;
+            float max = Float.NEGATIVE_INFINITY;
+            for (int i = 0; i < weights.length; i++) {
+                min = Math.min(min, adjustedCorrelation[i]);
+                max = Math.max(max, adjustedCorrelation[i]);
+            }
+            for (int i = 0; i < weights.length; i++) {
+                weights[i] = (adjustedCorrelation[i] - min) / (max - min);
             }
         }
     }
 
-    private int makeTournament(float[] weights) {
+    protected double distanceCorrelation(double[] x, double[] y) {
+        double[][] A = distMatrix(x);
+        double[][] B = distMatrix(y);
+        centreMatrix(A);
+        centreMatrix(B);
+
+        double[][] AB = mult(A, B);
+        double[][] AA = mult(A, A);
+        double[][] BB = mult(B, B);
+
+        double Cxy = FastMath.sqrt(mean(AB));
+        double Vx = FastMath.sqrt(mean(AA));
+        double Vy = FastMath.sqrt(mean(BB));
+
+        double R = Cxy / FastMath.sqrt(Vx * Vy);
+        return R;
+    }
+
+    private double mean(double[][] m) {
+        double sum = 0;
+        for (int i = 0; i < m.length; i++) {
+            for (int j = 0; j < m.length; j++) {
+                sum += m[i][j];
+            }
+        }
+        return sum / (m.length * m.length);
+    }
+
+    private double[][] mult(double[][] A, double[][] B) {
+        double[][] res = new double[A.length][A.length];
+        for (int i = 0; i < res.length; i++) {
+            for (int j = 0; j < res.length; j++) {
+                res[i][j] = A[i][j] * B[i][j];
+            }
+        }
+        return res;
+    }
+
+    private void centreMatrix(double[][] m) {
+        double grandMean = 0;
+        double[] colMeans = new double[m.length];
+        double[] rowMeans = new double[m.length];
+        for (int i = 0; i < m.length; i++) {
+            for (int j = 0; j < m.length; j++) {
+                grandMean += m[i][j];
+                rowMeans[i] += m[i][j];
+                colMeans[j] += m[i][j];
+            }
+        }
+        grandMean /= m.length * m.length;
+        for (int i = 0; i < m.length; i++) {
+            colMeans[i] /= m.length;
+            rowMeans[i] /= m.length;
+        }
+        for (int i = 0; i < m.length; i++) {
+            for (int j = 0; j < m.length; j++) {
+                m[i][j] = m[i][j] - rowMeans[i] - colMeans[j] + grandMean;
+            }
+        }
+    }
+
+    private double[][] distMatrix(double[] v) {
+        double[][] res = new double[v.length][v.length];
+        for (int i = 0; i < v.length; i++) {
+            for (int j = 0; j < v.length; j++) {
+                res[i][j] = Math.abs(v[i] - v[j]);
+            }
+        }
+        return res;
+    }
+
+    protected int makeTournament(float[] weights) {
         int k = (int) selectionPressure;
         int[] players = new int[k];
         for (int i = 0; i < k; i++) {
