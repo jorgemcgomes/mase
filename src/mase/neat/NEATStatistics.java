@@ -41,10 +41,10 @@ public class NEATStatistics extends Statistics {
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
         // Gen | subpop{Species | Avg neurons | Avg links | Avg recurr | Best neurons | Best links | Best recurr}
-        state.output.print(state.generation + " ", log);
+        state.output.print(state.generation + "", log);
         for (int i = 0; i < state.population.subpops.length; i++) {
             NEATGeneticAlgorithm neat = ((NEATSubpop) state.population.subpops[i]).getNEAT();
-            state.output.print(neat.getSpecies().specieList().size() + "", log);
+            state.output.print(" " + neat.getSpecies().specieList().size(), log);
             
             float highestFitness = Float.NEGATIVE_INFINITY;
             int[] bestDescr = null;

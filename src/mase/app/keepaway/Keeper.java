@@ -14,7 +14,6 @@ import mase.mason.EmboddiedAgent;
 import mase.mason.SmartAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
-import sim.util.Double2D;
 
 /**
  *
@@ -108,22 +107,22 @@ public class Keeper extends SmartAgent {
         Keepaway kw = (Keepaway) sim;
 
         // Ball
-        sb.append("Ball: (" + df.format(sensorValues[0]) + ";" + Math.round(sensorValues[1] / Math.PI * 180) + "\u00B0)");
+        sb.append("Ball: (").append(df.format(sensorValues[0])).append(";").append(Math.round(sensorValues[1] / Math.PI * 180)).append("\u00B0)");
         int index = 2;
         // Keepers
         for (int i = 0; i < kw.keepers.size(); i++) {
             if (kw.keepers.get(i) != this) {
-                sb.append(" | Keeper" + i + ": (" + df.format(sensorValues[index++]));
-                sb.append(";" + Math.round(sensorValues[index++] / Math.PI * 180) + "\u00B0)");
+                sb.append(" | Keeper").append(i).append(": (").append(df.format(sensorValues[index++]));
+                sb.append(";").append(Math.round(sensorValues[index++] / Math.PI * 180)).append("\u00B0)");
             }
         }
         // Takers
         for (int i = 0; i < kw.takers.size(); i++) {
-            sb.append(" | Taker" + i + ": (" + df.format(sensorValues[index++]));
-            sb.append(";" + Math.round(sensorValues[index++] / Math.PI * 180) + "\u00B0)");
+            sb.append(" | Taker").append(i).append(": (").append(df.format(sensorValues[index++]));
+            sb.append(";").append(Math.round(sensorValues[index++] / Math.PI * 180)).append("\u00B0)");
         }
         // Distance of the ball to the centre
-        sb.append(" | BallToCenter: " + df.format(sensorValues[index]));
+        sb.append(" | BallToCenter: ").append(df.format(sensorValues[index]));
 
         return sb.toString();
     }

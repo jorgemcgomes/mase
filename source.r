@@ -300,13 +300,13 @@ fitnessSomPlot <- function(som, data, mapping, ...) {
 
 # Batch analysis functions #####################################################
 
-quickReport <- function(folder, jobs=NULL, snapshots=10) {
+quickReport <- function(folder, jobs=NULL, snapshots=10, ...) {
     files <- list.files(folder, pattern="bests.tar.gz")
     if(is.null(jobs)) {
         jobs <- length(files)
     }
     
-    data <- loadData(folder, jobs=jobs, load.behavs=F, load.clusters=F, load.weights=F)
+    data <- loadData(folder, jobs=jobs, load.behavs=F, load.clusters=F, load.weights=F, ...)
     frame <- data.frame(gen=data$gens)
     for(j in data$jobs) {
         frame[[j]] <- data[[j]]$fitness$best.sofar

@@ -14,7 +14,7 @@ import org.neat4j.neat.ga.core.Chromosome;
  */
 public class PreEvaluatedFitnessFunction extends NEATFitnessFunction {
 
-    private Map<Chromosome, Float> scores;
+    private final Map<Chromosome, Float> scores;
 
     public PreEvaluatedFitnessFunction(Map<Chromosome, Float> scores) {
         super(null, null);

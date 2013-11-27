@@ -508,3 +508,17 @@ data <- metaLoadData("k3_ph_hard_fit","k3_ph_hard_nov50","k3_ph_hard_nov50_indmu
 count <- exploration.count(data, levels=5, vars=par$vars.group)
 uniformity.gen.2(count, threshold=100)
 rm(data) ; rm(count) ; gc()
+
+setwd("~/exps/generic2/pred")
+vars <- c("captured","time","predDisp","maxDisp","preyDisp")
+data.fit <- loadData("fit_mp2", jobs=10, gens=0:249, load.behavs=T, subpops=3, behavs.sample=0.25, vars.group=vars)
+data.nsga <- loadData("nsga_mp2", jobs=10, gens=0:249, load.behavs=T, subpops=3, behavs.sample=0.25, vars.group=vars)
+data.cl <- loadData("cl50_mp2", jobs=10, gens=0:249, load.behavs=T, subpops=3, behavs.sample=0.25, vars.group=vars, vars.file=c(vars,paste0("B",1:50)))
+datalist <- list(data.fit, data.nsga, data.cl)
+fullStatistics(datalist, expset.name="pred.mp2", fit.comp=T, fit.comp.par=list(snapshots=c(75,150,249)), som.group=T, som.alljobs=T)
+
+
+
+
+
+

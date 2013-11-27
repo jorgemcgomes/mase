@@ -79,6 +79,7 @@ public class MasonPlayer {
             FileInputStream fis = new FileInputStream(gc);
             ObjectInputStream ois = new ObjectInputStream(fis);
             controller = (GroupController) ois.readObject();
+            System.out.println(controller);
             if (verbose) {
                 EvaluationResult[] chars = (EvaluationResult[]) ois.readObject();
                 for (int i = 0; i < chars.length; i++) {

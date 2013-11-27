@@ -31,7 +31,7 @@ public class HeterogeneousGroupController implements GroupController {
     public String toString() {
         String s = "";
         for(int i = 0 ; i < controllers.length ; i++) {
-            s += "Agent Controller " + i + ":\n" + controllers[i].toString()+"\n";
+            s += "AC-" + i + ": " + controllers[i].toString()+"\n";
         }
         return s;
     }    
