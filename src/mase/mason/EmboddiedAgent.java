@@ -34,6 +34,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     protected SimState sim;
     public static final double COLLISION_SPEED_DECAY = 0.5;
     public static final double COLLISION_DIRECTION = Math.PI / 2;
+    private boolean isAlive;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
         super(new OvalPortrayal2D(c, radius * 2, true), 0, radius,
@@ -45,9 +46,19 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.speed = 0;
         this.detectCollisions = false;
         this.boundedArena = false;
+        this.isAlive = true;
         this.setLocation(new Double2D(0, 0));
         this.setOrientation(0);
     }
+
+    public double getRadius() {
+        return radius;
+    }
+    
+    public boolean isAlive() {
+        return isAlive;
+    }
+    
 
     public void enableCollisionDetection(boolean enable) {
         this.detectCollisions = enable;
@@ -128,6 +139,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
 
     public void stop() {
         stopper.stop();
+        this.isAlive = false;
     }
 
     @Override
@@ -164,18 +176,6 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         Double2D agentToPoint = point.subtract(pos).normalize();
         Double2D agentDir = new Double2D(FastMath.cos(orientation), FastMath.sin(orientation));
         return FastMath.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
-        //return Math.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
-
-        // atan2 returns between -PI and PI
-        /*double angleToPoint = point.subtract(pos).angle(); // [-PI, PI]
-         double agentOri = this.orientation; // [-PI, PI]
-         double a = angleToPoint - agentOri; // [-2PI,2PI]
-         if(a > Math.PI * 2) {
-         a = a - Math.PI * 2;
-         } else if(a < -Math.PI * 2) {
-         a = a + Math.PI * 2;
-         }
-         return a;*/
     }
 
     public static void main(String[] args) {

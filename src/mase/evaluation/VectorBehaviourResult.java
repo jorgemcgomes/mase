@@ -51,7 +51,7 @@ public class VectorBehaviourResult implements BehaviourResult {
     }
 
     @Override
-    public EvaluationResult mergeEvaluations(EvaluationResult[] results) {
+    public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
         float[] merged = new float[behaviour.length];
         Arrays.fill(merged, 0f);
         for (int i = 0; i < merged.length; i++) {

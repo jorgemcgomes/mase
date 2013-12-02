@@ -52,7 +52,7 @@ public class ResourceSharing extends MaseSimState {
     protected void placeResource() {
         resource = new Resource(this, field);
         resource.setLocation(new Double2D(field.height / 2, field.width / 2));
-        schedule.scheduleRepeating(resource);
+        resource.setStopper(schedule.scheduleRepeating(resource));
     }
 
     protected void placeAgents() {

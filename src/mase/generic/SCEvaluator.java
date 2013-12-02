@@ -21,7 +21,6 @@ public class SCEvaluator extends MasonEvaluation {
 
     public static final String P_DISCRETIZATION = "discretisation";
     public static final String P_DISTANCE = "distance";
-    public static final String V_BRAY_CURTIS = "bray-curtis", V_COSINE = "cosine";
     private int bins;
     private Distance distance;
     private HashMap<Integer, byte[]> key;

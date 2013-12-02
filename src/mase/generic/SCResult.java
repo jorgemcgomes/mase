@@ -42,7 +42,7 @@ public class SCResult extends VectorBehaviourResult {
     }
 
     @Override
-    public EvaluationResult mergeEvaluations(EvaluationResult[] results) {
+    public SCResult mergeEvaluations(EvaluationResult[] results) {
         Map<Integer, Float> mergedCounts = new HashMap<Integer, Float>();
         Map<Integer, byte[]> mergedStates = new HashMap<Integer, byte[]>();
         for (EvaluationResult er : results) {

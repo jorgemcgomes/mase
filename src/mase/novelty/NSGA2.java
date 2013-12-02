@@ -7,6 +7,7 @@ package mase.novelty;
 
 import ec.EvolutionState;
 import ec.Population;
+import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,8 +21,8 @@ import mase.PostEvaluator;
  */
 public class NSGA2 implements PostEvaluator {
 
-    protected List<Individual> allInds;
-    
+    protected List<Individual> allInds; // this is used just for stats
+
     @Override
     public void setup(EvolutionState state, Parameter base) {
         // Nothing to do
@@ -59,23 +60,34 @@ public class NSGA2 implements PostEvaluator {
                 //System.out.println(rank.size());
                 crowdingDistanceAssignement(rank, ranges);
             }
-            // Calculate score
+
+            assignFitnessScores(pop.subpops[i], state, ranked);
+
+            // for stats only
             allInds = new ArrayList<Individual>();
-            for(List<Individual> rank : ranked) {
-                for(Individual ind : rank) {
-                    ind.score = ranked.size() - ind.rank + ind.crowdingDistance;
-                    NoveltyFitness nf = (NoveltyFitness) pop.subpops[i].individuals[ind.individualId].fitness;
-                    nf.setFitness(state, (float) ind.score, false);
+            for (List<Individual> rank : ranked) {
+                for (Individual ind : rank) {
                     allInds.add(ind);
                 }
-            }            
+            }
+        }
+    }
+
+    protected void assignFitnessScores(Subpopulation pop, EvolutionState state, List<List<Individual>> rankedInds) {
+        // Calculate score
+        for (List<Individual> rank : rankedInds) {
+            for (Individual ind : rank) {
+                ind.score = rankedInds.size() - ind.rank + ind.crowdingDistance;
+                NoveltyFitness nf = (NoveltyFitness) pop.individuals[ind.individualId].fitness;
+                nf.setFitness(state, (float) ind.score, false);
+            }
         }
     }
 
     /*
      * Returns the fronts and assign the nondomination rank to each individual
      */
-    private List<List<Individual>> fastNondominatedSort(List<Individual> inds) {
+    protected List<List<Individual>> fastNondominatedSort(List<Individual> inds) {
         List<List<Individual>> F = new ArrayList<List<Individual>>();
         List<Individual> F1 = new ArrayList<Individual>();
         for (Individual p : inds) {
@@ -108,9 +120,9 @@ public class NSGA2 implements PostEvaluator {
             i = i + 1;
             F.add(H);
         }
-        
+
         // Last one may be empty
-        if(F.get(F.size() - 1).isEmpty()) {
+        if (F.get(F.size() - 1).isEmpty()) {
             F.remove(F.size() - 1);
         }
 
@@ -123,7 +135,7 @@ public class NSGA2 implements PostEvaluator {
         return F;
     }
 
-    private void crowdingDistanceAssignement(List<Individual> I, double[] ranges) {
+    protected void crowdingDistanceAssignement(List<Individual> I, double[] ranges) {
         int mTotal = I.get(0).objectives.length;
         int l = I.size();
         for (Individual i : I) {
@@ -143,7 +155,6 @@ public class NSGA2 implements PostEvaluator {
             for (int i = 1; i < l - 1; i++) {
                 I.get(i).crowdingDistance = I.get(i).crowdingDistance
                         + (I.get(i + 1).objectives[m] - I.get(i - 1).objectives[m]) / ranges[m];
-
             }
         }
     }

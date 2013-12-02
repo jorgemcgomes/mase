@@ -519,6 +519,10 @@ fullStatistics(datalist, expset.name="pred.mp2", fit.comp=T, fit.comp.par=list(s
 
 
 
+setwd("~/exps/generic2/ksh")
+data <- metaLoadData("fit_noneat","nsga_noneat","nsga_b_noneat","cl50_noneat", params=list(jobs=10,load.behavs=F))
+fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)))
+
 
 
 

@@ -27,8 +27,10 @@ public class Resource extends EmboddiedAgent {
     public void step(SimState state) {
         ResourceSharing rs = (ResourceSharing) sim;
         int i = 0;
+        boolean someAlive = false;
         for (RSAgent a : rs.agents) {
-            if (a.inStation && Math.abs(a.getSpeed()) < 0.001) {
+            someAlive = someAlive || a.isAlive();
+            if (a.isAlive() && a.inStation && Math.abs(a.getSpeed()) < 0.001) {
                 if (stay[i] >= rs.par.rechargeDelay) {
                     a.energyLevel = Math.min(rs.par.maxEnergy, a.energyLevel + rs.par.rechargeRate);
                 } else {
@@ -38,6 +40,9 @@ public class Resource extends EmboddiedAgent {
                 stay[i] = 0;
             }
             i++;
+        }
+        if(!someAlive) {
+            this.stop();
         }
     }
 }
