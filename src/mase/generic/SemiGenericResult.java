@@ -14,12 +14,12 @@ import mase.evaluation.VectorBehaviourResult;
  */
 public class SemiGenericResult extends VectorBehaviourResult {
 
+    protected float[] originalResult;
+
     public SemiGenericResult(float... bs) {
         super(bs);
         this.originalResult = Arrays.copyOf(bs, bs.length);
     }
-
-    protected float[] originalResult;
 
     public float[] getOriginalResult() {
         return originalResult;
@@ -33,6 +33,15 @@ public class SemiGenericResult extends VectorBehaviourResult {
     public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
         VectorBehaviourResult vbr = super.mergeEvaluations(results);
         return new SemiGenericResult(vbr.getBehaviour());
+    }
+
+    @Override
+    public String toString() {
+        String original = super.toString();
+        for (int i = 0; i < originalResult.length; i++) {
+            original += " " + originalResult[i];
+        }
+        return original;
     }
 
 }

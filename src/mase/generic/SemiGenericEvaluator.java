@@ -6,8 +6,10 @@
 package mase.generic;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import mase.EvaluationResult;
 import mase.mason.EmboddiedAgent;
 import mase.mason.MasonEvaluation;
@@ -24,6 +26,8 @@ public class SemiGenericEvaluator extends MasonEvaluation {
     protected SemiGenericResult vbr;
     protected List<EmboddiedAgent[]> agentGroups;
     protected List<EnvironmentFeature> environmentFeatures;
+    protected Map<EmboddiedAgent, Double2D> lastPosition;
+    protected Map<EmboddiedAgent[], Double2D> lastCentreMass;
     private float[] features;
     private int[] norm;
     private int size;
@@ -34,6 +38,8 @@ public class SemiGenericEvaluator extends MasonEvaluation {
         this.environmentFeatures = new LinkedList<EnvironmentFeature>();
         this.features = new float[100]; // TODO: it should be possible to calculate the exact number
         this.norm = new int[100];
+        this.lastCentreMass = new HashMap<EmboddiedAgent[], Double2D>();
+        this.lastPosition = new HashMap<EmboddiedAgent, Double2D>();
     }
 
     protected void addEnvironmentFeature(EnvironmentFeature ef) {
@@ -42,6 +48,18 @@ public class SemiGenericEvaluator extends MasonEvaluation {
 
     protected void addAgentGroup(EmboddiedAgent[] group) {
         agentGroups.add(group);
+        // initial centre mass
+        MutableDouble2D centreMass = new MutableDouble2D();
+        int al = 0;
+        for (EmboddiedAgent a : group) {
+            if (a.isAlive()) {
+                centreMass.addIn(a.getLocation());
+                al++;
+            }
+            lastPosition.put(a, a.getLocation());
+        }
+        centreMass.multiplyIn(1.0 / al);
+        lastCentreMass.put(group, new Double2D(centreMass));
     }
 
     @Override
@@ -61,9 +79,9 @@ public class SemiGenericEvaluator extends MasonEvaluation {
                 norm[index]++;
                 index++;
 
-                if (al > 1) {
+                MutableDouble2D centreMass = new MutableDouble2D();
+                if (al > 0) {
                     // Calculate centre of mass
-                    MutableDouble2D centreMass = new MutableDouble2D();
                     for (EmboddiedAgent a : g) {
                         if (a.isAlive()) {
                             centreMass.addIn(a.getLocation());
@@ -71,6 +89,14 @@ public class SemiGenericEvaluator extends MasonEvaluation {
                     }
                     centreMass.multiplyIn(1.0 / al);
 
+                    // Average movement of the centre of mass
+                    features[index] += centreMass.distance(lastCentreMass.get(g));
+                    lastCentreMass.put(g, new Double2D(centreMass));
+                    norm[index]++;
+                }
+                index++;
+
+                if (al > 1) {
                     // Average distance to centre of mass
                     double avgDisp = 0;
                     for (EmboddiedAgent a : g) {
@@ -88,7 +114,8 @@ public class SemiGenericEvaluator extends MasonEvaluation {
             // Individual agent movement
             for (EmboddiedAgent a : g) {
                 if (a.isAlive()) {
-                    features[index] += a.getSpeed();
+                    features[index] += lastPosition.get(a).distance(a.getLocation());
+                    lastPosition.put(a, a.getLocation());
                     norm[index]++;
                 }
             }
@@ -200,10 +227,10 @@ public class SemiGenericEvaluator extends MasonEvaluation {
 
         @Override
         public double distanceTo(EmboddiedAgent ag) {
-            double min = 0;
+            double min = Double.POSITIVE_INFINITY;
             for (int i = 0; i < segStarts.length; i++) {
                 double d = distToSegment(ag.getLocation(), segStarts[i], segEnds[i]);
-                min = Math.min(min, d - ag.getRadius());
+                min = Math.min(min, Math.max(0, d - ag.getRadius()));
             }
             return min;
         }
@@ -239,7 +266,7 @@ public class SemiGenericEvaluator extends MasonEvaluation {
 
         @Override
         public double distanceTo(EmboddiedAgent ag) {
-            double min = 0;
+            double min = Double.POSITIVE_INFINITY;
             for (EnvironmentFeature ef : features) {
                 min = Math.min(min, ef.distanceTo(ag));
             }
