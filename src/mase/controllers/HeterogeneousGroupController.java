@@ -13,7 +13,7 @@ import mase.GroupController;
  */
 public class HeterogeneousGroupController implements GroupController {
 
-    private AgentController[] controllers;
+    private final AgentController[] controllers;
     
     public HeterogeneousGroupController(AgentController[] controllers) {
         this.controllers = controllers;

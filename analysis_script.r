@@ -524,5 +524,18 @@ data <- metaLoadData("fit_noneat","nsga_noneat","nsga_b_noneat","cl50_noneat", p
 fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)))
 
 
+setwd("~/exps/generic2/ksh")
+data <- metaLoadData("fit","nsga_b/","nsga_semigen/", params=list(jobs=8,load.behavs=F, gens=0:299))
+fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,200,299)), show.only=T)
 
+setwd("~/exps/generic2/keepaway")
+data <- metaLoadData("fit/","nsga","nsga_b/","cl50_brown_norm_biased/","nsga_semigen", params=list(jobs=10,load.behavs=F))
+fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=T)
 
+setwd("~/exps/generic2/indiana4")
+data <- metaLoadData("fit/","nsga","cl50_brown_norm","nsga_semigen", params=list(jobs=10,load.behavs=F))
+fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=T)
+
+setwd("~/exps/g0eneric2/keepaway")
+data <- metaLoadData("fit/","nsga","nsga_b/","cl50_brown_norm_biased/","nsga_semigen", params=list(jobs=10,load.behavs=F))
+fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=T)

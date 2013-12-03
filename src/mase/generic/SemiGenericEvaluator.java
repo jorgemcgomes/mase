@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import mase.EvaluationResult;
 import mase.mason.EmboddiedAgent;
+import mase.mason.MaseSimState;
 import mase.mason.MasonEvaluation;
 import net.jafama.FastMath;
 import sim.util.Double2D;
@@ -64,21 +65,24 @@ public class SemiGenericEvaluator extends MasonEvaluation {
 
     @Override
     protected void evaluate() {
+        if(!((MaseSimState) sim).continueSimulation()) {
+            return;
+        }
+        
         int index = 0;
         for (int gi = 0; gi < agentGroups.size(); gi++) {
             EmboddiedAgent[] g = agentGroups.get(gi);
-            if (g.length > 1) {
-                // Percentage of alive agents
-                int al = 0;
-                for (EmboddiedAgent a : g) {
-                    if (a.isAlive()) {
-                        al++;
-                    }
+            // Percentage of alive agents
+            int al = 0;
+            for (EmboddiedAgent a : g) {
+                if (a.isAlive()) {
+                    al++;
                 }
-                features[index] += al / (float) g.length;
-                norm[index]++;
-                index++;
-
+            }
+            features[index] += al / (float) g.length;
+            norm[index]++;
+            index++;
+            if (g.length > 1) {
                 MutableDouble2D centreMass = new MutableDouble2D();
                 if (al > 0) {
                     // Calculate centre of mass
@@ -142,18 +146,19 @@ public class SemiGenericEvaluator extends MasonEvaluation {
             for (int go = gi + 1; go < agentGroups.size(); go++) {
                 EmboddiedAgent[] otherG = agentGroups.get(go);
                 double dist = 0;
-                int aliveThis = 0, aliveOther = 0;
+                int count = 0;
                 for (EmboddiedAgent a : g) {
                     if (a.isAlive()) {
                         for (EmboddiedAgent otherA : otherG) {
                             if (otherA.isAlive()) {
                                 dist += a.distanceTo(otherA);
+                                count++;
                             }
                         }
                     }
                 }
-                if (aliveThis > 0 && aliveOther > 0) {
-                    features[index] += dist / (aliveThis * aliveOther);
+                if (count > 0) {
+                    features[index] += dist / count;
                     norm[index]++;
                 }
                 index++;

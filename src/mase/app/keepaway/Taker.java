@@ -31,7 +31,7 @@ public class Taker extends EmboddiedAgent {
         if(this.distanceTo(kw.ball) == 0) {
             this.caughtBall = true;
             kw.caught = true;
-            kw.terminate();
+            kw.ball.stop();
             return;
         }
         

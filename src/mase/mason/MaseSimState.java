@@ -17,6 +17,10 @@ public abstract class MaseSimState extends SimState {
         super(seed);
     }
     
+    public boolean continueSimulation() {
+        return true;
+    }
+    
     public abstract Object getField();
     
     public abstract List<? extends SmartAgent> getSmartAgents();

@@ -40,7 +40,7 @@ public class Ball extends EmboddiedAgent {
         // check if the ball has escaped the limits
         if(getLocation().x < 0 || getLocation().x > kw.par.size || getLocation().y < 0 || getLocation().y > kw.par.size) {
             kw.outOfLimits = true;
-            kw.terminate();
+            this.stop();
         }
     }
     

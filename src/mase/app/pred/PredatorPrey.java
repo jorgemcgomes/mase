@@ -100,13 +100,9 @@ public class PredatorPrey extends MaseSimState  {
         return new Prey(this, field);
     }
 
-    protected void terminate() {
-        for (Prey p : preys) {
-            p.stop();
-        }
-        for (Predator p : predators) {
-            p.stop();
-        }
+    @Override
+    public boolean continueSimulation() {
+        return !activePreys.isEmpty();
     }
 
     public int getCaptureCount() {

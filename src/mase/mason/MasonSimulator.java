@@ -10,7 +10,6 @@ import mase.EvaluationResult;
 import mase.GroupController;
 import mase.SimulationProblem;
 import sim.display.GUIState;
-import sim.engine.SimState;
 
 /**
  *
@@ -41,7 +40,7 @@ public abstract class MasonSimulator extends SimulationProblem {
 
     @Override
     public EvaluationResult[] evaluateSolution(GroupController gc, long seed) {
-        SimState sim = createSimState(gc, seed);
+        MaseSimState sim = createSimState(gc, seed);
         EvaluationResult[][] evalResults = new EvaluationResult[evalFunctions.length][repetitions];
         for (int r = 0; r < repetitions; r++) {
             MasonEvaluation[] evals = new MasonEvaluation[evalFunctions.length];
@@ -54,7 +53,7 @@ public abstract class MasonSimulator extends SimulationProblem {
             for (int i = 0; i < evals.length; i++) {
                 evals[i].preSimulation();
             }
-            while (sim.schedule.getSteps() < maxSteps) {
+            while (sim.schedule.getSteps() < maxSteps && sim.continueSimulation()) {
                 boolean b = sim.schedule.step(sim);
                 for (int i = 0; i < evals.length; i++) {
                     evals[i].evaluationStep();
@@ -77,7 +76,7 @@ public abstract class MasonSimulator extends SimulationProblem {
         return mergedResult;
     }
 
-    public abstract SimState createSimState(GroupController gc, long seed);
+    public abstract MaseSimState createSimState(GroupController gc, long seed);
 
     public abstract GUIState createSimStateWithUI(GroupController gc, long seed);
 }

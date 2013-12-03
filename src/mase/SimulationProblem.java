@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import mase.controllers.HeterogeneousGroupController;
 import mase.controllers.HomogeneousGroupController;
-import mase.neat.NEATAgentController;
-import mase.neat.NEATIndividual;
 
 /**
  *
@@ -107,7 +105,6 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         AgentController[] acs = new AgentController[ind.length];
         for (int i = 0; i < ind.length; i++) {
             acs[i] = ((AgentControllerIndividual) ind[i]).decodeController();
-            //System.out.println(Thread.currentThread().getId() + "\t" + ((NEATIndividual) ind[i]).getChromosome() + "\t" + acs[i] + "\t" + ((NEATAgentController) acs[i]).getNetwork());
         }
         
         HeterogeneousGroupController controller = new HeterogeneousGroupController(acs);

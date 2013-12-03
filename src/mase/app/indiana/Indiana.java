@@ -98,9 +98,15 @@ public class Indiana extends MaseSimState {
         }
     }
 
+    @Override
+    public boolean continueSimulation() {
+        return !gate.closed;
+    }
+
     protected static class Gate extends EmboddiedAgent {
         
         protected long openTime = -1;
+        protected boolean closed = false;
 
         protected Gate(Indiana sim, Continuous2D field) {
             super(sim, field, sim.par.gateSize / 2, Color.RED);
@@ -124,17 +130,8 @@ public class Indiana extends MaseSimState {
                     }
                 }
             }
-            if (!anyInside) {
-                stop();
-                return;
-            }
-            if (openTime != -1 && ind.schedule.getSteps() - openTime > ind.par.gateInterval) {
-                for (IndianaAgent a : ind.agents) {
-                    if (!a.escaped) {
-                        a.stop();
-                    }
-                }
-                stop();
+            if (!anyInside || (openTime != -1 && ind.schedule.getSteps() - openTime > ind.par.gateInterval)) {
+                closed = true;
             }
         }
     }

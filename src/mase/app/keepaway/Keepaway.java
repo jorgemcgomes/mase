@@ -97,15 +97,10 @@ public class Keepaway extends MaseSimState {
         ball.setLocation(loc);
         ball.setStopper(schedule.scheduleRepeating(ball));
     }
-    
-    protected void terminate() {
-        for (Keeper k : keepers) {
-            k.stop();
-        }
-        for (Taker t : takers) {
-            t.stop();
-        }
-        ball.stop();
+
+    @Override
+    public boolean continueSimulation() {
+        return ball.isAlive();
     }
 
     @Override
