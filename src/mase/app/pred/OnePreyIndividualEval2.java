@@ -6,7 +6,7 @@ package mase.app.pred;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import mase.evaluation.AgentEvaluationResult;
+import mase.evaluation.SubpopEvaluationResult;
 import mase.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
@@ -26,7 +26,7 @@ public class OnePreyIndividualEval2 extends MasonEvaluation {
     protected float[] captured;
     protected float[] movement;
     protected float[] partnerAvgDist;
-    protected AgentEvaluationResult evaluation;
+    protected SubpopEvaluationResult evaluation;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -100,7 +100,7 @@ public class OnePreyIndividualEval2 extends MasonEvaluation {
                 float[] b = new float[]{captured[i], avgDistance[i], movement[i], partnerAvgDist[i]};
                 res[i] = new VectorBehaviourResult(b);
             }
-            evaluation = new AgentEvaluationResult(res);
+            evaluation = new SubpopEvaluationResult(res);
         }
         return evaluation;
     }

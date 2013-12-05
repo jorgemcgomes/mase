@@ -13,9 +13,9 @@ quit-on-run-complete =			false
 # Populations configuration
 pop.subpops =                           1
 pop.default-subpop = 			mase.neat.NEATSubpop
-pop.default-subpop.species = 		mase.neat.NEATSpecies
-pop.default-subpop.size =               300
-pop.default-subpop.duplicate-retries =  0
+neat.species = 		                mase.neat.NEATSpecies
+neat.size =                             200
+neat.duplicate-retries =                100
 neat.species.ind =                      mase.neat.NEATIndividual
 neat.species.pipe =                     mase.neat.DummyPipeline
 
@@ -35,6 +35,7 @@ stat.child.1.file =			$fitness.stat
 stat.child.1.do-subpops =               true
 stat.child.2 =                          mase.stat.BestEverSolutionStat
 stat.child.2.file =                     $best.ind
+stat.child.2.last =                     $last.ind
 stat.child.3 =                          mase.stat.EvaluationsStat
 stat.child.3.do-behaviours =            true
 stat.child.3.file =                     $behaviours.stat
@@ -84,8 +85,8 @@ neat.MAX.PERTURB =                      0.5
 neat.MAX.BIAS.PERTURB =                 0.1
 neat.FEATURE.SELECTION =                false
 neat.RECURRENCY.ALLOWED =               true
-neat.INPUT.NODES =                      2
-neat.OUTPUT.NODES =                     1
+#neat.INPUT.NODES =                      2
+#neat.OUTPUT.NODES =                     1
 
 # Extinction Control
 neat.ELE.EVENTS =                       false
@@ -93,7 +94,7 @@ neat.ELE.SURVIVAL.COUNT =               0.1
 neat.ELE.EVENT.TIME =                   1000
 
 # Epoch Control
-neat.KEEP.BEST.EVER =                   true
+neat.KEEP.BEST.EVER =                   false
 neat.EXTRA.FEATURE.COUNT =              0
 neat.NUMBER.EPOCHS =                    100
 neat.NATURAL.ORDER.STRATEGY =           false

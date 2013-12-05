@@ -18,11 +18,11 @@ public class FitnessResult implements EvaluationResult {
     protected int combination;
 
     public FitnessResult(Float value) {
-        this.value = value;
-        this.combination = HARMONIC;
+        this(value, HARMONIC);
     }
-
-    public void setCombinationMethod(int combination) {
+    
+    public FitnessResult(Float value, int combination) {
+                this.value = value;
         this.combination = combination;
     }
 
@@ -74,8 +74,7 @@ public class FitnessResult implements EvaluationResult {
                 score = 0.01f * (mean / results.length) + 0.99f * min;
                 break;
         }
-        FitnessResult fit = new FitnessResult(score);
-        fit.setCombinationMethod(combination);
+        FitnessResult fit = new FitnessResult(score, combination);
         return fit;
     }
 

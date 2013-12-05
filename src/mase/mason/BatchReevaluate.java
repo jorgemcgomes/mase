@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.zip.GZIPInputStream;
 import mase.EvaluationResult;
 import mase.GroupController;
-import mase.evaluation.AgentEvaluationResult;
+import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonReevaluate.Reevaluation;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -84,8 +84,8 @@ public class BatchReevaluate {
             String[] split = f.getName().split("_");
             bfw.write(split[0] + " " + split[1] + " " + split[2] + " " + re.meanFitness + " " + re.sdFitness + " " + bestSoFar);
             for (EvaluationResult er : re.mergedResults) {
-                if (er instanceof AgentEvaluationResult) {
-                    AgentEvaluationResult aer = (AgentEvaluationResult) er;
+                if (er instanceof SubpopEvaluationResult) {
+                    SubpopEvaluationResult aer = (SubpopEvaluationResult) er;
                     for (EvaluationResult er2 : aer.getAllEvaluations()) {
                         bfw.write(" " + er2);
                     }

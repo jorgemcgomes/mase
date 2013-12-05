@@ -45,7 +45,6 @@ public class IndianaFitness2 extends MasonEvaluation {
         float esc = (float) count / ind.agents.size();
         float w = 1 / (1 + (float) ind.agents.size());
         res = new FitnessResult(esc * (1 - w) + time * w);
-        res.setCombinationMethod(FitnessResult.HARMONIC);
     }
 
 }

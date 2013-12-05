@@ -8,6 +8,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
+import mase.mason.EmboddiedAgent;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimulator;
 import sim.util.Double2D;
@@ -81,7 +82,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         }
 
         // ball-taker distance
-        for (Taker t : kw.takers) {
+        for (EmboddiedAgent t : kw.takers) {
             ballTakerDistance += t.getLocation().distance(kw.ball.getLocation());
         }
 

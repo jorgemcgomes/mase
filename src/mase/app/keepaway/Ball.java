@@ -8,7 +8,6 @@ import java.awt.Color;
 import mase.mason.EmboddiedAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
-import sim.util.Double2D;
 
 /**
  *

@@ -9,6 +9,8 @@ import ec.Fitness;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 import java.util.Arrays;
+import java.util.Comparator;
+import mase.evaluation.SubpopEvaluationResult;
 
 /**
  *
@@ -23,7 +25,7 @@ public class ExpandedFitness extends SimpleFitness {
     public Parameter defaultBase() {
         return new Parameter(P_FITNESS);
     }
-    
+
     protected EvaluationResult[] evalResults;
     protected float fitnessScore;
     protected int subpop;
@@ -34,16 +36,14 @@ public class ExpandedFitness extends SimpleFitness {
         this.fitnessIndex = state.parameters.getIntWithDefault(base.push(P_FITNESS_EVAL_INDEX), defaultBase().push(P_FITNESS_EVAL_INDEX), 0);
     }
 
-    public void setCorrespondingSubpop(int n) {
-        this.subpop = n;
+    public void setEvaluationResults(EvolutionState state, EvaluationResult[] br, int subpop) {
+        this.evalResults = br;
+        this.subpop = subpop;
+        this.setFitness(state, getFitnessScore(), false);
     }
 
     public int getCorrespondingSubpop() {
         return subpop;
-    }
-
-    public void setEvaluationResults(EvaluationResult[] br) {
-        this.evalResults = br;
     }
 
     public EvaluationResult[] getEvaluationResults() {
@@ -51,7 +51,13 @@ public class ExpandedFitness extends SimpleFitness {
     }
 
     public float getFitnessScore() {
-        return (Float) evalResults[fitnessIndex].value();
+        EvaluationResult er = evalResults[fitnessIndex];
+        if (er instanceof SubpopEvaluationResult) {
+            SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
+            return (Float) ser.getSubpopEvaluation(subpop).value();
+        } else {
+            return (Float) er.value();
+        }
     }
 
     /**
@@ -63,30 +69,44 @@ public class ExpandedFitness extends SimpleFitness {
     @Override
     public void setToMeanOf(EvolutionState state, Fitness[] fitnesses) {
         super.setToMeanOf(state, fitnesses);
+        this.subpop = ((ExpandedFitness) fitnesses[0]).subpop;
         if (fitnesses.length == 1) {
-            EvaluationResult[] otherChars = ((ExpandedFitness) fitnesses[0]).evalResults;
-            this.evalResults = Arrays.copyOf(otherChars, otherChars.length);
+            // Just one, pass the information
+            this.setEvaluationResults(state, ((ExpandedFitness) fitnesses[0]).evalResults, subpop);
             this.setContext(fitnesses[0].getContext());
         } else {
-            this.evalResults = new EvaluationResult[((ExpandedFitness) fitnesses[0]).evalResults.length];
-            for (int i = 0; i < evalResults.length; i++) { // for each evaluation function
-                EvaluationResult[] evals = new EvaluationResult[fitnesses.length];
+            // Merge evaluation results
+            EvaluationResult[] evalFunctions = new EvaluationResult[((ExpandedFitness) fitnesses[0]).evalResults.length];
+            for (int i = 0; i < evalFunctions.length; i++) { // for each evaluation function
+                EvaluationResult[] evalTrials = new EvaluationResult[fitnesses.length];
                 for (int j = 0; j < fitnesses.length; j++) { // for each trial
-                    evals[j] = ((ExpandedFitness) fitnesses[j]).evalResults[i];
+                    evalTrials[j] = ((ExpandedFitness) fitnesses[j]).evalResults[i];
                 }
-                this.evalResults[i] = (EvaluationResult) evals[0].mergeEvaluations(evals);
+                evalFunctions[i] = (EvaluationResult) evalTrials[0].mergeEvaluations(evalTrials);
             }
-            // How to fill the context in this case? Context = best fitness
-            float maxFit = Float.NEGATIVE_INFINITY;
-            int best = -1;
-            for (int j = 0; j < fitnesses.length; j++) {
-                float f = ((ExpandedFitness) fitnesses[j]).fitness;
-                if (f > maxFit) {
-                    maxFit = f;
-                    best = j;
+            this.setEvaluationResults(state, evalFunctions, subpop);
+            
+            // Context corresponding to the individual with the median fitness score
+            Fitness[] sortedFits = Arrays.copyOf(fitnesses, fitnesses.length);
+            Arrays.sort(sortedFits, new Comparator<Fitness>() {
+                @Override
+                public int compare(Fitness o1, Fitness o2) {
+                    return Float.compare(((ExpandedFitness) o2).getFitnessScore(), 
+                            ((ExpandedFitness) o1).getFitnessScore());
+                }
+            });
+            this.setContext(sortedFits[sortedFits.length / 2].getContext());
+            
+            /*Individual[] c = null;
+            float worstScore = Float.MAX_VALUE;
+            for(Fitness f : fitnesses) {
+                if(((ExpandedFitness) f).getFitnessScore() < worstScore) {
+                    worstScore = ((ExpandedFitness) f).getFitnessScore();
+                    c = f.getContext();
                 }
             }
-            this.setContext(fitnesses[best].getContext());
+            this.setContext(c);*/
         }
+
     }
 }

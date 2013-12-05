@@ -94,7 +94,6 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
                         ind.fitness.setToBestOf(state, trials);
                 }
                 ind.evaluated = true;
-                ((ExpandedFitness) ind.fitness).setCorrespondingSubpop(i);
             }
         }
     }
@@ -114,8 +113,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         for (int i = 0; i < ind.length; i++) {
             if (updateFitness[i]) {
                 ExpandedFitness trial = (ExpandedFitness) ind[i].fitness.clone();
-                trial.setEvaluationResults(eval);
-                trial.setFitness(state, trial.getFitnessScore(), false);
+                trial.setEvaluationResults(state, eval, subpops[i]);
                 trial.setContext(ind);
                 ind[i].fitness.trials.add(trial);
             }
@@ -128,8 +126,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         HomogeneousGroupController hc = new HomogeneousGroupController(aci.decodeController());
         EvaluationResult[] eval = evaluateSolution(hc, state.random[threadnum].nextLong());
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
-        fit.setEvaluationResults(eval);
-        fit.setFitness(state, fit.getFitnessScore(), false);
+        fit.setEvaluationResults(state, eval, subpopulation);
         ind.evaluated = true;
     }
 

@@ -17,7 +17,9 @@ import mase.ExpandedFitness;
 public class BestEverSolutionStat extends SolutionWriterStat {
 
     public static final String P_FILE = "file";
+    public static final String P_LAST_FILE = "last";
     File bestFile;
+    File lastFile;
     double bestSoFar;
 
     @Override
@@ -26,6 +28,8 @@ public class BestEverSolutionStat extends SolutionWriterStat {
         File f = state.parameters.getFile(base.push(P_FILE), null);
         bestFile = new File(f.getParent(), prefix + f.getName());
         bestSoFar = Double.NEGATIVE_INFINITY;
+        f = state.parameters.getFile(base.push(P_LAST_FILE), null);
+        lastFile = new File(f.getParent(), prefix + f.getName());
     }
 
     @Override
@@ -48,5 +52,8 @@ public class BestEverSolutionStat extends SolutionWriterStat {
             bestSoFar = bestFitness;
             super.writeSolution(best, bestFile);
         }
+        
+        super.writeSolution(best, lastFile);
+        
     }
 }

@@ -76,6 +76,7 @@ public class ConsoleStat extends Statistics {
         for (int s = 0; s < state.population.subpops.length; s++) {
             DescriptiveStatistics ds = new DescriptiveStatistics(state.population.subpops[s].individuals.length);
             for (Individual ind : state.population.subpops[s].individuals) {
+                //System.out.println(((ExpandedFitness) ind.fitness).getFitnessScore());
                 ds.addValue(((ExpandedFitness) ind.fitness).getFitnessScore());
             }
             state.output.message("Subpop " + s + 

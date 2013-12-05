@@ -6,6 +6,7 @@ package mase;
 
 import ec.Evaluator;
 import ec.EvolutionState;
+import ec.coevolve.MultiPopCoevolutionaryEvaluator;
 import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
 import ec.util.Parameter;
 
@@ -40,8 +41,8 @@ public class MetaEvaluator extends Evaluator {
         for (PostEvaluator postEval : postEvaluators) {
             postEval.processPopulation(state);
         }
-        // necessary dirty hack
-        if (baseEvaluator instanceof MultiPopCoevolutionaryEvaluator2) {
+        // necessary hack
+        if (baseEvaluator instanceof MultiPopCoevolutionaryEvaluator2) {            
             ((MultiPopCoevolutionaryEvaluator2) baseEvaluator).afterCoevolutionaryEvaluation(state, state.population, null);
         }
     }

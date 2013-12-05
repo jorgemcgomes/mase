@@ -21,7 +21,7 @@ import mase.PostEvaluator;
  */
 public class NSGA2 implements PostEvaluator {
 
-    protected List<Individual> allInds; // this is used just for stats
+    protected List<Individual>[] allInds; // this is used just for stats
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -31,6 +31,7 @@ public class NSGA2 implements PostEvaluator {
     @Override
     public void processPopulation(EvolutionState state) {
         Population pop = state.population;
+        allInds = new ArrayList[pop.subpops.length];
         for (int i = 0; i < pop.subpops.length; i++) {
             // find ranges
             float noveltyMin = Float.POSITIVE_INFINITY;
@@ -64,10 +65,10 @@ public class NSGA2 implements PostEvaluator {
             assignFitnessScores(pop.subpops[i], state, ranked);
 
             // for stats only
-            allInds = new ArrayList<Individual>();
+            allInds[i] = new ArrayList<Individual>();
             for (List<Individual> rank : ranked) {
                 for (Individual ind : rank) {
-                    allInds.add(ind);
+                    allInds[i].add(ind);
                 }
             }
         }

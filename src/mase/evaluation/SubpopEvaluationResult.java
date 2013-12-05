@@ -10,15 +10,15 @@ import mase.EvaluationResult;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class AgentEvaluationResult implements EvaluationResult {
+public class SubpopEvaluationResult implements EvaluationResult {
 
-    private EvaluationResult[] evals;
+    private final EvaluationResult[] evals;
 
-    public AgentEvaluationResult(EvaluationResult[] evals) {
+    public SubpopEvaluationResult(EvaluationResult[] evals) {
         this.evals = evals;
     }
 
-    public EvaluationResult getAgentEvaluation(int index) {
+    public EvaluationResult getSubpopEvaluation(int index) {
         return evals[index];
     }
     
@@ -32,16 +32,16 @@ public class AgentEvaluationResult implements EvaluationResult {
     }
 
     @Override
-    public AgentEvaluationResult mergeEvaluations(EvaluationResult[] results) {
-        EvaluationResult[] merged = new EvaluationResult[((AgentEvaluationResult) results[0]).evals.length];
+    public SubpopEvaluationResult mergeEvaluations(EvaluationResult[] results) {
+        EvaluationResult[] merged = new EvaluationResult[((SubpopEvaluationResult) results[0]).evals.length];
         for (int a = 0; a < merged.length; a++) {
-            EvaluationResult[] agentEvals = new EvaluationResult[results.length];
+            EvaluationResult[] subpopEvals = new EvaluationResult[results.length];
             for (int i = 0; i < results.length; i++) {
-                agentEvals[i] = ((AgentEvaluationResult) results[i]).evals[a];
+                subpopEvals[i] = ((SubpopEvaluationResult) results[i]).evals[a];
             }
-            merged[a] = agentEvals[0].mergeEvaluations(agentEvals);
+            merged[a] = subpopEvals[0].mergeEvaluations(subpopEvals);
         }
-        return new AgentEvaluationResult(merged);
+        return new SubpopEvaluationResult(merged);
     }
 
     @Override

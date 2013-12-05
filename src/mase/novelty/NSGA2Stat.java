@@ -50,19 +50,21 @@ public class NSGA2Stat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        List<Individual> inds = evaluator.allInds;
-        Collections.sort(inds, new Comparator<Individual>() {
-            @Override
-            public int compare(Individual o1, Individual o2) {
-                return Double.compare(o2.score, o1.score);
+        List<Individual>[] inds = evaluator.allInds;
+        for (int s = 0; s < inds.length; s++) {
+            Collections.sort(inds[s], new Comparator<Individual>() {
+                @Override
+                public int compare(Individual o1, Individual o2) {
+                    return Double.compare(o2.score, o1.score);
+                }
+            });
+            for (Individual i : inds[s]) {
+                state.output.print(state.generation + " " + s + " " + i.score + " " + i.rank + " " + i.crowdingDistance, log);
+                for (double o : i.objectives) {
+                    state.output.print(" " + o, log);
+                }
+                state.output.println("", log);
             }
-        });
-        for(Individual i : inds) {
-            state.output.print(state.generation + " " + i.score + " " + i.rank + " " + i.crowdingDistance, log);
-            for(double o : i.objectives) {
-                state.output.print(" " + o, log);
-            }
-            state.output.println("", log);
         }
     }
 

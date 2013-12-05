@@ -38,7 +38,6 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        
         Parameter def = defaultBase();
 
         // Create network

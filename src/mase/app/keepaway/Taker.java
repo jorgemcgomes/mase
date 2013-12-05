@@ -18,7 +18,6 @@ import sim.util.Double2D;
 public class Taker extends EmboddiedAgent {
 
     public static final double RADIUS = 2;
-    private boolean caughtBall = false;
     
     public Taker(SimState sim, Continuous2D field) {
         super(sim, field, RADIUS, Color.BLACK);
@@ -29,7 +28,6 @@ public class Taker extends EmboddiedAgent {
         Keepaway kw = (Keepaway) sim;
         // check if it caught the ball
         if(this.distanceTo(kw.ball) == 0) {
-            this.caughtBall = true;
             kw.caught = true;
             kw.ball.stop();
             return;
@@ -39,9 +37,5 @@ public class Taker extends EmboddiedAgent {
         Double2D d = kw.ball.getLocation().subtract(this.getLocation());
         //double dir = this.angleTo(kw.ball.getLocation());
         super.move(FastMath.atan2(d.y, d.x), kw.par.takerSpeed);
-    }
-    
-    public boolean hasCaughtBall() {
-        return caughtBall;
     }
 }

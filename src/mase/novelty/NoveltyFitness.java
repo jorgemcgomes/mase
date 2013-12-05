@@ -8,7 +8,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.EvaluationResult;
 import mase.ExpandedFitness;
-import mase.evaluation.AgentEvaluationResult;
+import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.BehaviourResult;
 
 /**
@@ -31,9 +31,9 @@ public class NoveltyFitness extends ExpandedFitness {
     public BehaviourResult getNoveltyBehaviour() {
         EvaluationResult er = super.evalResults[noveltyIndex];
         BehaviourResult br;
-        if(er instanceof AgentEvaluationResult) {
-            AgentEvaluationResult aer = (AgentEvaluationResult) er;
-            br = (BehaviourResult) aer.getAgentEvaluation(super.getCorrespondingSubpop());
+        if(er instanceof SubpopEvaluationResult) {
+            SubpopEvaluationResult aer = (SubpopEvaluationResult) er;
+            br = (BehaviourResult) aer.getSubpopEvaluation(super.getCorrespondingSubpop());
         } else {
             br = (BehaviourResult) er;
         }

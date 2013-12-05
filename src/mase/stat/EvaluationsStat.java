@@ -10,7 +10,7 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import mase.EvaluationResult;
-import mase.evaluation.AgentEvaluationResult;
+import mase.evaluation.SubpopEvaluationResult;
 import mase.ExpandedFitness;
 
 /**
@@ -49,9 +49,9 @@ public class EvaluationsStat extends Statistics {
                 state.output.print(state.generation + " " + i + " " + j, log);
                 if (doBehaviours) {
                     for (EvaluationResult er : nf.getEvaluationResults()) {
-                        if (er instanceof AgentEvaluationResult) {
-                            AgentEvaluationResult aer = (AgentEvaluationResult) er;
-                            state.output.print(" " + aer.getAgentEvaluation(i).toString(), log);
+                        if (er instanceof SubpopEvaluationResult) {
+                            SubpopEvaluationResult aer = (SubpopEvaluationResult) er;
+                            state.output.print(" " + aer.getSubpopEvaluation(i).toString(), log);
                         } else {
                             state.output.print(" " + er.toString(), log);
                         }

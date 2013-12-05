@@ -50,13 +50,6 @@ public class NoveltyPopStat extends Statistics {
         super.postEvaluationStatistics(state);
         
         state.output.print(state.generation + "", log);
-        if(ne.archiveMode == NoveltyEvaluation.V_SHARED) {
-            state.output.print(" " + ne.archives.get(0).size(), log);
-        } else if(ne.archiveMode == NoveltyEvaluation.V_MULTIPLE) {
-            for(List<BehaviourResult> arch : ne.archives) {
-                state.output.print(" " + arch.size(), log);
-            }
-        }
         
         for (int i = 0; i < state.population.subpops.length; i++) {
             double averageNovScore = 0;
@@ -79,7 +72,7 @@ public class NoveltyPopStat extends Statistics {
             avgFromRepo /= state.population.subpops[i].individuals.length;
             averageNovScore /= state.population.subpops[i].individuals.length;
 
-            state.output.print(" " + averageNovScore + " " + maxNovScore + " " + minNovScore + " "
+            state.output.print(" " + ne.archives.get(i).size() + " " + averageNovScore + " " + maxNovScore + " " + minNovScore + " "
                     + avgFromRepo + " " + maxFromRepo + " " + minFromRepo, log);
         }
         state.output.println("", log);

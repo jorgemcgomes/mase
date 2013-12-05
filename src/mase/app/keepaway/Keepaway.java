@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.AgentController;
 import mase.GroupController;
+import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -23,7 +24,7 @@ public class Keepaway extends MaseSimState {
     protected KeepawayParams par;
     protected Continuous2D field;
     protected List<Keeper> keepers;
-    protected List<Taker> takers;
+    protected List<EmboddiedAgent> takers;
     protected Ball ball;
     protected boolean caught;
     protected boolean outOfLimits;
@@ -70,7 +71,7 @@ public class Keepaway extends MaseSimState {
     }
 
     protected void placeTakers() {
-        takers = new ArrayList<Taker>(1);
+        takers = new ArrayList<EmboddiedAgent>(1);
         Taker t = new Taker(this, field);
         if(par.takersPlacement == KeepawayParams.V_CENTER) {
             t.setLocation(center);

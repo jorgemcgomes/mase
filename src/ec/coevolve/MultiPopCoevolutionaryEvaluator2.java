@@ -9,6 +9,7 @@ import ec.*;
 import ec.util.Parameter;
 import ec.util.QuickSort;
 import ec.util.SortComparatorL;
+import java.util.ArrayList;
 import mase.ExpandedFitness;
 
 /**
@@ -18,13 +19,36 @@ import mase.ExpandedFitness;
  */
 public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEvaluator {
 
+    public static final String P_OLD_ELITES = "old-elites";
     public static final String P_FITNESS_ONLY_ELITE = "fitness-only-elite";
     protected boolean eliteFitness;
+    protected boolean oldElites;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         eliteFitness = state.parameters.getBoolean(base.push(P_FITNESS_ONLY_ELITE), null, false);
+        oldElites = state.parameters.getBoolean(base.push(P_OLD_ELITES), null, false);
+    }
+
+    @Override
+    public void evaluatePopulation(final EvolutionState state) {
+        // determine who needs to be evaluated
+        boolean[] preAssessFitness = new boolean[state.population.subpops.length];
+        boolean[] postAssessFitness = new boolean[state.population.subpops.length];
+        for (int i = 0; i < state.population.subpops.length; i++) {
+            postAssessFitness[i] = shouldEvaluateSubpop(state, i, 0);
+            preAssessFitness[i] = postAssessFitness[i] || (state.generation == 0);  // always prepare (set up trials) on generation 0
+        }
+
+        // do evaluation
+        beforeCoevolutionaryEvaluation(state, state.population, (GroupedProblemForm) p_problem);
+
+        ((GroupedProblemForm) p_problem).preprocessPopulation(state, state.population, preAssessFitness, false);
+        performCoevolutionaryEvaluation(state, state.population, (GroupedProblemForm) p_problem);
+        ((GroupedProblemForm) p_problem).postprocessPopulation(state, state.population, postAssessFitness, false);
+        
+        // other methods become responsible of calling afterCoevolutionaryEvaluation
     }
 
     @Override
@@ -33,7 +57,6 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
             final GroupedProblemForm prob) {
 
         /* initialization -- not modified */
-
         inds = new Individual[population.subpops.length];
         updates = new boolean[population.subpops.length];
 
@@ -60,7 +83,6 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         }
 
         /* shuffling -- single threaded -- not modified */
-
         if (numShuffled > 0) {
             int[/*numShuffled*/][/*subpop*/][/*shuffledIndividualIndexes*/] ordering = null;
             // build shuffled orderings
@@ -89,7 +111,6 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         }
 
         /* subpops evaluation -- multi-threaded */
-
         // figure out multi-thread distribution
         int numinds[][] = new int[state.evalthreads][state.population.subpops.length];
         int from[][] = new int[state.evalthreads][state.population.subpops.length];
@@ -101,8 +122,8 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
                     if (y < state.evalthreads - 1) { // not last one
                         numinds[y][x] = state.population.subpops[x].individuals.length / state.evalthreads;
                     } else { // in case we're slightly off in division
-                        numinds[y][x] =
-                                state.population.subpops[x].individuals.length / state.evalthreads
+                        numinds[y][x]
+                                = state.population.subpops[x].individuals.length / state.evalthreads
                                 + (state.population.subpops[x].individuals.length
                                 - (state.population.subpops[x].individuals.length
                                 / state.evalthreads) // note integer division
@@ -143,7 +164,6 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         }
 
         /* finalization -- not modified */
-
         if (numCurrent > 0) {
             for (int i = 0; i < selectionMethodCurrent.length; i++) {
                 selectionMethodCurrent[i].finishProducing(state, i, 0);
@@ -244,44 +264,78 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
             int best = 0;
             Individual[] oldinds = subpop.individuals;
             for (int x = 1; x < oldinds.length; x++) {
-                if ((eliteFitness && 
-                        ((ExpandedFitness) oldinds[x].fitness).getFitnessScore() > ((ExpandedFitness) oldinds[x].fitness).getFitnessScore()) || 
-                        (!eliteFitness && oldinds[x].fitness.betterThan(oldinds[best].fitness))) {
+                if (betterThan(oldinds[x], oldinds[best])) {
                     best = x;
                 }
             }
             eliteIndividuals[whichSubpop][0] = (Individual) (state.population.subpops[whichSubpop].individuals[best].clone());
-        } else if (numElite > 0) {// we'll need to sort
+        } else if (!oldElites && numElite > 0) { // elites from current population
             int[] orderedPop = new int[subpop.individuals.length];
             for (int x = 0; x < subpop.individuals.length; x++) {
                 orderedPop[x] = x;
             }
-            final Individual[] subInds = subpop.individuals;
-            // sorted the opposite way on purpose -- we want the best to be first in the array
-            QuickSort.qsort(orderedPop, new SortComparatorL() {
-                @Override
-                public boolean lt(long a, long b) {
-                    if(eliteFitness) {
-                        return ((ExpandedFitness) subInds[(int) a].fitness).getFitnessScore() >  ((ExpandedFitness) subInds[(int) b].fitness).getFitnessScore();
-                    } else {
-                        return subInds[(int) a].fitness.betterThan(subInds[(int) b].fitness);
-                    }
-                }
-
-                @Override
-                public boolean gt(long a, long b) {
-                    if(eliteFitness) {
-                        return ((ExpandedFitness) subInds[(int) a].fitness).getFitnessScore() <  ((ExpandedFitness) subInds[(int) b].fitness).getFitnessScore();
-                    } else {
-                        return subInds[(int) b].fitness.betterThan(subInds[(int) a].fitness);
-                    }
-                }
-            });
-
+            QuickSort.qsort(orderedPop, new EliteComparator2(subpop.individuals));
             // load the top N individuals
             for (int j = 0; j < numElite; j++) {
                 eliteIndividuals[whichSubpop][j] = (Individual) (state.population.subpops[whichSubpop].individuals[orderedPop[j]].clone());
             }
+        } else if (oldElites && numElite > 0) { // elites from previous generations
+            int best = 0;
+            for (int x = 1; x < subpop.individuals.length; x++) {
+                if (betterThan(subpop.individuals[x], subpop.individuals[best])) {
+                    best = x;
+                }
+            }
+            eliteIndividuals[whichSubpop][(state.generation) % numElite]
+                    = (Individual) subpop.individuals[best].clone();
+            if (state.generation < numElite - 1) { // need to fill the rest of the elites
+                int[] orderedPop = new int[subpop.individuals.length];
+                for (int x = 0; x < subpop.individuals.length; x++) {
+                    orderedPop[x] = x;
+                }
+                QuickSort.qsort(orderedPop, new EliteComparator2(subpop.individuals));
+
+                // fill the rest of the elites vector
+                for (int j = 1; j < numElite - state.generation; j++) {
+                    eliteIndividuals[whichSubpop][j + state.generation]
+                            = (Individual) (state.population.subpops[whichSubpop].individuals[orderedPop[j]].clone());
+                }
+            }
+
+            /*System.out.println(whichSubpop + " -------");
+             for (int i = 0; i < numElite; i++) {
+             System.out.print(eliteIndividuals[whichSubpop][i].fitness.fitness() + " ");
+             }
+             System.out.println();*/
+        }
+    }
+
+    // sorts the opposite way on purpose -- we want the best to be first in the array
+    class EliteComparator2 implements SortComparatorL {
+
+        Individual[] inds;
+
+        public EliteComparator2(Individual[] inds) {
+            super();
+            this.inds = inds;
+        }
+
+        @Override
+        public boolean lt(long a, long b) {
+            return betterThan(inds[(int) a], inds[(int) b]);
+        }
+
+        @Override
+        public boolean gt(long a, long b) {
+            return betterThan(inds[(int) b], inds[(int) a]);
+        }
+    }
+
+    private boolean betterThan(Individual a, Individual b) {
+        if (eliteFitness) {
+            return ((ExpandedFitness) a.fitness).getFitnessScore() > ((ExpandedFitness) b.fitness).getFitnessScore();
+        } else {
+            return a.fitness.betterThan(b.fitness);
         }
     }
 }

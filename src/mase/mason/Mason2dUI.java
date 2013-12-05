@@ -92,4 +92,13 @@ public class Mason2dUI extends GUIState {
         displayFrame = null;
         display = null;
     }
+
+    @Override
+    public boolean step() {
+        boolean b = super.step();
+        MaseSimState mss = (MaseSimState) super.state;
+        return b && mss.continueSimulation();
+    }
+    
+    
 }

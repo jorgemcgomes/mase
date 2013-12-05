@@ -47,7 +47,6 @@ public class IndianaFitness3 extends MasonEvaluation {
         float time = ind.gate.openTime == -1 ? 1 : ind.gate.openTime / (float) maxSteps;
         float esc = (float) count / ind.agents.size();
         res = new FitnessResult(Math.max(0, esc - time * weight));
-        res.setCombinationMethod(FitnessResult.HARMONIC);
     }
 
 }
