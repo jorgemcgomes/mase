@@ -10,3 +10,5 @@ eval.base.select-current =		ec.select.RandomSelection
 eval.base.select-prev = 		ec.select.RandomSelection
 
 pop.subpops =                           2
+
+stat.child.4 =                          mase.stat.CompetitiveBestStat

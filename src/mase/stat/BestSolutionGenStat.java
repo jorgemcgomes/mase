@@ -20,9 +20,12 @@ import mase.evaluation.ExpandedFitness;
 public class BestSolutionGenStat extends SolutionWriterStat {
 
     public static final String P_FILE = "file";
+    public static final String P_KEEP_LAST = "keep-last";
+    public static final String P_COMPRESS = "compress";
+    public static final String LAST = "last.ind";
     File bestsFolder;
     File outFile;
-    public static final String P_COMPRESS = "compress";
+    File last;
     protected boolean compress;
 
     @Override
@@ -43,6 +46,10 @@ public class BestSolutionGenStat extends SolutionWriterStat {
         }
         if (!bestsFolder.exists()) {
             bestsFolder.mkdirs();
+        }
+        boolean k = state.parameters.getBoolean(base.push(P_KEEP_LAST), null, true);
+        if(k) {
+            last = new File(outFile.getParent(), prefix + LAST);
         }
     }
 
@@ -70,6 +77,9 @@ public class BestSolutionGenStat extends SolutionWriterStat {
                 + String.format("%02d", sub) + "_"
                 + String.format("%03d", index) + "_"
                 + String.format("%.2f", bestFitness) + ".ind"));
+        if(last != null) {
+            super.writeSolution(best, last);
+        }
     }
 
     @Override

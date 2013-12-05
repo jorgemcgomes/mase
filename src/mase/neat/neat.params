@@ -42,6 +42,7 @@ stat.child.3.file =                     $behaviours.stat
 stat.child.4 =                          mase.stat.BestSolutionGenStat
 stat.child.4.file =                     $bests.tar.gz
 stat.child.4.compress =                 true
+stat.child.4.keep-last =                true
 stat.child.5 =                          mase.stat.SampleSolutionsStat
 stat.child.5.file =                     $sample.tar.gz
 stat.child.5.compress =                 true
