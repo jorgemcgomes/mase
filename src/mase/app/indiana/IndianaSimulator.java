@@ -8,7 +8,7 @@ package mase.app.indiana;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
-import mase.GroupController;
+import mase.controllers.GroupController;
 import mase.app.indiana.Indiana.AgentPlacement;
 import mase.mason.MaseSimState;
 import mase.mason.Mason2dUI;

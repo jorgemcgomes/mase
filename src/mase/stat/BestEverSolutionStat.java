@@ -8,7 +8,7 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.util.Parameter;
 import java.io.File;
-import mase.ExpandedFitness;
+import mase.evaluation.ExpandedFitness;
 
 /**
  *

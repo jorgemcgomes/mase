@@ -7,7 +7,7 @@ package mase.app.indiana;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
-import mase.AgentController;
+import mase.controllers.AgentController;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;

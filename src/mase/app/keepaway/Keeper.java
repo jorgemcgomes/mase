@@ -8,7 +8,7 @@ import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import mase.AgentController;
+import mase.controllers.AgentController;
 import mase.mason.EmboddiedAgent;
 import mase.mason.SmartAgent;
 import sim.engine.SimState;

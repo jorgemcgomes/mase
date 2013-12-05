@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.VectorBehaviourResult;
 import org.apache.commons.lang3.tuple.Pair;

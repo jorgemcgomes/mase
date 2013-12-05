@@ -9,7 +9,7 @@ import ec.util.Parameter;
 import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mase.GroupController;
+import mase.controllers.GroupController;
 import mase.mason.MaseSimState;
 import mase.mason.Mason2dUI;
 import mase.mason.MasonSimulator;

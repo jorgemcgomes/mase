@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase;
+package mase.controllers;
 
+import mase.controllers.AgentController;
 import java.io.Serializable;
 
 /**

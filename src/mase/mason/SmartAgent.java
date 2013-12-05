@@ -4,7 +4,7 @@
  */
 package mase.mason;
 
-import mase.AgentController;
+import mase.controllers.AgentController;
 import java.awt.Color;
 import java.util.Arrays;
 import sim.engine.SimState;

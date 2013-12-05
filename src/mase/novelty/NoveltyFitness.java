@@ -6,8 +6,8 @@ package mase.novelty;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import mase.EvaluationResult;
-import mase.ExpandedFitness;
+import mase.evaluation.EvaluationResult;
+import mase.evaluation.ExpandedFitness;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.BehaviourResult;
 

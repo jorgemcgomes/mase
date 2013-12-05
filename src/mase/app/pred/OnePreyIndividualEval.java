@@ -8,7 +8,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.Arrays;
 import mase.evaluation.SubpopEvaluationResult;
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 

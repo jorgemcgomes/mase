@@ -4,6 +4,12 @@
  */
 package mase;
 
+import mase.controllers.GroupController;
+import mase.evaluation.ExpandedFitness;
+import mase.evaluation.EvaluationResult;
+import mase.evaluation.EvaluationFunction;
+import mase.controllers.AgentControllerIndividual;
+import mase.controllers.AgentController;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.Population;

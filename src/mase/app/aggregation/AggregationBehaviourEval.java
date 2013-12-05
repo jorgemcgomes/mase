@@ -4,7 +4,7 @@
  */
 package mase.app.aggregation;
 
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import sim.util.MutableDouble2D;

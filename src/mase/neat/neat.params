@@ -22,7 +22,7 @@ neat.species.pipe =                     mase.neat.DummyPipeline
 # Evaluation config
 eval =                                  mase.MetaEvaluator
 eval.base =                             ec.simple.SimpleEvaluator
-neat.species.fitness =                  mase.ExpandedFitness
+neat.species.fitness =                  mase.evaluation.ExpandedFitness
 
 # Statistics
 stat.child.0 = 				ec.simple.SimpleShortStatistics

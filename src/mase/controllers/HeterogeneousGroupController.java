@@ -4,9 +4,6 @@
  */
 package mase.controllers;
 
-import mase.AgentController;
-import mase.GroupController;
-
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>

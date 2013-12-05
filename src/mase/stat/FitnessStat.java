@@ -8,7 +8,7 @@ package mase.stat;
 import ec.*;
 import java.io.*;
 import ec.util.*;
-import mase.ExpandedFitness;
+import mase.evaluation.ExpandedFitness;
 
 /* 
  * SimpleShortStatistics.java

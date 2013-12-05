@@ -7,8 +7,8 @@ package mase.mason;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import mase.EvaluationResult;
-import mase.GroupController;
+import mase.evaluation.EvaluationResult;
+import mase.controllers.GroupController;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**

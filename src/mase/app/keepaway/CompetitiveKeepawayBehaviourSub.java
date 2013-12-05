@@ -6,7 +6,7 @@
 
 package mase.app.keepaway;
 
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.mason.MasonEvaluation;
 
 /**

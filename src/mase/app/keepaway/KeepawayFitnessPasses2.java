@@ -6,7 +6,7 @@ package mase.app.keepaway;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
 import sim.util.Double2D;

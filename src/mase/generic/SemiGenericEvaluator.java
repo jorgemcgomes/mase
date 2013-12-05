@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
 import mase.mason.MasonEvaluation;

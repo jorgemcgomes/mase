@@ -4,8 +4,6 @@
  */
 package mase.evaluation;
 
-import mase.EvaluationResult;
-
 /**
  *
  * @author jorge

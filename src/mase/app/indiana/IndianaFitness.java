@@ -6,7 +6,7 @@
 
 package mase.app.indiana;
 
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
 

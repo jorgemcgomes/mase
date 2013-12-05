@@ -8,7 +8,7 @@ package mase.app.keepaway;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import mase.AgentController;
+import mase.controllers.AgentController;
 import mase.mason.EmboddiedAgent;
 import mase.mason.SmartAgent;
 import sim.engine.SimState;

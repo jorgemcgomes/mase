@@ -6,7 +6,7 @@
 
 package mase.app.keepaway;
 
-import mase.GroupController;
+import mase.controllers.GroupController;
 import mase.mason.MaseSimState;
 
 /**

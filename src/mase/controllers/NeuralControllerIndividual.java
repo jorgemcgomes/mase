@@ -9,8 +9,6 @@ import ec.util.Parameter;
 import ec.vector.DoubleVectorIndividual;
 import ec.vector.FloatVectorSpecies;
 import java.util.Arrays;
-import mase.AgentController;
-import mase.AgentControllerIndividual;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.engine.network.activation.ActivationLinear;
 import org.encog.engine.network.activation.ActivationSigmoid;

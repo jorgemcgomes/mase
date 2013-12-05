@@ -4,7 +4,6 @@
  */
 package mase.evaluation;
 
-import mase.EvaluationResult;
 import java.util.Arrays;
 import net.jafama.FastMath;
 

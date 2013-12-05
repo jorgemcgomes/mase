@@ -13,7 +13,7 @@ quit-on-run-complete =			false
 # Evaluation config
 eval =                                  mase.MetaEvaluator
 eval.base =                             ec.simple.SimpleEvaluator
-vector.species.fitness =                mase.ExpandedFitness
+vector.species.fitness =                mase.evaluation.ExpandedFitness
 
 # Individual representation
 ec.subpop.species = 			ec.vector.FloatVectorSpecies

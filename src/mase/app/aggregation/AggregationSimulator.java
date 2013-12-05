@@ -7,7 +7,7 @@ package mase.app.aggregation;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
-import mase.GroupController;
+import mase.controllers.GroupController;
 import mase.mason.MaseSimState;
 import mase.mason.Mason2dUI;
 import mase.mason.MasonSimulator;

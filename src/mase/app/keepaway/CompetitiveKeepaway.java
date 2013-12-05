@@ -7,8 +7,8 @@
 package mase.app.keepaway;
 
 import java.util.ArrayList;
-import mase.AgentController;
-import mase.GroupController;
+import mase.controllers.AgentController;
+import mase.controllers.GroupController;
 import mase.mason.EmboddiedAgent;
 import sim.util.Double2D;
 

@@ -10,7 +10,7 @@ import ec.util.Parameter;
 import ec.util.QuickSort;
 import ec.util.SortComparatorL;
 import java.util.ArrayList;
-import mase.ExpandedFitness;
+import mase.evaluation.ExpandedFitness;
 
 /**
  * Multi-threaded version

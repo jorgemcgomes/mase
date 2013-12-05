@@ -5,7 +5,7 @@
 package mase.generic;
 
 import java.util.Arrays;
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 
 /**

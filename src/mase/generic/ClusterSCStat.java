@@ -11,8 +11,8 @@ import ec.Subpopulation;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import mase.EvaluationResult;
-import mase.ExpandedFitness;
+import mase.evaluation.EvaluationResult;
+import mase.evaluation.ExpandedFitness;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
 

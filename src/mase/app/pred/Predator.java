@@ -5,7 +5,7 @@
 package mase.app.pred;
 
 import java.awt.Color;
-import mase.AgentController;
+import mase.controllers.AgentController;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;

@@ -6,7 +6,7 @@ package mase.app.sharing;
 
 import java.awt.Color;
 import java.util.Arrays;
-import mase.AgentController;
+import mase.controllers.AgentController;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;

@@ -4,7 +4,7 @@
  */
 package mase.neat;
 
-import mase.AgentController;
+import mase.controllers.AgentController;
 import org.neat4j.neat.core.NEATNeuralNet;
 import org.neat4j.neat.core.NEATNeuron;
 import org.neat4j.neat.data.core.NetworkInput;

@@ -6,8 +6,8 @@ package mase.mason;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import mase.EvaluationResult;
-import mase.GroupController;
+import mase.evaluation.EvaluationResult;
+import mase.controllers.GroupController;
 import mase.SimulationProblem;
 import sim.display.GUIState;
 

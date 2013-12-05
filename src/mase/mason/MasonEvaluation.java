@@ -8,8 +8,8 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mase.EvaluationFunction;
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationFunction;
+import mase.evaluation.EvaluationResult;
 import mase.SimulationProblem;
 import sim.engine.SimState;
 

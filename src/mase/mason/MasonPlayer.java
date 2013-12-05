@@ -15,8 +15,8 @@ import java.io.ObjectInputStream;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mase.EvaluationResult;
-import mase.GroupController;
+import mase.evaluation.EvaluationResult;
+import mase.controllers.GroupController;
 import mase.MetaEvaluator;
 import sim.display.GUIState;
 

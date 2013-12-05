@@ -4,7 +4,7 @@
  */
 package mase.app.pred;
 
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import sim.util.MutableDouble2D;
 

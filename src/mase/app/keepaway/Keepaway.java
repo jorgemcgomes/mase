@@ -6,8 +6,8 @@ package mase.app.keepaway;
 
 import java.util.ArrayList;
 import java.util.List;
-import mase.AgentController;
-import mase.GroupController;
+import mase.controllers.AgentController;
+import mase.controllers.GroupController;
 import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;

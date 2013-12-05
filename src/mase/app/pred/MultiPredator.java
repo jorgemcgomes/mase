@@ -6,7 +6,7 @@ package mase.app.pred;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import mase.AgentController;
+import mase.controllers.AgentController;
 import sim.field.continuous.Continuous2D;
 
 /**

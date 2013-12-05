@@ -12,7 +12,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import mase.ExpandedFitness;
+import mase.evaluation.ExpandedFitness;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 

@@ -8,7 +8,7 @@ package mase.app.indiana;
 import ec.EvolutionState;
 import ec.Problem;
 import ec.util.Parameter;
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimulator;

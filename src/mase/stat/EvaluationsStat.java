@@ -9,9 +9,9 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import mase.EvaluationResult;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
-import mase.ExpandedFitness;
+import mase.evaluation.ExpandedFitness;
 
 /**
  * Generation -- sub-population number -- individual-index -- fitness --

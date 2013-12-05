@@ -1,16 +1,17 @@
-package mase;
-
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+package mase.evaluation;
+
+import ec.Prototype;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public interface AgentControllerIndividual {
+public interface EvaluationFunction extends Prototype {
     
-    public AgentController decodeController();
+    public EvaluationResult getResult();
     
 }
