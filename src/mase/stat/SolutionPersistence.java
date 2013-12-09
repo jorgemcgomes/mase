@@ -36,8 +36,8 @@ import org.apache.commons.lang3.SerializationUtils;
  */
 public abstract class SolutionPersistence {
 
-    public static PersistentController createPersistentController(Individual ind, int gen, int sub, int index) {
-        PersistentController pc = new PersistentController();
+    public static PersistentSolution createPersistentController(Individual ind, int gen, int sub, int index) {
+        PersistentSolution pc = new PersistentSolution();
         GroupController gc = null;
         if (ind.fitness.getContext() == null) {
             gc = new HomogeneousGroupController(((AgentControllerIndividual) ind).decodeController());
@@ -58,7 +58,7 @@ public abstract class SolutionPersistence {
         return pc;
     }
 
-    public static void writeSolutionInFolder(PersistentController c, File outFolder) throws IOException {
+    public static void writeSolutionInFolder(PersistentSolution c, File outFolder) throws IOException {
         File out = new File(outFolder, String.format("%03d", c.getGeneration()) + "_"
                 + String.format("%02d", c.getSubpop()) + "_"
                 + String.format("%03d", c.getIndex()) + "_"
@@ -66,14 +66,14 @@ public abstract class SolutionPersistence {
         writeSolution(c, out);
     }
 
-    public static void writeSolution(PersistentController c, File output) throws IOException {
+    public static void writeSolution(PersistentSolution c, File output) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(output));
         oos.writeObject(c);
         oos.flush();
         oos.close();
     }
 
-    public static void writeSolutionToTar(PersistentController c, TarArchiveOutputStream out) throws IOException {
+    public static void writeSolutionToTar(PersistentSolution c, TarArchiveOutputStream out) throws IOException {
         String fileName = String.format("%03d", c.getGeneration()) + "_"
                 + String.format("%02d", c.getSubpop()) + "_"
                 + String.format("%03d", c.getIndex()) + "_"
@@ -92,20 +92,20 @@ public abstract class SolutionPersistence {
         out.closeArchiveEntry();
     }
 
-    public static PersistentController readSolution(InputStream is) throws Exception {
+    public static PersistentSolution readSolution(InputStream is) throws Exception {
         ObjectInputStream ois = new ObjectInputStream(is);
-        PersistentController controller = (PersistentController) ois.readObject();
+        PersistentSolution controller = (PersistentSolution) ois.readObject();
         return controller;
     }
     
-    public static List<PersistentController> readSolutionsFromTar(File tarFile) throws Exception {
+    public static List<PersistentSolution> readSolutionsFromTar(File tarFile) throws Exception {
         GZIPInputStream gis = new GZIPInputStream(new FileInputStream(tarFile));
         TarArchiveInputStream tis = new TarArchiveInputStream(gis);
 
-        ArrayList<PersistentController> gcs = new ArrayList<PersistentController>();        
+        ArrayList<PersistentSolution> gcs = new ArrayList<PersistentSolution>();        
         TarArchiveEntry e;
         while ((e = tis.getNextTarEntry()) != null) {
-            PersistentController gc = readSolution(tis);
+            PersistentSolution gc = readSolution(tis);
             gcs.add(gc);
         }
         tis.close();

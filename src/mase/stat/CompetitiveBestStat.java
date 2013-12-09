@@ -85,7 +85,7 @@ public class CompetitiveBestStat extends SolutionWriterStat {
                     index = j;
                 }
             }
-            PersistentController c = SolutionPersistence.createPersistentController(best, state.generation, i, index);
+            PersistentSolution c = SolutionPersistence.createPersistentController(best, state.generation, i, index);
             try {
                 if (compress) {
                     SolutionPersistence.writeSolutionToTar(c, taos[i]);

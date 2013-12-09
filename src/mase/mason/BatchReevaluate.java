@@ -20,7 +20,7 @@ import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonReevaluate.Reevaluation;
-import mase.stat.PersistentController;
+import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -59,9 +59,9 @@ public class BatchReevaluate {
 
         // Reevaluate
         MasonSimulator sim = MasonPlayer.createSimulator(args);
-        List<PersistentController> gcs = SolutionPersistence.readSolutionsFromTar(tar);
-        PersistentController best = null;
-        for (PersistentController gc : gcs) {
+        List<PersistentSolution> gcs = SolutionPersistence.readSolutionsFromTar(tar);
+        PersistentSolution best = null;
+        for (PersistentSolution gc : gcs) {
             Reevaluation re = MasonReevaluate.reevaluate(gc, sim, nreps);
             if (re.meanFitness > bestSoFar) {
                 bestSoFar = re.meanFitness;

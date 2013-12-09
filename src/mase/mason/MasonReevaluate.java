@@ -11,7 +11,7 @@ import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
 import mase.evaluation.SubpopEvaluationResult;
-import mase.stat.PersistentController;
+import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -42,7 +42,7 @@ public class MasonReevaluate {
 
         // Init
         MasonSimulator sim = MasonPlayer.createSimulator(args);
-        PersistentController c = SolutionPersistence.readSolution(new FileInputStream(gc));
+        PersistentSolution c = SolutionPersistence.readSolution(new FileInputStream(gc));
         // Eval
         Reevaluation res = reevaluate(c, sim, nreps);
         for (int i = 0; i < res.mergedResults.length; i++) {
@@ -54,7 +54,7 @@ public class MasonReevaluate {
     /*
      * WARNING: assumes that fitness is always the first evaluation result
      */
-    public static Reevaluation reevaluate(PersistentController gc, MasonSimulator sim, int reps) {
+    public static Reevaluation reevaluate(PersistentSolution gc, MasonSimulator sim, int reps) {
         // Make simulations
         ArrayList<EvaluationResult[]> results = new ArrayList<EvaluationResult[]>(reps);
         for (int i = 0; i < reps; i++) {

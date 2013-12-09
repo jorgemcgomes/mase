@@ -14,7 +14,7 @@ import mase.evaluation.EvaluationResult;
  *
  * @author jorge
  */
-public class PersistentController implements Serializable, Comparable<PersistentController> {
+public class PersistentSolution implements Serializable, Comparable<PersistentSolution> {
     
     private static final long serialVersionUID = 1;
     
@@ -76,7 +76,7 @@ public class PersistentController implements Serializable, Comparable<Persistent
         return fitness;
     }
     @Override
-    public int compareTo(PersistentController o) {
+    public int compareTo(PersistentSolution o) {
         int genC = Integer.compare(this.generation, o.generation);
         if(genC != 0) {
             return genC;
