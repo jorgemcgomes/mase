@@ -19,6 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class SCResult extends VectorBehaviourResult {
 
+    private static final long serialVersionUID = 1;
     protected Map<Integer, Float> counts;
     protected Map<Integer, byte[]> states;
     protected int removedByFilter;

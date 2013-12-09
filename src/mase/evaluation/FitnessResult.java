@@ -10,6 +10,7 @@ package mase.evaluation;
  */
 public class FitnessResult implements EvaluationResult {
 
+    private static final long serialVersionUID = 1;
     public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3, MIN_PLUS = 4;
     public static final float FLOAT_THRESHOLD = 0.0001f;
     protected Float value;

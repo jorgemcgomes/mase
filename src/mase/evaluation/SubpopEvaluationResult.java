@@ -10,6 +10,7 @@ package mase.evaluation;
  */
 public class SubpopEvaluationResult implements EvaluationResult {
 
+    private static final long serialVersionUID = 1;
     private final EvaluationResult[] evals;
 
     public SubpopEvaluationResult(EvaluationResult[] evals) {
@@ -19,7 +20,7 @@ public class SubpopEvaluationResult implements EvaluationResult {
     public EvaluationResult getSubpopEvaluation(int index) {
         return evals[index];
     }
-    
+
     public EvaluationResult[] getAllEvaluations() {
         return evals;
     }
@@ -45,11 +46,10 @@ public class SubpopEvaluationResult implements EvaluationResult {
     @Override
     public String toString() {
         String str = "";
-        for(int i = 0 ; i < evals.length ; i++) {
-            str += i+": " + evals[i].toString() + "\n";
+        for (int i = 0; i < evals.length; i++) {
+            str += i + ": " + evals[i].toString() + "\n";
         }
         return str;
     }
-    
-    
+
 }

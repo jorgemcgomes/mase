@@ -8,6 +8,9 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.util.Parameter;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.evaluation.ExpandedFitness;
 
 /**
@@ -17,14 +20,14 @@ import mase.evaluation.ExpandedFitness;
 public class BestEverSolutionStat extends SolutionWriterStat {
 
     public static final String P_FILE = "file";
-    File bestFile;
-    double bestSoFar;
+    protected File bestFile;
+    protected double bestSoFar;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         File f = state.parameters.getFile(base.push(P_FILE), null);
-        bestFile = new File(f.getParent(), prefix + f.getName());
+        bestFile = new File(f.getParent(), jobPrefix + f.getName());
         bestSoFar = Double.NEGATIVE_INFINITY;
     }
 
@@ -33,6 +36,8 @@ public class BestEverSolutionStat extends SolutionWriterStat {
         super.postInitializationStatistics(state);
         double bestFitness = Double.NEGATIVE_INFINITY;
         Individual best = null;
+        int sub = -1;
+        int index = -1;
         for (int i = 0; i < state.population.subpops.length; i++) {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 Individual ind = state.population.subpops[i].individuals[j];
@@ -40,13 +45,20 @@ public class BestEverSolutionStat extends SolutionWriterStat {
                 if (fit > bestFitness) {
                     bestFitness = fit;
                     best = ind;
+                    sub = i;
+                    index = j;
                 }
             }
         }
 
         if (bestFitness > bestSoFar) {
             bestSoFar = bestFitness;
-            super.writeSolution(best, bestFile);
+            PersistentController c = SolutionWriterStat.createPersistentController(best, state.generation, sub, index);
+            try {
+                SolutionWriterStat.writeSolution(c, bestFile);
+            } catch (IOException ex) {
+                Logger.getLogger(BestEverSolutionStat.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }    
     }
 }

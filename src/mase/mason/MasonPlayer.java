@@ -11,13 +11,10 @@ import ec.util.Parameter;
 import ec.util.ParameterDatabase;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import mase.evaluation.EvaluationResult;
-import mase.controllers.GroupController;
 import mase.MetaEvaluator;
+import mase.stat.PersistentController;
+import mase.stat.SolutionWriterStat;
 import sim.display.GUIState;
 
 /**
@@ -28,7 +25,7 @@ public class MasonPlayer {
 
     public static final String P_CONTROLLER = "-gc";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         // Parameter loading
         File gc = null;
         int x;
@@ -48,11 +45,10 @@ public class MasonPlayer {
 
         // Create controller
         MasonSimulator sim = createSimulator(args);
-        GroupController controller = loadController(gc, true);
-        Random rand = new Random();
-        long startSeed = rand.nextLong();
-
-        GUIState gui = sim.createSimStateWithUI(controller, startSeed);
+        PersistentController c = SolutionWriterStat.readSolution(new FileInputStream(gc));
+        System.out.println(c);
+        long startSeed = new Random().nextLong();
+        GUIState gui = sim.createSimStateWithUI(c.getController(), startSeed);
         gui.createController();
     }
 
@@ -71,24 +67,5 @@ public class MasonPlayer {
             return sim;
         }
 
-    }
-
-    public static GroupController loadController(File gc, boolean verbose) {
-        GroupController controller = null;
-        try {
-            FileInputStream fis = new FileInputStream(gc);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            controller = (GroupController) ois.readObject();
-            System.out.println(controller);
-            if (verbose) {
-                EvaluationResult[] chars = (EvaluationResult[]) ois.readObject();
-                for (int i = 0; i < chars.length; i++) {
-                    System.out.println("Evaluation " + i + ":\n" + chars[i].toString() + "\n");
-                }
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(MasonPlayer.class.getName()).log(Level.FINE, null, ex);
-        }
-        return controller;
     }
 }

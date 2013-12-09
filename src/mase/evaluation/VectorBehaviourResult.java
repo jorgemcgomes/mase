@@ -13,6 +13,7 @@ import net.jafama.FastMath;
  */
 public class VectorBehaviourResult implements BehaviourResult {
 
+    private static final long serialVersionUID = 1;
     protected float[] behaviour;
     protected Distance dist;
 

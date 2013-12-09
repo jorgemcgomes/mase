@@ -4,7 +4,6 @@
  */
 package mase.controllers;
 
-import mase.controllers.AgentController;
 import java.io.Serializable;
 
 /**

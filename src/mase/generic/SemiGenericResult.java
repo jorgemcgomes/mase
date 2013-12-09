@@ -14,6 +14,7 @@ import mase.evaluation.VectorBehaviourResult;
  */
 public class SemiGenericResult extends VectorBehaviourResult {
 
+    private static final long serialVersionUID = 1;
     protected float[] originalResult;
 
     public SemiGenericResult(float... bs) {

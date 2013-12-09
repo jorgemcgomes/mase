@@ -10,6 +10,7 @@ package mase.controllers;
  */
 public class HeterogeneousGroupController implements GroupController {
 
+    private static final long serialVersionUID = 1;
     private final AgentController[] controllers;
     
     public HeterogeneousGroupController(AgentController[] controllers) {

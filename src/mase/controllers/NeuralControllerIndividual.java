@@ -87,35 +87,4 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         network.decodeNetwork(genome);
         return new NeuralAgentController(network);
     }
-
-    public static class NeuralAgentController implements AgentController {
-
-        private FlatNetwork network;
-
-        public NeuralAgentController(FlatNetwork net) {
-            this.network = net;
-        }
-
-        @Override
-        public void reset() {
-            network.clearContext();
-        }
-
-        @Override
-        public double[] processInputs(double[] input) {
-            double[] output = new double[network.getOutputCount()];
-            network.compute(input, output);
-            return output;
-        }
-
-        @Override
-        public String toString() {
-            return Arrays.toString(network.encodeNetwork());
-        }
-
-        @Override
-        public AgentController clone() {
-            return new NeuralAgentController(network.clone());
-        }
-    }
 }

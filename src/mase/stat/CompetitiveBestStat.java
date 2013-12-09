@@ -8,11 +8,15 @@ package mase.stat;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.util.Parameter;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 import mase.evaluation.ExpandedFitness;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 
 /**
  *
@@ -23,9 +27,9 @@ public class CompetitiveBestStat extends SolutionWriterStat {
     public static final String P_FILE = "file";
     public static final String P_KEEP_LAST = "keep-last";
     public static final String P_COMPRESS = "compress";
-    File[] bestsFolder;
-    File[] outFile;
-    File[] last;
+    protected TarArchiveOutputStream[] taos;
+    protected File[] outFile;
+    protected File[] last;
     protected boolean compress;
 
     @Override
@@ -36,35 +40,31 @@ public class CompetitiveBestStat extends SolutionWriterStat {
         outFile = new File[n];
         for (int i = 0; i < n; i++) {
             outFile[i] = state.parameters.getFile(base.push(P_FILE), null);
-            if(compress) {
-                outFile[i] = new File(outFile[i].getParent(), prefix + outFile[i].getName().replace(".tar.gz", i + ".tar.gz"));
-            } else {
-                outFile[i] = new File(outFile[i].getParent(), prefix + outFile[i].getName() + "." + i);
-            }
+            String newName = compress ? outFile[i].getName().replace(".tar.gz", "." + i + ".tar.gz")
+                    : outFile[i].getName() + "." + i;
+            outFile[i] = new File(outFile[i].getParent(), jobPrefix + newName);
         }
         if (compress) {
-            bestsFolder = new File[n];
+            taos = new TarArchiveOutputStream[n];
             for (int i = 0; i < n; i++) {
                 try {
-                    bestsFolder[i] = File.createTempFile("tempbests" + i, Long.toString(System.currentTimeMillis()));
-                    bestsFolder[i].delete();
+                    taos[i] = new TarArchiveOutputStream(
+                            new GZIPOutputStream(
+                                    new BufferedOutputStream(new FileOutputStream(outFile[i]))));
                 } catch (IOException ex) {
                     Logger.getLogger(BestSolutionGenStat.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        } else {
-            bestsFolder = outFile;
         }
         for (int i = 0; i < n; i++) {
-            if (!bestsFolder[i].exists()) {
-                bestsFolder[i].mkdirs();
+            if (!compress && !outFile[i].exists()) {
+                outFile[i].mkdirs();
             }
         }
-        boolean k = state.parameters.getBoolean(base.push(P_KEEP_LAST), null, true);
-        if (k) {
+        if (state.parameters.getBoolean(base.push(P_KEEP_LAST), null, true)) {
             last = new File[n];
             for (int i = 0; i < n; i++) {
-                last[i] = new File(outFile[i].getParent(), prefix + "last" + i + ".ind");
+                last[i] = new File(outFile[i].getParent(), jobPrefix + "last." + i + ".ind");
             }
         }
     }
@@ -85,13 +85,18 @@ public class CompetitiveBestStat extends SolutionWriterStat {
                     index = j;
                 }
             }
-            super.writeSolution(best, new File(bestsFolder[i],
-                    String.format("%03d", state.generation) + "_"
-                    + String.format("%02d", i) + "_"
-                    + String.format("%03d", index) + "_"
-                    + String.format("%.2f", bestFitness) + ".ind"));
-            if (last != null) {
-                super.writeSolution(best, last[i]);
+            PersistentController c = SolutionWriterStat.createPersistentController(best, state.generation, i, index);
+            try {
+                if (compress) {
+                    SolutionWriterStat.writeSolutionToTar(c, taos[i]);
+                } else {
+                    SolutionWriterStat.writeSolutionInFolder(c, outFile[i]);
+                }
+                if (last != null) {
+                    SolutionWriterStat.writeSolution(c, last[i]);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -101,7 +106,11 @@ public class CompetitiveBestStat extends SolutionWriterStat {
         super.finalStatistics(state, result);
         if (compress) {
             for (int i = 0; i < state.population.subpops.length; i++) {
-                SolutionWriterStat.compressFolder(bestsFolder[i], outFile[i], true);
+                try {
+                    taos[i].close();
+                } catch (IOException ex) {
+                    Logger.getLogger(CompetitiveBestStat.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }

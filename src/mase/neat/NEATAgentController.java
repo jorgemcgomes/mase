@@ -19,6 +19,7 @@ import org.neat4j.neat.nn.core.Synapse;
  */
 public class NEATAgentController implements AgentController {
 
+    private static final long serialVersionUID = 1;
     private NEATNeuralNet network;
 
     public NEATAgentController(NEATNeuralNet network) {

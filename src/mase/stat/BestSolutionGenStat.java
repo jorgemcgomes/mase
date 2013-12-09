@@ -7,11 +7,15 @@ package mase.stat;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.util.Parameter;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 import mase.evaluation.ExpandedFitness;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 
 /**
  *
@@ -23,33 +27,31 @@ public class BestSolutionGenStat extends SolutionWriterStat {
     public static final String P_KEEP_LAST = "keep-last";
     public static final String P_COMPRESS = "compress";
     public static final String LAST = "last.ind";
-    File bestsFolder;
-    File outFile;
-    File last;
+    protected File outFile;
+    protected File last;
+    protected TarArchiveOutputStream taos;
     protected boolean compress;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         outFile = state.parameters.getFile(base.push(P_FILE), null);
-        outFile = new File(outFile.getParent(), prefix + outFile.getName());
+        outFile = new File(outFile.getParent(), jobPrefix + outFile.getName());
         compress = state.parameters.getBoolean(base.push(P_COMPRESS), null, true);
         if (compress) {
             try {
-                bestsFolder = File.createTempFile("tempbests", Long.toString(System.currentTimeMillis()));
-                bestsFolder.delete();
+                taos = new TarArchiveOutputStream(
+                        new GZIPOutputStream(
+                                new BufferedOutputStream(new FileOutputStream(outFile))));
             } catch (IOException ex) {
                 Logger.getLogger(BestSolutionGenStat.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else {
-            bestsFolder = outFile;
         }
-        if (!bestsFolder.exists()) {
-            bestsFolder.mkdirs();
+        if (!compress && !outFile.exists()) {
+            outFile.mkdirs();
         }
-        boolean k = state.parameters.getBoolean(base.push(P_KEEP_LAST), null, true);
-        if(k) {
-            last = new File(outFile.getParent(), prefix + LAST);
+        if (state.parameters.getBoolean(base.push(P_KEEP_LAST), null, true)) {
+            last = new File(outFile.getParent(), jobPrefix + LAST);
         }
     }
 
@@ -72,13 +74,18 @@ public class BestSolutionGenStat extends SolutionWriterStat {
                 }
             }
         }
-        super.writeSolution(best, new File(bestsFolder,
-                String.format("%03d", state.generation) + "_"
-                + String.format("%02d", sub) + "_"
-                + String.format("%03d", index) + "_"
-                + String.format("%.2f", bestFitness) + ".ind"));
-        if(last != null) {
-            super.writeSolution(best, last);
+        PersistentController c = SolutionWriterStat.createPersistentController(best, state.generation, sub, index);
+        try {
+            if (compress) {
+                SolutionWriterStat.writeSolutionToTar(c, taos);
+            } else {
+                SolutionWriterStat.writeSolutionInFolder(c, outFile);
+            }
+            if (last != null) {
+                SolutionWriterStat.writeSolution(c, last);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -86,7 +93,11 @@ public class BestSolutionGenStat extends SolutionWriterStat {
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
         if (compress) {
-            SolutionWriterStat.compressFolder(bestsFolder, outFile, true);
+            try {
+                taos.close();
+            } catch (IOException ex) {
+                Logger.getLogger(BestSolutionGenStat.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 }

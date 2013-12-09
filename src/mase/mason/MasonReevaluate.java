@@ -5,10 +5,14 @@
 package mase.mason;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
+import mase.evaluation.SubpopEvaluationResult;
+import mase.stat.PersistentController;
+import mase.stat.SolutionWriterStat;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -19,7 +23,7 @@ public class MasonReevaluate {
 
     public static final String P_NREPS = "-r";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         // Parameter loading
         File gc = null;
         int x;
@@ -38,23 +42,23 @@ public class MasonReevaluate {
 
         // Init
         MasonSimulator sim = MasonPlayer.createSimulator(args);
-        GroupController controller = MasonPlayer.loadController(gc, true);
-
+        PersistentController c = SolutionWriterStat.readSolution(new FileInputStream(gc));
         // Eval
-        Reevaluation res = reevaluate(controller, sim, nreps);
+        Reevaluation res = reevaluate(c, sim, nreps);
         for (int i = 0; i < res.mergedResults.length; i++) {
             System.out.println("Evaluation " + i + ":\n" + res.mergedResults[i].toString() + "\n");
         }
+
     }
 
     /*
      * WARNING: assumes that fitness is always the first evaluation result
      */
-    public static Reevaluation reevaluate(GroupController gc, MasonSimulator sim, int reps) {
+    public static Reevaluation reevaluate(PersistentController gc, MasonSimulator sim, int reps) {
         // Make simulations
         ArrayList<EvaluationResult[]> results = new ArrayList<EvaluationResult[]>(reps);
         for (int i = 0; i < reps; i++) {
-            results.add(sim.evaluateSolution(gc, i));
+            results.add(sim.evaluateSolution(gc.getController(), i));
         }
 
         // Merge evals
@@ -69,7 +73,14 @@ public class MasonReevaluate {
 
         DescriptiveStatistics ds = new DescriptiveStatistics(results.size());
         for (EvaluationResult[] rs : results) {
-            ds.addValue((Float) rs[0].value());
+            float fit;
+            if(rs[0] instanceof SubpopEvaluationResult) {
+                SubpopEvaluationResult ser = (SubpopEvaluationResult) rs[0];
+                fit = (Float) ser.getSubpopEvaluation(gc.getSubpop()).value();
+            } else {
+                fit = (Float) rs[0].value();
+            }
+            ds.addValue(fit);
         }
 
         Reevaluation res = new Reevaluation();
