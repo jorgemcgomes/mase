@@ -14,7 +14,7 @@ import java.io.FileInputStream;
 import java.util.Random;
 import mase.MetaEvaluator;
 import mase.stat.PersistentController;
-import mase.stat.SolutionWriterStat;
+import mase.stat.SolutionPersistence;
 import sim.display.GUIState;
 
 /**
@@ -45,7 +45,7 @@ public class MasonPlayer {
 
         // Create controller
         MasonSimulator sim = createSimulator(args);
-        PersistentController c = SolutionWriterStat.readSolution(new FileInputStream(gc));
+        PersistentController c = SolutionPersistence.readSolution(new FileInputStream(gc));
         System.out.println(c);
         long startSeed = new Random().nextLong();
         GUIState gui = sim.createSimStateWithUI(c.getController(), startSeed);

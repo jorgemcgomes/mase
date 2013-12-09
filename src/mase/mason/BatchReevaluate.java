@@ -21,7 +21,7 @@ import mase.controllers.GroupController;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonReevaluate.Reevaluation;
 import mase.stat.PersistentController;
-import mase.stat.SolutionWriterStat;
+import mase.stat.SolutionPersistence;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
@@ -59,7 +59,7 @@ public class BatchReevaluate {
 
         // Reevaluate
         MasonSimulator sim = MasonPlayer.createSimulator(args);
-        List<PersistentController> gcs = SolutionWriterStat.readSolutionsFromTar(tar);
+        List<PersistentController> gcs = SolutionPersistence.readSolutionsFromTar(tar);
         PersistentController best = null;
         for (PersistentController gc : gcs) {
             Reevaluation re = MasonReevaluate.reevaluate(gc, sim, nreps);

@@ -85,15 +85,15 @@ public class CompetitiveBestStat extends SolutionWriterStat {
                     index = j;
                 }
             }
-            PersistentController c = SolutionWriterStat.createPersistentController(best, state.generation, i, index);
+            PersistentController c = SolutionPersistence.createPersistentController(best, state.generation, i, index);
             try {
                 if (compress) {
-                    SolutionWriterStat.writeSolutionToTar(c, taos[i]);
+                    SolutionPersistence.writeSolutionToTar(c, taos[i]);
                 } else {
-                    SolutionWriterStat.writeSolutionInFolder(c, outFile[i]);
+                    SolutionPersistence.writeSolutionInFolder(c, outFile[i]);
                 }
                 if (last != null) {
-                    SolutionWriterStat.writeSolution(c, last[i]);
+                    SolutionPersistence.writeSolution(c, last[i]);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

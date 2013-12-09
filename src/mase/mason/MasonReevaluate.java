@@ -12,7 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.stat.PersistentController;
-import mase.stat.SolutionWriterStat;
+import mase.stat.SolutionPersistence;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -42,7 +42,7 @@ public class MasonReevaluate {
 
         // Init
         MasonSimulator sim = MasonPlayer.createSimulator(args);
-        PersistentController c = SolutionWriterStat.readSolution(new FileInputStream(gc));
+        PersistentController c = SolutionPersistence.readSolution(new FileInputStream(gc));
         // Eval
         Reevaluation res = reevaluate(c, sim, nreps);
         for (int i = 0; i < res.mergedResults.length; i++) {

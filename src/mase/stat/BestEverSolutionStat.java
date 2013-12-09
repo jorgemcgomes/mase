@@ -53,9 +53,9 @@ public class BestEverSolutionStat extends SolutionWriterStat {
 
         if (bestFitness > bestSoFar) {
             bestSoFar = bestFitness;
-            PersistentController c = SolutionWriterStat.createPersistentController(best, state.generation, sub, index);
+            PersistentController c = SolutionPersistence.createPersistentController(best, state.generation, sub, index);
             try {
-                SolutionWriterStat.writeSolution(c, bestFile);
+                SolutionPersistence.writeSolution(c, bestFile);
             } catch (IOException ex) {
                 Logger.getLogger(BestEverSolutionStat.class.getName()).log(Level.SEVERE, null, ex);
             }

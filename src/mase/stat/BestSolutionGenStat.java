@@ -74,15 +74,15 @@ public class BestSolutionGenStat extends SolutionWriterStat {
                 }
             }
         }
-        PersistentController c = SolutionWriterStat.createPersistentController(best, state.generation, sub, index);
+        PersistentController c = SolutionPersistence.createPersistentController(best, state.generation, sub, index);
         try {
             if (compress) {
-                SolutionWriterStat.writeSolutionToTar(c, taos);
+                SolutionPersistence.writeSolutionToTar(c, taos);
             } else {
-                SolutionWriterStat.writeSolutionInFolder(c, outFile);
+                SolutionPersistence.writeSolutionInFolder(c, outFile);
             }
             if (last != null) {
-                SolutionWriterStat.writeSolution(c, last);
+                SolutionPersistence.writeSolution(c, last);
             }
         } catch (Exception e) {
             e.printStackTrace();
