@@ -2,16 +2,11 @@ ECJ_HOME <- "/home/jorge/Dropbox/mase"
 CP <- paste0("\"",ECJ_HOME, "/build/classes:",ECJ_HOME,"/lib/*\"")
 OUTPUT_BASE <- "/home/jorge/exps"
 
-defaultPlayerCall <- function(args) {
-    if(("-r" %in% args)) {
-        if("-tar" %in% args) {
-            callTarReevaluate(args)
-        } else {
-            callReevaluate(args)
-        }
-    } else {
-        callPlayer(args)
-    }
+appCall <- function(app, args) {
+    args <- checkConfig(args)
+    command <- paste("java -cp", CP, app, paste(args, collapse=" "))
+    cat(command,"\n")
+    system(command)      
 }
 
 checkConfig <- function(args) {
@@ -37,26 +32,6 @@ checkConfig <- function(args) {
     return(args)
 }
 
-callTarReevaluate <- function(args) {
-    args <- checkConfig(args)
-    command <- paste("java -cp", CP, "mase.mason.BatchReevaluate", paste(args, collapse=" "))
-    cat(command,"\n")
-    system(command)    
-}
-
-callReevaluate <- function(args) {
-    args <- checkConfig(args)
-    command <- paste("java -cp", CP, "mase.mason.MasonReevaluate", paste(args, collapse=" "))
-    cat(command,"\n")
-    system(command)
-}
-
-callPlayer <- function(args) {
-    args <- checkConfig(args)
-    command <- paste("java -cp", CP, "mase.mason.MasonPlayer", paste(args, collapse=" "))
-    cat(command,"\n")
-    system(command)
-}
 
 callEvolve <- function(file, extraString="") {
     command <- paste("java -cp", CP, "ec.Evolve", "-file", file, extraString)

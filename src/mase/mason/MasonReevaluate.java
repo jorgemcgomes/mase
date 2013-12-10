@@ -55,10 +55,14 @@ public class MasonReevaluate {
      * WARNING: assumes that fitness is always the first evaluation result
      */
     public static Reevaluation reevaluate(PersistentSolution gc, MasonSimulator sim, int reps) {
-        // Make simulations
+        return reevaluate(gc.getController(), gc.getSubpop(), sim, reps);
+    }
+    
+    public static Reevaluation reevaluate(GroupController gc, int subpop, MasonSimulator sim, int reps) {
+                // Make simulations
         ArrayList<EvaluationResult[]> results = new ArrayList<EvaluationResult[]>(reps);
         for (int i = 0; i < reps; i++) {
-            results.add(sim.evaluateSolution(gc.getController(), i));
+            results.add(sim.evaluateSolution(gc, i));
         }
 
         // Merge evals
@@ -76,7 +80,7 @@ public class MasonReevaluate {
             float fit;
             if(rs[0] instanceof SubpopEvaluationResult) {
                 SubpopEvaluationResult ser = (SubpopEvaluationResult) rs[0];
-                fit = (Float) ser.getSubpopEvaluation(gc.getSubpop()).value();
+                fit = (Float) ser.getSubpopEvaluation(subpop).value();
             } else {
                 fit = (Float) rs[0].value();
             }

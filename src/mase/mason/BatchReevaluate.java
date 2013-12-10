@@ -6,24 +6,15 @@ package mase.mason;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 import mase.evaluation.EvaluationResult;
-import mase.controllers.GroupController;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonReevaluate.Reevaluation;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 /**
  * Input: .tar.gz file Output: CSV with all the individuals re-evaluated
