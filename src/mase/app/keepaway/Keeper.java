@@ -75,7 +75,7 @@ public class Keeper extends SmartAgent {
         Keepaway kw = (Keepaway) sim;
         if (justKicked
                 && (kw.ball.getSpeed() < 0.0001
-                || kw.ball.getLocation().distance(getLocation()) > Keeper.RADIUS + Ball.RADIUS)) {
+                || kw.ball.getLocation().distance(getLocation()) > Keeper.RADIUS + Ball.RADIUS + KICK_DISTANCE)) {
             justKicked = false;
         }
         if (!justKicked && kw.ball.distanceTo(this) < KICK_DISTANCE) {

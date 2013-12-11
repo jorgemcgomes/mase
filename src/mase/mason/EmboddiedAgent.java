@@ -84,6 +84,11 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
 
     // from anything to [-PI,PI]
     protected double normalizeAngle(double ang) {
+        if(ang > Math.PI * 2) {
+            ang = ang % (Math.PI * 2);
+        } else if(ang < -Math.PI * 2) {
+            ang = -(Math.abs(ang) % (Math.PI * 2));
+        }
         if (ang > Math.PI) {
             ang = ang - Math.PI * 2;
         } else if (ang < -Math.PI) {

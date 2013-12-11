@@ -415,10 +415,6 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
         gens <- data[[1]][[1]]$gen
     }
     
-    if(analyse %in% vars.sub) {
-        analyse <- paste(analyse, "mean", sep=".")
-    }
-    
     # mean plots
     print("Assembling plot data...")
     plotframe <- data.frame(gen=gens)
@@ -448,18 +444,24 @@ loadExp <- function(folder, filename, ...) {
 }
 
 loadFile <- function(file, vars.pre, vars.sub, vars.post, gens) {
-    f <- read.table(file, header=F, sep=" ")
+    f <- read.table(file, header=F, sep=" ", stringsAsFactors=F)
     subs <- (ncol(f) - length(vars.pre) - length(vars.post)) / length(vars.sub)
     names <- vars.pre
-    for(i in 0:(subs-1)) {
-        names <- c(names, paste(vars.sub,i,sep="."))
+    if(subs > 1) {
+        for(i in 0:(subs-1)) {
+            names <- c(names, paste(vars.sub,i,sep="."))
+        }
+    } else {
+        names <- c(names, vars.sub)
     }
     names <- c(names, vars.post)
     colnames(f) <- names
     if(!is.null(gens)) {
         f <- f[which(f$gen %in% gens),]
     }
-    f <- addSubStats(f, vars.sub)
+    if(subs > 1) {
+        f <- addSubStats(f, vars.sub)
+    }
     return(f)
 }
 

@@ -5,6 +5,7 @@ eval.post.0 =                          mase.novelty.NoveltyEvaluation
 eval.post.0.ns-k =                     15
 eval.post.0.ns-archive-prob =          0.01
 eval.post.0.ns-archive-size =          1000
+eval.post.0.ns-archive-mode =          shared
 
 stat.child.10 =                        mase.novelty.NoveltyPopStat
 stat.child.10.file =		       $noveltypop.stat

@@ -13,7 +13,7 @@ public class SubpopEvaluationResult implements EvaluationResult {
     private static final long serialVersionUID = 1;
     private final EvaluationResult[] evals;
 
-    public SubpopEvaluationResult(EvaluationResult[] evals) {
+    public SubpopEvaluationResult(EvaluationResult... evals) {
         this.evals = evals;
     }
 
