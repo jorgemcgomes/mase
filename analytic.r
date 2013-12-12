@@ -399,7 +399,7 @@ kl <- function(p, q) {
 #### Generic generational data analysis ########################################
 
 analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, 
-                    checkpoints=NULL, splits=NULL, t.tests=TRUE, plot=TRUE, print=TRUE, smooth=0) {
+                    checkpoints=NULL, splits=NULL, t.tests=TRUE, plot=TRUE, print=TRUE, smooth=0, transform=list()) {
     
     # data loading
     print("Loading data...")
@@ -419,11 +419,17 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     print("Assembling plot data...")
     plotframe <- data.frame(gen=gens)
     for(exp in names(data)) {
-        mean <- list()
-        for(job in names(data[[exp]])) {
-            mean[[job]] <- data[[exp]][[job]][[analyse]] 
+        for(a in analyse) {
+            mean <- list()
+            for(job in names(data[[exp]])) {
+                d <- data[[exp]][[job]][[a]]
+                if(!is.null(transform[[a]])) {
+                    d <- transform(d, transform[[a]])
+                }
+                mean[[job]] <- d
+            }
+            plotframe[[paste(exp,a,sep=".")]] <- rowMeans(as.data.frame(mean))
         }
-        plotframe[[exp]] <- rowMeans(as.data.frame(mean))
     }
     if(smooth > 0) {
         plotframe <- smooth(plotframe, window=smooth)

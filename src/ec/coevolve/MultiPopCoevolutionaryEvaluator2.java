@@ -8,9 +8,16 @@ package ec.coevolve;
 import ec.*;
 import ec.util.Parameter;
 import ec.util.QuickSort;
-import ec.util.SortComparatorL;
+import ec.util.SortComparator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import mase.evaluation.ExpandedFitness;
+import mase.neat.NEATSubpop;
+import org.neat4j.neat.core.NEATChromosome;
+import org.neat4j.neat.core.NEATGeneticAlgorithm;
+import org.neat4j.neat.ga.core.Chromosome;
 
 /**
  * Multi-threaded version
@@ -19,20 +26,47 @@ import mase.evaluation.ExpandedFitness;
  */
 public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEvaluator {
 
-    public static final String P_OLD_ELITES = "old-elites";
+    public static final String P_LAST_CHAMPIONS = "num-last-champions";
+    public static final String P_RANDOM_CHAMPIONS = "num-random-champions";
+    public static final String P_NEAT_ELITE = "num-neat-elite";
+    public static final String P_CURRENT_ELITE = "num-current-elite";
+
     public static final String P_FITNESS_ONLY_ELITE = "fitness-only-elite";
     protected boolean eliteFitness;
-    protected boolean oldElites;
+    protected int lastChampions;
+    protected int randomChampions;
+    protected int neatElite;
+    protected int currentElite;
+    protected ArrayList<Individual>[] hallOfFame;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         eliteFitness = state.parameters.getBoolean(base.push(P_FITNESS_ONLY_ELITE), null, false);
-        oldElites = state.parameters.getBoolean(base.push(P_OLD_ELITES), null, false);
+
+        lastChampions = state.parameters.getIntWithDefault(base.push(P_LAST_CHAMPIONS), null, 0);
+        randomChampions = state.parameters.getIntWithDefault(base.push(P_RANDOM_CHAMPIONS), null, 0);
+        neatElite = state.parameters.getIntWithDefault(base.push(P_NEAT_ELITE), null, 0);
+        currentElite = state.parameters.getIntWithDefault(base.push(P_CURRENT_ELITE), null, 0);
+
+        if (lastChampions > 0 || randomChampions > 0 || neatElite > 0 || currentElite > 0) {
+            this.numElite = lastChampions + randomChampions + neatElite + currentElite;
+            state.output.warnOnce("Parameter value was ignored. Value changed to: " + this.numElite, base.push(P_NUM_ELITE));
+        } else {
+            currentElite = this.numElite;
+        }
     }
 
     @Override
     public void evaluatePopulation(final EvolutionState state) {
+        // initialize
+        if (hallOfFame == null && (lastChampions > 0 || randomChampions > 0)) {
+            hallOfFame = new ArrayList[state.population.subpops.length];
+            for (int i = 0; i < hallOfFame.length; i++) {
+                hallOfFame[i] = new ArrayList<Individual>();
+            }
+        }
+
         // determine who needs to be evaluated
         boolean[] preAssessFitness = new boolean[state.population.subpops.length];
         boolean[] postAssessFitness = new boolean[state.population.subpops.length];
@@ -47,7 +81,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         ((GroupedProblemForm) p_problem).preprocessPopulation(state, state.population, preAssessFitness, false);
         performCoevolutionaryEvaluation(state, state.population, (GroupedProblemForm) p_problem);
         ((GroupedProblemForm) p_problem).postprocessPopulation(state, state.population, postAssessFitness, false);
-        
+
         // other methods become responsible of calling afterCoevolutionaryEvaluation
     }
 
@@ -259,8 +293,11 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     @Override
     void loadElites(final EvolutionState state, int whichSubpop) {
         Subpopulation subpop = state.population.subpops[whichSubpop];
+        int index = 0;
+        String[] marks = new String[numElite];
 
-        if (numElite == 1) {
+        // Update hall of fame
+        if (hallOfFame != null) {
             int best = 0;
             Individual[] oldinds = subpop.individuals;
             for (int x = 1; x < oldinds.length; x++) {
@@ -268,67 +305,98 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
                     best = x;
                 }
             }
-            eliteIndividuals[whichSubpop][0] = (Individual) (state.population.subpops[whichSubpop].individuals[best].clone());
-        } else if (!oldElites && numElite > 0) { // elites from current population
-            int[] orderedPop = new int[subpop.individuals.length];
-            for (int x = 0; x < subpop.individuals.length; x++) {
-                orderedPop[x] = x;
+            hallOfFame[whichSubpop].add((Individual) subpop.individuals[best].clone());
+        }
+
+        // Last champions
+        if (lastChampions > 0) {
+            for (int i = 1; i <= lastChampions; i++) {
+                eliteIndividuals[whichSubpop][index++]
+                        = (Individual) hallOfFame[whichSubpop].get(hallOfFame[whichSubpop].size() - i).clone();
             }
-            QuickSort.qsort(orderedPop, new EliteComparator2(subpop.individuals));
-            // load the top N individuals
-            for (int j = 0; j < numElite; j++) {
-                eliteIndividuals[whichSubpop][j] = (Individual) (state.population.subpops[whichSubpop].individuals[orderedPop[j]].clone());
+        }
+
+        // Random champions
+        if (randomChampions > 0) {
+            // Choose random positions
+            ArrayList<Integer> pos = new ArrayList<Integer>(hallOfFame[whichSubpop].size());
+            for (int i = 0; i < hallOfFame[whichSubpop].size(); i++) {
+                pos.add(i);
             }
-        } else if (oldElites && numElite > 0) { // elites from previous generations
-            int best = 0;
+            Collections.shuffle(pos);
+            for (int i = 0; i < pos.size() && i < randomChampions; i++) {
+                marks[index] = "R";
+                eliteIndividuals[whichSubpop][index++]
+                        = (Individual) hallOfFame[whichSubpop].get(pos.get(i)).clone();
+            }
+        }
+
+        // NEAT Elite
+        if (neatElite > 0) {
+            // Issue: the population suffers speciation BEFORE breeding
+            NEATGeneticAlgorithm neat = ((NEATSubpop) subpop).getNEAT();
+            if (!neat.getSpecies().specieList().isEmpty()) {
+                HashMap<Integer, Individual> specieBests = new HashMap<Integer,Individual>(neat.getSpecies().specieList().size() * 2);
+                Chromosome[] genoTypes = neat.population().genoTypes();
+                for (int i = 0; i < genoTypes.length; i++) {
+                    int specie = ((NEATChromosome) genoTypes[i]).getSpecieId();
+                    if (!specieBests.containsKey(specie) 
+                            || betterThan(subpop.individuals[i], specieBests.get(specie))) {
+                        specieBests.put(specie, subpop.individuals[i]);
+                    }
+                }
+                Individual[] specBests = new Individual[specieBests.size()];
+                specieBests.values().toArray(specBests);
+                QuickSort.qsort(specBests, new EliteComparator2());
+                for (int i = 0; i < specBests.length && i < neatElite; i++) {
+                    marks[index] = "N";
+                    eliteIndividuals[whichSubpop][index++] = (Individual) specBests[i].clone();
+                }
+            }
+        }
+
+        // Fill remaining with the elite of the current pop
+        int toFill = numElite - index ;
+        if (toFill == 1) { // Just one to place
+            Individual best = subpop.individuals[0];
             for (int x = 1; x < subpop.individuals.length; x++) {
-                if (betterThan(subpop.individuals[x], subpop.individuals[best])) {
-                    best = x;
+                if (betterThan(subpop.individuals[x], best)) {
+                    best = subpop.individuals[x];
                 }
             }
-            eliteIndividuals[whichSubpop][(state.generation) % numElite]
-                    = (Individual) subpop.individuals[best].clone();
-            if (state.generation < numElite - 1) { // need to fill the rest of the elites
-                int[] orderedPop = new int[subpop.individuals.length];
-                for (int x = 0; x < subpop.individuals.length; x++) {
-                    orderedPop[x] = x;
-                }
-                QuickSort.qsort(orderedPop, new EliteComparator2(subpop.individuals));
-
-                // fill the rest of the elites vector
-                for (int j = 1; j < numElite - state.generation; j++) {
-                    eliteIndividuals[whichSubpop][j + state.generation]
-                            = (Individual) (state.population.subpops[whichSubpop].individuals[orderedPop[j]].clone());
-                }
+            marks[index] = "C";
+            eliteIndividuals[whichSubpop][index++] = (Individual) best.clone();
+        } else if (toFill > 1) {
+            Individual[] orderedPop = Arrays.copyOf(subpop.individuals, subpop.individuals.length);
+            QuickSort.qsort(orderedPop, new EliteComparator2());
+            // load the top N individuals
+            for (int j = 0; j < toFill; j++) {
+                marks[index] = "C";
+                eliteIndividuals[whichSubpop][index++] = (Individual) orderedPop[j].clone();
             }
-
-            /*System.out.println(whichSubpop + " -------");
-             for (int i = 0; i < numElite; i++) {
-             System.out.print(eliteIndividuals[whichSubpop][i].fitness.fitness() + " ");
-             }
-             System.out.println();*/
         }
+
+       /* System.out.println(whichSubpop + " -------");
+        System.out.println(Arrays.toString(marks));
+        for (int i = 0; i < numElite; i++) {
+            System.out.print(eliteIndividuals[whichSubpop][i].fitness.fitness() + " ");
+        }
+        System.out.println();*/
     }
-
+    
     // sorts the opposite way on purpose -- we want the best to be first in the array
-    class EliteComparator2 implements SortComparatorL {
+    class EliteComparator2 implements SortComparator {
 
-        Individual[] inds;
-
-        public EliteComparator2(Individual[] inds) {
-            super();
-            this.inds = inds;
+        @Override
+        public boolean lt(Object a, Object b) {
+            return betterThan((Individual) a, (Individual) b);
         }
 
         @Override
-        public boolean lt(long a, long b) {
-            return betterThan(inds[(int) a], inds[(int) b]);
+        public boolean gt(Object a, Object b) {
+            return betterThan((Individual) b, (Individual) a);
         }
-
-        @Override
-        public boolean gt(long a, long b) {
-            return betterThan(inds[(int) b], inds[(int) a]);
-        }
+        
     }
 
     private boolean betterThan(Individual a, Individual b) {

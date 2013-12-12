@@ -93,7 +93,9 @@ public class NEATCrossover implements CrossOver {
 			}
 		}
 		
-		childSet.add(this.createChromosome(childGenes));
+                NEATChromosome newC = this.createChromosome(childGenes);
+                newC.setSpecieId(((NEATChromosome) pOne).getSpecieId()); // ADDED
+		childSet.add(newC);
                 
                 // debug
                 int size = ((NEATChromosome) childSet.get(0)).genes().length;

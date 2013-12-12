@@ -104,7 +104,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
 }
 
 transform <- function(v, t) {
-    return(min(max((v + t[1]) * t[2], t[3]), t[4]))
+    return((v + t[1]) * t[2])
 }
 
 filterJobs <- function(data, jobs=c()) {
