@@ -1,17 +1,22 @@
 parent.0 = ../../competitive.params
 pop.subpop.0 = ec.Subpopulation
-pop.subpop.0.size = 200
+pop.subpop.0.size = 150
 pop.subpop.0.species.genome-size =        102
 pop.subpop.0.species.ind.input =          9
 pop.subpop.0.species.ind.hidden =                     7
 pop.subpop.0.species.ind.output =                     4
 
 pop.subpop.1 = ec.Subpopulation
-pop.subpop.1.size = 100
+pop.subpop.1.size = 150
 pop.subpop.1.species.genome-size =        8
 pop.subpop.1.species.ind.input =          3
 pop.subpop.1.species.ind.hidden =                     0
 pop.subpop.1.species.ind.output =                     2
+
+pop.subpop.0.INPUT.NODES = 9
+pop.subpop.0.OUTPUT.NODES = 4
+pop.subpop.1.INPUT.NODES = 3
+pop.subpop.1.OUTPUT.NODES = 2
 
 eval.base.problem =                 mase.app.keepaway.CompetitiveKeepawaySimulator
 problem.trials-merge =              mean
@@ -47,5 +52,3 @@ problem.keeper.pass-speed =         4
 problem.keeper.color =              blue
 # displacement = ball-speed^2 / ball-decay
 
-# neat 
-#-p pop.subpop.0=mase.neat.NEATSubpop -p pop.subpop.1=mase.neat.NEATSubpop -p pop.subpop.0.INPUT.NODES=9 -p pop.subpop.0.OUTPUT.NODES=4 -p pop.subpop.1.INPUT.NODES=3 -p pop.subpop.1.OUTPUT.NODES=2

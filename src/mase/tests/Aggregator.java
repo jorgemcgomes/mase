@@ -8,7 +8,7 @@
  *
  * Created on 4/Dez/2011, 12:13:16
  */
-package mase.stat;
+package mase.tests;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;

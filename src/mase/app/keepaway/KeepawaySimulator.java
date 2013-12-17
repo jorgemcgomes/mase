@@ -14,6 +14,7 @@ import mase.mason.MaseSimState;
 import mase.mason.Mason2dUI;
 import mase.mason.MasonSimulator;
 import sim.display.GUIState;
+import sim.util.Double2D;
 
 /**
  *
@@ -42,17 +43,17 @@ public class KeepawaySimulator extends MasonSimulator {
         par.color = new Color[par.numKeepers];
         par.moveSpeed = new double[par.numKeepers];
         par.passSpeed = new double[par.numKeepers];
-        for(int i = 0 ; i < par.numKeepers ; i++) {
-            String c = state.parameters.getString(df.push(KeepawayParams.P_KEEPER).push(i+"").push(KeepawayParams.P_COLOR), 
+        for (int i = 0; i < par.numKeepers; i++) {
+            String c = state.parameters.getString(df.push(KeepawayParams.P_KEEPER).push(i + "").push(KeepawayParams.P_COLOR),
                     df.push(KeepawayParams.P_KEEPER).push(KeepawayParams.P_COLOR));
             try {
                 par.color[i] = (Color) Color.class.getDeclaredField(c).get(null);
             } catch (Exception ex) {
                 Logger.getLogger(KeepawaySimulator.class.getName()).log(Level.SEVERE, null, ex);
             }
-            par.moveSpeed[i] = state.parameters.getDouble(df.push(KeepawayParams.P_KEEPER).push(i+"").push(KeepawayParams.P_MOVE_SPEED), 
+            par.moveSpeed[i] = state.parameters.getDouble(df.push(KeepawayParams.P_KEEPER).push(i + "").push(KeepawayParams.P_MOVE_SPEED),
                     df.push(KeepawayParams.P_KEEPER).push(KeepawayParams.P_MOVE_SPEED));
-            par.passSpeed[i] = state.parameters.getDouble(df.push(KeepawayParams.P_KEEPER).push(i+"").push(KeepawayParams.P_PASS_SPEED), 
+            par.passSpeed[i] = state.parameters.getDouble(df.push(KeepawayParams.P_KEEPER).push(i + "").push(KeepawayParams.P_PASS_SPEED),
                     df.push(KeepawayParams.P_KEEPER).push(KeepawayParams.P_PASS_SPEED));
         }
 
@@ -67,6 +68,19 @@ public class KeepawaySimulator extends MasonSimulator {
         } else {
             state.output.fatal("Unknown takers placement", df.push(KeepawayParams.P_TAKERS_PLACEMENT));
         }
+
+        // Initial keeper position
+        // place keepers evenly distributed around the circle
+        Double2D center = new Double2D(par.size / 2, par.size / 2);
+        par.keeperStartPos = new Double2D[par.numKeepers];
+        par.keeperStartAngle = new double[par.numKeepers];
+        Double2D up = new Double2D(0, par.ringSize / 2);
+        double rot = Math.PI * 2 / par.numKeepers;
+        for (int i = 0; i < par.numKeepers; i++) {
+            Double2D v = up.rotate(rot * i);
+            par.keeperStartPos[i] = v.add(center);
+            par.keeperStartAngle[i] = v.negate().angle();
+        }
     }
 
     @Override
@@ -78,5 +92,5 @@ public class KeepawaySimulator extends MasonSimulator {
     public GUIState createSimStateWithUI(GroupController gc, long seed) {
         return new Mason2dUI(createSimState(gc, seed), "Keepaway", 500, 500, new Color(0, 150, 0));
     }
-    
+
 }

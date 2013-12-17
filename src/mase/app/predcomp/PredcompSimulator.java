@@ -8,6 +8,7 @@ package mase.app.predcomp;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
+import mase.app.predcomp.PredcompParams.ORIENTATION;
 import mase.controllers.GroupController;
 import mase.mason.MaseSimState;
 import mase.mason.Mason2dUI;
@@ -36,6 +37,7 @@ public class PredcompSimulator extends MasonSimulator {
         par.visionRange = state.parameters.getDouble(df.push(PredcompParams.P_VISION_RANGE), null);
         par.proximitySensors = state.parameters.getInt(df.push(PredcompParams.P_PROXIMITY_SENSORS), null);
         par.visionNeurons = state.parameters.getInt(df.push(PredcompParams.P_VISION_NEURONS), null);
+        par.orientation = ORIENTATION.valueOf(state.parameters.getString(df.push(PredcompParams.P_INITIAL_ORIENTATIONS), null));
     }
 
     @Override

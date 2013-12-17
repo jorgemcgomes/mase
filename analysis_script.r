@@ -539,3 +539,10 @@ fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=
 setwd("~/exps/g0eneric2/keepaway")
 data <- metaLoadData("fit/","nsga","nsga_b/","cl50_brown_norm_biased/","nsga_semigen", params=list(jobs=10,load.behavs=F))
 fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=T)
+
+
+
+# competitive
+
+data <- metaLoadData("fit_neat_rand_b","nov_neat_rand","novcur_neat_rand", names=c("fit","nov","novcur"), params=list(jobs=10, vars.ind=c("time","walldist","agdist","mov"), subpops=2, load.behavs=T, behavs.sample=0.25))
+fullStatistics(data, som.ind=TRUE, behav.mean=TRUE, show.only=F)

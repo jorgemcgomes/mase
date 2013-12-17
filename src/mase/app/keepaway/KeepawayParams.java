@@ -5,6 +5,7 @@
 package mase.app.keepaway;
 
 import java.awt.Color;
+import sim.util.Double2D;
 
 /**
  *
@@ -36,6 +37,8 @@ public class KeepawayParams {
     protected double[] moveSpeed;
     protected double[] passSpeed;
     protected Color[] color;
+    protected Double2D[] keeperStartPos;
+    protected double[] keeperStartAngle;
     
     // Takers
     public static final String P_NUM_TAKERS = "n-takers";

@@ -399,7 +399,7 @@ kl <- function(p, q) {
 #### Generic generational data analysis ########################################
 
 analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, 
-                    checkpoints=NULL, splits=NULL, t.tests=TRUE, plot=TRUE, print=TRUE, smooth=0, transform=list()) {
+                    splits=10, t.tests=TRUE, plot=TRUE, print=TRUE, smooth=0, transform=list(), ylim=NULL) {
     
     # data loading
     print("Loading data...")
@@ -414,12 +414,15 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     if(is.null(gens)) {
         gens <- data[[1]][[1]]$gen
     }
+    splits <- c((0:(splits-1)) * floor(length(gens) / splits) + 1, length(gens))
     
     # mean plots
     print("Assembling plot data...")
     plotframe <- data.frame(gen=gens)
-    for(exp in names(data)) {
-        for(a in analyse) {
+    for(a in analyse) {  
+        splitsets <- list()
+        for(s in splits) {splitsets[[s]] <- list()}
+        for(exp in names(data)) {
             mean <- list()
             for(job in names(data[[exp]])) {
                 d <- data[[exp]][[job]][[a]]
@@ -427,16 +430,36 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
                     d <- transform(d, transform[[a]])
                 }
                 mean[[job]] <- d
-            }
+                
+                for(s in splits) {
+                    splitsets[[s]][[exp]] <- c(splitsets[[s]][[exp]], d[[s]])
+                }
+            }  
             plotframe[[paste(exp,a,sep=".")]] <- rowMeans(as.data.frame(mean))
         }
+
+        # t-tests
+        if(t.tests) {
+            for(s in splits) {
+                cat("\nVar:",a,"\tGen:",s,"\n")
+                print(batch.ttest(splitsets[[s]]))
+            }
+        }
     }
+    if(print) {
+        sampFrame <- plotframe[splits,]
+        cat("\n")
+        print(sampFrame)
+    }
+    
     if(smooth > 0) {
         plotframe <- smooth(plotframe, window=smooth)
     }
-    print("Plotting...")
-    g <- plotMultiline(plotframe, title=analyse, ylim=NULL)
-    plotToPDF(g, show=T)
+    if(plot) {
+        print("Plotting...")
+        g <- plotMultiline(plotframe, title=analyse, ylim=ylim)
+        plotToPDF(g, show=T)
+    }
 }
 
 loadExp <- function(folder, filename, ...) {

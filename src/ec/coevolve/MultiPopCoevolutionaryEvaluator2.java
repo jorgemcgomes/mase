@@ -310,7 +310,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
 
         // Last champions
         if (lastChampions > 0) {
-            for (int i = 1; i <= lastChampions; i++) {
+            for (int i = 1; i <= lastChampions && i <= hallOfFame[whichSubpop].size() ; i++) {
                 eliteIndividuals[whichSubpop][index++]
                         = (Individual) hallOfFame[whichSubpop].get(hallOfFame[whichSubpop].size() - i).clone();
             }

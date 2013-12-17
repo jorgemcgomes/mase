@@ -7,6 +7,7 @@ package mase.app.predcomp;
 
 import java.util.ArrayList;
 import java.util.List;
+import mase.app.predcomp.PredcompParams.ORIENTATION;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
@@ -39,18 +40,27 @@ public class Predcomp extends MaseSimState {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
         this.caught = false;
-        
+
         HeterogeneousGroupController hgc = (HeterogeneousGroupController) gc;
         AgentController[] acs = hgc.getAgentControllers(2);
         predator = new Predator(this, field, acs[0]);
         prey = new Prey(this, field, acs[1]);
 
         predator.setLocation(new Double2D(par.size / 3, par.size / 2));
-        predator.setOrientation(random.nextDouble() * Math.PI * 2 - Math.PI);
+        if (par.orientation == ORIENTATION.random) {
+            predator.setOrientation(random.nextDouble() * Math.PI * 2 - Math.PI);
+        } else if(par.orientation == ORIENTATION.opposing){
+            predator.setOrientation(Math.PI);
+        }
         schedule.scheduleRepeating(predator);
 
         prey.setLocation(new Double2D(par.size * 2 / 3, par.size / 2));
-        prey.setOrientation(random.nextDouble() * Math.PI * 2 - Math.PI);
+        if(par.orientation == ORIENTATION.random) {
+            prey.setOrientation(random.nextDouble() * Math.PI * 2 - Math.PI);
+        } else if(par.orientation == ORIENTATION.opposing) {
+            prey.setOrientation(0);
+        }
+        
         schedule.scheduleRepeating(prey);
     }
 

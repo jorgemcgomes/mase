@@ -27,17 +27,20 @@ public class NoveltyEvaluation implements PostEvaluator {
     public static final String P_ARCHIVE_ADD_PROB = "ns-archive-prob";
     public static final String P_ARCHIVE_SIZE_LIMIT = "ns-archive-size";
     public static final String P_ARCHIVE_MODE = "ns-archive-mode";
+    public static final String P_USE_CURRENT_POP = "ns-use-current";
     public static final String V_NONE = "none", V_SHARED = "shared", V_MULTIPLE = "multiple";
     protected String archiveMode;
     protected int k;
     protected double addProb;
     protected int sizeLimit;
+    protected boolean useCurrent;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         this.k = state.parameters.getInt(base.push(P_K_NN), null);
         this.addProb = state.parameters.getDouble(base.push(P_ARCHIVE_ADD_PROB), null);
         this.sizeLimit = state.parameters.getInt(base.push(P_ARCHIVE_SIZE_LIMIT), null);
+        this.useCurrent = state.parameters.getBoolean(base.push(P_USE_CURRENT_POP), null, true);
         String m = state.parameters.getStringWithDefault(base.push(P_ARCHIVE_MODE), null, V_SHARED);
         if (m.equalsIgnoreCase(V_NONE)) {
             archiveMode = V_NONE;
@@ -48,7 +51,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         } else {
             state.output.fatal("Unknown archive mode", base.push(P_ARCHIVE_MODE));
         }
-        
+
         int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this must be more flexible
         this.archives = new ArrayList<List<BehaviourResult>>(nPops);
         if (archiveMode == V_NONE) {
@@ -84,15 +87,17 @@ public class NoveltyEvaluation implements PostEvaluator {
                 Individual ind = pop.subpops[p].individuals[j];
                 NoveltyFitness indFit = (NoveltyFitness) ind.fitness;
 
-                ArrayList<Pair<Float, Boolean>> distances =
-                        new ArrayList<Pair<Float, Boolean>>(archive.size() + pop.subpops[p].individuals.length);
+                ArrayList<Pair<Float, Boolean>> distances
+                        = new ArrayList<Pair<Float, Boolean>>(archive.size() + pop.subpops[p].individuals.length);
 
                 // from subpop
-                for (Individual i : pop.subpops[p].individuals) {
-                    if (ind != i) {
-                        BehaviourResult er1 = ((NoveltyFitness) i.fitness).getNoveltyBehaviour();
-                        BehaviourResult er2 = indFit.getNoveltyBehaviour();
-                        distances.add(Pair.of(distance(er1, er2), false));
+                if (useCurrent) {
+                    for (Individual i : pop.subpops[p].individuals) {
+                        if (ind != i) {
+                            BehaviourResult er1 = ((NoveltyFitness) i.fitness).getNoveltyBehaviour();
+                            BehaviourResult er2 = indFit.getNoveltyBehaviour();
+                            distances.add(Pair.of(distance(er1, er2), false));
+                        }
                     }
                 }
 
@@ -113,7 +118,7 @@ public class NoveltyEvaluation implements PostEvaluator {
                 // average to k nearest
                 indFit.noveltyScore = 0;
                 indFit.repoComparisons = 0;
-                for (int i = 0; i < k; i++) {
+                for (int i = 0; i < k && i < distances.size() ; i++) {
                     indFit.noveltyScore += distances.get(i).getLeft();
                     if (distances.get(i).getRight()) {
                         indFit.repoComparisons++;

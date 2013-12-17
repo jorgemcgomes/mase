@@ -21,7 +21,13 @@ public class PredcompParams {
     public static final String P_PREY_SPEED = "prey-speed";
     public static final String P_PREDATOR_SPEED = "predator-speed";
     public static final String P_DISCRETIZATION = "discretization";
+    public static final String P_INITIAL_ORIENTATIONS = "initial-orientations";
     
+    public enum ORIENTATION {
+        random, opposing;
+    }
+    
+    protected ORIENTATION orientation;
     protected double size;
     protected int proximitySensors;
     protected double proximityRange;

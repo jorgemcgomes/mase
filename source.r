@@ -311,7 +311,6 @@ quickReport <- function(folder, jobs=NULL, snapshots=10, ...) {
     for(j in data$jobs) {
         frame[[j]] <- data[[j]]$fitness$best.sofar
     }
-    interval <- floor(length(data$gens) / snapshots)
     snapshots <- c((0:(snapshots-1)) * floor(length(data$gens) / snapshots) + 1, length(data$gens))
      means <- c()
     sds <- c()
