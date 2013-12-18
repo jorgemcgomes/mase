@@ -399,7 +399,7 @@ kl <- function(p, q) {
 #### Generic generational data analysis ########################################
 
 analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, 
-                    splits=10, t.tests=TRUE, plot=TRUE, print=TRUE, smooth=0, transform=list(), ylim=NULL) {
+                    splits=10, t.tests=TRUE, plot=TRUE, boxplots=TRUE, print=TRUE, smooth=0, transform=list(), ylim=NULL) {
     
     # data loading
     print("Loading data...")
@@ -408,7 +408,7 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     for(i in 1:length(expsfolders)) {
         f <- expsfolders[[i]]
         index <- ifelse(is.null(exp.names), basename(f), exp.names[i])
-        data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens)
+        data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens, transform=transform)
     }
     
     if(is.null(gens)) {
@@ -426,11 +426,7 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
             mean <- list()
             for(job in names(data[[exp]])) {
                 d <- data[[exp]][[job]][[a]]
-                if(!is.null(transform[[a]])) {
-                    d <- transform(d, transform[[a]])
-                }
                 mean[[job]] <- d
-                
                 for(s in splits) {
                     splitsets[[s]][[exp]] <- c(splitsets[[s]][[exp]], d[[s]])
                 }
@@ -446,6 +442,32 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
             }
         }
     }
+    
+    if(boxplots) {
+        plots <- list()
+        for(s in splits) {
+            frame <- NULL
+            for(a in analyse) {
+                for(exp in names(data)) {
+                    for(job in names(data[[exp]])) {
+                        frame <- rbind(frame, c(paste(a,exp,sep="."), data[[exp]][[job]][[a]][s]))
+                    }
+                }
+            }
+            frame <- data.frame(exp=frame[,1], v=as.numeric(frame[,2]))
+            p <- ggplot(frame, aes(factor(exp), v)) + 
+                geom_boxplot(aes(fill=factor(exp))) +
+                ggtitle(paste("Generation",s)) + xlab("") +
+                theme(axis.text.x = element_text(angle = 22.5, hjust = 1)) +
+                geom_jitter(colour="darkgrey")
+            if(!is.null(ylim)) {
+                p <- p + ylim(ylim[1],ylim[2])
+            }
+            plots[[length(plots)+1]] <- p
+        }
+        plotListToPDF(plots, show=T)
+    }
+    
     if(print) {
         sampFrame <- plotframe[splits,]
         cat("\n")
@@ -462,12 +484,19 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     }
 }
 
-loadExp <- function(folder, filename, ...) {
+loadExp <- function(folder, filename, transform=list(), ...) {
     files <- list.files(folder, pattern=filename, full.names=T)
     exp <- list()
     for(f in files) {
         jobname <- basename(f)
-        exp[[jobname]] <- loadFile(f, ...)
+        e <- loadFile(f, ...)
+        for(cn in colnames(e)) {
+            if(cn %in% names(transform)) {
+                e[[cn]] <- transform(e[[cn]], transform[[cn]])
+            }
+        }
+        exp[[jobname]] <- e
+        print(summary(e))
     }
     return(exp)
 }

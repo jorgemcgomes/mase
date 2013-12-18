@@ -52,11 +52,10 @@ plotListToPDF <- function(plotlist, title="", nrow=NULL, ncol=NULL, width=DEF_WI
     if(is.null(file)) {
         file <- tempfile(fileext=".pdf")
     }
-    if(is.null(ncol) & is.null(nrow)) {
-        ncol <- nrow <- ceiling(sqrt(length(plotlist)))
-    } else if(is.null(ncol)) {
-        ncol <- ceiling(length(plotlist) / nrow)
-    } else if(is.null(nrow)) {
+    if(is.null(ncol) & length(plotlist) > 1) {
+        ncol <- 2
+    }
+    if(is.null(nrow)) {
         nrow <- ceiling(length(plotlist) / ncol)
     }
     plot <- do.call("arrangeGrob", c(plotlist, nrow=nrow, ncol=ncol, main=title))

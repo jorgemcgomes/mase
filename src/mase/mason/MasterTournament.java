@@ -111,12 +111,15 @@ public class MasterTournament {
             // Write evaluations log
             File log = new File(tar.getParent(), tar.getName().replace("bests.1.tar.gz", "comp.stat"));
             BufferedWriter bfw = new BufferedWriter(new FileWriter(log));
+            float bestFar0 = Float.MIN_VALUE, bestFar1 = Float.MIN_VALUE;
             for (int g = 0; g < evals0.size(); g++) {
                 EvaluationResult[] e0 = evals0.get(g);
                 EvaluationResult[] e1 = evals1.get(g);
                 float fit0 = (Float) (((SubpopEvaluationResult) e0[0]).getSubpopEvaluation(0).value());
                 float fit1 = (Float) (((SubpopEvaluationResult) e1[0]).getSubpopEvaluation(1).value());
-                bfw.write(g + " " + fit0 + " " + fit1);
+                bestFar0 = Math.max(bestFar0, fit0);
+                bestFar1 = Math.max(bestFar1, fit1);
+                bfw.write(g + " " + fit0 + " " + fit1 + " " + bestFar0 + " " + bestFar1);
                 bfw.newLine();
             }
             bfw.close();
