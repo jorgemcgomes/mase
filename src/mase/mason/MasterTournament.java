@@ -31,16 +31,23 @@ public class MasterTournament {
 
     public static final String FOLDER = "-f";
     public static final String FREQUENCY = "-freq";
+    public static final String OUTNAME = "-name";
 
     public static void main(String[] args) throws Exception {
         List<File> folders = new ArrayList<File>();
         int freq = 1;
+        String name = "comp";
         for (int x = 0; x < args.length; x++) {
             if (args[x].equalsIgnoreCase(FOLDER)) {
-                folders.add(new File(args[1 + x++]));
-            }
-            if (args[x].equalsIgnoreCase(FREQUENCY)) {
+                File folder = new File(args[1 + x++]);
+                if(!folder.exists()) {
+                    throw new Exception("Folder does not exist: " + folder.getAbsolutePath());
+                }
+                folders.add(folder);
+            } else if (args[x].equalsIgnoreCase(FREQUENCY)) {
                 freq = Integer.parseInt(args[1 + x++]);
+            } else if(args[x].equalsIgnoreCase(OUTNAME)) {
+                name = args[1 + x++];
             }
         }
         if (folders.isEmpty()) {
@@ -49,7 +56,7 @@ public class MasterTournament {
         }
 
         MasonSimulator sim = MasonPlayer.createSimulator(args);
-        MasterTournament mt = new MasterTournament(folders, freq, sim);
+        MasterTournament mt = new MasterTournament(folders, freq, sim, name);
         mt.makeTournaments();
     }
     
@@ -57,12 +64,14 @@ public class MasterTournament {
     private final int freq;
     private final MasonSimulator sim;
     private final ExecutorService executor;
+    private final String name;
     
-    public MasterTournament(List<File> folders, int sampleFreq, MasonSimulator sim) {
+    public MasterTournament(List<File> folders, int sampleFreq, MasonSimulator sim, String name) {
         this.folders = folders;
         this.freq = sampleFreq;
         this.sim = sim;
         this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        this.name = name;
     }
 
     public void makeTournaments() throws Exception {
@@ -109,7 +118,7 @@ public class MasterTournament {
             PersistentSolution best1 = sols.get(bestIndex1);
             
             // Write evaluations log
-            File log = new File(tar.getParent(), tar.getName().replace("bests.1.tar.gz", "comp.stat"));
+            File log = new File(tar.getParent(), tar.getName().replace("bests.1.tar.gz", name));
             BufferedWriter bfw = new BufferedWriter(new FileWriter(log));
             float bestFar0 = Float.MIN_VALUE, bestFar1 = Float.MIN_VALUE;
             for (int g = 0; g < evals0.size(); g++) {
