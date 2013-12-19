@@ -536,7 +536,7 @@ setwd("~/exps/generic2/indiana4")
 data <- metaLoadData("fit/","nsga","cl50_brown_norm","nsga_semigen", params=list(jobs=10,load.behavs=F))
 fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,250,399)), show.only=T)
 
-setwd("~/exps/g0eneric2/keepaway")
+setwd("~/exps/generic2/keepaway")
 data <- metaLoadData("fit/","nsga","nsga_b/","cl50_brown_norm_biased/","nsga_semigen", params=list(jobs=10,load.behavs=F))
 fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=c(100,300,499)), show.only=T)
 
@@ -546,3 +546,9 @@ fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=
 
 data <- metaLoadData("fit_neat_rand_b","nov_neat_rand","novcur_neat_rand", names=c("fit","nov","novcur"), params=list(jobs=10, vars.ind=c("time","walldist","agdist","mov"), subpops=2, load.behavs=T, behavs.sample=0.25))
 fullStatistics(data, som.ind=TRUE, behav.mean=TRUE, show.only=F)
+
+
+analyse("nov_neat_rand","novcur_neat_rand","fit_neat_rand_b",filename="comp.stat", vars.pre=c("gen"), vars.sub=c("fit0","fit1","bestfit0","bestfit1"), analyse=c("bestfit0","bestfit1"), transform=list(bestfit0=c(-500,1)), smooth=5, splits=5)
+
+
+analyse("novcur_neat_rand","fit_neat_rand_b","novcur_neat_rand25/","fit_neat_rand25/",filename="comp.stat", vars.pre=c("gen"), vars.sub=c("fit0","fit1","bestfit0","bestfit1"), analyse=c("bestfit0","bestfit1"), transform=list(bestfit0=c(-500,1)), smooth=0, splits=5)

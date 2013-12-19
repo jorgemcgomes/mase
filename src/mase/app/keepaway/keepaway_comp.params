@@ -1,4 +1,5 @@
 parent.0 = ../../competitive.params
+
 pop.subpop.0 = ec.Subpopulation
 pop.subpop.0.size = 150
 pop.subpop.0.species.genome-size =        102
@@ -24,7 +25,7 @@ problem.number-evals =              2
 problem.eval.0 =                    mase.app.keepaway.CompetitiveKeepawayFitness
 problem.eval.0.update-freq =        1
 problem.eval.0.pass-length =        10
-problem.eval.1 =                    mase.app.keepaway.CompetitiveKeepawayBehaviour
+problem.eval.1 =                    mase.app.keepaway.CompetitiveKeepawayBehaviourSub
 problem.eval.1.update-freq =        1
 problem.eval.1.pass-length =        10
 problem.eval.1.pass-normalization = 10
