@@ -32,7 +32,7 @@ public class Mason2dUI extends GUIState {
         this.title = title;
         this.w = w;
         this.h = h;
-        this.portrayal = new ContinuousPortrayal2D();
+        this.portrayal = state.createFieldPortrayal();
         this.background = background;
     }
 
@@ -49,8 +49,8 @@ public class Mason2dUI extends GUIState {
     }
 
     public void setupPortrayals() {
-        MaseSimState pss = (MaseSimState) state;
-        portrayal.setField(pss.getField());
+        MaseSimState mss = (MaseSimState) state;
+        mss.setupPortrayal(portrayal);
         // reschedule the displayer
         display.reset();
         display.setBackdrop(background);

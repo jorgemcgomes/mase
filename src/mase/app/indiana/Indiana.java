@@ -15,9 +15,9 @@ import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.engine.SimState;
-import sim.engine.Steppable;
-import sim.engine.Stoppable;
 import sim.field.continuous.Continuous2D;
+import sim.portrayal.FieldPortrayal2D;
+import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.util.Double2D;
 
 /**
@@ -44,10 +44,14 @@ public class Indiana extends MaseSimState {
     }
 
     @Override
-    public Object getField() {
-        return field;
+    public FieldPortrayal2D createFieldPortrayal() {
+        return new ContinuousPortrayal2D();
     }
 
+    @Override
+    public void setupPortrayal(FieldPortrayal2D port) {
+        port.setField(field);
+    }
     @Override
     public List<? extends SmartAgent> getSmartAgents() {
         return agents;

@@ -544,11 +544,16 @@ fullStatistics(data, expset.name="ksh", fit.comp=T, fit.comp.par=list(snapshots=
 
 # competitive
 
-data <- metaLoadData("fit_neat_rand_b","nov_neat_rand","novcur_neat_rand", names=c("fit","nov","novcur"), params=list(jobs=10, vars.ind=c("time","walldist","agdist","mov"), subpops=2, load.behavs=T, behavs.sample=0.25))
-fullStatistics(data, som.ind=TRUE, behav.mean=TRUE, show.only=F)
+data <- metaLoadData("fit_neat_rand_b","novcur_neat_rand", names=c("fit","nov"), params=list(jobs=10, vars.ind=c("time","walldist","agdist","mov"), subpops=2, load.behavs=T, behavs.sample=0.25))
+fullStatistics(data, som.ind=TRUE, behav.mean=TRUE, show.only=F, expset.name="fit_vs_novcur")
 
+data <- metaLoadData("fit_neat_rand_b","fit_neat_nov", names=c("fitrand","fitnov"), params=list(jobs=10, vars.ind=c("time","walldist","agdist","mov"), subpops=2, load.behavs=T, behavs.sample=0.25))
+fullStatistics(data, som.ind=TRUE, behav.mean=TRUE, show.only=F, expset.name="fitrand_vs_fitnov")
 
 analyse("nov_neat_rand","novcur_neat_rand","fit_neat_rand_b",filename="comp.stat", vars.pre=c("gen"), vars.sub=c("fit0","fit1","bestfit0","bestfit1"), analyse=c("bestfit0","bestfit1"), transform=list(bestfit0=c(-500,1)), smooth=5, splits=5)
 
 
 analyse("novcur_neat_rand","fit_neat_rand_b","novcur_neat_rand25/","fit_neat_rand25/",filename="comp.stat", vars.pre=c("gen"), vars.sub=c("fit0","fit1","bestfit0","bestfit1"), analyse=c("bestfit0","bestfit1"), transform=list(bestfit0=c(-500,1)), smooth=0, splits=5)
+
+setwd("~/exps//competitive/pred2")
+analyse("nov_neat_rand","nov_neat_novrand","nov_neat_novcent",filename="compall.stat", vars.pre=c("gen"), vars.sub=c("fit0","fit1","bestfit0","bestfit1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5)

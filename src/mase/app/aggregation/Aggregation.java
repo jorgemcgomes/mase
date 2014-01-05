@@ -11,6 +11,8 @@ import mase.controllers.GroupController;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
+import sim.portrayal.FieldPortrayal2D;
+import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.util.Double2D;
 
 /**
@@ -38,11 +40,6 @@ public class Aggregation extends MaseSimState {
     }
 
     @Override
-    public Object getField() {
-        return field;
-    }
-
-    @Override
     public List<? extends SmartAgent> getSmartAgents() {
         return agents;
     }
@@ -63,5 +60,15 @@ public class Aggregation extends MaseSimState {
             schedule.scheduleRepeating(ag);
             agents.add(ag);
         }
+    }
+
+    @Override
+    public FieldPortrayal2D createFieldPortrayal() {
+        return new ContinuousPortrayal2D();
+    }
+
+    @Override
+    public void setupPortrayal(FieldPortrayal2D port) {
+        port.setField(field);
     }
 }

@@ -67,7 +67,6 @@ public class NoveltyEvaluation implements PostEvaluator {
             for (int i = 0; i < nPops; i++) {
                 this.archives.add(new ArrayList<BehaviourResult>(sizeLimit));
             }
-            this.addProb = this.addProb * nPops;
         }
     }
 

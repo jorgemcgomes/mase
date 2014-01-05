@@ -6,6 +6,7 @@ package mase.mason;
 
 import java.util.List;
 import sim.engine.SimState;
+import sim.portrayal.FieldPortrayal2D;
 
 /**
  *
@@ -21,7 +22,9 @@ public abstract class MaseSimState extends SimState {
         return true;
     }
     
-    public abstract Object getField();
+    public abstract FieldPortrayal2D createFieldPortrayal();
+    
+    public abstract void setupPortrayal(FieldPortrayal2D port);
     
     public abstract List<? extends SmartAgent> getSmartAgents();
     
