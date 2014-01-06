@@ -4,97 +4,141 @@
  */
 package mase.app.go;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import sim.field.grid.IntGrid2D;
 import sim.util.Int2D;
-import sim.util.IntBag;
 
 /**
  *
  * @author Jorge
  */
-public class GoState {
+public class GoState implements Cloneable {
 
     public static final int BLACK = 0, WHITE = 1, EMPTY = 2;
-    protected IntGrid2D grid;
-    protected Set<Group>[] groups;
+    protected int[] grid;
+    protected List<Group>[] groups;
     protected int[] captured;
-    protected int passCount;
-    
 
-    private GoState() {}
+    protected static Int2D[][] neighbourMap;
+    protected static int size;
+
+    private GoState() {
+    }
 
     public GoState(int size) {
-        this.grid = new IntGrid2D(size, size, EMPTY);
-        this.groups = new Set[]{new HashSet<Group>(), new HashSet<Group>()};
+        this.grid = new int[size * size];
+        Arrays.fill(grid, EMPTY);
+        this.groups = new List[]{new ArrayList<Group>(20), new ArrayList<Group>(20)};
         this.captured = new int[]{0, 0};
-        this.passCount = 0;
+        synchronized (this) {
+            GoState.size = size;
+            if (neighbourMap == null) {
+                initNeighbours(size);
+            }
+        }
+    }
+
+    private static void initNeighbours(int size) {
+        neighbourMap = new Int2D[size * size][];
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                ArrayList<Int2D> ns = new ArrayList<Int2D>(4);
+                if (x > 0) {
+                    ns.add(new Int2D(x - 1, y));
+                }
+                if (x < size - 1) {
+                    ns.add(new Int2D(x + 1, y));
+                }
+                if (y > 0) {
+                    ns.add(new Int2D(x, y - 1));
+                }
+                if (y < size - 1) {
+                    ns.add(new Int2D(x, y + 1));
+                }
+                Int2D[] a = new Int2D[ns.size()];
+                ns.toArray(a);
+                int index = x % size + y * size;
+                neighbourMap[index] = a;
+            }
+        }
+    }
+
+    public static int index(Int2D pos) {
+        return index(pos.x, pos.y);
+    }
+
+    public static int index(int x, int y) {
+        return x % size + y * size;
     }
     
-    public void update(GoState state) {
-        if(state == this) {
-            this.passCount++;
-        } else {
-            this.passCount = 0;
+    public static Int2D reverseIndex(int index) {
+        return new Int2D(index % size, index / size);
+    }
+
+    private static Int2D[] neighbours(Int2D pos) {
+        return neighbourMap[index(pos)];
+    }
+
+    protected static class Group implements Cloneable {
+
+        protected ArrayList<Int2D> stones;
+        protected ArrayList<Int2D> liberties;
+
+        Group() {
+            this.stones = new ArrayList<Int2D>();
+            this.liberties = new ArrayList<Int2D>();
         }
-        this.grid.setTo(state.getGrid());
-        this.groups = state.groups;
-        this.captured = state.captured;
+
+        @Override
+        protected Group clone() throws CloneNotSupportedException {
+            Group newGroup = (Group) super.clone();
+            newGroup.stones = (ArrayList<Int2D>) stones.clone();
+            newGroup.liberties = (ArrayList<Int2D>) liberties.clone();
+            return newGroup;
+        }
+
+        protected boolean contains(Int2D stone) {
+            for (Int2D s : stones) {
+                if (s.x == stone.x && s.y == stone.y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // WARNING: might have repeated liberties
+        private void updateGroupLiberties(int[] grid) {
+            liberties.clear();
+            for (Int2D p : stones) {
+                for (Int2D n : neighbours(p)) {
+                    if (grid[index(n)] == EMPTY) {
+                        liberties.add(n);
+                    }
+                }
+            }
+        }
     }
 
     @Override
-    protected GoState clone() {
+    protected GoState clone() throws CloneNotSupportedException {
         // deep clone
-        GoState newState = new GoState();
-        newState.grid = new IntGrid2D(grid.getWidth(), grid.getWidth());
-        for(int x = 0 ; x < grid.getWidth() ; x++) {
-            for(int y = 0 ; y < grid.getWidth() ; y++) {
-                newState.grid.set(x, y, grid.get(x, y));
-            }
-        }
+        GoState newState = (GoState) super.clone();
+        newState.grid = Arrays.copyOf(grid, grid.length);
         newState.captured = Arrays.copyOf(captured, 2);
-        newState.groups = new Set[2];
-        for(int i = 0 ; i < newState.groups.length ; i++) {
-            newState.groups[i] = new HashSet<Group>();
-            for(Group g : this.groups[i]) {
+        newState.groups = new List[2];
+        for (int i = 0; i < newState.groups.length; i++) {
+            newState.groups[i] = new ArrayList<Group>(groups[i].size());
+            for (Group g : this.groups[i]) {
                 newState.groups[i].add(g.clone());
             }
         }
         return newState;
-    }
-
-    protected static class Group {
-
-        protected Set<Int2D> stones;
-        protected Set<Int2D> liberties;
-
-        Group() {
-            this.stones = new HashSet<Int2D>();
-            this.liberties = new HashSet<Int2D>();
-        }
-
-        @Override
-        protected Group clone() {
-            Group newGroup = new Group();
-            newGroup.stones = new HashSet<Int2D>(stones);
-            newGroup.liberties = new HashSet<Int2D>(liberties);
-            return newGroup;
-        }
-    }
-
-    private void updateGroupLiberties(Group group, IntGrid2D grid) {
-        group.liberties.clear();
-        for (Int2D p : group.stones) {
-            for (Int2D n : neighbours(p)) {
-                if (grid.get(n.x, n.y) == EMPTY) {
-                    group.liberties.add(n);
-                }
-            }
-        }
     }
 
     /*
@@ -102,13 +146,18 @@ public class GoState {
      */
     public GoState nextState(int player, Int2D pos) {
         // position already occupied
-        if (grid.get(pos.x, pos.y) != EMPTY) {
+        if (grid[index(pos)] != EMPTY) {
             return null;
         }
 
         // place stone
-        GoState newState = this.clone();
-        newState.grid.set(pos.x, pos.y, player);
+        GoState newState = null;
+        try {
+            newState = this.clone();
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(GoState.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        newState.grid[index(pos)] = player;
 
         // update players groups
         // create new group with new stone
@@ -120,7 +169,7 @@ public class GoState {
             while (iter.hasNext()) {
                 Group next = iter.next();
                 // if present, merge them in the new group and remove them
-                if (next.stones.contains(n)) {
+                if (next.contains(n)) {
                     newGroup.stones.addAll(next.stones);
                     iter.remove();
                 }
@@ -133,26 +182,26 @@ public class GoState {
         Iterator<Group> iter = newState.groups[(player + 1) % 2].iterator();
         while (iter.hasNext()) {
             Group next = iter.next();
-            updateGroupLiberties(next, newState.grid);
+            next.updateGroupLiberties(newState.grid);
             // remove group if no liberties
             if (next.liberties.isEmpty()) {
                 iter.remove();
                 newState.captured[player] += next.stones.size();
                 for (Int2D p : next.stones) {
-                    newState.grid.set(p.x, p.y, EMPTY);
+                    newState.grid[index(p)] = EMPTY;
                 }
             }
         }
-        
+
         /* Check for self-capture
          * A player may not self-capture, that is play a stone into a position where 
          * it would have no liberties or form part of a group which would thereby have 
          * no liberties, unless, as a result, one or more of the stones surrounding it is captured.*/
         // update player liberties
-        for(Group g : newState.groups[player]) {
-            updateGroupLiberties(g, newState.grid);
+        for (Group g : newState.groups[player]) {
+            g.updateGroupLiberties(newState.grid);
             // if there is any player group without liberties, the play is invalid
-            if(g.liberties.isEmpty()) {
+            if (g.liberties.isEmpty()) {
                 return null;
             }
         }
@@ -166,54 +215,39 @@ public class GoState {
         states.add(this);
 
         // for each empty intersection, generate next state
-        for(int x = 0 ; x < grid.getWidth() ; x++) {
-            for(int y = 0 ; y < grid.getWidth() ; y++) {
-                if(grid.get(x, y) == EMPTY) {
-                    GoState next = nextState(player, new Int2D(x,y));
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                if (grid[index(x, y)] == EMPTY) {
+                    GoState next = nextState(player, new Int2D(x, y));
                     // check for invalid states
-                    if(next != null) {
+                    if (next != null) {
                         states.add(next);
                     }
                 }
             }
         }
-        
+
         GoState[] res = new GoState[states.size()];
         states.toArray(res);
         return res;
     }
 
-    // TODO: optimize, initialize table with the neighbours and then use fast lookups
-    private Int2D[] neighbours(Int2D pos) {
-        IntBag xs = new IntBag(), ys = new IntBag();
-        grid.getVonNeumannLocations(pos.x, pos.y, 1, IntGrid2D.BOUNDED, false, xs, ys);
-        Int2D[] a = new Int2D[xs.numObjs];
-        for (int i = 0; i < a.length; i++) {
-            a[i] = new Int2D(xs.objs[i], ys.objs[i]);
-        }
-        return a;
-    }
-
     public int[] getBoardDescription() {
-        return grid.toArray();
-    }
-
-    public IntGrid2D getGrid() {
         return grid;
     }
 
     public int getScore(int player) {
         int ownStones = 0;
         int surroundedEmpty = 0;
-        for (int x = 0; x < grid.getWidth(); x++) {
-            for (int y = 0; y < grid.getWidth(); y++) {
-                if (grid.get(x, y) == player) {
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                if (grid[index(x, y)] == player) {
                     ownStones++;
-                // empty intersections that are completely surrounded by only stones of that player
-                } else if (grid.get(x, y) == EMPTY) {
+                    // empty intersections that are completely surrounded by only stones of that player
+                } else if (grid[index(x, y)] == EMPTY) {
                     boolean surrounded = true;
-                    for (Int2D n : neighbours(new Int2D(x,y))) {
-                        if (grid.get(n.x, n.y) != player) {
+                    for (Int2D n : neighbours(new Int2D(x, y))) {
+                        if (grid[index(n)] != player) {
                             surrounded = false;
                             break;
                         }
@@ -226,8 +260,36 @@ public class GoState {
         }
         int cap = captured[player];
         return ownStones + surroundedEmpty + cap;
-        
+
         // TODO: komi
     }
-    
+
+    public IntGrid2D asGrid2D() {
+        IntGrid2D g = new IntGrid2D(size, size);
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                g.set(x, y, grid[index(x, y)]);
+            }
+        }
+        return g;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof GoState) {
+            GoState other = (GoState) obj;
+            return Arrays.equals(this.grid, other.grid);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 97 * hash + Arrays.hashCode(this.grid);
+        return hash;
+    }
 }

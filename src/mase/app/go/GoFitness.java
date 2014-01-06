@@ -24,8 +24,8 @@ public class GoFitness extends MasonEvaluation {
         int whiteScore = go.state.getScore(GoState.WHITE);
     
         res = new SubpopEvaluationResult(
-                new FitnessResult(1000f + blackScore - whiteScore),  
-                new FitnessResult(1000f + whiteScore - blackScore));
+                new FitnessResult(100f + blackScore - whiteScore),  
+                new FitnessResult(100f + whiteScore - blackScore));
     }
 
     @Override

@@ -6,12 +6,13 @@ package mase.app.go;
 
 import java.awt.Color;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.MaseSimState;
-import mase.mason.Mason2dUI;
 import mase.mason.SmartAgent;
+import sim.field.grid.IntGrid2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.grid.ValueGridPortrayal2D;
 import sim.util.gui.SimpleColorMap;
@@ -21,42 +22,58 @@ import sim.util.gui.SimpleColorMap;
  * @author Jorge
  */
 public class Go extends MaseSimState {
-        
-    public static void main(String[] args) {
-        Go game = new Go(1, null);
-        Mason2dUI ui = new Mason2dUI(game, "Go", 500, 500, Color.RED);
-        ui.createController();
-    }
-    
-    protected GoState state;
-    protected GoPlayerBoardEvaluation black;
-    protected GoPlayerBoardEvaluation white;
-    protected GroupController gc;
-    private boolean flag; 
 
-    
-    public Go(long seed, GroupController gc) {
+    /*public static void main(String[] args) {
+     Go game = new Go(1, null);
+     Mason2dUI ui = new Mason2dUI(game, "Go", 500, 500, Color.RED);
+     ui.createController();
+     }*/
+    protected GoState state;
+    protected IntGrid2D grid;
+    protected GoPlayer black;
+    protected GoPlayer white;
+    protected GroupController gc;
+    protected boolean startsBlack;
+    protected LinkedList<GoState> history;
+    protected ControllerMode mode;
+    protected int boardSize;
+
+    public enum ControllerMode {
+
+        board, position
+    }
+
+    /*
+    BLACK = controller[0] ; WHITE = controller[1]
+    */
+    public Go(long seed, GroupController gc, ControllerMode mode, int boardSize) {
         super(seed);
         this.gc = gc;
-        this.flag = true;
+        this.startsBlack = true;
+        this.mode = mode;
+        this.boardSize = boardSize;
     }
 
     @Override
     public void start() {
         super.start();
-        this.state = new GoState(5);
+        this.state = new GoState(boardSize);
+        this.history = new LinkedList<GoState>();
         AgentController[] controllers = this.gc.getAgentControllers(2);
-        if(flag) {
+        if (mode == ControllerMode.board) {
             this.black = new GoPlayerBoardEvaluation(this, controllers[0], GoState.BLACK);
             this.white = new GoPlayerBoardEvaluation(this, controllers[1], GoState.WHITE);
-        } else {
-            this.black = new GoPlayerBoardEvaluation(this, controllers[1], GoState.BLACK);
-            this.white = new GoPlayerBoardEvaluation(this, controllers[0], GoState.WHITE);
+        } else if (mode == ControllerMode.position) {
+            this.black = new GoPlayerMoveEvaluation(this, controllers[0], GoState.BLACK);
+            this.white = new GoPlayerMoveEvaluation(this, controllers[1], GoState.WHITE);
         }
-        flag = !flag;
         
-        this.schedule.scheduleRepeating(0.0, black, 2.0);
-        this.schedule.scheduleRepeating(1.0, white, 2.0);
+        /*
+        To facilitate implementation, instead of the black starting always first, it alternates
+        */
+        this.schedule.scheduleRepeating(startsBlack ? 0.0 : 1.0, black, 2.0);
+        this.schedule.scheduleRepeating(startsBlack ? 1.0 : 0.0, white, 2.0);
+        startsBlack = !startsBlack;
     }
 
     @Override
@@ -73,11 +90,10 @@ public class Go extends MaseSimState {
     @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         ValueGridPortrayal2D vgp = (ValueGridPortrayal2D) port;
-        vgp.setField(state.getGrid());
+        this.grid = new IntGrid2D(boardSize, boardSize, GoState.EMPTY);
+        vgp.setField(grid);
         SimpleColorMap map = new SimpleColorMap(new Color[]{Color.BLACK, Color.WHITE, Color.GRAY});
         vgp.setMap(map);
     }
-    
-    
-    
+
 }
