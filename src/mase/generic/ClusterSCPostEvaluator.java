@@ -18,6 +18,7 @@ import mase.PostEvaluator;
 import mase.evaluation.BehaviourResult;
 import static mase.generic.SCPostEvaluator.mergeCountMap;
 import mase.novelty.NoveltyEvaluation;
+import mase.novelty.NoveltyEvaluation.ArchiveEntry;
 import net.jafama.FastMath;
 
 /**
@@ -35,7 +36,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     protected KDTree<Integer> clusterTree;
     protected Map<Integer, Integer> assignements; // state-cluster assignments
     protected Map<Integer, Float> buffer; // counts of the above elements
-    protected List<BehaviourResult> archive;
+    protected List<ArchiveEntry> archive;
     protected int updateFrequency;
     protected int maxUpdateFrequency;
     protected int lastUpdate;
@@ -154,8 +155,8 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                 }
             }
             // adjust archive counts
-            for (BehaviourResult br : archive) {
-                SCResult scr = (SCResult) br;
+            for (ArchiveEntry ar : archive) {
+                SCResult scr = (SCResult) ar.getBehaviour();
                 for (int i = 0; i < numClusters; i++) {
                     scr.getBehaviour()[i] = clusterCount[i] > 0 ? scr.rawClusteredCount[i] / (clusterCount[i] /currentPop.size()) : 0;
                 }
@@ -260,8 +261,8 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
                 }
             }
         }
-        for (BehaviourResult br : archive) {
-            SCResult scr = (SCResult) br;
+        for (ArchiveEntry ar : archive) {
+            SCResult scr = (SCResult) ar.getBehaviour();
             // make the cluster assignements
             for (Integer key : scr.getCounts().keySet()) {
                 if (!assignements.containsKey(key)) {

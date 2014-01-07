@@ -14,9 +14,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import mase.MetaEvaluator;
+import mase.PostEvaluator;
+import mase.evaluation.BehaviourResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.VectorBehaviourResult;
 import mase.neat.NEATSubpop;
+import mase.novelty.NoveltyEvaluation;
+import mase.novelty.NoveltyEvaluation.ArchiveEntry;
 import mase.novelty.NoveltyFitness;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
@@ -37,13 +42,20 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     public static final String P_RANDOM_CHAMPIONS = "num-random-champions";
     public static final String P_NOVEL_CHAMPIONS = "num-novel-champions";
     public static final String P_NOVEL_CHAMPIONS_MODE = "novel-champions-mode";
+    public static final String P_NOVEL_CHAMPIONS_ORIGIN = "novel-champions-origin";
     public static final String P_NEAT_ELITE = "num-neat-elite";
     public static final String P_CURRENT_ELITE = "num-current-elite";
 
     public enum NovelChampionsMode {
+
         random, last, centroid;
     }
-    
+
+    public enum NovelChampionsOrigin {
+
+        archive, halloffame
+    }
+
     public static final String P_FITNESS_ONLY_ELITE = "fitness-only-elite";
     protected boolean eliteFitness;
     protected int lastChampions;
@@ -52,6 +64,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     protected int neatElite;
     protected int currentElite;
     protected NovelChampionsMode novelChampionsMode;
+    protected NovelChampionsOrigin novelChampionsOrigin;
     protected ArrayList<Individual>[] hallOfFame;
 
     @Override
@@ -62,12 +75,12 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         lastChampions = state.parameters.getIntWithDefault(base.push(P_LAST_CHAMPIONS), null, 0);
         randomChampions = state.parameters.getIntWithDefault(base.push(P_RANDOM_CHAMPIONS), null, 0);
         novelChampions = state.parameters.getIntWithDefault(base.push(P_NOVEL_CHAMPIONS), null, 0);
-        if(novelChampions > 0) {
+        if (novelChampions > 0) {
             novelChampionsMode = NovelChampionsMode.valueOf(state.parameters.getString(base.push(P_NOVEL_CHAMPIONS_MODE), null));
+            novelChampionsOrigin = NovelChampionsOrigin.valueOf(state.parameters.getString(base.push(P_NOVEL_CHAMPIONS_ORIGIN), null));
         }
         neatElite = state.parameters.getIntWithDefault(base.push(P_NEAT_ELITE), null, 0);
         currentElite = state.parameters.getIntWithDefault(base.push(P_CURRENT_ELITE), null, 0);
-        
 
         if (lastChampions > 0 || randomChampions > 0 || novelChampions > 0 || neatElite > 0 || currentElite > 0) {
             this.numElite = lastChampions + randomChampions + novelChampions + neatElite + currentElite;
@@ -348,11 +361,11 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
                         = (Individual) hallOfFame[whichSubpop].get(pos.get(i)).clone();
             }
         }
-        
+
         // Novel champions
-        if(novelChampions > 0) {
+        if (novelChampions > 0) {
             Individual[] behaviourElite = behaviourElite(state, whichSubpop);
-            for(int i = 0 ; i < behaviourElite.length ; i++) {
+            for (int i = 0; i < behaviourElite.length; i++) {
                 eliteIndividuals[whichSubpop][index++] = (Individual) behaviourElite[i].clone();
             }
         }
@@ -433,40 +446,52 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         }
 
         // Generate the dataset
-        ArrayList<IndividualClusterable> points = new ArrayList<IndividualClusterable>(hallOfFame[subpop].size());
-        for (int i = 0 ; i < hallOfFame[subpop].size() ; i++) {
-            points.add(new IndividualClusterable(hallOfFame[subpop].get(i), i));
+        ArrayList<IndividualClusterable> points = new ArrayList<IndividualClusterable>();
+        if (novelChampionsOrigin == NovelChampionsOrigin.halloffame) {
+            for (int i = 0; i < hallOfFame[subpop].size(); i++) {
+                points.add(new IndividualClusterable(hallOfFame[subpop].get(i), i));
+            }
+        } else if (novelChampionsOrigin == NovelChampionsOrigin.archive) {
+            for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
+                if (pe instanceof NoveltyEvaluation) {
+                    NoveltyEvaluation ne = (NoveltyEvaluation) pe;
+                    for(ArchiveEntry ar : ne.getArchives().get(subpop)) {
+                        points.add(new IndividualClusterable(ar.getIndividual(), ar.getGeneration()));
+                    }
+                    break;
+                }
+            }
         }
 
         // Do the k-means clustering
         KMeansPlusPlusClusterer<IndividualClusterable> clusterer
                 = new KMeansPlusPlusClusterer<IndividualClusterable>(novelChampions, 100);
         List<CentroidCluster<IndividualClusterable>> clusters = clusterer.cluster(points);
-        
+
         // Return one from each cluster
         Individual[] elite = new Individual[novelChampions];
-        for(int i = 0 ; i < clusters.size() ; i++) {
+        for (int i = 0; i < clusters.size(); i++) {
             CentroidCluster<IndividualClusterable> cluster = clusters.get(i);
             List<IndividualClusterable> clusterPoints = cluster.getPoints();
-            if(novelChampionsMode == NovelChampionsMode.random) {
+            if (novelChampionsMode == NovelChampionsMode.random) {
                 int randIndex = state.random[0].nextInt(clusterPoints.size());
                 elite[i] = clusterPoints.get(randIndex).getIndividual();
-            } else if(novelChampionsMode == NovelChampionsMode.last) {
+            } else if (novelChampionsMode == NovelChampionsMode.last) {
                 IndividualClusterable oldest = null;
-                for(IndividualClusterable ic : clusterPoints) {
-                    if(oldest == null || ic.age > oldest.age) {
+                for (IndividualClusterable ic : clusterPoints) {
+                    if (oldest == null || ic.age > oldest.age) {
                         oldest = ic;
                     }
                 }
                 elite[i] = oldest.getIndividual();
-            } else if(novelChampionsMode == NovelChampionsMode.centroid) {
+            } else if (novelChampionsMode == NovelChampionsMode.centroid) {
                 DistanceMeasure dm = clusterer.getDistanceMeasure();
                 double[] centroid = cluster.getCenter().getPoint();
                 IndividualClusterable closest = null;
                 double closestDist = Double.MAX_VALUE;
-                for(IndividualClusterable ic : clusterPoints) {
+                for (IndividualClusterable ic : clusterPoints) {
                     double dist = dm.compute(centroid, ic.getPoint());
-                    if(dist < closestDist) {
+                    if (dist < closestDist) {
                         closestDist = dist;
                         closest = ic;
                     }

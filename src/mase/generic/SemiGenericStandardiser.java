@@ -10,12 +10,11 @@ import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
-import mase.evaluation.BehaviourResult;
 import mase.novelty.NoveltyEvaluation;
+import mase.novelty.NoveltyEvaluation.ArchiveEntry;
 import mase.novelty.NoveltyFitness;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -26,7 +25,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class SemiGenericStandardiser implements PostEvaluator {
 
     // TODO: write original behaviours somewhere
-    private List<List<BehaviourResult>> archives;
+    private List<List<ArchiveEntry>> archives;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -51,8 +50,8 @@ public class SemiGenericStandardiser implements PostEvaluator {
         // join all behaviour results in one list
         // from archive
         ArrayList<SemiGenericResult> results = new ArrayList<SemiGenericResult>(2000);
-        for (BehaviourResult br : archives.get(0)) {
-            results.add((SemiGenericResult) br);
+        for (ArchiveEntry ar : archives.get(0)) {
+            results.add((SemiGenericResult) ar.getBehaviour());
         }
         // from the population
         for (Subpopulation sub : state.population.subpops) {

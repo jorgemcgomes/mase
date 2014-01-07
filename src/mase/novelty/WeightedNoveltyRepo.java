@@ -12,7 +12,6 @@ import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import mase.evaluation.BehaviourResult;
 import mase.evaluation.VectorBehaviourResult;
 import static mase.novelty.NoveltyEvaluation.V_NONE;
 import net.jafama.FastMath;
@@ -40,7 +39,7 @@ public class WeightedNoveltyRepo extends WeightedNovelty {
      */
     @Override
     protected void updateWeights(EvolutionState state, Population pop) {
-        List<BehaviourResult> archive = archives.get(0);
+        List<ArchiveEntry> archive = archives.get(0);
         int indIndex = 0;
         double[] fitnessScores = new double[nIndividuals + archive.size()];
         double[][] behaviourFeatures = new double[weights.length][nIndividuals + archive.size()];
@@ -58,7 +57,7 @@ public class WeightedNoveltyRepo extends WeightedNovelty {
             }
         }
         for (int i = 0 ; i < archive.size() ; i++) {
-            VectorBehaviourResult vbr = (VectorBehaviourResult) archive.get(i);
+            VectorBehaviourResult vbr = (VectorBehaviourResult) archive.get(i).getBehaviour();
             float[] v = (float[]) vbr.value();
             for (int j = 0; j < v.length; j++) {
                 behaviourFeatures[j][indIndex] = v[j]; // fill by columns
@@ -113,18 +112,18 @@ public class WeightedNoveltyRepo extends WeightedNovelty {
         protected void updateArchive(EvolutionState state, Population pop) {
         if (archiveMode != V_NONE) {
             for (int i = 0; i < pop.subpops.length; i++) {
-                List<BehaviourResult> archive = archives.get(i);
+                List<ArchiveEntry> archive = archives.get(i);
                 for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
                     Individual ind = pop.subpops[i].individuals[j];
                     if (state.random[0].nextDouble() < addProb) {
-                        BehaviourResult br = (BehaviourResult) ((NoveltyFitness) ind.fitness).getNoveltyBehaviour();
+                        ArchiveEntry ar = new ArchiveEntry(state, ind);
                         float fit = ((NoveltyFitness) ind.fitness).getFitnessScore();
                         if (archive.size() == sizeLimit) {
                             int index = state.random[0].nextInt(archive.size());
-                            archive.set(index, br);
+                            archive.set(index, ar);
                             archiveFitness.set(index, fit);
                         } else {
-                            archive.add(br);
+                            archive.add(ar);
                             archiveFitness.add(fit);
                         }
                     }
