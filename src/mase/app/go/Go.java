@@ -33,7 +33,6 @@ public class Go extends MaseSimState {
     protected GoPlayer black;
     protected GoPlayer white;
     protected GroupController gc;
-    protected boolean startsBlack;
     protected LinkedList<GoState> history;
     protected ControllerMode mode;
     protected int boardSize;
@@ -49,7 +48,6 @@ public class Go extends MaseSimState {
     public Go(long seed, GroupController gc, ControllerMode mode, int boardSize) {
         super(seed);
         this.gc = gc;
-        this.startsBlack = true;
         this.mode = mode;
         this.boardSize = boardSize;
     }
@@ -61,19 +59,15 @@ public class Go extends MaseSimState {
         this.history = new LinkedList<GoState>();
         AgentController[] controllers = this.gc.getAgentControllers(2);
         if (mode == ControllerMode.board) {
-            this.black = new GoPlayerBoardEvaluation(this, controllers[0], GoState.BLACK);
-            this.white = new GoPlayerBoardEvaluation(this, controllers[1], GoState.WHITE);
+            this.black = new GoPlayerBoardEvaluation(this, controllers[GoState.BLACK], GoState.BLACK);
+            this.white = new GoPlayerBoardEvaluation(this, controllers[GoState.WHITE], GoState.WHITE);
         } else if (mode == ControllerMode.position) {
-            this.black = new GoPlayerMoveEvaluation(this, controllers[0], GoState.BLACK);
-            this.white = new GoPlayerMoveEvaluation(this, controllers[1], GoState.WHITE);
+            this.black = new GoPlayerMoveEvaluation(this, controllers[GoState.BLACK], GoState.BLACK);
+            this.white = new GoPlayerMoveEvaluation(this, controllers[GoState.WHITE], GoState.WHITE);
         }
-        
-        /*
-        To facilitate implementation, instead of the black starting always first, it alternates
-        */
-        this.schedule.scheduleRepeating(startsBlack ? 0.0 : 1.0, black, 2.0);
-        this.schedule.scheduleRepeating(startsBlack ? 1.0 : 0.0, white, 2.0);
-        startsBlack = !startsBlack;
+
+        this.schedule.scheduleRepeating(0.0, black, 2.0);
+        this.schedule.scheduleRepeating(1.0, white, 2.0);
     }
 
     @Override

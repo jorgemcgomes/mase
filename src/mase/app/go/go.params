@@ -12,7 +12,7 @@ eval.base.problem =                mase.app.go.GoSimulator
 problem.number-evals =             2
 problem.trials-merge =             mean
 
-problem.eval.0 =                   mase.app.go.GoFitness
+problem.eval.0 =                   mase.app.go.GoWinsFitness
 problem.eval.0.update-freq =       0
 
 problem.eval.1 =                   mase.app.go.GoFinalCharacterisation
@@ -21,7 +21,7 @@ problem.eval.1.update-freq =       0
 fitness.fitness-index =            0
 fitness.novelty-index =            1
 
-problem.repetitions =              2
-problem.max-steps =                50
+problem.repetitions =              1
+problem.max-steps =                100
 problem.controller-mode =          board
 problem.board-size =               5

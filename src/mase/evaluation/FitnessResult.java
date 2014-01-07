@@ -19,9 +19,9 @@ public class FitnessResult implements EvaluationResult {
     public FitnessResult(Float value) {
         this(value, HARMONIC);
     }
-    
+
     public FitnessResult(Float value, int combination) {
-                this.value = value;
+        this.value = value;
         this.combination = combination;
     }
 
@@ -81,6 +81,5 @@ public class FitnessResult implements EvaluationResult {
     public String toString() {
         return value + "";
     }
-    
-    
+
 }
