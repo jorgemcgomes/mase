@@ -399,7 +399,7 @@ kl <- function(p, q) {
 #### Generic generational data analysis ########################################
 
 analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, 
-                    splits=10, t.tests=TRUE, plot=TRUE, boxplots=TRUE, print=TRUE, smooth=0, transform=list(), ylim=NULL) {
+                    splits=10, t.tests=T, plot=T, boxplots=T, all=T, print=F, smooth=0, transform=list(), ylim=NULL) {
     
     # data loading
     print("Loading data...")
@@ -416,8 +416,22 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     }
     splits <- c((0:(splits-1)) * floor(length(gens) / splits) + 1, length(gens))
     
-    # mean plots
-    print("Assembling plot data...")
+    # find max and min
+    if(is.null(ylim)) {
+        min <- +Inf
+        max <- -Inf
+        for(exp in names(data)) {
+            for(job in names(data[[exp]])) {
+                for(a in analyse) {
+                    min <- min(min, min(data[[exp]][[job]][[a]]))
+                    max <- max(max, max(data[[exp]][[job]][[a]]))
+                }
+            }
+        }
+        ylim <- c(min,max)
+    }
+    
+    # assemble plot data
     plotframe <- data.frame(gen=gens)
     for(a in analyse) {  
         splitsets <- list()
@@ -443,6 +457,36 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
         }
     }
     
+    if(print) {
+        sampFrame <- plotframe[splits,]
+        cat("\n")
+        print(sampFrame)
+    }
+    
+    # mean plots    
+    if(plot) {
+        if(smooth > 0) {
+            plotframe <- smooth(plotframe, window=smooth)
+        }
+        g <- plotMultiline(plotframe, title=paste0("Mean plots - Smooth=",smooth), ylim=NULL, ylabel="Value")
+        plotToPDF(g, show=T)
+    }
+    
+    if(all) {
+        for(exp in names(data)) {
+            plotlist <- list()
+            for(job in names(data[[exp]])) {
+                frame <- data[[exp]][[job]][,c("gen",analyse)]
+                if(smooth > 0) {
+                    frame <- smooth(frame, window=smooth)
+                }
+                g <- plotMultiline(frame, title=job, ylim=ylim, ylabel="Value")
+                plotlist[[length(plotlist)+1]] <- g
+            }
+            plotListToPDF(plotlist, show=T, title=paste0("Individual job plots - ",exp," - Smooth=",smooth))
+        }
+    }
+    
     if(boxplots) {
         plots <- list()
         for(s in splits) {
@@ -457,30 +501,12 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
             frame <- data.frame(exp=frame[,1], v=as.numeric(frame[,2]))
             p <- ggplot(frame, aes(factor(exp), v)) + 
                 geom_boxplot(aes(fill=factor(exp))) +
-                ggtitle(paste("Generation",s)) + xlab("") +
+                ggtitle(paste("Generation",s)) + xlab("") + ylab("Value") +
                 theme(axis.text.x = element_text(angle = 22.5, hjust = 1)) +
-                geom_jitter(colour="darkgrey")
-            if(!is.null(ylim)) {
-                p <- p + ylim(ylim[1],ylim[2])
-            }
+                geom_jitter(colour="darkgrey") + ylim(ylim[1], ylim[2])
             plots[[length(plots)+1]] <- p
         }
-        plotListToPDF(plots, show=T)
-    }
-    
-    if(print) {
-        sampFrame <- plotframe[splits,]
-        cat("\n")
-        print(sampFrame)
-    }
-    
-    if(smooth > 0) {
-        plotframe <- smooth(plotframe, window=smooth)
-    }
-    if(plot) {
-        print("Plotting...")
-        g <- plotMultiline(plotframe, title=analyse, ylim=ylim)
-        plotToPDF(g, show=T)
+        plotListToPDF(plots, show=T, title="Boxplots")
     }
 }
 
@@ -496,7 +522,7 @@ loadExp <- function(folder, filename, transform=list(), ...) {
             }
         }
         exp[[jobname]] <- e
-        print(summary(e))
+        #print(summary(e))
     }
     return(exp)
 }

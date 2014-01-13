@@ -31,7 +31,7 @@ public class NSGA2 implements PostEvaluator {
     @Override
     public void processPopulation(EvolutionState state) {
         Population pop = state.population;
-        allInds = new ArrayList[pop.subpops.length];
+        allInds = new ArrayList[pop.subpops.length]; // for stats only
         for (int i = 0; i < pop.subpops.length; i++) {
             // find ranges
             float noveltyMin = Float.POSITIVE_INFINITY;

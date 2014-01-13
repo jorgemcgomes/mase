@@ -8,6 +8,14 @@ pop.subpop.1.size                = 200
 neat.INPUT.NODES = 25
 neat.OUTPUT.NODES = 1
 
+#pop.subpop.0 = ec.Subpopulation
+#pop.subpop.1 = ec.Subpopulation
+pop.subpop.0.species.genome-size =        136
+pop.subpop.1.species.genome-size =        136
+neural.input =          25
+neural.hidden =         5
+neural.output =         1
+
 eval.base.problem =                mase.app.go.GoSimulator
 problem.number-evals =             2
 problem.trials-merge =             mean
@@ -15,8 +23,8 @@ problem.trials-merge =             mean
 problem.eval.0 =                   mase.app.go.GoWinsFitness
 problem.eval.0.update-freq =       0
 
-problem.eval.1 =                   mase.app.go.GoFinalCharacterisation
-problem.eval.1.update-freq =       0
+problem.eval.1 =                   mase.app.go.GoGroupCharacterisation
+problem.eval.1.update-freq =       1
 
 fitness.fitness-index =            0
 fitness.novelty-index =            1

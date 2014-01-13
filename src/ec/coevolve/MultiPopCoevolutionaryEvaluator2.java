@@ -99,6 +99,12 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
                 hallOfFame[i] = new ArrayList<Individual>();
             }
         }
+        if (archive == null && novelChampions > 0 && novelChampionsOrigin == NovelChampionsOrigin.archive) {
+            archive = new ArrayList[state.population.subpops.length];
+            for (int i = 0; i < archive.length; i++) {
+                archive[i] = new ArrayList<IndividualClusterable>();
+            }
+        }
 
         // determine who needs to be evaluated
         boolean[] preAssessFitness = new boolean[state.population.subpops.length];
@@ -323,10 +329,11 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         ((Problem) prob).finishEvaluating(state, threadnum);
     }
 
+    protected List<IndividualClusterable>[] archive;
+
     @Override
     void loadElites(final EvolutionState state, int whichSubpop) {
         Subpopulation subpop = state.population.subpops[whichSubpop];
-        int index = 0;
 
         // Update hall of fame
         if (hallOfFame != null) {
@@ -339,6 +346,25 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
             }
             hallOfFame[whichSubpop].add((Individual) subpop.individuals[best].clone());
         }
+
+        if (archive != null) {
+            float prob = 0.025f;
+            int maxSize = 1000;
+            for (int j = 0; j < subpop.individuals.length; j++) {
+                Individual ind = subpop.individuals[j];
+                if (state.random[0].nextDouble() < prob) {
+                    IndividualClusterable ic = new IndividualClusterable(ind, state.generation);
+                    if (archive[whichSubpop].size() == maxSize) {
+                        int randIndex = state.random[0].nextInt(archive[whichSubpop].size());
+                        archive[whichSubpop].set(randIndex, ic);
+                    } else {
+                        archive[whichSubpop].add(ic);
+                    }
+                }
+            }
+        }
+
+        int index = 0;
 
         // Last champions
         if (lastChampions > 0) {
@@ -452,15 +478,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
                 points.add(new IndividualClusterable(hallOfFame[subpop].get(i), i));
             }
         } else if (novelChampionsOrigin == NovelChampionsOrigin.archive) {
-            for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
-                if (pe instanceof NoveltyEvaluation) {
-                    NoveltyEvaluation ne = (NoveltyEvaluation) pe;
-                    for(ArchiveEntry ar : ne.getArchives().get(subpop)) {
-                        points.add(new IndividualClusterable(ar.getIndividual(), ar.getGeneration()));
-                    }
-                    break;
-                }
-            }
+            points.addAll(archive[subpop]);
         }
 
         // Do the k-means clustering
