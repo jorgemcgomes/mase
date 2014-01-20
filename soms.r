@@ -1,6 +1,6 @@
-buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE) {
+buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE, subpops=NULL) {
     dataList <- list(...)
-    sample <- sampleData(dataList, sample.size)
+    sample <- sampleData(dataList, sample.size, subpops)
     
     rm(dataList)
     gc()
@@ -97,15 +97,18 @@ fitnessMapQuantile <- function(som, data, q=0.75) {
     return(as.vector(temp, mode="numeric"))    
 }
 
-mapIndividualSubpops <- function(som, data, ...) {
-    mapping <- lapply(data$jobs, mapIndividualSubpopsAux, som, data, ...)
+mapIndividualSubpops <- function(som, data, subs=NULL,...) {
+    if(is.null(subs)) {
+        subs <- data$subpops
+    }
+    mapping <- lapply(data$jobs, mapIndividualSubpopsAux, som, data, subs, ...)
     names(mapping) <- data$jobs
     return(mapping)
 }
 
-mapIndividualSubpopsAux <- function(job, som, data, gen.from=data$gens[1], gen.to=data$gens[length(data$gens)], norm=NULL) {
+mapIndividualSubpopsAux <- function(job, som, data, subs, gen.from=data$gens[1], gen.to=data$gens[length(data$gens)], norm=NULL) {
     mapping <- list()
-    for(s in data$subpops) {
+    for(s in subs) {
         d <- subset(data[[job]][[s]], gen >= gen.from & gen <= gen.to)
         count <- countMap(som, d)
         if(is.null(norm)) {

@@ -107,7 +107,6 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
                         numPasses / (float) passesNormalization,
                         (float) (ballDist[0] / kw.par.size / steps),
                         (float) (takerDist / kw.par.size / steps),
-                        (float) (keeperDispersion / kw.par.size / steps),
                         allPassesCount == 0 ? 0 : (float) (passLength / allPassesCount / kw.par.size)),
                 new VectorBehaviourResult(
                         numPasses / (float) passesNormalization,

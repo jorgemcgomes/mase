@@ -22,7 +22,7 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class NoveltyEvaluation implements PostEvaluator {
 
-    protected List<List<ArchiveEntry>> archives;
+    protected List<ArchiveEntry>[] archives;
     public static final String P_K_NN = "ns-k";
     public static final String P_ARCHIVE_ADD_PROB = "ns-archive-prob";
     public static final String P_ARCHIVE_SIZE_LIMIT = "ns-archive-size";
@@ -53,19 +53,19 @@ public class NoveltyEvaluation implements PostEvaluator {
         }
 
         int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this must be more flexible
-        this.archives = new ArrayList<List<ArchiveEntry>>(nPops);
+        this.archives = new ArrayList[nPops];
         if (archiveMode == V_NONE) {
             for (int i = 0; i < nPops; i++) {
-                archives.add(Collections.EMPTY_LIST);
+                archives[i] = new ArrayList<ArchiveEntry>();
             }
         } else if (archiveMode == V_SHARED) {
             ArrayList<ArchiveEntry> arch = new ArrayList<ArchiveEntry>(sizeLimit);
             for (int i = 0; i < nPops; i++) {
-                archives.add(arch);
+                archives[i] = arch;
             }
         } else if (archiveMode == V_MULTIPLE) {
             for (int i = 0; i < nPops; i++) {
-                this.archives.add(new ArrayList<ArchiveEntry>(sizeLimit));
+                archives[i] = new ArrayList<ArchiveEntry>(sizeLimit);
             }
         }
     }
@@ -80,7 +80,7 @@ public class NoveltyEvaluation implements PostEvaluator {
 
     protected void setNoveltyScores(EvolutionState state, Population pop) {
         for (int p = 0; p < pop.subpops.length; p++) {
-            List<ArchiveEntry> archive = archives.get(p);
+            List<ArchiveEntry> archive = archives[p];
             // calculate novelty scores
             for (int j = 0; j < pop.subpops[p].individuals.length; j++) {
                 Individual ind = pop.subpops[p].individuals[j];
@@ -136,7 +136,7 @@ public class NoveltyEvaluation implements PostEvaluator {
     protected void updateArchive(EvolutionState state, Population pop) {
         if (archiveMode != V_NONE) {
             for (int i = 0; i < pop.subpops.length; i++) {
-                List<ArchiveEntry> archive = archives.get(i);
+                List<ArchiveEntry> archive = archives[i];
                 for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
                     Individual ind = pop.subpops[i].individuals[j];
                     if (state.random[0].nextDouble() < addProb) {
@@ -153,7 +153,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         }
     }
 
-    public List<List<ArchiveEntry>> getArchives() {
+    public List<ArchiveEntry>[] getArchives() {
         return archives;
     }
     

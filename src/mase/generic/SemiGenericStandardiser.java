@@ -25,7 +25,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class SemiGenericStandardiser implements PostEvaluator {
 
     // TODO: write original behaviours somewhere
-    private List<List<ArchiveEntry>> archives;
+    private List<ArchiveEntry>[] archives;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -50,7 +50,7 @@ public class SemiGenericStandardiser implements PostEvaluator {
         // join all behaviour results in one list
         // from archive
         ArrayList<SemiGenericResult> results = new ArrayList<SemiGenericResult>(2000);
-        for (ArchiveEntry ar : archives.get(0)) {
+        for (ArchiveEntry ar : archives[0]) {
             results.add((SemiGenericResult) ar.getBehaviour());
         }
         // from the population

@@ -623,5 +623,68 @@ analyse("fit_neat_rand/","div_neat_rand","purediv_sel0","purediv","nsgadiv_sel0"
 setwd("~/exps//competitive/ks")
 analyse("purediv_sel0/","nsgadiv_sel0/", filename = "compsel",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=5, splits=5, plot=T, boxplots=F, print=F, all=T)
 analyse("purediv_sel0/","nsgadiv_sel0/", filename = "compsel",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F)
+analyse("fit_neat_rand/", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","fit1","bestfit0","bestfit1"), analyse=c("fit0","fit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F)
+analyse("nsgadiv_sel0/", filename = "compsel",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F)
 
 
+setwd("~/exps//competitive/pred3")
+analyse("fit_ga_rand/","reeav","fit_reeav", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=2, splits=5, plot=T, boxplots=F, print=F, all=T,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_ga_rand/","reeav","fit_reeav", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+
+analyse("fit_rand","fit_nov","nsga_rand","nsga_nov", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_rand","fit_nov","nsga_rand","nsga_nov", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=5, splits=5, plot=T, boxplots=T, print=F, all=F,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+
+analyse("fit_nov_noreav","fit_nov","nsga_rand","nsga_rand_noreav", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_nov_noreav","fit_nov","nsga_rand","nsga_rand_noreav", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=5, splits=5, plot=T, boxplots=T, print=F, all=F,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+
+
+analyse("fit_rand","fit_nov","fit_nov_noreav","nsga_rand","nsga_rand_noreav","nsga_nov", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_rand","fit_nov","fit_nov_noreav","nsga_rand","nsga_rand_noreav","nsga_nov", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=10, splits=5, plot=T, boxplots=T, print=F, all=T,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+
+
+analyse("div_sel0", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=2, splits=5, plot=T, boxplots=F, print=F, all=T,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("div_sel0", filename = "compind.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=2, splits=5, plot=T, boxplots=F, print=F, all=T,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+
+analyse("fit_rand","nsga_rand_group", filename = "compgroup.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=2, splits=5, plot=T, boxplots=F, print=F, all=T,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+
+
+setwd("~/exps//competitive/sel/pred")
+analyse("fit_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=2, splits=5, plot=T, boxplots=F, print=F, all=T,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+data <- metaLoadData("fit_rand","nsga0_rand","nsga1_rand", names=c("fitrand","nsga0rand","nsga1rand"), params=list(jobs=10, vars.ind=c("time","walldist","agdist","mov"), subpops=2, load.behavs=T, behavs.sample=0.25))
+fullStatistics(data, som.sepind=T, behav.mean=F, show.only=F, expset.name="fit_vs_nsga")
+
+analyse("nsga0_rand","nsga0_novarch", filename = "comp0.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=2, splits=5, plot=T, boxplots=F, print=F, all=T,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+
+
+setwd("~/exps//competitive/sel/ks")
+analyse("fit_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=2, splits=5, plot=T, boxplots=F, print=F, all=T)
+
+setwd("~/exps//competitive/sel/go")
+analyse("fit_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=2, splits=5, plot=T, boxplots=F, print=F, all=T,transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F)
+
+
+setwd("~/exps//competitive/ga/go")
+analyse("fit_rand","fit_novarch","fit_novhall","nsga_rand","nsga_rand_noarch","nov0_rand","nov1_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("fit_rand","fit_novarch","fit_novhall", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("nov_rand/","nsga_rand","nsga_rand_noarch", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("nsga_rand","nov0_rand","nov1_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("fit_rand","nov0_rand","nov1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("fit_rand","nov0_rand","nov1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=0, splits=1, plot=T, boxplots=F, print=F, all=T)
+
+setwd("~/exps//competitive/ga/ks")
+analyse("fit_rand","fit_novarch","fit_novhall","nsga_rand","nsga_rand_noarch","nov0_rand","nov1_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("fit_rand","fit_novarch","fit_novhall", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("nov_rand/","nsga_rand","nsga_rand_noarch", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("nsga_rand","nov0_rand","nov1_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("fit_rand","nov0_rand","nov1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
+analyse("fit_rand","nov0_rand","nov1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=0, splits=1, plot=T, boxplots=F, print=F, all=T)
+
+setwd("~/exps//competitive/ga/pred")
+analyse("fit_rand","fit_novarch","fit_novhall","nsga_rand","nsga_rand_noarch","nov0_rand","nov1_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_rand","fit_novarch","fit_novhall", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("nsga_rand","nsga_rand_noarch", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("nsga_rand","nov0_rand","nov1_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_rand","nov0_rand","nov1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_rand","nov0_rand","nov1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=0, splits=5, plot=T, boxplots=F, print=F, all=T, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+analyse("fit_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=0, splits=5, plot=T, boxplots=F, print=F, all=T, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))

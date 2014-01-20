@@ -9,9 +9,9 @@ pop.subpop.0.species.ind.output =                     4
 
 pop.subpop.1 = ec.Subpopulation
 pop.subpop.1.size = 150
-pop.subpop.1.species.genome-size =        8
+pop.subpop.1.species.genome-size =        20
 pop.subpop.1.species.ind.input =          3
-pop.subpop.1.species.ind.hidden =                     0
+pop.subpop.1.species.ind.hidden =                     3
 pop.subpop.1.species.ind.output =                     2
 
 pop.subpop.0.INPUT.NODES = 9
@@ -34,9 +34,9 @@ fitness.fitness-index =             0
 fitness.novelty-index =             1
 
 problem.repetitions =               1
-problem.max-steps =                 500
-problem.view-size =                 100
-problem.ring-size =                 75
+problem.max-steps =                 300
+problem.view-size =                 75
+problem.ring-size =                 50
 problem.discretization =            15
 problem.collisions =                true
 problem.ball-decay =                0.05
@@ -49,7 +49,7 @@ problem.ball-placement =            0
 
 problem.n-keepers =                 3
 problem.keeper.move-speed =         0.5
-problem.keeper.pass-speed =         4
+problem.keeper.pass-speed =         3
 problem.keeper.color =              blue
 # displacement = ball-speed^2 / ball-decay
 

@@ -9,10 +9,8 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
-import mase.evaluation.BehaviourResult;
 
 /**
  *
@@ -72,7 +70,7 @@ public class NoveltyPopStat extends Statistics {
             avgFromRepo /= state.population.subpops[i].individuals.length;
             averageNovScore /= state.population.subpops[i].individuals.length;
 
-            state.output.print(" " + ne.archives.get(i).size() + " " + averageNovScore + " " + maxNovScore + " " + minNovScore + " "
+            state.output.print(" " + ne.archives[i].size() + " " + averageNovScore + " " + maxNovScore + " " + minNovScore + " "
                     + avgFromRepo + " " + maxFromRepo + " " + minFromRepo, log);
         }
         state.output.println("", log);

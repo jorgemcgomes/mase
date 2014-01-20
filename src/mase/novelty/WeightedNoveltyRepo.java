@@ -39,7 +39,7 @@ public class WeightedNoveltyRepo extends WeightedNovelty {
      */
     @Override
     protected void updateWeights(EvolutionState state, Population pop) {
-        List<ArchiveEntry> archive = archives.get(0);
+        List<ArchiveEntry> archive = archives[0];
         int indIndex = 0;
         double[] fitnessScores = new double[nIndividuals + archive.size()];
         double[][] behaviourFeatures = new double[weights.length][nIndividuals + archive.size()];
@@ -112,7 +112,7 @@ public class WeightedNoveltyRepo extends WeightedNovelty {
         protected void updateArchive(EvolutionState state, Population pop) {
         if (archiveMode != V_NONE) {
             for (int i = 0; i < pop.subpops.length; i++) {
-                List<ArchiveEntry> archive = archives.get(i);
+                List<ArchiveEntry> archive = archives[i];
                 for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
                     Individual ind = pop.subpops[i].individuals[j];
                     if (state.random[0].nextDouble() < addProb) {

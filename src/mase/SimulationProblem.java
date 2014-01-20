@@ -69,13 +69,14 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
             }
         }
     }
-    
 
     @Override
     public void preprocessPopulation(EvolutionState state, Population pop, boolean[] prepareForFitnessAssessment, boolean countVictoriesOnly) {
         for (int i = 0; i < pop.subpops.length; i++) {
             for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
-                pop.subpops[i].individuals[j].fitness.trials = new ArrayList();
+                if (prepareForFitnessAssessment[i]) {
+                    pop.subpops[i].individuals[j].fitness.trials = new ArrayList();
+                }
             }
         }
     }
@@ -84,22 +85,24 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     public void postprocessPopulation(EvolutionState state, Population pop, boolean[] assessFitness, boolean countVictoriesOnly) {
         for (int i = 0; i < pop.subpops.length; i++) {
             for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
-                Individual ind = pop.subpops[i].individuals[j];
-                ExpandedFitness[] trials = Arrays.copyOf(ind.fitness.trials.toArray(), ind.fitness.trials.size(), ExpandedFitness[].class);
-                for (int k = 0; k < trials.length; k++) {
-                    trials[k] = (ExpandedFitness) ind.fitness.trials.get(k);
+                if (assessFitness[i]) {
+                    Individual ind = pop.subpops[i].individuals[j];
+                    ExpandedFitness[] trials = Arrays.copyOf(ind.fitness.trials.toArray(), ind.fitness.trials.size(), ExpandedFitness[].class);
+                    for (int k = 0; k < trials.length; k++) {
+                        trials[k] = (ExpandedFitness) ind.fitness.trials.get(k);
+                    }
+                    switch (mergeMode) {
+                        case MERGE_MEAN:
+                            ind.fitness.setToMeanOf(state, trials);
+                            break;
+                        case MERGE_MEDIAN:
+                            ind.fitness.setToMedianOf(state, trials);
+                            break;
+                        case MERGE_BEST:
+                            ind.fitness.setToBestOf(state, trials);
+                    }
+                    ind.evaluated = true;
                 }
-                switch (mergeMode) {
-                    case MERGE_MEAN:
-                        ind.fitness.setToMeanOf(state, trials);
-                        break;
-                    case MERGE_MEDIAN:
-                        ind.fitness.setToMedianOf(state, trials);
-                        break;
-                    case MERGE_BEST:
-                        ind.fitness.setToBestOf(state, trials);
-                }
-                ind.evaluated = true;
             }
         }
     }
@@ -111,7 +114,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         for (int i = 0; i < ind.length; i++) {
             acs[i] = ((AgentControllerIndividual) ind[i]).decodeController();
         }
-        
+
         HeterogeneousGroupController controller = new HeterogeneousGroupController(acs);
         EvaluationResult[] eval = evaluateSolution(controller, state.random[threadnum].nextLong());
 

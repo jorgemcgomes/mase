@@ -327,7 +327,7 @@ quickReport <- function(folder, jobs=NULL, snapshots=10, ...) {
     print(report)
 }
 
-fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE, som.ind=FALSE, som.group=FALSE, som.alljobs=FALSE,
+fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE, som.ind=FALSE, som.sepind=FALSE, som.group=FALSE, som.alljobs=FALSE, 
                            fit.ind.par=list(), fit.comp.par=list(), behav.mean.par=list(), som.ind.par=list(), som.group.par=list(), 
                            expset.name="", show.only=FALSE) {
     datalist <- list(...)
@@ -360,8 +360,10 @@ fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE,
     }
     if(som.ind) {
         print("Som individual variables plots")
+        
         args <- c(som.ind.par, list(variables=datalist[[1]]$vars.ind))
         print("Building som")
+        
         ksoms$ind <- do.call(buildSom, c(datalist, args))
         gc()
         print("Som plots")
@@ -386,6 +388,46 @@ fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE,
             }
         }
         rm(map) ; gc()
+    }
+    if(som.sepind) {
+        subs <- datalist[[1]]$subpops
+        for(s in subs) {
+            cat("SOM ", s, "\n")
+            args <- c(som.ind.par, list(variables=datalist[[1]]$vars.ind, subpops=s))
+            ksoms$s <- do.call(buildSom, c(datalist, args))
+            gc()
+            cat("Plot ", s, "\n")
+            if(show.only) {
+                fitnessHeatmap(ksoms$s, show=T)
+                f <- tempfile(fileext=".pdf")
+                pdf(f) ; plot(ksoms$s) ; dev.off() ; file.show(f)      
+            } else {
+                fitnessHeatmap(ksoms$s, file=paste0(expset.name,".",s,".ind.heatmap.pdf"), show=F)
+                pdf(paste0(expset.name,".",s,".codes.pdf")) ; plot(ksoms$s) ; dev.off() 
+            }  
+        }
+        for(data in datalist) {
+            cat(data$expname, "\n")
+            gc()
+            plots <- list()
+            for(si in 1:length(subs)) {
+                s <- subs[si]
+                print(s)
+                map <- mapIndividualSubpops(ksoms$s, data, s)
+                for(ji in 1:length(data$jobs)) {
+                    j <- data$jobs[ji]
+                    print(j)
+                    plots[[(ji-1)*length(subs)+si]] <- somPlot(ksoms$s, map[[j]][[s]], title=paste(j,s), ...)
+                    gc()
+                }
+                rm(map) ; gc()
+            }
+            if(show.only) {
+                plotListToPDF(plots, ncol=length(subs), file=NULL, show=T)
+            } else {
+                plotListToPDF(plots, ncol=length(subs), file=paste0(expset.name,".sepind.",data$expname,".pdf"), show=F)
+            }
+        }
     }
     if(som.group) {
         print("Som group variables plots")

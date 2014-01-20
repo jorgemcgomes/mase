@@ -1,0 +1,47 @@
+parent.0 = ../../competitive.params
+pop.subpop.0 = ec.Subpopulation
+pop.subpop.0.size = 150
+pop.subpop.0.species.genome-size =        114
+pop.subpop.0.species.ind.input =          13
+pop.subpop.0.species.ind.hidden =         7
+pop.subpop.0.species.ind.output =         2
+
+pop.subpop.1 = ec.Subpopulation
+pop.subpop.1.size = 150
+pop.subpop.1.species.genome-size =        57
+pop.subpop.1.species.ind.input =          8
+pop.subpop.1.species.ind.hidden =         5
+pop.subpop.1.species.ind.output =         2
+
+pop.subpop.0.INPUT.NODES=13
+pop.subpop.0.OUTPUT.NODES=2
+pop.subpop.1.INPUT.NODES=8
+pop.subpop.1.OUTPUT.NODES=2
+
+eval.base.problem =                mase.app.predcomp.PredcompSimulator
+problem.number-evals =             2
+problem.trials-merge =             mean
+problem.eval.0 =                   mase.app.predcomp.PredcompFitness
+problem.eval.0.combination =       arithmetic
+problem.eval.0.update-freq =       0
+problem.eval.1 =                   mase.app.predcomp.PredcompBehaviour
+problem.eval.1.update-freq =       1
+
+fitness.fitness-index =            0
+fitness.novelty-index =            1
+
+problem.repetitions =              1
+problem.max-steps =                500
+problem.size =                     50
+problem.discretization =           10
+problem.predator-speed =           0.5
+problem.prey-speed =               0.5
+problem.proximity-sensors =        8
+problem.proximity-range =          2.5
+# 36 degrees
+problem.view-angle =               0.68
+problem.vision-neurons =           5
+problem.vision-range =             50
+problem.initial-orientations =     opposing
+
+

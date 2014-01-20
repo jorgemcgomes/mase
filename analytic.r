@@ -788,3 +788,18 @@ characterisationStats <- function(data) {
     }    
     return(res)    
 }
+
+##############
+
+correlation <- function(folder, jobs=10, files=NULL, cols=NULL, method="pearson") {
+    corrs <- c()
+    for(j in 0:(jobs-1)) {
+        d1 <- read.table(file.path(folder, paste0("job.",j,".",files[1])), header=F, stringsAsFactors=F, sep=" ")
+        d2 <- read.table(file.path(folder, paste0("job.",j,".",files[2])), header=F, stringsAsFactors=F, sep=" ")
+        c1 <- d1[,cols[1]]
+        c2 <- d2[,cols[2]]
+        corrs <- c(corrs, abs(cor(c1, c2, method=method)))
+    }
+    cat("MEAN: ", mean(corrs), " ; SD: ", sd(corrs), " ; MIN: ", min(corrs), " ; MAX: ", max(corrs), "\n")
+    #cat(corrs, "\n")
+}

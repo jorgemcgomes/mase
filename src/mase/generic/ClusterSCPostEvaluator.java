@@ -257,7 +257,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
             for (PostEvaluator pe : evals) {
                 if (pe instanceof NoveltyEvaluation) {
                     NoveltyEvaluation ne = (NoveltyEvaluation) pe;
-                    archive = ne.getArchives().get(0);
+                    archive = ne.getArchives()[0];
                 }
             }
         }

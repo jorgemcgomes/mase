@@ -156,13 +156,17 @@ reduceMean <- function(data) {
     return(data)
 }
 
-sampleData <- function(dataList, sample.size) {
+sampleData <- function(dataList, sample.size, subpops=NULL) {
     sample <- data.frame()
     data.sample.size <- sample.size / length(dataList)
     for(data in dataList) {
-        each.sample <- round(data.sample.size / data$njobs / data$nsubs)
+        subs <- subpops
+        if(is.null(subs)) {
+            subs <- data$subpops
+        }
+        each.sample <- round(data.sample.size / data$njobs / length(subs))
         for(j in data$jobs) {
-            for(s in data$subpops) {
+            for(s in subs) {
                 subsample <- data[[j]][[s]]
                 subsample <- subsample[sample(1:nrow(subsample), each.sample),]
                 sample <- rbind(sample, subsample)
