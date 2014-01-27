@@ -7,18 +7,22 @@ package mase.app.keepaway;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import mase.controllers.AgentController;
+import mase.generic.systematic.Agent;
 import mase.mason.EmboddiedAgent;
 import mase.mason.SmartAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
+import sim.util.Double2D;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Keeper extends SmartAgent {
+public class Keeper extends SmartAgent implements Agent {
 
     public static final double RADIUS = 2;
     public static final double KICK_DISTANCE = 0.5;
@@ -26,7 +30,7 @@ public class Keeper extends SmartAgent {
     protected double passSpeed;
     protected double moveSpeed;
     private boolean justKicked = false;
-    private DecimalFormat df;
+    private final DecimalFormat df;
     private List<EmboddiedAgent> agents;
     private double[] sensorValues;
 
@@ -43,13 +47,30 @@ public class Keeper extends SmartAgent {
         // builds auxiliary list
         if (agents == null) {
             agents = new ArrayList<EmboddiedAgent>(kw.keepers.size() + kw.takers.size());
-            agents.add(kw.ball);
-            for (Keeper k : kw.keepers) {
-                if (k != this) {
-                    agents.add(k);
+            if (kw.par.sortKeepers) {
+                ArrayList<Keeper> sorted = new ArrayList<Keeper>(kw.keepers.size() - 1);
+                for (Keeper k : kw.keepers) {
+                    if (k != this) {
+                        sorted.add(k);
+                    }
+                }
+                Collections.sort(sorted, new Comparator<Keeper>() {
+                    @Override
+                    public int compare(Keeper o1, Keeper o2) {
+                        Double2D thisLoc = Keeper.this.getLocation();
+                        return Double.compare(thisLoc.distance(o1.getLocation()), thisLoc.distance(o2.getLocation()));
+                    }
+                });
+                agents.addAll(sorted);
+            } else {
+                for (Keeper k : kw.keepers) {
+                    if (k != this) {
+                        agents.add(k);
+                    }
                 }
             }
             agents.addAll(kw.takers);
+            agents.add(kw.ball);
         }
 
         double[] input = new double[agents.size() * 2 + 1];
@@ -62,7 +83,6 @@ public class Keeper extends SmartAgent {
             sensorValues[index] = this.angleTo(a.getLocation());
             input[index] = sensorValues[index++] / Math.PI;
         }
-        
 
         // distance of the ball to the centre
         sensorValues[index] = kw.ball.distanceToCenter;
@@ -124,5 +144,15 @@ public class Keeper extends SmartAgent {
         sb.append(" | BallToCenter: ").append(df.format(sensorValues[index]));
 
         return sb.toString();
+    }
+
+    @Override
+    public Double2D getPosition() {
+        return getLocation();
+    }
+
+    @Override
+    public double[] getStateVariables() {
+        return new double[]{hasPossession || justKicked ? 1 : 0};
     }
 }

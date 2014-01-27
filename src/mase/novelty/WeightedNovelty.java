@@ -9,12 +9,25 @@ import ec.Individual;
 import ec.Population;
 import ec.Subpopulation;
 import ec.util.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.VectorBehaviourResult;
 import net.jafama.FastMath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.BestFirst;
+import weka.attributeSelection.CfsSubsetEval;
+import weka.attributeSelection.Ranker;
+import weka.attributeSelection.ReliefFAttributeEval;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  *
@@ -27,40 +40,39 @@ public class WeightedNovelty extends NoveltyEvaluation {
         all, truncation, tournament, roulette, normalised
     };
 
+    public static enum CorrelationMethod {
+
+        pearson, spearman, brownian, cfs, relief
+    }
+
     public static final String P_CORRELATION = "correlation";
-    public static final String V_PEARSON = "pearson", V_SPEARMAN = "spearman", V_BROWNIAN = "brownian";
     public static final String P_SMOOTH = "smooth";
     public static final String P_SELECTION_PRESSURE = "selection-pressure";
     public static final String P_DIMENSION_SELECTION = "selection-method";
+    public static final String P_WEIGHTS_ARCHIVE = "weights-archive";
     protected float[] weights;
     protected float[] instantCorrelation;
     protected float[] adjustedCorrelation;
     protected int nIndividuals;
-    protected String correlation;
+    protected CorrelationMethod correlation;
     protected float smooth;
     protected SelectionMethod selection;
     protected float selectionPressure;
+    protected boolean weightsArchive;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         String corr = state.parameters.getString(base.push(P_CORRELATION), null);
-        if (corr.equalsIgnoreCase(V_PEARSON)) {
-            this.correlation = V_PEARSON;
-        } else if (corr.equalsIgnoreCase(V_SPEARMAN)) {
-            this.correlation = V_SPEARMAN;
-        } else if (corr.equalsIgnoreCase(V_BROWNIAN)) {
-            this.correlation = V_BROWNIAN;
-        } else {
-            state.output.fatal("Unknown correlation method.", base.push(P_CORRELATION));
-        }
+        this.correlation = CorrelationMethod.valueOf(corr);
         String m = state.parameters.getString(base.push(P_DIMENSION_SELECTION), null);
         selection = SelectionMethod.valueOf(m);
         if (selection == null) {
             state.output.fatal("Unknown selection method: " + m, base.push(P_DIMENSION_SELECTION));
         }
         this.selectionPressure = state.parameters.getFloat(base.push(P_SELECTION_PRESSURE), null);
-        this.smooth = state.parameters.getFloat(base.push(P_SMOOTH), null, 0.5);
+        this.smooth = state.parameters.getFloat(base.push(P_SMOOTH), null);
+        this.weightsArchive = state.parameters.getBoolean(base.push(P_WEIGHTS_ARCHIVE), null, false);
         this.nIndividuals = 0;
     }
 
@@ -106,37 +118,89 @@ public class WeightedNovelty extends NoveltyEvaluation {
      * What behaviour features are relevant for fitness might change throughout evolution.
      */
     protected void updateWeights(EvolutionState state, Population pop) {
-        int indIndex = 0;
-        double[] fitnessScores = new double[nIndividuals];
-        double[][] behaviourFeatures = new double[weights.length][nIndividuals];
-
-        for (Subpopulation sub : pop.subpops) {
-            for (Individual ind : sub.individuals) {
-                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
-                VectorBehaviourResult vbr = (VectorBehaviourResult) nf.getNoveltyBehaviour();
-                float[] v = (float[]) vbr.value();
-                for (int i = 0; i < v.length; i++) {
-                    behaviourFeatures[i][indIndex] = v[i]; // fill by columns
-                }
-                fitnessScores[indIndex] = nf.getFitnessScore();
-                indIndex++;
-            }
-        }
+        List<float[]> instances = this.getInstances(state);
 
         // compute correlation
-        if (correlation == V_PEARSON) {
-            PearsonsCorrelation pearson = new PearsonsCorrelation();
-            for (int i = 0; i < instantCorrelation.length; i++) {
-                instantCorrelation[i] = (float) pearson.correlation(fitnessScores, behaviourFeatures[i]);
+        if (correlation == CorrelationMethod.pearson || correlation == CorrelationMethod.spearman || correlation == CorrelationMethod.brownian) {
+            /* Assemble data -- transpose*/
+            int indIndex = 0;
+            double[][] behaviourFeatures = new double[weights.length + 1][instances.size()];
+            for (float[] i : instances) {
+                for (int k = 0; k < behaviourFeatures.length; k++) {
+                    behaviourFeatures[k][indIndex] = i[k];
+                }
+                indIndex++;
             }
-        } else if (correlation == V_SPEARMAN) {
-            SpearmansCorrelation spearman = new SpearmansCorrelation();
-            for (int i = 0; i < instantCorrelation.length; i++) {
-                instantCorrelation[i] = (float) spearman.correlation(fitnessScores, behaviourFeatures[i]);
+
+            /* Compute correlation */
+            if (correlation == CorrelationMethod.pearson) {
+                PearsonsCorrelation pearson = new PearsonsCorrelation();
+                for (int i = 0; i < instantCorrelation.length; i++) {
+                    instantCorrelation[i] = (float) pearson.correlation(behaviourFeatures[0], behaviourFeatures[i + 1]);
+                }
+            } else if (correlation == CorrelationMethod.spearman) {
+                SpearmansCorrelation spearman = new SpearmansCorrelation();
+                for (int i = 0; i < instantCorrelation.length; i++) {
+                    instantCorrelation[i] = (float) spearman.correlation(behaviourFeatures[0], behaviourFeatures[i + 1]);
+                }
+            } else if (correlation == CorrelationMethod.brownian) {
+                for (int i = 0; i < instantCorrelation.length; i++) {
+                    instantCorrelation[i] = (float) distanceCorrelation(behaviourFeatures[0], behaviourFeatures[i + 1]);
+                }
             }
-        } else if (correlation == V_BROWNIAN) {
+        } else if (correlation == CorrelationMethod.cfs || correlation == CorrelationMethod.relief) {
+            /* Assemble data */
+            FastVector atts = new FastVector(instantCorrelation.length + 1);
+            atts.addElement(new Attribute("Fitness"));
             for (int i = 0; i < instantCorrelation.length; i++) {
-                instantCorrelation[i] = (float) distanceCorrelation(fitnessScores, behaviourFeatures[i]);
+                atts.addElement(new Attribute("A" + i));
+            }
+            Instances data = new Instances("Gen" + state.generation, atts, instances.size());
+            data.setClassIndex(0);
+            for (float[] i : instances) {
+                double[] vals = new double[i.length];
+                for (int k = 0; k < i.length; k++) {
+                    vals[k] = i[k];
+                }
+                Instance inst = new Instance(1, vals);
+                data.add(inst);
+            }
+
+            if (correlation == CorrelationMethod.cfs) {
+                // TODO: try with scatter
+                CfsSubsetEvalSpearman eval = new CfsSubsetEvalSpearman();
+                eval.setLocallyPredictive(true);
+                ASSearch search = new BestFirst();
+                AttributeSelection as = new AttributeSelection();
+                as.setEvaluator(eval);
+                as.setSearch(search);
+                try {
+                    /* Apply the algorithm to the data set */
+                    as.SelectAttributes(data);
+                    int[] selected = as.selectedAttributes();
+                    Arrays.fill(instantCorrelation, 0);
+                    for (int i = 0; i < selected.length - 1; i++) {
+                        instantCorrelation[selected[i] - 1] = 1;
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else if (correlation == CorrelationMethod.relief) {
+                ASEvaluation eval = new ReliefFAttributeEval();
+                ASSearch search = new Ranker();
+                AttributeSelection as = new AttributeSelection();
+                as.setEvaluator(eval);
+                as.setSearch(search);
+                try {
+                    /* Apply the algorithm to the data set */
+                    as.SelectAttributes(data);
+                    double[][] score = as.rankedAttributes();
+                    for (int i = 0; i < score.length; i++) {
+                        instantCorrelation[(int) score[i][0] - 1] = (float) Math.max(0, score[i][1]);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         }
 
@@ -150,7 +214,8 @@ public class WeightedNovelty extends NoveltyEvaluation {
 
         if (selection == SelectionMethod.all) {
             for (int i = 0; i < adjustedCorrelation.length; i++) {
-                weights[i] = (float) FastMath.pow(adjustedCorrelation[i], selectionPressure);
+                weights[i] = selectionPressure == 1 ? adjustedCorrelation[i]
+                        : (float) FastMath.pow(adjustedCorrelation[i], selectionPressure);
             }
         } else if (selection == SelectionMethod.truncation) {
             float[] v = Arrays.copyOf(adjustedCorrelation, adjustedCorrelation.length);
@@ -167,16 +232,43 @@ public class WeightedNovelty extends NoveltyEvaluation {
                 weights[idx] += adjustedCorrelation[idx];
             }
         } else if (selection == SelectionMethod.normalised) {
-            float min = Float.POSITIVE_INFINITY;
             float max = Float.NEGATIVE_INFINITY;
             for (int i = 0; i < weights.length; i++) {
-                min = Math.min(min, adjustedCorrelation[i]);
                 max = Math.max(max, adjustedCorrelation[i]);
             }
             for (int i = 0; i < weights.length; i++) {
-                weights[i] = (adjustedCorrelation[i] - min) / (max - min);
+                weights[i] = adjustedCorrelation[i] / max;
             }
         }
+    }
+
+    /*
+     First index is the fitness score
+     */
+    protected List<float[]> getInstances(EvolutionState state) {
+        ArrayList<float[]> list = new ArrayList<float[]>(state.population.subpops[0].individuals.length);
+        for (Subpopulation sub : state.population.subpops) {
+            for (Individual ind : sub.individuals) {
+                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
+                VectorBehaviourResult vbr = (VectorBehaviourResult) nf.getNoveltyBehaviour();
+                float[] v = (float[]) vbr.value();
+                float[] f = new float[v.length + 1];
+                f[0] = nf.getFitnessScore();
+                System.arraycopy(v, 0, f, 1, v.length);
+                list.add(f);
+            }
+        }
+        if (weightsArchive) {
+            for (ArchiveEntry ae : archives[0]) {
+                VectorBehaviourResult vbr = (VectorBehaviourResult) ae.getBehaviour();
+                float[] v = (float[]) vbr.value();
+                float[] f = new float[v.length + 1];
+                f[0] = ae.getFitness();
+                System.arraycopy(v, 0, f, 1, v.length);
+                list.add(f);
+            }
+        }
+        return list;
     }
 
     protected double distanceCorrelation(double[] x, double[] y) {

@@ -42,7 +42,7 @@ public class CompetitiveKeepaway extends Keepaway {
         CompetitiveTaker t = new CompetitiveTaker(this, field, acs[1].clone());
         if (par.takersPlacement == KeepawayParams.V_CENTER) {
             t.setLocation(center);
-        } else if (par.takersPlacement == KeepawayParams.V_RANDOM) {
+        } else if (par.takersPlacement == KeepawayParams.V_RANDOM_CENTER) {
             double q = random.nextDouble() * Math.PI * 2;
             double r = Math.sqrt(random.nextDouble());
             double x = (par.placeRadius * r) * Math.cos(q) + center.getX();

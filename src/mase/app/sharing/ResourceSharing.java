@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.systematic.AgentGroup;
+import mase.generic.systematic.EnvironmentalFeature;
+import mase.generic.systematic.TaskDescription;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -19,7 +22,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class ResourceSharing extends MaseSimState {
+public class ResourceSharing extends MaseSimState implements TaskDescription {
 
     protected RSParams par;
     protected List<RSAgent> agents;
@@ -78,5 +81,17 @@ public class ResourceSharing extends MaseSimState {
             ag.setStopper(schedule.scheduleRepeating(ag));
             agents.add(ag);
         }
+    }
+
+    @Override
+    public EnvironmentalFeature[] getEnvironmentalFeatures() {
+        return new EnvironmentalFeature[]{resource};
+    }
+
+    @Override
+    public AgentGroup[] getAgentGroups() {
+        AgentGroup a = new AgentGroup();
+        a.addAll(agents);
+        return new AgentGroup[]{a};
     }
 }

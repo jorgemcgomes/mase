@@ -688,3 +688,65 @@ analyse("nsga_rand","nov0_rand","nov1_rand","nsga0_rand","nsga1_rand", filename 
 analyse("fit_rand","nov0_rand","nov1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
 analyse("fit_rand","nov0_rand","nov1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=0, splits=5, plot=T, boxplots=F, print=F, all=T, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
 analyse("fit_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("fit0","fit1"), smooth=0, splits=5, plot=T, boxplots=F, print=F, all=T, transform=list(fit0=c(-500,1),bestfit0=c(-500,1)))
+
+correlation("fit_rand", jobs=20, files=c("comp.stat","compind.stat"), cols=c(2,2))
+correlation("nsga0_rand", jobs=20, files=c("comp.stat","compind.stat"), cols=c(2,2))
+
+
+setwd("~/exps//sys//rs")
+data <- loadData("fit", jobs=10, vars.group=c("survivors","energy","mov","dist","s.alive","s.massmov","s.dispersion","s.masspos.x","s.masspos.y","s.indmov","s.energy","s.charging","s.dist","s.station","s.simlength"), vars.file=c("survivors","energy","mov","dist","VOID","s.alive","s.massmov","s.dispersion","s.masspos.x","s.masspos.y","s.indmov","s.energy","s.charging","s.dist","s.station","s.simlength") ,subpops=1, load.behavs=T, behavs.sample=0.05)
+behaviourCorrelation(data, method="spearman")
+
+setwd("~/exps//sys//ind")
+data <- loadData("fit", jobs=10, vars.group=c("escaped","opentime","distance","dispersion","s.alive","s.massmov","s.dispersion","s.masspos.x","s.masspos.y","s.indmov","s.passing","s.distwall","s.distgate","s.gatestate","s.simlength"), vars.file=c("escaped","opentime","distance","dispersion","VOID","s.alive","s.massmov","s.dispersion","s.masspos.x","s.masspos.y","s.indmov","s.passing","s.distwall","s.distgate","s.gatestate","s.simlength") ,subpops=1, load.behavs=T, behavs.sample=0.05)
+behaviourCorrelation(data, method="spearman")
+
+setwd("~/exps/sys/ks")
+data <- loadData("fit", jobs=10, vars.group=c("passes","simlength","dispersion","passlength","k.alive","k.massmov","k.dispersion","k.masspos.x","k.masspos.y","k.indmov","k.possession","k.distball","k.disttaker","t.alive","t.pos.x","t.pos.y","t.mov","t.distball","b.speed","s.simlength"), vars.file=c("passes","simlength","dispersion","passlength","VOID","k.alive","k.massmov","k.dispersion","k.masspos.x","k.masspos.y","k.indmov","k.possession","k.distball","k.disttaker","t.alive","t.pos.x","t.pos.y","t.mov","t.distball","b.speed","s.simlength") ,subpops=1, load.behavs=T, behavs.sample=0.05)
+behaviourCorrelation(data, method="spearman")
+
+setwd("~/exps/sys/agg")
+data <- loadData("fit", jobs=10, vars.group=c(paste0("cm",1:20),"s.alive","s.massmov","s.dispersion","s.masspos.x","s.masspos.y","s.indmov","s.distwall","s.simlength"), vars.file=c(paste0("cm",1:20),"VOID","s.alive","s.massmov","s.dispersion","s.masspos.x","s.masspos.y","s.indmov","s.distwall","s.simlength") ,subpops=1, load.behavs=T, behavs.sample=0.1)
+behaviourCorrelation(data, method="spearman")
+
+setwd("~/exps//sys//ind")
+data <- loadData("nov_reg", jobs=4, vars.group=c("escaped","opentime","distance","dispersion","s.alive","m.alive","s.massmov","m.massmov","s.dispersion","m.dispersion","s.masspos.x","m.masspos.x","s.masspos.y","m.masspos.y","s.indmov","m.indmov","s.passing","m.passing","s.distwall","m.distwall","s.distgate","m.distgate","s.gatestate","m.gatestate","s.simlength"), vars.file=c("escaped","opentime","distance","dispersion","VOID","s.alive","m.alive","s.massmov","m.massmov","s.dispersion","m.dispersion","s.masspos.x","m.masspos.x","s.masspos.y","m.masspos.y","s.indmov","m.indmov","s.passing","m.passing","s.distwall","m.distwall","s.distgate","m.distgate","s.gatestate","m.gatestate","s.simlength") ,subpops=1, load.behavs=T, behavs.sample=0.05)
+behaviourCorrelation(data, method="brownian")
+behaviourCorrelation(data, method="spearman")
+behaviourCorrelation(data, method="pearson")
+
+setwd("~/exps/sys/rs")
+data <- metaLoadData("fit","ts","sys_mean","sys_mean2","sys_mean2_spear","sys_reg2","sys_frame2", params=list(jobs=5, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,399)))
+
+data <- metaLoadData("fit","ts","sys_mean2","sys_mean2", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,399)))
+
+setwd("~/exps/sys/ind")
+data <- metaLoadData("fit","ts","sys_mean","sys_mean2","sys_mean2_spear","sys_reg2","sys_frame2", params=list(jobs=5, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="sys", fit.comp.par=list(snapshots=c(75,150,249)))
+
+data <- metaLoadData("fit","sys_mean","sys_reg2", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(75,150,249)))
+
+
+data <- loadData("~/exps//sys//ind//sys_reg2", jobs=1, , vars.group=c("escaped","opentime","distance","dispersion","s.alive","m.alive","s.massmov","m.massmov","s.dispersion","m.dispersion","s.masspos.x","m.masspos.x","s.masspos.y","m.masspos.y","s.indmov","m.indmov","s.passing","m.passing","s.distwall","m.distwall","s.distgate","m.distgate","s.gatestate","m.gatestate","s.simlength"), vars.file=c("escaped","opentime","distance","dispersion","VOID","s.alive","m.alive","s.massmov","m.massmov","s.dispersion","m.dispersion","s.masspos.x","m.masspos.x","s.masspos.y","m.masspos.y","s.indmov","m.indmov","s.passing","m.passing","s.distwall","m.distwall","s.distgate","m.distgate","s.gatestate","m.gatestate","s.simlength") ,subpops=1, load.behavs=T, behavs.sample=0.1)
+behaviourCorrelation2(data)
+
+data <- loadData("~/exps//sys//ind//sys_reg2_alt/", jobs=1, , vars.group=c("escaped","opentime","distance","dispersion","s.alive","m.alive","s.massmov","m.massmov","s.dispersion","m.dispersion","s.masspos.x","m.masspos.x","s.masspos.y","m.masspos.y","s.indmov","m.indmov","s.passing","m.passing","s.distwall","m.distwall","s.distgate","m.distgate","s.gatestate","m.gatestate","s.simlength"), vars.file=c("escaped","opentime","distance","dispersion","VOID","s.alive","m.alive","s.massmov","m.massmov","s.dispersion","m.dispersion","s.masspos.x","m.masspos.x","s.masspos.y","m.masspos.y","s.indmov","m.indmov","s.passing","m.passing","s.distwall","m.distwall","s.distgate","m.distgate","s.gatestate","m.gatestate","s.simlength") ,subpops=1, load.behavs=T, behavs.sample=0.1)
+behaviourCorrelation2(data)
+
+data <- loadData("~/exps//sys//ind//sys_reg2_alt2/", jobs=1, , vars.group=c("escaped","opentime","distance","dispersion","s.alive","m.alive","s.massmov","m.massmov","s.dispersion","m.dispersion","s.masspos.x","m.masspos.x","s.masspos.y","m.masspos.y","s.indmov","m.indmov","s.passing","m.passing","s.distwall","m.distwall","s.distgate","m.distgate","s.gatestate","m.gatestate","s.simlength"), vars.file=c("escaped","opentime","distance","dispersion","VOID","s.alive","m.alive","s.massmov","m.massmov","s.dispersion","m.dispersion","s.masspos.x","m.masspos.x","s.masspos.y","m.masspos.y","s.indmov","m.indmov","s.passing","m.passing","s.distwall","m.distwall","s.distgate","m.distgate","s.gatestate","m.gatestate","s.simlength") ,subpops=1, load.behavs=T, behavs.sample=0.1)
+behaviourCorrelation2(data)
+
+setwd("~/exps/sys/ind")
+data <- metaLoadData("fit","ts","sys_mean/","sys_mean_cfs/","sys_reg_cfs/","sys_reg2","sys_mean_arch","sys_mean_cfs2/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="sys", fit.comp.par=list(snapshots=c(75,150,249)))
+
+setwd("~/exps//sys//rs")
+data <- metaLoadData("fit","ts","sys_mean/","sys_mean_cfs/","sys_reg_cfs/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,399)))
+
+setwd("~/exps//sys//ks")
+data <- metaLoadData("fit","ts","sys_mean/","sys_mean_cfs/","sys_reg/","sys_frames/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="sys", fit.comp.par=list(snapshots=c(100,300,499)))

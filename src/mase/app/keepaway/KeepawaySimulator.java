@@ -56,30 +56,37 @@ public class KeepawaySimulator extends MasonSimulator {
             par.passSpeed[i] = state.parameters.getDouble(df.push(KeepawayParams.P_KEEPER).push(i + "").push(KeepawayParams.P_PASS_SPEED),
                     df.push(KeepawayParams.P_KEEPER).push(KeepawayParams.P_PASS_SPEED));
         }
+        par.sortKeepers = state.parameters.getBoolean(df.push(KeepawayParams.P_SORT_KEEPERS), null, false);
 
         // Takers
         par.takerSpeed = state.parameters.getDouble(df.push(KeepawayParams.P_TAKER_SPEED), null);
         String placement = state.parameters.getString(df.push(KeepawayParams.P_TAKERS_PLACEMENT), null);
         if (placement.equalsIgnoreCase(KeepawayParams.V_CENTER)) {
             par.takersPlacement = KeepawayParams.V_CENTER;
-        } else if (placement.equalsIgnoreCase(KeepawayParams.V_RANDOM)) {
-            par.takersPlacement = KeepawayParams.V_RANDOM;
+        } else if (placement.equalsIgnoreCase(KeepawayParams.V_RANDOM_CENTER)) {
+            par.takersPlacement = KeepawayParams.V_RANDOM_CENTER;
             par.placeRadius = state.parameters.getDouble(df.push(KeepawayParams.P_PLACE_RADIUS), null);
         } else {
             state.output.fatal("Unknown takers placement", df.push(KeepawayParams.P_TAKERS_PLACEMENT));
         }
 
-        // Initial keeper position
-        // place keepers evenly distributed around the circle
-        Double2D center = new Double2D(par.size / 2, par.size / 2);
-        par.keeperStartPos = new Double2D[par.numKeepers];
-        par.keeperStartAngle = new double[par.numKeepers];
-        Double2D up = new Double2D(0, par.ringSize / 2);
-        double rot = Math.PI * 2 / par.numKeepers;
-        for (int i = 0; i < par.numKeepers; i++) {
-            Double2D v = up.rotate(rot * i);
-            par.keeperStartPos[i] = v.add(center);
-            par.keeperStartAngle[i] = v.negate().angle();
+        placement = state.parameters.getString(df.push(KeepawayParams.P_KEEPERS_PLACEMENT), null);
+        if (placement.equalsIgnoreCase(KeepawayParams.V_RANDOM)) {
+            par.keepersPlacement = KeepawayParams.V_RANDOM;
+        } else if (placement.equalsIgnoreCase(KeepawayParams.V_FIXED)) {
+            par.keepersPlacement = KeepawayParams.V_FIXED;
+                    // Initial keeper position
+            // place keepers evenly distributed around the circle
+            Double2D center = new Double2D(par.size / 2, par.size / 2);
+            par.keeperStartPos = new Double2D[par.numKeepers];
+            par.keeperStartAngle = new double[par.numKeepers];
+            Double2D up = new Double2D(0, par.ringSize / 2);
+            double rot = Math.PI * 2 / par.numKeepers;
+            for (int i = 0; i < par.numKeepers; i++) {
+                Double2D v = up.rotate(rot * i);
+                par.keeperStartPos[i] = v.add(center);
+                par.keeperStartAngle[i] = v.negate().angle();
+            }
         }
     }
 

@@ -8,6 +8,7 @@ package mase.app.indiana;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import mase.controllers.AgentController;
+import mase.generic.systematic.Agent;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
@@ -17,14 +18,13 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class IndianaAgent extends SmartAgent {
+public class IndianaAgent extends SmartAgent implements Agent {
 
     public static final double RADIUS = 2.5;
     private final boolean even;
     private final double slice;
     private final double start;
     private final Double2D[] rayStarts, rayEnds;
-    private Double2D[] obsStarts, obsEnds;
     private static final DecimalFormat DF = new DecimalFormat("0.0");
     protected boolean passingGate = false;
     protected boolean escaped = false;
@@ -52,21 +52,6 @@ public class IndianaAgent extends SmartAgent {
                 rayEnds[i] = rayEnds[i - 1].rotate(ang);
             }
         }
-        if (sim.par.wallRays > 0) {
-            // aux variables for wall sensors -- wall segments
-            obsStarts = new Double2D[5];
-            obsEnds = new Double2D[5];
-            obsStarts[0] = new Double2D(0, 0);
-            obsEnds[0] = new Double2D(sim.par.size, 0);
-            obsStarts[1] = obsEnds[0];
-            obsEnds[1] = new Double2D(sim.par.size, sim.par.size);
-            obsStarts[2] = obsEnds[1];
-            obsEnds[2] = new Double2D(0, sim.par.size);
-            obsStarts[3] = obsEnds[2];
-            obsEnds[3] = new Double2D(0, sim.par.size / 2 + sim.par.gateSize / 2);
-            obsStarts[4] = new Double2D(0, sim.par.size / 2 - sim.par.gateSize / 2);
-            obsEnds[4] = obsStarts[0];
-        }
     }
 
     @Override
@@ -79,7 +64,8 @@ public class IndianaAgent extends SmartAgent {
 
     @Override
     public double[] readNormalisedSensors() {
-        IndianaParams par = ((Indiana) sim).par;
+        Indiana indSim = (Indiana) sim;
+        IndianaParams par = indSim.par;
         double[] sens = new double[3 + par.agentSensorArcs + par.wallRays];
 
         // target sensor
@@ -122,8 +108,8 @@ public class IndianaAgent extends SmartAgent {
                 int si = i + par.agentSensorArcs + 3;
                 Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
                 Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
-                for (int j = 0; j < obsStarts.length; j++) {
-                    Double2D inters = segmentIntersection(rs, re, obsStarts[j], obsEnds[j]);
+                for (int j = 0; j < indSim.wallsFeature.getSegStarts().length; j++) {
+                    Double2D inters = segmentIntersection(rs, re, indSim.wallsFeature.getSegStarts()[j], indSim.wallsFeature.getSegEnds()[j]);
                     if (inters != null) {
                         double dist = rs.distance(inters);
                         sens[si] = Math.min(sens[si], (dist / par.wallRadius) * 2 - 1);
@@ -181,5 +167,15 @@ public class IndianaAgent extends SmartAgent {
     @Override
     public String getSensorsReport() {
         return super.getSensorsReport();
+    }
+
+    @Override
+    public Double2D getPosition() {
+        return getLocation();
+    }
+
+    @Override
+    public double[] getStateVariables() {
+        return new double[]{passingGate ? 1 : 0};
     }
 }

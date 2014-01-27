@@ -6,6 +6,7 @@ library(kohonen)
 library(RColorBrewer)
 library(parallel)
 library(pbapply)
+library(energy)
 
 SOURCE_DIR = "/home/jorge/Dropbox/mase/"
 source(file.path(SOURCE_DIR, "data.r"))

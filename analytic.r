@@ -514,6 +514,7 @@ loadExp <- function(folder, filename, transform=list(), ...) {
     files <- list.files(folder, pattern=filename, full.names=T)
     exp <- list()
     for(f in files) {
+        print(f)
         jobname <- basename(f)
         e <- loadFile(f, ...)
         for(cn in colnames(e)) {
@@ -622,6 +623,54 @@ weightAnalysis <- function(data) {
         res[["max"]] <- rowMeans(maxes[,-1])
     }
     return(res)
+}
+
+behaviourCorrelation <- function(data, method="brownian") {
+    frame <- data.frame()
+    prog <- txtProgressBar(min=0, max=length(data$jobs)*length(data$vars.group), style=3)
+    i <- 0
+    for(j in data$jobs) {
+        fit <- data[[j]][["sub.0"]]$fitness
+        #p <- as.numeric(quantile(fit, 0.5))
+        #elite <- which(fit > p)
+        #fit <- fit[elite]
+        
+        frame[j, "mean.fit"] <- mean(fit)
+        frame[j, "max.fit"] <- max(fit)
+        for(v in data$vars.group) {
+            var <- data[[j]][["sub.0"]][[v]]
+            cor <- NULL
+            if(method == "brownian") {
+                cor <- dcor(fit, var)
+            } else {
+                cor <- cor(fit, var, method=method)
+            }
+            frame[j, v] <- cor 
+            gc()
+            
+            i <- i+1
+            setTxtProgressBar(prog, i)
+        }
+    }
+    close(prog)
+    for(v in data$vars.group) {
+        frame["mean", v] <- mean(frame[data$jobs,v])
+        frame["sd", v] <- sd(frame[data$jobs,v])
+    }
+    return(frame)
+}
+
+behaviourCorrelation2 <- function(data) {
+    prog <- txtProgressBar(min=0, max=length(data$jobs), style=3)
+    i <- 0
+    for(j in data$jobs) {
+        m <- as.matrix(data[[j]][["sub.0"]][,data$vars.group])
+        c <- cor(m, method="spearman")
+        print(c)
+        i <- i + 1
+        setTxtProgressBar(prog, i)
+    }
+    close(prog)
 }
 
 #### Selection pressure ########################################################

@@ -161,6 +161,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         
         protected ArchiveEntry(EvolutionState state, Individual ind) {
             this.behaviour = (BehaviourResult) ((NoveltyFitness) ind.fitness).getNoveltyBehaviour();
+            this.fitness = ((NoveltyFitness) ind.fitness).getFitnessScore();
             this.individual = ind;
             this.generation = state.generation;
         }
@@ -168,6 +169,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         protected BehaviourResult behaviour;
         protected Individual individual;
         protected int generation;
+        protected float fitness;
 
         public BehaviourResult getBehaviour() {
             return behaviour;
@@ -179,6 +181,10 @@ public class NoveltyEvaluation implements PostEvaluator {
 
         public int getGeneration() {
             return generation;
+        }
+        
+        public float getFitness() {
+            return fitness;
         }
     }
 }

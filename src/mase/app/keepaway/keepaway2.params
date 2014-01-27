@@ -1,0 +1,44 @@
+eval.base.problem =                 mase.app.keepaway.KeepawaySimulator
+problem.trials-merge =              best
+problem.number-evals =              2
+problem.eval.0 =                    mase.app.keepaway.KeepawayFitnessLength
+problem.eval.0.combination =        harmonic
+problem.eval.0.update-freq =        1
+problem.eval.0.pass-length =        10
+problem.eval.1 =                    mase.app.keepaway.KeepawayBehaviourEval2
+problem.eval.1.update-freq =        1
+problem.eval.1.pass-length =        0
+problem.eval.1.pass-normalization = 10
+
+fitness.fitness-index =             0
+fitness.novelty-index =             1
+
+problem.repetitions =               10
+problem.max-steps =                 500
+problem.view-size =                 100
+problem.ring-size =                 75
+problem.discretization =            15
+problem.collisions =                true
+problem.ball-decay =                0.05
+
+problem.taker-speed =               0.5
+problem.takers-placement =          center
+
+problem.ball-placement =            0
+
+problem.sort-keepers =              false
+problem.keepers-placement =         random
+problem.n-keepers =                 3
+problem.keeper.move-speed =         0.5
+problem.keeper.pass-speed =         3
+problem.keeper.color =              blue
+# displacement = ball-speed^2 / ball-decay
+
+vector.species.genome-size =        102
+neural.input =                      9
+neural.hidden =                     7
+neural.output =                     4
+neural.structure =                  feed-forward
+neural.tanh =                       false
+neat.INPUT.NODES =                  9
+neat.OUTPUT.NODES =                 4

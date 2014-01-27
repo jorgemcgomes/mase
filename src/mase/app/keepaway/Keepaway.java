@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.systematic.AgentGroup;
+import mase.generic.systematic.EnvironmentalFeature;
+import mase.generic.systematic.TaskDescription;
 import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
+import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
@@ -20,7 +24,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Keepaway extends MaseSimState {
+public class Keepaway extends MaseSimState implements TaskDescription {
 
     protected GroupController gc;
     protected KeepawayParams par;
@@ -31,7 +35,8 @@ public class Keepaway extends MaseSimState {
     protected boolean caught;
     protected boolean outOfLimits;
     protected Double2D center;
-
+    public static final double BALL_OFFSET = 5;
+    
     public Keepaway(long seed, KeepawayParams par, GroupController gc) {
         super(seed);
         this.gc = gc;
@@ -63,10 +68,20 @@ public class Keepaway extends MaseSimState {
     protected void placeKeepers() {
         keepers = new ArrayList<Keeper>(par.numKeepers);
         AgentController[] acs = gc.getAgentControllers(par.numKeepers);
-        for(int i = 0 ; i < par.numKeepers ; i++) {
+        for (int i = 0; i < par.numKeepers; i++) {
             Keeper k = new Keeper(this, field, acs[i].clone(), par.passSpeed[i], par.moveSpeed[i], par.color[i]);
-            k.setLocation(par.keeperStartPos[i]);
-            k.setOrientation(par.keeperStartAngle[i]);
+            if (par.keepersPlacement == KeepawayParams.V_FIXED) {
+                k.setLocation(par.keeperStartPos[i]);
+                k.setOrientation(par.keeperStartAngle[i]);
+            } else {
+                double slice = Math.PI * 2 / par.numKeepers;
+                double margin = 0.15; // in radians
+                double rot = i* slice + margin + random.nextDouble() * slice - (margin * 2);
+                Double2D up = new Double2D(0, par.ringSize / 2);
+                Double2D v = up.rotate(rot);
+                k.setLocation(v.add(center));
+                k.setOrientation(v.negate().angle());
+            }
             k.setStopper(schedule.scheduleRepeating(k));
             k.enableCollisionDetection(par.collisions);
             keepers.add(k);
@@ -76,14 +91,14 @@ public class Keepaway extends MaseSimState {
     protected void placeTakers() {
         takers = new ArrayList<EmboddiedAgent>(1);
         Taker t = new Taker(this, field);
-        if(par.takersPlacement == KeepawayParams.V_CENTER) {
+        if (par.takersPlacement == KeepawayParams.V_CENTER) {
             t.setLocation(center);
-        } else if(par.takersPlacement == KeepawayParams.V_RANDOM) {
-            double q = random.nextDouble() * Math.PI *  2;
+        } else if (par.takersPlacement == KeepawayParams.V_RANDOM_CENTER) {
+            double q = random.nextDouble() * Math.PI * 2;
             double r = Math.sqrt(random.nextDouble());
             double x = (par.placeRadius * r) * Math.cos(q) + center.getX();
             double y = (par.placeRadius * r) * Math.sin(q) + center.getY();
-            t.setLocation(new Double2D(x,y));
+            t.setLocation(new Double2D(x, y));
         }
         Double2D ballDir = ball.getLocation().subtract(t.getLocation());
         t.setOrientation(ballDir.angle());
@@ -95,12 +110,15 @@ public class Keepaway extends MaseSimState {
     protected void placeBall() {
         ball = new Ball(this, field);
         int ag = par.ballPlacement;
-        if(ag == -1) {
+        if (ag == -1) {
             ag = random.nextInt(keepers.size());
         }
         Keeper k = keepers.get(ag);
-        Double2D loc = k.getLocation().add(new Double2D(0,-5));
-        ball.setLocation(loc);
+        
+        double angle = k.orientation2D();
+        double op = FastMath.sin(angle) * BALL_OFFSET;
+        double ad = FastMath.cos(angle) * BALL_OFFSET;
+        ball.setLocation(k.getLocation().add(new Double2D(ad, op)));
         ball.setStopper(schedule.scheduleRepeating(ball));
     }
 
@@ -112,5 +130,19 @@ public class Keepaway extends MaseSimState {
     @Override
     public List<? extends SmartAgent> getSmartAgents() {
         return keepers;
+    }
+
+    @Override
+    public EnvironmentalFeature[] getEnvironmentalFeatures() {
+        return new EnvironmentalFeature[]{ball};
+    }
+
+    @Override
+    public AgentGroup[] getAgentGroups() {
+        AgentGroup ks = new AgentGroup();
+        ks.addAll(keepers);
+        AgentGroup ts = new AgentGroup();
+        ts.add((Taker) takers.get(0));
+        return new AgentGroup[]{ks, ts};
     }
 }

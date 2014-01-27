@@ -5,6 +5,7 @@
 package mase.app.keepaway;
 
 import java.awt.Color;
+import mase.generic.systematic.Agent;
 import mase.mason.EmboddiedAgent;
 import net.jafama.FastMath;
 import sim.engine.SimState;
@@ -15,7 +16,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Taker extends EmboddiedAgent {
+public class Taker extends EmboddiedAgent implements Agent {
 
     public static final double RADIUS = 2;
     
@@ -37,5 +38,15 @@ public class Taker extends EmboddiedAgent {
         Double2D d = kw.ball.getLocation().subtract(this.getLocation());
         //double dir = this.angleTo(kw.ball.getLocation());
         super.move(FastMath.atan2(d.y, d.x), kw.par.takerSpeed);
+    }
+
+    @Override
+    public Double2D getPosition() {
+        return this.getLocation();
+    }
+
+    @Override
+    public double[] getStateVariables() {
+        return new double[0];
     }
 }

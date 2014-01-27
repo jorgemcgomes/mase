@@ -12,7 +12,7 @@ fitness.novelty-index =            1
 
 problem.repetitions =              10
 problem.max-steps =                500
-problem.size =                     200
+problem.size =                     250
 problem.discretization =           30
 problem.num-agents =               8
 problem.agent-radius =             15

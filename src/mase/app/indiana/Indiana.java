@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.systematic.AgentGroup;
+import mase.generic.systematic.EnvironmentalFeature;
+import mase.generic.systematic.PolygonFeature;
+import mase.generic.systematic.TaskDescription;
 import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
@@ -24,13 +28,26 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Indiana extends MaseSimState {
+public class Indiana extends MaseSimState implements TaskDescription {
 
     protected IndianaParams par;
     protected List<IndianaAgent> agents;
     protected Continuous2D field;
     protected GroupController gc;
     protected Gate gate;
+    protected PolygonFeature wallsFeature, gateFeature;
+
+    @Override
+    public EnvironmentalFeature[] getEnvironmentalFeatures() {
+        return new EnvironmentalFeature[]{wallsFeature, gate};
+    }
+
+    @Override
+    public AgentGroup[] getAgentGroups() {
+        AgentGroup ag = new AgentGroup();
+        ag.addAll(agents);
+        return new AgentGroup[]{ag};
+    }
 
     protected enum AgentPlacement {
 
@@ -41,6 +58,25 @@ public class Indiana extends MaseSimState {
         super(seed);
         this.par = par;
         this.gc = gc;
+        // aux variables for wall sensors -- wall segments
+
+        Double2D[] obsStarts = new Double2D[5];
+        Double2D[] obsEnds = new Double2D[5];
+        obsStarts[0] = new Double2D(0, 0);
+        obsEnds[0] = new Double2D(par.size, 0);
+        obsStarts[1] = obsEnds[0];
+        obsEnds[1] = new Double2D(par.size, par.size);
+        obsStarts[2] = obsEnds[1];
+        obsEnds[2] = new Double2D(0, par.size);
+        obsStarts[3] = obsEnds[2];
+        obsEnds[3] = new Double2D(0, par.size / 2 + par.gateSize / 2);
+        obsStarts[4] = new Double2D(0, par.size / 2 - par.gateSize / 2);
+        obsEnds[4] = obsStarts[0];
+        wallsFeature = new PolygonFeature(obsStarts, obsEnds);
+
+        Double2D[] gateStart = new Double2D[]{new Double2D(0, par.size / 2.0 - par.gateSize / 2.0)};
+        Double2D[] gateEnd = new Double2D[]{new Double2D(0, par.size / 2.0 + par.gateSize / 2.0)};
+        gateFeature = new PolygonFeature(gateStart, gateEnd);
     }
 
     @Override
@@ -52,6 +88,7 @@ public class Indiana extends MaseSimState {
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
     }
+
     @Override
     public List<? extends SmartAgent> getSmartAgents() {
         return agents;
@@ -61,7 +98,7 @@ public class Indiana extends MaseSimState {
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
-        this.gate = new Gate(this, field);
+        this.gate = new Gate(this, field, gateFeature);
         gate.setLocation(new Double2D(-0.001, par.size / 2));
         gate.setOrientation(Math.PI);
         gate.setStopper(schedule.scheduleRepeating(gate));
@@ -69,6 +106,7 @@ public class Indiana extends MaseSimState {
     }
 
     protected void placeAgents() {
+
         // TODO: place in single file
         agents = new ArrayList<IndianaAgent>(par.numAgents);
         AgentController[] acs = gc.getAgentControllers(par.numAgents);
@@ -107,14 +145,16 @@ public class Indiana extends MaseSimState {
         return !gate.closed;
     }
 
-    protected static class Gate extends EmboddiedAgent {
-        
+    protected static class Gate extends EmboddiedAgent implements EnvironmentalFeature {
+
         protected long openTime = -1;
         protected boolean closed = false;
+        protected PolygonFeature gate;
 
-        protected Gate(Indiana sim, Continuous2D field) {
+        protected Gate(Indiana sim, Continuous2D field, PolygonFeature gate) {
             super(sim, field, sim.par.gateSize / 2, Color.RED);
             this.enableCollisionDetection(false);
+            this.gate = gate;
         }
 
         @Override
@@ -137,6 +177,17 @@ public class Indiana extends MaseSimState {
             if (!anyInside || (openTime != -1 && ind.schedule.getSteps() - openTime > ind.par.gateInterval)) {
                 closed = true;
             }
+        }
+
+        @Override
+        public double distanceTo(Double2D position) {
+            return gate.distanceTo(position);
+        }
+
+        @Override
+        public double[] getStateVariables() {
+            // is the gate closing?
+            return new double[]{openTime == -1 ? 0 : 1};
         }
     }
 }

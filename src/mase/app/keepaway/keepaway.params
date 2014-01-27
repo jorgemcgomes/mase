@@ -9,10 +9,10 @@ problem.eval.1 =                    mase.app.keepaway.KeepawayBehaviourEval2
 problem.eval.1.update-freq =        1
 problem.eval.1.pass-length =        10
 problem.eval.1.pass-normalization = 10
-problem.eval.2 =                    mase.app.keepaway.KeepawayIndividualEval
-problem.eval.2.update-freq =        1
-problem.eval.2.pass-length =        10
-problem.eval.2.pass-normalization = 5
+#problem.eval.2 =                    mase.app.keepaway.KeepawayIndividualEval
+#problem.eval.2.update-freq =        1
+#problem.eval.2.pass-length =        10
+#problem.eval.2.pass-normalization = 5
 
 fitness.fitness-index =             0
 fitness.novelty-index =             1
