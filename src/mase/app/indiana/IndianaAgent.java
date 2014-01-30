@@ -7,8 +7,9 @@ package mase.app.indiana;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import mase.controllers.AgentController;
-import mase.generic.systematic.Agent;
+import mase.mason.PolygonFeature;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
@@ -18,7 +19,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class IndianaAgent extends SmartAgent implements Agent {
+public class IndianaAgent extends SmartAgent {
 
     public static final double RADIUS = 2.5;
     private final boolean even;
@@ -109,7 +110,7 @@ public class IndianaAgent extends SmartAgent implements Agent {
                 Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
                 Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
                 for (int j = 0; j < indSim.wallsFeature.getSegStarts().length; j++) {
-                    Double2D inters = segmentIntersection(rs, re, indSim.wallsFeature.getSegStarts()[j], indSim.wallsFeature.getSegEnds()[j]);
+                    Double2D inters = PolygonFeature.segmentIntersection(rs, re, indSim.wallsFeature.getSegStarts()[j], indSim.wallsFeature.getSegEnds()[j]);
                     if (inters != null) {
                         double dist = rs.distance(inters);
                         sens[si] = Math.min(sens[si], (dist / par.wallRadius) * 2 - 1);
@@ -118,21 +119,6 @@ public class IndianaAgent extends SmartAgent implements Agent {
             }
         }
         return sens;
-    }
-
-    // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
-    protected Double2D segmentIntersection(Double2D p0, Double2D p1, Double2D p2, Double2D p3) {
-        Double2D s1 = new Double2D(p1.x - p0.x, p1.y - p0.y);
-        Double2D s2 = new Double2D(p3.x - p2.x, p3.y - p2.y);
-        double s = (-s1.y * (p0.x - p2.x) + s1.x * (p0.y - p2.y)) / (-s2.x * s1.y + s1.x * s2.y);
-        double t = (s2.x * (p0.y - p2.y) - s2.y * (p0.x - p2.x)) / (-s2.x * s1.y + s1.x * s2.y);
-        if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
-            // collision detected
-            return new Double2D(p0.x + t * s1.x, p0.y + t * s1.y);
-        } else {
-            // no collision
-            return null;
-        }
     }
 
     private int angleToArc(double angle) {
@@ -168,14 +154,12 @@ public class IndianaAgent extends SmartAgent implements Agent {
     public String getSensorsReport() {
         return super.getSensorsReport();
     }
-
-    @Override
-    public Double2D getPosition() {
-        return getLocation();
-    }
-
+    
     @Override
     public double[] getStateVariables() {
-        return new double[]{passingGate ? 1 : 0};
+        double[] vars = super.getStateVariables();
+        double[] newVars = Arrays.copyOf(vars, vars.length + 1);
+        newVars[vars.length] = passingGate ? 1 : 0;
+        return newVars;
     }
 }

@@ -10,9 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.generic.systematic.AgentGroup;
-import mase.generic.systematic.EnvironmentalFeature;
-import mase.generic.systematic.PolygonFeature;
+import mase.generic.systematic.EntityGroup;
+import mase.generic.systematic.PhysicalEntity;
+import mase.generic.systematic.StaticEntity;
+import mase.mason.PolygonFeature;
 import mase.generic.systematic.TaskDescription;
 import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
@@ -36,17 +37,17 @@ public class Indiana extends MaseSimState implements TaskDescription {
     protected GroupController gc;
     protected Gate gate;
     protected PolygonFeature wallsFeature, gateFeature;
-
+    protected StaticEntity walls;
+    
     @Override
-    public EnvironmentalFeature[] getEnvironmentalFeatures() {
-        return new EnvironmentalFeature[]{wallsFeature, gate};
-    }
-
-    @Override
-    public AgentGroup[] getAgentGroups() {
-        AgentGroup ag = new AgentGroup();
-        ag.addAll(agents);
-        return new AgentGroup[]{ag};
+    public EntityGroup[] getEntityGroups() {
+        EntityGroup ags = new EntityGroup();
+        ags.addAll(agents);
+        EntityGroup g = new EntityGroup();
+        g.add(gate);
+        EntityGroup w = new EntityGroup();
+        w.add(walls);
+        return new EntityGroup[]{ags, g, w};
     }
 
     protected enum AgentPlacement {
@@ -73,7 +74,8 @@ public class Indiana extends MaseSimState implements TaskDescription {
         obsStarts[4] = new Double2D(0, par.size / 2 - par.gateSize / 2);
         obsEnds[4] = obsStarts[0];
         wallsFeature = new PolygonFeature(obsStarts, obsEnds);
-
+        walls = new StaticEntity(wallsFeature);
+        
         Double2D[] gateStart = new Double2D[]{new Double2D(0, par.size / 2.0 - par.gateSize / 2.0)};
         Double2D[] gateEnd = new Double2D[]{new Double2D(0, par.size / 2.0 + par.gateSize / 2.0)};
         gateFeature = new PolygonFeature(gateStart, gateEnd);
@@ -145,7 +147,7 @@ public class Indiana extends MaseSimState implements TaskDescription {
         return !gate.closed;
     }
 
-    protected static class Gate extends EmboddiedAgent implements EnvironmentalFeature {
+    protected static class Gate extends EmboddiedAgent {
 
         protected long openTime = -1;
         protected boolean closed = false;
@@ -180,13 +182,18 @@ public class Indiana extends MaseSimState implements TaskDescription {
         }
 
         @Override
-        public double distanceTo(Double2D position) {
-            return gate.distanceTo(position);
+        public double distance(PhysicalEntity other) {
+            if(other instanceof EmboddiedAgent) {
+                EmboddiedAgent o = (EmboddiedAgent) other;
+                double d = Math.max(0, gate.distanceTo(o.getLocation()) - o.getRadius());
+                return d;
+            } else {
+                return 0;
+            }
         }
 
         @Override
         public double[] getStateVariables() {
-            // is the gate closing?
             return new double[]{openTime == -1 ? 0 : 1};
         }
     }

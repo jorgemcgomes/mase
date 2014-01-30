@@ -7,7 +7,6 @@ package mase.app.sharing;
 import java.awt.Color;
 import java.util.Arrays;
 import mase.controllers.AgentController;
-import mase.generic.systematic.Agent;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
@@ -17,7 +16,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class RSAgent extends SmartAgent implements Agent {
+public class RSAgent extends SmartAgent {
 
     private boolean even;
     private double slice;
@@ -132,16 +131,16 @@ public class RSAgent extends SmartAgent implements Agent {
 
     @Override
     public boolean isAlive() {
-        return energyLevel > 0.0001;
-    }
-
-    @Override
-    public Double2D getPosition() {
-        return super.getLocation();
+        return super.isAlive() && energyLevel > 0.0001;
     }
 
     @Override
     public double[] getStateVariables() {
-        return new double[]{getEnergyLevel(), isInStation() ? 1 : 0};
+        double[] superVars = super.getStateVariables();
+        double[] extVars = new double[superVars.length + 2];
+        System.arraycopy(superVars, 0, extVars, 0, superVars.length);
+        extVars[extVars.length - 2] = getEnergyLevel();
+        extVars[extVars.length - 1] = isInStation() ? 1 : 0;
+        return extVars;
     }
 }

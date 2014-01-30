@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.generic.systematic.AgentGroup;
-import mase.generic.systematic.EnvironmentalFeature;
+import mase.generic.systematic.EntityGroup;
+import mase.mason.EnvironmentalFeature;
 import mase.generic.systematic.TaskDescription;
 import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
@@ -133,16 +133,13 @@ public class Keepaway extends MaseSimState implements TaskDescription {
     }
 
     @Override
-    public EnvironmentalFeature[] getEnvironmentalFeatures() {
-        return new EnvironmentalFeature[]{ball};
-    }
-
-    @Override
-    public AgentGroup[] getAgentGroups() {
-        AgentGroup ks = new AgentGroup();
+    public EntityGroup[] getEntityGroups() {
+        EntityGroup ks = new EntityGroup();
         ks.addAll(keepers);
-        AgentGroup ts = new AgentGroup();
-        ts.add((Taker) takers.get(0));
-        return new AgentGroup[]{ks, ts};
+        EntityGroup ts = new EntityGroup();
+        ts.addAll(takers);
+        EntityGroup b = new EntityGroup();
+        b.add(ball);
+        return new EntityGroup[]{ks, ts, b};
     }
 }

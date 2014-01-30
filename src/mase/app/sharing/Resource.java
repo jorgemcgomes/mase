@@ -5,17 +5,15 @@
 package mase.app.sharing;
 
 import java.awt.Color;
-import mase.generic.systematic.EnvironmentalFeature;
 import mase.mason.EmboddiedAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
-import sim.util.Double2D;
 
 /**
  *
  * @author jorge
  */
-public class Resource extends EmboddiedAgent implements EnvironmentalFeature {
+public class Resource extends EmboddiedAgent {
 
     private int[] stay;
     private boolean charging;
@@ -47,13 +45,8 @@ public class Resource extends EmboddiedAgent implements EnvironmentalFeature {
             i++;
         }
         if(!someAlive) {
-            this.stop();
+            state.kill();
         }
-    }
-
-    @Override
-    public double distanceTo(Double2D position) {
-        return this.getLocation().distance(position);
     }
 
     @Override

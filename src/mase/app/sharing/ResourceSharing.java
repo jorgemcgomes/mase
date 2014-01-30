@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.generic.systematic.AgentGroup;
-import mase.generic.systematic.EnvironmentalFeature;
+import mase.generic.systematic.EntityGroup;
+import mase.mason.EnvironmentalFeature;
 import mase.generic.systematic.TaskDescription;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
@@ -62,7 +62,7 @@ public class ResourceSharing extends MaseSimState implements TaskDescription {
     protected void placeResource() {
         resource = new Resource(this, field);
         resource.setLocation(new Double2D(field.height / 2, field.width / 2));
-        resource.setStopper(schedule.scheduleRepeating(resource));
+        schedule.scheduleRepeating(resource);
     }
 
     protected void placeAgents() {
@@ -84,14 +84,11 @@ public class ResourceSharing extends MaseSimState implements TaskDescription {
     }
 
     @Override
-    public EnvironmentalFeature[] getEnvironmentalFeatures() {
-        return new EnvironmentalFeature[]{resource};
-    }
-
-    @Override
-    public AgentGroup[] getAgentGroups() {
-        AgentGroup a = new AgentGroup();
-        a.addAll(agents);
-        return new AgentGroup[]{a};
+    public EntityGroup[] getEntityGroups() {
+        EntityGroup ags = new EntityGroup();
+        ags.addAll(agents);
+        EntityGroup res = new EntityGroup();
+        res.add(resource);
+        return new EntityGroup[]{ags, res};
     }
 }

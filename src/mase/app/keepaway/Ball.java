@@ -5,17 +5,15 @@
 package mase.app.keepaway;
 
 import java.awt.Color;
-import mase.generic.systematic.EnvironmentalFeature;
 import mase.mason.EmboddiedAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
-import sim.util.Double2D;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Ball extends EmboddiedAgent implements EnvironmentalFeature {
+public class Ball extends EmboddiedAgent {
 
     public static final double RADIUS = 1;
     private double nextKickPower;
@@ -49,15 +47,4 @@ public class Ball extends EmboddiedAgent implements EnvironmentalFeature {
         nextKickPower = power;
         nextKickDirection = direction;
     }
-
-    @Override
-    public double distanceTo(Double2D position) {
-        return this.getLocation().distance(position);
-    }
-
-    @Override
-    public double[] getStateVariables() {
-        return new double[]{this.getSpeed()};
-    }
-    
 }

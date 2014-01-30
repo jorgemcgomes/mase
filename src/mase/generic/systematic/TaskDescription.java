@@ -11,9 +11,7 @@ package mase.generic.systematic;
  * @author jorge
  */
 public interface TaskDescription {
-    
-    public EnvironmentalFeature[] getEnvironmentalFeatures();
-    
-    public AgentGroup[] getAgentGroups();
+        
+    public EntityGroup[] getEntityGroups();
     
 }

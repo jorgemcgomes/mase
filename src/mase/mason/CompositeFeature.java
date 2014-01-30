@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.generic.systematic;
+package mase.mason;
 
 import sim.util.Double2D;
 
@@ -26,10 +26,5 @@ public class CompositeFeature implements EnvironmentalFeature {
             min = Math.min(min, ef.distanceTo(position));
         }
         return min;
-    }
-
-    @Override
-    public double[] getStateVariables() {
-        return new double[0];
     }
 }

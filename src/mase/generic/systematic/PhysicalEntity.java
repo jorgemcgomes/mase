@@ -6,16 +6,16 @@
 
 package mase.generic.systematic;
 
-import sim.util.Double2D;
-
 /**
  *
  * @author jorge
  */
-public interface EnvironmentalFeature {
-    
-    public double distanceTo(Double2D position);
+public interface PhysicalEntity {
+        
+    public boolean isAlive();
     
     public double[] getStateVariables();
+    
+    public double distance(PhysicalEntity other);
     
 }

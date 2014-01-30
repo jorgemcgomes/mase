@@ -138,16 +138,14 @@ public class MasterTournament {
                     // assumes fitness evaluation is in first index
                     float fit = (Float) (((SubpopEvaluationResult) er[0]).getSubpopEvaluation(s).value());
                     // assumes behaviour evaluation is in second index
-                    BehaviourResult br = null, obr = null;
+                    BehaviourResult br = null;
                     if (er[1] instanceof SubpopEvaluationResult) {
                         br = (BehaviourResult) ((SubpopEvaluationResult) er[1]).getSubpopEvaluation(s);
-                        obr = (BehaviourResult) ((SubpopEvaluationResult) solutions[s].get(g).getEvalResults()[1]).getSubpopEvaluation(0);
                     } else {
                         br = (BehaviourResult) er[1];
-                        obr = (BehaviourResult) solutions[s].get(g).getEvalResults()[1];
                     }
                     bestFar[s] = Math.max(bestFar[s], fit);
-                    bfw.write(" " + fit + " " + bestFar[s] + " " + br.distanceTo(obr));
+                    bfw.write(" " + fit + " " + bestFar[s] + " " + br.toString());
                 }
                 bfw.newLine();
             }

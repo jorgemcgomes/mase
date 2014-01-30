@@ -7,11 +7,11 @@ package mase.app.keepaway;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import mase.controllers.AgentController;
-import mase.generic.systematic.Agent;
 import mase.mason.EmboddiedAgent;
 import mase.mason.SmartAgent;
 import sim.engine.SimState;
@@ -22,7 +22,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Keeper extends SmartAgent implements Agent {
+public class Keeper extends SmartAgent {
 
     public static final double RADIUS = 2;
     public static final double KICK_DISTANCE = 0.5;
@@ -145,14 +145,12 @@ public class Keeper extends SmartAgent implements Agent {
 
         return sb.toString();
     }
-
-    @Override
-    public Double2D getPosition() {
-        return getLocation();
-    }
-
+    
     @Override
     public double[] getStateVariables() {
-        return new double[]{hasPossession || justKicked ? 1 : 0};
+        double[] agVars = super.getStateVariables();
+        double[] newVars = Arrays.copyOf(agVars, agVars.length + 1);
+        newVars[newVars.length - 1] = hasPossession || justKicked ? 1 : 0;
+        return newVars;
     }
 }

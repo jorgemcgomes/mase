@@ -24,13 +24,12 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class SemiGenericStandardiser implements PostEvaluator {
 
-    public static final String P_BOUND = "bound";
     private List<ArchiveEntry>[] archives;
-    private double bound;
+    public static final double BOUND = 3; // 68–95–99.7 rule -- three-sigma rule
     
     @Override
     public void setup(EvolutionState state, Parameter base) {
-        this.bound = state.parameters.getDouble(base.push(P_BOUND), null);
+        ;
     }
 
     @Override
@@ -82,7 +81,7 @@ public class SemiGenericStandardiser implements PostEvaluator {
         for (SemiGenericResult vbr : results) {
             for (int i = 0; i < size; i++) {
                 double v = (vbr.getOriginalResult()[i] - means[i]) / sds[i];
-                vbr.getBehaviour()[i] = (float) Math.max(-bound, Math.min(bound, v));
+                vbr.getBehaviour()[i] = (float) Math.max(-BOUND, Math.min(BOUND, v));
             }
         }
     }

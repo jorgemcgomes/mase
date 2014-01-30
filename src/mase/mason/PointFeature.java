@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.generic.systematic;
+package mase.mason;
 
 import sim.util.Double2D;
 
@@ -28,10 +28,5 @@ public class PointFeature implements EnvironmentalFeature {
     @Override
     public double distanceTo(Double2D position) {
         return Math.max(0, position.distance(point) - radius);
-    }
-
-    @Override
-    public double[] getStateVariables() {
-        return new double[0];
     }
 }

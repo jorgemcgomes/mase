@@ -6,42 +6,24 @@
 package mase.generic.systematic;
 
 import java.util.ArrayList;
-import sim.util.Double2D;
-import sim.util.MutableDouble2D;
+import java.util.Arrays;
 
 /**
  *
  * @author jorge
  */
-public class AgentGroup extends ArrayList<Agent> {
-
-    public Double2D getCentreOfMass() {
-        int al = countAlive();
-        if (al == 0) {
-            return null;
-        }
-        MutableDouble2D centreMass = new MutableDouble2D();
-        for (Agent a : this) {
-            if (a.isAlive()) {
-                centreMass.addIn(a.getPosition());
-            }
-        }
-        centreMass.multiplyIn(1.0 / al);
-        return new Double2D(centreMass);
-    }
+public class EntityGroup extends ArrayList<PhysicalEntity> {
 
     public double[] getAverageState() {
+        double[] res = new double[this.get(0).getStateVariables().length];
         int al = countAlive();
         if (al == 0) {
-            return null;
+            Arrays.fill(res, Double.NaN);
+            return res;
         }
-        double[] res = null;
-        for (Agent a : this) {
+        for (PhysicalEntity a : this) {
             if (a.isAlive()) {
                 double[] state = a.getStateVariables();
-                if (res == null) {
-                    res = new double[state.length];
-                }
                 for (int i = 0; i < state.length; i++) {
                     res[i] += state[i] / al;
                 }
@@ -52,7 +34,7 @@ public class AgentGroup extends ArrayList<Agent> {
 
     public int countAlive() {
         int al = 0;
-        for (Agent a : this) {
+        for (PhysicalEntity a : this) {
             if (a.isAlive()) {
                 al++;
             }
@@ -60,14 +42,14 @@ public class AgentGroup extends ArrayList<Agent> {
         return al;
     }
 
-    public double distanceToGroup(AgentGroup other) {
+    public double distanceToGroup(EntityGroup other) {
         int c = 0;
         double dist = 0;
-        for (Agent a : this) {
+        for (PhysicalEntity a : this) {
             if (a.isAlive()) {
-                for (Agent otherA : other) {
+                for (PhysicalEntity otherA : other) {
                     if (otherA.isAlive()) {
-                        dist += a.getPosition().distance(otherA.getPosition());
+                        dist += a.distance(otherA);
                         c++;
                     }
                 }
