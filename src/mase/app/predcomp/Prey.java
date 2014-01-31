@@ -90,7 +90,7 @@ public class Prey extends SmartAgent {
         super.move(o, s);
         
         if(this.distanceTo(pred.predator) < Predator.THRESHOLD) {
-            pred.caught = true;
+            pred.kill();
         } 
     }
     

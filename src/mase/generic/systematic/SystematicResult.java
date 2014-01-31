@@ -12,12 +12,12 @@ import mase.evaluation.VectorBehaviourResult;
  *
  * @author Jorge
  */
-public class SemiGenericResult extends VectorBehaviourResult {
+public class SystematicResult extends VectorBehaviourResult {
 
     private static final long serialVersionUID = 1;
     protected float[] originalResult;
 
-    public SemiGenericResult(float... bs) {
+    public SystematicResult(float... bs) {
         super(bs);
         this.originalResult = Arrays.copyOf(bs, bs.length);
     }
@@ -33,7 +33,7 @@ public class SemiGenericResult extends VectorBehaviourResult {
     @Override
     public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
         VectorBehaviourResult vbr = super.mergeEvaluations(results);
-        return new SemiGenericResult(vbr.getBehaviour());
+        return new SystematicResult(vbr.getBehaviour());
     }
 
     @Override

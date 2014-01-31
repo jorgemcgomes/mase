@@ -4,15 +4,19 @@
  */
 package mase.app.aggregation;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.generic.systematic.AgentGroup;
-import mase.mason.EnvironmentalFeature;
-import mase.mason.PolygonFeature;
+import mase.generic.systematic.EntityGroup;
+import mase.mason.PolygonEntity;
 import mase.generic.systematic.TaskDescription;
+import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MaseSimState;
+import mase.mason.MasonDistanceFunction;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -23,32 +27,30 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Aggregation extends MaseSimState implements TaskDescription {
+public class Aggregation extends MaseSimState implements TaskDescriptionProvider {
 
     protected AggregationParams par;
     protected List<AggregationAgent> agents;
     protected Continuous2D field;
     protected GroupController gc;
-    private final Double2D[] obsStarts, obsEnds;
-    protected PolygonFeature walls;
+    protected PolygonEntity walls;
+    protected TaskDescription td;
 
     public Aggregation(long seed, AggregationParams par, GroupController gc) {
         super(seed);
         this.par = par;
         this.gc = gc;
 
-        // aux variables for wall sensors -- wall segments
-        obsStarts = new Double2D[4];
-        obsEnds = new Double2D[4];
-        obsStarts[0] = new Double2D(0, 0);
-        obsEnds[0] = new Double2D(par.size, 0);
-        obsStarts[1] = obsEnds[0];
-        obsEnds[1] = new Double2D(par.size, par.size);
-        obsStarts[2] = obsEnds[1];
-        obsEnds[2] = new Double2D(0, par.size);
-        obsStarts[3] = obsEnds[2];
-        obsEnds[3] = obsStarts[0];
-        walls = new PolygonFeature(obsStarts, obsEnds);
+        walls = new PolygonEntity(new Double2D[]{
+            new Double2D(0,0),
+            new Double2D(par.size, 0),
+            new Double2D(par.size, par.size),
+            new Double2D(0, par.size),
+            new Double2D(0,0)
+        });
+        walls.paint = Color.BLACK;
+        walls.setStroke(new BasicStroke(3f));
+        walls.filled = false;
     }
 
     @Override
@@ -56,6 +58,12 @@ public class Aggregation extends MaseSimState implements TaskDescription {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
         placeAgents();
+        field.setObjectLocation(walls, new Double2D(0,0));
+        
+        this.td = new TaskDescription(new MasonDistanceFunction(field), 
+                new EntityGroup(agents, agents.size(), agents.size(), false),
+                new EntityGroup(Collections.singletonList(walls), 1, 1, true)
+        );
     }
 
     @Override
@@ -92,14 +100,7 @@ public class Aggregation extends MaseSimState implements TaskDescription {
     }
 
     @Override
-    public EnvironmentalFeature[] getEnvironmentalFeatures() {
-        return new EnvironmentalFeature[]{walls};
-    }
-
-    @Override
-    public AgentGroup[] getAgentGroups() {
-        AgentGroup ag = new AgentGroup();
-        ag.addAll(agents);
-        return new AgentGroup[]{ag};
+    public TaskDescription getTaskDescription() {
+        return td;
     }
 }

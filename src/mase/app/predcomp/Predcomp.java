@@ -29,7 +29,6 @@ public class Predcomp extends MaseSimState {
     protected Prey prey;
     protected Predator predator;
     protected Continuous2D field;
-    protected boolean caught;
 
     public Predcomp(long seed, PredcompParams par, GroupController gc) {
         super(seed);
@@ -41,7 +40,6 @@ public class Predcomp extends MaseSimState {
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
-        this.caught = false;
 
         HeterogeneousGroupController hgc = (HeterogeneousGroupController) gc;
         AgentController[] acs = hgc.getAgentControllers(2);
@@ -83,10 +81,4 @@ public class Predcomp extends MaseSimState {
         l.add(predator);
         return l;
     }
-
-    @Override
-    public boolean continueSimulation() {
-        return !caught;
-    }
-
 }

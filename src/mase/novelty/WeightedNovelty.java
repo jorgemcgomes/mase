@@ -24,6 +24,7 @@ import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.Ranker;
 import weka.attributeSelection.ReliefFAttributeEval;
+import weka.clusterers.SimpleKMeans;
 import weka.clusterers.XMeans;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -49,12 +50,19 @@ public class WeightedNovelty extends NoveltyEvaluation {
         pearson, spearman, brownian, cfs, relief, mutualinfo
     }
 
+    public static enum DiscretizationMethod {
+
+        equalwidth, equalfreq, kmeans
+
+    }
+
     public static final String P_CORRELATION = "correlation";
     public static final String P_SMOOTH = "smooth";
     public static final String P_SELECTION_PRESSURE = "selection-pressure";
     public static final String P_DIMENSION_SELECTION = "selection-method";
     public static final String P_WEIGHTS_ARCHIVE = "weights-archive";
     public static final String P_FITNESS_BINS = "fitness-bins";
+    public static final String P_FITNESS_DISC = "fitness-disc";
     protected float[] weights;
     protected float[] instantCorrelation;
     protected float[] adjustedCorrelation;
@@ -65,6 +73,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
     protected float selectionPressure;
     protected boolean weightsArchive;
     protected int fitnessBins;
+    protected DiscretizationMethod discMethod;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -82,6 +91,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
         this.nIndividuals = 0;
         if (this.correlation == CorrelationMethod.mutualinfo) {
             this.fitnessBins = state.parameters.getInt(base.push(P_FITNESS_BINS), null);
+            this.discMethod = DiscretizationMethod.valueOf(state.parameters.getString(base.push(P_FITNESS_DISC), null));
         }
     }
 
@@ -129,9 +139,11 @@ public class WeightedNovelty extends NoveltyEvaluation {
     protected void updateWeights(EvolutionState state, Population pop) {
         List<float[]> instances = this.getInstances(state);
 
-        // compute correlation
+        /*
+         Numerical correlation
+         */
         if (correlation == CorrelationMethod.pearson || correlation == CorrelationMethod.spearman || correlation == CorrelationMethod.brownian) {
-            /* Assemble data -- transpose*/
+            // Assemble data -- transpose
             int indIndex = 0;
             double[][] behaviourFeatures = new double[weights.length + 1][instances.size()];
             for (float[] i : instances) {
@@ -141,7 +153,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
                 indIndex++;
             }
 
-            /* Compute correlation */
+            // Compute correlation
             if (correlation == CorrelationMethod.pearson) {
                 PearsonsCorrelation pearson = new PearsonsCorrelation();
                 for (int i = 0; i < instantCorrelation.length; i++) {
@@ -157,6 +169,9 @@ public class WeightedNovelty extends NoveltyEvaluation {
                     instantCorrelation[i] = (float) distanceCorrelation(behaviourFeatures[0], behaviourFeatures[i + 1]);
                 }
             }
+            /*
+             Weka-based correlation
+             */
         } else if (correlation == CorrelationMethod.cfs || correlation == CorrelationMethod.relief || correlation == CorrelationMethod.mutualinfo) {
             /* Assemble data */
             FastVector atts = new FastVector(instantCorrelation.length + 1);
@@ -176,7 +191,6 @@ public class WeightedNovelty extends NoveltyEvaluation {
             }
 
             if (correlation == CorrelationMethod.cfs) {
-                // TODO: try with scatter
                 CfsSubsetEvalSpearman eval = new CfsSubsetEvalSpearman();
                 eval.setLocallyPredictive(false);
                 BestFirst search = new BestFirst();
@@ -213,61 +227,69 @@ public class WeightedNovelty extends NoveltyEvaluation {
                 }
             } else if (correlation == CorrelationMethod.mutualinfo) {
                 try {
-                    /*FastVector att = new FastVector(1);
-                    att.addElement(new Attribute("Fitness"));
-                    Instances fitnessData = new Instances("Fit" + state.generation, att, instances.size());
-                    for(int i = 0 ; i < data.numInstances() ; i++) {
-                        fitnessData.add(new Instance(1, new double[]{data.instance(i).classValue()}));
-                    }
-                    XMeans clusterer = new XMeans();
-                    clusterer.setMinNumClusters(5);
-                    clusterer.setMaxNumClusters(10);
-                    clusterer.buildClusterer(fitnessData);
-                    Instances centers = clusterer.getClusterCenters();
-                    FastVector nominalValues = new FastVector(centers.numInstances());
-                    for(int i = 0 ; i < centers.numInstances() ; i++) {
-                        System.out.println(Arrays.toString(centers.instance(i).toDoubleArray()));
-                        nominalValues.addElement("C" + i);
-                    }
-                                   
-                    String[] assignements = new String[data.numInstances()];
-                    for(int i = 0 ; i < data.numInstances() ; i++) {
-                        int c = clusterer.clusterInstance(fitnessData.instance(i));
-                        assignements[i] = "C" + c;
-                    }
-                    
-                    Attribute at = new Attribute("Fitness-disc", nominalValues);
-                    data.insertAttributeAt(at, 0);
-                    data.setClassIndex(0);
-                    for(int i = 0 ; i < data.numInstances() ; i++) {
-                        data.instance(i).setClassValue(assignements[i]);
-                    }
-                    data.deleteAttributeAt(1);
-                    Instances discretized = data;*/
-                    
-                    
-                    data.setClassIndex(1);
-                    Discretize disc = new Discretize();
-                    disc.setAttributeIndicesArray(new int[]{0});
-                    disc.setInputFormat(data);
-                    disc.setUseEqualFrequency(true);
-                    disc.setBins(fitnessBins);
+                    /*
+                     Discretize fitness class
+                     */
+                    Instances discretized = null;
+                    //double[] splits = null; // DEBUG
+                    if (discMethod == DiscretizationMethod.equalfreq || discMethod == DiscretizationMethod.equalwidth) {
+                        data.setClassIndex(1);
+                        Discretize disc = new Discretize();
+                        disc.setAttributeIndicesArray(new int[]{0});
+                        disc.setInputFormat(data);
+                        disc.setBins(fitnessBins);
+                        if (discMethod == DiscretizationMethod.equalwidth) {
+                            disc.setUseEqualFrequency(false);
+                            disc.setFindNumBins(fitnessBins == -1);
+                        } else if (discMethod == DiscretizationMethod.equalfreq) {
+                            disc.setUseEqualFrequency(true);
+                        }
+                        discretized = Filter.useFilter(data, disc);
+                        discretized.setClassIndex(0);
+                        //splits = disc.getCutPoints(0);
+                    } else if (discMethod == DiscretizationMethod.kmeans) {
+                        FastVector att = new FastVector(1);
+                        att.addElement(new Attribute("Fitness"));
+                        Instances fitnessData = new Instances("Fit" + state.generation, att, instances.size());
+                        for (int i = 0; i < data.numInstances(); i++) {
+                            fitnessData.add(new Instance(1, new double[]{data.instance(i).classValue()}));
+                        }
 
-                    /*disc.setUseEqualFrequency(false);
-                     if (fitnessBins == -1) {
-                     disc.setBins(10);
-                     disc.setFindNumBins(true);
-                     } else {
-                     disc.setBins(fitnessBins);
-                     disc.setFindNumBins(false);
-                     }*/
-                    Instances discretized = Filter.useFilter(data, disc);
-                    discretized.setClassIndex(0);
-                    System.out.println(Arrays.toString(disc.getCutPoints(0)));
+                        SimpleKMeans clusterer = new SimpleKMeans();
+                        clusterer.setNumClusters(fitnessBins);
+                        clusterer.setSeed(state.random[0].nextInt());
+                        clusterer.setPreserveInstancesOrder(true);
+                        clusterer.buildClusterer(fitnessData);
+                        int[] assignements = clusterer.getAssignments();
+                        FastVector nominalValues = new FastVector(fitnessBins);
+                        for (int i = 0; i < fitnessBins; i++) {
+                            nominalValues.addElement("C" + i);
+                        }
 
+                        Attribute at = new Attribute("Fitness-disc", nominalValues);
+                        data.insertAttributeAt(at, 0);
+                        data.setClassIndex(0);
+                        //splits = new double[fitnessBins];
+                        //Arrays.fill(splits, Double.POSITIVE_INFINITY);
+                        //int[] counts = new int[fitnessBins]; // DEBUG
+                        for (int i = 0; i < data.numInstances(); i++) {
+                            data.instance(i).setClassValue("C" + assignements[i]);
+                            //splits[assignements[i]] = Math.min(splits[assignements[i]], data.instance(i).value(1));
+                            //counts[assignements[i]]++;
+                        }
+                        //System.out.println(Arrays.toString(counts));
+                        data.deleteAttributeAt(1);
+                        discretized = data;
+                    }
+                    
+                    //Arrays.sort(splits);
+                    //System.out.println(Arrays.toString(splits));
+                    
+                    /*
+                    Compute mutual information
+                    */
                     ASEvaluation eval = new InfoGainAttributeEval();
                     ASSearch search = new Ranker();
-                    //ASSearch search = new BestFirst();
                     AttributeSelection as = new AttributeSelection();
                     as.setEvaluator(eval);
                     as.setSearch(search);
@@ -276,11 +298,6 @@ public class WeightedNovelty extends NoveltyEvaluation {
                     for (int i = 0; i < score.length; i++) {
                         instantCorrelation[(int) score[i][0] - 1] = (float) score[i][1];
                     }
-                    /*int[] selected = as.selectedAttributes();
-                     Arrays.fill(instantCorrelation, 0);
-                     for (int i = 0; i < selected.length - 1; i++) {
-                     instantCorrelation[selected[i] - 1] = 1;
-                     }*/
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

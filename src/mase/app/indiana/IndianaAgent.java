@@ -9,7 +9,6 @@ import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import mase.controllers.AgentController;
-import mase.mason.PolygonFeature;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
@@ -70,7 +69,7 @@ public class IndianaAgent extends SmartAgent {
         double[] sens = new double[3 + par.agentSensorArcs + par.wallRays];
 
         // target sensor
-        Double2D target = ((Indiana) sim).gate.getLocation();
+        Double2D target = ((Indiana) sim).gate.getCenter();
         double d = this.getLocation().distance(target);
         if (d <= par.gateSensorRange) {
             sens[0] = (this.getLocation().distance(target) / par.gateSensorRange) * 2 - 1;
@@ -109,12 +108,9 @@ public class IndianaAgent extends SmartAgent {
                 int si = i + par.agentSensorArcs + 3;
                 Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
                 Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
-                for (int j = 0; j < indSim.wallsFeature.getSegStarts().length; j++) {
-                    Double2D inters = PolygonFeature.segmentIntersection(rs, re, indSim.wallsFeature.getSegStarts()[j], indSim.wallsFeature.getSegEnds()[j]);
-                    if (inters != null) {
-                        double dist = rs.distance(inters);
-                        sens[si] = Math.min(sens[si], (dist / par.wallRadius) * 2 - 1);
-                    }
+                double dist = indSim.walls.closestDistance(rs, re);
+                if(!Double.isInfinite(dist)) {
+                    sens[si] = dist / par.wallRadius * 2 - 1;
                 }
             }
         }
@@ -154,7 +150,7 @@ public class IndianaAgent extends SmartAgent {
     public String getSensorsReport() {
         return super.getSensorsReport();
     }
-    
+
     @Override
     public double[] getStateVariables() {
         double[] vars = super.getStateVariables();

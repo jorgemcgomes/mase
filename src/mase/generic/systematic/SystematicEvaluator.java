@@ -19,13 +19,13 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
  *
  * @author jorge
  */
-public class SemiGenericEvaluator extends MasonEvaluation {
+public class SystematicEvaluator extends MasonEvaluation {
 
     @Override
     public Parameter defaultBase() {
         return new Parameter(P_SYSTEMATIC_BASE);
     }
-    
+
     public static final String P_TIME_MODE = "time-mode";
     public static final String P_TIME_FRAMES = "time-frames";
     public static final String P_NUM_ALIVE = "num-alive";
@@ -42,11 +42,11 @@ public class SemiGenericEvaluator extends MasonEvaluation {
     public static final int MAX_FEATURES = 100;
     public static final int INITIAL_SIZE = 1000;
 
-    protected SemiGenericResult vbr;
-    protected EntityGroup[] entityGroups;
+    protected SystematicResult vbr;
+    protected TaskDescription td;
 
     protected List<List<Double>> features;
-    protected int size;
+    protected int size = -1;
 
     protected TimeMode timeMode;
     protected int timeFrames;
@@ -69,8 +69,8 @@ public class SemiGenericEvaluator extends MasonEvaluation {
 
     @Override
     protected void preSimulation() {
-        TaskDescription td = (TaskDescription) sim;
-        this.entityGroups = td.getEntityGroups();
+        this.td = ((TaskDescriptionProvider) sim).getTaskDescription();
+
         this.features = new ArrayList<List<Double>>(MAX_FEATURES);
         for (int i = 0; i < MAX_FEATURES; i++) {
             features.add(new ArrayList(INITIAL_SIZE));
@@ -79,22 +79,18 @@ public class SemiGenericEvaluator extends MasonEvaluation {
 
     @Override
     protected void evaluate() {
-        if (!((MaseSimState) sim).continueSimulation()) {
-            return;
-        }
-
         int index = 0;
-        for (int gi = 0; gi < entityGroups.length; gi++) {
-            EntityGroup eg = entityGroups[gi];
-            double[] averageState = eg.getAverageState();
+        for (int gi = 0; gi < td.groups().length; gi++) {
+            EntityGroup eg = td.groups()[gi];
 
             // Percentage of alive agents
-            int al = eg.countAlive();
-            if (numAlive) {
-                features.get(index++).add(al / (double) eg.size());
+            if (numAlive && eg.getMaxSize() > eg.getMinSize()) {
+                features.get(index++).add((double) (eg.size() - eg.getMinSize())
+                        / (eg.getMaxSize() - eg.getMinSize()));
             }
 
             // Average state of the group -- if none alive it is filled with NaN
+            double[] averageState = eg.getAverageState();
             if (stateMean) {
                 for (int i = 0; i < averageState.length; i++) {
                     features.get(index++).add(averageState[i]);
@@ -102,20 +98,18 @@ public class SemiGenericEvaluator extends MasonEvaluation {
             }
 
             // StateVariables dispersion -- average difference to the mean value
-            if (stateDeviation && eg.size() > 1) {
+            if (stateDeviation && eg.getMaxSize() > 1) {
                 // If the group has more than one alive
-                if (al > 1) {
+                if (eg.size() > 1) {
                     double[] diffs = new double[averageState.length];
-                    for (PhysicalEntity e : eg) {
-                        if (e.isAlive()) {
-                            double[] vars = e.getStateVariables();
-                            for (int i = 0; i < averageState.length; i++) {
-                                diffs[i] += FastMath.pow2(averageState[i] - vars[i]);
-                            }
+                    for (Entity e : eg) {
+                        double[] vars = e.getStateVariables();
+                        for (int i = 0; i < averageState.length; i++) {
+                            diffs[i] += FastMath.pow2(averageState[i] - vars[i]);
                         }
                     }
                     for (int i = 0; i < diffs.length; i++) {
-                        double sd = FastMath.sqrtQuick(diffs[i] / al);
+                        double sd = FastMath.sqrtQuick(diffs[i] / eg.size());
                         features.get(index++).add(sd);
                     }
                 } else {
@@ -126,31 +120,32 @@ public class SemiGenericEvaluator extends MasonEvaluation {
             }
 
             // Physical dispersion -- mean distance of each entity to the other entities
-            if (physicalRelations && eg.size() > 1) {
+            if (physicalRelations && td.distanceFunction() != null && eg.getMaxSize() > 1 && !eg.isStatic()) {
                 double sumDists = 0;
                 int count = 0;
                 for (int i = 0; i < eg.size(); i++) {
-                    if (eg.get(i).isAlive()) {
-                        for (int j = i + 1; j < eg.size(); j++) {
-                            if (eg.get(j).isAlive()) {
-                                sumDists += eg.get(i).distance(eg.get(j));
-                                count++;
-                            }
-                        }
+                    for (int j = i + 1; j < eg.size(); j++) {
+                        sumDists += td.distanceFunction().distance(eg.get(i), eg.get(j));
+                        count++;
                     }
                 }
                 features.get(index++).add(count > 0 ? sumDists / count : Double.NaN);
             }
 
             // Relations with other entities -- physical distances
-            if (physicalRelations) {
-                for (int go = gi + 1; go < entityGroups.length; go++) {
-                    EntityGroup otherG = entityGroups[go];
-                    features.get(index++).add(eg.distanceToGroup(otherG));
+            if (physicalRelations && td.distanceFunction() != null) {
+                for (int go = gi + 1; go < td.groups().length; go++) {
+                    EntityGroup otherG = td.groups()[go];
+                    if (!eg.isStatic() || !otherG.isStatic()) {
+                        features.get(index++).add(td.distanceFunction().distance(eg, otherG));
+                    }
                 }
             }
-
+        }
+        if (size == -1) {
             size = index;
+        } else if (size != index) {
+            System.out.println("Incoherent size! Expected: " + size + " Got: " + index);
         }
     }
 
@@ -172,7 +167,7 @@ public class SemiGenericEvaluator extends MasonEvaluation {
                 res[i] = (float) (count == 0 ? 0 : sum / count);
             }
             res[size] = sim.schedule.getSteps();
-            vbr = new SemiGenericResult(res);
+            vbr = new SystematicResult(res);
         } else if (timeMode == TimeMode.simplereg || timeMode == TimeMode.meanslope) {
             SimpleRegression reg = new SimpleRegression(true);
             float[] res = new float[size * 2 + 1];
@@ -196,7 +191,7 @@ public class SemiGenericEvaluator extends MasonEvaluation {
                 res[i * 2 + 1] = (float) (reg.getN() >= 2 ? reg.getSlope() : 0);
             }
             res[size * 2] = sim.schedule.getSteps();
-            vbr = new SemiGenericResult(res);
+            vbr = new SystematicResult(res);
         } else if (timeMode == TimeMode.frames) {
             int len = features.get(0).size();
             int frameLen = (int) Math.ceil((double) len / timeFrames);
@@ -228,7 +223,7 @@ public class SemiGenericEvaluator extends MasonEvaluation {
                 }
             }
             res[size * timeFrames] = features.get(0).size();
-            vbr = new SemiGenericResult(res);
+            vbr = new SystematicResult(res);
         }
     }
 

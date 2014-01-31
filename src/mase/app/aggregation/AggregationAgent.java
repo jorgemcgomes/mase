@@ -7,7 +7,7 @@ package mase.app.aggregation;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import mase.controllers.AgentController;
-import mase.generic.systematic.Agent;
+import mase.generic.systematic.Entity;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
@@ -17,13 +17,13 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class AggregationAgent extends SmartAgent implements Agent{
+public class AggregationAgent extends SmartAgent implements Entity {
 
     public static final double RADIUS = 2.5;
-    private boolean even;
-    private double slice;
-    private double start;
-    private Double2D[] rayStarts, rayEnds;
+    private final boolean even;
+    private final double slice;
+    private final double start;
+    private final Double2D[] rayStarts, rayEnds;
     private static DecimalFormat DF = new DecimalFormat("0.0");
 
     public static void main(String[] args) {
@@ -94,12 +94,9 @@ public class AggregationAgent extends SmartAgent implements Agent{
                 int si = i + par.agentArcs + 1;
                 Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
                 Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
-                for (int j = 0; j < agg.walls.getSegStarts().length; j++) {
-                    Double2D inters = segmentIntersection(rs, re, agg.walls.getSegStarts()[j], agg.walls.getSegEnds()[j]);
-                    if (inters != null) {
-                        double dist = rs.distance(inters);
-                        sens[si] = Math.min(sens[si], (dist / par.wallRadius) * 2 - 1);
-                    }
+                double dist = agg.walls.closestDistance(rs, re);
+                if(!Double.isInfinite(dist)) {
+                    sens[si] = dist / par.wallRadius * 2 - 1;
                 }
             }
         }
@@ -152,17 +149,9 @@ public class AggregationAgent extends SmartAgent implements Agent{
 
     @Override
     public String getSensorsReport() {
-        
-        
-        
         return super.getSensorsReport(); //To change body of generated methods, choose Tools | Templates.
     }
-
-    @Override
-    public Double2D getPosition() {
-        return getLocation();
-    }
-
+    
     @Override
     public double[] getStateVariables() {
         return new double[0];

@@ -5,28 +5,33 @@
 package mase.app.sharing;
 
 import java.awt.Color;
-import mase.mason.EmboddiedAgent;
+import mase.generic.systematic.Entity;
 import sim.engine.SimState;
-import sim.field.continuous.Continuous2D;
+import sim.engine.Steppable;
+import sim.portrayal.simple.OvalPortrayal2D;
+import sim.util.Double2D;
 
 /**
  *
  * @author jorge
  */
-public class Resource extends EmboddiedAgent {
+public class Resource extends OvalPortrayal2D implements Steppable, Entity {
 
-    private int[] stay;
+    private final int[] stay;
     private boolean charging;
+    protected Double2D location;
+    protected double radius;
 
-    public Resource(ResourceSharing sim, Continuous2D field) {
-        super(sim, field, sim.par.resourceRadius, Color.YELLOW);
-        this.enableCollisionDetection(false);
+    public Resource(ResourceSharing sim) {
+        super(Color.YELLOW, sim.par.resourceRadius * 2, true);
+        this.radius = sim.par.resourceRadius;
         this.stay = new int[sim.par.numAgents];
+        this.location = new Double2D(sim.par.size / 2, sim.par.size / 2);
     }
 
     @Override
     public void step(SimState state) {
-        ResourceSharing rs = (ResourceSharing) sim;
+        ResourceSharing rs = (ResourceSharing) state;
         int i = 0;
         boolean someAlive = false;
         charging = false;
@@ -47,6 +52,10 @@ public class Resource extends EmboddiedAgent {
         if(!someAlive) {
             state.kill();
         }
+    }
+    
+    public Double2D getLocation() {
+        return location;
     }
 
     @Override

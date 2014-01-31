@@ -5,14 +5,16 @@
 package mase.app.keepaway;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
-import mase.mason.EnvironmentalFeature;
 import mase.generic.systematic.TaskDescription;
+import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.EmboddiedAgent;
 import mase.mason.MaseSimState;
+import mase.mason.MasonDistanceFunction;
 import mase.mason.SmartAgent;
 import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
@@ -24,7 +26,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Keepaway extends MaseSimState implements TaskDescription {
+public class Keepaway extends MaseSimState implements TaskDescriptionProvider {
 
     protected GroupController gc;
     protected KeepawayParams par;
@@ -35,6 +37,7 @@ public class Keepaway extends MaseSimState implements TaskDescription {
     protected boolean caught;
     protected boolean outOfLimits;
     protected Double2D center;
+    protected TaskDescription td;
     public static final double BALL_OFFSET = 5;
     
     public Keepaway(long seed, KeepawayParams par, GroupController gc) {
@@ -53,6 +56,12 @@ public class Keepaway extends MaseSimState implements TaskDescription {
         placeKeepers();
         placeBall();
         placeTakers();
+        
+        this.td = new TaskDescription(new MasonDistanceFunction(field),
+                new EntityGroup(keepers, keepers.size(), keepers.size(), false),
+                new EntityGroup(takers, takers.size(), takers.size(), false),
+                new EntityGroup(Collections.singletonList(ball), 1, 1, false)
+        );
     }
 
     @Override
@@ -123,23 +132,12 @@ public class Keepaway extends MaseSimState implements TaskDescription {
     }
 
     @Override
-    public boolean continueSimulation() {
-        return ball.isAlive();
-    }
-
-    @Override
     public List<? extends SmartAgent> getSmartAgents() {
         return keepers;
     }
 
     @Override
-    public EntityGroup[] getEntityGroups() {
-        EntityGroup ks = new EntityGroup();
-        ks.addAll(keepers);
-        EntityGroup ts = new EntityGroup();
-        ts.addAll(takers);
-        EntityGroup b = new EntityGroup();
-        b.add(ball);
-        return new EntityGroup[]{ks, ts, b};
+    public TaskDescription getTaskDescription() {
+        return td;
     }
 }

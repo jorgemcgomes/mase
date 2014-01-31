@@ -53,7 +53,7 @@ public abstract class MasonSimulator extends SimulationProblem {
             for (int i = 0; i < evals.length; i++) {
                 evals[i].preSimulation();
             }
-            while (sim.schedule.getSteps() < maxSteps && sim.continueSimulation()) {
+            while (sim.schedule.getSteps() < maxSteps) {
                 boolean b = sim.schedule.step(sim);
                 for (int i = 0; i < evals.length; i++) {
                     evals[i].evaluationStep();

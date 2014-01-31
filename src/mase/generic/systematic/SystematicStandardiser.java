@@ -22,7 +22,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  * @author jorge
  */
-public class SemiGenericStandardiser implements PostEvaluator {
+public class SystematicStandardiser implements PostEvaluator {
 
     private List<ArchiveEntry>[] archives;
     public static final double BOUND = 3; // 68–95–99.7 rule -- three-sigma rule
@@ -49,15 +49,15 @@ public class SemiGenericStandardiser implements PostEvaluator {
 
         // join all behaviour results in one list
         // from archive
-        ArrayList<SemiGenericResult> results = new ArrayList<SemiGenericResult>(2000);
+        ArrayList<SystematicResult> results = new ArrayList<SystematicResult>(2000);
         for (ArchiveEntry ar : archives[0]) {
-            results.add((SemiGenericResult) ar.getBehaviour());
+            results.add((SystematicResult) ar.getBehaviour());
         }
         // from the population
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;
-                results.add((SemiGenericResult) nf.getNoveltyBehaviour());
+                results.add((SystematicResult) nf.getNoveltyBehaviour());
             }
         }
         
@@ -66,7 +66,7 @@ public class SemiGenericStandardiser implements PostEvaluator {
         DescriptiveStatistics[] ds = new DescriptiveStatistics[size];
         for (int i = 0; i < size; i++) {
             ds[i] = new DescriptiveStatistics();
-            for (SemiGenericResult vbr : results) {
+            for (SystematicResult vbr : results) {
                 ds[i].addValue(vbr.getOriginalResult()[i]);
             }
         }
@@ -78,7 +78,7 @@ public class SemiGenericStandardiser implements PostEvaluator {
             sds[i] = sd == 0 || Double.isNaN(sd) || Double.isInfinite(sd) ? 1 : sd;
         }
 
-        for (SemiGenericResult vbr : results) {
+        for (SystematicResult vbr : results) {
             for (int i = 0; i < size; i++) {
                 double v = (vbr.getOriginalResult()[i] - means[i]) / sds[i];
                 vbr.getBehaviour()[i] = (float) Math.max(-BOUND, Math.min(BOUND, v));

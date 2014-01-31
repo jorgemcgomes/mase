@@ -5,12 +5,14 @@
 package mase.app.sharing;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
-import mase.mason.EnvironmentalFeature;
+import mase.mason.MasonDistanceFunction;
 import mase.generic.systematic.TaskDescription;
+import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -22,13 +24,14 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class ResourceSharing extends MaseSimState implements TaskDescription {
+public class ResourceSharing extends MaseSimState implements TaskDescriptionProvider {
 
     protected RSParams par;
     protected List<RSAgent> agents;
     protected Continuous2D field;
     protected GroupController gc;
     protected Resource resource;
+    protected TaskDescription td;
 
     public ResourceSharing(long seed, RSParams par, GroupController gc) {
         super(seed);
@@ -42,6 +45,10 @@ public class ResourceSharing extends MaseSimState implements TaskDescription {
         this.field = new Continuous2D(par.discretization, par.size, par.size);
         placeResource();
         placeAgents();
+        td = new TaskDescription(
+                new MasonDistanceFunction(field),
+                new EntityGroup(agents, 0, agents.size(), false),
+                new EntityGroup(Collections.singletonList(resource), 1, 1, true));
     }
 
     @Override
@@ -60,8 +67,8 @@ public class ResourceSharing extends MaseSimState implements TaskDescription {
     }
 
     protected void placeResource() {
-        resource = new Resource(this, field);
-        resource.setLocation(new Double2D(field.height / 2, field.width / 2));
+        resource = new Resource(this);
+        field.setObjectLocation(resource, resource.getLocation());
         schedule.scheduleRepeating(resource);
     }
 
@@ -84,11 +91,7 @@ public class ResourceSharing extends MaseSimState implements TaskDescription {
     }
 
     @Override
-    public EntityGroup[] getEntityGroups() {
-        EntityGroup ags = new EntityGroup();
-        ags.addAll(agents);
-        EntityGroup res = new EntityGroup();
-        res.add(resource);
-        return new EntityGroup[]{ags, res};
+    public TaskDescription getTaskDescription() {
+        return td;
     }
 }

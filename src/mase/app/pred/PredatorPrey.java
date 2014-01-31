@@ -102,11 +102,6 @@ public class PredatorPrey extends MaseSimState  {
         return new Prey(this, field);
     }
 
-    @Override
-    public boolean continueSimulation() {
-        return !activePreys.isEmpty();
-    }
-
     public int getCaptureCount() {
         return captureCount;
     }

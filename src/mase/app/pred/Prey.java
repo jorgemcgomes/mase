@@ -79,5 +79,8 @@ public class Prey extends EmboddiedAgent {
         stop();
         field.remove(this);
         predSim.activePreys.remove(this);
+        if(predSim.activePreys.isEmpty()) {
+            predSim.kill();
+        }
     }
 }

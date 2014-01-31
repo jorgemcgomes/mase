@@ -18,10 +18,6 @@ public abstract class MaseSimState extends SimState {
         super(seed);
     }
     
-    public boolean continueSimulation() {
-        return true;
-    }
-    
     public abstract FieldPortrayal2D createFieldPortrayal();
     
     public abstract void setupPortrayal(FieldPortrayal2D port);

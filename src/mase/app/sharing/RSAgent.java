@@ -10,7 +10,6 @@ import mase.controllers.AgentController;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
-import sim.util.Double2D;
 
 /**
  *
@@ -18,9 +17,9 @@ import sim.util.Double2D;
  */
 public class RSAgent extends SmartAgent {
 
-    private boolean even;
-    private double slice;
-    private double start;
+    private final boolean even;
+    private final double slice;
+    private final double start;
     protected double energyLevel;
     protected boolean inStation;
 
@@ -109,6 +108,7 @@ public class RSAgent extends SmartAgent {
         // Death procedures
         if (!isAlive()) {
             this.stop();
+            rs.td.groups()[0].remove(this);
             int i = 0;
             for (; i < rs.par.agentSensorArcs; i++) {
                 lastSensors[i] = 1;
@@ -137,8 +137,7 @@ public class RSAgent extends SmartAgent {
     @Override
     public double[] getStateVariables() {
         double[] superVars = super.getStateVariables();
-        double[] extVars = new double[superVars.length + 2];
-        System.arraycopy(superVars, 0, extVars, 0, superVars.length);
+        double[] extVars = Arrays.copyOf(superVars, superVars.length + 2);
         extVars[extVars.length - 2] = getEnergyLevel();
         extVars[extVars.length - 1] = isInStation() ? 1 : 0;
         return extVars;

@@ -10,12 +10,8 @@ package mase.generic.systematic;
  *
  * @author jorge
  */
-public interface PhysicalEntity {
-        
-    public boolean isAlive();
+public interface TaskDescriptionProvider {
     
-    public double[] getStateVariables();
-    
-    public double distance(PhysicalEntity other);
+    public TaskDescription getTaskDescription();
     
 }

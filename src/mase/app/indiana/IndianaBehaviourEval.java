@@ -42,7 +42,7 @@ public class IndianaBehaviourEval extends MasonEvaluation {
         Indiana ind = (Indiana) sim;
         MutableDouble2D centre = new MutableDouble2D(0, 0);
         for (IndianaAgent a : ind.agents) {
-            avgDist += a.getLocation().distance(ind.gate.getLocation());
+            avgDist += a.getLocation().distance(ind.gate.getCenter());
             centre.addIn(a.getLocation());
         }
         centre.multiplyIn(1.0 / ind.agents.size());

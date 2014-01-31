@@ -5,7 +5,7 @@
 package mase.mason;
 
 import java.awt.Color;
-import mase.generic.systematic.PhysicalEntity;
+import mase.generic.systematic.Entity;
 import net.jafama.FastMath;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -21,7 +21,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Steppable, Oriented2D, PhysicalEntity {
+public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Steppable, Oriented2D, Entity {
 
     protected Continuous2D field;
     private Double2D pos;
@@ -56,7 +56,6 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         return radius;
     }
     
-    @Override
     public boolean isAlive() {
         return isAlive;
     }
@@ -64,15 +63,6 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     @Override
     public double[] getStateVariables() {
         return new double[] {getLocation().x, getLocation().y, orientation2D(), getSpeed()};
-    }
-
-    @Override
-    public double distance(PhysicalEntity other) {
-        if(other instanceof EmboddiedAgent) {
-            return this.distanceTo((EmboddiedAgent) other);
-        } else {
-            return other.distance(this);
-        }
     }
 
     public void enableCollisionDetection(boolean enable) {

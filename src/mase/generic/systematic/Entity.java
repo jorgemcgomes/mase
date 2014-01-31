@@ -4,16 +4,14 @@
  * and open the template in the editor.
  */
 
-package mase.mason;
-
-import sim.util.Double2D;
+package mase.generic.systematic;
 
 /**
  *
  * @author jorge
  */
-public interface EnvironmentalFeature {
-    
-    public double distanceTo(Double2D position);
+public interface Entity {
+            
+    public double[] getStateVariables();
         
 }

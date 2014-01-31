@@ -40,6 +40,7 @@ public class Ball extends EmboddiedAgent {
         if(getLocation().x < 0 || getLocation().x > kw.par.size || getLocation().y < 0 || getLocation().y > kw.par.size) {
             kw.outOfLimits = true;
             this.stop();
+            state.kill();
         }
     }
     

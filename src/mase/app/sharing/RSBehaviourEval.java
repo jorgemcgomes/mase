@@ -36,7 +36,7 @@ public class RSBehaviourEval extends MasonEvaluation {
             if (a.isAlive()) {
                 averageMovement += a.getSpeed();
                 averageEnergy += a.energyLevel;
-                averageDistance += a.distanceTo(rs.resource);
+                averageDistance += rs.resource.getLocation().distance(a.getLocation());
                 totalEvals++;
             }
         }

@@ -1,17 +1,20 @@
 eval.num-post = 3
 
-eval.post.0 =                          mase.generic.systematic.SemiGenericStandardiser
+eval.post.0 =                          mase.generic.systematic.SystematicStandardiser
 
 eval.post.1 =                           mase.novelty.WeightedNovelty
 eval.post.1.ns-k =                     15
 eval.post.1.ns-archive-prob =          0.03
 eval.post.1.ns-archive-size =          1000
-eval.post.1.correlation =               brownian
+eval.post.1.correlation =               mutualinfo
 eval.post.1.min-weight =                0.0
 eval.post.1.smooth =                    0.5
 eval.post.1.selection-method =		all
 eval.post.1.selection-pressure = 	1
 eval.post.1.weights-archive =           false
+eval.post.1.fitness-bins = 10
+eval.post.1.fitness-disc = kmeans
+
 pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
 neat.SPECIE.FITNESS.MAX =              1000
 

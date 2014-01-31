@@ -10,8 +10,22 @@ package mase.generic.systematic;
  *
  * @author jorge
  */
-public interface TaskDescription {
+public class TaskDescription {
+    
+    private final EntityGroup[] groups;
+    private final DistanceFunction df;
         
-    public EntityGroup[] getEntityGroups();
+    public TaskDescription(DistanceFunction df, EntityGroup ... groups) {
+        this.groups = groups;
+        this.df = df;
+    }
+    
+    public EntityGroup[] groups() {
+        return groups;
+    }
+    
+    public DistanceFunction distanceFunction() {
+        return df;
+    }
     
 }

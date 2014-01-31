@@ -5,21 +5,23 @@
  */
 package mase.app.indiana;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
-import mase.generic.systematic.PhysicalEntity;
-import mase.generic.systematic.StaticEntity;
-import mase.mason.PolygonFeature;
+import mase.mason.MasonDistanceFunction;
+import mase.mason.PolygonEntity;
 import mase.generic.systematic.TaskDescription;
-import mase.mason.EmboddiedAgent;
+import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MaseSimState;
 import mase.mason.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
@@ -29,25 +31,19 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Indiana extends MaseSimState implements TaskDescription {
+public class Indiana extends MaseSimState implements TaskDescriptionProvider {
 
     protected IndianaParams par;
     protected List<IndianaAgent> agents;
     protected Continuous2D field;
     protected GroupController gc;
+    protected PolygonEntity walls;
     protected Gate gate;
-    protected PolygonFeature wallsFeature, gateFeature;
-    protected StaticEntity walls;
-    
+    protected TaskDescription td;
+
     @Override
-    public EntityGroup[] getEntityGroups() {
-        EntityGroup ags = new EntityGroup();
-        ags.addAll(agents);
-        EntityGroup g = new EntityGroup();
-        g.add(gate);
-        EntityGroup w = new EntityGroup();
-        w.add(walls);
-        return new EntityGroup[]{ags, g, w};
+    public TaskDescription getTaskDescription() {
+        return td;
     }
 
     protected enum AgentPlacement {
@@ -59,26 +55,17 @@ public class Indiana extends MaseSimState implements TaskDescription {
         super(seed);
         this.par = par;
         this.gc = gc;
-        // aux variables for wall sensors -- wall segments
 
-        Double2D[] obsStarts = new Double2D[5];
-        Double2D[] obsEnds = new Double2D[5];
-        obsStarts[0] = new Double2D(0, 0);
-        obsEnds[0] = new Double2D(par.size, 0);
-        obsStarts[1] = obsEnds[0];
-        obsEnds[1] = new Double2D(par.size, par.size);
-        obsStarts[2] = obsEnds[1];
-        obsEnds[2] = new Double2D(0, par.size);
-        obsStarts[3] = obsEnds[2];
-        obsEnds[3] = new Double2D(0, par.size / 2 + par.gateSize / 2);
-        obsStarts[4] = new Double2D(0, par.size / 2 - par.gateSize / 2);
-        obsEnds[4] = obsStarts[0];
-        wallsFeature = new PolygonFeature(obsStarts, obsEnds);
-        walls = new StaticEntity(wallsFeature);
-        
-        Double2D[] gateStart = new Double2D[]{new Double2D(0, par.size / 2.0 - par.gateSize / 2.0)};
-        Double2D[] gateEnd = new Double2D[]{new Double2D(0, par.size / 2.0 + par.gateSize / 2.0)};
-        gateFeature = new PolygonFeature(gateStart, gateEnd);
+        this.walls = new PolygonEntity(new Double2D[]{
+            new Double2D(0, par.size / 2 + par.gateSize / 2),
+            new Double2D(0, par.size),
+            new Double2D(par.size, par.size),
+            new Double2D(par.size, 0),
+            new Double2D(0, 0),
+            new Double2D(0, par.size / 2 - par.gateSize / 2)});
+        this.walls.filled = false;
+        this.walls.paint = Color.BLACK;
+        this.walls.setStroke(new BasicStroke(2f));
     }
 
     @Override
@@ -100,16 +87,20 @@ public class Indiana extends MaseSimState implements TaskDescription {
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
-        this.gate = new Gate(this, field, gateFeature);
-        gate.setLocation(new Double2D(-0.001, par.size / 2));
-        gate.setOrientation(Math.PI);
-        gate.setStopper(schedule.scheduleRepeating(gate));
+        this.gate = new Gate(this, field);
+        schedule.scheduleRepeating(gate);
+        field.setObjectLocation(gate, new Double2D(0.5,0));
+        field.setObjectLocation(walls, new Double2D(0,0));
         placeAgents();
+
+        this.td = new TaskDescription(
+                new MasonDistanceFunction(field),
+                new EntityGroup(agents, 0, agents.size(), false),
+                new EntityGroup(Collections.singletonList(gate), 1, 1, true),
+                new EntityGroup(Collections.singletonList(walls), 1, 1, true));
     }
 
     protected void placeAgents() {
-
-        // TODO: place in single file
         agents = new ArrayList<IndianaAgent>(par.numAgents);
         AgentController[] acs = gc.getAgentControllers(par.numAgents);
         double agentSeparation = (par.size - IndianaAgent.RADIUS) / par.numAgents;
@@ -129,7 +120,7 @@ public class Indiana extends MaseSimState implements TaskDescription {
                 Double2D p = null;
                 while (p == null) {
                     double randAngle = this.random.nextDouble() * Math.PI * 2;
-                    Double2D candidate = new Double2D(FastMath.cos(randAngle) * radius, gate.getLocation().y + FastMath.sin(randAngle) * radius);
+                    Double2D candidate = new Double2D(FastMath.cos(randAngle) * radius, gate.getCenter().y + FastMath.sin(randAngle) * radius);
                     if (ag.checkEnvironmentValidty(candidate)) {
                         p = candidate;
                     }
@@ -142,59 +133,54 @@ public class Indiana extends MaseSimState implements TaskDescription {
         }
     }
 
-    @Override
-    public boolean continueSimulation() {
-        return !gate.closed;
-    }
-
-    protected static class Gate extends EmboddiedAgent {
+    protected static class Gate extends PolygonEntity implements Steppable {
 
         protected long openTime = -1;
         protected boolean closed = false;
-        protected PolygonFeature gate;
-
-        protected Gate(Indiana sim, Continuous2D field, PolygonFeature gate) {
-            super(sim, field, sim.par.gateSize / 2, Color.RED);
-            this.enableCollisionDetection(false);
-            this.gate = gate;
+        protected Double2D center;
+        
+        protected Gate(Indiana sim, Continuous2D field) {
+            super(new Double2D[]{new Double2D(-0.1, sim.par.size / 2 - sim.par.gateSize / 2),
+                new Double2D(-0.1, sim.par.size / 2 + sim.par.gateSize / 2)});
+            this.paint = Color.BLUE;
+            this.filled = false;
+            this.setStroke(new BasicStroke(3));
+            this.center = new Double2D(0, sim.par.size / 2);
+            
         }
 
         @Override
         public void step(SimState state) {
-            Indiana ind = (Indiana) sim;
+            Indiana ind = (Indiana) state;
             boolean anyInside = false;
             for (IndianaAgent a : ind.agents) {
                 if (!a.escaped) {
                     anyInside = true;
                     if (a.passingGate && a.getLocation().x < 0) {
                         if (openTime == -1) {
+                            this.paint = Color.RED;
                             openTime = ind.schedule.getSteps();
                         }
                         a.stop();
                         a.escaped = true;
-                        field.remove(a);
+                        ind.field.remove(a);
+                        ind.td.groups()[0].remove(a);
                     }
                 }
             }
             if (!anyInside || (openTime != -1 && ind.schedule.getSteps() - openTime > ind.par.gateInterval)) {
                 closed = true;
-            }
-        }
-
-        @Override
-        public double distance(PhysicalEntity other) {
-            if(other instanceof EmboddiedAgent) {
-                EmboddiedAgent o = (EmboddiedAgent) other;
-                double d = Math.max(0, gate.distanceTo(o.getLocation()) - o.getRadius());
-                return d;
-            } else {
-                return 0;
+                state.kill();
             }
         }
 
         @Override
         public double[] getStateVariables() {
             return new double[]{openTime == -1 ? 0 : 1};
+        }
+        
+        protected Double2D getCenter() {
+            return center;
         }
     }
 }
