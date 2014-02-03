@@ -57,25 +57,14 @@ public class KeepawaySimulator extends MasonSimulator {
                     df.push(KeepawayParams.P_KEEPER).push(KeepawayParams.P_PASS_SPEED));
         }
         par.sortKeepers = state.parameters.getBoolean(df.push(KeepawayParams.P_SORT_KEEPERS), null, false);
+        par.keepersPlacement = state.parameters.getDouble(df.push(KeepawayParams.P_KEEPERS_PLACEMENT), null);
 
         // Takers
         par.takerSpeed = state.parameters.getDouble(df.push(KeepawayParams.P_TAKER_SPEED), null);
-        String placement = state.parameters.getString(df.push(KeepawayParams.P_TAKERS_PLACEMENT), null);
-        if (placement.equalsIgnoreCase(KeepawayParams.V_CENTER)) {
-            par.takersPlacement = KeepawayParams.V_CENTER;
-        } else if (placement.equalsIgnoreCase(KeepawayParams.V_RANDOM_CENTER)) {
-            par.takersPlacement = KeepawayParams.V_RANDOM_CENTER;
-            par.placeRadius = state.parameters.getDouble(df.push(KeepawayParams.P_PLACE_RADIUS), null);
-        } else {
-            state.output.fatal("Unknown takers placement", df.push(KeepawayParams.P_TAKERS_PLACEMENT));
-        }
+        par.takersPlacement = state.parameters.getDouble(df.push(KeepawayParams.P_TAKERS_PLACEMENT), null);
 
-        placement = state.parameters.getString(df.push(KeepawayParams.P_KEEPERS_PLACEMENT), null);
-        if (placement.equalsIgnoreCase(KeepawayParams.V_RANDOM)) {
-            par.keepersPlacement = KeepawayParams.V_RANDOM;
-        } else if (placement.equalsIgnoreCase(KeepawayParams.V_FIXED)) {
-            par.keepersPlacement = KeepawayParams.V_FIXED;
-                    // Initial keeper position
+        if (par.keepersPlacement == 0) {
+            // Initial keeper position
             // place keepers evenly distributed around the circle
             Double2D center = new Double2D(par.size / 2, par.size / 2);
             par.keeperStartPos = new Double2D[par.numKeepers];

@@ -29,7 +29,6 @@ public class KeepawayParams {
     
     // Keepers
     public static final String P_KEEPERS_PLACEMENT = "keepers-placement";
-    public static final String V_RANDOM_CENTER = "random", V_FIXED = "fixed";
     public static final String P_NUM_KEEPERS = "n-keepers";
     public static final String P_KEEPER = "keeper";
     public static final String P_MOVE_SPEED = "move-speed";
@@ -42,16 +41,13 @@ public class KeepawayParams {
     protected Color[] color;
     protected Double2D[] keeperStartPos;
     protected double[] keeperStartAngle;
-    protected String keepersPlacement;
+    protected double keepersPlacement;
     protected boolean sortKeepers;
     
     // Takers
     public static final String P_NUM_TAKERS = "n-takers";
     public static final String P_TAKER_SPEED = "taker-speed";
     public static final String P_TAKERS_PLACEMENT = "takers-placement";
-    public static final String V_RANDOM = "random-center", V_CENTER = "center";
-    public static final String P_PLACE_RADIUS = "placement-radius";
     protected double takerSpeed;
-    protected String takersPlacement;
-    protected double placeRadius;
+    protected double takersPlacement;
 }

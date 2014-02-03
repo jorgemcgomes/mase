@@ -168,7 +168,8 @@ sampleData <- function(dataList, sample.size, subpops=NULL) {
         for(j in data$jobs) {
             for(s in subs) {
                 subsample <- data[[j]][[s]]
-                subsample <- subsample[sample(1:nrow(subsample), each.sample),]
+                n <- min(nrow(subsample), each.sample)
+                subsample <- subsample[sample(1:nrow(subsample), n),]
                 sample <- rbind(sample, subsample)
             }
         }
@@ -229,4 +230,35 @@ frameFusion <- function(framelist) {
     }
     colnames(result) <- colnames(framelist[[1]])
     return(result)
+}
+
+transformTournamentFiles <- function(folder, infile, outfile, vars.0, vars.1) {
+    files <- list.files(folder, pattern=infile, full.names=T)
+    for(f in files) {
+        print(f)
+        t <- read.table(f, header=F, sep=" ", stringsAsFactors=F)
+        df <- data.frame()
+        r <- 1
+        for(g in 1:nrow(t)) {
+            df[r,1] <- t[g,1]
+            df[r,2] <- 0
+            df[r,3] <- 0
+            df[r,4] <- t[g,2]
+            for(i in 1:vars.0) {
+                df[r,4+i] <- t[g,3+i]
+            }
+            r <- r+1
+            df[r,1] <- t[g,1]
+            df[r,2] <- 1
+            df[r,3] <- 0
+            df[r,4] <- t[g, vars.0 + 4]
+            for(i in 1:vars.1) {
+                df[r,4+i] <- t[g,5+vars.0+i]
+            }
+            r <- r+1
+        }
+        
+        o <- gsub(infile, outfile, f)
+        write.table(df, file=o, row.names=F, col.names=F, sep=" ", quote=F)
+    }
 }

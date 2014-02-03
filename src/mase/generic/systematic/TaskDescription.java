@@ -27,5 +27,4 @@ public class TaskDescription {
     public DistanceFunction distanceFunction() {
         return df;
     }
-    
 }

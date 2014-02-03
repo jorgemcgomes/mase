@@ -30,6 +30,7 @@ public class EntityGroup extends ArrayList<Entity> {
         this(ents, ents.size(), ents.size(), isStatic);
     }
 
+
     public double[] getAverageState() {
         if (size == -1) {
             size = this.get(0).getStateVariables().length;

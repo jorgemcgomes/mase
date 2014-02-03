@@ -22,12 +22,12 @@ problem.collisions =                true
 problem.ball-decay =                0.05
 
 problem.taker-speed =               0.5
-problem.takers-placement =          center
+problem.takers-placement =          0
 
 problem.ball-placement =            0
 
 problem.sort-keepers =              false
-problem.keepers-placement =         random
+problem.keepers-placement =         0.7
 problem.n-keepers =                 3
 problem.keeper.move-speed =         0.5
 problem.keeper.pass-speed =         3

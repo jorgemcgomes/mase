@@ -26,8 +26,7 @@ problem.collisions =                true
 problem.ball-decay =                0.05
 
 problem.taker-speed =               0.5
-problem.takers-placement =          random-center
-problem.placement-radius =          15
+problem.takers-placement =          15
 
 problem.ball-placement =            0
 

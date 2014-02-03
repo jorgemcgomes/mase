@@ -763,3 +763,29 @@ fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=li
 setwd("~/exps/sys2//rs")
 data <- metaLoadData("brownian","mutual_k5","mutual_k10","mutual_kf5","mutual_kf10", params=list(jobs=10, load.behavs=F, subpops=1))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,200,399)))
+
+
+setwd("~/exps//competitive/ga//pred")
+data <- metaLoadData("fit_rand","nsga0_rand","nsga1_rand", names=c("fitrand","nsga0rand","nsga1rand"), params=list(jobs=20, vars.ind=c("time","walldist","agdist","mov"), subpops=2, load.behavs=T, behavs.file="tbehaviours.stat", behavs.sample=1))
+fullStatistics(data, som.ind=T, behav.mean=F, show.only=T, expset.name="fit_vs_nsga")
+
+setwd("~/exps//competitive/ga//go")
+data <- metaLoadData("fit_rand","nsga0_rand","nsga1_rand", names=c("fitrand","nsga0rand","nsga1rand"), params=list(jobs=20, vars.ind=c("captured","lost","length","groupSize","groupNumber"), subpops=2, load.behavs=T, behavs.file="tbehaviours.stat", behavs.sample=1))
+fullStatistics(data, som.ind=T, behav.mean=F, show.only=T, expset.name="fit_vs_nsga")
+
+setwd("~/exps/sys3//rs")
+data <- metaLoadData("~/exps/sys/rs/fit/","~/exps/sys/rs/ts/","mutual_km10","~/exps/sys2/rs/mutual_kf5/","~/exps/sys2/rs/mutual_kf10/","~/exps/sys2/rs/mutual_k5/","~/exps/sys2/rs/mutual_k10/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,200,399)))
+
+setwd("~/exps/sys2//ind")
+data <- metaLoadData("mutual_mean_kf5","mutual_mean_kf10", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(75,150,249)))
+
+setwd("~/exps/sys3//ind")
+data <- metaLoadData("mutual_km5","mutual_km10","mutual_km10_arch/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(75,150,249)))
+
+setwd("~/exps/")
+data <- metaLoadData("sys/ind/fit/","sys/ind/ts/","sys2/ind/mutual_mean_kf10","sys2/ind/mutual_mean_kf5","sys3/ind/mutual_km5","sys3/ind/mutual_km10", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(75,150,249)))
+

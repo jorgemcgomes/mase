@@ -8,6 +8,7 @@ package mase.generic.systematic;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.mason.MaseSimState;
@@ -33,6 +34,7 @@ public class SystematicEvaluator extends MasonEvaluation {
     public static final String P_STATE_DEVIATION = "state-deviation";
     public static final String P_PHYSICAL_RELATIONS = "physical-relations";
     public static final String P_SYSTEMATIC_BASE = "systematic";
+    public static final String P_IGNORE_GROUPS = "ignore-groups";
 
     public enum TimeMode {
 
@@ -51,6 +53,7 @@ public class SystematicEvaluator extends MasonEvaluation {
     protected TimeMode timeMode;
     protected int timeFrames;
 
+    protected boolean[] evaluateGroup;
     protected boolean numAlive, stateMean, stateDeviation, physicalRelations;
 
     @Override
@@ -65,6 +68,18 @@ public class SystematicEvaluator extends MasonEvaluation {
         this.stateMean = state.parameters.getBoolean(base.push(P_STATE_MEAN), df.push(P_STATE_MEAN), false);
         this.stateDeviation = state.parameters.getBoolean(base.push(P_STATE_DEVIATION), df.push(P_STATE_DEVIATION), false);
         this.physicalRelations = state.parameters.getBoolean(base.push(P_PHYSICAL_RELATIONS), df.push(P_PHYSICAL_RELATIONS), false);
+
+        String s = state.parameters.getStringWithDefault(base.push(P_IGNORE_GROUPS), df.push(P_IGNORE_GROUPS), "");
+        this.evaluateGroup = new boolean[100];
+        Arrays.fill(evaluateGroup, true);
+        for (String sp : s.split(",")) {
+            try {
+                int index = Integer.parseInt(sp.trim());
+                evaluateGroup[index] = false;
+                state.output.message("Ignoring group " + index);
+            } catch (Exception ex) {
+            }
+        }
     }
 
     @Override
@@ -82,61 +97,62 @@ public class SystematicEvaluator extends MasonEvaluation {
         int index = 0;
         for (int gi = 0; gi < td.groups().length; gi++) {
             EntityGroup eg = td.groups()[gi];
-
-            // Percentage of alive agents
-            if (numAlive && eg.getMaxSize() > eg.getMinSize()) {
-                features.get(index++).add((double) (eg.size() - eg.getMinSize())
-                        / (eg.getMaxSize() - eg.getMinSize()));
-            }
-
-            // Average state of the group -- if none alive it is filled with NaN
-            double[] averageState = eg.getAverageState();
-            if (stateMean) {
-                for (int i = 0; i < averageState.length; i++) {
-                    features.get(index++).add(averageState[i]);
+            if (evaluateGroup[gi]) {
+                // Percentage of alive agents
+                if (numAlive && eg.getMaxSize() > eg.getMinSize()) {
+                    features.get(index++).add((double) (eg.size() - eg.getMinSize())
+                            / (eg.getMaxSize() - eg.getMinSize()));
                 }
-            }
 
-            // StateVariables dispersion -- average difference to the mean value
-            if (stateDeviation && eg.getMaxSize() > 1) {
-                // If the group has more than one alive
-                if (eg.size() > 1) {
-                    double[] diffs = new double[averageState.length];
-                    for (Entity e : eg) {
-                        double[] vars = e.getStateVariables();
-                        for (int i = 0; i < averageState.length; i++) {
-                            diffs[i] += FastMath.pow2(averageState[i] - vars[i]);
+                // Average state of the group -- if none alive it is filled with NaN
+                double[] averageState = eg.getAverageState();
+                if (stateMean) {
+                    for (int i = 0; i < averageState.length; i++) {
+                        features.get(index++).add(averageState[i]);
+                    }
+                }
+
+                // StateVariables dispersion -- average difference to the mean value
+                if (stateDeviation && eg.getMaxSize() > 1) {
+                    // If the group has more than one alive
+                    if (eg.size() > 1) {
+                        double[] diffs = new double[averageState.length];
+                        for (Entity e : eg) {
+                            double[] vars = e.getStateVariables();
+                            for (int i = 0; i < averageState.length; i++) {
+                                diffs[i] += FastMath.pow2(averageState[i] - vars[i]);
+                            }
+                        }
+                        for (int i = 0; i < diffs.length; i++) {
+                            double sd = FastMath.sqrtQuick(diffs[i] / eg.size());
+                            features.get(index++).add(sd);
+                        }
+                    } else {
+                        for (int i = 0; i < 1 + averageState.length; i++) {
+                            features.get(index++).add(Double.NaN);
                         }
                     }
-                    for (int i = 0; i < diffs.length; i++) {
-                        double sd = FastMath.sqrtQuick(diffs[i] / eg.size());
-                        features.get(index++).add(sd);
-                    }
-                } else {
-                    for (int i = 0; i < 1 + averageState.length; i++) {
-                        features.get(index++).add(Double.NaN);
-                    }
                 }
-            }
 
-            // Physical dispersion -- mean distance of each entity to the other entities
-            if (physicalRelations && td.distanceFunction() != null && eg.getMaxSize() > 1 && !eg.isStatic()) {
-                double sumDists = 0;
-                int count = 0;
-                for (int i = 0; i < eg.size(); i++) {
-                    for (int j = i + 1; j < eg.size(); j++) {
-                        sumDists += td.distanceFunction().distance(eg.get(i), eg.get(j));
-                        count++;
+                // Physical dispersion -- mean distance of each entity to the other entities
+                if (physicalRelations && td.distanceFunction() != null && eg.getMaxSize() > 1 && !eg.isStatic()) {
+                    double sumDists = 0;
+                    int count = 0;
+                    for (int i = 0; i < eg.size(); i++) {
+                        for (int j = i + 1; j < eg.size(); j++) {
+                            sumDists += td.distanceFunction().distance(eg.get(i), eg.get(j));
+                            count++;
+                        }
                     }
+                    features.get(index++).add(count > 0 ? sumDists / count : Double.NaN);
                 }
-                features.get(index++).add(count > 0 ? sumDists / count : Double.NaN);
             }
 
             // Relations with other entities -- physical distances
             if (physicalRelations && td.distanceFunction() != null) {
                 for (int go = gi + 1; go < td.groups().length; go++) {
                     EntityGroup otherG = td.groups()[go];
-                    if (!eg.isStatic() || !otherG.isStatic()) {
+                    if ((!eg.isStatic() || !otherG.isStatic()) && (evaluateGroup[gi] || evaluateGroup[go])) {
                         features.get(index++).add(td.distanceFunction().distance(eg, otherG));
                     }
                 }

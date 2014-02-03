@@ -40,13 +40,13 @@ public class CompetitiveKeepaway extends Keepaway {
         takers = new ArrayList<EmboddiedAgent>(1);
         AgentController[] acs = gc.getAgentControllers(2);
         CompetitiveTaker t = new CompetitiveTaker(this, field, acs[1].clone());
-        if (par.takersPlacement == KeepawayParams.V_CENTER) {
+        if (par.takersPlacement == 0) {
             t.setLocation(center);
-        } else if (par.takersPlacement == KeepawayParams.V_RANDOM_CENTER) {
+        } else  {
             double q = random.nextDouble() * Math.PI * 2;
             double r = Math.sqrt(random.nextDouble());
-            double x = (par.placeRadius * r) * Math.cos(q) + center.getX();
-            double y = (par.placeRadius * r) * Math.sin(q) + center.getY();
+            double x = (par.takersPlacement * r) * Math.cos(q) + center.getX();
+            double y = (par.takersPlacement * r) * Math.sin(q) + center.getY();
             t.setLocation(new Double2D(x, y));
         }
         Double2D ballDir = ball.getLocation().subtract(t.getLocation());

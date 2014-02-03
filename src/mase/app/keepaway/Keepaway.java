@@ -79,13 +79,12 @@ public class Keepaway extends MaseSimState implements TaskDescriptionProvider {
         AgentController[] acs = gc.getAgentControllers(par.numKeepers);
         for (int i = 0; i < par.numKeepers; i++) {
             Keeper k = new Keeper(this, field, acs[i].clone(), par.passSpeed[i], par.moveSpeed[i], par.color[i]);
-            if (par.keepersPlacement == KeepawayParams.V_FIXED) {
+            if (par.keeperStartPos != null && par.keeperStartAngle != null) {
                 k.setLocation(par.keeperStartPos[i]);
                 k.setOrientation(par.keeperStartAngle[i]);
             } else {
                 double slice = Math.PI * 2 / par.numKeepers;
-                double margin = 0.15; // in radians
-                double rot = i* slice + margin + random.nextDouble() * slice - (margin * 2);
+                double rot = i * slice + (random.nextDouble() - 0.5) * par.keepersPlacement;
                 Double2D up = new Double2D(0, par.ringSize / 2);
                 Double2D v = up.rotate(rot);
                 k.setLocation(v.add(center));
@@ -100,13 +99,13 @@ public class Keepaway extends MaseSimState implements TaskDescriptionProvider {
     protected void placeTakers() {
         takers = new ArrayList<EmboddiedAgent>(1);
         Taker t = new Taker(this, field);
-        if (par.takersPlacement == KeepawayParams.V_CENTER) {
+        if (par.takersPlacement == 0) {
             t.setLocation(center);
-        } else if (par.takersPlacement == KeepawayParams.V_RANDOM_CENTER) {
+        } else {
             double q = random.nextDouble() * Math.PI * 2;
             double r = Math.sqrt(random.nextDouble());
-            double x = (par.placeRadius * r) * Math.cos(q) + center.getX();
-            double y = (par.placeRadius * r) * Math.sin(q) + center.getY();
+            double x = (par.takersPlacement * r) * Math.cos(q) + center.getX();
+            double y = (par.takersPlacement * r) * Math.sin(q) + center.getY();
             t.setLocation(new Double2D(x, y));
         }
         Double2D ballDir = ball.getLocation().subtract(t.getLocation());
