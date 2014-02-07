@@ -151,9 +151,4 @@ public class AggregationAgent extends SmartAgent implements Entity {
     public String getSensorsReport() {
         return super.getSensorsReport(); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    @Override
-    public double[] getStateVariables() {
-        return new double[0];
-    }
 }

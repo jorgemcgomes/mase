@@ -36,6 +36,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     public static final double COLLISION_SPEED_DECAY = 0.5;
     public static final double COLLISION_DIRECTION = Math.PI / 2;
     private boolean isAlive;
+    private double turningSpeed;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
         super(new OvalPortrayal2D(c, radius * 2, true), 0, radius,
@@ -45,6 +46,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.field = field;
         this.collisionStatus = false;
         this.speed = 0;
+        this.turningSpeed = 0;
         this.detectCollisions = false;
         this.boundedArena = false;
         this.isAlive = true;
@@ -62,7 +64,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
 
     @Override
     public double[] getStateVariables() {
-        return new double[] {getLocation().x, getLocation().y, orientation2D(), getSpeed()};
+        return new double[] {getLocation().x, getLocation().y, getTurningSpeed(), getSpeed()};
     }
 
     public void enableCollisionDetection(boolean enable) {
@@ -74,8 +76,10 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     }
 
     protected boolean move(double orientation, double speed) {
-        this.orientation = normalizeAngle(orientation);
-
+        double o = normalizeAngle(orientation);
+        this.turningSpeed = o - this.orientation;
+        this.orientation = o;
+        
         if (!attemptMove(orientation, speed)) { // cannot move
             // try to escape to both sides with a random order
             double angle = sim.random.nextBoolean() ? COLLISION_DIRECTION : -COLLISION_DIRECTION;
@@ -176,6 +180,10 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
 
     public double getSpeed() {
         return speed;
+    }
+    
+    public double getTurningSpeed() {
+        return turningSpeed;
     }
 
     /**

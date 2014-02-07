@@ -38,7 +38,7 @@ public class SystematicEvaluator extends MasonEvaluation {
 
     public enum TimeMode {
 
-        mean, simplereg, meanslope, frames
+        mean, simplereg, meanslope, frames, meanlast, last
     }
 
     public static final int MAX_FEATURES = 100;
@@ -183,6 +183,39 @@ public class SystematicEvaluator extends MasonEvaluation {
                 res[i] = (float) (count == 0 ? 0 : sum / count);
             }
             res[size] = sim.schedule.getSteps();
+            vbr = new SystematicResult(res);
+        } else if(timeMode == TimeMode.last) { 
+            float[] res = new float[size + 1];
+            for (int i = 0; i < size; i++) {
+                List<Double> featureSample = features.get(i);
+                double last = 0;
+                for (Double d : featureSample) {
+                    if (!Double.isNaN(d)) {
+                        last = d;
+                    }
+                }
+                res[i] = (float) last;
+            }
+            res[size] = sim.schedule.getSteps();
+            vbr = new SystematicResult(res);        
+        } else if (timeMode == TimeMode.meanlast) {
+            float[] res = new float[size * 2 + 1];
+            for (int i = 0; i < size; i++) {
+                List<Double> featureSample = features.get(i);
+                double last = 0;
+                double sum = 0;
+                int count = 0;
+                for (Double d : featureSample) {
+                    if (!Double.isNaN(d)) {
+                        sum += d;
+                        count++;
+                        last = d;
+                    }
+                }
+                res[i*2] = (float) (count == 0 ? 0 : sum / count);
+                res[i*2+1] = (float) last;
+            }
+            res[size * 2] = sim.schedule.getSteps();
             vbr = new SystematicResult(res);
         } else if (timeMode == TimeMode.simplereg || timeMode == TimeMode.meanslope) {
             SimpleRegression reg = new SimpleRegression(true);

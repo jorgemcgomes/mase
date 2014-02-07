@@ -789,3 +789,29 @@ setwd("~/exps/")
 data <- metaLoadData("sys/ind/fit/","sys/ind/ts/","sys2/ind/mutual_mean_kf10","sys2/ind/mutual_mean_kf5","sys3/ind/mutual_km5","sys3/ind/mutual_km10", params=list(jobs=10, load.behavs=F, subpops=1))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(75,150,249)))
 
+
+
+setwd("~/exps/sys3/ind")
+data <- metaLoadData("ga_fit","ga_ts/","ga_mutual_km10/","ga_mutual_km10_l/","ga_mutual_km10_ml/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sys3/rs")
+data <- metaLoadData("ga_fit","ga_ts/","ga_mutual_km10/","ga_mutual_km10_l/","ga_mutual_km10_ml/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
+
+
+
+setwd("~/exps/sys3/rs")
+data <- metaLoadData("ga_mutual_km10_2/","ga_mutual_km10_2_flat/", params=list(jobs=10, load.behavs=T, behavs.sample=0.25, subpops=1, vars.file=c("alive","energy","mov","dist","na","alive", "x.avg", "y.avg", "ori.avg", "speed.avg", "energy.avg", "charging.avg", "dispersion", "res.dist",  "res.charging", "simlength"), vars.group=c("alive", "x.avg", "y.avg", "ori.avg", "speed.avg", "energy.avg", "charging.avg", "dispersion", "res.dist",  "res.charging", "simlength")))
+fullStatistics(data, fit.comp=T, som.group=T, som.alljobs=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
+
+data1 <- metaLoadData("ga_fit/","ga_ts/", names=c("fit","ts"), params=list(jobs=10, load.behavs=T, behavs.sample=0.25, subpops=1, vars.group=c("alive","energy","mov","dist")))
+data2 <- metaLoadData("ga_mutual_km10/","ga_mutual_km10_flat/", names=c("sys","sys_nw"),params=list(jobs=10, load.behavs=T, behavs.sample=0.25, subpops=1, vars.file=c("alive","energy","mov","dist","na","alive", "x.avg", "y.avg", "ori.avg", "speed.avg", "energy.avg", "charging.avg", "dispersion", "res.dist",  "res.charging", "simlength"), vars.group=c("alive","energy","mov","dist")))
+data <- c(data1, data2)
+fullStatistics(data, fit.comp=T, som.group=T, som.alljobs=T, show.only=F, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sys3/ind")
+data1 <- metaLoadData("ga_fit/","ga_ts/", names=c("fit","ts"), params=list(jobs=10, load.behavs=T, behavs.sample=0.25, subpops=1, vars.group=c("escaped","opentime","distgate","dispersion")))
+data2 <- metaLoadData("ga_mutual_km10/","ga_mutual_km10_flat/", names=c("sys","sys_nw"),params=list(jobs=10, load.behavs=T, behavs.sample=0.25, subpops=1, vars.file=c("escaped","opentime","distgate","dispersion","na","alive","x","y","ori","speed","passing","dispersion","distgate", "distwall", "gate.open","simlength"), vars.group=c("escaped","opentime","distgate","dispersion")))
+data <- c(data1, data2)
+fullStatistics(data, fit.comp=F, som.group=T, som.alljobs=T, show.only=F, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))

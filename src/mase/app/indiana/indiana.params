@@ -29,3 +29,10 @@ problem.gate-sensor-range =        100
 
 neat.INPUT.NODES = 11
 neat.OUTPUT.NODES=3
+
+vector.species.genome-size =       108
+neural.input =                     11
+neural.hidden =                    7
+neural.output =                    3
+neural.structure =                 feed-forward
+neural.tanh =                      false
