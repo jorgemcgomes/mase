@@ -7,6 +7,7 @@ package mase.app.pred;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
+import mase.app.pred.PredParams.SensorMode;
 import mase.controllers.GroupController;
 import mase.mason.Mason2dUI;
 import mase.mason.MasonSimulator;
@@ -47,11 +48,8 @@ public class PredatorPreySimulator extends MasonSimulator {
             state.output.fatal("Unknown strategy: " + par.escapeStrategy, base.push(PredParams.P_ESCAPE_STRATEGY));
         }
 
-        par.sensorMode = state.parameters.getString(base.push(PredParams.P_SENSOR_MODE), null);
-        if (par.sensorMode.equals(PredParams.V_CLOSEST)) {
-            par.sensorMode = PredParams.V_CLOSEST;
-        } else if (par.sensorMode.equals(PredParams.V_ARCS)) {
-            par.sensorMode = PredParams.V_ARCS;
+        par.sensorMode = SensorMode.valueOf(state.parameters.getString(base.push(PredParams.P_SENSOR_MODE), null));
+        if (par.sensorMode == SensorMode.arcs) {
             par.sensorArcs = state.parameters.getInt(base.push(PredParams.P_SENSOR_ARCS), null);
             if(par.sensorArcs % 2 != 0) {
                 state.output.fatal("The number of sensor arcs must be even.", base.push(PredParams.P_SENSOR_ARCS));

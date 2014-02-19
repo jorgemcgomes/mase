@@ -6,7 +6,9 @@ package mase.generic;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.BehaviourResult;
@@ -90,9 +92,9 @@ public class SCResult extends VectorBehaviourResult {
 
 
 
-    /*@Override
+    @Override
     public String toString() {
-        return "SC";
+        //return "SC";
         StringBuilder sb = new StringBuilder();
         for (Iterator<Entry<Integer, Float>> iter = counts.entrySet().iterator(); iter.hasNext();) {
             Entry<Integer, Float> e = iter.next();
@@ -104,7 +106,7 @@ public class SCResult extends VectorBehaviourResult {
             }
         }
         return new String(sb);
-    }*/
+    }
 
     public Map<Integer, Float> getCounts() {
         return counts;

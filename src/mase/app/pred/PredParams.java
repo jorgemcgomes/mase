@@ -27,7 +27,6 @@ public class PredParams {
     public static final String P_ESCAPE_STRATEGY = "escape-strategy";
     public static final String V_MEAN_VECTOR = "mean-vector", V_NEAREST = "nearest";
     public static final String P_SENSOR_MODE = "sensor-mode";
-    public static final String V_CLOSEST = "closest", V_ARCS = "arcs";
     public static final String P_SENSOR_ARCS = "n-arcs";
     public static final String P_COLLISIONS = "collisions";
     public double size = 100d;
@@ -44,7 +43,11 @@ public class PredParams {
     public int nPredators = 3;
     public String preyPlacement = V_CENTER;
     public String escapeStrategy = V_MEAN_VECTOR;
-    public String sensorMode = V_CLOSEST;
+    public SensorMode sensorMode;
     public int sensorArcs;
     public boolean collisions;
+    
+    public enum SensorMode {
+        closest, arcs, otherpreds
+    }
 }

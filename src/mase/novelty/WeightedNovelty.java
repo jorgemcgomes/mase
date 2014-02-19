@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.VectorBehaviourResult;
+import mase.generic.systematic.SystematicResult;
 import net.jafama.FastMath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
@@ -42,7 +43,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
 
     public static enum SelectionMethod {
 
-        all, truncation, tournament, roulette, normalised
+        all, truncation, tournament, roulette, normalised, min
     };
 
     public static enum CorrelationMethod {
@@ -339,6 +340,10 @@ public class WeightedNovelty extends NoveltyEvaluation {
             for (int i = 0; i < weights.length; i++) {
                 weights[i] = adjustedCorrelation[i] / max;
             }
+        } else if(selection == SelectionMethod.min) {
+            for(int i = 0 ; i < weights.length ; i++) {
+                weights[i] = adjustedCorrelation[i] + selectionPressure;
+            }
         }
     }
 
@@ -351,7 +356,13 @@ public class WeightedNovelty extends NoveltyEvaluation {
             for (Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;
                 VectorBehaviourResult vbr = (VectorBehaviourResult) nf.getNoveltyBehaviour();
-                float[] v = (float[]) vbr.value();
+                float[] v;
+                if(vbr instanceof SystematicResult) {
+                    SystematicResult sr = (SystematicResult) vbr;
+                    v = sr.getOriginalResult();
+                } else {
+                    v = (float[]) vbr.value();
+                }
                 float[] f = new float[v.length + 1];
                 f[0] = nf.getFitnessScore();
                 System.arraycopy(v, 0, f, 1, v.length);

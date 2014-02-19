@@ -792,11 +792,48 @@ fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=li
 
 
 setwd("~/exps/sys3/ind")
-data <- metaLoadData("ga_fit","ga_ts/","ga_mutual_km10/","ga_mutual_km10_l/","ga_mutual_km10_ml/", params=list(jobs=10, load.behavs=F, subpops=1))
+data <- metaLoadData("ga2_ts/","ga2_mutual_km10_ml_min/","ga2_mutual_km10_ml_min_k5/","ga2_mutual_km10_m_min_k5/","ga2_mutual_km10_l_min_k5/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Ind", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sys3/rs")
+data <- metaLoadData("ga2_ts/","ga2_mutual_km10_ml_min/","ga2_mutual_km10_ml_min_k5/","ga2_mutual_km10_m_min_k5/","ga2_mutual_km10_l_min_k5/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="RS", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sys3/pred")
+data <- metaLoadData("ga2_ts/","ga2_mutual_km10_ml_min/","ga2_mutual_km10_ml_min_k5/","ga2_mutual_km10_m_min_k5/","ga2_mutual_km10_l_min_k5/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,250,499)))
+
+data <- metaLoadData("ga_fit","ga2_ts/","ga_mutual_km10_ml","ga2_mutual_km10_ml_min", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,250,499)))
+
+data <- metaLoadData("ga2_mutual_km10_ml_min/","ga2_mutual_km10_ml_min_k5/", params=list(jobs=10, load.behavs=F, subpops=1))
+
+
+setwd("~/exps/sys3/pred")
+data <- metaLoadData("ga2_ts/","ga2_mutual_km10_ml_min/","ga2_mutual_km10_ml_min10/","ga2_mutual_km10_ml_min50/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,250,499)))
+
+
+
+
+setwd("~/exps/sys3/ind")
+data <- metaLoadData("ga_fit","ga_ts/","ga_nov_ts/","ga_mutual_km10_ml/","ga_nov_mutual_km10_ml/", params=list(jobs=10, load.behavs=F, subpops=1))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
 
 setwd("~/exps/sys3/rs")
-data <- metaLoadData("ga_fit","ga_ts/","ga_mutual_km10/","ga_mutual_km10_l/","ga_mutual_km10_ml/", params=list(jobs=10, load.behavs=F, subpops=1))
+data <- metaLoadData("ga_fit","ga_ts/","ga_nov_ts/","ga_mutual_km10_ml/","ga_nov_mutual_km10_ml/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sys3/ks3/")
+data <- metaLoadData("ga_fit","ga_ts/","ga_mutual_km10_ml/","ga_mutual_km10_ml_i/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sys3/rs")
+data <- metaLoadData("ga_fit","ga_nov_ts/","ga_nov_mutual_km10_ml/","ga_nov_mutual_km10_ml_nosmooth/","ga_nov_mutual_km10_ml_smooth75/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sys3/pred/")
+data <- metaLoadData("ga_fit", params=list(jobs=10, load.behavs=F, subpops=1))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
 
 
@@ -815,3 +852,17 @@ data1 <- metaLoadData("ga_fit/","ga_ts/", names=c("fit","ts"), params=list(jobs=
 data2 <- metaLoadData("ga_mutual_km10/","ga_mutual_km10_flat/", names=c("sys","sys_nw"),params=list(jobs=10, load.behavs=T, behavs.sample=0.25, subpops=1, vars.file=c("escaped","opentime","distgate","dispersion","na","alive","x","y","ori","speed","passing","dispersion","distgate", "distwall", "gate.open","simlength"), vars.group=c("escaped","opentime","distgate","dispersion")))
 data <- c(data1, data2)
 fullStatistics(data, fit.comp=F, som.group=T, som.alljobs=T, show.only=F, expset.name="sys", fit.comp.par=list(snapshots=c(100,250,499)))
+
+
+
+setwd("~/exps/sysf/pred")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25/","ga_k10_ml_min50/","ga_k10_ml_flat/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749)))
+
+setwd("~/exps/sysf/ind")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25/","ga_k10_ml_flat/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sysf/rs")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25/","ga_k10_ml_flat/", params=list(jobs=10, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749)))

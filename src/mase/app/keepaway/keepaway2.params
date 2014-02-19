@@ -26,16 +26,16 @@ problem.takers-placement =          0
 
 problem.ball-placement =            0
 
-problem.sort-keepers =              false
-problem.keepers-placement =         0.7
+problem.sort-keepers =              true
+problem.keepers-placement =         0.785
 problem.n-keepers =                 3
 problem.keeper.move-speed =         0.5
 problem.keeper.pass-speed =         3
 problem.keeper.color =              blue
 # displacement = ball-speed^2 / ball-decay
 
-vector.species.genome-size =        102
-neural.input =                      9
+vector.species.genome-size =        109
+neural.input =                      10
 neural.hidden =                     7
 neural.output =                     4
 neural.structure =                  feed-forward

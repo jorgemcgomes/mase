@@ -26,7 +26,7 @@ public class EntityGroup extends ArrayList<Entity> {
         this.isStatic = isStatic;
     }
 
-    public EntityGroup(List<Entity> ents, boolean isStatic) {
+    public EntityGroup(List<? extends Entity> ents, boolean isStatic) {
         this(ents, ents.size(), ents.size(), isStatic);
     }
 

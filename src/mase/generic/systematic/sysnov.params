@@ -7,13 +7,18 @@ eval.post.1.ns-k =                     15
 eval.post.1.ns-archive-prob =          0.03
 eval.post.1.ns-archive-size =          1000
 eval.post.1.correlation =               mutualinfo
-eval.post.1.min-weight =                0.0
-eval.post.1.smooth =                    0.5
-eval.post.1.selection-method =		all
-eval.post.1.selection-pressure = 	1
+eval.post.1.smooth =                    0
+eval.post.1.selection-method =		min
+eval.post.1.selection-pressure = 	0.25
 eval.post.1.weights-archive =           false
-eval.post.1.fitness-bins = 10
-eval.post.1.fitness-disc = kmeans
+eval.post.1.fitness-bins =              10
+eval.post.1.fitness-disc =              kmeans
+
+systematic.time-mode =                 meanlast
+systematic.num-alive =                 true
+systematic.state-mean =                true
+systematic.state-deviation =           false
+systematic.physical-relations =        true
 
 pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
 neat.SPECIE.FITNESS.MAX =              1000
@@ -32,8 +37,4 @@ stat.child.12.corr-file =                $corr.stat
 stat.child.13 =                        mase.novelty.NSGA2Stat
 stat.child.13.file =                   $nsga.stat
 
-systematic.time-mode = mean
-systematic.num-alive = true
-systematic.state-mean = true
-systematic.state-deviation = false
-systematic.physical-relations = true
+

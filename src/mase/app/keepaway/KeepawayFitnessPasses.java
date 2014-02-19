@@ -9,7 +9,6 @@ import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
-import mase.mason.MasonSimulator;
 import sim.util.Double2D;
 
 /**
@@ -42,8 +41,8 @@ public class KeepawayFitnessPasses extends MasonEvaluation {
         Keepaway kw = (Keepaway) sim;
         for (Keeper k : kw.keepers) {
             if (k.hasPossession) {
-                if ((lastKeeper == null || k != lastKeeper)
-                        && (lastBallPos == null || lastBallPos.distance(kw.ball.getLocation()) > passLength)) {
+                if (lastKeeper != null && k != lastKeeper
+                        && lastBallPos.distance(kw.ball.getLocation()) > passLength) {
                     numPasses++;
                 }
                 lastKeeper = k;

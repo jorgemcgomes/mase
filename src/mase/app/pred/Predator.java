@@ -65,6 +65,7 @@ public class Predator extends SmartAgent {
         for (Object o : objects) {
             if (o instanceof Prey) {
                 ((Prey) o).disappear();
+                predSim.td.groups()[1].remove((Prey) o);
                 this.captureCount++;
                 predSim.captureCount++;
             }

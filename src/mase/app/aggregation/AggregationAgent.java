@@ -68,7 +68,7 @@ public class AggregationAgent extends SmartAgent implements Entity {
         int count = 0;
         Bag neighbours = field.getNeighborsWithinDistance(this.getLocation(), par.agentRadius + RADIUS * 2);
         for (Object n : neighbours) {
-            if (n != this) {
+            if (n instanceof AggregationAgent && n != this) {
                 AggregationAgent aa = (AggregationAgent) n;
                 double dist = this.distanceTo(aa);
                 if (dist <= par.agentRadius) {

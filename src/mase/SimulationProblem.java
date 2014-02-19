@@ -55,7 +55,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         /* trial merge */
         if (!state.parameters.exists(base.push(P_TRIALS_MERGE), null)) {
             mergeMode = MERGE_BEST;
-            state.output.warning("Parameter not found. Going with mean.", base.push(P_TRIALS_MERGE));
+            state.output.warning("Parameter not found. Going with best.", base.push(P_TRIALS_MERGE));
         } else {
             String val = state.parameters.getString(base.push(P_TRIALS_MERGE), null);
             if (val.equals(V_BEST)) {

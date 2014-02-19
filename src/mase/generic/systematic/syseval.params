@@ -1,0 +1,10 @@
+problem.number-evals =                 3
+problem.eval.2 =                       mase.generic.systematic.SystematicEvaluator
+problem.eval.2.update-freq =           1
+
+systematic.time-mode =                 meanlast
+systematic.num-alive =                 true
+systematic.state-mean =                true
+systematic.state-deviation =           false
+systematic.physical-relations =        true
+

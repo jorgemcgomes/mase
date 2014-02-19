@@ -48,4 +48,11 @@ public class Ball extends EmboddiedAgent {
         nextKickPower = power;
         nextKickDirection = direction;
     }
+
+    @Override
+    public double[] getStateVariables() {
+        return new double[] {getLocation().x, getLocation().y, getSpeed()};
+    }
+    
+    
 }

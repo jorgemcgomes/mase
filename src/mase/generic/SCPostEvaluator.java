@@ -88,15 +88,12 @@ public class SCPostEvaluator implements PostEvaluator {
                 highestCount = e;
             }
         }
+        
         if (toRemove.size() < res.getCounts().size()) {
             res.getCounts().keySet().removeAll(toRemove);
-            res.getStates().keySet().removeAll(toRemove);
         } else { // retain only the element with highest count
             res.getCounts().clear();
             res.getCounts().put(highestCount.getKey(), highestCount.getValue());
-            byte[] state = res.getStates().get(highestCount.getKey());
-            res.getStates().clear();
-            res.getStates().put(highestCount.getKey(), state);
         }
 
         res.removedByFilter = numStates - res.getCounts().size();

@@ -73,7 +73,7 @@ public class Keeper extends SmartAgent {
             agents.add(kw.ball);
         }
 
-        double[] input = new double[agents.size() * 2 + 1];
+        double[] input = new double[agents.size() * 2 + 2];
         sensorValues = new double[input.length];
         int index = 0;
         // relative positions and angles of the ball, keepers and takers
@@ -85,8 +85,15 @@ public class Keeper extends SmartAgent {
         }
 
         // distance of the ball to the centre
-        sensorValues[index] = kw.ball.distanceToCenter;
-        input[index] = (sensorValues[index] / (kw.par.size / 2)) * 2 - 1;
+        /*sensorValues[index] = kw.ball.distanceToCenter;
+        input[index] = (sensorValues[index] / (kw.par.size / 2)) * 2 - 1;*/
+        
+        Double2D centre = new Double2D(field.width / 2, field.height / 2);
+        sensorValues[index] = this.getLocation().distance(centre);
+        input[index] = (sensorValues[index++] / (kw.par.size / 2)) * 2 - 1;
+        sensorValues[index] = this.angleTo(centre);
+        input[index] = sensorValues[index] / Math.PI;
+        
         return input;
     }
 
@@ -141,8 +148,10 @@ public class Keeper extends SmartAgent {
             sb.append(";").append(Math.round(sensorValues[index++] / Math.PI * 180)).append("\u00B0)");
         }
         // Distance of the ball to the centre
-        sb.append(" | BallToCenter: ").append(df.format(sensorValues[index]));
-
+        //sb.append(" | BallToCenter: ").append(df.format(sensorValues[index]));
+        sb.append(" | Centre: (").append(df.format(sensorValues[index++]));
+        sb.append(";").append(Math.round(sensorValues[index++] / Math.PI * 180)).append("\u00B0)");
+        
         return sb.toString();
     }
     

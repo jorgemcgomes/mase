@@ -22,7 +22,7 @@ public class PolygonEntity extends ShapePortrayal2D implements Entity {
     protected final Double2D[] points;
     private static final double[] EMPTY_ARRAY = new double[]{};
 
-    public PolygonEntity(Double2D[] points) {
+    public PolygonEntity(Double2D ... points) {
         super(buildShape(points));
         this.segStarts = new Double2D[points.length - 1];
         this.segEnds = new Double2D[points.length - 1];

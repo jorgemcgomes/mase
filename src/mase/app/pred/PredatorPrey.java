@@ -5,11 +5,18 @@
 package mase.app.pred;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import mase.app.pred.PredParams.SensorMode;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.systematic.EntityGroup;
+import mase.generic.systematic.TaskDescription;
+import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MaseSimState;
+import mase.mason.MasonDistanceFunction;
+import mase.mason.PolygonEntity;
 import mase.mason.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -21,7 +28,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredatorPrey extends MaseSimState  {
+public class PredatorPrey extends MaseSimState implements TaskDescriptionProvider {
 
     protected PredParams par;
     protected Continuous2D field;
@@ -30,7 +37,8 @@ public class PredatorPrey extends MaseSimState  {
     protected List<Prey> preys;
     protected List<Prey> activePreys;
     protected int captureCount;
-
+    protected TaskDescription td;
+    
     public PredatorPrey(long seed, PredParams params, GroupController gc) {
         super(seed);
         this.gc = gc;
@@ -47,6 +55,12 @@ public class PredatorPrey extends MaseSimState  {
         this.captureCount = 0;
         placePredators();
         placePreys();
+        
+        PolygonEntity boundaries = new PolygonEntity(new Double2D(0,0), new Double2D(par.size,0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0,0));
+        this.td = new TaskDescription(new MasonDistanceFunction(field),
+                new EntityGroup(predators, par.nPredators, par.nPredators, false),
+                new EntityGroup(preys, 0, par.nPreys, false),
+                new EntityGroup(Collections.singletonList(boundaries), true));
     }
 
     protected void placePreys() {
@@ -85,17 +99,21 @@ public class PredatorPrey extends MaseSimState  {
             double x = startX + i * par.predatorSeparation;
             Predator newPred = newPredator(controllers[i].clone());
             newPred.setLocation(new Double2D(x, y));
+            newPred.setOrientation(Math.PI / 2);
             newPred.setStopper(schedule.scheduleRepeating(newPred));
             predators.add(newPred);
         }
     }
 
     protected Predator newPredator(AgentController ac) {
-        if (par.sensorMode == PredParams.V_ARCS) {
+        if (par.sensorMode == SensorMode.arcs) {
             return new MultiPredator(this, field, ac);
-        } else {
+        } else if(par.sensorMode == SensorMode.closest) {
             return new Predator(this, field, ac);
+        } else if(par.sensorMode == SensorMode.otherpreds) {
+            return new PredatorHomo(this, field, ac);
         }
+        return null;
     }
 
     protected Prey newPrey() {
@@ -119,5 +137,10 @@ public class PredatorPrey extends MaseSimState  {
     @Override
     public List<? extends SmartAgent> getSmartAgents() {
         return predators;
+    }
+
+    @Override
+    public TaskDescription getTaskDescription() {
+        return td;
     }
 }
