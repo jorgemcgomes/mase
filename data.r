@@ -18,7 +18,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
                      load.clusters=FALSE, new.clusters=TRUE, load.weights=FALSE, load.noveltyind=FALSE,
                      behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat",
                      clusters.file="genclusters.stat", weights.file="weights.stat",
-                     noveltyind.file="noveltyind.stat") {
+                     noveltyind.file="noveltyind.stat", offset=1) {
     data <- NULL
     data$fitlim <- fitlim
     if(is.character(jobs)) {
@@ -48,7 +48,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         } else {
             ext <- ext[which(ext[[1]] %in% data$gens),]
         }
-        data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)-1]], best.gen=ext[[ncol(ext)-2]], mean=ext[[ncol(ext)-3]])    
+        data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)-offset]], best.gen=ext[[ncol(ext)-offset-1]], mean=ext[[ncol(ext)-offset-2]])    
         
         # Behaviours
         if(load.behavs) {

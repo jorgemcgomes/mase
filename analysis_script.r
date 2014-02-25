@@ -855,14 +855,80 @@ fullStatistics(data, fit.comp=F, som.group=T, som.alljobs=T, show.only=F, expset
 
 
 
+
+setwd("~/exps/sysf/ind")
+data <- loadData("ga_k10_ml_min25/", jobs=20, load.behavs=F, subpops=1, load.weights=T, weights.file="corr.stat")
+weightAnalysis(data)
+
+setwd("~/exps/sysf/rs")
+data <- loadData("ga_k10_ml_min25/", jobs=20, load.behavs=F, subpops=1, load.weights=T, weights.file="corr.stat")
+weightAnalysis(data)
+
+
 setwd("~/exps/sysf/pred")
-data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25/","ga_k10_ml_min50/","ga_k10_ml_flat/", params=list(jobs=10, load.behavs=F, subpops=1))
+data <- loadData("ga_k10_ml_min25_2/", jobs=20, load.behavs=F, subpops=1, load.weights=T, weights.file="corr.stat")
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749)))
+weightAnalysis(data)
+
+
+
+setwd("~/exps/sysf/rs")
+sysvars <- c("m.alive","f.alive","m.x","f.x","m.y","f.y","m.turn","f.turn","m.speed","f.speed","m.energy","f.energy","m.charging","f.charging","m.dispersion","f.dispersion","m.resdist","f.resdist","m.rescharging","f.rescharging","simlength")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", params=list(jobs=10, load.behavs=T, subpops=1, vars.file=c("survivors","energy","mov","dist","NA",sysvars), vars.group=sysvars, behavs.sample=0.1))
+fullStatistics(data, som.group=T, som.alljobs=T, expset.name="rs")
+
+setwd("~/exps/sysf/ind")
+sysvars <- c("m.alive",    "f.alive",	"m.x",	"f.x",	"m.y",	"f.y",	"m.turn",	"f.turn",	"m.speed",	"f.speed",	"m.passing",	"f.passing",	"m.dispersion",	"f.dispersion",	"m.distgate",	"f.distgate",	"m.distwall",	"f.distwall",	"m.gate.open",	"f.gate.open",	"simlength")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", params=list(jobs=10, load.behavs=T, subpops=1, vars.file=c("A","B","C","D","NA",sysvars), vars.group=sysvars, behavs.sample=0.1))
+fullStatistics(data, som.group=T, som.alljobs=T, expset.name="ind")
+
+setwd("~/exps/sysf/pred")
+data <- metaLoadData("ga_fit_2","ga_ts","ga_k10_ml_min25_2","ga_k10_ml_flat_2", names=c("Fit","NS-TS","NS-SW", "NS-SF"), params=list(jobs=20, load.behavs=F, subpops=1, fitlim=c(0,2)))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749)))
 
 setwd("~/exps/sysf/ind")
-data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25/","ga_k10_ml_flat/", params=list(jobs=10, load.behavs=F, subpops=1))
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25/","ga_k10_ml_flat/", names=c("Fit","NS-TS","NS-SW", "NS-SF"), params=list(jobs=20, load.behavs=F, subpops=1))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,250,499)))
 
 setwd("~/exps/sysf/rs")
-data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25/","ga_k10_ml_flat/", params=list(jobs=10, load.behavs=F, subpops=1))
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", names=c("Fit","NS-TS","NS-SW", "NS-SF"), params=list(jobs=20, load.behavs=F, subpops=1))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749)))
+
+
+
+theme_set(theme_bw())
+# final ---- fitness plots
+
+setwd("~/exps/sysf/pred")
+data <- metaLoadData("ga_fit_2","ga_ts","ga_k10_ml_min25_2","ga_k10_ml_flat_2", names=c("Fit","NS - TS","NS - Sys weighted", "NS - Sys flat"), params=list(jobs=20, load.behavs=F, subpops=1, fitlim=c(0,2)))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749)))
+
+setwd("~/exps/sysf/ind")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25/","ga_k10_ml_flat/", names=c("Fit","NS - TS","NS - Sys weighted", "NS - Sys flat"), params=list(jobs=20, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,250,499)))
+
+setwd("~/exps/sysf/rs")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", names=c("Fit","NS - TS","NS - Sys weighted", "NS - Sys flat"), params=list(jobs=20, load.behavs=F, subpops=1))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749)))
+
+# final ---- som plots
+
+setwd("~/exps/sysf/rs")
+sysvars <- c("m.alive","f.alive","m.x","f.x","m.y","f.y","m.turn","f.turn","m.speed","f.speed","m.energy","f.energy","m.charging","f.charging","m.dispersion","f.dispersion","m.resdist","f.resdist","m.rescharging","f.rescharging","simlength")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", params=list(jobs=10, load.behavs=T, subpops=1, vars.file=c("survivors","energy","mov","dist","NA",sysvars), vars.group=sysvars, behavs.sample=0.1))
+fullStatistics(data, som.group=T, som.alljobs=T, expset.name="rs")
+
+
+theme_set(theme_bw()) ; DEF_WIDTH = 5 ; DEF_HEIGHT=3
+
+setwd("~/exps/sysf/ind")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", names=c("Fit","NS-TS","NS-SW", "NS-SF"), params=list(jobs=20, load.behavs=F, subpops=1, fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="Indiana", fit.comp.par=list(snapshots=c(100,250,499), jitter=F))
+
+setwd("~/exps/sysf/pred")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", names=c("Fit","NS-TS","NS-SW", "NS-SF"), params=list(jobs=20, load.behavs=F, subpops=1, fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749), jitter=F))
+
+setwd("~/exps/sysf/rs")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", names=c("Fit","NS-TS","NS-SW", "NS-SF"), params=list(jobs=20, load.behavs=F, subpops=1, fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="RS", fit.comp.par=list(snapshots=c(100,300,749), jitter=F))

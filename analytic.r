@@ -601,27 +601,40 @@ clusterAnalysis <- function(data) {
 #### Weight analysis ###########################################################
 
 weightAnalysis <- function(data) {
-    means <- data.frame(gen=data$gens)
-    maxes <- data.frame(gen=data$gens)
+    means <- data.frame()
+    maxes <- data.frame()
     for(j in data$jobs) {
         weights <- data[[j]]$weights
-        m <- c()
-        ma <- c()
-        for(g in 1:nrow(weights)) {
-            m <- c(m, mean(as.numeric(weights[g,-1])))
-            ma <- c(ma, max(as.numeric(weights[g,-1]))) 
+        for(w in colnames(weights)[-1]) {
+            means[j,w] <- mean(weights[,w])
+            maxes[j,w] <- max(weights[,w])
         }
-        means[[j]] <- m
-        maxes[[j]] <- ma
     }
-    res <- data.frame(gen=data$gens)
-    if(ncol(means) == 2) {
-        res[["mean"]] <- means[,2]
-        res[["max"]] <- maxes[,2]
-    } else {
-        res[["mean"]] <- rowMeans(means[,-1])
-        res[["max"]] <- rowMeans(maxes[,-1])
+    res <- data.frame()
+    for(w in colnames(means)) {
+        res[w,"mean"] <- mean(means[,w])
+        res[w,"mean.sd"] <- sd(means[,w])
+        res[w,"max"] <- mean(maxes[,w])
+        res[w,"max.sd"] <- sd(maxes[,w])
     }
+    
+    # bar plot with mean and max for each weight
+    index <- 1
+    plotframe <- data.frame()
+    for(w in rownames(res)) {
+        plotframe[index, "feature"] <- w
+        plotframe[index, "value"] <- res[w,"mean"]
+        plotframe[index, "type"] <- "mean"
+        index <- index + 1
+        plotframe[index, "feature"] <- w
+        plotframe[index, "value"] <- res[w,"max"]
+        plotframe[index, "type"] <- "max"        
+        index <- index + 1
+    }
+    g <- ggplot(plotframe, aes(x = reorder(feature, value), y=value, fill=factor(type))) + geom_bar(stat="identity", position="dodge") + ggtitle(data$expname) + ylab("Weight") + xlab("Feature") + guides(fill=guide_legend(title=NULL))
+    plot(g)
+    
+    res <- res[order(-res$mean),]
     return(res)
 }
 

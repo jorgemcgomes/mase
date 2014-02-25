@@ -15,6 +15,8 @@ buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.
     
     som <- som(as.matrix(trainData), keep.data=FALSE, grid=somgrid(grid.size, grid.size, grid.type))
     gc()
+    som$fitmin <- min(sample$fitness)
+    som$fitmax <- max(sample$fitness)
     
     print("Som done...")
     

@@ -57,10 +57,11 @@ public class PredatorPrey extends MaseSimState implements TaskDescriptionProvide
         placePreys();
         
         PolygonEntity boundaries = new PolygonEntity(new Double2D(0,0), new Double2D(par.size,0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0,0));
+        field.setObjectLocation(boundaries, new Double2D(0,0));
         this.td = new TaskDescription(new MasonDistanceFunction(field),
                 new EntityGroup(predators, par.nPredators, par.nPredators, false),
                 new EntityGroup(preys, 0, par.nPreys, false),
-                new EntityGroup(Collections.singletonList(boundaries), true));
+                new EntityGroup(Collections.singletonList(boundaries), 1, 1, true));
     }
 
     protected void placePreys() {
