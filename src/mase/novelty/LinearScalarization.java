@@ -16,7 +16,7 @@ import mase.PostEvaluator;
 public class LinearScalarization implements PostEvaluator {
 
     protected double blend;
-    public static final String P_BLEND = "ns-blend";
+    public static final String P_BLEND = "novelty-proportion";
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -36,15 +36,15 @@ public class LinearScalarization implements PostEvaluator {
                 NoveltyFitness nf = (NoveltyFitness) pop.subpops[i].individuals[j].fitness;
                 fitnessMin = (float) Math.min(fitnessMin, nf.getFitnessScore());
                 fitnessMax = (float) Math.max(fitnessMax, nf.getFitnessScore());
-                noveltyMin = (float) Math.min(noveltyMin, nf.noveltyScore);
-                noveltyMax = (float) Math.max(noveltyMax, nf.noveltyScore);
+                noveltyMin = (float) Math.min(noveltyMin, nf.getNoveltyScore());
+                noveltyMax = (float) Math.max(noveltyMax, nf.getNoveltyScore());
             }
 
             // mix
             for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
                 NoveltyFitness nf = (NoveltyFitness) pop.subpops[i].individuals[j].fitness;
                 float normalizedFitnessScore = fitnessMax == fitnessMin ? 0 : (nf.getFitnessScore() - fitnessMin) / (fitnessMax - fitnessMin);
-                float normalizedNoveltyScore = (float) (noveltyMax == noveltyMin ? 0 : (nf.noveltyScore - noveltyMin) / (noveltyMax - noveltyMin));
+                float normalizedNoveltyScore = (float) (noveltyMax == noveltyMin ? 0 : (nf.getNoveltyScore() - noveltyMin) / (noveltyMax - noveltyMin));
                 nf.setFitness(state, (float) ((1 - blend) * normalizedFitnessScore + blend * normalizedNoveltyScore), false);
             }
         }

@@ -1,0 +1,7 @@
+parent.0 = novelty.params
+
+eval.num-post = 2
+eval.post.1 =                           mase.novelty.PMCNS
+eval.post.1.percentile =                50
+stat.child.12 =                         mase.novelty.PMCNSStat
+stat.child.12.file =                    $pmcns.stat

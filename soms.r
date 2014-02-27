@@ -27,7 +27,7 @@ buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.
     if(compute.fitness) {
         som$fitness.avg <- fitnessMapAvg(som, sample)
         #som$fitness.max <- fitnessMapMax(som, sample)
-        som$fitness.max <- fitnessMapQuantile(som, sample, q=0.75)
+        som$fitness.max <- fitnessMapQuantile(som, sample, q=0.9)
     }
     som$count <- countMap(som, sample)
     

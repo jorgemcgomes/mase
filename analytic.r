@@ -239,6 +239,26 @@ merge.counts <- function(counts) {
     }
 }
 
+merge.counts.sub <- function(counts, targetsub) {
+    countsum <- NULL
+    for(exp in counts) {
+        for(job in exp) {
+            for(sub in names(job)) {
+                if(is.null(sub) || sub == targetsub) {
+                    for(i in job[[sub]]) {
+                        if(is.null(countsum)) {
+                            countsum <- i
+                        } else {
+                            countsum <- countsum + i
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return(countsum)
+}
+
 # Divergence from the total exploration of each experiment to the uniform distribution
 uniformity.group <- function(count, threshold=100) {
     all.count <- merge.counts(count)
@@ -278,20 +298,24 @@ uniformity.group.alt <- function(count, threshold=0.0001) {
 }
 
 # Divergence from the exploration of each subpop to the uniform distribution
-uniformity.ind <- function(count, threshold=100) {
-    all.count <- merge.counts(count)
+uniformity.ind <- function(count, sub, threshold=100) {
+    all.count <- merge.counts.sub(count, sub)
     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
     visited <- which(all.count > threshold)
+    cat("All:", length(all.count), "| Visited:", length(visited),"\n")
+    print(summary(all.count[visited]))
     ideal <- rep(1 / length(visited), length(visited))
     setlist <- list()
     for(i in 1:length(count)) { # exps
         chis <- c()
         for(j in 1:length(count[[i]])) { # jobs
             subchis <- c()
-            for(s in 1:length(count[[i]][[j]])) { # subpops
-                subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
-                subcounts <- subcounts / sum(subcounts)
-                subchis <- c(subchis, 1 - jsd(subcounts , ideal))
+            for(s in names(count[[i]][[j]])) { # subpops
+                if(is.null(sub) || sub == s) {
+                    subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
+                    subcounts <- subcounts / sum(subcounts)
+                    subchis <- c(subchis, 1 - jsd(subcounts , ideal))
+                }
             }
             chis <- c(chis, mean(subchis))
         }

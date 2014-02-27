@@ -664,6 +664,9 @@ analyse("fit_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c(
 analyse("fit_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=5, plot=T, boxplots=T, print=F, all=F)
 
 
+data <- loadData("fit_rand/", jobs=10, vars.ind=c("captured","lost","time","groupsize","groupnumber"), load.behavs=T, behavs.sample=0.25)
+
+
 setwd("~/exps//competitive/ga/go")
 analyse("fit_rand","fit_novarch","fit_novhall","nov_rand","nsga_rand","nsga_rand_noarch","nov0_rand","nov1_rand","nsga0_rand","nsga1_rand", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)
 analyse("fit_rand","fit_novarch","fit_novhall", filename = "comp.stat",vars.pre=c("gen"), vars.sub=c("fit0","bestfit0","diff0","fit1","bestfit1","diff1"), analyse=c("bestfit0","bestfit1"), smooth=0, splits=1, plot=T, boxplots=T, print=F, all=F)

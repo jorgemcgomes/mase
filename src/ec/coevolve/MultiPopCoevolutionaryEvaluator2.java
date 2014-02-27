@@ -47,7 +47,8 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     public static final String P_NOVEL_CHAMPIONS_CAP = "novel-champions-cap";
     public static final String P_NEAT_ELITE = "num-neat-elite";
     public static final String P_CURRENT_ELITE = "num-current-elite";
-
+    public static final String P_FITNESS_ONLY_ELITE = "fitness-only-elite";
+    
     public enum NovelChampionsMode {
 
         random, last, centroid, best;
@@ -58,7 +59,6 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         archive, halloffame
     }
 
-    public static final String P_FITNESS_ONLY_ELITE = "fitness-only-elite";
     protected boolean eliteFitness;
     protected int lastChampions;
     protected int randomChampions;

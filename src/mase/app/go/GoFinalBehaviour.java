@@ -17,7 +17,7 @@ import mase.mason.MasonSimulator;
  *
  * @author jorge
  */
-public class GoFinalCharacterisation extends MasonEvaluation {
+public class GoFinalBehaviour extends MasonEvaluation {
 
     private SubpopEvaluationResult ser;
     protected float maxSteps;
@@ -35,12 +35,10 @@ public class GoFinalCharacterisation extends MasonEvaluation {
         ser = new SubpopEvaluationResult(
                 new VectorBehaviourResult(
                         go.state.captured[GoState.BLACK] / d, 
-                        go.state.captured[GoState.WHITE] / d, 
-                        go.schedule.getSteps() / maxSteps),
+                        go.state.captured[GoState.WHITE] / d),
                 new VectorBehaviourResult(
                         go.state.captured[GoState.WHITE] / d, 
-                        go.state.captured[GoState.BLACK] / d, 
-                        go.schedule.getSteps() / maxSteps)
+                        go.state.captured[GoState.BLACK] / d)
         );
     }
 

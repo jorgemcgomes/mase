@@ -3,13 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package mase.app.predcomp;
 
+import ec.EvolutionState;
+import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimulator;
 
 /**
  *
@@ -18,15 +20,22 @@ import mase.mason.MasonEvaluation;
 public class PredcompFitness extends MasonEvaluation {
 
     private SubpopEvaluationResult ser;
+    private int maxSteps;
+
+    @Override
+    public void setup(EvolutionState state, Parameter base) {
+        super.setup(state, base);
+        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
+    }
 
     @Override
     protected void postSimulation() {
         ser = new SubpopEvaluationResult(
-                new FitnessResult(1000f - sim.schedule.getSteps(), FitnessResult.ARITHMETIC),
+                new FitnessResult((float) maxSteps - sim.schedule.getSteps(), FitnessResult.ARITHMETIC),
                 new FitnessResult((float) sim.schedule.getSteps(), FitnessResult.ARITHMETIC)
         );
     }
-    
+
     @Override
     public EvaluationResult getResult() {
         return ser;

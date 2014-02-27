@@ -36,12 +36,14 @@ public class MasterTournament {
     public static final String FREQUENCY = "-freq";
     public static final String OUTNAME = "-name";
     public static final String SELF = "-self";
+    public static final String ELITE = "-elite";
 
     public static void main(String[] args) throws Exception {
         List<File> folders = new ArrayList<File>();
-        int freq = 1;
+        int freq = 0;
         String name = "comp.stat";
         boolean self = false;
+        int elite = 0;
         for (int x = 0; x < args.length; x++) {
             if (args[x].equalsIgnoreCase(FOLDER)) {
                 File folder = new File(args[1 + x++]);
@@ -51,19 +53,26 @@ public class MasterTournament {
                 folders.add(folder);
             } else if (args[x].equalsIgnoreCase(FREQUENCY)) {
                 freq = Integer.parseInt(args[1 + x++]);
+            } else if (args[x].equalsIgnoreCase(ELITE)) {
+                elite = Integer.parseInt(args[1 + x++]);
             } else if (args[x].equalsIgnoreCase(OUTNAME)) {
                 name = args[1 + x++];
             } else if (args[x].equalsIgnoreCase(SELF)) {
                 self = true;
             }
         }
+        if (freq == 0 && elite == 0) {
+            System.out.println("Sample size is 0!");
+            return;
+        }
+
         if (folders.isEmpty()) {
             System.out.println("Nothing to evaluate!");
             return;
         }
 
         MasonSimulator sim = MasonPlayer.createSimulator(args);
-        MasterTournament mt = new MasterTournament(folders, freq, self, sim, name);
+        MasterTournament mt = new MasterTournament(folders, freq, elite, self, sim, name);
         mt.makeTournaments();
     }
     private final List<File> folders;
@@ -72,10 +81,12 @@ public class MasterTournament {
     private final MasonSimulator sim;
     private final ExecutorService executor;
     private final String name;
+    private final int elite;
 
-    public MasterTournament(List<File> folders, int sampleFreq, boolean self, MasonSimulator sim, String name) {
+    public MasterTournament(List<File> folders, int sampleFreq, int elite, boolean self, MasonSimulator sim, String name) {
         this.folders = folders;
         this.freq = sampleFreq;
+        this.elite = elite;
         this.self = self;
         this.sim = sim;
         this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -101,11 +112,10 @@ public class MasterTournament {
         }
 
         // Load samples
-
         List<AgentController>[] samples = new List[2];
         if (!self) {
-            samples[0] = loadSample(tars[1], 1, freq);
-            samples[1] = loadSample(tars[0], 0, freq);
+            samples[0] = loadSample(tars[1], 1, freq, elite);
+            samples[1] = loadSample(tars[0], 0, freq, elite);
         }
 
         // Make tournaments
@@ -116,13 +126,13 @@ public class MasterTournament {
             for (int s = 0; s < 2; s++) {
                 if (self) {
                     int opposing = s == 0 ? 1 : 0;
-                    samples[s] = loadSample(Collections.singletonList(tars[opposing].get(job)), opposing, freq);
+                    samples[s] = loadSample(Collections.singletonList(tars[opposing].get(job)), opposing, freq, elite);
                 }
 
                 File tar = tars[s].get(job);
                 System.out.println(tar.getAbsolutePath());
                 solutions[s] = SolutionPersistence.readSolutionsFromTar(tar);
-                List<AgentController> all = loadControllers(solutions[s], s, 1);
+                List<AgentController> all = loadControllers(solutions[s], s, 1, 0);
                 System.out.println(tar.getAbsolutePath() + " " + all.size() + " vs " + samples[s].size());
                 subpopEvals[s] = tournament(all, samples[s], s);
             }
@@ -187,32 +197,38 @@ public class MasterTournament {
         return bestIndex;
     }
 
-    private List<AgentController> loadSample(List<File> tars, int subpop, int sampleFreq) throws Exception {
+    private List<AgentController> loadSample(List<File> tars, int subpop, int sampleFreq, int elite) throws Exception {
         ArrayList<AgentController> list = new ArrayList<AgentController>();
         for (File f : tars) {
             List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(f);
-            List<AgentController> cs = loadControllers(sols, subpop, sampleFreq);
+            List<AgentController> cs = loadControllers(sols, subpop, sampleFreq, elite);
             list.addAll(cs);
         }
         return list;
     }
 
-    private List<AgentController> loadControllers(List<PersistentSolution> solutions, int subpop, int sampleFreq) throws Exception {
-        if(sampleFreq == 1) {
+    private List<AgentController> loadControllers(List<PersistentSolution> solutions, int subpop, int sampleFreq, int elite) throws Exception {
+        if (sampleFreq == 1) {
             ArrayList<AgentController> list = new ArrayList<AgentController>(solutions.size());
-            for(PersistentSolution s : solutions) {
+            for (PersistentSolution s : solutions) {
                 list.add(getAC(s, subpop));
             }
             return list;
         }
-        
+
         ArrayList<AgentController> list = new ArrayList<AgentController>();
-        list.add(getAC(solutions.get(solutions.size() - 1), subpop));
-        Random rand = new Random();
-        int splits = solutions.size() / sampleFreq;
-        for (int i = 0; i < splits ; i++) {
-            int index = i * sampleFreq + rand.nextInt(sampleFreq);
-            list.add(getAC(solutions.get(index), subpop));
+        if (freq > 0) {
+            list.add(getAC(solutions.get(solutions.size() - 1), subpop));
+            Random rand = new Random();
+            int splits = solutions.size() / sampleFreq;
+            for (int i = 0; i < splits; i++) {
+                int index = i * sampleFreq + rand.nextInt(sampleFreq);
+                list.add(getAC(solutions.get(index), subpop));
+            }
+        }
+
+        for (int i = 0; i < elite; i++) {
+            list.add(getAC(solutions.get(solutions.size() - i - 1), subpop));
         }
 
         /*for (int i = 0; i < solutions.size(); i++) {
@@ -224,7 +240,7 @@ public class MasterTournament {
          }*/
         return list;
     }
-    
+
     private AgentController getAC(PersistentSolution s, int subpop) {
         HeterogeneousGroupController gc = (HeterogeneousGroupController) s.getController();
         return gc.getAgentControllers(2)[subpop];

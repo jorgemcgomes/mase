@@ -24,6 +24,8 @@ public class GoState implements Cloneable {
     protected int[] grid;
     protected List<Group>[] groups;
     protected int[] captured;
+    protected int[] surrounded;
+    protected int[] possession;
 
     protected static Int2D[][] neighbourMap;
     protected static int size;
@@ -36,6 +38,8 @@ public class GoState implements Cloneable {
         Arrays.fill(grid, EMPTY);
         this.groups = new List[]{new ArrayList<Group>(20), new ArrayList<Group>(20)};
         this.captured = new int[]{0, 0};
+        this.surrounded = new int[]{0,0};
+        this.possession = new int[]{0,0};
         synchronized (this) {
             GoState.size = size;
             if (neighbourMap == null) {
@@ -237,29 +241,28 @@ public class GoState implements Cloneable {
     }
 
     public int getScore(int player) {
-        int ownStones = 0;
-        int surroundedEmpty = 0;
+        possession[player] = 0;
+        surrounded[player] = 0;
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 if (grid[index(x, y)] == player) {
-                    ownStones++;
+                    possession[player]++;
                     // empty intersections that are completely surrounded by only stones of that player
                 } else if (grid[index(x, y)] == EMPTY) {
-                    boolean surrounded = true;
+                    boolean sur = true;
                     for (Int2D n : neighbours(new Int2D(x, y))) {
                         if (grid[index(n)] != player) {
-                            surrounded = false;
+                            sur = false;
                             break;
                         }
                     }
-                    if (surrounded) {
-                        surroundedEmpty++;
+                    if (sur) {
+                        surrounded[player]++;
                     }
                 }
             }
         }
-        int cap = captured[player];
-        return ownStones + surroundedEmpty + cap;
+        return possession[player] + surrounded[player] + captured[player];
 
         // TODO: komi
     }
