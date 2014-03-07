@@ -118,6 +118,12 @@ filterJobs <- function(data, jobs=c()) {
     return(data)
 }
 
+filterSubs <- function(data, subs) {
+    data[["subpops"]] <- subs
+    data[["nsubs"]] <- length(subs)
+    return(data)
+}
+
 reduceMean <- function(data) {
     progress <- txtProgressBar(min = 0, max = data$njobs, initial = 0, char = "=", style = 3)
     prog <- 0

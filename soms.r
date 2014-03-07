@@ -1,12 +1,41 @@
 buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE, subpops=NULL) {
     dataList <- list(...)
     sample <- sampleData(dataList, sample.size, subpops)
-    
+
     rm(dataList)
     gc()
     
     sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample
-    trainData <- sample[,variables]
+    
+    # test
+    baseSample <- sample[,variables]
+    print(nrow(baseSample))
+    trainData <- data.frame()
+    for(i in 1:nrow(baseSample)) {
+        if(i %% 1000 == 0) {
+            cat(i,nrow(trainData),"\n")
+        }
+        s <- baseSample[i,]
+        ok <- T
+        if(nrow(trainData) > 0) {
+            for(j in 1:nrow(trainData)) {
+                if(euclideanDist(as.numeric(s),as.numeric(trainData[j,])) < 0.005) {
+                    ok <- F
+                    break
+                } 
+            }
+        }
+        if(ok) {
+            #print(s)
+            trainData <- rbind(trainData, as.numeric(s))
+            
+        }
+    }
+    colnames(trainData) <- variables
+    View(trainData)
+    # item
+    
+    #trainData <- sample[,variables]
     if(scale) {
         trainData <- scale(trainData)
     }

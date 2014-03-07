@@ -262,9 +262,7 @@ public class GoState implements Cloneable {
                 }
             }
         }
-        return possession[player] + surrounded[player] + captured[player];
-
-        // TODO: komi
+        return possession[player];
     }
 
     public IntGrid2D asGrid2D() {

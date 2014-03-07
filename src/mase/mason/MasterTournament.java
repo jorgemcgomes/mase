@@ -7,8 +7,10 @@ package mase.mason;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -25,6 +27,9 @@ import mase.evaluation.FitnessResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 /**
  *
@@ -32,25 +37,44 @@ import mase.stat.SolutionPersistence;
  */
 public class MasterTournament {
 
-    public static final String FOLDER = "-f";
+    public static final String TEST_FOLDER = "-t";
+    public static final String SAMPLE_FOLDER = "-s";
+    public static final String BOTH_FOLDER = "-ts";
     public static final String FREQUENCY = "-freq";
     public static final String OUTNAME = "-name";
     public static final String SELF = "-self";
     public static final String ELITE = "-elite";
+    public static final String INDIVIDUALS = "-inds";
 
     public static void main(String[] args) throws Exception {
-        List<File> folders = new ArrayList<File>();
+        List<File> sampleFolders = new ArrayList<File>();
+        List<File> testFolders = new ArrayList<File>();
         int freq = 0;
-        String name = "comp.stat";
+        String name = "";
         boolean self = false;
+        String individuals = null;
         int elite = 0;
+
         for (int x = 0; x < args.length; x++) {
-            if (args[x].equalsIgnoreCase(FOLDER)) {
+            if (args[x].equalsIgnoreCase(TEST_FOLDER)) {
                 File folder = new File(args[1 + x++]);
                 if (!folder.exists()) {
                     throw new Exception("Folder does not exist: " + folder.getAbsolutePath());
                 }
-                folders.add(folder);
+                testFolders.add(folder);
+            } else if(args[x].equalsIgnoreCase(SAMPLE_FOLDER)) {
+                File folder = new File(args[1 + x++]);
+                if (!folder.exists()) {
+                    throw new Exception("Folder does not exist: " + folder.getAbsolutePath());
+                }
+                sampleFolders.add(folder); 
+            } else if(args[x].equalsIgnoreCase(BOTH_FOLDER)) {
+                File folder = new File(args[1 + x++]);
+                if (!folder.exists()) {
+                    throw new Exception("Folder does not exist: " + folder.getAbsolutePath());
+                }
+                sampleFolders.add(folder); 
+                testFolders.add(folder);
             } else if (args[x].equalsIgnoreCase(FREQUENCY)) {
                 freq = Integer.parseInt(args[1 + x++]);
             } else if (args[x].equalsIgnoreCase(ELITE)) {
@@ -59,41 +83,44 @@ public class MasterTournament {
                 name = args[1 + x++];
             } else if (args[x].equalsIgnoreCase(SELF)) {
                 self = true;
+            } else if (args[x].equalsIgnoreCase(INDIVIDUALS)) {
+                individuals = args[1 + x++];
             }
         }
-        if (freq == 0 && elite == 0) {
-            System.out.println("Sample size is 0!");
-            return;
-        }
 
-        if (folders.isEmpty()) {
+        if (testFolders.isEmpty() || sampleFolders.isEmpty()) {
             System.out.println("Nothing to evaluate!");
             return;
         }
 
         MasonSimulator sim = MasonPlayer.createSimulator(args);
-        MasterTournament mt = new MasterTournament(folders, freq, elite, self, sim, name);
-        mt.makeTournaments();
+        MasterTournament mt = new MasterTournament(sampleFolders, testFolders, sim, name);
+
+        if (individuals != null) {
+            mt.makeIndsTournaments(individuals);
+        } else if (self) {
+            mt.makeSelfTournaments(freq);
+        } else {
+            mt.makeSampleTournaments(freq, elite);
+        }
+
+        mt.executor.shutdown();
     }
-    private final List<File> folders;
-    private final int freq;
-    private final boolean self;
+    private final List<File> sampleFolders;
+    private final List<File> testFolders;
     private final MasonSimulator sim;
     private final ExecutorService executor;
     private final String name;
-    private final int elite;
 
-    public MasterTournament(List<File> folders, int sampleFreq, int elite, boolean self, MasonSimulator sim, String name) {
-        this.folders = folders;
-        this.freq = sampleFreq;
-        this.elite = elite;
-        this.self = self;
+    public MasterTournament(List<File> sampleFolders, List<File> testFolders, MasonSimulator sim, String name) {
+        this.sampleFolders = sampleFolders;
+        this.testFolders = testFolders;
         this.sim = sim;
         this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         this.name = name;
     }
 
-    public void makeTournaments() throws Exception {
+    private List<File>[] findTars(List<File> folders) {
         // Find all the relevant tars under the given folders
         List<File>[] tars = new List[]{new ArrayList<File>(), new ArrayList<File>()};
         for (File folder : folders) {
@@ -110,77 +137,147 @@ public class MasterTournament {
                 }
             }
         }
+        return tars;
+    }
 
-        // Load samples
+    public void makeSelfTournaments(int freq) throws Exception {
+        List<File>[] tars = findTars(testFolders);
         List<AgentController>[] samples = new List[2];
-        if (!self) {
-            samples[0] = loadSample(tars[1], 1, freq, elite);
-            samples[1] = loadSample(tars[0], 0, freq, elite);
-        }
 
         // Make tournaments
         for (int job = 0; job < tars[0].size(); job++) {
             // Make evaluations -- test every best from every generation against the samples
             List<EvaluationResult[]>[] subpopEvals = new List[2];
             List<PersistentSolution>[] solutions = new List[2];
-            for (int s = 0; s < 2; s++) {
-                if (self) {
+            File log = new File(tars[0].get(job).getAbsolutePath().replace("bests.0.tar.gz", ""));
+            if(log.exists()) {
+                System.out.println("Log already exists. Skipping. " + log.getAbsolutePath());
+            } else {
+                for (int s = 0; s < 2; s++) {
                     int opposing = s == 0 ? 1 : 0;
-                    samples[s] = loadSample(Collections.singletonList(tars[opposing].get(job)), opposing, freq, elite);
+                    samples[s] = loadSample(Collections.singletonList(tars[opposing].get(job)), opposing, freq);
+                    File tar = tars[s].get(job);
+                    System.out.println(tar.getAbsolutePath());
+                    solutions[s] = SolutionPersistence.readSolutionsFromTar(tar);
+                    List<AgentController> all = loadControllers(solutions[s], s, 1);
+                    System.out.println(tar.getAbsolutePath() + " " + all.size() + " vs " + samples[s].size());
+                    subpopEvals[s] = tournament(all, samples[s], s);
                 }
+                logResults(solutions, subpopEvals, log.getAbsolutePath());
+            }
+        }
+    }
 
-                File tar = tars[s].get(job);
+    public void makeSampleTournaments(int freq, int elite) throws Exception {
+        // Load samples
+        List<File>[] sampleTars = findTars(sampleFolders);
+        List<AgentController>[] samples = new List[2];
+        samples[0] = loadSample(sampleTars[1], 1, freq);
+        samples[0].addAll(loadElite(sampleTars[1], 1, elite));
+        samples[1] = loadSample(sampleTars[0], 0, freq);
+        samples[1].addAll(loadElite(sampleTars[0], 0, elite));
+        
+        List<File>[] testTars = findTars(testFolders);
+
+        // Make tournaments
+        for (int job = 0; job < testTars[0].size(); job++) {
+            // Make evaluations -- test every best from every generation against the samples
+            List<EvaluationResult[]>[] subpopEvals = new List[2];
+            List<PersistentSolution>[] solutions = new List[2];
+            for (int s = 0; s < 2; s++) {
+                File tar = testTars[s].get(job);
                 System.out.println(tar.getAbsolutePath());
                 solutions[s] = SolutionPersistence.readSolutionsFromTar(tar);
-                List<AgentController> all = loadControllers(solutions[s], s, 1, 0);
+                List<AgentController> all = loadControllers(solutions[s], s, 1);
                 System.out.println(tar.getAbsolutePath() + " " + all.size() + " vs " + samples[s].size());
                 subpopEvals[s] = tournament(all, samples[s], s);
             }
 
-            // Log results
-            File log = new File(tars[0].get(job).getParent(), tars[0].get(job).getName().replace("bests.0.tar.gz", name));
-            BufferedWriter bfw = new BufferedWriter(new FileWriter(log));
-            float[] bestFar = new float[]{Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY};
-            for (int g = 0; g < subpopEvals[0].size(); g++) {
-                bfw.write(g + "");
-                for (int s = 0; s < 2; s++) {
-                    EvaluationResult[] er = subpopEvals[s].get(g);
-                    // assumes fitness evaluation is in first index
-                    float fit = (Float) (((SubpopEvaluationResult) er[0]).getSubpopEvaluation(s).value());
-                    // assumes behaviour evaluation is in second index
-                    BehaviourResult br = null;
-                    if (er[1] instanceof SubpopEvaluationResult) {
-                        br = (BehaviourResult) ((SubpopEvaluationResult) er[1]).getSubpopEvaluation(s);
-                    } else {
-                        br = (BehaviourResult) er[1];
-                    }
-                    bestFar[s] = Math.max(bestFar[s], fit);
-                    bfw.write(" " + fit + " " + bestFar[s] + " " + br.toString());
-                }
-                bfw.newLine();
-            }
-            bfw.close();
+            logResults(solutions, subpopEvals, testTars[0].get(job).getAbsolutePath().replace("bests.0.tar.gz", ""));
+        }
+    }
 
-            // Persist the most interesting challenge
-            PersistentSolution best0 = solutions[0].get(bestIndex(subpopEvals[0], 0));
-            PersistentSolution best1 = solutions[1].get(bestIndex(subpopEvals[1], 1));
-            HeterogeneousGroupController hc0 = (HeterogeneousGroupController) best0.getController();
-            HeterogeneousGroupController hc1 = (HeterogeneousGroupController) best1.getController();
-            HeterogeneousGroupController newC = new HeterogeneousGroupController(new AgentController[]{
-                hc0.getAgentControllers(2)[0],
-                hc1.getAgentControllers(2)[1]
-            });
-            SubpopEvaluationResult ser = new SubpopEvaluationResult(
-                    new FitnessResult(bestFar[0]),
-                    new FitnessResult(bestFar[1]));
-            PersistentSolution sol = new PersistentSolution();
-            sol.setController(newC);
-            sol.setEvalResults(new EvaluationResult[]{ser});
-            File superBest = new File(tars[0].get(job).getParent(), tars[0].get(job).getName().replace("bests.0.tar.gz", "challenge.ind"));
-            SolutionPersistence.writeSolution(sol, superBest);
+    public void makeIndsTournaments(String indName) throws Exception {
+        List<PersistentSolution> inds = new ArrayList<PersistentSolution>();
+        for (File folder : sampleFolders) {
+            Collection<File> files = FileUtils.listFiles(folder, new SuffixFileFilter(indName), TrueFileFilter.INSTANCE);
+            for (File f : files) {
+                FileInputStream fis = new FileInputStream(f);
+                inds.add(SolutionPersistence.readSolution(fis));
+                fis.close();
+            }
         }
 
-        executor.shutdown();
+        List<AgentController>[] samples = new List[2];
+        samples[0] = new ArrayList<AgentController>(inds.size());
+        samples[1] = new ArrayList<AgentController>(inds.size());
+        for (PersistentSolution sol : inds) {
+            AgentController[] controllers = sol.getController().getAgentControllers(2);
+            samples[0].add(controllers[1]);
+            samples[1].add(controllers[0]);
+        }
+
+        List<File>[] tars = findTars(testFolders);
+        // Make tournaments
+        for (int job = 0; job < tars[0].size(); job++) {
+            // Make evaluations -- test every best from every generation against the samples
+            List<EvaluationResult[]>[] subpopEvals = new List[2];
+            List<PersistentSolution>[] solutions = new List[2];
+            for (int s = 0; s < 2; s++) {
+                File tar = tars[s].get(job);
+                System.out.println(tar.getAbsolutePath());
+                solutions[s] = SolutionPersistence.readSolutionsFromTar(tar);
+                List<AgentController> all = loadControllers(solutions[s], s, 1);
+                System.out.println(tar.getAbsolutePath() + " " + all.size() + " vs " + samples[s].size());
+                subpopEvals[s] = tournament(all, samples[s], s);
+            }
+
+            logResults(solutions, subpopEvals, tars[0].get(job).getAbsolutePath().replace("bests.0.tar.gz", ""));
+        }
+    }
+
+    private void logResults(List<PersistentSolution>[] solutions, List<EvaluationResult[]>[] subpopEvals, String outPath) throws Exception {
+        // Log results
+        File log = new File(outPath + "comp" + name + ".stat");
+        BufferedWriter bfw = new BufferedWriter(new FileWriter(log));
+        float[] bestFar = new float[]{Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY};
+        for (int g = 0; g < subpopEvals[0].size(); g++) {
+            bfw.write(g + "");
+            for (int s = 0; s < 2; s++) {
+                EvaluationResult[] er = subpopEvals[s].get(g);
+                // assumes fitness evaluation is in first index
+                float fit = (Float) (((SubpopEvaluationResult) er[0]).getSubpopEvaluation(s).value());
+                // assumes behaviour evaluation is in second index
+                BehaviourResult br = null;
+                if (er[1] instanceof SubpopEvaluationResult) {
+                    br = (BehaviourResult) ((SubpopEvaluationResult) er[1]).getSubpopEvaluation(s);
+                } else {
+                    br = (BehaviourResult) er[1];
+                }
+                bestFar[s] = Math.max(bestFar[s], fit);
+                bfw.write(" " + fit + " " + bestFar[s] + " " + br.toString());
+            }
+            bfw.newLine();
+        }
+        bfw.close();
+
+        // Persist the most interesting challenge
+        PersistentSolution best0 = solutions[0].get(bestIndex(subpopEvals[0], 0));
+        PersistentSolution best1 = solutions[1].get(bestIndex(subpopEvals[1], 1));
+        HeterogeneousGroupController hc0 = (HeterogeneousGroupController) best0.getController();
+        HeterogeneousGroupController hc1 = (HeterogeneousGroupController) best1.getController();
+        HeterogeneousGroupController newC = new HeterogeneousGroupController(new AgentController[]{
+            hc0.getAgentControllers(2)[0],
+            hc1.getAgentControllers(2)[1]
+        });
+        SubpopEvaluationResult ser = new SubpopEvaluationResult(
+                new FitnessResult(bestFar[0]),
+                new FitnessResult(bestFar[1]));
+        PersistentSolution sol = new PersistentSolution();
+        sol.setController(newC);
+        sol.setEvalResults(new EvaluationResult[]{ser});
+        File superBest = new File(outPath + "challenge" + name + ".ind");
+        SolutionPersistence.writeSolution(sol, superBest);
     }
 
     private int bestIndex(List<EvaluationResult[]> evals, int subpop) {
@@ -197,17 +294,28 @@ public class MasterTournament {
         return bestIndex;
     }
 
-    private List<AgentController> loadSample(List<File> tars, int subpop, int sampleFreq, int elite) throws Exception {
+    private List<AgentController> loadElite(List<File> tars, int subpop, int elite) throws Exception {
         ArrayList<AgentController> list = new ArrayList<AgentController>();
         for (File f : tars) {
             List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(f);
-            List<AgentController> cs = loadControllers(sols, subpop, sampleFreq, elite);
+            for (int i = 0; i < elite; i++) {
+                list.add(getAC(sols.get(sols.size() - i - 1), subpop));
+            }
+        }
+        return list;
+    }
+
+    private List<AgentController> loadSample(List<File> tars, int subpop, int sampleFreq) throws Exception {
+        ArrayList<AgentController> list = new ArrayList<AgentController>();
+        for (File f : tars) {
+            List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(f);
+            List<AgentController> cs = loadControllers(sols, subpop, sampleFreq);
             list.addAll(cs);
         }
         return list;
     }
 
-    private List<AgentController> loadControllers(List<PersistentSolution> solutions, int subpop, int sampleFreq, int elite) throws Exception {
+    private List<AgentController> loadControllers(List<PersistentSolution> solutions, int subpop, int sampleFreq) throws Exception {
         if (sampleFreq == 1) {
             ArrayList<AgentController> list = new ArrayList<AgentController>(solutions.size());
             for (PersistentSolution s : solutions) {
@@ -217,7 +325,7 @@ public class MasterTournament {
         }
 
         ArrayList<AgentController> list = new ArrayList<AgentController>();
-        if (freq > 0) {
+        if (sampleFreq > 0) {
             list.add(getAC(solutions.get(solutions.size() - 1), subpop));
             Random rand = new Random();
             int splits = solutions.size() / sampleFreq;
@@ -226,18 +334,6 @@ public class MasterTournament {
                 list.add(getAC(solutions.get(index), subpop));
             }
         }
-
-        for (int i = 0; i < elite; i++) {
-            list.add(getAC(solutions.get(solutions.size() - i - 1), subpop));
-        }
-
-        /*for (int i = 0; i < solutions.size(); i++) {
-         if (i % sampleFreq == 0 || i == solutions.size() - 1) {
-         PersistentSolution s = solutions.get(i);
-         HeterogeneousGroupController gc = (HeterogeneousGroupController) s.getController();
-         list.add(gc.getAgentControllers(2)[subpop]);
-         }
-         }*/
         return list;
     }
 

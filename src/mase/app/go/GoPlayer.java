@@ -55,6 +55,17 @@ public abstract class GoPlayer implements Steppable {
         if (sim.grid != null) {
             sim.grid.setTo(sim.state.asGrid2D());
         }
+        
+        // Check if board is near-filled
+        int count = 0;
+        for(int i = 0 ; i < sim.state.grid.length ; i++) {
+            if(sim.state.grid[i] == GoState.EMPTY) {
+                count++;
+            }
+        }
+        if(count == 1) {
+            sim.kill();
+        }
     }
 
     protected abstract GoState pickNextState(GoState currentState);

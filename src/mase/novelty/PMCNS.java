@@ -9,6 +9,7 @@ import ec.Individual;
 import ec.Population;
 import ec.Subpopulation;
 import ec.util.Parameter;
+import java.util.Arrays;
 import mase.PostEvaluator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -19,14 +20,17 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class PMCNS implements PostEvaluator {
 
     public static final String P_PERCENTILE = "percentile";
+    public static final String P_CHANGE_RATE = "change-rate";
     public static final double DISAPPEAR = 0.0001;
     protected double percentile;
+    protected double changeRate;
     protected int[] aptCount;
     protected double[] cutPoint;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         this.percentile = state.parameters.getDouble(base.push(P_PERCENTILE), null);
+        this.changeRate = state.parameters.getDouble(base.push(P_CHANGE_RATE), null);
     }
 
     @Override
@@ -35,6 +39,7 @@ public class PMCNS implements PostEvaluator {
         if(aptCount == null) {
             aptCount = new int[pop.subpops.length];
             cutPoint = new double[pop.subpops.length];
+            Arrays.fill(cutPoint, 0);
         }
         for (int i = 0 ; i < pop.subpops.length ; i++) {
             Subpopulation sub = pop.subpops[i];
@@ -43,7 +48,10 @@ public class PMCNS implements PostEvaluator {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;
                 ds.addValue(nf.getFitnessScore());
             }
-            cutPoint[i] = ds.getPercentile(percentile);
+            
+            double p = ds.getPercentile(percentile);
+            cutPoint[i] = p * changeRate + cutPoint[i] * (1 - changeRate);
+            // cutPoint[i] = cutPoint[i] + Math.max(0, (p - cutPoint[i]) * changeRate);
             aptCount[i] = 0;
             for(Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;

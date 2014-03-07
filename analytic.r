@@ -889,3 +889,66 @@ correlation <- function(folder, jobs=10, files=NULL, cols=NULL, method="pearson"
     cat("MEAN: ", mean(corrs), " ; SD: ", sd(corrs), " ; MIN: ", min(corrs), " ; MAX: ", max(corrs), "\n")
     #cat(corrs, "\n")
 }
+
+
+
+
+diffs <- function(folder, self.name, all.name) {
+    h <- c("gen","best0","bestfar0","a1","a2","a3","best1","bestfar1","a4","a5","a6")
+    selfs <- list.files(folder, pattern=self.name, full.names=T)
+    alls <- list.files(folder, pattern=all.name, full.names=T)
+    meandiff0 <- NULL
+    meandiff1 <- NULL
+    gen <- NULL
+    for(i in 1:length(selfs)) {
+        s <- read.table(selfs[i], sep=" ", header=F, col.names=h)
+        a <- read.table(alls[i], sep=" ", header=F, col.names=h)
+        diffs0 <- a$best0 - s$best0
+        diffs1 <- a$best1 - s$best1
+        if(is.null(meandiff0)) {
+            gen <- s$gen
+            meandiff0 <- diffs0
+            meandiff1 <- diffs1
+        } else {
+            meandiff0 <- meandiff0 + diffs0
+            meandiff1 <- meandiff1 + diffs1
+        }
+    }
+    meandiff0 <- meandiff0 / length(selfs)
+    meandiff1 <- meandiff1 / length(selfs)
+    frame <- data.frame(gen=gen, diff0=meandiff0, diff1=meandiff1)
+    plotMultiline(frame, ylim=NULL, ylabel="Subjective fitness error")
+}
+
+diffs2 <- function(folder, all.name, bvars=3) {
+    h <- c("gen","best0","bestfar0",paste0("b",1:bvars),"best1","bestfar1",paste0("b",(bvars+1):(bvars+bvars)))
+    selfs <- list.files(folder, pattern="fitness.stat", full.names=T)
+    alls <- list.files(folder, pattern=all.name, full.names=T)
+    meandiff0 <- NULL
+    meandiff1 <- NULL
+    corrs0 <- c()
+    corrs1 <- c()
+    gen <- NULL
+    for(i in 1:length(selfs)) {
+        s <- read.table(selfs[i], sep=" ", header=F, col.names=c("gen","mean0","best0","bestfar0","mean1","best1","bestfar1","a1","a2","a3","a4"))
+        a <- read.table(alls[i], sep=" ", header=F, col.names=c("gen","best0","bestfar0",paste0("b",1:bvars),"best1","bestfar1",paste0("b",(bvars+1):(bvars+bvars))))
+        diffs0 <- s$best0 - a$best0
+        diffs1 <- s$best1 - a$best1 
+        if(is.null(meandiff0)) {
+            gen <- s$gen
+            meandiff0 <- diffs0
+            meandiff1 <- diffs1
+        } else {
+            meandiff0 <- meandiff0 + diffs0
+            meandiff1 <- meandiff1 + diffs1
+        }
+        corrs0 <- c(corrs0, cor(s$best0,a$best0))
+        corrs1 <- c(corrs1, cor(s$best1,a$best1))
+    }
+    meandiff0 <- meandiff0 / length(selfs)
+    meandiff1 <- meandiff1 / length(selfs)
+    frame <- data.frame(gen=gen, diff0=meandiff0, diff1=meandiff1)
+    plotMultiline(frame, ylim=NULL, ylabel="Subjective fitness error")
+    print(summary(corrs0))
+    print(summary(corrs1))
+}

@@ -1,0 +1,92 @@
+nohup ./run.r mase.mason.MasterTournament -freq 50 -name sample -file ~/exps/competitive/ga/pred5/fit_wins/config.params -ts ~/exps/competitive/ga/pred5/fit_wins -ts ~/exps/competitive/ga/pred5/pmcns -ts ~/exps/competitive/ga/pred5/nsga &
+
+
+setwd("~/exps/competitive/ga/pred5")
+analyse("fit_wins","pmcns","nsga",filename="compsample.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit",c("b1","b2","b3","b4")), analyse=c("bestfit.0","bestfit.1"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+
+transformTournamentFiles("fit_wins", "compsample.stat", "samplebehaviours.stat",4,4)
+transformTournamentFiles("pmcns", "compsample.stat", "samplebehaviours.stat",4,4)
+transformTournamentFiles("nsga", "compsample.stat", "samplebehaviours.stat",4,4)
+
+data <- metaLoadData("fit_wins","pmcns","nsga", params=list(jobs=10, vars.group=c("time","dist","speed","walls"), subpops=2, load.behavs=T, behavs.sample=1, behavs.file="samplebehaviours.stat"))
+count <- exploration.count(data, levels=5, vars=c("time","dist","speed","walls"))
+uniformity.ind(count, "sub.0" ,threshold=50)
+uniformity.ind(count, "sub.1" ,threshold=50)
+
+
+./run.r mase.mason.MasterTournament -self -freq 1 -name self -file ~/exps/competitive/ga/pred5/fit/config.params -ts ~/exps/competitive/ga/pred5/fit -ts ~/exps/competitive/ga/pred5/nov -ts ~/exps/competitive/ga/pred5/pmcns -ts ~/exps/competitive/ga/pred5/nsga -ts ~/exps/competitive/ga/pred5/nov0 -ts ~/exps/competitive/ga/pred5/nov1 -ts ~/exps/competitive/ga/pred5/alt25
+
+
+
+nohup ./run.r mase.mason.MasterTournament -inds challengeself.ind -name master -file ~/exps/competitive/ga/pred4/fit/config.params -s ~/exps/competitive/ga/pred4/fit -s ~/exps/competitive/ga/pred4/pmcns -s ~/exps/competitive/ga/pred4/nov -s ~/exps/competitive/ga/pred4/nov0 -s ~/exps/competitive/ga/pred4/nov1 -s ~/exps/competitive/ga/pred4/nsga -t ~/exps/competitive/ga/pred4/nov_alt10 -t ~/exps/competitive/ga/pred4/nov_alt25 -t ~/exps/competitive/ga/pred4/nov_alt50 & 
+
+
+nohup ./run.r mase.mason.MasterTournament -freq 150 -name sample -file ~/exps/competitive/ga/go4/fit/config.params -f ~/exps/competitive/ga/go4/fit -f ~/exps/competitive/ga/go4/pmcns -f ~/exps/competitive/ga/go4/pmcns0 -f ~/exps/competitive/ga/go4/pmcns1 -f ~/exps/competitive/ga/go4/nov -f ~/exps/competitive/ga/go4/nov0 -f ~/exps/competitive/ga/go4/nov1 &> o1.out &
+
+nohup ./run.r mase.mason.MasterTournament -self -freq 1 -name self -file ~/exps/competitive/ga/go4/fit/config.params -f ~/exps/competitive/ga/go4/fit -f ~/exps/competitive/ga/go4/pmcns -f ~/exps/competitive/ga/go4/pmcns0 -f ~/exps/competitive/ga/go4/pmcns1 -f ~/exps/competitive/ga/go4/nov -f ~/exps/competitive/ga/go4/nov0 -f ~/exps/competitive/ga/go4/nov1 &> o2.out &
+
+
+nohup ./run.r mase.mason.MasterTournament -self -freq 1 -name self -file ~/exps/competitive/ga/pred4/fit/config.params -f ~/exps/competitive/ga/pred4/fit -f ~/exps/competitive/ga/pred4/pmcns -f ~/exps/competitive/ga/pred4/pmcns0 -f ~/exps/competitive/ga/pred4/pmcns1 -f ~/exps/competitive/ga/pred4/nov -f ~/exps/competitive/ga/pred4/nov0 -f ~/exps/competitive/ga/pred4/nov1 &> o4.out &
+
+
+nohup ./evolve.r -out competitive/ga/go4/pmcns50_temparch -p jobs=10 -p parent.0=src/mase/app/go/go.params -p parent.1=src/mase/novelty/pmcns.params -p parent.2=src/mase/ga.params -p generations=500 -p eval.base.num-random-champions=10 -p problem.eval.0=mase.app.go.GoFitness -p problem.eval.1=mase.app.go.GoScoreBehaviour -p eval.post.1.percentile=50 -p eval.post.0.ns-archive-mode=multiple -p eval.post.0.ns-archive-prob=0.05 -p eval.post.0.ns-archive-size=500 &
+
+
+
+nohup ./run.r mase.mason.MasterTournament -elite 5 -name comp.stat -file ~/exps/competitive/ga/pred3/fit/config.params -f ~/exps/competitive/ga/pred3/fit -f ~/exps/competitive/ga/pred3/pmcns50 -f ~/exps/competitive/ga/pred3/ls50 -f ~/exps/competitive/ga/pred3/nsga -f ~/exps/competitive/ga/pred3/nov0 -f ~/exps/competitive/ga/pred3/nov1 &
+
+analyse("fit","pmcns",filename="comp.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","captured","possession","surrounded"), analyse=c("bestfit.0","bestfit.1"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+
+analyse("fit","pmcns","nov_alt10","nov_alt25","nov_alt50",filename="compmaster.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","a1","a2","a3"), analyse=c("bestfit.0","bestfit.1"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+
+./run.r mase.mason.MasterTournament -elite 5 -name comp.stat -file ~/exps/competitive/ga/go4/fit/config.params -f ~/exps/competitive/ga/go4/fit -f ~/exps/competitive/ga/go4/pmcns50 -f ~/exps/competitive/ga/go4/nsga -f ~/exps/competitive/ga/go4/nov0 -f ~/exps/competitive/ga/go4/nov1 
+
+analyse("fit","nsga","pmcns50","nov0","nov1",filename="comp.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","b1","b2","b3"), analyse=c("bestfit.0","bestfit.1"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+
+
+for(f in c("fit","nsga","nov0","nov1","pmcns50")) {
+    transformTournamentFiles(f, "comp.stat", "tbehaviours.stat",3,3)
+}
+data <- metaLoadData("fit","nsga","nov0","nov1","pmcns50", params=list(jobs=10, vars.ind=c("captured","possession","surrounded"), subpops=2, load.behavs=T, behavs.sample=1, behavs.file="tbehaviours.stat"))
+count <- exploration.count(data, levels=5, vars=data[[1]]$vars.ind)
+uniformity.ind(count, "sub.0" ,threshold=50)
+uniformity.ind(count, "sub.1" ,threshold=50)
+
+
+nohup ./run.r mase.mason.MasterTournament -elite 5 -name comparch.stat -file ~/exps/competitive/ga/pred3/nsga/config.params -f ~/exps/competitive/ga/pred3/pmcns50 -f ~/exps/competitive/ga/pred3/pmcns50_noarch -f ~/exps/competitive/ga/pred3/nsga -f ~/exps/competitive/ga/pred3/nsga_noarch -f ~/exps/competitive/ga/pred3/nov0 -f ~/exps/competitive/ga/pred3/nov0_noarch &
+
+nohup ./run.r mase.mason.MasterTournament -elite 5 -name comparch.stat -file ~/exps/competitive/ga/go4/nsga/config.params -f ~/exps/competitive/ga/go4/pmcns50 -f ~/exps/competitive/ga/go4/pmcns50_noarch -f ~/exps/competitive/ga/go4/nsga -f ~/exps/competitive/ga/go4/nsga_noarch -f ~/exps/competitive/ga/go4/nov0 -f ~/exps/competitive/ga/go4/nov0_noarch -f ~/exps/competitive/ga/go4/nov1 -f ~/exps/competitive/ga/go4/nov1_noarch &
+
+analyse("pmcns50","pmcns50_noarch","nsga","nsga_noarch","nov0","nov0_noarch","nov1","nov1_noarch",filename="comparch.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","captured","possession","surrounded"), analyse=c("bestfit.0"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+analyse("pmcns50","pmcns50_noarch","nsga","nsga_noarch","nov0","nov0_noarch","nov1","nov1_noarch",filename="comparch.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","captured","possession","surrounded"), analyse=c("bestfit.1"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+for(f in c("pmcns50","pmcns50_noarch","nsga","nsga_noarch","nov0","nov0_noarch","nov1","nov1_noarch")) {
+    transformTournamentFiles(f, "comparch.stat", "abehaviours.stat",3,3)
+}
+data <- metaLoadData("pmcns50","pmcns50_noarch","nsga","nsga_noarch","nov0","nov0_noarch","nov1","nov1_noarch", params=list(jobs=10, vars.ind=c("captured","possession","surrounded"), subpops=2, load.behavs=T, behavs.sample=1, behavs.file="abehaviours.stat"))
+count <- exploration.count(data, levels=5, vars=data[[1]]$vars.ind)
+uniformity.ind(count, "sub.0" ,threshold=50)
+uniformity.ind(count, "sub.1" ,threshold=50)
+
+analyse("pmcns50","pmcns50_noarch","nsga","nsga_noarch","nov0","nov0_noarch",filename="comparch.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","captured","possession","surrounded"), analyse=c("bestfit.0"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+analyse("pmcns50","pmcns50_noarch","nsga","nsga_noarch","nov0","nov0_noarch",filename="comparch.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","captured","possession","surrounded"), analyse=c("bestfit.1"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+for(f in c("pmcns50","pmcns50_noarch","nsga","nsga_noarch","nov0","nov0_noarch")) {
+    transformTournamentFiles(f, "comparch.stat", "abehaviours.stat",3,3)
+}
+data <- metaLoadData("pmcns50","pmcns50_noarch","nsga","nsga_noarch","nov0","nov0_noarch", params=list(jobs=10, vars.ind=c("captured","possession","surrounded"), subpops=2, load.behavs=T, behavs.sample=1, behavs.file="abehaviours.stat"))
+count <- exploration.count(data, levels=5, vars=data[[1]]$vars.ind)
+uniformity.ind(count, "sub.0" ,threshold=50)
+uniformity.ind(count, "sub.1" ,threshold=50)
+
+
+nohup ./run.r mase.mason.MasterTournament -elite 5 -name comprepo.stat -file ~/exps/competitive/ga/go4/pmcns50/config.params -f ~/exps/competitive/ga/go4/fit -f ~/exps/competitive/ga/go4/pmcns50 -f ~/exps/competitive/ga/go4/pmcns50_noarch -f ~/exps/competitive/ga/go4/pmcns50_temparch &
+
+
+analyse("pmcns50","pmcns50_noarch","pmcns50_temparch",filename="comprepo.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","captured","possession","surrounded"), analyse=c("bestfit.0"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+analyse("pmcns50","pmcns50_noarch","pmcns50_temparch",filename="comprepo.stat", vars.pre=c("gen"), vars.sub=c("fit","bestfit","captured","possession","surrounded"), analyse=c("bestfit.1"), smooth=0, splits=10, boxplots=F, print=T, all=F, plot=F)
+for(f in c("pmcns50","pmcns50_noarch","pmcns50_temparch")) {
+    transformTournamentFiles(f, "comprepo.stat", "rbehaviours.stat",3,3)
+}
+data <- metaLoadData("pmcns50","pmcns50_noarch","pmcns50_temparch", params=list(jobs=10, vars.ind=c("captured","possession","surrounded"), subpops=2, load.behavs=T, behavs.sample=1, behavs.file="rbehaviours.stat"))
+count <- exploration.count(data, levels=5, vars=data[[1]]$vars.ind)
+uniformity.ind(count, "sub.0" ,threshold=50)
+uniformity.ind(count, "sub.1" ,threshold=50)
