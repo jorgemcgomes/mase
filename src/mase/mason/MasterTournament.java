@@ -149,7 +149,7 @@ public class MasterTournament {
             // Make evaluations -- test every best from every generation against the samples
             List<EvaluationResult[]>[] subpopEvals = new List[2];
             List<PersistentSolution>[] solutions = new List[2];
-            File log = new File(tars[0].get(job).getAbsolutePath().replace("bests.0.tar.gz", ""));
+            File log = new File(tars[0].get(job).getAbsolutePath().replace("bests.0.tar.gz",  "comp" + name + ".stat"));
             if(log.exists()) {
                 System.out.println("Log already exists. Skipping. " + log.getAbsolutePath());
             } else {
@@ -163,7 +163,7 @@ public class MasterTournament {
                     System.out.println(tar.getAbsolutePath() + " " + all.size() + " vs " + samples[s].size());
                     subpopEvals[s] = tournament(all, samples[s], s);
                 }
-                logResults(solutions, subpopEvals, log.getAbsolutePath());
+                logResults(solutions, subpopEvals, tars[0].get(job).getAbsolutePath().replace("bests.0.tar.gz",""));
             }
         }
     }

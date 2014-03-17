@@ -174,7 +174,6 @@ interPopDiversity <- function(data, vars=data$vars.ind) {
 #### Behaviour exploration uniformity ##########################################
 
 # levels: number of levels per variable to consider for patch formation
-# only group variables are used, and assumes all the datas have the same vars
 exploration.count <- function(datalist, levels=5, vars=datalist[[1]]$vars.group) {    
     pb <- txtProgressBar(min=1, max=length(datalist)*length(datalist[[1]]$subpops)*length(datalist[[1]]$jobs) * length(datalist[[1]]$gens), style=3)
     pbindex <- 1
@@ -194,6 +193,7 @@ exploration.count <- function(datalist, levels=5, vars=datalist[[1]]$vars.group)
     }
     
     # count the patches visited in each method, each evolutionary run, each subpop
+    maxFitness <- rep(0, levels ^ length(vars))
     counts <- list()
     for(data in datalist) { # experiment
         exp <- data$expname
@@ -207,19 +207,21 @@ exploration.count <- function(datalist, levels=5, vars=datalist[[1]]$vars.group)
                     pbindex <- pbindex + 1
                     
                     counts[[exp]][[j]][[s]][[g+1]] <- rep(0, levels ^ length(vars))
-                    frame <- subset(data[[j]][[s]], gen == g, select=vars)
+                    frame <- subset(data[[j]][[s]], gen == g, select=c("fitness",vars))
                     for(v in vars) {
                         frame[[v]] <- round((frame[[v]] - minv[[v]]) / (maxv[[v]] - minv[[v]]) * (levels - 1))
                     }
                     for(r in 1:nrow(frame)) {
-                        vec <- as.numeric(frame[r,])
+                        vec <- as.numeric(frame[r,vars])
                         id <- sum(vec * levels ^ ((length(vec)-1):0))
                         counts[[exp]][[j]][[s]][[g+1]][id] <- counts[[exp]][[j]][[s]][[g+1]][id] + 1
+                        maxFitness[id] <- max(maxFitness[id], frame[r,"fitness"])
                     }
                 }
             }
         }
     }
+    counts$maxFitness <- maxFitness
     return(counts)
 }
 
@@ -298,15 +300,15 @@ uniformity.group.alt <- function(count, threshold=0.0001) {
 }
 
 # Divergence from the exploration of each subpop to the uniform distribution
-uniformity.ind <- function(count, sub, threshold=100) {
+uniformity.ind <- function(count, sub, threshold=100, fitness.threshold=0) {
     all.count <- merge.counts.sub(count, sub)
     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-    visited <- which(all.count > threshold)
+    visited <- which(all.count > threshold & count$maxFitness > fitness.threshold)
     cat("All:", length(all.count), "| Visited:", length(visited),"\n")
     print(summary(all.count[visited]))
     ideal <- rep(1 / length(visited), length(visited))
     setlist <- list()
-    for(i in 1:length(count)) { # exps
+    for(i in 1:(length(count)-1)) { # exps
         chis <- c()
         for(j in 1:length(count[[i]])) { # jobs
             subchis <- c()
@@ -315,6 +317,31 @@ uniformity.ind <- function(count, sub, threshold=100) {
                     subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
                     subcounts <- subcounts / sum(subcounts)
                     subchis <- c(subchis, 1 - jsd(subcounts , ideal))
+                }
+            }
+            chis <- c(chis, mean(subchis))
+        }
+        setlist[[names(count)[i]]] <- chis
+    }
+    return(metaAnalysis(setlist))    
+}
+
+uniformity.ind.visited <- function(count, sub, threshold=1) {
+    all.count <- merge.counts.sub(count, sub)
+    plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
+    visited <- which(all.count > threshold)
+    cat("All:", length(all.count), "| Visited:", length(visited),"\n")
+    print(summary(all.count[visited]))
+    setlist <- list()
+    for(i in 1:length(count)) { # exps
+        chis <- c()
+        for(j in 1:length(count[[i]])) { # jobs
+            subchis <- c()
+            for(s in names(count[[i]][[j]])) { # subpops
+                if(is.null(sub) || sub == s) {
+                    subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
+                    above <- length(which(subcounts > threshold))
+                    subchis <- c(subchis, above / length(visited))
                 }
             }
             chis <- c(chis, mean(subchis))
@@ -423,7 +450,7 @@ kl <- function(p, q) {
 #### Generic generational data analysis ########################################
 
 analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, 
-                    splits=10, t.tests=T, plot=T, boxplots=T, all=T, print=F, smooth=0, transform=list(), ylim=NULL) {
+                    splits=10, t.tests=T, plot=T, boxplots=T, all=T, print=F, smooth=0, transform=list(), ylim=NULL, jitter=T) {
     
     # data loading
     print("Loading data...")
@@ -438,7 +465,11 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     if(is.null(gens)) {
         gens <- data[[1]][[1]]$gen
     }
-    splits <- c((0:(splits-1)) * floor(length(gens) / splits) + 1, length(gens))
+    if(splits == 0) {
+        splits <- length(gens)
+    } else {
+        splits <- c((0:(splits-1)) * floor(length(gens) / splits) + 1, length(gens))
+    }
     
     # find max and min
     if(is.null(ylim)) {
@@ -479,13 +510,20 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
                 print(batch.ttest(splitsets[[s]]))
             }
         }
+        
+        if(print) {
+            printframe <- data.frame()
+            for(s in splits) {
+                for(exp in names(data)) {
+                    printframe[paste0("",s), paste0(exp,".mean")] <- mean(splitsets[[s]][[exp]])
+                    printframe[paste0("",s), paste0(exp,".sd")] <- sd(splitsets[[s]][[exp]])
+                }
+            }
+            print(printframe)
+        }
     }
     
-    if(print) {
-        sampFrame <- plotframe[splits,]
-        cat("\n")
-        print(sampFrame)
-    }
+
     
     # mean plots    
     if(plot) {
@@ -514,23 +552,36 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     if(boxplots) {
         plots <- list()
         for(s in splits) {
+            names <- c()
             frame <- NULL
             for(a in analyse) {
                 for(exp in names(data)) {
+                    n <- paste(a,exp,sep=".")
+                    names <- c(names, n)
                     for(job in names(data[[exp]])) {
-                        frame <- rbind(frame, c(paste(a,exp,sep="."), data[[exp]][[job]][[a]][s]))
+                        frame <- rbind(frame, c(n, data[[exp]][[job]][[a]][s]))
                     }
                 }
             }
             frame <- data.frame(exp=frame[,1], v=as.numeric(frame[,2]))
-            p <- ggplot(frame, aes(factor(exp), v)) + 
+            print(frame$exp)
+            print(names(data))
+            frame$exp <- factor(frame$exp, levels = names,ordered = TRUE)
+            p <- ggplot(frame, aes(exp, v)) + 
                 geom_boxplot(aes(fill=factor(exp))) +
                 ggtitle(paste("Generation",s)) + xlab("") + ylab("Value") +
-                theme(axis.text.x = element_text(angle = 22.5, hjust = 1)) +
-                geom_jitter(colour="darkgrey") + ylim(ylim[1], ylim[2])
+                theme(axis.text.x = element_text(angle = 45, hjust = 1)) + ylim(ylim[1], ylim[2])
+            if(jitter) {
+                p <- p + geom_jitter(colour="darkgrey")
+            }
             plots[[length(plots)+1]] <- p
         }
-        plotListToPDF(plots, show=T, title="Boxplots")
+        if(length(plots) > 1) {
+            plotListToPDF(plots, show=T, title="Boxplots")
+        } else {
+            plotToPDF(plots[[1]], show=T)
+        }
+        
     }
 }
 

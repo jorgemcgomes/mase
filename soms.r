@@ -19,7 +19,7 @@ buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.
         ok <- T
         if(nrow(trainData) > 0) {
             for(j in 1:nrow(trainData)) {
-                if(euclideanDist(as.numeric(s),as.numeric(trainData[j,])) < 0.005) {
+                if(euclideanDist(as.numeric(s),as.numeric(trainData[j,])) < 0.01) {
                     ok <- F
                     break
                 } 
@@ -32,7 +32,7 @@ buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.
         }
     }
     colnames(trainData) <- variables
-    View(trainData)
+
     # item
     
     #trainData <- sample[,variables]
@@ -169,4 +169,50 @@ mapMergeSubpopsAux <- function(job, som, data, gen.from=data$gens[1], gen.to=dat
     count <- count / data$nsubs
     d <- data.frame(somx=som$grid$pts[,1], somy=som$grid$pts[,2], count=count, fitness.avg=som$fitness.avg, fitness.max=som$fitness.max)    
     return(list(all=d))
+}
+
+identifyBests <- function(som, data, n=10, outfile) {
+    # create identification data frame
+    variables <- colnames(som$codes)
+    idframe <- data.frame(job=rep(NA,100000), sub=rep(NA,100000), gen=rep(NA,100000), id=rep(NA,100000), fitness=rep(NA,100000))
+    for(var in variables) {
+        idframe[[var]] <- rep(NA,100000)
+    }
+    index <- 1
+    for(job in data$jobs) {
+        print(job)
+        for(sub in data$subpops) {
+            subset <- data[[job]][[sub]]
+            for(r in 1:nrow(subset)) {
+                row <- subset[r,]
+                rowT <- c(job, sub, row["gen"], row["index"], row["fitness"], row[variables])
+                idframe[index,] <- rowT
+                index <- index + 1
+            }
+        }
+    }
+    idframe <- idframe[complete.cases(idframe),]
+    
+    # map data to som
+    m <- map2(som, idframe[,variables])$unit.classif
+    
+    # pick bests
+    bestsframe <- data.frame(x=rep(NA,100000), y=rep(NA,100000))
+    for(col in colnames(idframe)) {
+        bestsframe[[col]] <- rep(NA,100000)
+    }
+    index <- 1
+    for(i in 1:nrow(som$grid$pts)) {
+        mapped <- idframe[m == i,]
+        mapped <- mapped[order(mapped$fitness, decreasing=T),]
+        if(nrow(mapped) > 0) {
+            for(j in 1:min(nrow(mapped),n)) {
+                row <- c(som$grid$pts[i,1], som$grid$pts[i,2], mapped[j,])
+                bestsframe[index,] <- row
+                index <- index + 1
+            }
+        }
+    }
+    bestsframe <- bestsframe[complete.cases(bestsframe),]
+    write.table(bestsframe, file=outfile, row.names=F, col.names=T)
 }

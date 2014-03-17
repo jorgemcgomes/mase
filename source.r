@@ -181,7 +181,7 @@ individualSomPlots <- function(som, data, mapping, ...) {
     return(plots)
 }
 
-somPlot <- function(som, mapping, title="som", alpha=0.70, gradient.low="blue", gradient.high="red", colour.limits=c(), size.max=25, limit.max=0.03) {
+somPlot <- function(som, mapping, title="som", alpha=0.70, gradient.low="blue", gradient.high="red", colour.limits=c(), size.max=30, limit.max=0.05) {
     g <- ggplot(mapping, aes(somx, somy)) + 
         geom_point(aes(size=count, colour=fitness.max), alpha=alpha) + 
         scale_colour_gradient(limits=colour.limits, low=gradient.low, high=gradient.high, space="Lab") + 
@@ -474,7 +474,7 @@ fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE,
                 allcount <- allcount / data$njobs
                 allmap <- map[[1]]$all # arbitrary one
                 allmap$count <- allcount
-                alljobsPlots[[length(alljobsPlots)+1]] <- somPlot(ksoms$group, allmap, title=data$expname, limit.max=0.02)
+                alljobsPlots[[length(alljobsPlots)+1]] <- somPlot(ksoms$group, allmap, title=data$expname)
             }
         }
         if(som.alljobs) {

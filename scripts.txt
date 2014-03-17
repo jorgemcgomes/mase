@@ -14,8 +14,9 @@ uniformity.ind(count, "sub.0" ,threshold=50)
 uniformity.ind(count, "sub.1" ,threshold=50)
 
 
-./run.r mase.mason.MasterTournament -self -freq 1 -name self -file ~/exps/competitive/ga/pred5/fit/config.params -ts ~/exps/competitive/ga/pred5/fit -ts ~/exps/competitive/ga/pred5/nov -ts ~/exps/competitive/ga/pred5/pmcns -ts ~/exps/competitive/ga/pred5/nsga -ts ~/exps/competitive/ga/pred5/nov0 -ts ~/exps/competitive/ga/pred5/nov1 -ts ~/exps/competitive/ga/pred5/alt25
+nohup ./run.r mase.mason.MasterTournament -self -freq 1 -name self -file ~/exps/competitive/ga/pred5/fit/config.params -ts ~/exps/competitive/ga/pred5/fit -ts ~/exps/competitive/ga/pred5/nov -ts ~/exps/competitive/ga/pred5/pmcns -ts ~/exps/competitive/ga/pred5/nsga -ts ~/exps/competitive/ga/pred5/nov0 -ts ~/exps/competitive/ga/pred5/nov1 -ts ~/exps/competitive/ga/pred5/alt25 &
 
+nohup ./run.r mase.mason.MasterTournament -inds challengeself.ind -name master -file ~/exps/competitive/ga/pred5/fit/config.params -ts ~/exps/competitive/ga/pred5/fit -ts ~/exps/competitive/ga/pred5/nov -ts ~/exps/competitive/ga/pred5/pmcns -ts ~/exps/competitive/ga/pred5/nsga -ts ~/exps/competitive/ga/pred5/nov0 -ts ~/exps/competitive/ga/pred5/nov1 -ts ~/exps/competitive/ga/pred5/alt25 &
 
 
 nohup ./run.r mase.mason.MasterTournament -inds challengeself.ind -name master -file ~/exps/competitive/ga/pred4/fit/config.params -s ~/exps/competitive/ga/pred4/fit -s ~/exps/competitive/ga/pred4/pmcns -s ~/exps/competitive/ga/pred4/nov -s ~/exps/competitive/ga/pred4/nov0 -s ~/exps/competitive/ga/pred4/nov1 -s ~/exps/competitive/ga/pred4/nsga -t ~/exps/competitive/ga/pred4/nov_alt10 -t ~/exps/competitive/ga/pred4/nov_alt25 -t ~/exps/competitive/ga/pred4/nov_alt50 & 

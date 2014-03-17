@@ -11,8 +11,12 @@ import ec.util.Parameter;
 import ec.util.ParameterDatabase;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Random;
 import mase.MetaEvaluator;
+import mase.controllers.AgentController;
+import mase.controllers.GroupController;
+import mase.controllers.HeterogeneousGroupController;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import sim.display.GUIState;
@@ -24,31 +28,49 @@ import sim.display.GUIState;
 public class MasonPlayer {
 
     public static final String P_CONTROLLER = "-gc";
+    public static final String P_AGENT_CONTROLLER = "-c";
 
     public static void main(String[] args) throws Exception {
         // Parameter loading
         File gc = null;
+        ArrayList<File> controllers = new ArrayList<File>();
         int x;
         for (x = 0; x < args.length; x++) {
             if (args[x].equals(P_CONTROLLER)) {
                 gc = new File(args[1 + x++]);
+            } else if (args[x].equals(P_AGENT_CONTROLLER)) {
+                controllers.add(new File(args[1 + x++]));
             }
         }
-        if (gc == null) {
-            System.out.println("Missing argument -gc.");
+        if (gc == null && controllers.isEmpty()) {
+            System.out.println("No controllers to run.");
             return;
         }
-        if (!gc.exists()) {
-            System.out.println("File does not exist: " + gc.getAbsolutePath());
+        if (gc != null && !controllers.isEmpty()) {
+            System.out.println("Both agent controllers and a group controller were provided.");
             return;
         }
 
         // Create controller
         MasonSimulator sim = createSimulator(args);
-        PersistentSolution c = SolutionPersistence.readSolution(new FileInputStream(gc));
-        System.out.println(c);
         long startSeed = new Random().nextLong();
-        GUIState gui = sim.createSimStateWithUI(c.getController(), startSeed);
+        GroupController controller = null;
+        if (gc != null) {
+            PersistentSolution c = SolutionPersistence.readSolution(new FileInputStream(gc));
+            System.out.println(c);
+            controller = c.getController();
+        } else {
+            AgentController[] acs = new AgentController[controllers.size()];
+            for(int i = 0 ; i < controllers.size() ; i++) {
+                PersistentSolution c = SolutionPersistence.readSolution(new FileInputStream(controllers.get(i)));
+                System.out.println("------------- Controller " + i + " -------------");
+                System.out.println(c);
+                HeterogeneousGroupController hgc = (HeterogeneousGroupController) c.getController();
+                acs[i] = hgc.getAgentControllers(controllers.size())[i];
+            }
+            controller = new HeterogeneousGroupController(acs);
+        }
+        GUIState gui = sim.createSimStateWithUI(controller, startSeed);
         gui.createController();
     }
 
