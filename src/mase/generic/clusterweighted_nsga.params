@@ -1,6 +1,6 @@
 eval.num-post = 3
 
-eval.post.0 =                           mase.generic.ClusterSCPostEvaluator
+eval.post.0 =                           mase.generic.ClusterSCPostEvalBalanced
 statecount.k-clusters =                 50
 statecount.filter-threshold =          0.01
 statecount.do-filter =                 FALSE
@@ -10,18 +10,21 @@ statecount.do-tf-idf =			TRUE
 statecount.distance =                   euclidean
 statecount.max-update-freq =            10
 statecount.allowed-change =             0.01
+statecount.min-learning-rate =          0.25
 
 eval.post.1 =                           mase.novelty.WeightedNovelty
-eval.post.1.ns-k =                     15
-eval.post.1.ns-archive-prob =          0.01
-eval.post.1.ns-archive-size =          1000
-eval.post.1.correlation =               spearman
-eval.post.1.min-weight =                0.0
-eval.post.1.smooth =                    0.5
-eval.post.1.selection-method =		all
-eval.post.1.selection-pressure = 	1
-pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
-neat.SPECIE.FITNESS.MAX =              1000
+eval.post.1.ns-k =                      15
+eval.post.1.ns-archive-prob =           0.03
+eval.post.1.ns-archive-size =           1000
+eval.post.1.correlation =               mutualinfo
+eval.post.1.smooth =                    0.75
+eval.post.1.selection-method =		min
+eval.post.1.selection-pressure = 	0
+eval.post.1.weights-archive =           false
+eval.post.1.fitness-bins =              10
+eval.post.1.fitness-disc =              kmeans
+pop.default-subpop.species.fitness =    mase.novelty.NoveltyFitness
+neat.SPECIE.FITNESS.MAX =               1000
 
 eval.post.2 =                          mase.novelty.NSGA2
 
@@ -39,7 +42,7 @@ stat.child.13.file =                   $nsga.stat
 
 stat.child.15 =                         mase.generic.SCStat
 stat.child.15.log-file =                $genericlog.stat
-stat.child.15.save-states = 			FALSE
+stat.child.15.save-states = 		FALSE
 
 stat.child.16 =                         mase.generic.ClusterSCStat
 stat.child.16.gen-clusters =            $genclusters.stat

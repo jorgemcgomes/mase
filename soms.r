@@ -7,38 +7,38 @@ buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.
     
     sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample
     
-    # test
-    baseSample <- sample[,variables]
-    print(nrow(baseSample))
-    trainData <- data.frame()
-    for(i in 1:nrow(baseSample)) {
-        if(i %% 1000 == 0) {
-            cat(i,nrow(trainData),"\n")
-        }
-        s <- baseSample[i,]
-        ok <- T
-        if(nrow(trainData) > 0) {
-            for(j in 1:nrow(trainData)) {
-                if(euclideanDist(as.numeric(s),as.numeric(trainData[j,])) < 0.01) {
-                    ok <- F
-                    break
-                } 
-            }
-        }
-        if(ok) {
-            #print(s)
-            trainData <- rbind(trainData, as.numeric(s))
-            
-        }
-    }
-    colnames(trainData) <- variables
-
-    # item
-    
-    #trainData <- sample[,variables]
+    trainData <- sample[,variables]
     if(scale) {
         trainData <- scale(trainData)
     }
+    colnames(trainData) <- variables
+    
+    # test
+#     outliers <- which(trainData > 1.5 | trainData < -1.5)
+#     trainData <- trainData[-outliers,]
+#     print(nrow(trainData))
+#     trainData2 <- data.frame()
+#     for(i in 1:nrow(trainData)) {
+#         if(i %% 10 == 0) {
+#             cat(i,nrow(trainData2),"\n")
+#         }
+#         s <- trainData[i,]
+#         ok <- T
+#         if(nrow(trainData2) > 0) {
+#             for(j in 1:nrow(trainData2)) {
+#                 if(euclideanDist(as.numeric(s),as.numeric(trainData2[j,])) < 5) {
+#                     ok <- F
+#                     break
+#                 } 
+#             }
+#         }
+#         if(ok) {
+#             #print(s)
+#             trainData2 <- rbind(trainData2, as.numeric(s))
+#             
+#         }
+#     }
+#     colnames(trainData2) <- variables
     
     print("Sampling done...")
     

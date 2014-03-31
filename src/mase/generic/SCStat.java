@@ -70,18 +70,18 @@ public class SCStat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        DescriptiveStatistics filterDS = new DescriptiveStatistics();
-        DescriptiveStatistics sizeDS = new DescriptiveStatistics();
-        DescriptiveStatistics countDS = new DescriptiveStatistics();
+        DescriptiveStatistics filteredStatesDS = new DescriptiveStatistics();
+        DescriptiveStatistics visitedStatesDS = new DescriptiveStatistics();
+        DescriptiveStatistics stateCountsDS = new DescriptiveStatistics();
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
                     if (er instanceof SCResult) {
                         SCResult r = (SCResult) er;
-                        filterDS.addValue(r.removedByFilter / (double) (r.removedByFilter + r.counts.size()));
-                        sizeDS.addValue(r.counts.size());
+                        filteredStatesDS.addValue(r.removedByFilter / (double) (r.removedByFilter + r.counts.size()));
+                        visitedStatesDS.addValue(r.counts.size());
                         for (Float f : r.counts.values()) {
-                            countDS.addValue(f);
+                            stateCountsDS.addValue(f);
                         }
                         SCPostEvaluator.mergeCountMap(globalCount, r.getCounts());
                     }
@@ -89,9 +89,9 @@ public class SCStat extends Statistics {
             }
         }
         state.output.println(state.generation + " " + globalCount.size() + " "
-                + sizeDS.getMin() + " " + sizeDS.getMean() + " " + sizeDS.getMax() + " "
-                + filterDS.getMin() + " " + filterDS.getMean() + " " + filterDS.getMax() + " "
-                + countDS.getMin() + " " + countDS.getMean() + " " + countDS.getMax() + " " + countDS.getSkewness(), genLog);
+                + visitedStatesDS.getMin() + " " + visitedStatesDS.getMean() + " " + visitedStatesDS.getMax() + " "
+                + filteredStatesDS.getMin() + " " + filteredStatesDS.getMean() + " " + filteredStatesDS.getMax() + " "
+                + stateCountsDS.getMin() + " " + stateCountsDS.getMean() + " " + stateCountsDS.getMax() + " " + stateCountsDS.getSkewness(), genLog);
     }
 
     @Override

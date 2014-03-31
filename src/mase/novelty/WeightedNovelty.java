@@ -26,7 +26,6 @@ import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.Ranker;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.clusterers.SimpleKMeans;
-import weka.clusterers.XMeans;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;

@@ -919,7 +919,7 @@ fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=l
 setwd("~/exps/sysf/rs")
 sysvars <- c("m.alive","f.alive","m.x","f.x","m.y","f.y","m.turn","f.turn","m.speed","f.speed","m.energy","f.energy","m.charging","f.charging","m.dispersion","f.dispersion","m.resdist","f.resdist","m.rescharging","f.rescharging","simlength")
 data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", params=list(jobs=10, load.behavs=T, subpops=1, vars.file=c("survivors","energy","mov","dist","NA",sysvars), vars.group=sysvars, behavs.sample=0.1))
-fullStatistics(data, som.group=T, som.alljobs=T, expset.name="rs")
+fullStatistics(data, som.group=T, som.alljobs=T, expset.name="rs2")
 
 
 theme_set(theme_bw()) ; DEF_WIDTH = 5 ; DEF_HEIGHT=3
@@ -935,3 +935,17 @@ fullStatistics(data, fit.comp=T, show.only=F, expset.name="Pred", fit.comp.par=l
 setwd("~/exps/sysf/rs")
 data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat", names=c("Fit","NS-TS","NS-SW", "NS-SF"), params=list(jobs=20, load.behavs=F, subpops=1, fitness.file="refitness.stat", offset=0))
 fullStatistics(data, fit.comp=T, show.only=F, expset.name="RS", fit.comp.par=list(snapshots=c(100,300,749), jitter=F))
+
+
+
+setwd("~/exps/sysf/ind")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat","ga_cl50", names=c("Fit","NS-TS","NS-SW", "NS-SF","NS-CL"), params=list(jobs=10, load.behavs=F, subpops=1, fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Indiana", fit.comp.par=list(snapshots=c(100,250,499), jitter=F))
+
+setwd("~/exps/sysf/pred")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat","ga_cl50", names=c("Fit","NS-TS","NS-SW", "NS-SF","NS-CL"), params=list(jobs=10, load.behavs=F, subpops=1, fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=list(snapshots=c(100,300,749), jitter=F))
+
+setwd("~/exps/sysf/rs")
+data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat","ga_cl50", names=c("Fit","NS-TS","NS-SW", "NS-SF","NS-CL"), params=list(jobs=10, load.behavs=F, subpops=1, fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="RS", fit.comp.par=list(snapshots=c(100,300,749), jitter=F))
