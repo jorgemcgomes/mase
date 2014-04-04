@@ -4,6 +4,7 @@
  */
 package mase.app.pred;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -49,15 +50,17 @@ public class PredatorPrey extends MaseSimState implements TaskDescriptionProvide
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
+        PolygonEntity boundaries = new PolygonEntity(new Double2D(0,0), new Double2D(par.size,0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0,0));
+        boundaries.paint = Color.WHITE;
+        field.setObjectLocation(boundaries, new Double2D(0,0));
+        
         this.predators = null;
         this.preys = null;
         this.activePreys = null;
         this.captureCount = 0;
         placePredators();
         placePreys();
-        
-        PolygonEntity boundaries = new PolygonEntity(new Double2D(0,0), new Double2D(par.size,0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0,0));
-        field.setObjectLocation(boundaries, new Double2D(0,0));
+
         this.td = new TaskDescription(new MasonDistanceFunction(field),
                 new EntityGroup(predators, par.nPredators, par.nPredators, false),
                 new EntityGroup(preys, 0, par.nPreys, false),

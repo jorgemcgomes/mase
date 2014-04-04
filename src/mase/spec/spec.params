@@ -1,0 +1,8 @@
+exch = 					mase.spec.SelectionPoolBuilder
+exch.selection-threshold =              1
+
+vector.mutate.source.0 =                mase.spec.MultiPopulationSource
+multipop-source.tournament-size = 5
+
+stat.child.20 =  mase.spec.MultiPopStat
+stat.child.20.file = $multipop.stat

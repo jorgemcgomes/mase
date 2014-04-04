@@ -949,3 +949,51 @@ fullStatistics(data, fit.comp=T, show.only=T, expset.name="Pred", fit.comp.par=l
 setwd("~/exps/sysf/rs")
 data <- metaLoadData("ga_fit","ga_ts","ga_k10_ml_min25","ga_k10_ml_flat","ga_cl50", names=c("Fit","NS-TS","NS-SW", "NS-SF","NS-CL"), params=list(jobs=10, load.behavs=F, subpops=1, fitness.file="refitness.stat", offset=0))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="RS", fit.comp.par=list(snapshots=c(100,300,749), jitter=F))
+
+
+
+# specialisation ---------------------------------------------------------------
+
+setwd("~/exps/spec/pred5")
+data <- metaLoadData("nospec","nospec_nov","spec_p","spec_p_nov","spec","spec_nov", params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="sp",fit.comp.par=list(snapshots=c(100,250,399)),som.group=T, som.alljobs=T, som.ind=T)
+
+count <- exploration.count(data, vars=data$nospec$vars.ind)
+uniformity.ind(count, NULL, threshold=50)
+#uniformity.diff(count)
+countg <- exploration.count(data, vars=data$nospec$vars.group)
+uniformity.group(countg, threshold=50)
+
+setwd("~/exps/spec/pred5_2")
+data <- metaLoadData("nospec","nospec_nov","spec_p","spec", params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="sp",fit.comp.par=list(snapshots=c(100,250,399)),som.group=T, som.alljobs=T, som.ind=T)
+
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sp",fit.comp.par=list(snapshots=c(100,250,399)))
+
+count <- exploration.count(data, vars=data$nospec$vars.ind)
+uniformity.ind(count, NULL, threshold=50)
+countg <- exploration.count(data, vars=data$nospec$vars.group)
+uniformity.group(countg, threshold=50)
+
+setwd("~/exps/spec/pred5_2")
+data <- metaLoadData("nospec","nospec_nov","fit_xover","nov_xover", params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="sp",fit.comp.par=list(snapshots=c(100,250,399)))
+count <- exploration.count(data, vars=data$nospec$vars.ind)
+uniformity.ind(count, NULL, threshold=50)
+countg <- exploration.count(data, vars=data$nospec$vars.group)
+uniformity.group(countg, threshold=50)
+
+setwd("~/exps/spec/pred5_2")
+data <- metaLoadData("nospec_nov","nov_xover","nov_xover_50_50","nov_xover2_50", params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="crossovers",fit.comp.par=list(snapshots=c(100,250,399)))
+count <- exploration.count(data, vars=data$nospec$vars.ind)
+uniformity.ind(count, NULL, threshold=50)
+countg <- exploration.count(data, vars=data$nospec$vars.group)
+uniformity.group(countg, threshold=50)
+
+data <- metaLoadData("nospec","fit_xover","fit_xover_50_50", params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="crossovers",fit.comp.par=list(snapshots=c(100,250,399)))
+count <- exploration.count(data, vars=data$nospec$vars.ind)
+uniformity.ind(count, NULL, threshold=50)
+countg <- exploration.count(data, vars=data$nospec$vars.group)
+uniformity.group(countg, threshold=50)

@@ -246,7 +246,7 @@ merge.counts.sub <- function(counts, targetsub) {
     for(exp in counts) {
         for(job in exp) {
             for(sub in names(job)) {
-                if(is.null(sub) || sub == targetsub) {
+                if(is.null(targetsub) || sub == targetsub) {
                     for(i in job[[sub]]) {
                         if(is.null(countsum)) {
                             countsum <- i
@@ -264,12 +264,12 @@ merge.counts.sub <- function(counts, targetsub) {
 # Divergence from the total exploration of each experiment to the uniform distribution
 uniformity.group <- function(count, threshold=100) {
     all.count <- merge.counts(count)
-    print(sum(all.count))
     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
     visited <- which(all.count > threshold)
+    cat("All:", length(all.count), "| Visited:", length(visited),"\n")
     ideal <- rep(1 / length(visited), length(visited))
     setlist <- list()
-    for(i in 1:length(count)) { # exps
+    for(i in 1:(length(count)-1)) { # exps: -1 to discard the maxFitness
         chis <- c()
         for(j in 1:length(count[[i]])) { # jobs
             job.counts <- merge.counts(count[[i]][[j]])[visited]

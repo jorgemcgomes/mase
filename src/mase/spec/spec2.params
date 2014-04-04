@@ -1,0 +1,6 @@
+exch = 					mase.spec.SpecialisationExchanger
+exch.similarity-threshold =             0.3
+exch.elite-portion =                    0.2
+
+stat.child.20 =  mase.spec.SpecialisationStats
+stat.child.20.file = $specialisation.stat
