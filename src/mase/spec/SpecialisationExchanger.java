@@ -30,11 +30,14 @@ public class SpecialisationExchanger extends Exchanger {
 
     public static final String P_ELITE_PORTION = "elite-portion";
     public static final String P_SIMILARITY_THRESHOLD = "similarity-threshold";
+    public static final String P_STABILITY_THRESHOLD = "stability-threshold";
     double[][] distanceMatrix;
     List<MetaPopulation> metaPops;
     double elitePortion;
     double similarityThreshold;
+    int stabilityThreshold;
     int subpopN;
+    int[] age;
 
     // stats
     int splits;
@@ -43,6 +46,7 @@ public class SpecialisationExchanger extends Exchanger {
     public void setup(EvolutionState state, Parameter base) {
         elitePortion = state.parameters.getDouble(base.push(P_ELITE_PORTION), null);
         similarityThreshold = state.parameters.getDouble(base.push(P_SIMILARITY_THRESHOLD), null);
+        stabilityThreshold = state.parameters.getInt(base.push(P_STABILITY_THRESHOLD), null);
     }
 
     /*
@@ -55,6 +59,10 @@ public class SpecialisationExchanger extends Exchanger {
             initMetaPopulations(state);
         }
 
+        for(MetaPopulation mp : metaPops) {
+            mp.age++;
+        }
+        
         updateDistanceMatrix(state);
         splitProcess(state);
         mergeProcess(state);
@@ -138,7 +146,7 @@ public class SpecialisationExchanger extends Exchanger {
         splits = 0;
         List<MetaPopulation> created = new ArrayList<MetaPopulation>();
         for (MetaPopulation mp : metaPops) {
-            if (mp.populations.size() > 1) {
+            if (mp.populations.size() > 1 && mp.age > stabilityThreshold) {
                 // Find the biggest distance between populations of the same MetaPopulation
                 int maxI = 0, maxJ = 0;
                 for (Integer i : mp.populations) {
@@ -166,6 +174,7 @@ public class SpecialisationExchanger extends Exchanger {
                     // Do the split
                     System.out.println("Spliting " + exitPop + " from " + mp.toString());
                     mp.populations.remove((Object) exitPop);
+                    mp.age = 0;
 
                     MetaPopulation mpj = new MetaPopulation();
                     mpj.individuals = state.population.subpops[exitPop].individuals;
@@ -184,13 +193,13 @@ public class SpecialisationExchanger extends Exchanger {
         while (iter.hasNext()) {
             MetaPopulation next = iter.next();
             // The population is alone: candidate to merging
-            if (next.populations.size() == 1) {
+            if (next.populations.size() == 1 && next.age > stabilityThreshold) {
                 // Find a metapopulation to merge with
                 int subpop = next.populations.get(0);
                 MetaPopulation closest = null;
                 double distance = Double.POSITIVE_INFINITY;
                 for (MetaPopulation mp : metaPops) {
-                    if (mp != next) { // can not merge with itself
+                    if (mp != next && mp.age > stabilityThreshold) { // can not merge with itself
                         double d = maxDistance(subpop, mp);
                         if (d < similarityThreshold && d < distance) {
                             distance = d;
@@ -206,6 +215,7 @@ public class SpecialisationExchanger extends Exchanger {
                     System.out.println("Merging " + subpop + " with " + closest.toString());
                     closest.populations.add(subpop);
                     closest.waitingIndividuals.add(state.population.subpops[subpop].individuals);
+                    closest.age = 0;
                 }
             }
         }
@@ -300,10 +310,12 @@ public class SpecialisationExchanger extends Exchanger {
         List<Integer> populations;
         Individual[] individuals;
         List<Individual[]> waitingIndividuals;
+        int age;
 
         MetaPopulation() {
             this.populations = new ArrayList<Integer>();
             this.waitingIndividuals = new ArrayList<Individual[]>();
+            this.age = 0;
         }
 
         @Override

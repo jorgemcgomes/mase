@@ -997,3 +997,17 @@ count <- exploration.count(data, vars=data$nospec$vars.ind)
 uniformity.ind(count, NULL, threshold=50)
 countg <- exploration.count(data, vars=data$nospec$vars.group)
 uniformity.group(countg, threshold=50)
+
+
+data <- metaLoadData("fit_sp_000/","fit_sp_010/","fit_sp_020/","fit_sp_030/","fit_sp_040/","fit_sp_050/","fit_sp_075/","fit_sp_100/", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="simt",fit.comp.par=list(snapshots=c(100,250,399)))
+data <- metaLoadData("fit_sp_030_05/","fit_sp_030_10/","fit_sp_030/","fit_sp_030_50","fit_sp_030_75","fit_sp_030_100", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="elitet",fit.comp.par=list(snapshots=c(100,250,399)))
+data <- metaLoadData("fit_sp_000","fit_sp_030_10/", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+
+data <- metaLoadData("fit_sp_000","fit_sp_030_10","test_fit_sp_030_10", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+
+data <- metaLoadData("fit_sp_000","fit_sp_030_10","test_fit_sp_030_10", params=list(jobs=10, subpops=1, load.behavs=F, fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))

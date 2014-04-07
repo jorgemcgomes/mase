@@ -72,6 +72,10 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     protected List<ArchiveEntry>[] archives;
     protected Individual[][] competitors;
 
+    public Individual[][] getEliteIndividuals() {
+        return eliteIndividuals;
+    }
+    
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);

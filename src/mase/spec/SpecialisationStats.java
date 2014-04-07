@@ -6,10 +6,14 @@
 package mase.spec;
 
 import ec.EvolutionState;
+import ec.Individual;
 import ec.Statistics;
+import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import mase.MetaEvaluator;
 import mase.spec.SpecialisationExchanger.MetaPopulation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -87,6 +91,21 @@ public class SpecialisationStats extends Statistics {
                 }
             }
         }
+        
+        // representatives
+        /*MetaEvaluator me = (MetaEvaluator) state.evaluator;
+        MultiPopCoevolutionaryEvaluator2 baseEval = (MultiPopCoevolutionaryEvaluator2) me.getBaseEvaluator();
+        Individual[][] elites = baseEval.getEliteIndividuals();
+        ds.clear();
+        for(MetaPopulation mp : exc.metaPops) {
+            HashSet<Individual> inds = new HashSet<Individual>();
+            for(Integer p : mp.populations) {
+                inds.add(elites[p][0]);
+            }
+            ds.addValue(inds.size() / (double) mp.populations.size());
+        }
+        state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);*/
+        
         
         state.output.println("", log);
     }
