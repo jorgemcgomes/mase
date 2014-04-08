@@ -1011,3 +1011,16 @@ fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=li
 
 data <- metaLoadData("fit_sp_000","fit_sp_030_10","test_fit_sp_030_10", params=list(jobs=10, subpops=1, load.behavs=F, fitness.file="refitness.stat", offset=0))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+
+data <- metaLoadData("fit_sp_030_10","fit_sp_m30_s40","fit_sp_m30_s50","test_fit_sp_030_10/", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+
+data <- metaLoadData("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+
+analyse("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="merges", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="splits", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="maxdisp", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+
+

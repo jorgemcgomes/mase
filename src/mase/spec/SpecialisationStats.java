@@ -12,6 +12,7 @@ import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import mase.MetaEvaluator;
 import mase.spec.SpecialisationExchanger.MetaPopulation;
@@ -91,6 +92,10 @@ public class SpecialisationStats extends Statistics {
                 }
             }
         }
+        
+        /*for(double[] m : exc.distanceMatrix) {
+            state.output.message(Arrays.toString(m));
+        }*/
         
         // representatives
         /*MetaEvaluator me = (MetaEvaluator) state.evaluator;

@@ -29,15 +29,16 @@ import mase.novelty.NoveltyFitness;
 public class SpecialisationExchanger extends Exchanger {
 
     public static final String P_ELITE_PORTION = "elite-portion";
-    public static final String P_SIMILARITY_THRESHOLD = "similarity-threshold";
     public static final String P_STABILITY_THRESHOLD = "stability-threshold";
+    public static final String P_MERGE_THRESHOLD = "merge-threshold";
+    public static final String P_SPLIT_THRESHOLD = "split-threshold";
     double[][] distanceMatrix;
     List<MetaPopulation> metaPops;
     double elitePortion;
-    double similarityThreshold;
+    double mergeThreshold;
+    double splitThreshold;
     int stabilityThreshold;
     int subpopN;
-    int[] age;
 
     // stats
     int splits;
@@ -45,7 +46,8 @@ public class SpecialisationExchanger extends Exchanger {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         elitePortion = state.parameters.getDouble(base.push(P_ELITE_PORTION), null);
-        similarityThreshold = state.parameters.getDouble(base.push(P_SIMILARITY_THRESHOLD), null);
+        mergeThreshold = state.parameters.getDouble(base.push(P_MERGE_THRESHOLD), null);
+        splitThreshold = state.parameters.getDouble(base.push(P_SPLIT_THRESHOLD), null);
         stabilityThreshold = state.parameters.getInt(base.push(P_STABILITY_THRESHOLD), null);
     }
 
@@ -159,7 +161,7 @@ public class SpecialisationExchanger extends Exchanger {
                 }
 
                 // Check if it needs to be split
-                if (distanceMatrix[maxI][maxJ] > similarityThreshold) {
+                if (distanceMatrix[maxI][maxJ] > splitThreshold) {
                     // Determine which one will leave the metapopulation
                     int exitPop = maxJ;
                     if (mp.populations.size() > 2) {
@@ -201,7 +203,7 @@ public class SpecialisationExchanger extends Exchanger {
                 for (MetaPopulation mp : metaPops) {
                     if (mp != next && mp.age > stabilityThreshold) { // can not merge with itself
                         double d = maxDistance(subpop, mp);
-                        if (d < similarityThreshold && d < distance) {
+                        if (d < mergeThreshold && d < distance) {
                             distance = d;
                             closest = mp;
                         }

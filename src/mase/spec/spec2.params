@@ -1,6 +1,8 @@
-exch = 					mase.spec.SpecialisationExchanger
-exch.similarity-threshold =             0.3
-exch.elite-portion =                    0.2
+exch =                      mase.spec.SpecialisationExchanger
+exch.merge-threshold =      0.2
+exch.split-threshold =      0.3
+exch.elite-portion =        0.1
+exch.stability-threshold =  -1
 
-stat.child.20 =  mase.spec.SpecialisationStats
-stat.child.20.file = $specialisation.stat
+stat.child.20 =             mase.spec.SpecialisationStats
+stat.child.20.file =        $specialisation.stat
