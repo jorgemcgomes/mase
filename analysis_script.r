@@ -1015,12 +1015,82 @@ fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=li
 data <- metaLoadData("fit_sp_030_10","fit_sp_m30_s40","fit_sp_m30_s50","test_fit_sp_030_10/", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
 
-data <- metaLoadData("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+data <- metaLoadData("fit_sp_m20_s20","fit_sp_m20_s20_t5","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
 
-analyse("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="merges", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
-analyse("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="splits", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
-analyse("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
-analyse("fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="maxdisp", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp_m20_s20_t5","fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="merges", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp_m20_s20_t5","fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="splits", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp_m20_s20_t5","fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp_m20_s20_t5","fit_sp_m20_s20","fit_sp_m20_s30","fit_sp_m20_s40","fit_sp_m20_s50", filename="specialisation.stat", analyse="maxdisp", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+
+
+data <- metaLoadData("fit_sp_000","fit_sp_m20_s40", params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+countg <- exploration.count(data, vars=data$fit_sp_000$vars.group)
+uniformity.group(countg, threshold=50)
+
+data <- metaLoadData("fit_sp_000","fit_sp2_m15s15","fit_sp2_m15s20","fit_sp2_m15s25","fit_sp2_m25s25","fit_sp2_m25s35", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+
+data <- metaLoadData("fit_sp_000","fit_sp2_m15s20","dist_test","dist_test2", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+analyse("fit_sp2_m15s20","dist_test","dist_test2", filename="specialisation.stat", analyse="merges", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp2_m15s20","dist_test","dist_test2", filename="specialisation.stat", analyse="splits", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp2_m15s20","dist_test","dist_test2", filename="specialisation.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=5)
+analyse("fit_sp2_m15s20","dist_test","dist_test2", filename="specialisation.stat", analyse="maxdisp", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+
+setwd("~/exps/spec/pred5_2")
+data <- metaLoadData("fit_sp_000","fit_sp3_m100s120","fit_sp3_m125s145","fit_sp3_m150s170","fit_sp3_m100s120_alt","fit_sp3_m100s120_shared", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+analyse("fit_sp3_m100s120","fit_sp3_m125s145","fit_sp3_m150s170","fit_sp3_m100s120_alt","fit_sp3_m100s120_shared", filename="specialisation.stat", analyse="merges", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp3_m100s120","fit_sp3_m125s145","fit_sp3_m150s170","fit_sp3_m100s120_alt","fit_sp3_m100s120_shared", filename="specialisation.stat", analyse="splits", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_sp3_m100s120","fit_sp3_m125s145","fit_sp3_m150s170","fit_sp3_m100s120_alt","fit_sp3_m100s120_shared", filename="specialisation.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:20)), all=F, boxplots=F, t.tests=F, splits=0, smooth=5)
+
+setwd("~/exps/spec/pred7")
+data <- metaLoadData("fit","fit_sp3_m100s120", params=list(jobs=10, subpops=7, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+analyse("fit_sp3_m100s120", filename="specialisation.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits",paste0("A",1:28)), all=F, boxplots=F, t.tests=F, splits=0, smooth=5)
+
+setwd("~/exps/spec/pred5")
+data <- metaLoadData("fit","fit_m110s130_elites","fit_m110s130_full","fit_m110s130_one","fit_m110s130_partial", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+data <- metaLoadData("fit_m110s130_elites","fit_m110s130_elites_homo","fit_m110s130_elites_shared", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(100,250,399)))
+
+analyse("fit_m110s130_elites","fit_m110s130_full","fit_m110s130_one","fit_m110s130_partial", filename="specialisation.stat", analyse="npops", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_full","fit_m110s130_one","fit_m110s130_partial", filename="specialisation.stat", analyse="merges", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_full","fit_m110s130_one","fit_m110s130_partial", filename="specialisation.stat", analyse="splits", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_full","fit_m110s130_one","fit_m110s130_partial", filename="specialisation.stat", analyse="meandistother.mean", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_full","fit_m110s130_one","fit_m110s130_partial", filename="specialisation.stat", analyse="diversity.mean", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+
+analyse("fit_m110s130_elites", filename="specialisation.stat", analyse="npops", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+
+analyse("fit_m110s130_elites","fit_m110s130_elites_homo","fit_m110s130_elites_shared", filename="specialisation.stat", analyse="npops", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_elites_homo","fit_m110s130_elites_shared", filename="specialisation.stat", analyse="merges", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_elites_homo","fit_m110s130_elites_shared", filename="specialisation.stat", analyse="meandistother.mean", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_elites_homo","fit_m110s130_elites_shared", filename="specialisation.stat", analyse="diversity.mean", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+
+data <- metaLoadData("fit","fit_m110s130_elites","fit_m110s130_full", params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist")))
+countg <- exploration.count(data, vars=data$fit$vars.group)
+uniformity.group(countg, threshold=50)
+fullStatistics(data, fit.comp=T, show.only=F, expset.name="sp",fit.comp.par=list(snapshots=c(100,250,399)),som.group=T, som.alljobs=T, som.ind=T)
+
+data <- metaLoadData("fit_m110s130_elites","fit_m110s130_group","fit", names=c("indspec","groupspec","fit"),params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist"),  fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(399)))
+analyse("fit_m110s130_elites","fit_m110s130_group","fit", filename="specialisation.stat", analyse="meandistother.mean", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_group","fit", filename="specialisation.stat", analyse="diversity.mean", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+analyse("fit_m110s130_elites","fit_m110s130_group", filename="specialisation.stat", analyse="npops", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
+
+
+countg <- exploration.count(data, vars=data$fit$vars.group)
+uniformity.group(countg, threshold=50)
+
+
+data <- metaLoadData("fit","fit_m110s130_elites", names=c("Fit","MP-CCEA"), params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.2, vars.group=c("captured","time","finalDist","predDisp"), vars.ind=c("i.captured","i.preyDist","i.movement","i.predatorDist"), fitness.file="refitness.stat", offset=0))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="comp",fit.comp.par=list(snapshots=c(399)))
+countg <- exploration.count(data, vars=data$Fit$vars.group)
+uniformity.group(countg, threshold=100)
+uniformity.group(countg, threshold=100, fitness.threshold=7)
+analyse("fit_m110s130_elites", filename="specialisation.stat", analyse="npops", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=5)
+analyse("fit_m110s130_elites","fit", filename="specialisation.stat", analyse="meandistother.mean", vars.pre=c("gen","npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","merges","splits"), vars.sub=c("metapop","diversity","mindistsame","meandistsame","maxdistsame","mindistother","meandistother","maxdistother"), all=F, boxplots=F, t.tests=F, splits=0, smooth=10)
 
 

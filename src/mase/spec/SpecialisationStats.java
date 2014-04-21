@@ -6,15 +6,10 @@
 package mase.spec;
 
 import ec.EvolutionState;
-import ec.Individual;
 import ec.Statistics;
-import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import mase.MetaEvaluator;
 import mase.spec.SpecialisationExchanger.MetaPopulation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -73,45 +68,63 @@ public class SpecialisationStats extends Statistics {
         }
         state.output.print(" " + count + " " + exc.splits, log);
 
-        // population distance to others (min, mean, max)
-        for (int i = 0; i < exc.subpopN; i++) {
-            ds.clear();
-            for (int j = 0; j < exc.subpopN; j++) {
-                if (j != i) {
-                    ds.addValue(exc.distanceMatrix[i][j]);
+        for (int i = 0; i < exc.prototypeSubs.length; i++) {
+            // MetaPop to which they belong
+            MetaPopulation pop = null;
+            for (int m = 0; m < exc.metaPops.size(); m++) {
+                if (exc.metaPops.get(m).populations.contains(i)) {
+                    pop = exc.metaPops.get(m);
+                    state.output.print(" " + m, log);
                 }
+            }
+
+            // Population dispersion
+            state.output.print(" " + exc.originalMatrix[i][i], log);
+
+            // Normalised distance to internal pops -- include itself -- 1
+            ds.clear();
+            for(Integer p : pop.populations) {
+                ds.addValue(exc.distanceMatrix[i][p]);
+            }
+            state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);
+            
+            // Normalised distance to external pops
+            ds.clear();
+            for (MetaPopulation mp : exc.metaPops) {
+                if (mp != pop) {
+                    for(Integer p : mp.populations) {
+                        ds.addValue(exc.distanceMatrix[i][p]);
+                    }
+                }
+            }
+            if(ds.getN() == 0) {
+                ds.addValue(1);
             }
             state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);
         }
 
-        // the metapop to each they belong
-        for (int i = 0; i < exc.subpopN; i++) {
-            for (int m = 0; m < exc.metaPops.size(); m++) {
-                if (exc.metaPops.get(m).populations.contains(i)) {
-                    state.output.print(" " + m, log);
-                }
-            }
+        String str = "";
+        for (MetaPopulation mp : exc.metaPops) {
+            str += mp + " ; ";
         }
-        
+        state.output.message(str);
+
         /*for(double[] m : exc.distanceMatrix) {
-            state.output.message(Arrays.toString(m));
-        }*/
-        
+         state.output.message(Arrays.toString(m));
+         }*/
         // representatives
         /*MetaEvaluator me = (MetaEvaluator) state.evaluator;
-        MultiPopCoevolutionaryEvaluator2 baseEval = (MultiPopCoevolutionaryEvaluator2) me.getBaseEvaluator();
-        Individual[][] elites = baseEval.getEliteIndividuals();
-        ds.clear();
-        for(MetaPopulation mp : exc.metaPops) {
-            HashSet<Individual> inds = new HashSet<Individual>();
-            for(Integer p : mp.populations) {
-                inds.add(elites[p][0]);
-            }
-            ds.addValue(inds.size() / (double) mp.populations.size());
-        }
-        state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);*/
-        
-        
+         MultiPopCoevolutionaryEvaluator2 baseEval = (MultiPopCoevolutionaryEvaluator2) me.getBaseEvaluator();
+         Individual[][] elites = baseEval.getEliteIndividuals();
+         ds.clear();
+         for(MetaPopulation mp : exc.metaPops) {
+         HashSet<Individual> inds = new HashSet<Individual>();
+         for(Integer p : mp.populations) {
+         inds.add(elites[p][0]);
+         }
+         ds.addValue(inds.size() / (double) mp.populations.size());
+         }
+         state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);*/
         state.output.println("", log);
     }
 

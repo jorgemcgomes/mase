@@ -262,10 +262,10 @@ merge.counts.sub <- function(counts, targetsub) {
 }
 
 # Divergence from the total exploration of each experiment to the uniform distribution
-uniformity.group <- function(count, threshold=100) {
+uniformity.group <- function(count, threshold=100, fitness.threshold=0) {
     all.count <- merge.counts(count)
     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-    visited <- which(all.count > threshold)
+    visited <- which(all.count > threshold & count$maxFitness > fitness.threshold)
     cat("All:", length(all.count), "| Visited:", length(visited),"\n")
     ideal <- rep(1 / length(visited), length(visited))
     setlist <- list()
@@ -273,7 +273,9 @@ uniformity.group <- function(count, threshold=100) {
         chis <- c()
         for(j in 1:length(count[[i]])) { # jobs
             job.counts <- merge.counts(count[[i]][[j]])[visited]
-            job.counts <- job.counts / sum(job.counts)
+            if(sum(job.counts) > 0) {
+                job.counts <- job.counts / sum(job.counts)
+            }
             chis <- c(chis, 1 - jsd(job.counts, ideal))
         }
         setlist[[names(count)[i]]] <- chis

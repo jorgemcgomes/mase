@@ -1,8 +1,13 @@
 exch =                      mase.spec.SpecialisationExchanger
-exch.merge-threshold =      0.2
-exch.split-threshold =      0.3
+exch.merge-threshold =      1.0
+exch.split-threshold =      1.2
 exch.elite-portion =        0.1
 exch.stability-threshold =  -1
+exch.share-representatives = false
+exch.homogeneous-start =    false
+exch.merge-mode =           elites
+
+vector.species.fitness=mase.novelty.NoveltyFitness
 
 stat.child.20 =             mase.spec.SpecialisationStats
 stat.child.20.file =        $specialisation.stat
