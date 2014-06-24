@@ -48,7 +48,8 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         } else {
             ext <- ext[which(ext[[1]] %in% data$gens),]
         }
-        data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)-offset]], best.gen=ext[[ncol(ext)-offset-1]], mean=ext[[ncol(ext)-offset-2]])    
+        data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)-offset]], best.gen=ext[[ncol(ext)-offset-1]], mean=ext[[ncol(ext)-offset-2]])
+        #data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[4]], best.gen=ext[[3]], mean=ext[[2]])    
         
         # Behaviours
         if(load.behavs) {

@@ -26,6 +26,7 @@ public abstract class MasonEvaluation implements EvaluationFunction {
     protected int currentEvaluationStep;
     protected int maxEvaluationSteps;
     protected int updateFrequency;
+    protected int maxSteps;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -33,7 +34,7 @@ public abstract class MasonEvaluation implements EvaluationFunction {
         if (updateFrequency < 0) {
             state.output.fatal("Update frequency must be >= 0", base.push(P_FREQUENCY), defaultBase().push(P_FREQUENCY));
         }
-        int maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
+        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
         this.maxEvaluationSteps = updateFrequency == 0 ? 0 : maxSteps / updateFrequency;
     }
 

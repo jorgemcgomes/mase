@@ -6,8 +6,6 @@ package mase.stat;
 
 import ec.EvolutionState;
 import ec.Individual;
-import ec.Statistics;
-import ec.util.Parameter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,12 +17,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
-import mase.controllers.AgentController;
-import mase.controllers.AgentControllerIndividual;
+import mase.SimulationProblem;
 import mase.controllers.GroupController;
 import mase.evaluation.ExpandedFitness;
-import mase.controllers.HeterogeneousGroupController;
-import mase.controllers.HomogeneousGroupController;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -36,24 +31,17 @@ import org.apache.commons.lang3.SerializationUtils;
  */
 public abstract class SolutionPersistence {
 
-    public static PersistentSolution createPersistentController(Individual ind, int gen, int sub, int index) {
+    public static PersistentSolution createPersistentController(EvolutionState state, Individual ind, int sub, int index) {
+        SimulationProblem sp = (SimulationProblem) state.evaluator.p_problem;
         PersistentSolution pc = new PersistentSolution();
-        GroupController gc = null;
-        if (ind.fitness.getContext() == null) {
-            gc = new HomogeneousGroupController(((AgentControllerIndividual) ind).decodeController());
-        } else {
-            Individual[] inds = ind.fitness.getContext();
-            AgentController[] acs = new AgentController[inds.length];
-            for (int i = 0; i < inds.length; i++) {
-                acs[i] = ((AgentControllerIndividual) inds[i]).decodeController();
-            }
-            gc = new HeterogeneousGroupController(acs);
-        }
+        GroupController gc = ind.fitness.getContext() == null ? 
+                sp.createController(state, ind) : 
+                sp.createController(state, ind.fitness.getContext());
         pc.setController(gc);
 
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
         pc.setEvalResults(fit.getEvaluationResults());
-        pc.setOrigin(gen, sub, index);
+        pc.setOrigin(state.generation, sub, index);
         pc.setFitness(fit.getFitnessScore());
         return pc;
     }

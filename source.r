@@ -29,7 +29,7 @@ theme_set(theme_grey(base_size = 12))
 plotMultiline <- function(data, ylim=c(0,1), legend="right", title=NULL, ylabel="Fitness", col="variable",lty="variable") {
     xlabel <- colnames(data)[1]
     data.long <- melt(data, id=xlabel)
-    g <- ggplot(data=data.long, aes_string(x=xlabel, y="value", colour="variable", lty="variable")) + geom_line() + theme(legend.position=legend) + ylab(ylabel) + guides(fill=guide_legend(title=NULL))
+    g <- ggplot(data=data.long, aes_string(x=xlabel, y="value", colour="variable")) + geom_line() + theme(legend.position=legend) + ylab(ylabel) + guides(fill=guide_legend(title=NULL))
     if(!is.null(ylim)) {
         g <- g + ylim(ylim[1],ylim[2])
     }

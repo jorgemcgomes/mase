@@ -4,12 +4,6 @@
  */
 package mase;
 
-import mase.controllers.GroupController;
-import mase.evaluation.ExpandedFitness;
-import mase.evaluation.EvaluationResult;
-import mase.evaluation.EvaluationFunction;
-import mase.controllers.AgentControllerIndividual;
-import mase.controllers.AgentController;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.Population;
@@ -19,8 +13,16 @@ import ec.simple.SimpleProblemForm;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import mase.controllers.AgentController;
+import mase.controllers.AgentControllerIndividual;
+import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.controllers.HomogeneousGroupController;
+import mase.evaluation.EvaluationFunction;
+import mase.evaluation.EvaluationResult;
+import mase.evaluation.ExpandedFitness;
+import mase.spec.HybridExchanger;
 
 /**
  *
@@ -107,17 +109,39 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         }
     }
 
-    @Override
-    public void evaluate(EvolutionState state, Individual[] ind, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
-        /* Perform simulation */
+    // TODO: Bad dependence -- should be improved with interfaces
+    public GroupController createController(EvolutionState state, Individual... ind) {
         AgentController[] acs = new AgentController[ind.length];
         for (int i = 0; i < ind.length; i++) {
             acs[i] = ((AgentControllerIndividual) ind[i]).decodeController();
         }
+        GroupController gc = null;
+        if (acs.length == 1) {
+            gc = new HomogeneousGroupController(acs[0]);
+        } else {
+            if (state.exchanger instanceof HybridExchanger) {
+                HybridExchanger exc = (HybridExchanger) state.exchanger;
+                List<Integer>[] allocations = exc.getAllocations(state);
+                AgentController[] temp = new AgentController[100];
+                int count = 0;
+                for (int i = 0; i < allocations.length; i++) {
+                    for (Integer ag : allocations[i]) {
+                        temp[ag] = acs[i].clone();
+                        count++;
+                    }
+                }
+                acs = Arrays.copyOf(temp, count);
+            }
 
-        HeterogeneousGroupController controller = new HeterogeneousGroupController(acs);
-        EvaluationResult[] eval = evaluateSolution(controller, state.random[threadnum].nextLong());
+            gc = new HeterogeneousGroupController(acs);
+        }
+        return gc;
+    }
 
+    @Override
+    public void evaluate(EvolutionState state, Individual[] ind, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
+        GroupController gc = createController(state, ind);
+        EvaluationResult[] eval = evaluateSolution(gc, state.random[threadnum].nextLong());
         /* Save results */
         for (int i = 0; i < ind.length; i++) {
             if (updateFitness[i]) {
@@ -131,9 +155,8 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
 
     @Override
     public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
-        AgentControllerIndividual aci = (AgentControllerIndividual) ind;
-        HomogeneousGroupController hc = new HomogeneousGroupController(aci.decodeController());
-        EvaluationResult[] eval = evaluateSolution(hc, state.random[threadnum].nextLong());
+        GroupController gc = createController(state, ind);
+        EvaluationResult[] eval = evaluateSolution(gc, state.random[threadnum].nextLong());
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
         fit.setEvaluationResults(state, eval, subpopulation);
         ind.evaluated = true;

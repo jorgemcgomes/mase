@@ -53,15 +53,19 @@ public class InnovationDatabase implements Serializable {
         }*/
     }
     
-    public static void resetInnovationDatabase() {
-        //database = new InnovationDatabase();
+    public void reset() {
+        this.innovations = new HashMap();
+        this.innovationId = 1;
+        this.neuronId = 1;
+        this.hits = 0;
+        this.misses = 0;
     }
 
-    private int nextInnovationNumber() {
+    private synchronized int nextInnovationNumber() {
         return (innovationId++);
     }
 
-    private int nextNodeNumber() {
+    private synchronized int nextNodeNumber() {
         return (neuronId++);
     }
 

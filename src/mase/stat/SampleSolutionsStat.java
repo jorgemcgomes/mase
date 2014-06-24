@@ -72,7 +72,7 @@ public class SampleSolutionsStat extends SolutionWriterStat {
 
         for (int i = 0; i < sampleSize; i++) {
             Individual ind = state.population.subpops[subs[i]].individuals[inds[i]];
-            PersistentSolution c = SolutionPersistence.createPersistentController(ind, state.generation, subs[i], inds[i]);
+            PersistentSolution c = SolutionPersistence.createPersistentController(state, ind, subs[i], inds[i]);
             try {
                 if (compress) {
                     SolutionPersistence.writeSolutionToTar(c, taos);

@@ -31,12 +31,13 @@ import mase.novelty.NoveltyFitness;
 public class SpecialisationExchanger extends Exchanger {
 
     public static final String P_ELITE_PORTION = "elite-portion";
-    public static final String P_STABILITY_THRESHOLD = "stability-threshold";
-    public static final String P_MERGE_THRESHOLD = "merge-threshold";
-    public static final String P_SPLIT_THRESHOLD = "split-threshold";
     public static final String P_SHARED_REPRESENTATIVES = "shared-representatives";
     public static final String P_HOMOGENEOUS_START = "homogeneous-start";
     public static final String P_MERGE_MODE = "merge-mode";
+    public static final String P_STABILITY_THRESHOLD = "stability-threshold";
+    public static final String P_MERGE_THRESHOLD = "merge-threshold";
+    public static final String P_SPLIT_THRESHOLD = "split-threshold";
+    
     double elitePortion;
     double mergeThreshold;
     double splitThreshold;
@@ -219,7 +220,7 @@ public class SpecialisationExchanger extends Exchanger {
         int count = 0;
         double total = 0;
         for (int i = 0; i < brs1.length; i++) {
-            for (int j = i; j < brs2.length; j++) {
+            for (int j = 0; j < brs2.length; j++) {
                 if (brs1[i] != brs2[j]) {
                     total += brs1[i].distanceTo(brs2[j]);
                     count++;
@@ -334,8 +335,8 @@ public class SpecialisationExchanger extends Exchanger {
             }
         }
     }
-
-    private double maxDistance(int subpop, MetaPopulation mp) {
+    
+    protected double maxDistance(int subpop, MetaPopulation mp) {
         double max = Double.NEGATIVE_INFINITY;
         for (Integer s : mp.populations) {
             max = Math.max(distanceMatrix[subpop][s], max);

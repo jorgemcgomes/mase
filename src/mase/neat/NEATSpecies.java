@@ -4,6 +4,7 @@
  */
 package mase.neat;
 
+import ec.EvolutionState;
 import ec.Species;
 import ec.util.Parameter;
 
@@ -14,7 +15,7 @@ import ec.util.Parameter;
 public class NEATSpecies extends Species {
     
     public static final String P_NEAT_SPECIES = "neat.species";
-
+    
     @Override
     public Parameter defaultBase() {
         return new Parameter(P_NEAT_SPECIES);

@@ -26,6 +26,9 @@ public class MetaEvaluator extends Evaluator {
     public void setup(EvolutionState state, Parameter base) {
         baseEvaluator = (Evaluator) state.parameters.getInstanceForParameter(base.push(P_BASE_EVAL), null, Evaluator.class);
         baseEvaluator.setup(state, base.push(P_BASE_EVAL));
+        this.masterproblem = baseEvaluator.masterproblem;
+        this.p_problem = baseEvaluator.p_problem;
+        
         int numPosts = state.parameters.getIntWithDefault(base.push(P_NUM_POST_EVAL), null, 0);
         postEvaluators = new PostEvaluator[numPosts];
         for (int i = 0; i < numPosts; i++) {

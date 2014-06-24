@@ -74,7 +74,7 @@ public class BestSolutionGenStat extends SolutionWriterStat {
                 }
             }
         }
-        PersistentSolution c = SolutionPersistence.createPersistentController(best, state.generation, sub, index);
+        PersistentSolution c = SolutionPersistence.createPersistentController(state, best, sub, index);
         try {
             if (compress) {
                 SolutionPersistence.writeSolutionToTar(c, taos);

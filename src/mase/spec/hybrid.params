@@ -1,0 +1,16 @@
+exch =                  mase.spec.HybridExchanger
+exch.merge-threshold =  1.25
+exch.split-threshold =  5
+exch.stability-time =   10
+exch.elite-portion =    1
+exch.merge-mode =       elites
+exch.merge-equal =      false
+exch.merge-normalise =  true
+
+pop.default-subpop.species.fitness =    mase.novelty.NoveltyFitness
+neat.shared-database =  true
+
+stat.child.20 =             mase.spec.HybridStat
+stat.child.20.file =        $hybrid.stat
+
+stat.child.1.do-subpops =   false

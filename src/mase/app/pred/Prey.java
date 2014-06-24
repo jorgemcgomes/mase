@@ -26,9 +26,10 @@ public class Prey extends EmboddiedAgent {
         super(sim, field, RADIUS, COLOUR);
         super.setOrientationShowing(false);
         this.predSim = sim;
-        if(sim.par.collisions) {
+        this.enableCollisionDetection(false);
+        /*if(sim.par.collisions) {
             this.enableCollisionDetection(true);
-        }
+        }*/
     }
 
     @Override

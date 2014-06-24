@@ -97,6 +97,7 @@ public class FitnessStat extends Statistics {
     public int statisticslog = 0;  // stdout by default
     public boolean doSubpops;
     public Individual[] bestSoFar;
+    public Individual absoluteBest;
     public long[] totalIndsSoFar;
     public long[] totalIndsThisGen;                         // total assessed individuals
     public double[] totalFitnessThisGen;                    // per-subpop mean fitness this generation
@@ -171,6 +172,10 @@ public class FitnessStat extends Statistics {
                                 > ((ExpandedFitness) bestSoFar[x].fitness).getFitnessScore()) {
                             bestSoFar[x] = (Individual) (bestOfGeneration[x].clone());
                         }
+                        if(absoluteBest == null || ((ExpandedFitness) bestOfGeneration[x].fitness).getFitnessScore()
+                                > ((ExpandedFitness) absoluteBest.fitness).getFitnessScore()) {
+                            absoluteBest = (Individual) bestOfGeneration[x].clone();
+                        }
                     }
 
                     // sum up mean fitness for population
@@ -193,16 +198,12 @@ public class FitnessStat extends Statistics {
         double popMeanFitness = 0;
         double popTotalFitness = 0;
         Individual popBestOfGeneration = null;
-        Individual popBestSoFar = null;
 
         for (int x = 0; x < subpops; x++) {
             popTotalInds += totalIndsThisGen[x];
             popTotalFitness += totalFitnessThisGen[x];
             if (bestOfGeneration[x] != null && (popBestOfGeneration == null || ((ExpandedFitness) bestOfGeneration[x].fitness).getFitnessScore() > ((ExpandedFitness) popBestOfGeneration.fitness).getFitnessScore())) {
                 popBestOfGeneration = bestOfGeneration[x];
-            }
-            if (bestSoFar[x] != null && (popBestSoFar == null || ((ExpandedFitness) bestSoFar[x].fitness).getFitnessScore() > ((ExpandedFitness) popBestSoFar.fitness).getFitnessScore())) {
-                popBestSoFar = bestSoFar[x];
             }
         }
 
@@ -212,7 +213,7 @@ public class FitnessStat extends Statistics {
         // print out fitness info
         state.output.print("" + popMeanFitness + " ", statisticslog);                                                                                  // mean fitness of pop this gen
         state.output.print("" + (double) ((ExpandedFitness) popBestOfGeneration.fitness).getFitnessScore() + " ", statisticslog);                 // best fitness of pop this gen
-        state.output.print("" + (double) ((ExpandedFitness) popBestSoFar.fitness).getFitnessScore() + " ", statisticslog);                // best fitness of pop so far
+        state.output.print("" + (double) ((ExpandedFitness) absoluteBest.fitness).getFitnessScore() + " ", statisticslog);                // best fitness of pop so far
 
         // we're done!
         state.output.println("", statisticslog);

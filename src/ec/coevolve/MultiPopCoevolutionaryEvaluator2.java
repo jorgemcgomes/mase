@@ -76,6 +76,10 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         return eliteIndividuals;
     }
     
+    public void setEliteIndividuals(Individual[][] elite) {
+        this.eliteIndividuals = elite;
+    }
+    
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
