@@ -1,0 +1,45 @@
+eval.base.problem =                mase.app.herding.HerdingSimulator
+problem.number-evals =             2
+problem.trials-merge =             best
+problem.eval.0 =                   mase.app.herding.HerdingFitness2
+problem.eval.0.update-freq =       1
+problem.eval.1 =                   mase.app.herding.ShepherdIndividualEvaluation2
+problem.eval.1.update-freq =       1
+
+fitness.fitness-index =            0
+#fitness.novelty-index =            1
+
+problem.repetitions =              5
+problem.max-steps =                500
+
+problem.arena-size = 150
+problem.gate-size = 25
+problem.discretization = 25
+
+problem.agent-radius = 2.5
+problem.herding-range = 5
+
+problem.num-sheeps = 1
+problem.sheep-x = 0.2
+problem.active-sheep = false
+problem.sheep-speed = 1
+problem.place-radius = 0
+
+problem.num-foxes = 2
+problem.fox-speed = 1
+
+problem.num-shepherds = 6
+problem.shepherd-x = 0.5
+problem.shepherd-speed = 1
+problem.shepherd-turn-speed = 0.2
+problem.shepherd-sensor-range = 25
+problem.shepherd-separation = 7
+
+vector.species.genome-size =       92
+neural.input =                     12
+neural.hidden =                    6
+neural.output =                    2
+neural.structure =                 feed-forward
+neural.tanh =                      false
+neat.INPUT.NODES =                 12
+neat.OUTPUT.NODES =                2 
