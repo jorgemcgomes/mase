@@ -11,7 +11,7 @@ import java.util.List;
 import mase.evaluation.VectorBehaviourResult.Distance;
 import mase.mason.MaseSimState;
 import mase.mason.MasonEvaluation;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 
 /**
  *

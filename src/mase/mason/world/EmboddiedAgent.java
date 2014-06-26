@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.mason;
+package mase.mason.world;
 
 import java.awt.Color;
 import mase.generic.systematic.Entity;
@@ -195,7 +195,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         Double2D agentDir = new Double2D(FastMath.cos(orientation), FastMath.sin(orientation));
         return FastMath.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
     }
-
+    
     public static void main(String[] args) {
         double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < 10000000; i++) {
@@ -208,5 +208,9 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
 
     public double distanceTo(EmboddiedAgent other) {
         return Math.max(0, pos.distance(other.getLocation()) - other.radius - this.radius);
+    }
+    
+    public double distanceTo(Double2D point) {
+        return Math.max(0, pos.distance(point) - this.radius);
     }
 }

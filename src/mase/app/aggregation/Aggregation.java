@@ -12,12 +12,12 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
-import mase.mason.PolygonEntity;
+import mase.mason.world.PolygonEntity;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MaseSimState;
-import mase.mason.MasonDistanceFunction;
-import mase.mason.SmartAgent;
+import mase.mason.world.GenericDistanceFunction;
+import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
@@ -60,7 +60,7 @@ public class Aggregation extends MaseSimState implements TaskDescriptionProvider
         placeAgents();
         field.setObjectLocation(walls, new Double2D(0,0));
         
-        this.td = new TaskDescription(new MasonDistanceFunction(field), 
+        this.td = new TaskDescription(new GenericDistanceFunction(field), 
                 new EntityGroup(agents, agents.size(), agents.size(), false),
                 new EntityGroup(Collections.singletonList(walls), 1, 1, true)
         );

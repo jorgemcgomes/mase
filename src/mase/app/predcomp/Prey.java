@@ -11,7 +11,7 @@ import java.util.Arrays;
 import static mase.app.predcomp.Predator.RADIUS;
 import static mase.app.predcomp.Predator.segmentIntersection;
 import mase.controllers.AgentController;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 

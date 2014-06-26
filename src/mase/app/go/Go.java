@@ -11,7 +11,7 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.MaseSimState;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import sim.field.grid.IntGrid2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.grid.ValueGridPortrayal2D;

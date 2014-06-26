@@ -12,8 +12,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import mase.controllers.AgentController;
-import mase.mason.EmboddiedAgent;
-import mase.mason.SmartAgent;
+import mase.mason.world.EmboddiedAgent;
+import mase.mason.world.SmartAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
@@ -121,10 +121,10 @@ public class Keeper extends SmartAgent {
 
     @Override
     public String getActionReport() {
-        return "Dash speed: " + df.format(lastAction[0] * moveSpeed)
-                + " | Dash angle: " + Math.round(lastAction[1] * 180 - 90) + "\u00B0"
-                + " | Kick speed: " + df.format(lastAction[2] * passSpeed)
-                + " | Kick angle: " + Math.round(lastAction[3] * 360 - 180) + "\u00B0";
+        return "Dash speed: " + df.format(lastActionOutput[0] * moveSpeed)
+                + " | Dash angle: " + Math.round(lastActionOutput[1] * 180 - 90) + "\u00B0"
+                + " | Kick speed: " + df.format(lastActionOutput[2] * passSpeed)
+                + " | Kick angle: " + Math.round(lastActionOutput[3] * 360 - 180) + "\u00B0";
     }
 
     @Override

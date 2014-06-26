@@ -8,7 +8,7 @@ package mase.app.predcomp;
 import java.awt.Color;
 import java.util.Arrays;
 import mase.controllers.AgentController;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;

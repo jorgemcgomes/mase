@@ -13,12 +13,12 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
-import mase.mason.MasonDistanceFunction;
-import mase.mason.PolygonEntity;
+import mase.mason.world.GenericDistanceFunction;
+import mase.mason.world.PolygonEntity;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MaseSimState;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -94,7 +94,7 @@ public class Indiana extends MaseSimState implements TaskDescriptionProvider {
         placeAgents();
 
         this.td = new TaskDescription(
-                new MasonDistanceFunction(field),
+                new GenericDistanceFunction(field),
                 new EntityGroup(agents, 0, agents.size(), false),
                 new EntityGroup(Collections.singletonList(gate), 1, 1, true),
                 new EntityGroup(Collections.singletonList(walls), 1, 1, true));

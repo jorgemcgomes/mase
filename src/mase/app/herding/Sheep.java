@@ -7,7 +7,7 @@ package mase.app.herding;
 
 import java.awt.Color;
 import java.util.LinkedList;
-import mase.mason.EmboddiedAgent;
+import mase.mason.world.EmboddiedAgent;
 import net.jafama.FastMath;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;

@@ -10,11 +10,11 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
-import mase.mason.MasonDistanceFunction;
+import mase.mason.world.GenericDistanceFunction;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MaseSimState;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
@@ -46,7 +46,7 @@ public class ResourceSharing extends MaseSimState implements TaskDescriptionProv
         placeResource();
         placeAgents();
         td = new TaskDescription(
-                new MasonDistanceFunction(field),
+                new GenericDistanceFunction(field),
                 new EntityGroup(agents, 0, agents.size(), false),
                 new EntityGroup(Collections.singletonList(resource), 1, 1, true));
     }

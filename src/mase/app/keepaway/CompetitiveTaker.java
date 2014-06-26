@@ -9,8 +9,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
-import mase.mason.EmboddiedAgent;
-import mase.mason.SmartAgent;
+import mase.mason.world.EmboddiedAgent;
+import mase.mason.world.SmartAgent;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 

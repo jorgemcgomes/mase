@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.mason;
+package mase.mason.world;
 
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
@@ -22,7 +22,7 @@ public class PolygonEntity extends ShapePortrayal2D implements Entity {
     protected final Double2D[] points;
     private static final double[] EMPTY_ARRAY = new double[]{};
 
-    public PolygonEntity(Double2D ... points) {
+    public PolygonEntity(Double2D... points) {
         super(buildShape(points));
         this.segStarts = new Double2D[points.length - 1];
         this.segEnds = new Double2D[points.length - 1];
@@ -31,6 +31,40 @@ public class PolygonEntity extends ShapePortrayal2D implements Entity {
             segEnds[i] = points[i + 1];
         }
         this.points = points;
+    }
+
+    public double closestDistance(Double2D rayStart, Double2D rayEnd) {
+        double closestDist = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < segStarts.length; i++) {
+            Double2D inters = segmentIntersection(rayStart, rayEnd, segStarts[i], segEnds[i]);
+            if (inters != null) {
+                double d = rayStart.distance(inters);
+                if (d < closestDist) {
+                    closestDist = d;
+                }
+            }
+        }
+        return closestDist;
+    }
+
+    public double closestDistance(Double2D testPoint) {
+        double min = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < segStarts.length; i++) {
+            double d = distToSegment(testPoint, segStarts[i], segEnds[i]);
+            min = Math.min(min, Math.max(0, d));
+        }
+        return min;
+    }
+
+    public double closestDistance(PolygonEntity other) {
+        double closest = Double.NEGATIVE_INFINITY;
+        for (Double2D p : this.points) {
+            closest = Math.min(closest, other.closestDistance(p));
+        }
+        for (Double2D p : other.points) {
+            closest = Math.min(closest, this.closestDistance(p));
+        }
+        return closest;
     }
 
     private static Shape buildShape(Double2D[] points) {
@@ -76,41 +110,7 @@ public class PolygonEntity extends ShapePortrayal2D implements Entity {
             return null;
         }
     }
-    
-    public double closestDistance(Double2D rayStart, Double2D rayEnd) {
-        double closestDist = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < segStarts.length; i++) {
-            Double2D inters = segmentIntersection(rayStart, rayEnd, segStarts[i], segEnds[i]);
-            if (inters != null) {
-                double d = rayStart.distance(inters);
-                if (d < closestDist) {
-                    closestDist = d;
-                }
-            }
-        }
-        return closestDist;
-    }
 
-    public double closestDistance(Double2D testPoint) {
-        double min = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < segStarts.length; i++) {
-            double d = distToSegment(testPoint, segStarts[i], segEnds[i]);
-            min = Math.min(min, Math.max(0, d));
-        }
-        return min;
-    }
-    
-    public double closestDistance(PolygonEntity other) {
-        double closest = Double.NEGATIVE_INFINITY;
-        for(Double2D p : this.points) {
-            closest = Math.min(closest, other.closestDistance(p));
-        }
-        for(Double2D p : other.points) {
-            closest = Math.min(closest, this.closestDistance(p));
-        }
-        return closest;
-    }
-    
     @Override
     public double[] getStateVariables() {
         return EMPTY_ARRAY;

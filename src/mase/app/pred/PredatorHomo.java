@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import mase.controllers.AgentController;
-import mase.mason.EmboddiedAgent;
+import mase.mason.world.EmboddiedAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 

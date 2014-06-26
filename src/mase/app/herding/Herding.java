@@ -10,7 +10,7 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.MaseSimState;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -46,9 +46,9 @@ public class Herding extends MaseSimState {
         super.start();
         this.field = new Continuous2D(par.discretization, par.arenaSize, par.arenaSize);
 
-        placeShepherds();
         placeSheeps();
         placeFoxes();
+        placeShepherds();
     }
 
     protected void placeSheeps() {

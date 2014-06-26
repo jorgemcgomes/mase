@@ -7,7 +7,7 @@ package mase.app.sharing;
 import java.awt.Color;
 import java.util.Arrays;
 import mase.controllers.AgentController;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
 
@@ -111,12 +111,12 @@ public class RSAgent extends SmartAgent {
             rs.td.groups()[0].remove(this);
             int i = 0;
             for (; i < rs.par.agentSensorArcs; i++) {
-                lastSensors[i] = 1;
+                lastNormSensors[i] = 1;
             }
-            lastSensors[i++] = 1;
-            lastSensors[i++] = 0;
-            lastSensors[i] = -1;
-            Arrays.fill(lastAction, 0);
+            lastNormSensors[i++] = 1;
+            lastNormSensors[i++] = 0;
+            lastNormSensors[i] = -1;
+            Arrays.fill(lastActionOutput, 0);
             move(orientation2D(), 0);
         }
     }

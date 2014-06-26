@@ -8,7 +8,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
-import mase.mason.EmboddiedAgent;
+import mase.mason.world.EmboddiedAgent;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimulator;
 import sim.util.Double2D;

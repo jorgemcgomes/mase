@@ -8,7 +8,7 @@ import java.awt.Color;
 import java.text.DecimalFormat;
 import mase.controllers.AgentController;
 import mase.generic.systematic.Entity;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
 import sim.util.Double2D;
@@ -142,9 +142,9 @@ public class AggregationAgent extends SmartAgent implements Entity {
     @Override
     public String getActionReport() {
         AggregationParams par = ((Aggregation) sim).par;
-        return "Move speed: " + DF.format(lastAction[0] * par.agentSpeed)
-                + " | Move rot: " + Math.round((lastAction[1] * 2 - 1) * par.agentRotation * 180 / Math.PI) + "\u00B0"
-                + " | Stop: " + Boolean.toString(lastAction[2] > 0.5);
+        return "Move speed: " + DF.format(lastActionOutput[0] * par.agentSpeed)
+                + " | Move rot: " + Math.round((lastActionOutput[1] * 2 - 1) * par.agentRotation * 180 / Math.PI) + "\u00B0"
+                + " | Stop: " + Boolean.toString(lastActionOutput[2] > 0.5);
     }
 
     @Override

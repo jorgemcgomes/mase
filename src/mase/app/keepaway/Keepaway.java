@@ -12,10 +12,10 @@ import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
-import mase.mason.EmboddiedAgent;
+import mase.mason.world.EmboddiedAgent;
 import mase.mason.MaseSimState;
-import mase.mason.MasonDistanceFunction;
-import mase.mason.SmartAgent;
+import mase.mason.world.GenericDistanceFunction;
+import mase.mason.world.SmartAgent;
 import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -57,7 +57,7 @@ public class Keepaway extends MaseSimState implements TaskDescriptionProvider {
         placeBall();
         placeTakers();
         
-        this.td = new TaskDescription(new MasonDistanceFunction(field),
+        this.td = new TaskDescription(new GenericDistanceFunction(field),
                 new EntityGroup(keepers, keepers.size(), keepers.size(), false),
                 new EntityGroup(takers, takers.size(), takers.size(), false),
                 new EntityGroup(Collections.singletonList(ball), 1, 1, false)

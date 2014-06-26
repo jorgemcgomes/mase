@@ -4,6 +4,7 @@
  */
 package mase.mason;
 
+import mase.mason.world.SmartAgent;
 import java.util.List;
 import sim.engine.SimState;
 import sim.portrayal.FieldPortrayal2D;

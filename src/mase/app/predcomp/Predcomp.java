@@ -12,7 +12,7 @@ import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.mason.MaseSimState;
-import mase.mason.SmartAgent;
+import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;

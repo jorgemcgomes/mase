@@ -4,27 +4,27 @@
  * and open the template in the editor.
  */
 
-package mase.mason;
+package mase.mason.world;
 
 import mase.generic.systematic.DistanceFunction;
-import mase.generic.systematic.Entity;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.SimplePortrayal2D;
+import sim.util.Double2D;
 
 /**
  *
  * @author jorge
  */
-public class MasonDistanceFunction extends DistanceFunction {
+public class GenericDistanceFunction extends DistanceFunction {
 
     private final Continuous2D field;
     
-    public MasonDistanceFunction(Continuous2D field) {
+    public GenericDistanceFunction(Continuous2D field) {
         this.field = field;
     }
     
     @Override
-    public double distance(Entity e1, Entity e2) {
+    public double distance(Object e1, Object e2) {
         if(field.exists(e1) && field.exists(e2)) {
             return distance(e1, e2, false);
         } else {
@@ -32,7 +32,7 @@ public class MasonDistanceFunction extends DistanceFunction {
         }
     }
     
-    private double distance(Entity e1, Entity e2, boolean reverse) {
+    private double distance(Object e1, Object e2, boolean reverse) {
         double res = Double.NaN;
         if(e1 instanceof EmboddiedAgent && e2 instanceof EmboddiedAgent) {
             EmboddiedAgent a1 = (EmboddiedAgent) e1;

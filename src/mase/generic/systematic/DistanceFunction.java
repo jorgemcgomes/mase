@@ -12,7 +12,7 @@ package mase.generic.systematic;
  */
 public abstract class DistanceFunction {
     
-    public abstract double distance(Entity e1, Entity e2);
+    public abstract double distance(Object e1, Object e2);
     
 
     /*
