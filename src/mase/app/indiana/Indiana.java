@@ -12,12 +12,13 @@ import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.SmartAgentProvider;
 import mase.generic.systematic.EntityGroup;
-import mase.mason.world.GenericDistanceFunction;
-import mase.mason.world.PolygonEntity;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
-import mase.mason.MaseSimState;
+import mase.mason.GUICompatibleSimState;
+import mase.mason.world.GenericDistanceFunction;
+import mase.mason.world.PolygonEntity;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.engine.SimState;
@@ -31,7 +32,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Indiana extends MaseSimState implements TaskDescriptionProvider {
+public class Indiana extends GUICompatibleSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
     protected IndianaParams par;
     protected List<IndianaAgent> agents;

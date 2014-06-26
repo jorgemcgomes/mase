@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.mason.MaseSimState;
+import mase.mason.GUICompatibleSimState;
 import mase.mason.world.SmartAgent;
 import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
@@ -21,7 +21,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Herding extends MaseSimState {
+public class Herding extends GUICompatibleSimState {
 
     protected HerdingParams par;
     protected Continuous2D field;
@@ -109,11 +109,6 @@ public class Herding extends MaseSimState {
     @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
-    }
-
-    @Override
-    public List<? extends SmartAgent> getSmartAgents() {
-        return shepherds;
     }
 
 }

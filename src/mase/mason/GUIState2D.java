@@ -17,7 +17,7 @@ import sim.portrayal.Inspector;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Mason2dUI extends GUIState {
+public class GUIState2D extends GUIState {
 
     protected Display2D display;
     protected JFrame displayFrame;
@@ -26,7 +26,7 @@ public class Mason2dUI extends GUIState {
     protected Color background;
     protected FieldPortrayal2D portrayal;
 
-    public Mason2dUI(MaseSimState state, String title, int w, int h, Color background) {
+    public GUIState2D(GUICompatibleSimState state, String title, int w, int h, Color background) {
         super(state);
         this.title = title;
         this.w = w;
@@ -48,7 +48,7 @@ public class Mason2dUI extends GUIState {
     }
 
     public void setupPortrayals() {
-        MaseSimState mss = (MaseSimState) state;
+        GUICompatibleSimState mss = (GUICompatibleSimState) state;
         mss.setupPortrayal(portrayal);
         // reschedule the displayer
         display.reset();

@@ -9,11 +9,12 @@ import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.SmartAgentProvider;
 import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
+import mase.mason.GUICompatibleSimState;
 import mase.mason.world.EmboddiedAgent;
-import mase.mason.MaseSimState;
 import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.SmartAgent;
 import net.jafama.FastMath;
@@ -26,7 +27,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Keepaway extends MaseSimState implements TaskDescriptionProvider {
+public class Keepaway extends GUICompatibleSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
     protected GroupController gc;
     protected KeepawayParams par;

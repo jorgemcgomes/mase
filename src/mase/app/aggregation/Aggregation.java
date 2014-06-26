@@ -11,12 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.SmartAgentProvider;
 import mase.generic.systematic.EntityGroup;
-import mase.mason.world.PolygonEntity;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
-import mase.mason.MaseSimState;
+import mase.mason.GUICompatibleSimState;
 import mase.mason.world.GenericDistanceFunction;
+import mase.mason.world.PolygonEntity;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -27,7 +28,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Aggregation extends MaseSimState implements TaskDescriptionProvider {
+public class Aggregation extends GUICompatibleSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
     protected AggregationParams par;
     protected List<AggregationAgent> agents;

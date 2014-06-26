@@ -10,8 +10,8 @@ import ec.util.Parameter;
 import java.awt.Color;
 import mase.controllers.GroupController;
 import mase.app.indiana.Indiana.AgentPlacement;
-import mase.mason.MaseSimState;
-import mase.mason.Mason2dUI;
+import mase.mason.GUICompatibleSimState;
+import mase.mason.GUIState2D;
 import mase.mason.MasonSimulator;
 import sim.display.GUIState;
 
@@ -44,13 +44,13 @@ public class IndianaSimulator extends MasonSimulator {
     }
 
     @Override
-    public MaseSimState createSimState(GroupController gc, long seed) {
+    public GUICompatibleSimState createSimState(GroupController gc, long seed) {
         return new Indiana(seed, par, gc);
     }
 
     @Override
     public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new Mason2dUI(createSimState(gc, seed), "Indiana", 500, 500, Color.WHITE);
+        return new GUIState2D(createSimState(gc, seed), "Indiana", 500, 500, Color.WHITE);
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.mason.MaseSimState;
+import mase.mason.GUICompatibleSimState;
 import mase.mason.world.SmartAgent;
 import sim.field.grid.IntGrid2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -21,7 +21,7 @@ import sim.util.gui.SimpleColorMap;
  *
  * @author Jorge
  */
-public class Go extends MaseSimState {
+public class Go extends GUICompatibleSimState {
 
     /*public static void main(String[] args) {
      Go game = new Go(1, null);
@@ -68,11 +68,6 @@ public class Go extends MaseSimState {
 
         this.schedule.scheduleRepeating(0.0, black, 2.0);
         this.schedule.scheduleRepeating(1.0, white, 2.0);
-    }
-
-    @Override
-    public List<? extends SmartAgent> getSmartAgents() {
-        return Collections.EMPTY_LIST;
     }
 
     @Override

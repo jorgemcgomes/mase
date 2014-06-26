@@ -8,8 +8,8 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
 import mase.controllers.GroupController;
-import mase.mason.MaseSimState;
-import mase.mason.Mason2dUI;
+import mase.mason.GUICompatibleSimState;
+import mase.mason.GUIState2D;
 import mase.mason.MasonSimulator;
 import sim.display.GUIState;
 
@@ -43,12 +43,12 @@ public class ResourceSharingSimulator extends MasonSimulator {
     }
 
     @Override
-    public MaseSimState createSimState(GroupController gc, long seed) {
+    public GUICompatibleSimState createSimState(GroupController gc, long seed) {
         return new ResourceSharing(seed, par, gc);
     }
 
     @Override
     public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new Mason2dUI(createSimState(gc, seed), "Aggregation", 500, 500, Color.WHITE);
+        return new GUIState2D(createSimState(gc, seed), "Aggregation", 500, 500, Color.WHITE);
     }
 }

@@ -28,8 +28,6 @@ import org.neat4j.neat.core.xover.NEATCrossover;
 public class NEATSubpop extends Subpopulation {
 
     public static final String P_NEAT_BASE = "neat";
-    public static final String P_SHARED_DB = "shared-database";
-    public static final InnovationDatabase sharedDB = new InnovationDatabase();
 
     public static final String[] NEAT_PARAMETERS = {"PROBABILITY.MUTATION",
         "PROBABILITY.CROSSOVER", "PROBABILITY.ADDLINK", "PROBABILITY.ADDNODE",
@@ -42,7 +40,6 @@ public class NEATSubpop extends Subpopulation {
         "INPUT.NODES", "OUTPUT.NODES", "ELE.EVENTS", "ELE.SURVIVAL.COUNT", "ELE.EVENT.TIME",
         "KEEP.BEST.EVER", "EXTRA.FEATURE.COUNT", "NATURAL.ORDER.STRATEGY", "TERMINATION.VALUE"};
     private NEATGeneticAlgorithm neat;
-    private boolean shareDB;
 
     // parameters
     @Override
@@ -63,11 +60,11 @@ public class NEATSubpop extends Subpopulation {
 
         NEATGATrainingManager gam = new NEATGATrainingManager();
 
-        shareDB = state.parameters.getBoolean(df.push(P_SHARED_DB), null, false);
-        if (!shareDB) {
+        NEATInitializer init = (NEATInitializer) state.initializer;
+        if (init.innovDB == null) {
             neat = new NEATGeneticAlgorithm((NEATGADescriptor) gam.createDescriptor(config));
         } else {
-            neat = new NEATGeneticAlgorithm((NEATGADescriptor) gam.createDescriptor(config), sharedDB);
+            neat = new NEATGeneticAlgorithm((NEATGADescriptor) gam.createDescriptor(config), init.innovDB);
         }
 
         neat.pluginFitnessFunction(new PreEvaluatedFitnessFunction(Collections.EMPTY_MAP));
@@ -88,9 +85,7 @@ public class NEATSubpop extends Subpopulation {
 
     @Override
     public void populate(EvolutionState state, int thread) {
-        if(shareDB) {
-            neat.innovationDatabase().reset();
-        }
+        neat.innovationDatabase().reset();
         neat.createPopulation();
         for (int j = 0; j < individuals.length; j++) {
             individuals[j] = species.newIndividual(state, 0);

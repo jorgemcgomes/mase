@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
-import mase.mason.MaseSimState;
+import mase.mason.GUICompatibleSimState;
 import mase.mason.MasonEvaluation;
 import net.jafama.FastMath;
 import org.apache.commons.math3.stat.regression.SimpleRegression;

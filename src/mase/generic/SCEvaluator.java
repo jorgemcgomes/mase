@@ -9,7 +9,8 @@ import ec.util.Parameter;
 import java.util.HashMap;
 import java.util.List;
 import mase.evaluation.VectorBehaviourResult.Distance;
-import mase.mason.MaseSimState;
+import mase.generic.systematic.TaskDescriptionProvider;
+import mase.mason.GUICompatibleSimState;
 import mase.mason.MasonEvaluation;
 import mase.mason.world.SmartAgent;
 
@@ -61,8 +62,8 @@ public class SCEvaluator extends MasonEvaluation {
 
     @Override
     protected void evaluate() {
-        MaseSimState mss = (MaseSimState) sim;
-        List<? extends SmartAgent> agents = mss.getSmartAgents();
+        SmartAgentProvider td = (SmartAgentProvider) sim;
+        List<? extends SmartAgent> agents = td.getSmartAgents();
         for (SmartAgent a : agents) {
             double[] lastSensors = a.lastInputs();
             double[] lastAction = a.lastOutputs();

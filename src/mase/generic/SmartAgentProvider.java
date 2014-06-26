@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package mase.generic.systematic;
+package mase.generic;
 
 import java.util.List;
 import mase.mason.world.SmartAgent;
@@ -13,8 +13,8 @@ import mase.mason.world.SmartAgent;
  *
  * @author jorge
  */
-public interface TaskDescriptionProvider {
+public interface SmartAgentProvider {
     
-    public TaskDescription getTaskDescription();
-        
+    public List<? extends SmartAgent> getSmartAgents();
+    
 }

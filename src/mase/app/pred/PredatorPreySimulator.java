@@ -9,7 +9,7 @@ import ec.util.Parameter;
 import java.awt.Color;
 import mase.app.pred.PredParams.SensorMode;
 import mase.controllers.GroupController;
-import mase.mason.Mason2dUI;
+import mase.mason.GUIState2D;
 import mase.mason.MasonSimulator;
 import sim.display.GUIState;
 
@@ -72,6 +72,6 @@ public class PredatorPreySimulator extends MasonSimulator {
 
     @Override
     public GUIState createSimStateWithUI(GroupController cs, long seed) {
-        return new Mason2dUI(createSimState(cs, seed), "Predator-prey", 500, 500, Color.WHITE);
+        return new GUIState2D(createSimState(cs, seed), "Predator-prey", 500, 500, Color.WHITE);
     }
 }

@@ -11,7 +11,7 @@ import mase.app.predcomp.PredcompParams.ORIENTATION;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
-import mase.mason.MaseSimState;
+import mase.mason.GUICompatibleSimState;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -22,7 +22,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Predcomp extends MaseSimState {
+public class Predcomp extends GUICompatibleSimState {
 
     protected PredcompParams par;
     protected GroupController gc;
@@ -72,13 +72,5 @@ public class Predcomp extends MaseSimState {
     @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
-    }
-
-    @Override
-    public List<? extends SmartAgent> getSmartAgents() {
-        ArrayList<SmartAgent> l = new ArrayList<SmartAgent>(2);
-        l.add(prey);
-        l.add(predator);
-        return l;
     }
 }

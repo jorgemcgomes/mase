@@ -2,9 +2,9 @@ parent.0=../base.params
 
 # Generational configuration
 state = 				ec.simple.SimpleEvolutionState
-init = 					ec.simple.SimpleInitializer
 finish = 	        		ec.simple.SimpleFinisher
 exch = 					ec.simple.SimpleExchanger
+init = 					mase.neat.NEATInitializer
 breed =					mase.neat.NEATBreeder
 pop = 					ec.Population
 generations =				500

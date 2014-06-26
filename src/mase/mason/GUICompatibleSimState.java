@@ -13,16 +13,14 @@ import sim.portrayal.FieldPortrayal2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class MaseSimState extends SimState {
+public abstract class GUICompatibleSimState extends SimState {
 
-    public MaseSimState(long seed) {
+    public GUICompatibleSimState(long seed) {
         super(seed);
     }
     
     public abstract FieldPortrayal2D createFieldPortrayal();
     
     public abstract void setupPortrayal(FieldPortrayal2D port);
-    
-    public abstract List<? extends SmartAgent> getSmartAgents();
-    
+        
 }

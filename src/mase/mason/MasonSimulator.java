@@ -40,7 +40,7 @@ public abstract class MasonSimulator extends SimulationProblem {
 
     @Override
     public EvaluationResult[] evaluateSolution(GroupController gc, long seed) {
-        MaseSimState sim = createSimState(gc, seed);
+        GUICompatibleSimState sim = createSimState(gc, seed);
         EvaluationResult[][] evalResults = new EvaluationResult[evalFunctions.length][repetitions];
         for (int r = 0; r < repetitions; r++) {
             MasonEvaluation[] evals = new MasonEvaluation[evalFunctions.length];
@@ -76,7 +76,7 @@ public abstract class MasonSimulator extends SimulationProblem {
         return mergedResult;
     }
 
-    public abstract MaseSimState createSimState(GroupController gc, long seed);
+    public abstract GUICompatibleSimState createSimState(GroupController gc, long seed);
 
     public abstract GUIState createSimStateWithUI(GroupController gc, long seed);
 }
