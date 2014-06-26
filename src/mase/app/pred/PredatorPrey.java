@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import mase.app.pred.PredParams.SensorMode;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
@@ -58,8 +57,8 @@ public class PredatorPrey extends MaseSimState implements TaskDescriptionProvide
         this.preys = null;
         this.activePreys = null;
         this.captureCount = 0;
-        placePredators();
         placePreys();
+        placePredators();
 
         this.td = new TaskDescription(new GenericDistanceFunction(field),
                 new EntityGroup(predators, par.nPredators, par.nPredators, false),
@@ -84,7 +83,7 @@ public class PredatorPrey extends MaseSimState implements TaskDescriptionProvide
                     continue;
                 }
             }
-            Prey newPrey = newPrey();
+            Prey newPrey = new Prey(this, field);
             newPrey.setLocation(new Double2D(x, y));
             newPrey.setStopper(schedule.scheduleRepeating(newPrey));
             preys.add(newPrey);
@@ -101,27 +100,12 @@ public class PredatorPrey extends MaseSimState implements TaskDescriptionProvide
         AgentController[] controllers = gc.getAgentControllers(par.nPredators);
         for (int i = 0; i < par.nPredators; i++) {
             double x = startX + i * par.predatorSeparation;
-            Predator newPred = newPredator(controllers[i].clone());
+            Predator newPred = new Predator(this, field, controllers[i].clone());
             newPred.setLocation(new Double2D(x, y));
             newPred.setOrientation(Math.PI / 2);
             newPred.setStopper(schedule.scheduleRepeating(newPred));
             predators.add(newPred);
         }
-    }
-
-    protected Predator newPredator(AgentController ac) {
-        if (par.sensorMode == SensorMode.arcs) {
-            return new MultiPredator(this, field, ac);
-        } else if(par.sensorMode == SensorMode.closest) {
-            return new Predator(this, field, ac);
-        } else if(par.sensorMode == SensorMode.otherpreds) {
-            return new PredatorHomo(this, field, ac);
-        }
-        return null;
-    }
-
-    protected Prey newPrey() {
-        return new Prey(this, field);
     }
 
     public int getCaptureCount() {

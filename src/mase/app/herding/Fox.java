@@ -6,10 +6,7 @@
 package mase.app.herding;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.LinkedList;
 import mase.mason.world.EmboddiedAgent;
-import net.jafama.FastMath;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;

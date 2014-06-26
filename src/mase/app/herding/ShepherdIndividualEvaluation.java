@@ -19,7 +19,6 @@ import sim.util.Double2D;
  */
 public class ShepherdIndividualEvaluation extends MasonEvaluation {
 
-    private double[] shepherdDist;
     private double[] sheepDist;
     private List<double[]> foxDist;
     private double[] gateDist;
@@ -30,7 +29,6 @@ public class ShepherdIndividualEvaluation extends MasonEvaluation {
     protected void preSimulation() {
         super.preSimulation();
         Herding herd = (Herding) sim;
-        shepherdDist = new double[herd.shepherds.size()];
         sheepDist = new double[herd.shepherds.size()];
         foxDist = new ArrayList<double[]>(herd.foxes.size());
         for (int i = 0; i < herd.foxes.size(); i++) {
@@ -65,13 +63,6 @@ public class ShepherdIndividualEvaluation extends MasonEvaluation {
 
             // Gate
             gateDist[i] += shep.getLocation().distance(gate);
-            
-            // Mean distance to other shepherds
-            for(Shepherd s2 : herd.shepherds) {
-                if(shep != s2) {
-                    shepherdDist[i] += shep.distanceTo(s2);
-                }
-            }
         }
     }
 
@@ -82,12 +73,11 @@ public class ShepherdIndividualEvaluation extends MasonEvaluation {
         VectorBehaviourResult[] res = new VectorBehaviourResult[herd.shepherds.size()];
         double maxD = herd.par.arenaSize;
         for(int i = 0 ; i < herd.shepherds.size() ; i++) {
-            float[] br = new float[3 + foxDist.size()];
+            float[] br = new float[2 + foxDist.size()];
             br[0] = (float) (sheepDist[i] / currentEvaluationStep / maxD);
             br[1] = (float) (gateDist[i] / currentEvaluationStep / maxD);
-            br[2] = (float) (shepherdDist[i] / currentEvaluationStep / maxD / (herd.shepherds.size() - 1));
             for(int j = 0 ; j < foxDist.size() ; j++) {
-                br[3 + j] = (float) (foxDist.get(j)[i] / currentEvaluationStep / maxD);
+                br[2 + j] = (float) (foxDist.get(j)[i] / currentEvaluationStep / maxD);
             }
             res[i] = new VectorBehaviourResult(br);
         }

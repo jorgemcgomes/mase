@@ -4,11 +4,8 @@
  */
 package mase.app.pred;
 
-import ec.EvolutionState;
-import ec.util.Parameter;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
-import mase.mason.MasonSimulator;
 
 /**
  *
@@ -17,15 +14,6 @@ import mase.mason.MasonSimulator;
 public class MultiPreyFitness extends MasonEvaluation {
 
     private FitnessResult fitnessResult;
-    private int maxSteps;
-    private int nPreys;
-
-    @Override
-    public void setup(EvolutionState state, Parameter base) {
-        super.setup(state, base);
-        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
-        this.nPreys = state.parameters.getInt(base.pop().pop().push(PredParams.P_NPREYS), null);
-    }
 
     @Override
     public FitnessResult getResult() {
@@ -34,9 +22,10 @@ public class MultiPreyFitness extends MasonEvaluation {
 
     @Override
     public void postSimulation() {
-        int captureCount = ((PredatorPrey) super.sim).getCaptureCount();
-        float captured = captureCount / (float) nPreys;
-        float time = captureCount < nPreys ? 1 : sim.schedule.getSteps() / (float) maxSteps;
+        PredatorPrey predSim = (PredatorPrey) sim;
+        int captureCount = predSim.getCaptureCount();
+        float captured = captureCount / (float) predSim.preys.size();
+        float time = captureCount < predSim.preys.size() ? 1 : sim.schedule.getSteps() / (float) maxSteps;
         fitnessResult = new FitnessResult(0.9f * captured + 0.1f * (1 - time));
     }
 }

@@ -18,32 +18,26 @@ import sim.util.Double2D;
 public class HerdingFitness extends MasonEvaluation {
 
     private FitnessResult res;
-    private double accum;
 
     @Override
     protected void preSimulation() {
         super.preSimulation();
-        this.accum = 0;
-    }
-
-    @Override
-    protected void evaluate() {
-        super.evaluate();
-        Herding herd = (Herding) super.sim;
-        Double2D gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
-        accum += gate.distance(herd.sheeps.get(0).getLocation());
     }
 
     @Override
     protected void postSimulation() {
         super.postSimulation();
         Herding herd = (Herding) super.sim;
-        if (currentEvaluationStep < maxEvaluationSteps) {
+        double fitness;
+        
+        if (herd.sheeps.get(0).status == Sheep.Status.CAPTURED) { // sheep curraled
+            fitness = 2 - herd.schedule.getSteps() / (double) maxSteps;
+        } else {
             Double2D gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
-            accum += gate.distance(herd.sheeps.get(0).getLocation()) * (maxEvaluationSteps - currentEvaluationStep);
-        }
-        double maxDist = FastMath.sqrt(FastMath.pow(herd.par.arenaSize, 2) + FastMath.pow(herd.par.arenaSize / 2, 2));
-        res = new FitnessResult((float) (1 - accum / maxEvaluationSteps / maxDist), FitnessResult.ARITHMETIC);
+            double maxDist = FastMath.sqrt(FastMath.pow(herd.par.arenaSize, 2) + FastMath.pow(herd.par.arenaSize / 2, 2));
+            fitness = 1 - herd.sheeps.get(0).getLocation().distance(gate) / maxDist;
+        }      
+        res = new FitnessResult((float) fitness, FitnessResult.ARITHMETIC);
     }
 
     @Override

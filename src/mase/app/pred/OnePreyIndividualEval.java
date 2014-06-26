@@ -4,13 +4,11 @@
  */
 package mase.app.pred;
 
-import ec.EvolutionState;
-import ec.util.Parameter;
-import java.util.Arrays;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import net.jafama.FastMath;
 
 /**
  *
@@ -19,50 +17,33 @@ import mase.mason.MasonEvaluation;
 public class OnePreyIndividualEval extends MasonEvaluation {
 
     protected float diagonal;
-    protected int nAgents;
-    protected float maxSpeed;
-    protected float[] initialDistance;
     protected float[] avgDistance;
     protected int avgDistanceSteps;
     protected int[] voidSteps;
-    protected float[] minDistance;
     protected float[] captured;
     protected float[] movement;
-    protected float[] angle;
     protected float[] partnerAvgDist;
-    protected float[] partnerMinDist;
     protected SubpopEvaluationResult evaluation;
-
-    @Override
-    public void setup(EvolutionState state, Parameter base) {
-        super.setup(state, base);
-        this.nAgents = state.parameters.getInt(base.pop().pop().push(PredParams.P_NPREDATORS), null);
-        this.maxSpeed = state.parameters.getFloat(base.pop().pop().push(PredParams.P_PREDATOR_SPEED), null);
-        float size = state.parameters.getInt(base.pop().pop().push(PredParams.P_SIZE), null);
-        this.diagonal = (float) Math.sqrt(Math.pow(size, 2) * 2);
-    }
 
     @Override
     public void preSimulation() {
         super.preSimulation();
+        PredatorPrey predSim = (PredatorPrey) sim;
+        int nAgents = predSim.predators.size();
         avgDistance = new float[nAgents];
-        minDistance = new float[nAgents];
-        Arrays.fill(minDistance, Float.POSITIVE_INFINITY);
         captured = new float[nAgents];
         movement = new float[nAgents];
-        angle = new float[nAgents];
-        initialDistance = new float[nAgents];
         partnerAvgDist = new float[nAgents];
-        partnerMinDist = new float[nAgents];
         avgDistanceSteps = 0;
         voidSteps = new int[nAgents];
         PredatorPrey simState = (PredatorPrey) sim;
         for (int i = 0; i < simState.predators.size(); i++) {
             Predator pred = simState.predators.get(i);
             Prey prey = simState.preys.get(0);
-            initialDistance[i] = (float) pred.distanceTo(prey);
-            voidSteps[i] = Math.round(initialDistance[i] / maxSpeed);
+            double d = pred.distanceTo(prey);
+            voidSteps[i] = (int) Math.round(d / predSim.par.predatorSpeed);
         }
+        diagonal = (float) FastMath.sqrtQuick(FastMath.pow2(((PredatorPrey) sim).field.width) * 2);
     }
 
     @Override
@@ -73,13 +54,10 @@ public class OnePreyIndividualEval extends MasonEvaluation {
             Predator pred = simState.predators.get(i);
             Prey prey = simState.preys.get(0);
             double d = pred.distanceTo(prey);
-            minDistance[i] = (float) Math.min(minDistance[i], d);
             if(simState.schedule.getSteps() > voidSteps[i]) {
                 avgDistance[i] += d;
                 avgDistanceSteps++;
             }
-            double[] sens = pred.lastInputs();
-            angle[i] += (sens[1] + 1) / 2; // normalize from -1,1 to 0,1
             movement[i] += pred.getSpeed();
             float closest = Float.POSITIVE_INFINITY;
             for(Predator pOther : simState.predators) {
@@ -89,32 +67,28 @@ public class OnePreyIndividualEval extends MasonEvaluation {
                     partnerAvgDist[i] += dPred;
                 }
             }
-            partnerMinDist[i] += closest;
         }
     }
 
     @Override
     public void postSimulation() {
         super.postSimulation();
-        PredatorPrey simState = (PredatorPrey) sim;
-        for (int i = 0; i < simState.predators.size(); i++) {
-            Predator pred = simState.predators.get(i);
-            captured[i] += pred.getCaptureCount() * nAgents;
+        PredatorPrey predSim = (PredatorPrey) sim;
+        for (int i = 0; i < predSim.predators.size(); i++) {
+            Predator pred = predSim.predators.get(i);
+            captured[i] += pred.getCaptureCount();
             avgDistance[i] /= (diagonal / 2) * avgDistanceSteps;
-            minDistance[i] /= initialDistance[i];
-            angle[i] /= currentEvaluationStep;
-            movement[i] /= currentEvaluationStep * maxSpeed;
-            partnerAvgDist[i] /= (nAgents -1) * currentEvaluationStep * (diagonal / 2);
-            partnerMinDist[i] /= currentEvaluationStep * (diagonal / 2);
+            movement[i] /= currentEvaluationStep * predSim.par.predatorSpeed;
+            partnerAvgDist[i] /= (predSim.predators.size() -1) * currentEvaluationStep * (diagonal / 2);
         }
     }
 
     @Override
     public EvaluationResult getResult() {
         if (evaluation == null) {
-            VectorBehaviourResult[] res = new VectorBehaviourResult[nAgents];
+            VectorBehaviourResult[] res = new VectorBehaviourResult[avgDistance.length];
             for (int i = 0; i < res.length; i++) {
-                float[] b = new float[]{avgDistance[i], minDistance[i], angle[i], captured[i], movement[i], partnerAvgDist[i], partnerMinDist[i]};
+                float[] b = new float[]{captured[i], avgDistance[i], movement[i], partnerAvgDist[i]};
                 res[i] = new VectorBehaviourResult(b);
             }
             evaluation = new SubpopEvaluationResult(res);

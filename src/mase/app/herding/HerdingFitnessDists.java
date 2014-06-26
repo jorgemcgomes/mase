@@ -15,45 +15,35 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class HerdingFitness4 extends MasonEvaluation {
+public class HerdingFitnessDists extends MasonEvaluation {
 
     private FitnessResult res;
-    private double sheepSafety;
+    private double accum;
 
     @Override
     protected void preSimulation() {
         super.preSimulation();
+        this.accum = 0;
     }
 
     @Override
     protected void evaluate() {
-        super.evaluate(); 
+        super.evaluate();
         Herding herd = (Herding) super.sim;
-        double minDist = Double.POSITIVE_INFINITY;
-        for(Fox f : herd.foxes) {
-            minDist = Math.min(minDist, f.distanceTo(herd.sheeps.get(0)));
-        }
-        sheepSafety += minDist;
+        Double2D gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
+        accum += gate.distance(herd.sheeps.get(0).getLocation());
     }
-
 
     @Override
     protected void postSimulation() {
         super.postSimulation();
         Herding herd = (Herding) super.sim;
-
-        Double2D gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
+        if (currentEvaluationStep < maxEvaluationSteps) {
+            Double2D gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
+            accum += gate.distance(herd.sheeps.get(0).getLocation()) * (maxEvaluationSteps - currentEvaluationStep);
+        }
         double maxDist = FastMath.sqrt(FastMath.pow(herd.par.arenaSize, 2) + FastMath.pow(herd.par.arenaSize / 2, 2));
-        double fitness = 1 - herd.sheeps.get(0).getLocation().distance(gate) / maxDist + sheepSafety / maxDist / currentEvaluationStep;
-        
-        /*if (herd.sheeps.get(0).status == Sheep.Status.CAPTURED) { // sheep curraled
-         fitness = 2 - herd.schedule.getSteps() / (double) maxSteps;
-         } else {
-
-         fitness = 1 - herd.sheeps.get(0).getLocation().distance(gate) / maxDist;
-         // fitness = 1 - distance + distance
-         }    */
-        res = new FitnessResult((float) fitness, FitnessResult.ARITHMETIC);
+        res = new FitnessResult((float) (1 - accum / maxEvaluationSteps / maxDist), FitnessResult.ARITHMETIC);
     }
 
     @Override

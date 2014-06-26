@@ -52,7 +52,7 @@ public class MultiPreyGroupEval extends OnePreyGroupEval {
     @Override
     public EvaluationResult getResult() {
         if (evaluation == null) {
-            evaluation = new VectorBehaviourResult(new float[]{captured, simTime, predatorDispersion, maxPredatorDispersion, preyDispersion});
+            evaluation = new VectorBehaviourResult(new float[]{captured, simTime, predatorDispersion, preyDispersion});
         }
         return evaluation;
     }

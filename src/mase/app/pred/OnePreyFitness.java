@@ -9,6 +9,7 @@ import ec.util.Parameter;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimulator;
+import net.jafama.FastMath;
 import sim.util.Double2D;
 
 /**
@@ -19,16 +20,7 @@ public class OnePreyFitness extends MasonEvaluation {
 
     private float initialDistance, finalDistance;
     private FitnessResult fitnessResult;
-    private int maxSteps;
     private float diagonal;
-
-    @Override
-    public void setup(EvolutionState state, Parameter base) {
-        super.setup(state, base);
-        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
-        float size = state.parameters.getInt(base.pop().pop().push(PredParams.P_SIZE), null);
-        this.diagonal = (float) Math.sqrt(Math.pow(size, 2) * 2);
-    }
 
     @Override
     public FitnessResult getResult() {
@@ -44,6 +36,7 @@ public class OnePreyFitness extends MasonEvaluation {
             initialDistance += prey.distanceTo(pred);
         }
         initialDistance /= simState.predators.size();
+        diagonal = (float) FastMath.sqrtQuick(FastMath.pow2(simState.field.width) * 2);
     }
 
     @Override
@@ -64,10 +57,10 @@ public class OnePreyFitness extends MasonEvaluation {
         
         float score = 0;
         if (simState.getCaptureCount() == 1) {
-            score = 3 - finalDistance - timeSpent  ; // 1..3
+            score = 2 - timeSpent  ; // 1..2
         } else {
             score = Math.max(initialDistance - finalDistance, 0); // 0..1
         }
-        this.fitnessResult = new FitnessResult(score);
+        this.fitnessResult = new FitnessResult(score, FitnessResult.HARMONIC);
     }
 }
