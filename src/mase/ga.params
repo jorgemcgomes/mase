@@ -47,11 +47,6 @@ vector.species.mutation-prob =          0.05
 vector.species.mutation-bounded =       TRUE
 select.tournament.size =                5
 
-#vector.mutate.source.0 =                ec.vector.breed.VectorCrossoverPipeline
-#vector.xover.source.0 =                 ec.select.TournamentSelection
-#vector.xover.source.1 =                 ec.select.TournamentSelection
-#vector.species.crossover-type =         one
-
 # Statistics
 stat.child.0 = 				ec.simple.SimpleShortStatistics
 stat.child.0.file =			$extended.stat

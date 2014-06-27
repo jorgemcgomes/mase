@@ -15,6 +15,11 @@ import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.neural.flat.FlatLayer;
 import org.encog.neural.flat.FlatNetwork;
+import org.encog.neural.networks.BasicNetwork;
+import org.encog.neural.pattern.ElmanPattern;
+import org.encog.neural.pattern.FeedForwardPattern;
+import org.encog.neural.pattern.JordanPattern;
+import org.encog.neural.pattern.NeuralNetworkPattern;
 
 /**
  *
@@ -31,7 +36,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
     public static final String FEED_FORWARD = "feed-forward";
     public static final String ELMAN = "elman";
     public static final String JORDAN = "jordan";
-    private FlatNetwork prototypeNetwork;
+    private BasicNetwork prototypeNetwork;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -44,35 +49,30 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         int hidden = state.parameters.getInt(base.push(P_HIDDEN), def.push(P_HIDDEN));
         int output = state.parameters.getInt(base.push(P_OUTPUTS), def.push(P_OUTPUTS));
         boolean tanh = state.parameters.getBoolean(base.push(P_TANH), def.push(P_TANH), false);
-        // TODO: check for parameter errors
 
-        final ActivationFunction linearAct = new ActivationLinear();
         final ActivationFunction act = tanh ? new ActivationTANH() : new ActivationSigmoid();
-        FlatLayer[] layers;
-        if (hidden == 0) {
-            layers = new FlatLayer[2];
-            layers[0] = new FlatLayer(linearAct, input, FlatNetwork.DEFAULT_BIAS_ACTIVATION);
-            layers[1] = new FlatLayer(act, output, FlatNetwork.NO_BIAS_ACTIVATION);
+
+        NeuralNetworkPattern pattern = null;
+        if (structure.equalsIgnoreCase(ELMAN)) {
+            pattern = new ElmanPattern();
+        } else if (structure.equalsIgnoreCase(JORDAN)) {
+            pattern = new JordanPattern();
+        } else if (structure.equalsIgnoreCase(FEED_FORWARD)) {
+            pattern = new FeedForwardPattern();
         } else {
-            layers = new FlatLayer[3];
-            layers[0] = new FlatLayer(linearAct, input, FlatNetwork.DEFAULT_BIAS_ACTIVATION);
-            layers[1] = new FlatLayer(act, hidden, FlatNetwork.DEFAULT_BIAS_ACTIVATION);
-            layers[2] = new FlatLayer(act, output, FlatNetwork.NO_BIAS_ACTIVATION);
-        }
-        if (hidden > 0) {
-            if (structure.equalsIgnoreCase(ELMAN)) {
-                layers[0].setContextFedBy(layers[1]);
-            } else if (structure.equalsIgnoreCase(JORDAN)) {
-                layers[0].setContextFedBy(layers[2]);
-            } else if (!structure.equalsIgnoreCase(FEED_FORWARD)) {
-                state.output.fatal("Unknown structure: " + structure, base.push(P_STRUCTURE));
-            }
+            state.output.fatal("Unknown structure: " + structure, base.push(P_STRUCTURE));
         }
 
-        prototypeNetwork = new FlatNetwork(layers);
+        pattern.setActivationFunction(act);
+        pattern.setInputNeurons(input);
+        pattern.addHiddenLayer(hidden);
+        pattern.setOutputNeurons(output);
+        prototypeNetwork = (BasicNetwork) pattern.generate();
+        //prototypeNetwork.reset();
+
         int genomeSize = ((FloatVectorSpecies) species).genomeSize;
-        if (genomeSize != prototypeNetwork.getWeights().length) {
-            state.output.fatal("NN weights (" + prototypeNetwork.getWeights().length + ") does not match genome size (" + genomeSize + ").");
+        if (genomeSize != prototypeNetwork.getStructure().calculateSize()) {
+            state.output.fatal("NN weights (" + prototypeNetwork.getStructure().calculateSize() + ") does not match genome size (" + genomeSize + ").");
         }
     }
 
@@ -83,8 +83,8 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
 
     @Override
     public AgentController decodeController() {
-        FlatNetwork network = prototypeNetwork.clone();
-        network.decodeNetwork(genome);
+        BasicNetwork network = (BasicNetwork) prototypeNetwork.clone();
+        network.decodeFromArray(genome);
         return new NeuralAgentController(network);
     }
 }

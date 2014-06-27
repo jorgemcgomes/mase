@@ -5,8 +5,7 @@
  */
 package mase.controllers;
 
-import java.util.Arrays;
-import org.encog.neural.flat.FlatNetwork;
+import org.encog.neural.networks.BasicNetwork;
 
 /**
  *
@@ -15,9 +14,9 @@ import org.encog.neural.flat.FlatNetwork;
 public class NeuralAgentController implements AgentController {
 
     private static final long serialVersionUID = 1;
-    private final FlatNetwork network;
+    private final BasicNetwork network;
 
-    public NeuralAgentController(FlatNetwork net) {
+    public NeuralAgentController(BasicNetwork net) {
         this.network = net;
     }
 
@@ -35,11 +34,11 @@ public class NeuralAgentController implements AgentController {
 
     @Override
     public String toString() {
-        return Arrays.toString(network.encodeNetwork());
+        return network.dumpWeights();
     }
 
     @Override
     public AgentController clone() {
-        return new NeuralAgentController(network.clone());
+        return new NeuralAgentController((BasicNetwork) network.clone());
     }
 }

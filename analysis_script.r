@@ -1189,3 +1189,7 @@ data <- metaLoadData("fit_passive_neat","hybrid_passive_neat_el10_s10","hybrid_p
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="hybrid",fit.comp.par=list(snapshots=c(100,300,499)))
 analyse("hybrid_passive_neat_el10_s10","hybrid_passive_neat_el10_s10_altnorm_m100","hybrid_passive_neat_el10_s10_altnorm_m125", filename="hybrid.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","maxdisp","mindiff","meandiff","maxdiff","merges","splits"), all=F, boxplots=F, t.tests=F, splits=10, print=F, plot=T, smooth=15)
 
+setwd("~/exps/gatest")
+data <- metaLoadData("ga","gax","gax2","neat","gax_e5", params=list(jobs=10, subpops=3, load.behavs=F))
+fullStatistics(data, fit.comp=T, show.only=T, expset.name="gatest",fit.comp.par=list(snapshots=c(50,100,300,499)))
+
