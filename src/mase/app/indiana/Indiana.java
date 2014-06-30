@@ -18,7 +18,7 @@ import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.GUICompatibleSimState;
 import mase.mason.world.GenericDistanceFunction;
-import mase.mason.world.PolygonEntity;
+import mase.mason.world.StaticPolygon;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.engine.SimState;
@@ -38,7 +38,7 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
     protected List<IndianaAgent> agents;
     protected Continuous2D field;
     protected GroupController gc;
-    protected PolygonEntity walls;
+    protected StaticPolygon walls;
     protected Gate gate;
     protected TaskDescription td;
 
@@ -57,7 +57,7 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
         this.par = par;
         this.gc = gc;
 
-        this.walls = new PolygonEntity(new Double2D[]{
+        this.walls = new StaticPolygon(new Double2D[]{
             new Double2D(0, par.size / 2 + par.gateSize / 2),
             new Double2D(0, par.size),
             new Double2D(par.size, par.size),
@@ -134,7 +134,7 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
         }
     }
 
-    protected static class Gate extends PolygonEntity implements Steppable {
+    protected static class Gate extends StaticPolygon implements Steppable {
 
         protected long openTime = -1;
         protected boolean closed = false;

@@ -5,12 +5,19 @@
  */
 package mase.app.herding;
 
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.systematic.EntityGroup;
+import mase.generic.systematic.TaskDescription;
+import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.GUICompatibleSimState;
-import mase.mason.world.SmartAgent;
+import mase.mason.world.GenericDistanceFunction;
+import mase.mason.world.StaticPolygon;
+import mase.mason.world.StaticPolygon.Segment;
 import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -21,8 +28,9 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Herding extends GUICompatibleSimState {
+public class Herding extends GUICompatibleSimState implements TaskDescriptionProvider {
 
+    protected TaskDescription td;
     protected HerdingParams par;
     protected Continuous2D field;
     protected GroupController gc;
@@ -30,6 +38,7 @@ public class Herding extends GUICompatibleSimState {
     protected List<Fox> foxes;
     protected List<Sheep> sheeps;
     protected List<Sheep> activeSheeps;
+    private final StaticPolygon fence, openSide, curral;
     public static final Double2D[] FOX_POSITIONS = new Double2D[]{
         new Double2D(0.95, 0.05), new Double2D(0.95, 0.95), new Double2D(0.95, 0.5),
         new Double2D(0.5, 0.95), new Double2D(0.5, 0.05)
@@ -39,6 +48,20 @@ public class Herding extends GUICompatibleSimState {
         super(seed);
         this.par = par;
         this.gc = gc;
+
+        // Static environment
+        fence = new StaticPolygon(new Segment(0, 0, par.arenaSize, 0),
+                new Segment(par.arenaSize, 0, par.arenaSize, par.arenaSize / 2 - par.gateSize / 2),
+                new Segment(par.arenaSize, par.arenaSize / 2 + par.gateSize / 2, par.arenaSize, par.arenaSize),
+                new Segment(par.arenaSize, par.arenaSize, 0, par.arenaSize));
+        fence.paint = Color.BLACK;
+
+        openSide = new StaticPolygon(new Segment(0, 0, 0, par.arenaSize));
+        openSide.paint = Color.RED;
+
+        curral = new StaticPolygon(new Segment(par.arenaSize, par.arenaSize / 2 - par.gateSize / 2,
+                par.gateSize, par.arenaSize / 2 + par.gateSize / 2));
+        curral.paint = Color.BLUE;
     }
 
     @Override
@@ -49,6 +72,19 @@ public class Herding extends GUICompatibleSimState {
         placeSheeps();
         placeFoxes();
         placeShepherds();
+
+        field.setObjectLocation(fence, new Double2D(0, 0));
+        field.setObjectLocation(openSide, new Double2D(0, 0));
+        field.setObjectLocation(curral, new Double2D(0, 0));
+
+        this.td = new TaskDescription(new GenericDistanceFunction(field),
+                new EntityGroup(shepherds, shepherds.size(), shepherds.size(), false),
+                new EntityGroup(activeSheeps, 0, sheeps.size(), false),
+                new EntityGroup(foxes, foxes.size(), foxes.size(), false),
+                new EntityGroup(Collections.singletonList(fence), 1, 1, true),
+                new EntityGroup(Collections.singletonList(openSide), 1, 1, true),
+                new EntityGroup(Collections.singletonList(curral), 1, 1, true)
+        );
     }
 
     protected void placeSheeps() {
@@ -109,6 +145,11 @@ public class Herding extends GUICompatibleSimState {
     @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
+    }
+
+    @Override
+    public TaskDescription getTaskDescription() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

@@ -38,20 +38,20 @@ public class GenericDistanceFunction extends DistanceFunction {
             EmboddiedAgent a1 = (EmboddiedAgent) e1;
             EmboddiedAgent a2 = (EmboddiedAgent) e2;
             res = a1.distanceTo(a2);
-        } else if(e1 instanceof EmboddiedAgent && e2 instanceof PolygonEntity) {
+        } else if(e1 instanceof EmboddiedAgent && e2 instanceof StaticPolygon) {
             EmboddiedAgent a1 = (EmboddiedAgent) e1;
-            PolygonEntity a2 = (PolygonEntity) e2;
+            StaticPolygon a2 = (StaticPolygon) e2;
             res = a2.closestDistance(a1.getLocation()) - a1.getRadius();
         } else if(e1 instanceof EmboddiedAgent && e2 instanceof SimplePortrayal2D) {
             EmboddiedAgent a1 = (EmboddiedAgent) e1;
             SimplePortrayal2D a2 = (SimplePortrayal2D) e2;
             res = a1.getLocation().distance(field.getObjectLocation(a2)) - a1.getRadius();
-        } else if(e1 instanceof PolygonEntity && e2 instanceof PolygonEntity) {
-            PolygonEntity a1 = (PolygonEntity) e2;
-            PolygonEntity a2 = (PolygonEntity) e2;
+        } else if(e1 instanceof StaticPolygon && e2 instanceof StaticPolygon) {
+            StaticPolygon a1 = (StaticPolygon) e2;
+            StaticPolygon a2 = (StaticPolygon) e2;
             return a1.closestDistance(a2);
-        } else if(e1 instanceof PolygonEntity && e2 instanceof SimplePortrayal2D) { 
-            PolygonEntity a1 = (PolygonEntity) e1;
+        } else if(e1 instanceof StaticPolygon && e2 instanceof SimplePortrayal2D) { 
+            StaticPolygon a1 = (StaticPolygon) e1;
             SimplePortrayal2D a2 = (SimplePortrayal2D) e2;
             return a1.closestDistance(field.getObjectLocation(a2));
         } else if(e1 instanceof SimplePortrayal2D && e2 instanceof SimplePortrayal2D) {

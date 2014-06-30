@@ -7,6 +7,7 @@ package mase.mason.world;
 
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
+import java.util.LinkedHashSet;
 import mase.generic.systematic.Entity;
 import net.jafama.FastMath;
 import sim.portrayal.simple.ShapePortrayal2D;
@@ -16,27 +17,51 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class PolygonEntity extends ShapePortrayal2D implements Entity {
+public class StaticPolygon extends ShapePortrayal2D implements Entity {
 
-    protected final Double2D[] segStarts, segEnds;
+    protected final Segment[] segments;
     protected final Double2D[] points;
     private static final double[] EMPTY_ARRAY = new double[]{};
 
-    public PolygonEntity(Double2D... points) {
+    /**
+     * Builds a polygon with all points connected
+     *
+     * @param base
+     * @param points
+     */
+    public StaticPolygon(Double2D... points) {
         super(buildShape(points));
-        this.segStarts = new Double2D[points.length - 1];
-        this.segEnds = new Double2D[points.length - 1];
+
+        this.segments = new Segment[points.length - 1];
         for (int i = 0; i < points.length - 1; i++) {
-            segStarts[i] = points[i];
-            segEnds[i] = points[i + 1];
+            segments[i] = new Segment(points[i], points[i + 1]);
         }
         this.points = points;
     }
 
+    /**
+     * Builds a polygon with the given segments
+     *
+     * @param base
+     * @param segs
+     */
+    public StaticPolygon(Segment... segs) {
+        super(buildShape(segs));
+
+        LinkedHashSet<Double2D> ps = new LinkedHashSet<Double2D>();
+        for (int i = 0; i < segs.length; i++) {
+            ps.add(segs[i].start);
+            ps.add(segs[i].end);
+        }
+        this.segments = segs;
+        this.points = new Double2D[ps.size()];
+        ps.toArray(points);
+    }
+
     public double closestDistance(Double2D rayStart, Double2D rayEnd) {
         double closestDist = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < segStarts.length; i++) {
-            Double2D inters = segmentIntersection(rayStart, rayEnd, segStarts[i], segEnds[i]);
+        for (Segment seg : segments) {
+            Double2D inters = segmentIntersection(rayStart, rayEnd, seg.start, seg.end);
             if (inters != null) {
                 double d = rayStart.distance(inters);
                 if (d < closestDist) {
@@ -49,14 +74,14 @@ public class PolygonEntity extends ShapePortrayal2D implements Entity {
 
     public double closestDistance(Double2D testPoint) {
         double min = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < segStarts.length; i++) {
-            double d = distToSegment(testPoint, segStarts[i], segEnds[i]);
+        for (Segment seg : segments) {
+            double d = distToSegment(testPoint, seg.start, seg.end);
             min = Math.min(min, Math.max(0, d));
         }
         return min;
     }
 
-    public double closestDistance(PolygonEntity other) {
+    public double closestDistance(StaticPolygon other) {
         double closest = Double.NEGATIVE_INFINITY;
         for (Double2D p : this.points) {
             closest = Math.min(closest, other.closestDistance(p));
@@ -72,6 +97,15 @@ public class PolygonEntity extends ShapePortrayal2D implements Entity {
         path.moveTo(points[0].x, points[0].y);
         for (int i = 1; i < points.length; i++) {
             path.lineTo(points[i].x, points[i].y);
+        }
+        return path;
+    }
+
+    private static Shape buildShape(Segment[] segments) {
+        GeneralPath path = new GeneralPath();
+        for (Segment seg : segments) {
+            path.moveTo(seg.start.x, seg.start.y);
+            path.lineTo(seg.end.x, seg.end.y);
         }
         return path;
     }
@@ -114,5 +148,22 @@ public class PolygonEntity extends ShapePortrayal2D implements Entity {
     @Override
     public double[] getStateVariables() {
         return EMPTY_ARRAY;
+    }
+
+    public static class Segment {
+
+        public final Double2D start;
+        public final Double2D end;
+
+        public Segment(Double2D start, Double2D end) {
+            this.start = start;
+            this.end = end;
+        }
+        
+        public Segment(double startX, double startY, double endX, double endY) {
+            this.start = new Double2D(startX, startY);
+            this.end = new Double2D(endX, endY);
+        }
+
     }
 }

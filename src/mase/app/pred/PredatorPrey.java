@@ -17,7 +17,7 @@ import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.GUICompatibleSimState;
 import mase.mason.world.GenericDistanceFunction;
-import mase.mason.world.PolygonEntity;
+import mase.mason.world.StaticPolygon;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -38,22 +38,23 @@ public class PredatorPrey extends GUICompatibleSimState implements TaskDescripti
     protected List<Prey> preys;
     protected List<Prey> activePreys;
     protected int captureCount;
+    private final StaticPolygon boundaries;
     protected TaskDescription td;
-    
+
     public PredatorPrey(long seed, PredParams params, GroupController gc) {
         super(seed);
         this.gc = gc;
         this.par = params;
+        this.boundaries = new StaticPolygon(new Double2D(0, 0), new Double2D(par.size, 0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0, 0));
+        boundaries.paint = Color.WHITE;
     }
 
     @Override
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
-        PolygonEntity boundaries = new PolygonEntity(new Double2D(0,0), new Double2D(par.size,0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0,0));
-        boundaries.paint = Color.WHITE;
-        field.setObjectLocation(boundaries, new Double2D(0,0));
-        
+        field.setObjectLocation(boundaries, new Double2D(0, 0));
+
         this.predators = null;
         this.preys = null;
         this.activePreys = null;

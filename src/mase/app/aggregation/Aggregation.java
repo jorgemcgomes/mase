@@ -17,7 +17,7 @@ import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.GUICompatibleSimState;
 import mase.mason.world.GenericDistanceFunction;
-import mase.mason.world.PolygonEntity;
+import mase.mason.world.StaticPolygon;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -34,7 +34,7 @@ public class Aggregation extends GUICompatibleSimState implements TaskDescriptio
     protected List<AggregationAgent> agents;
     protected Continuous2D field;
     protected GroupController gc;
-    protected PolygonEntity walls;
+    protected StaticPolygon walls;
     protected TaskDescription td;
 
     public Aggregation(long seed, AggregationParams par, GroupController gc) {
@@ -42,7 +42,7 @@ public class Aggregation extends GUICompatibleSimState implements TaskDescriptio
         this.par = par;
         this.gc = gc;
 
-        walls = new PolygonEntity(new Double2D[]{
+        walls = new StaticPolygon(new Double2D[]{
             new Double2D(0,0),
             new Double2D(par.size, 0),
             new Double2D(par.size, par.size),

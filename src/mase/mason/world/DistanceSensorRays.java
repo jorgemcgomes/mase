@@ -69,8 +69,8 @@ public class DistanceSensorRays extends AbstractSensor {
             Double2D rs = rayStarts[i].rotate(ag.orientation2D()).add(ag.getLocation());
             Double2D re = rayEnds[i].rotate(ag.orientation2D()).add(ag.getLocation());
             for (Object o : field.allObjects) {
-                if (o instanceof PolygonEntity) {
-                    PolygonEntity pe = (PolygonEntity) o;
+                if (o instanceof StaticPolygon) {
+                    StaticPolygon pe = (StaticPolygon) o;
                     double dist = pe.closestDistance(rs, re);
                     if (!Double.isInfinite(dist)) {
                         vals[i] = binary ? 1 : Math.min(vals[i], dist);
