@@ -8,15 +8,10 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import ec.vector.DoubleVectorIndividual;
 import ec.vector.FloatVectorSpecies;
-import java.util.Arrays;
 import org.encog.engine.network.activation.ActivationFunction;
-import org.encog.engine.network.activation.ActivationLinear;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
-import org.encog.neural.flat.FlatLayer;
-import org.encog.neural.flat.FlatNetwork;
 import org.encog.neural.networks.BasicNetwork;
-import org.encog.neural.pattern.ElmanPattern;
 import org.encog.neural.pattern.FeedForwardPattern;
 import org.encog.neural.pattern.JordanPattern;
 import org.encog.neural.pattern.NeuralNetworkPattern;
@@ -54,7 +49,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
 
         NeuralNetworkPattern pattern = null;
         if (structure.equalsIgnoreCase(ELMAN)) {
-            pattern = new ElmanPattern();
+            pattern = new ElmanPattern2();
         } else if (structure.equalsIgnoreCase(JORDAN)) {
             pattern = new JordanPattern();
         } else if (structure.equalsIgnoreCase(FEED_FORWARD)) {
