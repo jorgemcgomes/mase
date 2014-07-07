@@ -38,7 +38,7 @@ public class PredatorPrey extends GUICompatibleSimState implements TaskDescripti
     protected List<Prey> preys;
     protected List<Prey> activePreys;
     protected int captureCount;
-    private final StaticPolygon boundaries;
+    protected final StaticPolygon boundaries;
     protected TaskDescription td;
 
     public PredatorPrey(long seed, PredParams params, GroupController gc) {
@@ -64,7 +64,7 @@ public class PredatorPrey extends GUICompatibleSimState implements TaskDescripti
 
         this.td = new TaskDescription(new GenericDistanceFunction(field),
                 new EntityGroup(predators, par.nPredators, par.nPredators, false),
-                new EntityGroup(preys, 0, par.nPreys, false),
+                new EntityGroup(activePreys, 0, par.nPreys, false),
                 new EntityGroup(Collections.singletonList(boundaries), 1, 1, true));
     }
 
@@ -102,7 +102,9 @@ public class PredatorPrey extends GUICompatibleSimState implements TaskDescripti
         AgentController[] controllers = gc.getAgentControllers(par.nPredators);
         for (int i = 0; i < par.nPredators; i++) {
             double x = startX + i * par.predatorSeparation;
-            Predator newPred = new Predator(this, field, controllers[i].clone());
+            AgentController controller = controllers[i].clone();
+            controller.reset();
+            Predator newPred = new Predator(this, field, controller);
             newPred.setLocation(new Double2D(x, y));
             newPred.setOrientation(Math.PI / 2);
             newPred.setStopper(schedule.scheduleRepeating(newPred));

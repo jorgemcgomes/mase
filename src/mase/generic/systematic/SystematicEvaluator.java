@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
-import mase.mason.GUICompatibleSimState;
 import mase.mason.MasonEvaluation;
 import net.jafama.FastMath;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
@@ -117,7 +116,7 @@ public class SystematicEvaluator extends MasonEvaluation {
                     // If the group has more than one alive
                     if (eg.size() > 1) {
                         double[] diffs = new double[averageState.length];
-                        for (Entity e : eg) {
+                        for (Entity e : eg.getEntities()) {
                             double[] vars = e.getStateVariables();
                             for (int i = 0; i < averageState.length; i++) {
                                 diffs[i] += FastMath.pow2(averageState[i] - vars[i]);
@@ -136,15 +135,8 @@ public class SystematicEvaluator extends MasonEvaluation {
 
                 // Physical dispersion -- mean distance of each entity to the other entities
                 if (physicalRelations && td.distanceFunction() != null && eg.getMaxSize() > 1 && !eg.isStatic()) {
-                    double sumDists = 0;
-                    int count = 0;
-                    for (int i = 0; i < eg.size(); i++) {
-                        for (int j = i + 1; j < eg.size(); j++) {
-                            sumDists += td.distanceFunction().distance(eg.get(i), eg.get(j));
-                            count++;
-                        }
-                    }
-                    features.get(index++).add(count > 0 ? sumDists / count : Double.NaN);
+                    double dist = td.distanceFunction().distance(eg, eg);
+                    features.get(index++).add(dist);
                 }
             }
 

@@ -36,6 +36,7 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
 
     protected IndianaParams par;
     protected List<IndianaAgent> agents;
+    protected List<IndianaAgent> activeAgents;
     protected Continuous2D field;
     protected GroupController gc;
     protected StaticPolygon walls;
@@ -96,7 +97,7 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
 
         this.td = new TaskDescription(
                 new GenericDistanceFunction(field),
-                new EntityGroup(agents, 0, agents.size(), false),
+                new EntityGroup(activeAgents, 0, agents.size(), false),
                 new EntityGroup(Collections.singletonList(gate), 1, 1, true),
                 new EntityGroup(Collections.singletonList(walls), 1, 1, true));
     }
@@ -132,6 +133,7 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
                 agents.add(ag);
             }
         }
+        activeAgents = new ArrayList<IndianaAgent>(agents);
     }
 
     protected static class Gate extends StaticPolygon implements Steppable {
@@ -165,7 +167,7 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
                         a.stop();
                         a.escaped = true;
                         ind.field.remove(a);
-                        ind.td.groups()[0].remove(a);
+                        ind.activeAgents.remove(a);
                     }
                 }
             }

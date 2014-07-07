@@ -46,6 +46,12 @@ public class NSGA2 implements PostEvaluator {
                 noveltyMax = (float) Math.max(noveltyMax, nf.noveltyScore);
             }
             double[] ranges = new double[]{fitnessMax - fitnessMin, noveltyMax - noveltyMin};
+            if(ranges[0] == 0) {
+                ranges[0] = 0.001;
+            }
+            if(ranges[1] == 0) {
+                ranges[1] = 0.001;
+            }
 
             List<Individual> inds = new ArrayList<Individual>(pop.subpops[i].individuals.length);
 

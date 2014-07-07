@@ -1,53 +1,55 @@
-buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE, subpops=NULL) {
+buildSom <- function(..., variables=NULL, sample.size=25000, distance.filter=0.25, grid.size=10, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE, subpops=NULL) {
     dataList <- list(...)
     sample <- sampleData(dataList, sample.size, subpops)
-
+    sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample
+    trainData <- sample[,variables]
     rm(dataList)
     gc()
+    print("Sampling done")        
     
-    sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample
-    
-    trainData <- sample[,variables]
     if(scale) {
         trainData <- scale(trainData)
+        print("Scaling done")
     }
     colnames(trainData) <- variables
     
-    # test
-#     outliers <- which(trainData > 1.5 | trainData < -1.5)
-#     trainData <- trainData[-outliers,]
-#     print(nrow(trainData))
-#     trainData2 <- data.frame()
-#     for(i in 1:nrow(trainData)) {
-#         if(i %% 10 == 0) {
-#             cat(i,nrow(trainData2),"\n")
-#         }
-#         s <- trainData[i,]
-#         ok <- T
-#         if(nrow(trainData2) > 0) {
-#             for(j in 1:nrow(trainData2)) {
-#                 if(euclideanDist(as.numeric(s),as.numeric(trainData2[j,])) < 5) {
-#                     ok <- F
-#                     break
-#                 } 
-#             }
-#         }
-#         if(ok) {
-#             #print(s)
-#             trainData2 <- rbind(trainData2, as.numeric(s))
-#             
-#         }
-#     }
-#     colnames(trainData2) <- variables
+    somData <- NULL
+    if(distance.filter > 0) {
+      somData <- data.frame()
+      pb <- txtProgressBar(min=1, max=nrow(trainData),style=3)
+      for(i in 1:nrow(trainData)) {
+        setTxtProgressBar(pb, i)      
+        s <- trainData[i,]
+        ok <- T
+        if(nrow(somData) > 0) {
+          for(j in 1:nrow(somData)) {
+            if(euclideanDist(as.numeric(s),as.numeric(somData[j,])) < distance.filter) {
+              ok <- F
+              break
+            } 
+          }
+        }
+        if(ok) {
+          somData <- rbind(somData, as.numeric(s))
+          if(nrow(somData) %% 50 == 0) {
+            print(nrow(somData))
+          }
+        }
+      }
+      close(pb)
+      colnames(somData) <- variables
+      print("Filtering done")
+    } else {
+      somData <- trainData
+    }
     
-    print("Sampling done...")
     
-    som <- som(as.matrix(trainData), keep.data=FALSE, grid=somgrid(grid.size, grid.size, grid.type))
+    som <- som(as.matrix(somData), keep.data=FALSE, grid=somgrid(grid.size, grid.size, grid.type))
     gc()
     som$fitmin <- min(sample$fitness)
     som$fitmax <- max(sample$fitness)
     
-    print("Som done...")
+    print("Som done")
     
     if(scale) {
         som$scaled.center <- attr(trainData, "scaled:center")
@@ -55,8 +57,8 @@ buildSom <- function(..., variables=NULL, sample.size=50000, grid.size=20, grid.
     }
     if(compute.fitness) {
         som$fitness.avg <- fitnessMapAvg(som, sample)
-        #som$fitness.max <- fitnessMapMax(som, sample)
         som$fitness.max <- fitnessMapQuantile(som, sample, q=0.9)
+        print("Average unit fitness done")
     }
     som$count <- countMap(som, sample)
     

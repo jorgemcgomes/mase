@@ -14,8 +14,9 @@ import net.jafama.FastMath;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class OnePreyIndividualEval extends MasonEvaluation {
+public class OnePreyIndividualEvalSys extends MasonEvaluation {
 
+    protected float[] agentY;
     protected float[] partnerAvgDist;
     protected SubpopEvaluationResult evaluation;
 
@@ -24,6 +25,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
         super.preSimulation();
         PredatorPrey predSim = (PredatorPrey) sim;
         int nAgents = predSim.predators.size();
+        agentY = new float[nAgents];
         partnerAvgDist = new float[nAgents];
 
     }
@@ -34,6 +36,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
         PredatorPrey simState = (PredatorPrey) sim;
         for (int i = 0; i < simState.predators.size(); i++) {
             Predator pred = simState.predators.get(i);
+            agentY[i] += pred.getLocation().y;
             for (Predator pOther : simState.predators) {
                 if (pred != pOther) {
                     partnerAvgDist[i] += pred.distanceTo(pOther);
@@ -52,11 +55,15 @@ public class OnePreyIndividualEval extends MasonEvaluation {
         Prey prey = predSim.preys.get(0);
         for (int i = 0; i < predSim.predators.size(); i++) {
             Predator pred = predSim.predators.get(i);
+            agentY[i] = (float) (agentY[i] / predSim.field.height / currentEvaluationStep);
+            agentY[i] = Math.max(0, Math.min(agentY[i], 1));
             partnerAvgDist[i] = Math.min(1, partnerAvgDist[i] / (diagonal / 2) / currentEvaluationStep / (predSim.predators.size() - 1));
 
             float preyDist = (float) Math.min(1, pred.distanceTo(prey) / (diagonal / 2));
+            float boundsDist = (float) predSim.boundaries.closestDistance(pred.getLocation());
+            boundsDist = Math.min(1, boundsDist / (diagonal / 2));
 
-            res[i] = new VectorBehaviourResult(pred.getCaptureCount(), preyDist, partnerAvgDist[i]);
+            res[i] = new VectorBehaviourResult(preyDist, partnerAvgDist[i], boundsDist, agentY[i]);
         }
         evaluation = new SubpopEvaluationResult(res);
 

@@ -108,7 +108,7 @@ public class RSAgent extends SmartAgent {
         // Death procedures
         if (!isAlive()) {
             this.stop();
-            rs.td.groups()[0].remove(this);
+            rs.activeAgents.remove(this);
             int i = 0;
             for (; i < rs.par.agentSensorArcs; i++) {
                 lastNormSensors[i] = 1;

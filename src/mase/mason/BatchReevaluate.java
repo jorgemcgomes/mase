@@ -50,6 +50,8 @@ public class BatchReevaluate {
 
         // Reevaluate
         MasonSimulator sim = MasonPlayer.createSimulator(args);
+        sim.repetitions = 1;
+        
         List<PersistentSolution> gcs = SolutionPersistence.readSolutionsFromTar(tar);
         PersistentSolution best = null;
         for (PersistentSolution gc : gcs) {

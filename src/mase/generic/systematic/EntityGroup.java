@@ -5,7 +5,6 @@
  */
 package mase.generic.systematic;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,14 +12,15 @@ import java.util.List;
  *
  * @author jorge
  */
-public class EntityGroup extends ArrayList<Entity> {
+public class EntityGroup {
 
     private final int minSize, maxSize;
     private final boolean isStatic;
-    private int size = -1;
+    private int varsLen = -1;
+    private List<? extends Entity> ents;
 
     public EntityGroup(List<? extends Entity> ents, int min, int max, boolean isStatic) {
-        super(ents);
+        this.ents = ents;
         this.minSize = min;
         this.maxSize = max;
         this.isStatic = isStatic;
@@ -29,20 +29,24 @@ public class EntityGroup extends ArrayList<Entity> {
     public EntityGroup(List<? extends Entity> ents, boolean isStatic) {
         this(ents, ents.size(), ents.size(), isStatic);
     }
+    
+    public EntityGroup (List<? extends Entity> ents) {
+        this(ents, false);
+    }
 
 
     public double[] getAverageState() {
-        if (size == -1) {
-            size = this.get(0).getStateVariables().length;
+        if (varsLen == -1) {
+            varsLen = ents.get(0).getStateVariables().length;
         }
-        double[] res = new double[size];
-        if (this.isEmpty()) {
+        double[] res = new double[varsLen];
+        if (ents.isEmpty()) {
             Arrays.fill(res, Double.NaN);
         } else {
-            for (Entity a : this) {
+            for (Entity a : ents) {
                 double[] state = a.getStateVariables();
                 for (int i = 0; i < state.length; i++) {
-                    res[i] += state[i] / this.size();
+                    res[i] += state[i] / ents.size();
                 }
             }
         }
@@ -75,5 +79,13 @@ public class EntityGroup extends ArrayList<Entity> {
 
     public boolean isStatic() {
         return isStatic;
+    }
+
+    public List<? extends Entity> getEntities() {
+        return ents;
+    }
+    
+    public int size() {
+        return ents.size();
     }
 }

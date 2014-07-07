@@ -63,14 +63,11 @@ public class Predator extends SmartAgent {
     @Override
     public void action(double[] output) {
         super.action(output);
-
         // capture preys
         PredatorPrey predSim = (PredatorPrey) sim;
-        Bag objects = field.getNeighborsExactlyWithinDistance(getLocation(), predSim.par.captureDistance + Predator.RADIUS + Prey.RADIUS, false);
-        for (Object o : objects) {
-            if (o instanceof Prey) {
-                ((Prey) o).disappear();
-                predSim.td.groups()[1].remove((Prey) o);
+        for (Prey prey : predSim.activePreys) {
+            if (this.distanceTo(prey) <= predSim.par.captureDistance) {
+                prey.disappear();
                 this.captureCount++;
                 predSim.captureCount++;
             }

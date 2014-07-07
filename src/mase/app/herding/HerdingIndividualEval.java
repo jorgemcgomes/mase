@@ -17,12 +17,12 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class ShepherdIndividualEvaluation extends MasonEvaluation {
+public class HerdingIndividualEval extends MasonEvaluation {
 
     private double[] sheepDist;
     private List<double[]> foxDist;
-    private double[] gateDist;
-    private Double2D gate;
+    private double[] curralDist;
+    private Double2D curral;
     private SubpopEvaluationResult ser;
 
     @Override
@@ -34,8 +34,8 @@ public class ShepherdIndividualEvaluation extends MasonEvaluation {
         for (int i = 0; i < herd.foxes.size(); i++) {
             foxDist.add(new double[herd.shepherds.size()]);
         }
-        gateDist = new double[herd.shepherds.size()];
-        gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
+        curralDist = new double[herd.shepherds.size()];
+        curral = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ShepherdIndividualEvaluation extends MasonEvaluation {
             }
 
             // Gate
-            gateDist[i] += shep.getLocation().distance(gate);
+            curralDist[i] += shep.getLocation().distance(curral);
         }
     }
 
@@ -75,7 +75,7 @@ public class ShepherdIndividualEvaluation extends MasonEvaluation {
         for(int i = 0 ; i < herd.shepherds.size() ; i++) {
             float[] br = new float[2 + foxDist.size()];
             br[0] = (float) (sheepDist[i] / currentEvaluationStep / maxD);
-            br[1] = (float) (gateDist[i] / currentEvaluationStep / maxD);
+            br[1] = (float) (curralDist[i] / currentEvaluationStep / maxD);
             for(int j = 0 ; j < foxDist.size() ; j++) {
                 br[2 + j] = (float) (foxDist.get(j)[i] / currentEvaluationStep / maxD);
             }

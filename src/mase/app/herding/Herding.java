@@ -38,7 +38,7 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
     protected List<Fox> foxes;
     protected List<Sheep> sheeps;
     protected List<Sheep> activeSheeps;
-    private final StaticPolygon fence, openSide, curral;
+    protected final StaticPolygon fence, openSide, curral;
     public static final Double2D[] FOX_POSITIONS = new Double2D[]{
         new Double2D(0.95, 0.05), new Double2D(0.95, 0.95), new Double2D(0.95, 0.5),
         new Double2D(0.5, 0.95), new Double2D(0.5, 0.05)
@@ -60,7 +60,7 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
         openSide.paint = Color.RED;
 
         curral = new StaticPolygon(new Segment(par.arenaSize, par.arenaSize / 2 - par.gateSize / 2,
-                par.gateSize, par.arenaSize / 2 + par.gateSize / 2));
+                par.arenaSize, par.arenaSize / 2 + par.gateSize / 2));
         curral.paint = Color.BLUE;
     }
 
@@ -129,7 +129,9 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
         AgentController[] controllers = gc.getAgentControllers(par.numShepherds);
         for (int i = 0; i < par.numShepherds; i++) {
             double y = startY + i * par.shepherdSeparation;
-            Shepherd newShepherd = new Shepherd(this, field, controllers[i].clone());
+            AgentController contr = controllers[i].clone();
+            contr.reset();
+            Shepherd newShepherd = new Shepherd(this, field, contr);
             newShepherd.setLocation(new Double2D(x, y));
             newShepherd.setOrientation(0);
             shepherds.add(newShepherd);
@@ -149,7 +151,7 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
 
     @Override
     public TaskDescription getTaskDescription() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return td;
     }
 
 }

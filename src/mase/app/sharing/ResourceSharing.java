@@ -28,7 +28,7 @@ import sim.util.Double2D;
 public class ResourceSharing extends GUICompatibleSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
     protected RSParams par;
-    protected List<RSAgent> agents;
+    protected List<RSAgent> agents, activeAgents;
     protected Continuous2D field;
     protected GroupController gc;
     protected Resource resource;
@@ -89,6 +89,7 @@ public class ResourceSharing extends GUICompatibleSimState implements TaskDescri
             ag.setStopper(schedule.scheduleRepeating(ag));
             agents.add(ag);
         }
+        activeAgents = new ArrayList<RSAgent>(agents);
     }
 
     @Override

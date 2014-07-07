@@ -756,7 +756,7 @@ behaviourCorrelation2 <- function(data) {
     for(j in data$jobs) {
         m <- as.matrix(data[[j]][["sub.0"]][,data$vars.group])
         c <- cor(m, method="spearman")
-        print(c)
+        View(c)
         i <- i + 1
         setTxtProgressBar(prog, i)
     }

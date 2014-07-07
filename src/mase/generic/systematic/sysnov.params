@@ -19,11 +19,13 @@ systematic.num-alive =                 true
 systematic.state-mean =                true
 systematic.state-deviation =           false
 systematic.physical-relations =        true
+systematic.update-freq =               1
 
 pop.default-subpop.species.fitness =   mase.novelty.NoveltyFitness
 neat.SPECIE.FITNESS.MAX =              1000
 
-eval.post.2 =                          mase.novelty.BiasedNSGA
+eval.post.2 =                           mase.novelty.LinearScalarization
+eval.post.2.novelty-proportion =        0.5
 
 stat.child.10 =                        mase.novelty.NoveltyPopStat
 stat.child.10.file =		       $noveltypop.stat
@@ -33,8 +35,4 @@ stat.child.11.file =		       $noveltyind.stat
 stat.child.12 =                          mase.novelty.WeightedNoveltyStat
 stat.child.12.weight-file =              $weights.stat
 stat.child.12.corr-file =                $corr.stat
-
-stat.child.13 =                        mase.novelty.NSGA2Stat
-stat.child.13.file =                   $nsga.stat
-
 

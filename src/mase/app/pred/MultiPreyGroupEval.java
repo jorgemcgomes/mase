@@ -12,7 +12,7 @@ import sim.util.MutableDouble2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class MultiPreyGroupEval extends OnePreyGroupEval {
+public class MultiPreyGroupEval extends OnePreyGroupEvalOriginal {
 
     protected float preyDispersion = 0;
 

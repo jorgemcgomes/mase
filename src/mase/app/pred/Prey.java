@@ -83,6 +83,7 @@ public class Prey extends EmboddiedAgent {
         }
         if (getLocation().x > predSim.par.size || getLocation().y > predSim.par.size || getLocation().x < 0 || getLocation().y < 0) {
             disappear();
+            
         }
     }
 
