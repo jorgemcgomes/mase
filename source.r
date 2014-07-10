@@ -434,7 +434,7 @@ fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE,
             }
         }
     }
-    if(som.group) {
+    if(som.group || som.alljobs) {
         print("Som group variables plots")
         args <- c(som.group.par, list(variables=datalist[[1]]$vars.group))
         print("Building som")
@@ -456,11 +456,13 @@ fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE,
             gc()
             print(paste("Mapping", data$expname))
             map <- mapMergeSubpops(ksoms$group, data)
-            print(paste("Ploting", data$expname))
-            if(show.only) {
-                fitnessSomPlot(ksoms$group, data, map, show=T)
-            } else {
-                fitnessSomPlot(ksoms$group, data, map, file=paste0(expset.name,".group.",data$expname,".pdf"), show=F)
+            if(som.group) {
+              print(paste("Ploting", data$expname))
+              if(show.only) {
+                  fitnessSomPlot(ksoms$group, data, map, show=T)
+              } else {
+                  fitnessSomPlot(ksoms$group, data, map, file=paste0(expset.name,".group.",data$expname,".pdf"), show=F)
+              }
             }
             if(som.alljobs) { 
                 allcount <- NULL

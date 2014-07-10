@@ -6,7 +6,6 @@ package mase.app.pred;
 
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
-import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.mason.MasonEvaluation;
 import net.jafama.FastMath;

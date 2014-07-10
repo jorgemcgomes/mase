@@ -269,18 +269,38 @@ uniformity.group <- function(count, threshold=100, fitness.threshold=0) {
     cat("All:", length(all.count), "| Visited:", length(visited),"\n")
     ideal <- rep(1 / length(visited), length(visited))
     setlist <- list()
-    for(i in 1:(length(count)-1)) { # exps: -1 to discard the maxFitness
+    for(i in 1:(length(count)-1)) { # exps: -1 to discard the maxFitness column
         chis <- c()
         for(j in 1:length(count[[i]])) { # jobs
             job.counts <- merge.counts(count[[i]][[j]])[visited]
             if(sum(job.counts) > 0) {
                 job.counts <- job.counts / sum(job.counts)
+                chis <- c(chis, 1 - jsd(job.counts, ideal))
+            } else {
+                chis <- c(chis, 0)
             }
-            chis <- c(chis, 1 - jsd(job.counts, ideal))
+            
         }
         setlist[[names(count)[i]]] <- chis
     }
     return(metaAnalysis(setlist))
+}
+
+total.group <- function(count, threshold=100, fitness.threshold=0) {
+  all.count <- merge.counts(count)
+  plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
+  visited <- which(all.count > threshold & count$maxFitness > fitness.threshold)
+  cat("All:", length(all.count), "| Visited:", length(visited),"\n")
+  setlist <- list()
+  for(i in 1:(length(count)-1)) { # exps: -1 to discard the maxFitness column
+    chis <- c()
+    for(j in 1:length(count[[i]])) { # jobs
+      job.counts <- merge.counts(count[[i]][[j]])[visited]
+      chis <- c(chis, sum(job.counts))
+    }
+    setlist[[names(count)[i]]] <- chis
+  }
+  return(metaAnalysis(setlist))
 }
 
 uniformity.group.alt <- function(count, threshold=0.0001) {

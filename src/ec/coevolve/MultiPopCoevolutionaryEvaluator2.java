@@ -47,8 +47,8 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     public static final String P_NOVEL_CHAMPIONS_CAP = "novel-champions-cap";
     public static final String P_NEAT_ELITE = "num-neat-elite";
     public static final String P_CURRENT_ELITE = "num-current-elite";
-    public static final String P_FITNESS_ONLY_ELITE = "fitness-only-elite";
-    
+    public static final String P_ELITE_MODE = "elite-mode";
+
     public enum NovelChampionsMode {
 
         random, last, centroid, best;
@@ -59,7 +59,13 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         archive, halloffame
     }
 
-    protected boolean eliteFitness;
+    public enum EliteMode {
+
+        fitness, novelty, score
+
+    }
+
+    protected EliteMode eliteMode;
     protected int lastChampions;
     protected int randomChampions;
     protected int novelChampions;
@@ -75,15 +81,15 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     public Individual[][] getEliteIndividuals() {
         return eliteIndividuals;
     }
-    
+
     public void setEliteIndividuals(Individual[][] elite) {
         this.eliteIndividuals = elite;
     }
-    
+
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        eliteFitness = state.parameters.getBoolean(base.push(P_FITNESS_ONLY_ELITE), null, false);
+        eliteMode = EliteMode.valueOf(state.parameters.getString(base.push(P_ELITE_MODE), null));
 
         lastChampions = state.parameters.getIntWithDefault(base.push(P_LAST_CHAMPIONS), null, 0);
         randomChampions = state.parameters.getIntWithDefault(base.push(P_RANDOM_CHAMPIONS), null, 0);
@@ -348,7 +354,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         }
 
         double randChamps = randomChampions;
-        
+
         // Novel champions
         if (novelChampions > 0) {
             Individual[] behaviourElite = behaviourElite(state, whichSubpop);
@@ -431,8 +437,10 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     }
 
     protected boolean betterThan(Individual a, Individual b) {
-        if (eliteFitness) {
+        if (eliteMode == EliteMode.fitness) {
             return ((ExpandedFitness) a.fitness).getFitnessScore() > ((ExpandedFitness) b.fitness).getFitnessScore();
+        } else if (eliteMode == EliteMode.novelty) {
+            return ((NoveltyFitness) a.fitness).getNoveltyScore() > ((NoveltyFitness) b.fitness).getNoveltyScore();
         } else {
             return a.fitness.betterThan(b.fitness);
         }

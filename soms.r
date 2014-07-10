@@ -1,4 +1,4 @@
-buildSom <- function(..., variables=NULL, sample.size=25000, distance.filter=0.25, grid.size=10, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE, subpops=NULL) {
+buildSom <- function(..., variables=NULL, sample.size=25000, distance.filter=0, grid.size=10, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE, subpops=NULL) {
     dataList <- list(...)
     sample <- sampleData(dataList, sample.size, subpops)
     sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample

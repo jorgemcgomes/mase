@@ -28,12 +28,16 @@ public class NoveltyEvaluation implements PostEvaluator {
     public static final String P_ARCHIVE_SIZE_LIMIT = "ns-archive-size";
     public static final String P_ARCHIVE_MODE = "ns-archive-mode";
     public static final String P_USE_CURRENT_POP = "ns-use-current";
-    public static final String V_NONE = "none", V_SHARED = "shared", V_MULTIPLE = "multiple";
-    protected String archiveMode;
+    protected ArchiveMode archiveMode;
     protected int k;
     protected double addProb;
     protected int sizeLimit;
     protected boolean useCurrent;
+
+    public enum ArchiveMode {
+
+        none, shared, multiple;
+    }
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -41,29 +45,20 @@ public class NoveltyEvaluation implements PostEvaluator {
         this.addProb = state.parameters.getDouble(base.push(P_ARCHIVE_ADD_PROB), null);
         this.sizeLimit = state.parameters.getInt(base.push(P_ARCHIVE_SIZE_LIMIT), null);
         this.useCurrent = state.parameters.getBoolean(base.push(P_USE_CURRENT_POP), null, true);
-        String m = state.parameters.getStringWithDefault(base.push(P_ARCHIVE_MODE), null, V_SHARED);
-        if (m.equalsIgnoreCase(V_NONE)) {
-            archiveMode = V_NONE;
-        } else if (m.equalsIgnoreCase(V_SHARED)) {
-            archiveMode = V_SHARED;
-        } else if (m.equalsIgnoreCase(V_MULTIPLE)) {
-            archiveMode = V_MULTIPLE;
-        } else {
-            state.output.fatal("Unknown archive mode", base.push(P_ARCHIVE_MODE));
-        }
+        this.archiveMode = ArchiveMode.valueOf(state.parameters.getString(base.push(P_ARCHIVE_MODE), null));
 
         int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this must be more flexible
         this.archives = new ArrayList[nPops];
-        if (archiveMode == V_NONE) {
+        if (archiveMode == ArchiveMode.none) {
             for (int i = 0; i < nPops; i++) {
                 archives[i] = new ArrayList<ArchiveEntry>();
             }
-        } else if (archiveMode == V_SHARED) {
+        } else if (archiveMode == ArchiveMode.shared) {
             ArrayList<ArchiveEntry> arch = new ArrayList<ArchiveEntry>(sizeLimit);
             for (int i = 0; i < nPops; i++) {
                 archives[i] = arch;
             }
-        } else if (archiveMode == V_MULTIPLE) {
+        } else if (archiveMode == ArchiveMode.multiple) {
             for (int i = 0; i < nPops; i++) {
                 archives[i] = new ArrayList<ArchiveEntry>(sizeLimit);
             }
@@ -117,7 +112,7 @@ public class NoveltyEvaluation implements PostEvaluator {
                 // average to k nearest
                 indFit.noveltyScore = 0;
                 indFit.repoComparisons = 0;
-                for (int i = 0; i < k && i < distances.size() ; i++) {
+                for (int i = 0; i < k && i < distances.size(); i++) {
                     indFit.noveltyScore += distances.get(i).getLeft();
                     if (distances.get(i).getRight()) {
                         indFit.repoComparisons++;
@@ -134,7 +129,7 @@ public class NoveltyEvaluation implements PostEvaluator {
     }
 
     protected void updateArchive(EvolutionState state, Population pop) {
-        if (archiveMode != V_NONE) {
+        if (archiveMode != ArchiveMode.none) {
             for (int i = 0; i < pop.subpops.length; i++) {
                 List<ArchiveEntry> archive = archives[i];
                 for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
@@ -156,20 +151,24 @@ public class NoveltyEvaluation implements PostEvaluator {
     public List<ArchiveEntry>[] getArchives() {
         return archives;
     }
-    
+
     public static class ArchiveEntry {
-        
-        protected ArchiveEntry(EvolutionState state, Individual ind) {
-            this.behaviour = (BehaviourResult) ((NoveltyFitness) ind.fitness).getNoveltyBehaviour();
-            this.fitness = ((NoveltyFitness) ind.fitness).getFitnessScore();
-            this.individual = ind;
-            this.generation = state.generation;
-        }
-        
+
         protected BehaviourResult behaviour;
         protected Individual individual;
         protected int generation;
         protected float fitness;
+        
+        protected ArchiveEntry(EvolutionState state, Individual ind) {
+            this(state, ind, (BehaviourResult) ((NoveltyFitness) ind.fitness).getNoveltyBehaviour());
+        }
+
+        protected ArchiveEntry(EvolutionState state, Individual ind, BehaviourResult behaviour) {
+            this.behaviour = behaviour;
+            this.fitness = ((NoveltyFitness) ind.fitness).getFitnessScore();
+            this.individual = ind;
+            this.generation = state.generation;
+        }
 
         public BehaviourResult getBehaviour() {
             return behaviour;
@@ -182,7 +181,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         public int getGeneration() {
             return generation;
         }
-        
+
         public float getFitness() {
             return fitness;
         }
