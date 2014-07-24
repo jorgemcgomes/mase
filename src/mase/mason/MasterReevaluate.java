@@ -14,7 +14,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import mase.evaluation.BehaviourResult;
 import mase.evaluation.EvaluationResult;
+import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonReevaluate.Reevaluation;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
@@ -111,9 +113,14 @@ public class MasterReevaluate {
                 fitWriter.newLine();
 
                 // Log behaviours
-                behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex());
-                for (int j = 0; j < reev.mergedResults.length; j++) {
-                    behavWriter.write(" " + reev.mergedResults[j].toString());
+                behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex() + " " + reev.meanFitness);
+                for (int j = 1; j < reev.mergedResults.length; j++) { // starts at 1 to skip fitness
+                    EvaluationResult br = reev.mergedResults[j];
+                    if(br instanceof SubpopEvaluationResult) {
+                        SubpopEvaluationResult ser = (SubpopEvaluationResult) br;
+                        br = ser.getSubpopEvaluation(sols.get(i).getSubpop());
+                    }
+                    behavWriter.write(" " + br.toString());
                 }
                 behavWriter.newLine();
             }

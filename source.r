@@ -29,7 +29,7 @@ theme_set(theme_grey(base_size = 12))
 plotMultiline <- function(data, ylim=c(0,1), legend="right", title=NULL, ylabel="Fitness", col="variable",lty="variable") {
     xlabel <- colnames(data)[1]
     data.long <- melt(data, id=xlabel)
-    g <- ggplot(data=data.long, aes_string(x=xlabel, y="value", colour="variable")) + geom_line() + theme(legend.position=legend) + ylab(ylabel) + guides(fill=guide_legend(title=NULL))
+    g <- ggplot(data=data.long, aes_string(x=xlabel, y="value", colour=col,lty=lty)) + geom_line() + theme(legend.position=legend) + ylab(ylabel) + guides(fill=guide_legend(title=NULL))
     if(!is.null(ylim)) {
         g <- g + ylim(ylim[1],ylim[2])
     }
@@ -71,6 +71,7 @@ plotListToPDF <- function(plotlist, title="", nrow=NULL, ncol=NULL, width=DEF_WI
 fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE, jitter=TRUE, ylim=FALSE) {
     plots <- list()
     bestfar <- NULL
+    bestgen <- NULL
     datalist <- list(...)
     fitlim <- NULL
     if(ylim) {
@@ -79,15 +80,19 @@ fitnessComparisonPlots <- function(..., snapshots=NULL, ttests=TRUE, jitter=TRUE
     for(data in datalist) {
         if(is.null(bestfar)) {
             bestfar <- data.frame(Generation=data$gens)
+            bestgen <- data.frame(Generation=data$gens)
         }
         frame <- data.frame(Generation=data$gens)
+        genframe <- data.frame(Generation=data$gens)
         for(j in data$jobs) {
             frame[[j]] <- data[[j]]$fitness$best.sofar
+            genframe[[j]] <- data[[j]]$fitness$best.gen
         }
-        avg.best <- rowMeans(frame[,-1])
-        bestfar[[data$expname]] <- avg.best
+        bestfar[[data$expname]] <- rowMeans(frame[,-1])
+        bestgen[[data$expname]] <- rowMeans(genframe[,-1])
     }
     plots[[length(plots)+1]] <- plotMultiline(bestfar, ylim=fitlim, title="Best so far")
+    plots[[length(plots)+1]] <- plotMultiline(bestgen, ylim=fitlim, title="Best gen")
     
     if(is.null(snapshots)) {
         snapshots <- c(max(bestfar$gen))
@@ -181,8 +186,10 @@ individualSomPlots <- function(som, data, mapping, ...) {
     return(plots)
 }
 
-somPlot <- function(som, mapping, title="som", alpha=0.70, gradient.low="blue", gradient.high="red", colour.limits=c(), size.max=30, limit.max=0.05) {
-    g <- ggplot(mapping, aes(somx, somy)) + 
+somPlot <- function(som, mapping, title="som", alpha=0.70, gradient.low="blue", gradient.high="red", colour.limits=c(), size.max=30, limit.min=0.00, limit.max=0.05) {
+  almost <- which(mapping$count > 0 & mapping$count < limit.min)
+  mapping$count[almost] <- limit.min
+  g <- ggplot(mapping, aes(somx, somy)) + 
         geom_point(aes(size=count, colour=fitness.max), alpha=alpha) + 
         scale_colour_gradient(limits=colour.limits, low=gradient.low, high=gradient.high, space="Lab") + 
         scale_size(range=c(0,size.max), oob=squish, limits=c(0,limit.max)) + 

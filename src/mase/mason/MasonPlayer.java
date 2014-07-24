@@ -11,6 +11,7 @@ import ec.util.Parameter;
 import ec.util.ParameterDatabase;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Random;
 import mase.MetaEvaluator;
@@ -31,7 +32,15 @@ public class MasonPlayer {
     public static final String P_AGENT_CONTROLLER = "-c";
 
     public static void main(String[] args) throws Exception {
-        // Parameter loading
+        GroupController controller = createController(args);
+        long startSeed = new Random().nextLong();
+        MasonSimulator sim = createSimulator(args);
+        GUIState gui = sim.createSimStateWithUI(controller, startSeed);
+        gui.createController();
+    }
+    
+    public static GroupController createController(String[] args) throws Exception {
+                // Parameter loading
         File gc = null;
         ArrayList<File> controllers = new ArrayList<File>();
         int x;
@@ -44,16 +53,14 @@ public class MasonPlayer {
         }
         if (gc == null && controllers.isEmpty()) {
             System.out.println("No controllers to run.");
-            return;
+            return null;
         }
         if (gc != null && !controllers.isEmpty()) {
             System.out.println("Both agent controllers and a group controller were provided.");
-            return;
+            return null;
         }
 
         // Create controller
-        MasonSimulator sim = createSimulator(args);
-        long startSeed = new Random().nextLong();
         GroupController controller = null;
         if (gc != null) {
             PersistentSolution c = SolutionPersistence.readSolution(new FileInputStream(gc));
@@ -70,8 +77,7 @@ public class MasonPlayer {
             }
             controller = new HeterogeneousGroupController(acs);
         }
-        GUIState gui = sim.createSimStateWithUI(controller, startSeed);
-        gui.createController();
+        return controller;
     }
 
     public static MasonSimulator createSimulator(String[] args) {

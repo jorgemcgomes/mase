@@ -21,7 +21,7 @@ import sim.util.Bag;
 public class Predator extends SmartAgent {
 
     public static final double RADIUS = 1.5;
-    public static final Color COLOUR = Color.GREEN;
+    public static final Color COLOUR = Color.RED;
     protected int captureCount = 0;
 
     public Predator(PredatorPrey sim, Continuous2D field, AgentController ac) {

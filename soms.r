@@ -180,19 +180,15 @@ identifyBests <- function(som, data, n=10, outfile) {
     for(var in variables) {
         idframe[[var]] <- rep(NA,100000)
     }
-    index <- 1
+    idframe <- data.frame()
     for(job in data$jobs) {
         print(job)
         for(sub in data$subpops) {
-            subset <- data[[job]][[sub]]
-            for(r in 1:nrow(subset)) {
-                row <- subset[r,]
-                rowT <- c(job, sub, row["gen"], row["index"], row["fitness"], row[variables])
-                idframe[index,] <- rowT
-                index <- index + 1
-            }
+            f <- cbind(job=job, sub=sub, subset(data[[job]][[sub]], select=c("gen","index","fitness",variables)))
+            idframe <- rbind(idframe, f)
         }
     }
+    print(summary(idframe))
     idframe <- idframe[complete.cases(idframe),]
     
     # map data to som
