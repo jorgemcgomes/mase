@@ -41,17 +41,27 @@ public class CountSensor extends AbstractSensor {
         int count = 0;
         Bag neighbours = Double.isInfinite(range) ? field.allObjects
                 : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
-        for (Class type : types) {
-            for (Object n : neighbours) {
-                if (n != ag && type.isInstance(n)) {
-                    double dist = distFunction.distance(ag, n);
-                    if (dist <= range) {
-                        count++;
-                    }
+        for (Object n : neighbours) {
+            if (objectMatch(n)) {
+                double dist = distFunction.distance(ag, n);
+                if (dist <= range) {
+                    count++;
                 }
             }
         }
         return new double[]{count};
+    }
+
+    protected boolean objectMatch(Object o) {
+        if (o == ag) {
+            return false;
+        }
+        for (Class type : types) {
+            if (type.isInstance(o)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

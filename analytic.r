@@ -260,7 +260,9 @@ individuals.count <- function(datalist, min.fit=-Inf, max.fit=Inf, quantile=T) {
     }
     setlist[[data$expname]] <- chis
   }
-  return(metaAnalysis(setlist))
+  a <- metaAnalysis(setlist)
+  print(a)
+  return(a)
 }
 
 exploration.count <- function(datalist, levels=5, vars=datalist[[1]]$vars.group, min.fit=-Inf, max.fit=Inf, by.gen=NULL) {     
@@ -383,7 +385,9 @@ uniformity <- function(count, t=0.0001, ...) {
     }
     setlist[[names(count)[i]]] <- chis
   }
-  return(metaAnalysis(setlist))
+  a <- metaAnalysis(setlist)
+  print(a)
+  return(a)
 }
 
 uniformity.ind <- function(count, t=0.0001, ...) {  
@@ -411,7 +415,9 @@ uniformity.ind <- function(count, t=0.0001, ...) {
     }
     setlist[[names(count)[i]]] <- chis
   }
-  return(metaAnalysis(setlist))
+  a <- metaAnalysis(setlist)
+  print(a)
+  return(a)
 }
 
 uniformity.gen <- function(count, t=0.0001, ...) {
