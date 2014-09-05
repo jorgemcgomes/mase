@@ -3,7 +3,7 @@ problem.trials-merge =             best
 problem.number-evals =             2
 problem.eval.0 =                   mase.app.multirover.MultiRoverFitness
 problem.eval.0.update-freq =       0
-problem.eval.1 =                   mase.app.multirover.MultiRoverBehaviour
+problem.eval.1 =                   mase.app.multirover.MultiRoverBehaviour3
 problem.eval.1.update-freq =       1
 
 fitness.fitness-index =            0
@@ -11,16 +11,16 @@ fitness.novelty-index =            1
 
 problem.repetitions =              5
 problem.max-steps =                500
-problem.size =                     150
-problem.discretization = 15
+problem.size =                     100
+problem.discretization = 30
 problem.num-agents = 4
-problem.separation = 10
+problem.separation = 15
 problem.speed = 1
 problem.rotation-speed = 0.4
-problem.sensor-arcs = 4
+problem.sensor-arcs = 6
 problem.sensor-range = 25
-problem.num-rocks = 6
-problem.rock-radius = 7.5
+problem.num-rocks = 8
+problem.rock-radius = 6
 problem.min-activation-time = 25
 
 vector.species.genome-size =       46
@@ -30,5 +30,6 @@ neural.output =                    2
 neural.structure =                 jordan
 neural.tanh =                      false
 
-neat.INPUT.NODES =                 12
+neat.INPUT.NODES =                 11
+#neat.OUTPUT.NODES =                3
 neat.OUTPUT.NODES =                4

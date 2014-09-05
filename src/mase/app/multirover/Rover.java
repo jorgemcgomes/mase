@@ -10,6 +10,7 @@ import mase.controllers.AgentController;
 import mase.mason.world.AbstractSensor;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
+import mase.mason.world.DistanceSensorRays;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 
@@ -19,28 +20,37 @@ import sim.field.continuous.Continuous2D;
  */
 public class Rover extends SmartAgent {
 
-    public static final double RADIUS = 1.5;
+    public static final double RADIUS = 2;
     public static final Color COLOUR = Color.BLACK;
     public static final int LOW = -1, NONE = 0, HIGH = 1;
 
     protected int actuatorType;
     protected long lastActivation = -10000;
+    protected int numActivations = 0;
+    protected int captured = 0;
 
     public Rover(MultiRover sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, COLOUR, ac);
         this.enableCollisionDetection(true);
         this.enableBoundedArena(true);
 
+        DistanceSensorRays dw = new DistanceSensorRays();
+        dw.setAgent(sim, field, this);
+        dw.setRays(5.0, -Math.PI / 6, Math.PI / 6);
+        dw.setBinary(true);
+        super.addSensor(dw);
+
         // redrock sensor
+        //TypeDistanceSensor ds = new TypeDistanceSensor();
         DistanceSensorArcs ds = new DistanceSensorArcs();
-        ds.setArcs(sim.par.sensorArcs);
+        ds.setArcs(new double[]{-Math.PI / 2, -Math.PI / 6, Math.PI / 6}, new double[]{-Math.PI / 6, Math.PI / 6, Math.PI / 2});
         ds.setRange(sim.par.sensorRange);
         ds.setObjectTypes(RedRock.class);
         super.addSensor(ds);
 
         // closest rovers distance
         DistanceSensorArcs dsr = new DistanceSensorArcs();
-        dsr.setArcs(sim.par.sensorArcs);
+        dsr.setArcs(new double[]{-Math.PI / 2, -Math.PI / 6, Math.PI / 6}, new double[]{-Math.PI / 6, Math.PI / 6, Math.PI / 2});
         dsr.setRange(sim.par.sensorRange);
         dsr.setObjectTypes(Rover.class);
         super.addSensor(dsr);
@@ -98,13 +108,17 @@ public class Rover extends SmartAgent {
     public void action(double[] output) {
         if (sim.schedule.getSteps() - lastActivation > ((MultiRover) sim).par.minActivationTime) {
             if (output[2] > 0.5 || output[3] > 0.5) {
-                actuatorType = output[2] >= output[3] ? -1 : 1;
-                lastActivation = sim.schedule.getSteps();
+                int newType = output[2] >= output[3] ? LOW : HIGH;
+                if (actuatorType != newType) {
+                    lastActivation = sim.schedule.getSteps();
+                    actuatorType = newType;
+                    numActivations++;
+                }
             } else {
-                actuatorType = 0;
+                actuatorType = NONE;
+                super.action(output);
             }
         }
-        super.action(output);
     }
 
 }

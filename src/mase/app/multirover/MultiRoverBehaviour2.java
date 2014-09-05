@@ -8,15 +8,18 @@ package mase.app.multirover;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import sim.util.Double2D;
+import sim.util.MutableDouble2D;
 
 /**
  *
  * @author jorge
  */
-public class MultiRoverBehaviour extends MasonEvaluation {
+public class MultiRoverBehaviour2 extends MasonEvaluation {
 
     private VectorBehaviourResult br;
     private double activeTime;
+    private double dispersion;
 
     @Override
     public EvaluationResult getResult() {
@@ -27,21 +30,29 @@ public class MultiRoverBehaviour extends MasonEvaluation {
     protected void preSimulation() {
         super.preSimulation();
         activeTime = 0;
+        dispersion = 0;
     }
 
     @Override
     protected void postSimulation() {
         MultiRover mr = (MultiRover) sim;
-        br = new VectorBehaviourResult(mr.scores[0] / 3f, mr.scores[1] / 3f, mr.scores[2] / 3f, (float) activeTime / mr.rovers.size() / maxSteps);
+        br = new VectorBehaviourResult(mr.scores[2] / (float) mr.par.numRocks, (float) activeTime / mr.rovers.size() / maxSteps, (float) (dispersion / mr.rovers.size() / maxSteps / mr.par.size));
     }
 
     @Override
     protected void evaluate() {
         MultiRover mr = (MultiRover) sim;
+        MutableDouble2D cm = new MutableDouble2D();
         for (Rover r : mr.rovers) {
             if (r.getActuatorType() != 0) {
                 activeTime++;
             }
+            cm.addIn(r.getLocation());
+        }
+        
+        cm.multiplyIn(1.0 / mr.rovers.size());
+        for(Rover r : mr.rovers) {
+            dispersion += r.distanceTo(new Double2D(cm));
         }
     }
 }

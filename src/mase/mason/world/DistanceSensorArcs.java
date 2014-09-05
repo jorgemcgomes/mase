@@ -68,7 +68,8 @@ public class DistanceSensorArcs extends AbstractSensor {
         Bag neighbours = Double.isInfinite(range) ? field.allObjects
                 : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
         double[] vals = new double[valueCount()];
-            Arrays.fill(vals, Double.POSITIVE_INFINITY);
+        Arrays.fill(vals, Double.POSITIVE_INFINITY);
+        Arrays.fill(closestObjects, null);
         for (Object n : neighbours) {
             if (objectMatch(n)) {
                 double dist = distFunction.distance(ag, n);
@@ -77,7 +78,7 @@ public class DistanceSensorArcs extends AbstractSensor {
                     for (int a = 0; a < arcStart.length; a++) {
                         if ((angle >= arcStart[a] && angle <= arcEnd[a])
                                 || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a]))) {
-                            if(dist < vals[a]) {
+                            if (dist < vals[a]) {
                                 vals[a] = dist;
                                 closestObjects[a] = n;
                             }
@@ -88,7 +89,7 @@ public class DistanceSensorArcs extends AbstractSensor {
         }
         return vals;
     }
-    
+
     public Object[] getClosestObjects() {
         return closestObjects;
     }

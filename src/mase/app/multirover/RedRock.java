@@ -6,11 +6,7 @@
 package mase.app.multirover;
 
 import java.awt.Color;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
@@ -28,10 +24,10 @@ public class RedRock extends OvalPortrayal2D implements Steppable {
 
         A(Color.RED, new int[]{Rover.LOW, Rover.LOW}),
         B(Color.BLUE, new int[]{Rover.HIGH, Rover.HIGH}),
-        C(Color.GREEN, new int[]{Rover.HIGH, Rover.LOW});
+        C(new Color(122, 0, 122), new int[]{Rover.HIGH, Rover.LOW});
 
-        private final Color color;
-        private final int[] actuators;
+        public final Color color;
+        public final int[] actuators;
 
         RockType(Color c, int[] actuators) {
             this.color = c;
@@ -44,12 +40,16 @@ public class RedRock extends OvalPortrayal2D implements Steppable {
     private Stoppable stop;
 
     public RedRock(MultiRover sim, RockType type) {
-        super(type.color, sim.par.rockRadius, true);
+        super(type.color, sim.par.rockRadius * 2, true);
         this.type = type;
     }
 
     protected void setStopper(Stoppable stop) {
         this.stop = stop;
+    }
+
+    protected RockType getType() {
+        return type;
     }
 
     @Override
@@ -64,7 +64,10 @@ public class RedRock extends OvalPortrayal2D implements Steppable {
 
         for (Object n : neighbours.objs) {
             if (n instanceof Rover) {
-                requiredAct.remove((Integer) ((Rover) n).getActuatorType());
+                Rover r = (Rover) n;
+                if (state.schedule.getSteps() - r.lastActivation > mr.par.minActivationTime) {
+                    requiredAct.remove((Integer) ((Rover) n).getActuatorType());
+                }
             }
         }
 
@@ -73,6 +76,18 @@ public class RedRock extends OvalPortrayal2D implements Steppable {
             stop.stop();
             mr.field.remove(this);
             mr.scores[type.ordinal()]++;
+            mr.rocks.remove(this);
+
+            for (Object n : neighbours.objs) {
+                if (n instanceof Rover) {
+                    Rover r = (Rover) n;
+                    r.captured++;
+                }
+            }
+
+            if (mr.rocks.isEmpty()) {
+                mr.kill();
+            }
         }
     }
 
