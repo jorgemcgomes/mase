@@ -70,10 +70,10 @@ public class Sheep extends EmboddiedAgent {
         }
 
         // Check if the sheep escaped
-        if (this.getLocation().x <= herd.par.agentRadius + herd.par.sheepSpeed) {
+        /*if (this.getLocation().x <= herd.par.agentRadius + herd.par.sheepSpeed) {
             status = Status.ESCAPED;
             disappear();
-        }
+        }*/
         // check if sheep entered the curral
         if (getLocation().x >= herd.par.arenaSize - herd.par.agentRadius - herd.par.sheepSpeed
                 && getLocation().y >= herd.par.arenaSize / 2 - herd.par.gateSize / 2

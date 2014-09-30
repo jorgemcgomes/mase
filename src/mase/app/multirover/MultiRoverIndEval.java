@@ -3,25 +3,28 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package mase.app.multirover;
 
 import mase.evaluation.EvaluationResult;
+import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import sim.util.Double2D;
-import sim.util.MutableDouble2D;
 
 /**
  *
  * @author jorge
  */
-public class MultiRoverBehaviour3 extends MasonEvaluation {
-
-    private VectorBehaviourResult br;
+public class MultiRoverIndEval extends MasonEvaluation {
+    
+    private SubpopEvaluationResult br;
     private double dispersion;
-    private double proximity;
+    private double[] proximity;
     private Double2D[] lastPosition;
-    private double movement;
+    private double[] movement;
+    private int[] type1Active;
+    private int[] type2Active;
 
     @Override
     public EvaluationResult getResult() {
@@ -31,12 +34,15 @@ public class MultiRoverBehaviour3 extends MasonEvaluation {
     @Override
     protected void preSimulation() {
         super.preSimulation();
-        dispersion = 0;
-        proximity = 0;
-        
         MultiRover mr = (MultiRover) sim;
-        movement = 0;
+
+        dispersion = 0;
+        proximity = new double[mr.rovers.size()];
+        movement = new double[mr.rovers.size()];
         lastPosition = new Double2D[mr.rovers.size()];
+        type1Active = new int[mr.rovers.size()];
+        type2Active = new int[mr.rovers.size()];
+        
         int i = 0;
         for(Rover r : mr.rovers) {
             lastPosition[i++] = r.getLocation();
@@ -46,36 +52,31 @@ public class MultiRoverBehaviour3 extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         MultiRover mr = (MultiRover) sim;
-        int roversCount = 0;
-        int activationCount = 0;
-        for (Rover r : mr.rovers) {
-            if (r.captured > 0) {
-                roversCount++;
-            }
-            activationCount += r.numActivations;
+        VectorBehaviourResult[] res = new VectorBehaviourResult[mr.rovers.size()];
+        
+        for(int i = 0 ; i < mr.rovers.size() ; i++) {
+            res[i] = new VectorBehaviourResult((float) (movement[i] / currentEvaluationStep / mr.par.speed),
+                    (float) (proximity[i] / currentEvaluationStep / (mr.par.size / 4)),
+                    (float) type1Active[i] / currentEvaluationStep,
+                    (float) type2Active[i] / currentEvaluationStep
+            );
         }
-
-        br = new VectorBehaviourResult(mr.scores[2] / (float) mr.par.numRocks,
-                (float) (dispersion / mr.rovers.size() / currentEvaluationStep / (mr.par.size / 2)),
-                (float) (movement / mr.rovers.size() / currentEvaluationStep / mr.par.speed),
-                /*(float) roversCount / mr.rovers.size(),*/
-                (float) (proximity / mr.rovers.size() / currentEvaluationStep / (mr.par.size / 2))
-        );
+        this.br = new SubpopEvaluationResult(res);
     }
 
     @Override
     protected void evaluate() {
         MultiRover mr = (MultiRover) sim;
-        MutableDouble2D cm = new MutableDouble2D();
+        /*MutableDouble2D cm = new MutableDouble2D();
         for (Rover r : mr.rovers) {
             cm.addIn(r.getLocation());
         }
 
-        cm.multiplyIn(1.0 / mr.rovers.size());
+        cm.multiplyIn(1.0 / mr.rovers.size());*/
         
         int i = 0;
         for (Rover r : mr.rovers) {
-            dispersion += r.distanceTo(new Double2D(cm));
+            //dispersion += r.distanceTo(new Double2D(cm));
 
             double closest = Double.POSITIVE_INFINITY;
             for (RedRock rock : mr.rocks) {
@@ -84,11 +85,15 @@ public class MultiRoverBehaviour3 extends MasonEvaluation {
             }
 
             if (!Double.isInfinite(closest)) {
-                proximity += closest;
+                proximity[i] += closest;
             }
             
-            movement += r.getLocation().distance(lastPosition[i]);
+            movement[i] += r.getLocation().distance(lastPosition[i]);
             lastPosition[i] = r.getLocation();
+            
+            type1Active[i] += r.getActuatorType() == Rover.LOW ? 1 : 0;
+            type2Active[i] += r.getActuatorType() == Rover.HIGH ? 1 : 0;
+            
             i++;
         }
     }

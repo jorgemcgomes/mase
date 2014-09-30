@@ -97,9 +97,10 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
             Sheep sheep = new Sheep(this, field);
             Double2D displacement;
             if (par.placeRadius > 0) {
-                double q = 2 * Math.PI * random.nextDouble();
-                double r = FastMath.sqrtQuick(random.nextDouble());
-                displacement = new Double2D(par.placeRadius * r * FastMath.cosQuick(q), par.placeRadius * r * FastMath.sinQuick(q));
+                /*double q = 2 * Math.PI * random.nextDouble();
+                 double r = FastMath.sqrtQuick(random.nextDouble());
+                 displacement = new Double2D(par.placeRadius * r * FastMath.cosQuick(q), par.placeRadius * r * FastMath.sinQuick(q));*/
+                displacement = new Double2D(0, random.nextDouble() * par.placeRadius - par.placeRadius / 2);
             } else {
                 displacement = new Double2D(0, 0);
             }
@@ -112,12 +113,20 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
 
     protected void placeFoxes() {
         foxes = new ArrayList<Fox>(par.numFoxes);
+
+        double range = par.arenaSize / par.numFoxes;
+
         for (int i = 0; i < par.numFoxes; i++) {
             Fox f = new Fox(this, field);
-            f.setLocation(new Double2D(FOX_POSITIONS[i].x * par.arenaSize,
-                    FOX_POSITIONS[i].y * par.arenaSize));
+            /*f.setLocation(new Double2D(FOX_POSITIONS[i].x * par.arenaSize,
+             FOX_POSITIONS[i].y * par.arenaSize));*/
+
+            Double2D newLoc = new Double2D(par.foxX * par.arenaSize, 
+                    i * range + f.getRadius() + random.nextDouble() * (range - f.getRadius() * 2));
+            f.setLocation(newLoc);
             foxes.add(f);
             schedule.scheduleRepeating(f);
+
         }
     }
 

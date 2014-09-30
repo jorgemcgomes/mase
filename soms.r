@@ -1,5 +1,6 @@
 buildSom <- function(..., variables=NULL, sample.size=25000, distance.filter=0, grid.size=10, grid.type="rectangular", compute.fitness=TRUE, scale=TRUE, subpops=NULL) {
     dataList <- list(...)
+    print("Going to sample")
     sample <- sampleData(dataList, sample.size, subpops)
     sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample
     trainData <- sample[,variables]

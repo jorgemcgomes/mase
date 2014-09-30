@@ -346,6 +346,7 @@ fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE,
     if(length(datalist) == 1 & is.null(datalist[[1]]$folder)) {
         datalist <- datalist[[1]]
     }
+    print(summary(datalist))
     ksoms <- NULL
     args <- NULL
     if(fit.ind) {

@@ -11,7 +11,7 @@ problem.eval.2.update-freq =       1
 fitness.fitness-index =            0
 fitness.novelty-index =            1
 
-problem.repetitions =              5
+problem.repetitions =              10
 problem.max-steps =                500
 
 problem.arena-size = 150
@@ -22,18 +22,19 @@ problem.agent-radius = 2.5
 problem.herding-range = 5
 
 problem.num-sheeps = 1
-problem.sheep-x = 0.2
+problem.sheep-x = 0.3
 problem.active-sheep = false
 problem.sheep-speed = 1
 problem.place-radius = 0
 
 problem.num-foxes = 2
 problem.fox-speed = 1
+problem.fox-x = 0.9
 
-problem.num-shepherds = 6
-problem.shepherd-x = 0.5
+problem.num-shepherds = 5
+problem.shepherd-x = 0.1
 problem.shepherd-speed = 1
-problem.shepherd-turn-speed = 0.2
+problem.shepherd-turn-speed = 0.4
 problem.shepherd-sensor-range = 25
 problem.shepherd-separation = 7
 

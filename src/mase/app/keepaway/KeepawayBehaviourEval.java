@@ -94,7 +94,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         float steps = sim.schedule.getSteps();
         this.res = new VectorBehaviourResult(
                 numPasses / (float) passesNormalization,
-                steps / maxSteps,
+                //steps / maxSteps,
                 (float) (keeperDispersion / kw.keepers.size() / currentEvaluationStep / kw.par.size),
                 (float) (keeperMovement / kw.keepers.size() / currentEvaluationStep),
                 (float) (ballTakerDistance / kw.takers.size() / currentEvaluationStep / (kw.par.size / 2)));

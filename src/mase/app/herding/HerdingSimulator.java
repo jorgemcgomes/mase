@@ -33,6 +33,7 @@ public class HerdingSimulator extends MasonSimulator {
         par.arenaSize = state.parameters.getDouble(base.push(HerdingParams.P_ARENA_SIZE), null);
         par.discretization = state.parameters.getDouble(base.push(HerdingParams.P_DISCRETIZATION), null);
         par.foxSpeed = state.parameters.getDouble(base.push(HerdingParams.P_FOX_SPEED), null);
+        par.foxX = state.parameters.getDouble(base.push(HerdingParams.P_FOX_X), null);
         par.gateSize = state.parameters.getDouble(base.push(HerdingParams.P_GATE_SIZE), null);
         par.herdingRange = state.parameters.getDouble(base.push(HerdingParams.P_HERDING_RANGE), null);
         par.numFoxes = state.parameters.getInt(base.push(HerdingParams.P_NUM_FOXES), null);

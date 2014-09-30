@@ -58,6 +58,10 @@ public class Keepaway extends GUICompatibleSimState implements TaskDescriptionPr
         placeBall();
         placeTakers();
         
+        for(Keeper k : keepers) {
+            k.setupSensors();
+        }
+        
         this.td = new TaskDescription(new GenericDistanceFunction(field),
                 new EntityGroup(keepers, keepers.size(), keepers.size(), false),
                 new EntityGroup(takers, takers.size(), takers.size(), false),

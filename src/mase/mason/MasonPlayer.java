@@ -11,7 +11,6 @@ import ec.util.Parameter;
 import ec.util.ParameterDatabase;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Random;
 import mase.MetaEvaluator;

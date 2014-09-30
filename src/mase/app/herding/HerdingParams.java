@@ -26,6 +26,7 @@ public class HerdingParams {
     
     protected int numFoxes;
     protected double foxSpeed;
+    protected double foxX;
 
     protected int numShepherds;
     protected double shepherdSpeed;
@@ -49,6 +50,7 @@ public class HerdingParams {
 
     public static final String P_NUM_FOXES = "num-foxes";
     public static final String P_FOX_SPEED = "fox-speed";
+    public static final String P_FOX_X = "fox-x";
 
     public static final String P_NUM_SHEPHERDS = "num-shepherds";
     public static final String P_SHEPHERD_SPEED = "shepherd-speed";

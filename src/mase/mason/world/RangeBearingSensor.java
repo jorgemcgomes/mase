@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
+import sim.engine.SimState;
+import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 
 /**
@@ -110,4 +112,11 @@ public class RangeBearingSensor extends AbstractSensor {
         return norm;
     }
 
+    @Override
+    public void setAgent(SimState state, Continuous2D field, EmboddiedAgent ag) {
+        super.setAgent(state, field, ag);
+        this.setObjects(objects); // quick fix so that the own agent can be excluded from the object list
+    }
+
+    
 }

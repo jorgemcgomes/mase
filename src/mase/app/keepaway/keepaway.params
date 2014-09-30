@@ -1,18 +1,18 @@
 eval.base.problem =                 mase.app.keepaway.KeepawaySimulator
 problem.trials-merge =              best
 problem.number-evals =              3
-problem.eval.0 =                    mase.app.keepaway.KeepawayFitnessPasses2
+problem.eval.0 =                    mase.app.keepaway.KeepawayFitnessPasses
 problem.eval.0.combination =        harmonic
 problem.eval.0.update-freq =        1
 problem.eval.0.pass-length =        10
-problem.eval.1 =                    mase.app.keepaway.KeepawayBehaviourEval2
+problem.eval.1 =                    mase.app.keepaway.KeepawayBehaviourEval
 problem.eval.1.update-freq =        1
 problem.eval.1.pass-length =        10
 problem.eval.1.pass-normalization = 10
-#problem.eval.2 =                    mase.app.keepaway.KeepawayIndividualEval
-#problem.eval.2.update-freq =        1
-#problem.eval.2.pass-length =        10
-#problem.eval.2.pass-normalization = 5
+problem.eval.2 =                    mase.app.keepaway.KeepawayIndividualEval
+problem.eval.2.update-freq =        1
+problem.eval.2.pass-length =        10
+problem.eval.2.pass-normalization = 5
 
 fitness.fitness-index =             0
 fitness.novelty-index =             1
@@ -26,7 +26,7 @@ problem.collisions =                true
 problem.ball-decay =                0.05
 
 problem.taker-speed =               0.5
-problem.takers-placement =          15
+problem.takers-placement =          0
 
 problem.ball-placement =            0
 
@@ -34,6 +34,8 @@ problem.n-keepers =                 3
 problem.keeper.move-speed =         0.5
 problem.keeper.pass-speed =         4
 problem.keeper.color =              blue
+problem.keepers-placement =         0.5
+problem.sort-keepers =              false
 # displacement = ball-speed^2 / ball-decay
 
 vector.species.genome-size =        102
@@ -42,5 +44,6 @@ neural.hidden =                     7
 neural.output =                     4
 neural.structure =                  feed-forward
 neural.tanh =                       false
-neat.INPUT.NODES =                  9
+
+neat.INPUT.NODES =                  8
 neat.OUTPUT.NODES =                 4
