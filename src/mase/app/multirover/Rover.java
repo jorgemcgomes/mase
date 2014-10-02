@@ -76,21 +76,23 @@ public class Rover extends SmartAgent {
 
         @Override
         public int valueCount() {
-            return ds.valueCount();
+            return 1;
         }
 
         @Override
+        /*
+        WARNING: ONLY WORKS FOR 2-Agent setups!!!
+        */
         public double[] readValues() {
             Object[] rovers = ds.getClosestObjects();
-            double[] vals = new double[rovers.length];
+            
+            int closestType = 0;
             for (int i = 0; i < rovers.length; i++) {
-                if (rovers[i] == null) {
-                    vals[i] = 0;
-                } else {
-                    vals[i] = ((Rover) rovers[i]).getActuatorType();
+                if (rovers[i] != null) {
+                    closestType = ((Rover) rovers[i]).getActuatorType();
                 }
             }
-            return vals;
+            return new double[]{closestType};
         }
 
         @Override
@@ -108,7 +110,7 @@ public class Rover extends SmartAgent {
     public void action(double[] output) {
         if (sim.schedule.getSteps() - lastActivation > ((MultiRover) sim).par.minActivationTime) {
             if (output[2] > 0.5 || output[3] > 0.5) {
-                int newType = output[2] >= output[3] ? LOW : HIGH;
+                int newType = output[2] > output[3]? LOW : HIGH;
                 if (actuatorType != newType) {
                     lastActivation = sim.schedule.getSteps();
                     actuatorType = newType;

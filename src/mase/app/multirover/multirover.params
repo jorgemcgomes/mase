@@ -32,6 +32,6 @@ neural.output =                    2
 neural.structure =                 jordan
 neural.tanh =                      false
 
-neat.INPUT.NODES =                 11
+neat.INPUT.NODES =                 9
 #neat.OUTPUT.NODES =                3
 neat.OUTPUT.NODES =                4

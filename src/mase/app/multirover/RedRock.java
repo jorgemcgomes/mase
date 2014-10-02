@@ -56,18 +56,14 @@ public class RedRock extends OvalPortrayal2D implements Steppable {
     public void step(SimState state) {
         MultiRover mr = (MultiRover) state;
         Double2D pos = mr.field.getObjectLocation(this);
-        Bag neighbours = mr.field.getNeighborsExactlyWithinDistance(pos, mr.par.rockRadius);
         LinkedList<Integer> requiredAct = new LinkedList<Integer>();
         for (int t : type.actuators) {
             requiredAct.add(t);
         }
 
-        for (Object n : neighbours.objs) {
-            if (n instanceof Rover) {
-                Rover r = (Rover) n;
-                if (state.schedule.getSteps() - r.lastActivation > mr.par.minActivationTime) {
-                    requiredAct.remove((Integer) ((Rover) n).getActuatorType());
-                }
+        for (Rover r : mr.rovers) {
+            if (r.getLocation().distance(pos) < mr.par.rockRadius && state.schedule.getSteps() - r.lastActivation > mr.par.minActivationTime) {
+                requiredAct.remove((Integer) (r).getActuatorType());
             }
         }
 
@@ -78,17 +74,15 @@ public class RedRock extends OvalPortrayal2D implements Steppable {
             mr.scores[type.ordinal()]++;
             mr.rocks.remove(this);
 
-            for (Object n : neighbours.objs) {
-                if (n instanceof Rover) {
-                    Rover r = (Rover) n;
-                    r.captured++;
-                }
-            }
+            /*for (Rover r : mr.rovers) {
+                r.captured++;
+            }*/
+        }
 
-            if (mr.rocks.isEmpty()) {
-                mr.kill();
-            }
+        if (mr.rocks.isEmpty()) {
+            mr.kill();
         }
     }
-
 }
+
+
