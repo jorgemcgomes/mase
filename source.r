@@ -339,14 +339,13 @@ quickReport <- function(folder, jobs=NULL, snapshots=10, ...) {
     print(report)
 }
 
-fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE, som.ind=FALSE, som.sepind=FALSE, som.group=FALSE, som.alljobs=FALSE, 
+fullStatistics <- function(..., fit.tests=FALSE, fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE, som.ind=FALSE, som.sepind=FALSE, som.group=FALSE, som.alljobs=FALSE, 
                            fit.ind.par=list(), fit.comp.par=list(), behav.mean.par=list(), som.ind.par=list(), som.group.par=list(), 
                            expset.name="", show.only=FALSE) {
     datalist <- list(...)
     if(length(datalist) == 1 & is.null(datalist[[1]]$folder)) {
         datalist <- datalist[[1]]
     }
-    print(summary(datalist))
     ksoms <- NULL
     args <- NULL
     if(fit.ind) {
@@ -361,6 +360,9 @@ fullStatistics <- function(..., fit.ind=FALSE, fit.comp=FALSE, behav.mean=FALSE,
         }
         gc()
     }
+    if(fit.tests) {
+        print(generational.ttest(datalist, fit.comp.par$snapshots))            
+    }    
     if(fit.comp) {
         print("Fitness comparison plot")
         plots <- do.call(fitnessComparisonPlots, c(datalist, fit.comp.par))

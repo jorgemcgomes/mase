@@ -65,15 +65,37 @@ batch.ttest <- function(setlist, ...) {
     matrix <- matrix(data = NA, nrow = length(setlist), ncol=length(setlist))
     rownames(matrix) <- names(setlist)
     colnames(matrix) <- names(setlist)
+    
+    adj.matrix <- matrix
+    tests <- c()
     for(i in 1:length(setlist)) {
         for(j in 1:length(setlist)) {
-            if(i != j) {
+            if(i > j) {
                 pvalue <- wilcox.test(as.numeric(setlist[[i]]), as.numeric(setlist[[j]]), ...)$p.value
                 matrix[i,j] <- pvalue
+                tests <- c(tests, pvalue)
             }
         }
     }
-    return(matrix)
+    
+    adjusted <- p.adjust(tests, method="holm")
+    index <- 1
+    for(i in 1:length(setlist)) {
+      for(j in 1:length(setlist)) {
+        if(i > j) {
+          adj.matrix[i,j] <- adjusted[index]
+          index <- index + 1
+        }
+      }
+    }
+    
+    kruskal <- kruskal.test(setlist)
+    
+    result <- NULL
+    result$kruskal <- kruskal
+    result$uncorrected <- matrix
+    result$holm <- adj.matrix
+    return(result)
 }
 
 
