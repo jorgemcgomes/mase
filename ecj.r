@@ -162,16 +162,14 @@ for(i in 1:4) {
 }
 
 write.csv(frame, file="~/Dropbox/Papers/EC/data/exploration2_nsvariants.csv", quote=F)
+frame <- read.csv("~/Dropbox/Papers/EC/data/exploration2_nsvariants.csv")
+frame[["V"]] <- factor(frame[["V"]])
 
 pd <- position_dodge(.1) # move them .05 to the left and right
 ggplot(subset(frame, Type=="Team"), aes(x=V, y=mean, colour=Method)) + 
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.5, position=pd) +
   geom_line(position=pd,aes(group=Method)) +
   geom_point(position=pd) + ylab("Team exploration") + theme(legend.title=element_blank())
-# ggplot(subset(frame, Type=="Elite"), aes(x=V, y=mean, colour=Method)) + 
-#   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.5, position=pd) +
-#   geom_line(position=pd,aes(group=Method)) +
-#   geom_point(position=pd) + ylab("Elite exploration") + theme(legend.title=element_blank())
 ggplot(subset(frame, Type=="Individual"), aes(x=V, y=mean, colour=Method)) + 
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.5, position=pd) +
   geom_line(position=pd,aes(group=Method)) +
@@ -180,7 +178,10 @@ ggplot(subset(frame, Type=="Amount"), aes(x=V, y=mean, colour=Method)) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.5, position=pd) +
   geom_line(position=pd,aes(group=Method)) +
   geom_point(position=pd) + ylab("High-fitness proportion") + theme(legend.title=element_blank())
-
+# ggplot(subset(frame, Type=="Elite"), aes(x=V, y=mean, colour=Method)) + 
+#   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.5, position=pd) +
+#   geom_line(position=pd,aes(group=Method)) +
+#   geom_point(position=pd) + ylab("Elite exploration") + theme(legend.title=element_blank())
 
 ########## Exploration-exploitation balance ####
 
@@ -302,6 +303,38 @@ ggplot(frame, aes(x=A, y=mean, colour=method)) +
   geom_line(position=pd,aes(group=method)) +
   geom_point(position=pd) + ylab("Best fitness") + xlab("Number of predators") + theme(legend.title=element_blank())
 
+# scalability 2
+
+a1 <- metaAnalysis(list(e7p2=countNear("nov_e7_p2",2,0.15),e7p3=countNear("nov_e7",3,0.15),e7p5=countNear("nov_e7_p5",5,0.15),e7p7=countNear("nov_e7_p7",7,0.15)))
+a2 <- metaAnalysis(list(e4p2=countNear("nov_e4_p2",2,0.09),e7p3=countNear("nov_e7",3,0.15),e10p5=countNear("nov_e10_p5",5,0.21),e13p7=countNear("nov_e13_p7",7,0.27)))
+
+frame <- cbind(a1$summary, A=c("2","3","5","7"), V="Fixed V")
+frame <- rbind(frame, cbind(a2$summary, A=c("2","3","5","7"), V="Increasing V"))
+
+pd <- position_dodge(.1) # move them .05 to the left and right
+ggplot(frame, aes(x=A, y=mean, colour=V)) + 
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.5, position=pd) +
+  geom_line(position=pd,aes(group=V)) +
+  geom_point(position=pd) + ylab("Predators used in best solutions") + xlab("Total number of predators") + theme(legend.title=element_blank())
+
+
+# data2 <- metaLoadData("nov_e7_p2","nov_e4_p2", names=c("Fixed V","Increasing"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", offset=0, fitlim=c(0,2), load.behavs=F, behavs.sample=0.2, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+# data3 <- metaLoadData("nov_e7","nov_e7", names=c("Fixed V","Increasing"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", offset=0, fitlim=c(0,2), load.behavs=F, behavs.sample=0.2, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+# data5 <- metaLoadData("nov_e7_p5","nov_e10_p5", names=c("Fixed V","Increasing"), params=list(jobs=30, subpops=5, fitness.file="refitness.stat", offset=0, fitlim=c(0,2), load.behavs=F, behavs.sample=0.2, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+# data7 <- metaLoadData("nov_e7_p7","nov_e13_p7", names=c("Fixed V","Increasing"), params=list(jobs=30, subpops=7, fitness.file="refitness.stat", offset=0, fitlim=c(0,2), load.behavs=F, behavs.sample=0.2, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+# 
+# frame <- cbind(fitnessSummary(data2), A="2")
+# frame <- rbind(frame, cbind(fitnessSummary(data3), A="3"))
+# frame <- rbind(frame, cbind(fitnessSummary(data5), A="5"))
+# frame <- rbind(frame, cbind(fitnessSummary(data7), A="7"))
+# 
+# pd <- position_dodge(.1) # move them .05 to the left and right
+# ggplot(frame, aes(x=A, y=mean, colour=method)) + 
+#   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.5, position=pd) +
+#   geom_line(position=pd,aes(group=method)) +
+#   geom_point(position=pd) + ylab("Best fitness") + xlab("Total number of predators") + theme(legend.title=element_blank())
+
+
 
 # Herding & Multi-rover task
 
@@ -324,6 +357,16 @@ setwd("~/exps/multirover")
 data <- metaLoadData("fit","nov","nov_ind","nov_indgroup", names=c("Fit","NS-T","NS-I","NS-Mix"), params=list(fitness.file="refitness.stat", offset=0, jobs=30, subpops=2, load.behavs=F))
 
 fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(500), jitter=F), expset.name="herd", show.only=T)
+
+
+
+# scalability 2
+
+
+metaAnalysis(list(e7p2=countNear("nov_e7_p2",2,0.15),e7p3=countNear("nov_e7",3,0.15),e7p5=countNear("nov_e7_p5",5,0.15),e7p7=countNear("nov_e7_p7",7,0.15)))
+metaAnalysis(list(e4p2=countNear("nov_e4_p2",2,0.09),e7p3=countNear("nov_e7",3,0.15),e10p5=countNear("nov_e10_p5",5,0.21),e13p7=countNear("nov_e13_p7",7,0.27)))
+metaAnalysis(list(e4p2=countNear("fit_e4_p2",2,0.09),e7p3=countNear("fit_e7",3,0.15),e10p5=countNear("fit_e10_p5",5,0.21),e13p7=countNear("fit_e13_p7",7,0.27)))
+
 
 
 
@@ -360,10 +403,20 @@ fullStatistics(data, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expse
 data <- metaLoadData("fit_e7_p7","nov_e7_p7", names=c("Fit","NS-Team"), params=list(jobs=30, subpops=7, fitness.file="refitness.stat", offset=0, fitlim=c(0,2), load.behavs=F, behavs.sample=0.2, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 fullStatistics(data, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit", fit.comp.par=list(snapshots=c(500),jitter=F))
 
+fullStatistics(data2, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit", fit.comp.par=list(snapshots=c(500),jitter=F))
+fullStatistics(data3, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit", fit.comp.par=list(snapshots=c(500),jitter=F))
+fullStatistics(data5, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit", fit.comp.par=list(snapshots=c(500),jitter=F))
+fullStatistics(data7, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit", fit.comp.par=list(snapshots=c(500),jitter=F))
+
+
 
 data <- metaLoadData("fit_e7","nov_e7_l10","nov_e7_l20","nov_e7_l30","nov_e7_l40","nov_e7","nov_e7_l60","nov_e7_l70","nov_e7_l80","nov_e7_l90","nov_e7_l100", names=c("LS-0.0","LS-0.1","LS-0.2","LS-0.3","LS-0.4","LS-0.5","LS-0.6","LS-0.7","LS-0.8","LS-0.9","LS-1.0"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", offset=0, fitlim=c(0,2), load.behavs=F))
 fullStatistics(data, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit", fit.comp.par=list(snapshots=c(50,100,300,500),jitter=F))
 
 data <- metaLoadData("nov_e7_l20","nov_e7_l30","nov_e7_l40","nov_e7","nov_e7_l60", params=list(jobs=30, subpops=3, fitness.file="refitness.stat", offset=0, fitlim=c(0,2), load.behavs=F))
 fullStatistics(data, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit", fit.comp.par=list(snapshots=c(50,100,300,500),jitter=F))
+
+
+data <- metaLoadData("nov_e13_p7","nov_e13","nov_e10_p5","nov_e10", names=c("NS-V13-P7","NS-V13-P3","NS-V10-P5","NS-V10-P3"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", offset=0, fitlim=c(0,2), load.behavs=F))
+fullStatistics(data, fit.comp=T, fit.tests=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit", fit.comp.par=list(snapshots=c(500),jitter=F))
 

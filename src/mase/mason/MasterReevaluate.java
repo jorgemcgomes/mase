@@ -115,12 +115,16 @@ public class MasterReevaluate {
                 // Log behaviours
                 behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex() + " " + reev.meanFitness);
                 for (int j = 1; j < reev.mergedResults.length; j++) { // starts at 1 to skip fitness
-                    EvaluationResult br = reev.mergedResults[j];
+                    EvaluationResult br = reev.mergedResults[j];               
                     if(br instanceof SubpopEvaluationResult) {
                         SubpopEvaluationResult ser = (SubpopEvaluationResult) br;
-                        br = ser.getSubpopEvaluation(sols.get(i).getSubpop());
+                        EvaluationResult[] brs = ser.getAllEvaluations();
+                        for(int x = 0 ; x < brs.length ; x++) {
+                            behavWriter.write(" " + x + " " + brs[x].toString());
+                        }
+                    } else {
+                        behavWriter.write(" " + br.toString());
                     }
-                    behavWriter.write(" " + br.toString());
                 }
                 behavWriter.newLine();
             }
