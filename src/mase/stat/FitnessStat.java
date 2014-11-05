@@ -6,8 +6,10 @@
 package mase.stat;
 
 import ec.*;
-import java.io.*;
+import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
 import ec.util.*;
+import java.io.*;
+import mase.MetaEvaluator;
 import mase.evaluation.ExpandedFitness;
 
 /* 
@@ -130,7 +132,7 @@ public class FitnessStat extends Statistics {
         // we don't know if the number of subpopulations has been determined yet
         bestSoFar = new Individual[state.population.subpops.length];
         // print out our generation number
-        state.output.print("0 ", statisticslog);
+        state.output.print("0 0 ", statisticslog); // MODIFIED FOR EVALUATIONS LIMIT
 
         totalIndsSoFar = new long[state.population.subpops.length];
     }
@@ -138,7 +140,18 @@ public class FitnessStat extends Statistics {
     @Override
     public void postBreedingStatistics(final EvolutionState state) {
         super.postBreedingStatistics(state);
-        state.output.print((state.generation + 1) + " ", statisticslog); // 1 because we're putting the breeding info on the same line as the generation it *produces*, and the generation number is increased *after* breeding occurs, and statistics for it
+        // MODIFIED FOR EVALUATIONS LIMIT
+        int evals = 0;
+        if(state.evaluator instanceof MetaEvaluator) {
+            MetaEvaluator me = (MetaEvaluator) state.evaluator;
+            if(me.getBaseEvaluator() instanceof MultiPopCoevolutionaryEvaluator2) {
+                MultiPopCoevolutionaryEvaluator2 mpc = (MultiPopCoevolutionaryEvaluator2) me.getBaseEvaluator();
+                evals = mpc.totalEvaluations;
+            }
+        }
+        
+        
+        state.output.print((state.generation + 1) + " " + evals + " ", statisticslog); // 1 because we're putting the breeding info on the same line as the generation it *produces*, and the generation number is increased *after* breeding occurs, and statistics for it
     }
 
     /**

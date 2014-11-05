@@ -21,16 +21,19 @@ public class HerdingParams {
     protected int numSheeps;
     protected boolean activeSheep;
     protected double sheepSpeed;
-    protected double placeRadius;
+    protected boolean randomSheepPosition;
     protected double sheepX;
     
     protected int numFoxes;
     protected double foxSpeed;
     protected double foxX;
+    protected boolean randomFoxPosition;
+    protected boolean smartFox;
 
     protected int numShepherds;
     protected double shepherdSpeed;
     protected double shepherdSensorRange;
+    protected boolean shepherdArcSensor;
     protected double shepherdTurnSpeed;
     protected double shepherdSeparation;
     protected double shepherdX;
@@ -45,12 +48,14 @@ public class HerdingParams {
     public static final String P_NUM_SHEEPS = "num-sheeps";
     public static final String P_ACTIVE_SHEEP = "active-sheep";
     public static final String P_SHEEP_SPEED = "sheep-speed";
-    public static final String P_PLACE_RADIUS = "place-radius";
+    public static final String P_RANDOM_SHEEP_POSITION = "random-sheep-position";
     public static final String P_SHEEP_X = "sheep-x";
 
     public static final String P_NUM_FOXES = "num-foxes";
     public static final String P_FOX_SPEED = "fox-speed";
     public static final String P_FOX_X = "fox-x";
+    public static final String P_RANDOM_FOX_POSITION = "random-fox-position";
+    public static final String P_SMART_FOX = "smart-fox";
 
     public static final String P_NUM_SHEPHERDS = "num-shepherds";
     public static final String P_SHEPHERD_SPEED = "shepherd-speed";
@@ -58,5 +63,6 @@ public class HerdingParams {
     public static final String P_SHEPHERD_SENSOR_RANGE = "shepherd-sensor-range";
     public static final String P_SHEPHERD_SEPARATION = "shepherd-separation";
     public static final String P_SHEPHERD_X = "shepherd-x";
+    public static final String P_SHEPHERD_ARC_SENSOR = "shepherd-fox-arcs";
 
 }

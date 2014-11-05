@@ -5,22 +5,24 @@
  */
 package mase.app.herding;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
-import org.apache.commons.math3.util.FastMath;
 import sim.util.Double2D;
 
 /**
  *
  * @author jorge
  */
-public class HerdingFitness extends MasonEvaluation {
+public class HerdingFitnessFoxes extends MasonEvaluation {
 
     private FitnessResult res;
     private Map<Sheep, Double> initialDistances;
+    private double[] closestShepherd;
     private Double2D gate;
 
     @Override
@@ -31,6 +33,19 @@ public class HerdingFitness extends MasonEvaluation {
         initialDistances = new HashMap<Sheep,Double>();
         for(Sheep s : herd.sheeps) {
             initialDistances.put(s, s.distanceTo(gate));
+        }
+        closestShepherd = new double[herd.sheeps.size()];
+        Arrays.fill(closestShepherd, Double.POSITIVE_INFINITY);
+    }
+
+    @Override
+    protected void evaluate() {
+        super.evaluate();
+        Herding herd = (Herding) super.sim;
+        for(int i = 0 ; i < herd.sheeps.size() ; i++) {
+            for(Shepherd shep : herd.shepherds) {
+                closestShepherd[i] = Math.min(closestShepherd[i], herd.sheeps.get(i).distanceTo(shep));
+            }
         }
     }
 
@@ -46,6 +61,11 @@ public class HerdingFitness extends MasonEvaluation {
                 fitness += Math.max(0, 1 - sheep.distanceTo(gate) / initialDistances.get(sheep));
             }      
         }
+        double closest = 0;
+        for(double d : closestShepherd) {
+            closest += d / herd.field.width;
+        }
+        fitness += (1 - closest / closestShepherd.length);
         res = new FitnessResult((float) fitness, FitnessResult.HARMONIC);
     }
 

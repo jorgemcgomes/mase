@@ -18,7 +18,6 @@ import mase.mason.GUICompatibleSimState;
 import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.StaticPolygon.Segment;
-import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
@@ -89,22 +88,17 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
 
     protected void placeSheeps() {
         sheeps = new ArrayList<Sheep>(par.numSheeps);
-        double inc = par.arenaSize / (par.numSheeps + 1);
-        double y = 0;
-        double x = par.sheepX * par.arenaSize;
+        double range = par.arenaSize / par.numSheeps;
         for (int i = 0; i < par.numSheeps; i++) {
-            y += inc;
             Sheep sheep = new Sheep(this, field);
-            Double2D displacement;
-            if (par.placeRadius > 0) {
-                /*double q = 2 * Math.PI * random.nextDouble();
-                 double r = FastMath.sqrtQuick(random.nextDouble());
-                 displacement = new Double2D(par.placeRadius * r * FastMath.cosQuick(q), par.placeRadius * r * FastMath.sinQuick(q));*/
-                displacement = new Double2D(0, random.nextDouble() * par.placeRadius - par.placeRadius / 2);
+            Double2D newLoc = null;
+            if (par.randomSheepPosition) {
+                newLoc = new Double2D(par.sheepX * par.arenaSize,
+                        i * range + sheep.getRadius() + random.nextDouble() * (range - sheep.getRadius() * 2));
             } else {
-                displacement = new Double2D(0, 0);
+                newLoc = new Double2D(par.sheepX * par.arenaSize, i * range + range / 2);
             }
-            sheep.setLocation(new Double2D(x, y).add(displacement));
+            sheep.setLocation(newLoc);            
             sheep.setStopper(schedule.scheduleRepeating(sheep));
             sheeps.add(sheep);
         }
@@ -118,11 +112,13 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
 
         for (int i = 0; i < par.numFoxes; i++) {
             Fox f = new Fox(this, field);
-            /*f.setLocation(new Double2D(FOX_POSITIONS[i].x * par.arenaSize,
-             FOX_POSITIONS[i].y * par.arenaSize));*/
-
-            Double2D newLoc = new Double2D(par.foxX * par.arenaSize, 
-                    i * range + f.getRadius() + random.nextDouble() * (range - f.getRadius() * 2));
+            Double2D newLoc = null;
+            if (par.randomFoxPosition) {
+                newLoc = new Double2D(par.foxX * par.arenaSize,
+                        i * range + f.getRadius() + random.nextDouble() * (range - f.getRadius() * 2));
+            } else {
+                newLoc = new Double2D(par.foxX * par.arenaSize, i * range + range / 2);
+            }
             f.setLocation(newLoc);
             foxes.add(f);
             schedule.scheduleRepeating(f);

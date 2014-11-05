@@ -32,7 +32,7 @@ public class MasonPlayer {
 
     public static void main(String[] args) throws Exception {
         GroupController controller = createController(args);
-        long startSeed = new Random().nextLong();
+        long startSeed = 0;
         MasonSimulator sim = createSimulator(args);
         GUIState gui = sim.createSimStateWithUI(controller, startSeed);
         gui.createController();

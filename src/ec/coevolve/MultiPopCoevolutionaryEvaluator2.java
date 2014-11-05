@@ -48,6 +48,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     public static final String P_NEAT_ELITE = "num-neat-elite";
     public static final String P_CURRENT_ELITE = "num-current-elite";
     public static final String P_ELITE_MODE = "elite-mode";
+    public static final String P_MAX_EVALUATIONS = "max-evaluations";
 
     public enum NovelChampionsMode {
 
@@ -66,6 +67,8 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     }
 
     protected EliteMode eliteMode;
+    public int totalEvaluations;
+    public int maxEvaluations;
     protected int lastChampions;
     protected int randomChampions;
     protected int novelChampions;
@@ -89,6 +92,9 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
+        maxEvaluations = state.parameters.getIntWithDefault(base.push(P_MAX_EVALUATIONS), null, -1);
+        totalEvaluations = 0;
+        
         eliteMode = EliteMode.valueOf(state.parameters.getString(base.push(P_ELITE_MODE), null));
 
         lastChampions = state.parameters.getIntWithDefault(base.push(P_LAST_CHAMPIONS), null, 0);
@@ -109,6 +115,13 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
             currentElite = this.numElite;
         }
     }
+
+    @Override
+    public boolean runComplete(EvolutionState state) {
+        return maxEvaluations == -1 ? false : totalEvaluations >= maxEvaluations;
+    }
+    
+    
 
     @Override
     protected void beforeCoevolutionaryEvaluation(EvolutionState state, Population population, GroupedProblemForm prob) {
@@ -144,6 +157,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
         for (int i = 0; i < state.population.subpops.length; i++) {
             postAssessFitness[i] = shouldEvaluateSubpop(state, i, 0);
             preAssessFitness[i] = postAssessFitness[i] || (state.generation == 0);  // always prepare (set up trials) on generation 0
+            totalEvaluations += state.population.subpops[i].individuals.length;
         }
 
         // first generation initialization

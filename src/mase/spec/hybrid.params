@@ -1,11 +1,17 @@
-exch =                  mase.spec.HybridExchanger
-exch.merge-threshold =  1.25
-exch.split-threshold =  5
-exch.stability-time =   10
-exch.elite-portion =    1
-exch.merge-mode =       elites
-exch.merge-equal =      false
-exch.merge-normalise =  true
+exch =                   mase.spec.BasicHybridExchanger
+exch.merge-threshold =   1.25
+exch.stability-time =    10
+exch.elite-portion =     0.2
+exch.merge-mode =        elite
+exch.merge-proportion =  proportionate
+exch.homogeneous-start = false
+exch.split-mode =        random
+
+eval.base.max-evaluations = 100000
+quit-on-run-complete=true
+
+exch.foreign-mode =      elite
+exch.difference-mode =   mean
 
 pop.default-subpop.species.fitness =    mase.novelty.NoveltyFitness
 neat.shared-database =  true

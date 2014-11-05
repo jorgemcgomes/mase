@@ -17,7 +17,7 @@ fitnessSummary <- function(datalist, snapshots=NULL) {
   frame <- data.frame()
   for(data in datalist) {
     if(is.null(snapshots)) {
-      snapshots <- c(data$gens[length(data$gens)])
+      snapshots <- c(length(data$gens))
     }
     for(s in snapshots) {
       fits <- c()
@@ -59,6 +59,10 @@ generational.ttest <- function(datalist, snapshots, ...) {
 }
 
 batch.ttest <- function(setlist, ...) {
+    if(length(setlist) < 2) {
+      return(NULL)
+    } 
+  
     for(i in 1:length(setlist)) {
         setlist[[i]] <- as.numeric(setlist[[i]])
     }

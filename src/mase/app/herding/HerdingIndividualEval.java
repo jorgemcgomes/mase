@@ -5,8 +5,6 @@
  */
 package mase.app.herding;
 
-import java.util.ArrayList;
-import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
@@ -19,8 +17,9 @@ import sim.util.Double2D;
  */
 public class HerdingIndividualEval extends MasonEvaluation {
 
-    private double[] sheepDist;
-    private List<double[]> foxDist;
+    private int[] sheepLife;
+    private double[][] sheepDist;
+    private double[][] foxDist;
     private double[] curralDist;
     private Double2D curral;
     private SubpopEvaluationResult ser;
@@ -29,11 +28,9 @@ public class HerdingIndividualEval extends MasonEvaluation {
     protected void preSimulation() {
         super.preSimulation();
         Herding herd = (Herding) sim;
-        sheepDist = new double[herd.shepherds.size()];
-        foxDist = new ArrayList<double[]>(herd.foxes.size());
-        for (int i = 0; i < herd.foxes.size(); i++) {
-            foxDist.add(new double[herd.shepherds.size()]);
-        }
+        sheepDist = new double[herd.shepherds.size()][herd.sheeps.size()];
+        foxDist = new double[herd.shepherds.size()][herd.foxes.size()];
+        sheepLife = new int[herd.sheeps.size()];
         curralDist = new double[herd.shepherds.size()];
         curral = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
     }
@@ -44,25 +41,25 @@ public class HerdingIndividualEval extends MasonEvaluation {
         Herding herd = (Herding) sim;
         for (int i = 0; i < herd.shepherds.size(); i++) {
             Shepherd shep = herd.shepherds.get(i);
-            // Closest sheep
-            Sheep closestSheep = null;
-            for (Sheep s : herd.activeSheeps) {
-                double d = shep.distanceTo(s);
-                if (closestSheep == null || d < shep.distanceTo(closestSheep)) {
-                    closestSheep = s;
+
+            // Sheeps
+            for (int s = 0; s < herd.sheeps.size(); s++) {
+                Sheep sheep = herd.sheeps.get(s);
+                if (sheep.isAlive()) {
+                    sheepDist[i][s] += shep.distanceTo(sheep);
                 }
             }
-            if(closestSheep != null) {
-                sheepDist[i] += shep.distanceTo(closestSheep);
-            }
-            
+
             // Foxes
             for (int f = 0; f < herd.foxes.size(); f++) {
-                foxDist.get(f)[i] += shep.distanceTo(herd.foxes.get(f));
+                foxDist[i][f] += shep.distanceTo(herd.foxes.get(f));
             }
 
             // Gate
             curralDist[i] += shep.getLocation().distance(curral);
+        }
+        for (int s = 0; s < herd.sheeps.size(); s++) {
+            sheepLife[s]++;
         }
     }
 
@@ -72,12 +69,15 @@ public class HerdingIndividualEval extends MasonEvaluation {
         Herding herd = (Herding) sim;
         VectorBehaviourResult[] res = new VectorBehaviourResult[herd.shepherds.size()];
         double maxD = herd.par.arenaSize;
-        for(int i = 0 ; i < herd.shepherds.size() ; i++) {
-            float[] br = new float[2 + foxDist.size()];
-            br[0] = (float) (sheepDist[i] / currentEvaluationStep / maxD);
-            br[1] = (float) (curralDist[i] / currentEvaluationStep / maxD);
-            for(int j = 0 ; j < foxDist.size() ; j++) {
-                br[2 + j] = (float) (foxDist.get(j)[i] / currentEvaluationStep / maxD);
+        for (int i = 0; i < herd.shepherds.size(); i++) {
+            float[] br = new float[1 + herd.foxes.size() + herd.sheeps.size()];
+            int index = 0;
+            br[index++] = (float) (curralDist[i] / currentEvaluationStep / maxD);
+            for (int j = 0; j < foxDist[i].length; j++) {
+                br[index++] = (float) (foxDist[i][j] / currentEvaluationStep / maxD);
+            }
+            for (int j = 0; j < sheepDist[i].length; j++) {
+                br[index++] = (float) (sheepDist[i][j] / sheepLife[j] / maxD);
             }
             res[i] = new VectorBehaviourResult(br);
         }

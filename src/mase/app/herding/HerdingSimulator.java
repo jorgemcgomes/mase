@@ -43,10 +43,13 @@ public class HerdingSimulator extends MasonSimulator {
         par.shepherdSeparation = state.parameters.getDouble(base.push(HerdingParams.P_SHEPHERD_SEPARATION), null);
         par.shepherdSpeed = state.parameters.getDouble(base.push(HerdingParams.P_SHEPHERD_SPEED), null);
         par.shepherdTurnSpeed = state.parameters.getDouble(base.push(HerdingParams.P_SHEPHERD_TURN_SPEED), null);
-        par.placeRadius = state.parameters.getDouble(base.push(HerdingParams.P_PLACE_RADIUS), null);
+        par.randomSheepPosition = state.parameters.getBoolean(base.push(HerdingParams.P_RANDOM_SHEEP_POSITION), null, false);
         par.numSheeps = state.parameters.getInt(base.push(HerdingParams.P_NUM_SHEEPS), null);
         par.sheepX = state.parameters.getDouble(base.push(HerdingParams.P_SHEEP_X), null);
         par.shepherdX = state.parameters.getDouble(base.push(HerdingParams.P_SHEPHERD_X), null);
+        par.randomFoxPosition = state.parameters.getBoolean(base.push(HerdingParams.P_RANDOM_FOX_POSITION), null, true);
+        par.shepherdArcSensor = state.parameters.getBoolean(base.push(HerdingParams.P_SHEPHERD_ARC_SENSOR), null, true);
+        par.smartFox = state.parameters.getBoolean(base.push(HerdingParams.P_SMART_FOX), null, false);
     }
 
     @Override

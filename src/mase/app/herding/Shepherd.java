@@ -22,34 +22,43 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class Shepherd extends SmartAgent {
-
+    
     public Shepherd(Herding sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, Color.BLUE, ac);
         this.enableCollisionDetection(true);
         this.enableBoundedArena(true);
-
+        
         DistanceSensorArcs ds = new DistanceSensorArcs();
         ds.setArcs(4);
         ds.setRange(sim.par.shepherdSensorRange);
         ds.setObjectTypes(Shepherd.class);
+        super.addSensor(ds);
         
         RangeBearingSensor rbSheep = new RangeBearingSensor();
         rbSheep.setObjects(sim.sheeps);
-        rbSheep.setSort(true);
+        rbSheep.setSort(false);
+        super.addSensor(rbSheep);
         
         RangeBearingSensor rbGate = new RangeBearingSensor();
         rbGate.setObjects(Collections.singletonList(new Double2D(sim.par.arenaSize, sim.par.arenaSize / 2)));
+        super.addSensor(rbGate);
         
-        RangeBearingSensor rbFoxes = new RangeBearingSensor();
-        rbFoxes.setObjects(sim.foxes);
+        if (sim.par.shepherdArcSensor) {
+            ds = new DistanceSensorArcs();
+            ds.setArcs(4);
+            ds.setRange(sim.par.shepherdSensorRange);
+            ds.setObjectTypes(Fox.class);
+            super.addSensor(ds);
+        } else {
+            RangeBearingSensor rbFoxes = new RangeBearingSensor();
+            rbFoxes.setObjects(sim.foxes);
+            rbFoxes.setSort(false);
+            super.addSensor(rbFoxes);
+        }
         
         DashMovementEffector dm = new DashMovementEffector();
         dm.setSpeeds(sim.par.shepherdSpeed, sim.par.shepherdTurnSpeed);
-        
-        super.addSensor(ds);
-        super.addSensor(rbSheep);
-        super.addSensor(rbGate);
-        super.addSensor(rbFoxes);
         super.addEffector(dm);
+        
     }
 }

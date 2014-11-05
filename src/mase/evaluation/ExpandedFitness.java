@@ -27,7 +27,6 @@ public class ExpandedFitness extends SimpleFitness {
     }
 
     protected EvaluationResult[] evalResults;
-    protected float fitnessScore;
     protected int subpop;
 
     @Override

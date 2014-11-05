@@ -20,13 +20,7 @@ import sim.util.Double2D;
 public class Sheep extends EmboddiedAgent {
 
     public static final int HISTORY_SIZE = 10;
-    
-    public enum Status {
-
-        ALIVE, DEAD, CAPTURED, ESCAPED
-    }
-
-    protected Status status;
+    protected int corraledTime = -1;
     protected LinkedList<Double2D> positionHistory;
     protected Double2D realVelocity = new Double2D(0,0);
 
@@ -34,7 +28,6 @@ public class Sheep extends EmboddiedAgent {
         super(sim, field, sim.par.agentRadius, Color.GREEN);
         this.enableCollisionDetection(true);
         this.enableBoundedArena(true);
-        this.status = Status.ALIVE;
         this.positionHistory = new LinkedList<Double2D>();
     }
 
@@ -78,7 +71,7 @@ public class Sheep extends EmboddiedAgent {
         if (getLocation().x >= herd.par.arenaSize - herd.par.agentRadius - herd.par.sheepSpeed
                 && getLocation().y >= herd.par.arenaSize / 2 - herd.par.gateSize / 2
                 && getLocation().y <= herd.par.arenaSize / 2 + herd.par.gateSize / 2) {
-            status = Sheep.Status.CAPTURED;
+            corraledTime = (int) state.schedule.getSteps();
             disappear();
         }
     }

@@ -22,7 +22,9 @@ import mase.controllers.HomogeneousGroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
+import mase.spec.AbstractHybridExchanger;
 import mase.spec.HybridExchanger;
+import mase.spec.SafeHybridExchanger;
 
 /**
  *
@@ -119,20 +121,15 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         if (acs.length == 1) {
             gc = new HomogeneousGroupController(acs[0]);
         } else {
-            if (state.exchanger instanceof HybridExchanger) {
-                HybridExchanger exc = (HybridExchanger) state.exchanger;
-                List<Integer>[] allocations = exc.getAllocations(state);
-                AgentController[] temp = new AgentController[100];
-                int count = 0;
+            if (state.exchanger instanceof AbstractHybridExchanger) {
+                AbstractHybridExchanger exc = (AbstractHybridExchanger) state.exchanger;
+                int[] allocations = exc.getAllocations();
+                AgentController[] temp = new AgentController[allocations.length];
                 for (int i = 0; i < allocations.length; i++) {
-                    for (Integer ag : allocations[i]) {
-                        temp[ag] = acs[i].clone();
-                        count++;
-                    }
+                    temp[i] = acs[allocations[i]].clone();
                 }
-                acs = Arrays.copyOf(temp, count);
+                acs = temp;
             }
-
             gc = new HeterogeneousGroupController(acs);
         }
         return gc;

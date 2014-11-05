@@ -18,7 +18,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
                      load.clusters=FALSE, new.clusters=TRUE, load.weights=FALSE, load.noveltyind=FALSE,
                      behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat",
                      clusters.file="genclusters.stat", weights.file="weights.stat",
-                     noveltyind.file="noveltyind.stat", offset=1) {
+                     noveltyind.file="noveltyind.stat", offset=1, use.evals=FALSE) {
     data <- NULL
     data$fitlim <- fitlim
     if(is.character(jobs)) {
@@ -46,7 +46,22 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         if(is.null(data$gens)) {
             data$gens <- ext[[1]]
         } else {
+          if(use.evals) {
+            rows <- c()
+            rowIndex <- 1
+            for(i in 1:length(data$gens)) {
+              for(r in rowIndex:nrow(ext)) {
+                if(ext[[2]][r] >= data$gens[i]) {
+                  rows <- c(rows,r)
+                  break
+                }
+                rowIndex <- rowIndex + 1
+              }
+            }
+            ext <- ext[rows,]
+          } else {
             ext <- ext[which(ext[[1]] %in% data$gens),]
+          }
         }
         data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)-offset]], best.gen=ext[[ncol(ext)-offset-1]], mean=ext[[ncol(ext)-offset-2]])
         #data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[4]], best.gen=ext[[3]], mean=ext[[2]])    
