@@ -18,7 +18,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
                      load.clusters=FALSE, new.clusters=TRUE, load.weights=FALSE, load.noveltyind=FALSE,
                      behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat",
                      clusters.file="genclusters.stat", weights.file="weights.stat",
-                     noveltyind.file="noveltyind.stat", offset=1, use.evals=FALSE) {
+                     noveltyind.file="noveltyind.stat", use.evals=FALSE) {
     data <- NULL
     data$fitlim <- fitlim
     if(is.character(jobs)) {
@@ -43,6 +43,8 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         
         # Fitness
         ext <- read.table(file.path(folder, paste0(j,".",fitness.file)), header=FALSE, sep=" ")
+        ext <- ext[,colSums(is.na(ext)) != nrow(ext)]
+        old.gen <- NULL
         if(is.null(data$gens)) {
             data$gens <- ext[[1]]
         } else {
@@ -58,13 +60,21 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
                 rowIndex <- rowIndex + 1
               }
             }
+            old.gen <- ext[[1]][rows]
             ext <- ext[rows,]
+            
+            # TEMPORARY STUFF
+            hyb <- read.table(file.path(folder, paste0(j,".hybrid.stat")), header=FALSE, sep=" ")
+            hyb <- hyb[rows,]
+            data[[j]]$hybrid <- hyb
           } else {
             ext <- ext[which(ext[[1]] %in% data$gens),]
           }
         }
-        data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)-offset]], best.gen=ext[[ncol(ext)-offset-1]], mean=ext[[ncol(ext)-offset-2]])
-        #data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[4]], best.gen=ext[[3]], mean=ext[[2]])    
+        data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)]], best.gen=ext[[ncol(ext)-1]], mean=ext[[ncol(ext)-2]])
+        if(use.evals) {
+          data[[j]]$fitness$old.gen <- old.gen
+        }
         
         # Behaviours
         if(load.behavs) {

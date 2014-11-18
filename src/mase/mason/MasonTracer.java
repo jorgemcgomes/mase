@@ -33,23 +33,26 @@ public class MasonTracer {
 
     public static final String SIZE = "-s";
     public static final String OUT = "-o";
+    public static final String SEED = "-seed";
 
     public static void main(String[] args) throws Exception {
         int size = 0;
         File out = null;
         int index;
+        long seed = new Random().nextLong();
         for (index = 0; index < args.length; index++) {
             if (args[index].equals(SIZE)) {
                 size = Integer.parseInt(args[1 + index++]);
             } else if (args[index].equals(OUT)) {
                 out = new File(args[1 + index++]);
+            } else if(args[index].equals(SEED)) {
+                seed = Long.parseLong(args[1 + index++]);
             }
         }
 
         GroupController controller = createController(args);
-        long startSeed = new Random().nextLong();
         MasonSimulator sim = createSimulator(args);
-        trace(controller, sim, startSeed, size, out);
+        trace(controller, sim, seed, size, out);
 
     }
 
@@ -81,9 +84,9 @@ public class MasonTracer {
 
         // draw initial positions
         for (EmboddiedAgent ag : agents) {
-            int x = (int) Math.round((ag.getLocation().x - ag.getRadius()) * scale);
-            int y = (int) Math.round((ag.getLocation().y - ag.getRadius()) * scale);
-            int s = (int) Math.round(ag.getRadius() * 2 * scale);
+            int x = (int) Math.round((ag.getLocation().x - ag.getRadius()/2) * scale);
+            int y = (int) Math.round((ag.getLocation().y - ag.getRadius()/2) * scale);
+            int s = (int) Math.round(ag.getRadius() * scale);
             Color c = (Color) ag.paint;
             gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
             gr.fillOval(x, y, s, s);

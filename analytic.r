@@ -3,6 +3,7 @@
 metaAnalysis <- function(setlist, ...) {
     res <- data.frame(mean=NULL, sd=NULL, min=NULL, max=NULL)
     for(s in names(setlist)) {
+        res[s,"n"] <- length(setlist[[s]])
         res[s,"mean"] <- mean(setlist[[s]])
         res[s,"sd"] <- sd(setlist[[s]])
         res[s,"se"] <- res[s,"sd"] / sqrt(length(setlist[[s]]))
@@ -758,7 +759,7 @@ kl <- function(p, q) {
 #### Generic generational data analysis ########################################
 
 analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, 
-                    splits=10, t.tests=T, plot=T, boxplots=T, all=T, print=F, smooth=0, transform=list(), ylim=NULL, jitter=T) {
+                    splits=10, interval=F, t.tests=F, plot=T, boxplots=T, all=T, print=T, smooth=0, transform=list(), ylim=NULL, jitter=T) {
     
     # data loading
     print("Loading data...")
@@ -769,31 +770,40 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
         index <- ifelse(is.null(exp.names), basename(f), exp.names[i])
         data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens, transform=transform)
     }
-    
+        
     if(is.null(gens)) {
-        gens <- data[[1]][[1]]$gen
+      for(d in data) {
+        for(j in d) {
+          if(length(j[["gen"]]) > length(gens)) {
+            gens <- j[["gen"]]
+          }
+        }
+      }
     }
-    if(splits == 0) {
-        splits <- length(gens)
-    } else {
-        splits <- c((0:(splits-1)) * floor(length(gens) / splits) + 1, length(gens))
+
+    if(length(splits) == 1) {
+      if(splits == 0) {
+          splits <- length(gens)
+      } else {
+          splits <- c((0:(splits-1)) * floor(length(gens) / splits) + 1, length(gens))
+      }
     }
     
     # find max and min
     if(is.null(ylim)) {
         min <- +Inf
         max <- -Inf
-        for(exp in names(data)) {
-            for(job in names(data[[exp]])) {
+        for(exp in data) {
+            for(job in exp) {
                 for(a in analyse) {
-                    min <- min(min, min(data[[exp]][[job]][[a]]))
-                    max <- max(max, max(data[[exp]][[job]][[a]]))
+                    min <- min(min, min(job[[a]]))
+                    max <- max(max, max(job[[a]]))
                 }
             }
         }
         ylim <- c(min,max)
     }
-    
+        
     # assemble plot data
     plotframe <- data.frame(gen=gens)
     for(a in analyse) {  
@@ -802,32 +812,38 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
         for(exp in names(data)) {
             mean <- list()
             for(job in names(data[[exp]])) {
-                d <- data[[exp]][[job]][[a]]
+                d <- data[[exp]][[job]][[a]][gens+1]
+                d <- c(d, rep(NA,length(gens)-length(d)))
                 mean[[job]] <- d
-                for(s in splits) {
-                    splitsets[[s]][[exp]] <- c(splitsets[[s]][[exp]], d[[s]])
+                for(s in 1:(length(splits))) {
+                    split <- splits[s]
+                    if(interval & s != length(splits)) {
+                      splitsets[[split]][[exp]] <- c(splitsets[[split]][[exp]], mean(d[splits[s]:splits[s+1]],na.rm=T))
+                    } else {
+                      splitsets[[split]][[exp]] <- c(splitsets[[split]][[exp]], d[split])
+                    }
                 }
             }  
-            plotframe[[paste(exp,a,sep=".")]] <- rowMeans(as.data.frame(mean))
+            df <- as.data.frame(mean)
+            plotframe[[paste(exp,a,sep=".")]] <- rowMeans(df, na.rm=T)
         }
 
         # t-tests
         if(t.tests) {
             for(s in splits) {
-                cat("\nVar:",a,"\tGen:",s,"\n")
-                print(batch.ttest(splitsets[[s]]))
+                cat("\n____________________Var:",a,"\tGen:",s,"____________________\n")
+                print(metaAnalysis(splitsets[[s]]))
             }
         }
-        
         if(print) {
-            printframe <- data.frame()
-            for(s in splits) {
-                for(exp in names(data)) {
-                    printframe[paste0("",s), paste0(exp,".mean")] <- mean(splitsets[[s]][[exp]])
-                    printframe[paste0("",s), paste0(exp,".sd")] <- sd(splitsets[[s]][[exp]])
-                }
+          printframe <- data.frame()
+          for(s in splits) {
+            for(exp in names(data)) {
+              printframe[paste0("",s), paste0(exp,".mean")] <- mean(splitsets[[s]][[exp]])
+              printframe[paste0("",s), paste0(exp,".sd")] <- sd(splitsets[[s]][[exp]])
             }
-            print(printframe)
+          }
+          print(printframe)
         }
     }
     
@@ -897,7 +913,6 @@ loadExp <- function(folder, filename, transform=list(), ...) {
     files <- list.files(folder, pattern=filename, full.names=T)
     exp <- list()
     for(f in files) {
-        print(f)
         jobname <- basename(f)
         e <- loadFile(f, ...)
         for(cn in colnames(e)) {
