@@ -215,3 +215,4 @@ identifyBests <- function(som, data, n=10, outfile) {
     bestsframe <- bestsframe[complete.cases(bestsframe),]
     write.table(bestsframe, file=outfile, row.names=F, col.names=T)
 }
+

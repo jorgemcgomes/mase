@@ -26,7 +26,7 @@ public class Sheep extends EmboddiedAgent {
 
     public Sheep(Herding sim, Continuous2D field) {
         super(sim, field, sim.par.agentRadius, Color.GREEN);
-        this.enableCollisionDetection(true);
+        this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
         this.positionHistory = new LinkedList<Double2D>();
     }

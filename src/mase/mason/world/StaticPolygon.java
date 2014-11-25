@@ -10,6 +10,7 @@ import java.awt.geom.GeneralPath;
 import java.util.LinkedHashSet;
 import mase.generic.systematic.Entity;
 import net.jafama.FastMath;
+import org.apache.commons.lang3.tuple.Pair;
 import sim.portrayal.simple.ShapePortrayal2D;
 import sim.util.Double2D;
 
@@ -19,8 +20,10 @@ import sim.util.Double2D;
  */
 public class StaticPolygon extends ShapePortrayal2D implements Entity {
 
-    protected final Segment[] segments;
-    protected final Double2D[] points;
+    private final Segment[] segments;
+    private final Double2D[] points;
+    private final Pair<Double2D, Double2D> boundingBox;
+    private double width, height;
     private static final double[] EMPTY_ARRAY = new double[]{};
 
     /**
@@ -37,6 +40,9 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
             segments[i] = new Segment(points[i], points[i + 1]);
         }
         this.points = points;
+        this.boundingBox = computeBB(points);
+        this.width = boundingBox.getRight().x - boundingBox.getLeft().x;
+        this.height = boundingBox.getRight().y - boundingBox.getLeft().y;
     }
 
     /**
@@ -56,6 +62,9 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
         this.segments = segs;
         this.points = new Double2D[ps.size()];
         ps.toArray(points);
+        this.boundingBox = computeBB(points);
+        this.width = boundingBox.getRight().x - boundingBox.getLeft().x;
+        this.height = boundingBox.getRight().y - boundingBox.getLeft().y;
     }
 
     public double closestDistance(Double2D rayStart, Double2D rayEnd) {
@@ -90,6 +99,35 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
             closest = Math.min(closest, this.closestDistance(p));
         }
         return closest;
+    }
+
+    @Override
+    public double[] getStateVariables() {
+        return EMPTY_ARRAY;
+    }
+
+    public Pair<Double2D, Double2D> getBoundingBox() {
+        return boundingBox;
+    }
+    
+    public double getWidth() {
+        return width;
+    }
+    
+    public double getHeight() {
+        return height;
+    }
+
+    public static Pair<Double2D, Double2D> computeBB(Double2D[] points) {
+        double xMin = Double.POSITIVE_INFINITY, yMin = Double.POSITIVE_INFINITY;
+        double xMax = Double.NEGATIVE_INFINITY, yMax = Double.NEGATIVE_INFINITY;
+        for (Double2D p : points) {
+            xMin = Math.min(xMin, p.x);
+            yMin = Math.min(yMin, p.y);
+            xMax = Math.max(xMax, p.x);
+            yMax = Math.max(yMax, p.y);
+        }
+        return Pair.of(new Double2D(xMin, yMin), new Double2D(xMax, yMax));
     }
 
     private static Shape buildShape(Double2D[] points) {
@@ -132,22 +170,19 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
 
     // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
     public static Double2D segmentIntersection(Double2D p0, Double2D p1, Double2D p2, Double2D p3) {
-        Double2D s1 = new Double2D(p1.x - p0.x, p1.y - p0.y);
-        Double2D s2 = new Double2D(p3.x - p2.x, p3.y - p2.y);
-        double s = (-s1.y * (p0.x - p2.x) + s1.x * (p0.y - p2.y)) / (-s2.x * s1.y + s1.x * s2.y);
-        double t = (s2.x * (p0.y - p2.y) - s2.y * (p0.x - p2.x)) / (-s2.x * s1.y + s1.x * s2.y);
+        double s1x = p1.x - p0.x;
+        double s1y = p1.y - p0.y;
+        double s2x = p3.x - p2.x;
+        double s2y = p3.y - p2.y;
+        double s = (-s1y * (p0.x - p2.x) + s1x * (p0.y - p2.y)) / (-s2x * s1y + s1x * s2y);
+        double t = (s2x * (p0.y - p2.y) - s2y * (p0.x - p2.x)) / (-s2x * s1y + s1x * s2y);
         if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
             // collision detected
-            return new Double2D(p0.x + t * s1.x, p0.y + t * s1.y);
+            return new Double2D(p0.x + t * s1x, p0.y + t * s1y);
         } else {
             // no collision
             return null;
         }
-    }
-
-    @Override
-    public double[] getStateVariables() {
-        return EMPTY_ARRAY;
     }
 
     public static class Segment {
@@ -159,7 +194,7 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
             this.start = start;
             this.end = end;
         }
-        
+
         public Segment(double startX, double startY, double endX, double endY) {
             this.start = new Double2D(startX, startY);
             this.end = new Double2D(endX, endY);

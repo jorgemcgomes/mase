@@ -123,7 +123,7 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
                 while (p == null) {
                     double randAngle = this.random.nextDouble() * Math.PI * 2;
                     Double2D candidate = new Double2D(FastMath.cos(randAngle) * radius, gate.getCenter().y + FastMath.sin(randAngle) * radius);
-                    if (ag.checkEnvironmentValidty(candidate)) {
+                    if (ag.checkInsideArena(candidate)) {
                         p = candidate;
                     }
                 }

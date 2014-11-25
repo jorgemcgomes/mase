@@ -5,6 +5,8 @@
 package mase.mason.world;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import mase.generic.systematic.Entity;
 import net.jafama.FastMath;
 import sim.engine.SimState;
@@ -30,13 +32,16 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     private double speed;
     private boolean collisionStatus;
     private Stoppable stopper;
-    private boolean detectCollisions;
+    private boolean agentCollisions;
     private boolean boundedArena;
+    private boolean polygonCollisions;
+    private boolean collisionRebound;
     protected SimState sim;
     public static final double COLLISION_SPEED_DECAY = 0.5;
     public static final double COLLISION_DIRECTION = Math.PI / 2;
     private boolean isAlive;
     private double turningSpeed;
+    private List<StaticPolygon> obstacleList;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
         super(new OvalPortrayal2D(c, radius * 2, true), 0, radius,
@@ -47,8 +52,10 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.collisionStatus = false;
         this.speed = 0;
         this.turningSpeed = 0;
-        this.detectCollisions = false;
+        this.agentCollisions = false;
         this.boundedArena = false;
+        this.polygonCollisions = false;
+        this.collisionRebound = true;
         this.isAlive = true;
         this.setLocation(new Double2D(0, 0));
         this.setOrientation(0);
@@ -67,12 +74,20 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         return new double[] {getLocation().x, getLocation().y, getTurningSpeed(), getSpeed()};
     }
 
-    public void enableCollisionDetection(boolean enable) {
-        this.detectCollisions = enable;
+    public void enableAgentCollisions(boolean enable) {
+        this.agentCollisions = enable;
     }
 
     public void enableBoundedArena(boolean enable) {
         this.boundedArena = enable;
+    }
+    
+    public void enablePolygonCollisions(boolean enable) {
+        this.polygonCollisions = enable;
+    }
+    
+    public void enableCollisionRebound(boolean enable) {
+        this.collisionRebound = enable;
     }
 
     protected boolean move(double orientation, double speed) {
@@ -80,7 +95,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.turningSpeed = o - this.orientation;
         this.orientation = o;
         
-        if (!attemptMove(orientation, speed)) { // cannot move
+        if (!attemptMove(orientation, speed) && collisionRebound) { // cannot move
             // try to escape to both sides with a random order
             double angle = sim.random.nextBoolean() ? COLLISION_DIRECTION : -COLLISION_DIRECTION;
             if (!attemptMove(normalizeAngle(orientation + angle), speed * COLLISION_SPEED_DECAY)
@@ -128,11 +143,33 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
      * @return
      */
     protected boolean isValidMove(Double2D target) {
-        return (!boundedArena || checkEnvironmentValidty(target)) &&
-                (!detectCollisions || checkAgentCollisions(target));
+        return (!boundedArena || checkInsideArena(target)) &&
+                (!agentCollisions || checkAgentCollisions(target)) &&
+                (!polygonCollisions || checkPolygonCollisions(target));
+    }
+    
+    protected boolean checkPolygonCollisions(Double2D target) {
+        // initialisation
+        if(obstacleList == null) {
+            obstacleList = new ArrayList<StaticPolygon>();
+            for(Object o : field.allObjects) {
+                if(o instanceof StaticPolygon) {
+                    obstacleList.add((StaticPolygon) o);
+                }
+            }
+        }
+        
+        // check for collisions
+        for(StaticPolygon p : obstacleList) {
+            double d = p.closestDistance(target);
+            if(d <= radius) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    protected boolean checkEnvironmentValidty(Double2D target) {
+    protected boolean checkInsideArena(Double2D target) {
         return target.x >= radius && target.x <= field.width - radius && target.y >= radius && target.y <= field.height - radius;
     }
 
@@ -140,7 +177,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         Bag objects = field.getNeighborsExactlyWithinDistance(target, radius * 2);
 
         for (Object o : objects) {
-            if (o != this && o instanceof EmboddiedAgent && ((EmboddiedAgent) o).detectCollisions) {
+            if (o != this && o instanceof EmboddiedAgent && ((EmboddiedAgent) o).agentCollisions) {
                 return false;
             }
         }

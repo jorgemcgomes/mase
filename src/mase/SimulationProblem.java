@@ -13,7 +13,6 @@ import ec.simple.SimpleProblemForm;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.AgentControllerIndividual;
 import mase.controllers.GroupController;
@@ -23,8 +22,6 @@ import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
 import mase.spec.AbstractHybridExchanger;
-import mase.spec.HybridExchanger;
-import mase.spec.SafeHybridExchanger;
 
 /**
  *

@@ -64,9 +64,9 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
             ext <- ext[rows,]
             
             # TEMPORARY STUFF
-            hyb <- read.table(file.path(folder, paste0(j,".hybrid.stat")), header=FALSE, sep=" ")
-            hyb <- hyb[rows,]
-            data[[j]]$hybrid <- hyb
+            #hyb <- read.table(file.path(folder, paste0(j,".hybrid.stat")), header=FALSE, sep=" ")
+            #hyb <- hyb[rows,]
+            #data[[j]]$hybrid <- hyb
           } else {
             ext <- ext[which(ext[[1]] %in% data$gens),]
           }
@@ -82,8 +82,9 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
             fixedvars <- c("gen","subpop","index","fitness")
             colnames(tab) <- c(fixedvars,vars.file)
             for(s in 0:(data$nsubs-1)) {
-                sub <- subset(tab, subpop == s & gen %in% data$gens, select=c(fixedvars, data$vars.ind, data$vars.group))
-                if(behavs.sample < 1) {  # sample
+                # & gen %in% data$gens
+                sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group))
+                if(behavs.sample < 1 & nrow(sub > 1)) {  # sample
                     sub <- sub[sample(1:nrow(sub), round(nrow(sub) * behavs.sample)),]
                 } 
                 # apply transformations
@@ -294,3 +295,4 @@ transformTournamentFiles <- function(folder, infile, outfile, vars.0, vars.1) {
         write.table(df, file=o, row.names=F, col.names=F, sep=" ", quote=F)
     }
 }
+

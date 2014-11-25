@@ -31,7 +31,7 @@ public class Rover extends SmartAgent {
 
     public Rover(MultiRover sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, COLOUR, ac);
-        this.enableCollisionDetection(true);
+        this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
 
         DistanceSensorRays dw = new DistanceSensorRays();

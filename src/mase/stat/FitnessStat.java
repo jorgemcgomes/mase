@@ -150,7 +150,6 @@ public class FitnessStat extends Statistics {
             }
         }
         
-        
         state.output.print((state.generation + 1) + " " + evals + " ", statisticslog); // 1 because we're putting the breeding info on the same line as the generation it *produces*, and the generation number is increased *after* breeding occurs, and statistics for it
     }
 
@@ -226,7 +225,7 @@ public class FitnessStat extends Statistics {
         // print out fitness info
         state.output.print("" + popMeanFitness + " ", statisticslog);                                                                                  // mean fitness of pop this gen
         state.output.print("" + (double) ((ExpandedFitness) popBestOfGeneration.fitness).getFitnessScore() + " ", statisticslog);                 // best fitness of pop this gen
-        state.output.print("" + (double) ((ExpandedFitness) absoluteBest.fitness).getFitnessScore() + " ", statisticslog);                // best fitness of pop so far
+        state.output.print("" + (double) ((ExpandedFitness) absoluteBest.fitness).getFitnessScore(), statisticslog);                // best fitness of pop so far
 
         // we're done!
         state.output.println("", statisticslog);

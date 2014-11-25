@@ -14,10 +14,15 @@ public class DashMovementEffector extends AbstractEffector {
     
     private double linearSpeed;
     private double turnSpeed;
+    private boolean backward = false;
     
     public void setSpeeds(double linear, double turn) {
         this.linearSpeed = linear;
         this.turnSpeed = turn;
+    }
+    
+    public void allowBackwardMove(boolean allow) {
+        this.backward = allow;
     }
 
     @Override
@@ -27,7 +32,7 @@ public class DashMovementEffector extends AbstractEffector {
 
     @Override
     public void action(double[] values) {
-        double forward = values[0] * linearSpeed;
+        double forward = backward ? (values[0] * 2 - 1) * linearSpeed : values[0] * linearSpeed;
         double r = (values[1] * 2 - 1) * turnSpeed;
         ag.move(ag.orientation2D() + r, forward);
     }

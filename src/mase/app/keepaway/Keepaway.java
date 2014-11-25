@@ -96,7 +96,7 @@ public class Keepaway extends GUICompatibleSimState implements TaskDescriptionPr
                 k.setOrientation(v.negate().angle());
             }
             k.setStopper(schedule.scheduleRepeating(k));
-            k.enableCollisionDetection(par.collisions);
+            k.enableAgentCollisions(par.collisions);
             keepers.add(k);
         }
     }
@@ -115,7 +115,7 @@ public class Keepaway extends GUICompatibleSimState implements TaskDescriptionPr
         }
         Double2D ballDir = ball.getLocation().subtract(t.getLocation());
         t.setOrientation(ballDir.angle());
-        t.enableCollisionDetection(par.collisions);
+        t.enableAgentCollisions(par.collisions);
         t.setStopper(schedule.scheduleRepeating(t));
         takers.add(t);
     }

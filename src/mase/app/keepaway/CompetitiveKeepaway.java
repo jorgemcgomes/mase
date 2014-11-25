@@ -30,7 +30,7 @@ public class CompetitiveKeepaway extends Keepaway {
             k.setLocation(par.keeperStartPos[i]);
             k.setOrientation(par.keeperStartAngle[i]);
             k.setStopper(schedule.scheduleRepeating(k));
-            k.enableCollisionDetection(par.collisions);
+            k.enableAgentCollisions(par.collisions);
             keepers.add(k);
         }
     }
@@ -51,7 +51,7 @@ public class CompetitiveKeepaway extends Keepaway {
         }
         Double2D ballDir = ball.getLocation().subtract(t.getLocation());
         t.setOrientation(ballDir.angle());
-        t.enableCollisionDetection(par.collisions);
+        t.enableAgentCollisions(par.collisions);
         t.setStopper(schedule.scheduleRepeating(t));
         takers.add(t);
     }

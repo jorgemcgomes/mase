@@ -27,7 +27,7 @@ public class Predator extends SmartAgent {
     public Predator(PredatorPrey sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, COLOUR, ac);
         if (sim.par.collisions) {
-            this.enableCollisionDetection(true);
+            this.enableAgentCollisions(true);
         }
 
         if (sim.par.sensorMode == SensorMode.arcs) {

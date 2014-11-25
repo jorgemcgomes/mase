@@ -32,7 +32,7 @@ public class AggregationAgent extends SmartAgent implements Entity {
 
     public AggregationAgent(Aggregation sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.BLUE, ac);
-        this.enableCollisionDetection(true);
+        this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
 
         // aux variables for agent sensors

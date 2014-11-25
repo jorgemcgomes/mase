@@ -26,7 +26,7 @@ public class RSAgent extends SmartAgent {
     public RSAgent(ResourceSharing sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, Color.BLUE, ac);
 
-        this.enableCollisionDetection(true);
+        this.enableAgentCollisions(true);
         this.enableBoundedArena(false);
 
         // aux variables for agent sensors

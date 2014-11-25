@@ -31,7 +31,7 @@ public class IndianaAgent extends SmartAgent {
 
     public IndianaAgent(Indiana sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.BLUE, ac);
-        this.enableCollisionDetection(true);
+        this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
 
         // aux variables for agent sensors
@@ -55,11 +55,11 @@ public class IndianaAgent extends SmartAgent {
     }
 
     @Override
-    protected boolean checkEnvironmentValidty(Double2D target) {
+    protected boolean checkInsideArena(Double2D target) {
         IndianaParams par = ((Indiana) sim).par;
         this.passingGate = target.x >= -RADIUS && target.x <= RADIUS && target.y > par.size / 2 - par.gateSize / 2
                 && target.y < par.size / 2 + par.gateSize / 2;
-        return passingGate || super.checkEnvironmentValidty(target);
+        return passingGate || super.checkInsideArena(target);
     }
 
     @Override

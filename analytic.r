@@ -472,7 +472,7 @@ uniformity.gen <- function(count, t=0.0001, ...) {
   return(as.data.frame(result))    
 }
 
-count.uniformity <- function(vector, visited, mode="visit", count.threshold=0.0001) {
+count.uniformity <- function(vector, visited, mode="jsd", count.threshold=0.0001) {
   t <- count.threshold * sum(vector)
   vector <- vector[visited]
   if(sum(vector) == 0) {
