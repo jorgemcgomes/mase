@@ -87,7 +87,7 @@ public class KDTree<T> {
     */
     public void insert(double [] key, T value) 
     throws KeySizeException, KeyDuplicateException {
-        this.edit(key, new Editor.Inserter<T>(value));
+        this.edit(key, new Editor.Replacer<T>(value));
     }
     
     /** 

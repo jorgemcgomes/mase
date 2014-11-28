@@ -2,10 +2,12 @@
 
 eval.num-post = 1
 eval.post.0 =                          mase.novelty.NoveltyEvaluation
-eval.post.0.ns-k =                     15
-eval.post.0.ns-archive-prob =          0.03
-eval.post.0.ns-archive-size =          1000
-eval.post.0.ns-archive-mode =          shared
+eval.post.0.knn =                      15
+eval.post.0.archive-growth  =          0.03
+eval.post.0.archive-size =             10000
+eval.post.0.archive-mode =             shared
+eval.post.0.archive-criteria =         random
+eval.post.0.kd-tree =                  true
 
 stat.child.10 =                        mase.novelty.NoveltyPopStat
 stat.child.10.file =		       $noveltypop.stat

@@ -71,6 +71,10 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
             ext <- ext[which(ext[[1]] %in% data$gens),]
           }
         }
+        #bestfar <- ext[[ncol(ext)]]
+        #bestfar[which(bestfar > 1)] <- 1
+        #bestgen <- ext[[ncol(ext)-1]]
+        #bestgen[which(bestfar > 1)] <- 1
         data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)]], best.gen=ext[[ncol(ext)-1]], mean=ext[[ncol(ext)-2]])
         if(use.evals) {
           data[[j]]$fitness$old.gen <- old.gen

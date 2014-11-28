@@ -3,13 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package mase.app.maze;
 
+import com.kitfox.svg.SVGException;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.controllers.GroupController;
 import mase.mason.GUICompatibleSimState;
 import mase.mason.GUIState2D;
@@ -24,7 +29,7 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class MazeSimulator extends MasonSimulator {
-    
+
     private MazeParams par;
 
     @Override
@@ -35,24 +40,29 @@ public class MazeSimulator extends MasonSimulator {
         par.linearSpeed = state.parameters.getDouble(df.push(MazeParams.P_LINEAR_SPEED), null);
         par.turnSpeed = state.parameters.getDouble(df.push(MazeParams.P_TURN_SPEED), null);
         par.agentRadius = state.parameters.getDouble(df.push(MazeParams.P_AGENT_RADIUS), null);
-        String t = state.parameters.getString(df.push(MazeParams.P_MAZE), null);
-        StaticPolygon pol = PolygonGenerator.generateFromSegments(t);
-        pol.filled = false;
-        pol.paint = Color.BLACK;
-        pol.setStroke(new BasicStroke(2f));
-        par.maze = pol;
-        t = state.parameters.getString(df.push(MazeParams.P_START_POS), null);
-        String[] s = t.split(",");
-        par.startPos = new Double2D(Double.parseDouble(s[0]), Double.parseDouble(s[1]));
-        t = state.parameters.getString(df.push(MazeParams.P_TARGET_POS), null);
-        s = t.split(",");
-        par.targetPos = new Double2D(Double.parseDouble(s[0]), Double.parseDouble(s[1]));
-        par.targetRadius = state.parameters.getDouble(df.push(MazeParams.P_TARGET_RADIUS), null);
-        par.startOrientation = state.parameters.getDouble(df.push(MazeParams.P_START_ORI), null);
         par.sensorRange = state.parameters.getDouble(df.push(MazeParams.P_SENSOR_RANGE), null);
+        par.targetRadius = state.parameters.getDouble(df.push(MazeParams.P_TARGET_RADIUS), null);
+
+        try {
+            String svgPath = state.parameters.getString(df.push(MazeParams.P_MAZE), null);
+            File svg = new File(svgPath);
+            if (!svg.exists()) {
+                svg = new File(this.getClass().getResource(svgPath).toURI());
+            }
+            state.output.message("Maze: " + svg.getAbsolutePath());
+            MazeReader mr = new MazeReader(svg);
+            par.maze = new StaticPolygon(mr.getSegments());
+            par.maze.filled = false;
+            par.maze.paint = Color.BLACK;
+            par.maze.setStroke(new BasicStroke(2f));
+            par.startPos = mr.getStart();
+            par.targetPos = mr.getEnd();
+            Double2D dir = par.targetPos.subtract(par.startPos);
+            par.startOrientation = dir.angle();
+        } catch (Exception ex) {
+            state.output.fatal(ex.getMessage(), df.push(MazeParams.P_MAZE));
+        }
     }
-    
-    
 
     @Override
     public GUICompatibleSimState createSimState(GroupController gc, long seed) {
@@ -64,8 +74,8 @@ public class MazeSimulator extends MasonSimulator {
         double w = par.maze.getWidth();
         double h = par.maze.getHeight();
         double ratio = 500 / Math.max(w, h);
-        return new GUIState2D(createSimState(gc, seed), "Maze", 
+        return new GUIState2D(createSimState(gc, seed), "Maze",
                 (int) Math.round(w * ratio), (int) Math.round(h * ratio), Color.WHITE);
     }
-    
+
 }

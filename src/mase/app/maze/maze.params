@@ -2,12 +2,14 @@
 stat.child.5 = ec.Statistics
 
 eval.base.problem =                mase.app.maze.MazeSimulator
-problem.number-evals =             2
+problem.number-evals =             3
 problem.trials-merge =             best
-problem.eval.0 =                   mase.app.maze.MazeFitness
+problem.eval.0 =                   mase.app.maze.MazeFitnessExt
 problem.eval.0.update-freq =       0
 problem.eval.1 =                   mase.app.maze.MazeBehaviourFinal
 problem.eval.1.update-freq =       0
+problem.eval.2 =                   mase.app.maze.MazeBehaviourExt
+problem.eval.2.update-freq =       50
 
 fitness.fitness-index =            0
 fitness.novelty-index =            1
@@ -21,28 +23,11 @@ problem.max-steps =                500
 problem.linear-speed = 2
 problem.turn-speed = 0.39
 problem.agent-radius = 4
-problem.sensor-range = 75
+problem.sensor-range = 50
 
-# hard maze params
-#problem.maze = 0.12,0.04,145.65,0.04 ; 145.65,0.04,145.65,149.09 ; 145.65,149.09,0.12,149.09 ; 0.12,149.09,0.12,0.04 ; 56.22,0,79.86,28.23 ; 64.10,84.65,145.71,41.87 ; 118.27,29.63,39.62,73.67 ; 0,94.21,21.89,61.43 ; 0,116.87,39.76,114.05 ; 39.76,114.05,39.76,33.712 ; 39.76,112.22,99,131.64
-#problem.start-pos = 23.5,12
-#problem.start-orientation = 1.57
-#problem.target-pos = 20,140
-#problem.target-radius = 1
-
-# medium maze params
-problem.maze = 0,0,255.52,0 ; 255.52,0,255.52,113.98 ; 255.52,113.98,0,113.98 ; 0,113.98,0,0 ; 45.7,59.62,211.65,0 ; 89.47,76.54,110,36.74 ; 156.92,61.22,190.75,7.9 ; 206.1,39.13,238.31,0 ; 59.226,80.52,98.62,113.98 ; 118.32,72.56,174.44,113.98 ; 185.98,61.81,237.12,113.98
-problem.start-pos = 19.22,97.02
-problem.start-orientation = 0
-problem.target-pos = 234.54,27.20
+# maze params
 problem.target-radius = 1
-
-#medium maze -- lehman
-#problem.maze = 293,7,289,130;289,130,6,134;6,134,8,5;8,5,292,7;241,130,58,65;114,7,73,42;130,91,107,46;196,8,139,51;219,122,182,63;267,9,214,63;271,129,237,88
-#problem.start-pos = 30,22
-#problem.start-orientation = 0
-#problem.target-pos = 270,100
-#problem.target-radius = 2
+problem.maze = hard.svg
 
 vector.species.genome-size =       92
 neural.input =                     10

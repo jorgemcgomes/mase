@@ -45,11 +45,9 @@ public class GroupIndNoveltyEvaluation extends NoveltyEvaluation {
                 BehaviourResult brInd = ((NoveltyFitness) ind.fitness).getBehaviour(groupBehaviourIndex);
                 ArrayList<Float> distances = new ArrayList<Float>(groupArchive.size() + subpop.individuals.length);
                 // from subpop
-                if (useCurrent) {
-                    for (Individual i : subpop.individuals) {
-                        if (ind != i) {
-                            distances.add(distance(((NoveltyFitness) i.fitness).getBehaviour(groupBehaviourIndex), brInd));
-                        }
+                for (Individual i : subpop.individuals) {
+                    if (ind != i) {
+                        distances.add(distance(((NoveltyFitness) i.fitness).getBehaviour(groupBehaviourIndex), brInd));
                     }
                 }
                 // from repo
@@ -98,7 +96,7 @@ public class GroupIndNoveltyEvaluation extends NoveltyEvaluation {
 
         for (Subpopulation subpop : pop.subpops) {
             for (Individual ind : subpop.individuals) {
-                if (state.random[0].nextDouble() < addProb) {
+                if (state.random[0].nextDouble() < archiveGrowth) {
                     ArchiveEntry ar = new ArchiveEntry(state, ind, ((NoveltyFitness) ind.fitness).getBehaviour(groupBehaviourIndex));
                     if (groupArchive.size() == sizeLimit) {
                         int index = state.random[0].nextInt(groupArchive.size());

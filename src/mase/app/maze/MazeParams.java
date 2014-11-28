@@ -19,9 +19,9 @@ public class MazeParams {
     public static final String P_TURN_SPEED = "turn-speed";
     public static final String P_AGENT_RADIUS = "agent-radius";
     public static final String P_SENSOR_RANGE = "sensor-range";
-    public static final String P_START_POS = "start-pos";
+    //public static final String P_START_POS = "start-pos";
     public static final String P_START_ORI = "start-orientation";
-    public static final String P_TARGET_POS = "target-pos";
+    //public static final String P_TARGET_POS = "target-pos";
     public static final String P_TARGET_RADIUS = "target-radius";
 
     protected StaticPolygon maze;
