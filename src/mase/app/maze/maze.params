@@ -2,7 +2,7 @@
 stat.child.5 = ec.Statistics
 
 eval.base.problem =                mase.app.maze.MazeSimulator
-problem.number-evals =             3
+problem.number-evals =             2
 problem.trials-merge =             best
 problem.eval.0 =                   mase.app.maze.MazeFitnessExt
 problem.eval.0.update-freq =       0
@@ -29,7 +29,7 @@ problem.sensor-range = 50
 problem.target-radius = 1
 problem.maze = hard.svg
 
-vector.species.genome-size =       92
+vector.species.genome-size =       80
 neural.input =                     10
 neural.hidden =                    6
 neural.output =                    2

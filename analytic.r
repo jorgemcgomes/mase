@@ -11,7 +11,11 @@ metaAnalysis <- function(setlist, ...) {
         res[s,"max"] <- max(setlist[[s]])
     }
     tt <- batch.ttest(setlist, ...)
-    return(list(summary=res, ttest=tt))
+    
+    maxlen <- max(as.numeric(lapply(setlist, length)))
+    norm <- lapply(setlist, function(v){c(v,rep(NA,maxlen-length(v)))})
+    dd <- t(as.data.frame(norm))
+    return(list(summary=res, ttest=tt,data=dd))
 }
 
 fitnessSummary <- function(datalist, snapshots=NULL) {
@@ -37,6 +41,10 @@ fitnessSummary <- function(datalist, snapshots=NULL) {
   return(frame)
 }
 
+
+
+
+
 #### Generational t-tests ######################################################
 
 generational.ttest <- function(datalist, snapshots, ...) {
@@ -60,13 +68,16 @@ generational.ttest <- function(datalist, snapshots, ...) {
 }
 
 batch.ttest <- function(setlist, ...) {
+    for(n in names(setlist)) {
+      if(length(setlist[[n]]) < 3) {
+        setlist[[n]] <- NULL
+      } else {
+        setlist[[n]] <- as.numeric(setlist[[n]])
+      }
+    }
     if(length(setlist) < 2) {
       return(NULL)
     } 
-  
-    for(i in 1:length(setlist)) {
-        setlist[[i]] <- as.numeric(setlist[[i]])
-    }
     matrix <- matrix(data = NA, nrow = length(setlist), ncol=length(setlist))
     rownames(matrix) <- names(setlist)
     colnames(matrix) <- names(setlist)
@@ -270,7 +281,7 @@ individuals.quantile <- function(datalist, q) {
   return(res)
 }
 
-individuals.count <- function(datalist, min.fit=-Inf, max.fit=Inf, quantile=T) {
+individuals.count <- function(datalist, min.fit=-Inf, max.fit=Inf) {
   setlist <- list()
   
   for(data in datalist) {
@@ -288,7 +299,6 @@ individuals.count <- function(datalist, min.fit=-Inf, max.fit=Inf, quantile=T) {
     setlist[[data$expname]] <- chis
   }
   a <- metaAnalysis(setlist)
-  print(a)
   return(a)
 }
 
@@ -305,6 +315,12 @@ exploration.count <- function(datalist, levels=5, vars=datalist[[1]]$vars.group,
         for(v in vars) {
           maxv[[v]] <- max(maxv[[v]], data[[j]][[s]][[v]])
           minv[[v]] <- min(minv[[v]], data[[j]][[s]][[v]])
+          
+          c <- sum(data[[j]][[s]][[v]] > 1500)
+          c <- c + sum(data[[j]][[s]][[v]] < -1500)
+          if(c > 0) {
+            cat("\n", data$expname, " ", j, " ", s, " ", v, " ", c, "\n")
+          }
         }
       }
     }
@@ -320,7 +336,7 @@ exploration.count <- function(datalist, levels=5, vars=datalist[[1]]$vars.group,
   behav.id <- function(vector, levels) {sum(vector * levels)}
   lev <- levels ^ ((length(vars)-1):0)
   len <- levels ^ length(vars)
-  
+    
   # count the patches visited in each method, each evolutionary run, each subpop
   counts <- list()
   for(data in datalist) { # experiment
@@ -332,15 +348,17 @@ exploration.count <- function(datalist, levels=5, vars=datalist[[1]]$vars.group,
         # discretise
         normBehavs <- subset(data[[j]][[s]], fitness >= min.fit & fitness <= max.fit, select=c("gen","fitness",vars))
         for(v in vars) {
+          normBehavs[[v]][normBehavs[[v]] > maxv[[v]]] <- maxv[[v]]
+          normBehavs[[v]][normBehavs[[v]] < minv[[v]]] <- minv[[v]]
           normBehavs[[v]] <- round((normBehavs[[v]] - minv[[v]]) / (maxv[[v]] - minv[[v]]) * (levels - 1))
         }
-        
         setTxtProgressBar(pb,pbindex)
         pbindex <- pbindex + 1
 
         if(is.null(by.gen)) {
           size <- size + 1
-          ids <- apply(normBehavs[,vars], 1, behav.id, lev)
+          sub <- subset(normBehavs, select=vars)
+          ids <- apply(sub, 1, behav.id, lev)
           counts[[exp]][[j]][[s]] <- sapply(1:len, function(x) length(which(ids == x)))
           totalCount <- totalCount + counts[[exp]][[j]][[s]]
         } else {
@@ -413,7 +431,6 @@ uniformity <- function(count, t=0.0001, ...) {
     setlist[[names(count)[i]]] <- chis
   }
   a <- metaAnalysis(setlist)
-  print(a)
   return(a)
 }
 
@@ -1326,3 +1343,50 @@ diffs2 <- function(folder, all.name, bvars=3) {
     print(summary(corrs0))
     print(summary(corrs1))
 }
+
+fitnessLevels <- function(data, ...) {
+    setlist <- list()
+    for(exp in names(data)) {
+      metric <- c()
+      for(job in data[[exp]]$jobs) {
+        l <- fitnessLevelAux(data[[exp]][[job]]$fitness, ...)
+        metric <- c(metric, l)
+      }
+      setlist[[exp]] <- metric[which(!is.na(metric))]
+    }
+  return(metaAnalysis(setlist))
+}
+
+fitnessLevelAux <- function(fitness, level, use.max=NULL) {
+  for(r in 1:nrow(fitness)) {
+    if(fitness[r,"best.sofar"] >= level) {
+      return(fitness[r,"gen"])
+    }
+    if(r == nrow(fitness)) {
+      if(is.null(use.max)) {
+        return(NA)
+      } else {
+        return(use.max)
+      }
+    }
+  }
+}
+
+fitnessLevelReached <- function(datalist, level) {
+  setlist <- list()
+  for(data in datalist) {      
+    fits <- c()
+    for(job in data$jobs) {
+      fitness.list <- data[[job]]$fitness$best.sofar
+      f <- fitness.list[length(fitness.list)]
+      if(f >= level) {
+        fits <- c(fits,1)
+      } else {
+        fits <- c(fits,0)
+      }
+    }
+    setlist[[data$expname]] <- fits
+  }
+  return(metaAnalysis(setlist))
+}
+

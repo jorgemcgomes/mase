@@ -7,6 +7,8 @@ library(RColorBrewer)
 library(parallel)
 library(pbapply)
 library(energy)
+library(data.table)
+library(plyr)
 
 SOURCE_DIR = "/home/jorge/Dropbox/mase/"
 source(file.path(SOURCE_DIR, "data.r"))
@@ -515,4 +517,60 @@ fullStatistics <- function(..., fit.tests=FALSE, fit.ind=FALSE, fit.comp=FALSE, 
         rm(reduced) ; gc()
     }
     return(ksoms)
+}
+
+fitnessRanking <- function(datalist, generation=NULL, name=NULL) {
+  setlist <- list()
+  for(data in datalist) {
+    bests <- c()
+    for(job in data$jobs) {
+      bests <- c(bests, data[[job]]$fitness$best.sofar[generation])
+    }
+    setlist[[data$expname]] <- bests
+  }
+  m <- metaAnalysis(setlist)
+  sum <- m$summary
+  sum <- sum[with(sum, order(-mean)), ]
+  sum$method <- rownames(sum)
+  print(sum)
+  
+  toPlot <- sum
+  toPlot$method <- reorder(toPlot$method,toPlot$mean)  
+  
+  g <- ggplot(toPlot, aes(x=method, y=mean)) +
+    geom_bar(stat="identity",fill="#FF9999") + coord_flip() +
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se),width=.2, position=position_dodge(.9)) +
+    ggtitle(name)
+  print(g)
+  return(sum)
+}
+
+fitnessRanking2 <- function(datalist, generation=NULL, name=NULL) {
+  setlist <- list()
+  for(data in datalist) {
+    bests <- c()
+    for(job in data$jobs) {
+      f <- data[[job]]$fitness$best.sofar[generation]
+      if(f >= 1) {
+        bests <- c(bests, 1)
+      } else {
+        bests <- c(bests,0)
+      }
+    }
+    setlist[[data$expname]] <- bests
+  }
+  m <- metaAnalysis(setlist)
+  sum <- m$summary
+  sum <- sum[with(sum, order(-mean)), ]
+  sum$method <- rownames(sum)
+  print(sum)
+  
+  toPlot <- sum
+  toPlot$method <- reorder(toPlot$method,toPlot$mean)   
+  
+  g <- ggplot(toPlot, aes(x=method, y=mean)) +
+    geom_bar(stat="identity",fill="#FF9999") + coord_flip() + ggtitle(name) 
+  print(g)
+  
+  return(sum)
 }

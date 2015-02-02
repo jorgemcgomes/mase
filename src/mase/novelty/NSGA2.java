@@ -22,10 +22,12 @@ import mase.PostEvaluator;
 public class NSGA2 implements PostEvaluator {
 
     protected List<Individual>[] allInds; // this is used just for stats
+    public static final String P_ORDINAL_RANKING = "ordinal-ranking";
+    protected boolean ordinalRanking;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
-        // Nothing to do
+        ordinalRanking = state.parameters.getBoolean(base.push(P_ORDINAL_RANKING), null, false);
     }
 
     @Override
@@ -38,18 +40,18 @@ public class NSGA2 implements PostEvaluator {
             float noveltyMax = Float.NEGATIVE_INFINITY;
             float fitnessMin = Float.POSITIVE_INFINITY;
             float fitnessMax = Float.NEGATIVE_INFINITY;
-            for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
-                NoveltyFitness nf = (NoveltyFitness) pop.subpops[i].individuals[j].fitness;
+            for (ec.Individual individual : pop.subpops[i].individuals) {
+                NoveltyFitness nf = (NoveltyFitness) individual.fitness;
                 fitnessMin = (float) Math.min(fitnessMin, nf.getFitnessScore());
                 fitnessMax = (float) Math.max(fitnessMax, nf.getFitnessScore());
                 noveltyMin = (float) Math.min(noveltyMin, nf.noveltyScore);
                 noveltyMax = (float) Math.max(noveltyMax, nf.noveltyScore);
             }
             double[] ranges = new double[]{fitnessMax - fitnessMin, noveltyMax - noveltyMin};
-            if(ranges[0] == 0) {
+            if (ranges[0] == 0) {
                 ranges[0] = 0.001;
             }
-            if(ranges[1] == 0) {
+            if (ranges[1] == 0) {
                 ranges[1] = 0.001;
             }
 
@@ -82,11 +84,34 @@ public class NSGA2 implements PostEvaluator {
 
     protected void assignFitnessScores(Subpopulation pop, EvolutionState state, List<List<Individual>> rankedInds) {
         // Calculate score
-        for (List<Individual> rank : rankedInds) {
-            for (Individual ind : rank) {
-                ind.score = rankedInds.size() - ind.rank + ind.crowdingDistance;
+        if (ordinalRanking) {
+            List<Individual> all = new ArrayList<Individual>();
+            for (List<Individual> rank : rankedInds) {
+                all.addAll(rank);
+            }
+            Collections.sort(all);
+            int index = 0;
+            for (int i = 0 ; i < all.size() ; i++) {
+                Individual ind = all.get(i);
+                if(i > 0 && ind.compareTo(all.get(i-1)) == 0) {
+                    // Assign the same score to individuals that are tied
+                    ind.score = index;
+                } else {
+                    index = i;
+                    ind.score = index;
+                }
                 NoveltyFitness nf = (NoveltyFitness) pop.individuals[ind.individualId].fitness;
                 nf.setFitness(state, (float) ind.score, false);
+            }
+        } else {
+            for (List<Individual> rank : rankedInds) {
+                for (Individual ind : rank) {
+                    double rankScore = rankedInds.size() - ind.rank;
+                    double distScore = Double.isInfinite(ind.crowdingDistance) ? 1 : ind.crowdingDistance;
+                    ind.score = rankScore + distScore;
+                    NoveltyFitness nf = (NoveltyFitness) pop.individuals[ind.individualId].fitness;
+                    nf.setFitness(state, (float) ind.score, false);
+                }
             }
         }
     }
@@ -100,9 +125,9 @@ public class NSGA2 implements PostEvaluator {
         for (Individual p : inds) {
             for (Individual q : inds) {
                 if (p != q) {
-                    if (p.dominates(q)) {
+                    if (p.paretoDominates(q)) {
                         p.S.add(q);
-                    } else if (q.dominates(p)) {
+                    } else if (q.paretoDominates(p)) {
                         p.n = p.n + 1;
                     }
                 }
@@ -157,8 +182,8 @@ public class NSGA2 implements PostEvaluator {
                     return Double.compare(ind1.objectives[mm], ind2.objectives[mm]);
                 }
             });
-            I.get(0).crowdingDistance = 1;
-            I.get(l - 1).crowdingDistance = 1;
+            I.get(0).crowdingDistance = Double.POSITIVE_INFINITY;
+            I.get(l - 1).crowdingDistance = Double.POSITIVE_INFINITY;
             for (int i = 1; i < l - 1; i++) {
                 I.get(i).crowdingDistance = I.get(i).crowdingDistance
                         + (I.get(i + 1).objectives[m] - I.get(i - 1).objectives[m]) / ranges[m];
@@ -166,7 +191,7 @@ public class NSGA2 implements PostEvaluator {
         }
     }
 
-    protected static class Individual {
+    protected static class Individual implements Comparable<Individual>  {
 
         double[] objectives;
         int rank;
@@ -183,7 +208,7 @@ public class NSGA2 implements PostEvaluator {
             this.n = 0;
         }
 
-        boolean dominates(Individual other) {
+        boolean paretoDominates(Individual other) {
             boolean oneBetter = false;
             for (int i = 0; i < this.objectives.length; i++) {
                 if (this.objectives[i] < other.objectives[i]) {
@@ -193,6 +218,24 @@ public class NSGA2 implements PostEvaluator {
                 }
             }
             return oneBetter;
+        }
+
+        
+        @Override
+        public int compareTo(Individual o) {
+            if(this.rank < o.rank) {
+                return 1;
+            } else if(this.rank > o.rank) {
+                return -1;
+            } else {
+                if(this.crowdingDistance > o.crowdingDistance) {
+                    return 1;
+                } else if(this.crowdingDistance < o.crowdingDistance) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
         }
     }
 }

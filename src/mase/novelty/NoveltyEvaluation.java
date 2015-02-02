@@ -10,7 +10,6 @@ import ec.Population;
 import ec.util.Parameter;
 import edu.wlu.cs.levy.CG.Checker;
 import edu.wlu.cs.levy.CG.KDTree;
-import edu.wlu.cs.levy.CG.KeyDuplicateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,16 +38,16 @@ public class NoveltyEvaluation implements PostEvaluator {
     protected int k;
     protected double archiveGrowth;
     protected int sizeLimit;
-    private KNNDistanceCalculator knnDistance;
-
+    protected boolean useKDTree;
+    
     public enum ArchiveMode {
 
-        none, shared, multiple;
+        shared, multiple;
     }
 
     public enum ArchiveCriteria {
 
-        random, novel
+        none, random, novel
 
     }
 
@@ -59,23 +58,18 @@ public class NoveltyEvaluation implements PostEvaluator {
         this.sizeLimit = state.parameters.getInt(base.push(P_ARCHIVE_SIZE_LIMIT), null);
         this.archiveMode = ArchiveMode.valueOf(state.parameters.getString(base.push(P_ARCHIVE_MODE), null));
         this.archiveCriteria = ArchiveCriteria.valueOf(state.parameters.getString(base.push(P_ARCHIVE_CRITERIA), null));
-        boolean kdTree = state.parameters.getBoolean(base.push(P_KD_TREE), null, false);
-        knnDistance = kdTree ? new KDTreeCalculator() : new BruteForceCalculator();
+        this.useKDTree = state.parameters.getBoolean(base.push(P_KD_TREE), null, false);
 
         int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this must be more flexible
         this.archives = new ArrayList[nPops];
-        if (archiveMode == ArchiveMode.none) {
-            for (int i = 0; i < nPops; i++) {
-                archives[i] = new ArrayList<ArchiveEntry>();
-            }
-        } else if (archiveMode == ArchiveMode.shared) {
-            ArrayList<ArchiveEntry> arch = new ArrayList<ArchiveEntry>(sizeLimit);
+        if (archiveMode == ArchiveMode.shared) {
+            ArrayList<ArchiveEntry> arch = new ArrayList<ArchiveEntry>();
             for (int i = 0; i < nPops; i++) {
                 archives[i] = arch;
             }
         } else if (archiveMode == ArchiveMode.multiple) {
             for (int i = 0; i < nPops; i++) {
-                archives[i] = new ArrayList<ArchiveEntry>(sizeLimit);
+                archives[i] = new ArrayList<ArchiveEntry>();
             }
         }
     }
@@ -102,13 +96,16 @@ public class NoveltyEvaluation implements PostEvaluator {
                 NoveltyFitness indFit = (NoveltyFitness) ind.fitness;
                 pool.add(indFit.getNoveltyBehaviour());
             }
-            knnDistance.setPool(pool);
+            KNNDistanceCalculator calc = useKDTree && pool.size() >= k * 2 ?
+                    new KDTreeCalculator() :
+                    new BruteForceCalculator();
+            calc.setPool(pool);
 
             // Calculate novelty for each individual
             for (Individual ind : pop.subpops[p].individuals) {
                 NoveltyFitness indFit = (NoveltyFitness) ind.fitness;
                 BehaviourResult br = indFit.getNoveltyBehaviour();
-                indFit.noveltyScore = knnDistance.getDistance(br, k);
+                indFit.noveltyScore = calc.getDistance(br, k);
                 indFit.setFitness(state, (float) indFit.noveltyScore, false);
             }
         }
@@ -194,7 +191,7 @@ public class NoveltyEvaluation implements PostEvaluator {
     }
 
     protected void updateArchive(EvolutionState state, Population pop) {
-        if (archiveMode != ArchiveMode.none) {
+        if (archiveCriteria != ArchiveCriteria.none) {
             for (int i = 0; i < pop.subpops.length; i++) {
                 Individual[] popInds = pop.subpops[i].individuals;
                 List<ArchiveEntry> archive = archives[i];

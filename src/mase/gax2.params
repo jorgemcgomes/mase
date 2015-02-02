@@ -1,4 +1,4 @@
-parent.0=gax.params
+parent.0=ga.params
 
 # Breeding
 vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline

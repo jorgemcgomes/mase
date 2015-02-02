@@ -1,0 +1,16 @@
+parent.0 = novelty.params
+parent.1 = ../neat/neat.params
+
+eval.num-post = 2
+eval.post.1 =                           mase.novelty.NSGA2
+eval.post.1.ordinal-ranking =           true
+stat.child.12 =                         mase.novelty.NSGA2Stat
+stat.child.12.file =                    $nsga.stat
+
+breed =					mase.neat.NEATBreederNSGA
+neat.COMPATABILITY.THRESHOLD =          99999999
+neat.COMPATABILITY.CHANGE =             0
+neat.SPECIE.COUNT =                     1
+neat.SURVIVAL.THRESHOLD =               1
+neat.size =                             100
+neat.SPECIE.AGE.THRESHOLD =             79

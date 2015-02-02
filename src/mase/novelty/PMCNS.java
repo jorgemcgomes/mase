@@ -50,8 +50,8 @@ public class PMCNS implements PostEvaluator {
             }
             
             double p = ds.getPercentile(percentile);
-            cutPoint[i] = p * changeRate + cutPoint[i] * (1 - changeRate);
-            // cutPoint[i] = cutPoint[i] + Math.max(0, (p - cutPoint[i]) * changeRate);
+            //cutPoint[i] = p * changeRate + cutPoint[i] * (1 - changeRate);
+            cutPoint[i] = cutPoint[i] + Math.max(0, (p - cutPoint[i]) * changeRate);
             aptCount[i] = 0;
             for(Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;

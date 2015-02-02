@@ -10,7 +10,6 @@ import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 import java.util.Arrays;
 import java.util.Comparator;
-import mase.evaluation.SubpopEvaluationResult;
 
 /**
  *

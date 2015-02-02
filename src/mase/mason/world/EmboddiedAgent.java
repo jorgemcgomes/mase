@@ -222,6 +222,14 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     public double getTurningSpeed() {
         return turningSpeed;
     }
+    
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+    
+    public void setTurningSpeed(double turnSpeed) {
+        this.turningSpeed = turnSpeed;
+    }
 
     /**
      * @param point

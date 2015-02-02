@@ -135,13 +135,13 @@ public class NEATSpecie extends Specie {
             matableMembers[i] = (NEATChromosome) sorted[i];
         }
 
-        if (count > 0) {
+        if (count > 0 && this.ageThreshold != 79) { // !!!!REMOVE THIS LAST CONDITION!!!!
             // copy best member.
             offspring[0] = this.cloneChromosome((NEATChromosome) sorted[0]);
         }
 
         try {
-            for (i = 1; i < offspring.length; i++) {
+            for (i = ageThreshold != 79 ? 1 : 0; i < offspring.length; i++) { // !!! REMOVE I INITIALIZATION CONDITION !!!!
                 parents = selector.selectParents(matableMembers, false);
                 child = xOver.crossOver(this.cloneParents(parents));
                 offspring[i] = mut.mutate(child.nextChromosome());

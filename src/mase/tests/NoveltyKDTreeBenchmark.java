@@ -146,8 +146,8 @@ Size  	   N	   L	KD_ins	 KD_nn	 BF_nn	 Factor	KD_rem
     
     public static void main(String[] args) throws Exception {
 
-        int[] sizes = new int[]{200,1000,5000};
-        int[] ns = new int[]{1,15,200};
+        int[] sizes = new int[]{200};
+        int[] ns = new int[]{1,15,50,100,150,200};
         int[] ls = new int[]{2,20};
 
         System.out.println("Size  \t   N\t   L\tKD_ins\t KD_nn\t BF_nn\t Factor\tKD_rem");

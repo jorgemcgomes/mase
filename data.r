@@ -34,7 +34,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
     data$folder <- folder
     data$expname <- expname
     data$gens <- gens
-    
+        
     progress <- txtProgressBar(min = 0, max = data$njobs, initial = 0, char = "=", style = 3)
     prog <- 0
     for(j in data$jobs) {
@@ -42,8 +42,9 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         data[[j]] <- list()
         
         # Fitness
-        ext <- read.table(file.path(folder, paste0(j,".",fitness.file)), header=FALSE, sep=" ")
-        ext <- ext[,colSums(is.na(ext)) != nrow(ext)]
+        #ext <- read.table(file.path(folder, paste0(j,".",fitness.file)), header=FALSE, sep=" ", quote="", stringsAsFactors=F colClasses="numeric", comment.char="", multi.line=F)
+        ext <- fread(file.path(folder, paste0(j,".",fitness.file)), header=F, sep=" ", stringsAsFactors=F)  
+        #ext <- ext[,colSums(is.na(ext)) != nrow(ext)]
         old.gen <- NULL
         if(is.null(data$gens)) {
             data$gens <- ext[[1]]
@@ -82,9 +83,11 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         
         # Behaviours
         if(load.behavs) {
-            tab <- read.table(file.path(folder,paste0(j,".",behavs.file)), header=FALSE, sep=" ", stringsAsFactors=FALSE)
-            fixedvars <- c("gen","subpop","index","fitness")
-            colnames(tab) <- c(fixedvars,vars.file)
+          #tab <- read.table(file.path(folder,paste0(j,".",behavs.file)), header=FALSE, sep=" ", stringsAsFactors=FALSE, quote="", colClasses="numeric", comment.char="", multi.line=F)
+          tab <- fread(file.path(folder,paste0(j,".",behavs.file)), header=F, sep=" ", stringsAsFactors=F)  
+          fixedvars <- c("gen","subpop","index","fitness")
+            setnames(tab, c(fixedvars,vars.file))
+            #colnames(tab) <- c(fixedvars,vars.file)
             for(s in 0:(data$nsubs-1)) {
                 # & gen %in% data$gens
                 sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group))
@@ -97,6 +100,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
                         sub[,v] <- parSapply(NULL, sub[,v], transform, vars.transform[[v]])
                     }
                 }
+                sub <- na.omit(sub)
                 data[[j]][[data$subpops[s+1]]] <- sub           
             }
         }
@@ -300,3 +304,22 @@ transformTournamentFiles <- function(folder, infile, outfile, vars.0, vars.1) {
     }
 }
 
+
+
+# temp --- mazes
+shrinkBehaviours <- function(folder, cols) {
+  files <- list.files(folder, recursive=T, full.names=T, pattern=".behaviours.stat")
+  print(length(files))
+  index <- 0
+  pb <- txtProgressBar(min=0,max=length(files),style=3)
+  for(f in files) {
+    print(f)
+    tab <- fread(f, header=F, sep=" ", stringsAsFactors=F)
+    if(ncol(tab) > cols) {
+      write.table(as.matrix(subset(tab,select=(1:cols))), file=f, quote=F, sep=" ",row.names=F,col.names=F)
+    }
+    index <- index + 1
+    setTxtProgressBar(pb,index)
+  }
+  close(pb)
+}

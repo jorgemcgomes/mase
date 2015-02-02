@@ -1193,3 +1193,579 @@ setwd("~/exps/gatest")
 data <- metaLoadData("ga","gax","gax2","neat","gax_e5", params=list(jobs=10, subpops=3, load.behavs=F))
 fullStatistics(data, fit.comp=T, show.only=T, expset.name="gatest",fit.comp.par=list(snapshots=c(50,100,300,499)))
 
+setwd("~/exps")
+data <- metaLoadData("herd5r2_fit","herd5r2_nov", params=list(jobs=10, subpops=5, load.behavs=T, behavs.sample=0.1, vars.ind=c("sheepDist","curralDist","fox1Dist","fox2Dist"), vars.group=c("sheepCurral","time","sheepFence","sheepFox")))
+fullStatistics(data, fit.comp=F, som.group=T, som.alljobs=T, fit.comp.par=list(snapshots=c(500)), expset.name="herd", show.only=T)
+fullStatistics(data, fit.comp=T,  fit.comp.par=list(snapshots=c(500)), expset.name="herd", show.only=T)
+
+data <- metaLoadData("herd5r_fit","herd5r_nov", params=list(jobs=10, subpops=5, load.behavs=F, behavs.sample=0.1, vars.ind=c("sheepDist","curralDist","fox1Dist","fox2Dist"), vars.group=c("sheepCurral","time","sheepFence","sheepFox")))
+
+setwd("~/exps/herding")
+data <- metaLoadData("fit","nov","nov_ind","nov_indgroup", names=c("Fit","NS-T","NS-I","NS-Mix"), params=list(fitness.file="refitness.stat", offset=0, jobs=30, subpops=5, load.behavs=F, behavs.sample=0.1, vars.ind=c("sheepDist","curralDist","fox1Dist","fox2Dist"), vars.group=c("sheepCurral","time","sheepFence","sheepFox")))
+fullStatistics(data, fit.comp=T, som.group=F, som.alljobs=F, som.group.par=list(grid.size=10,distance.filter=0.4), fit.comp.par=list(snapshots=c(500)), expset.name="herd", show.only=T)
+
+setwd("~/exps/multirover")
+data <- metaLoadData("fit","nov","nov_ind","nov_indgroup", names=c("Fit","NS-T","NS-I","NS-Mix"), params=list(fitness.file="refitness.stat", offset=0, jobs=30, subpops=2, load.behavs=F, behavs.sample=0.1, vars.ind=c("ind.mov","ind.prox","lowActive","highActive"), vars.group=c("captured","distance","movement","proximity")))
+fullStatistics(data, fit.comp=T, som.group=F, som.alljobs=F, som.group.par=list(grid.size=10,distance.filter=0.5), fit.comp.par=list(snapshots=c(500)), expset.name="herd", show.only=T)
+
+setwd("~/exps/herding")
+data <- metaLoadData("fit","nov","nov_ind","nov_indgroup", names=c("Fit","NS-T","NS-I","NS-Mix"), params=list(fitness.file="refitness.stat", offset=0, jobs=30, subpops=5, load.behavs=T, behavs.sample=0.1, vars.ind=c("sheepDist","curralDist","fox1Dist","fox2Dist"), vars.group=c("sheepCurral","time","sheepFence","sheepFox")))
+
+setwd("~/exps/multirover")
+data <- metaLoadData("fit","nov","nov_ind","nov_indgroup", params=list(fitness.file="refitness.stat", offset=0, jobs=30, subpops=2, load.behavs=T, behavs.sample=0.1, vars.ind=c("ind.mov","ind.prox","lowActive","highActive"), vars.group=c("captured","distance","movement","proximity")))
+
+q <- individuals.quantile(data,0.85)
+count.g <- exploration.count(data)
+uni.g <- uniformity(count.g,mode="jsd")
+count.e <- exploration.count(data, min.fit=q)
+uni.e <- uniformity(count.e, mode="jsd")
+count.i <- exploration.count(data, vars=data[[1]]$vars.ind)
+uni.i <- uniformity.ind(count.i, mode="jsd")
+prop <- individuals.count(data, min.fit=q)
+
+
+
+setwd("~/exps/hybrid/herdtest/")
+data <- metaLoadData("s7_f2_p2_hyb","s7_f2_p2_base", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("s7_f2_p1_smart_hyb","s7_f2_p1_smart_base", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("s5_f2_p1_hyb","s5_f2_p1_base", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("s5_f1_p1_smart_hyb","s5_f1_p1_smart_base", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("s10_f2_p2_smart_hyb", params=list(jobs=7,load.behavs=F))
+
+data <- metaLoadData("s7_f2_p2_hyb","s7_f2_p2_hyb2","s7_f2_p2_base", params=list(jobs=7,load.behavs=F))
+
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(500)), expset.name="herd", show.only=T)
+
+analyse("s7_f2_p2_hyb","s7_f2_p1_smart_hyb","s5_f2_p1_hyb","s5_f1_p1_smart_hyb", filename="hybrid.stat", analyse=c("npops"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+
+analyse("s7_f2_p2_hyb", filename="hybrid.stat", analyse=c("allinds"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+
+
+
+
+setwd("~/exps/hybrid/herd7/")
+
+data <- metaLoadData("sm2_het_s5","sm2_het_s10","sm2_het_m50_s10","sm2_het_s10_rand","sm2_het_s5_e50","sm2_het_u", params=list(jobs=10,load.behavs=F))
+analyse("sm2_het_s5","sm2_het_s10","sm2_het_m50_s10","sm2_het_s10_rand","sm2_het_s5_e50","sm2_het_u", filename="hybrid.stat", analyse=c("npops"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+analyse("sm2_het_s5","sm2_het_s10","sm2_het_m50_s10","sm2_het_s10_rand","sm2_het_s5_e50","sm2_het_u", filename="hybrid.stat", analyse=c("allinds"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+analyse("sm2_het_s5","sm2_het_s10","sm2_het_m50_s10","sm2_het_s10_rand","sm2_het_s5_e50","sm2_het_u", filename="hybrid.stat", analyse=c("totalmerges"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+analyse("sm2_het_s5","sm2_het_s10","sm2_het_m50_s10","sm2_het_s10_rand","sm2_het_s5_e50","sm2_het_u", filename="hybrid.stat", analyse=c("totalsplits"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+analyse("sm2_het_s5","sm2_het_s10","sm2_het_m50_s10","sm2_het_s10_rand","sm2_het_s5_e50","sm2_het_u", filename="hybrid.stat", analyse=c("totalremerges"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+
+data <- metaLoadData("baseline","basic_het_m125","basic_het_m125_prob", params=list(jobs=9,load.behavs=F))
+analyse("basic_het_m125","basic_het_m110_e100", filename="hybrid.stat", analyse=c("npops"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+
+
+
+data <- metaLoadData("basic_hetero","safe_hetero","basic_homo","safe_homo", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("safe_hetero_f1","safe_hetero","safe_hetero_f20","safe_hetero_f50", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("safe_hetero_s3","safe_hetero","safe_homo_s3","safe_homo", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("basic_hetero","safe_hetero", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("basic_homo","safe_homo", params=list(jobs=10,load.behavs=F))
+data <- metaLoadData("basic_homo_s3","basic_hetero_s3","safe_homo_s3","safe_hetero_s3", params=list(jobs=10,load.behavs=F))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(400)), expset.name="herd", show.only=T)
+
+data <- metaLoadData("safemerge_het_m125","safemerge_het_m150","safemerge_het_m200", params=list(fitness.file="refitness.stat", offset=0,jobs=10,load.behavs=F))
+data <- metaLoadData("safemerge_het_f1","safemerge_het_m150","safemerge_het_f25","safemerge_het_f50", params=list(fitness.file="refitness.stat", offset=0,jobs=10,load.behavs=F))
+data <- metaLoadData("safemerge_het_m150","safemerge_het_m150_t5","safemerge_het_m150_t20", params=list(fitness.file="refitness.stat", offset=0,jobs=10,load.behavs=F))
+
+
+analyse("safemerge_het_m125","safemerge_het_m150","safemerge_het_m200", filename="hybrid.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","mindistother","meandistother","maxdistother","maxdisp","merges","splits"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+analyse("safemerge_het_f1","safemerge_het_m150","safemerge_het_f25","safemerge_het_f50", filename="hybrid.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","mindistother","meandistother","maxdistother","maxdisp","merges","splits"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+analyse("safemerge_het_m150","safemerge_het_m150_t5","safemerge_het_m150_t20", filename="hybrid.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","mindistother","meandistother","maxdistother","maxdisp","merges","splits"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+
+
+analyse("safemerge_het_m150","safe_hetero","basic_hetero", filename="hybrid.stat", analyse="npops", vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","mindisp","meandisp","mindistother","meandistother","maxdistother","maxdisp","merges","splits"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=15)
+
+data <- metaLoadData("s10_f3_p2_base","s10_f3_p2_hyb", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 399000, length.out=400))))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(400)), expset.name="herd", show.only=T)
+
+
+data_d <- metaLoadData("s7_f2_p2_hyb_t1","s7_f2_p2_hyb_t5","s7_f2_p2_hyb_m125", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
+fullStatistics(data_d, fit.comp=T, fit.comp.par=list(snapshots=c(428)), expset.name="herd", show.only=T)
+
+setwd("~/exps/hybrid/herdfinal/")
+data_d <- metaLoadData("s7_f2_p2_hyb_m100","s7_f2_p2_hyb_m110","s7_f2_p2_hyb_m125","s7_f2_p2_hyb_m150","s7_f2_p2_hyb_m175", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
+data_d <- metaLoadData("s7_f2_p2_hyb_t1","s7_f2_p2_hyb_t5","s7_f2_p2_hyb_m125_t10","s7_f2_p2_hyb_t20","s7_f2_p2_hyb_t40", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
+
+data_s <- metaLoadData("s7_f2_p1_smart_hyb_m100","s7_f2_p1_smart_hyb_m110","s7_f2_p1_smart_hyb","s7_f2_p1_smart_hyb_m150","s7_f2_p1_smart_hyb_m175", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
+data_s <- metaLoadData("s7_f2_p1_smart_hyb_t1","s7_f2_p1_smart_hyb_t5","s7_f2_p1_smart_hyb_m125_t10","s7_f2_p1_smart_hyb_t20","s7_f2_p1_smart_hyb_t40", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
+
+frame <- cbind(fitnessSummary(data_d), T=c("100","110","125","150","175"), Setup="Dumb")
+frame <- rbind(frame, cbind(fitnessSummary(data_s), T=c("100","110","125","150","175"), Setup="Smart"))
+
+frame <- cbind(fitnessSummary(data_d), T=c("01","05","10","20","40"), Setup="Dumb")
+frame <- rbind(frame, cbind(fitnessSummary(data_s), T=c("01","05","10","20","40"), Setup="Smart"))
+
+pd <- position_dodge(.1) # move them .05 to the left and right
+ggplot(frame, aes(x=T, y=mean, colour=Setup)) + 
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.25, position=pd) +
+  geom_line(position=pd,aes(group=Setup)) +
+  geom_point(position=pd) + ylab("Best fitness") + theme(legend.title=element_blank())
+
+data <- metaLoadData("s5_f2_p1_base","s5_f2_p1_hyb","s5_f2_p1_hyb_t20", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 199500, length.out=400))))
+data <- metaLoadData("s5_f1_p1_smart_base","s5_f1_p1_smart_hyb","s5_f1_p1_smart_hyb_t20", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 199500, length.out=400))))
+data <- metaLoadData("s7_f2_p2_base","s7_f2_p2_hyb_m125_t10","s7_f2_p2_hyb_t20", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=400))))
+data <- metaLoadData("s7_f2_p1_smart_base","s7_f2_p1_smart_hyb_m125_t10","s7_f2_p1_smart_hyb_t20", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=400))))
+data <- metaLoadData("s10_f3_p1_smart_base","s10_f3_p1_smart_hyb_t20","s10_f3_p1_smart_hyb_t20_homo", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 399000, length.out=400))))
+data <- metaLoadData("s10_f3_p2_base","s10_f3_p2_hyb_t20", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 399000, length.out=400))))
+
+data <- metaLoadData("s5_f2_p1_base","s5_f2_p1_hyb","s5_f2_p1_hyb_t20","s5_f2_p1_hyb_homo","s5_f2_p1_hyb_t20_homo", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 199500, length.out=400))))
+data <- metaLoadData("s5_f1_p1_smart_base","s5_f1_p1_smart_hyb","s5_f1_p1_smart_hyb_t20","s5_f1_p1_smart_hyb_homo","s5_f1_p1_smart_hyb_t20_homo", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 199500, length.out=400))))
+data <- metaLoadData("s7_f2_p2_base","s7_f2_p2_hyb_m125_t10","s7_f2_p2_hyb_t20","s7_f2_p2_hyb_homo","s7_f2_p2_hyb_t20_homo", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=400))))
+data <- metaLoadData("s7_f2_p1_smart_base","s7_f2_p1_smart_hyb_m125_t10","s7_f2_p1_smart_hyb_t20","s7_f2_p1_smart_hyb_homo","s7_f2_p1_smart_hyb_t20_homo", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=400))))
+data <- metaLoadData("s10_f3_p1_smart_base","s10_f3_p1_smart_hyb","s10_f3_p1_smart_hyb_t20","s10_f3_p1_smart_hyb","s10_f3_p1_smart_hyb_t20_homo", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 399000, length.out=400))))
+
+data <- metaLoadData("s5_f2_p1_base","s5_f2_p1_hyb_t20", params=list(jobs=30, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 150000, length.out=300))))
+data <- metaLoadData("s5_f1_p1_smart_base","s5_f1_p1_smart_hyb_t20", params=list(jobs=30, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 150000, length.out=300))))
+data <- metaLoadData("s7_f2_p2_base","s7_f2_p2_hyb_t20", params=list(jobs=30, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=400))))
+data <- metaLoadData("s7_f2_p1_smart_base","s7_f2_p1_smart_hyb_t20", params=list(jobs=30, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=400))))
+data <- metaLoadData("s10_f3_p1_smart_base","s10_f3_p1_smart_hyb_t20", params=list(jobs=30, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 399000, length.out=400))))
+data <- metaLoadData("s10_f3_p2_base","s10_f3_p2_hyb_t20", params=list(jobs=30, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 399000, length.out=400))))
+
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(300)), expset.name="herd", show.only=T)
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(400)), expset.name="herd", show.only=T)
+
+fitnessLevels(data, c(1.5,2.5))
+fitnessLevels(data, c(1.5,2.5,3.5))
+
+
+
+
+data <- metaLoadData("s7_f2_p1_smart_base","s7_f2_p1_smart_hyb", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
+
+data <- metaLoadData("s5_f1_p1_smart_hyb","s5_f1_p1_smart_base", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 199500, length.out=400))))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(400)), expset.name="herd", show.only=T)
+
+data <- metaLoadData("s7_f2_p1_smart_hyb", params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(428)), expset.name="herd", show.only=T)
+
+
+datah <- loadData("s7_f2_p2_hyb_m125", jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299000, length.out=400)))
+datab <- loadData("s7_f2_p2_hyb_base", jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299000, length.out=400)))
+data <- list(datah,datab)
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(400)), expset.name="herd", show.only=T)
+
+analyse("s5_f1_p1_smart_hyb_t20","s5_f2_p1_hyb_t20","s7_f2_p2_hyb_t20","s7_f2_p1_smart_hyb_t20","s10_f3_p2_hyb_t20", filename="hybrid.stat", analyse=c("npops"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=25)
+
+
+
+setwd("~/exps/hybrid/nov/")
+data <- metaLoadData("s7_f2_p1_smart_hyb_fit","s7_f2_p1_smart_hyb_nov","s7_f2_p1_smart_fit","s7_f2_p1_smart_nov", names=c("hyb.fit","hyb.nov","base.fit","base.nov"), params=list(jobs=10, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(428)), expset.name="S7_F2_P1_EVAS", show.only=T)
+fitnessLevels(data, c(1.5,1.75,2.0,2.25))
+analyse("s7_f2_p1_smart_hyb_fit","s7_f2_p1_smart_hyb_nov", exp.names=c("Fit","NS"), filename="hybrid.stat", analyse=c("npops"), vars.pre=c("gen"), vars.sub=c("npops","minsize","meansize","maxsize","foreigns","selfinds","forinds","allinds","meanage","maxage","meandisp","meandistother","merges","splits","remerges","totalmerges","totalsplits","totalremerges"), all=F, boxplots=F, t.tests=F, splits=10, print=T, plot=T, smooth=10, gens=seq(0,500))
+data <- metaLoadData("s7_f2_p1_smart_hyb_fit","s7_f2_p1_smart_hyb_nov","s7_f2_p1_smart_fit","s7_f2_p1_smart_nov", names=c("hyb.fit","hyb.nov","base.fit","base.nov"), params=list(jobs=10, load.behavs=T, behavs.sample=0.1, subpops=7, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428)), vars.ind=c("curralDist","fox1Dist","fox2Dist","sheepDist"),vars.group=c("sheepCurral","steps","sheepFence","sheepFox")))
+fullStatistics(data, expset.name="hybnov", show.only=T, som.group=T, som.alljobs=T, som.group.par=list(grid.size=10,distance.filter=0.4))
+
+
+
+
+setwd("~/exps/maze/")
+data <- metaLoadData("fit","nov_k15", params=list(jobs=10, load.behavs=F, use.evals=F))
+data <- metaLoadData("nov_k1","nov_k7","nov_k15","nov_k30","nov_k100","nov_k200", params=list(jobs=10, subpops=1,load.behavs=F))
+data <- metaLoadData("nov_s05","nov_s10","nov_k15","nov_s30","nov_s40","nov_s50","nov_s75", params=list(jobs=10, load.behavs=F, use.evals=F))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(500)), expset.name="maze", show.only=T)
+
+data <- metaLoadData("nov_k1","nov_k7","nov_k15","nov_k30","nov_k100","nov_k200", params=list(jobs=10, load.behavs=T, subpops=1, vars.group=c("x","y"), use.evals=F))
+data <- metaLoadData("nov_s05","nov_s10","nov_k15","nov_s30","nov_s40","nov_s50","nov_s75", params=list(jobs=10, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), use.evals=F))
+
+count <- exploration.count(data,levels=10)
+uniformity(count, mode="jsd")
+
+data <- metaLoadData("hard_fit","hard_nov_randarch","hard_nsga_randarch","hard_ls_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("hard_nov_noarch","hard_nov_novelarch","hard_nov_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("hard_ls_noarch","hard_ls_novelarch","hard_ls_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("hard_nsga_noarch","hard_nsga_novelarch","hard_nsga_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+
+data <- metaLoadData("med_fit","med_nov_randarch","med_nsga_randarch","med_ls_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("med_nov_noarch","med_nov_novelarch","med_nov_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("med_ls_noarch","med_ls_novelarch","med_ls_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("med_nsga_noarch","med_nsga_novelarch","med_nsga_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+
+data <- metaLoadData("hard_nov_noarch","hard_nov_novelarch","hard_nov_randarch", params=list(jobs=20, load.behavs=T, behavs.sample=0.2, subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("med_nov_noarch","med_nov_novelarch","med_nov_randarch", params=list(jobs=20, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+count <- exploration.count(data,levels=10)
+uniformity(count, mode="jsd")
+
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(500)), expset.name="maze", show.only=T)
+
+data <- metaLoadData("sub_fit","sub_nov_randarch","sub_nsga_randarch","sub_ls_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("sub_nov_noarch","sub_nov_novelarch","sub_nov_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("sub_ls_noarch","sub_ls_novelarch","sub_ls_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("sub_nsga_noarch","sub_nsga_novelarch","sub_nsga_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+
+data <- metaLoadData("multi_fit","multi_nov_randarch","multi_nsga_randarch","multi_ls_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("multi_nov_noarch","multi_nov_novelarch","multi_nov_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("multi_ls_noarch","multi_ls_novelarch","multi_ls_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+data <- metaLoadData("multi_nsga_noarch","multi_nsga_novelarch","multi_nsga_randarch", params=list(jobs=20, load.behavs=F, use.evals=F))
+
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(750)), expset.name="maze", show.only=T)
+
+data <- metaLoadData("sub_fit","sub_nov_randarch","sub_nsga_randarch","sub_ls_randarch", params=list(jobs=10, load.behavs=T, behavs.sample=0.2, subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("multi_fit","multi_nov_randarch","multi_nsga_randarch","multi_ls_randarch", params=list(jobs=10, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("sub_nov_noarch","sub_nov_novelarch","sub_nov_randarch", params=list(jobs=10, load.behavs=T, behavs.sample=0.2, subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("multi_nov_noarch","multi_nov_novelarch","multi_nov_randarch", params=list(jobs=10, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+
+count <- exploration.count(data,levels=10)
+uniformity(count, mode="jsd")
+
+
+data <- metaLoadData("sub2_nov", params=list(jobs=10, load.behavs=F, use.evals=F))
+
+
+setwd("~/exps/maze2/")
+data <- metaLoadData("hard_fit","hard_nov_randarch","hard_nov_noarch","hard_nov_arch01","hard_nov_arch03","hard_nov_arch06", params=list(jobs=20, load.behavs=F,gens=0:499))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(500)), expset.name="maze", show.only=T)
+data <- metaLoadData("multi_fit","multi_nov_randarch","multi_nov_noarch","multi_nov_arch01","multi_nov_arch03","multi_nov_arch06", params=list(jobs=20, load.behavs=F,gens=0:499))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(500)), expset.name="maze", show.only=T)
+data <- metaLoadData("sub_fit","sub_nov","sub_nov_noarch","sub_nov_arch01","sub_nov_arch03","sub_nov_arch06", params=list(jobs=20, load.behavs=F))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(750)), expset.name="maze", show.only=T)
+
+data <- metaLoadData("sub_fit","sub_nov","sub_nsga","sub_nov_long", params=list(jobs=20, load.behavs=F))
+data <- metaLoadData("open_fit","open_nov","open_nsga","open_nov_long", params=list(jobs=20, load.behavs=F))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(750)), expset.name="maze", show.only=T)
+data <- metaLoadData("hard_fit","hard_nov_randarch","hard_nov_long", params=list(jobs=20, load.behavs=F,gens=0:499))
+data <- metaLoadData("multi_fit","multi_nov_randarch","multi_nov_long", params=list(jobs=20, load.behavs=F,gens=0:499))
+data <- metaLoadData("med_fit","med_nov_randarch","med_nov_long", params=list(jobs=20, load.behavs=F,gens=0:499))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(500)), expset.name="maze", show.only=T)
+
+data <- metaLoadData("sub_fit","sub_nov","sub_nov_noarch","sub_nov_arch01","sub_nov_arch03","sub_nov_arch06", params=list(jobs=10, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+count <- exploration.count(data,levels=10)
+uniformity(count, mode="jsd")
+
+
+data <- metaLoadData("hard_fit","hard_nov_randarch","hard_nov_noarch", params=list(jobs=20, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("multi_fit","multi_nov_randarch","multi_nov_noarch", params=list(jobs=20, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("med_fit","med_nov_randarch","med_nov_noarch", params=list(jobs=20, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("sub_fit","sub_nov","sub_nov_noarch", params=list(jobs=20, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(500)), expset.name="maze", show.only=T)
+fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(750)), expset.name="maze", show.only=T)
+
+count <- exploration.count(data,levels=10)
+uniformity(count, mode="jsd")
+
+data <- metaLoadData("star_nov","star_nov_noarch",params=list(jobs=10, load.behavs=F, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("zigzag_nov","zigzag_nov_noarch",params=list(jobs=10, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+data <- metaLoadData("sub2_nov","sub2_nsga",params=list(jobs=10, load.behavs=T, behavs.sample=0.2,subpops=1, vars.group=c("x","y"), vars.file=c("x","y",rep(NA,20))))
+
+
+
+############################################### ns params
+
+allframe <- data.frame()
+for(maze in c("hard","zigzag","subset","multi","star","open")) {
+  setwd("~/exps/maze3/nspar")
+  setwd(maze)
+  all <- sub("./", "", list.dirs())[-1]
+  #all <- all[grep("ga_el10_e",all)]
+  #data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=F))))
+  #r <- fitnessLevelReached(data,1)
+  #r <- fitnessLevels(data,level=1,use.max=1000)
+  data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=T, behavs.sample=0.2, vars.group=c("x","y")))))
+  r <- uniformity(exploration.count(data,levels=10), mode="jsd")
+  
+  print(r$ttest)
+  frame <- r$summary
+  frame$method <- rownames(frame)
+  allframe <- rbind(allframe, cbind(frame, Maze=maze))
+}
+
+allframe[grep("k15",allframe$method),"Knn"] <- "015"
+allframe[grep("k1_",allframe$method),"Knn"] <- "001"
+allframe[grep("k50",allframe$method),"Knn"] <- "050"
+allframe[grep("k199",allframe$method),"Knn"] <- "199"
+allframe[grep("k5_",allframe$method),"Knn"] <- "005"
+allframe[grep("k100",allframe$method),"Knn"] <- "100"
+allframe[grep("anone",allframe$method),"Archive"] <- "none"
+allframe[grep("anovel",allframe$method),"Archive"] <- "novel"
+allframe[grep("arandom",allframe$method),"Archive"] <- "random"
+
+save(allframe, file="~/Dropbox/Papers/GECCO15/nspar_uniformity.rdata")
+
+aggregate <- function(frame) {
+  newframe <- data.frame()
+  for(a in unique(frame$Archive)) {
+    for(k in unique(frame$Knn)) {
+      if(!is.na(a) & !is.na(k)) {
+        sub <- subset(frame, k==Knn & a==Archive)
+        val <- mean(sub$mean)
+        row <- sub[1,]
+        row["mean"] <- val
+        newframe <- rbind(newframe, row)
+      }
+    }
+  }
+  return(newframe)
+}
+#frame <- subset(allframe, C=="short")
+agg <- aggregate(allframe)
+pd <- position_dodge() # move them .05 to the left and right
+ggplot(agg, aes(x=Knn, y=mean, colour=Archive, shape=Archive)) + 
+  geom_line(position=pd,aes(group=Archive)) +
+  geom_point(position=pd,size=4) + ylab("Mean exploration uniformity") + xlab("Knn") 
+  #geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.25, position=pd)
+
+
+# ALL IN ONE BAR PLOT #####################
+frame <- allframe
+un <- unique(frame$method)
+sums <- c()
+for(u in un) {
+  sums <- c(sums, sum(frame[which(frame$method==u),"mean"]))
+}
+#lvls <- rev(levels(reorder(un,sums,order=T)))
+lvls <- levels(reorder(un,sums,order=T))
+frame$method <- factor(frame$method, levels=lvls, ordered=T)
+ggplot(frame, aes(x=method, y=mean, fill=Maze)) +
+  geom_bar(stat="identity") + coord_flip() + xlab("Treatment") + ylab("Accumulated success ratio")
+
+# INDIVIDUAL MAZE BAR PLOTS #################
+for(maze in unique(allframe$Maze)) {
+  d <- subset(allframe, Maze==maze)
+  un <- unique(d$method)
+  sums <- c()
+  for(u in un) {
+    sums <- c(sums, sum(d[which(d$method==u),"mean"]))
+  }
+  lvls <- levels(reorder(un,sums,order=T))
+  d$method <- factor(d$method, levels=lvls, ordered=T)
+  
+  # plot
+  g <- ggplot(d, aes(x=method, y=mean, fill=Maze)) +
+    geom_bar(stat="identity") + coord_flip() + ggtitle(maze) +
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.25)
+  print(g)
+}
+
+################################################# NEAT VS GA
+
+allframe <- data.frame()
+for(maze in c("hard","zigzag","subset","multi","star","open")) {
+  ga <- file.path("~/exps/maze3/ea/mutation/",maze,"/ga_el10_m0.05")
+  neat <- file.path("~/exps/maze3/nspar/",maze,"/ns_k15_arandom")
+  
+  data <- metaLoadData(ga,neat,names=c("GA","NEAT"),params=list(jobs=30, load.behavs=F))
+  #r <- fitnessLevelReached(data,1)
+  #r <- fitnessLevels(data,level=1,use.max=1000)
+  data <- metaLoadData(ga,neat,names=c("GA","NEAT"),params=list(jobs=30, load.behavs=T, behavs.sample=0.2, vars.group=c("x","y")))
+  r <- uniformity(exploration.count(data,levels=10), mode="jsd")
+  
+  print(r$ttest)
+  frame <- r$summary
+  frame$method <- rownames(frame)
+  allframe <- rbind(allframe, cbind(frame, Maze=maze))
+}
+
+save(allframe, file="~/Dropbox/Papers/GECCO15/data/topology_uniformity.rdata")
+
+ggplot(allframe, aes(x=Maze, y=mean, fill=method)) +
+  geom_bar(stat="identity",position="dodge") + xlab("Maze") + ylab("Uniformity") +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.25, position=position_dodge(.9))
+
+
+
+################################################# mutation rate
+
+allframe <- data.frame()
+for(maze in c("hard","zigzag","subset","multi","star","open")) {
+  setwd("~/exps/maze3/ea/mutation")
+  setwd(maze)
+  all <- sub("./", "", list.dirs())[-1]
+  #data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=F))))
+  #r <- fitnessLevelReached(data,1)
+  #r <- fitnessLevels(data,level=1,use.max=1000)
+  data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=T, behavs.sample=0.2, vars.group=c("x","y")))))
+  r <- uniformity(exploration.count(data,levels=10), mode="jsd")
+  
+  print(r$ttest)
+  frame <- r$summary
+  frame$method <- rownames(frame)
+  allframe <- rbind(allframe, cbind(frame, Maze=maze))
+}
+
+allframe[grep("ga_ns",allframe$method),"NE"] <- "GA-NS"
+allframe[grep("ga_fit",allframe$method),"NE"] <- "GA-Fit"
+allframe[grep("neat_ns",allframe$method),"NE"] <- "NEAT-NS"
+allframe[grep("neat_fit",allframe$method),"NE"] <- "NEAT-Fit"
+allframe[grep("m0.025",allframe$method),"M"] <- "0.025"
+allframe[grep("m0.05",allframe$method),"M"] <- "0.05"
+allframe[grep("m0.1",allframe$method),"M"] <- "0.1"
+allframe[grep("m0.25",allframe$method),"M"] <- "0.25"
+allframe[grep("m0.4",allframe$method),"M"] <- "0.4"
+allframe[grep("m0.6",allframe$method),"M"] <- "0.6"
+allframe[grep("m0.8",allframe$method),"M"] <- "0.8"
+
+save(allframe, file="~/Dropbox/Papers/GECCO15/data/mutation_uniformity.rdata")
+
+aggregate2 <- function(frame) {
+  newframe <- data.frame()
+  for(ne in unique(frame$NE)) {
+    for(m in unique(frame$M)) {
+        sub <- subset(frame, ne==NE & m==M)
+        val <- mean(sub$mean)
+        row <- sub[1,]
+        row["mean"] <- val
+        newframe <- rbind(newframe, row)
+      }
+  }
+  return(newframe)
+}
+agg <- aggregate2(allframe)
+pd <- position_dodge()
+ggplot(agg, aes(x=M, y=mean, colour=NE, shape=NE)) + 
+  geom_line(position=pd,aes(group=NE)) +
+  geom_point(position=pd,size=4) + ylab("Mean exploration uniformity") + xlab("Mutation rate") 
+
+############################### combination
+
+allframe <- data.frame()
+for(maze in c("hard","zigzag","subset","multi","star","open")) {
+  setwd("~/exps/maze3/comb")
+  setwd(maze)
+  all <- sub("./", "", list.dirs())[-1]
+  data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=F))))
+  #r <- fitnessLevelReached(data,1)
+  #r <- fitnessLevels(data,level=1,use.max=1000)
+  data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=T, behavs.sample=0.2, vars.group=c("x","y")))))
+  #r <- uniformity(exploration.count(data,levels=10), mode="jsd")
+  r <- individuals.count(data, min.fit=0.95)
+  print(r$ttest)
+  frame <- r$summary
+  frame$method <- rownames(frame)
+  allframe <- rbind(allframe, cbind(frame, Maze=maze))
+}
+allframe$method <- factor(allframe$method, levels=c("fit","ns","ls50","ls75","pmcns","nsga2","nsga2_rank"))
+
+save(allframe, file="~/Dropbox/Papers/GECCO15/data/comb_proportion.rdata")
+
+
+ggplot(allframe, aes(x=Maze, y=mean, fill=method)) +
+  geom_bar(stat="identity",position="dodge") + xlab("Maze") + ylab("High-fitness proportion") +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.25, position=position_dodge(.9))
+
+ggplot(allframe, aes(x=method, y=mean, fill=Maze)) +
+  geom_bar(stat="identity") + xlab("Method") + ylab("Accumulated high-fitness proportion") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+############################################## elites
+
+allframe <- data.frame()
+for(maze in c("hard","zigzag","subset","multi","star","open")) {
+  setwd("~/exps/maze3/ea/elite")
+  setwd(maze)
+  all <- sub("./", "", list.dirs())[-1]
+  data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=F))))
+  #r <- fitnessLevelReached(data,1)
+  #r <- fitnessLevels(data,level=1,use.max=1000)
+  data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=T, behavs.sample=0.2, vars.group=c("x","y")))))
+  r <- uniformity(exploration.count(data,levels=10), mode="jsd")
+  
+  print(r$ttest)
+  frame <- r$summary
+  frame$method <- rownames(frame)
+  allframe <- rbind(allframe, cbind(frame, Maze=maze))
+}
+
+allframe[grep("ga",allframe$method),"NE"] <- "GA"
+allframe[grep("neat",allframe$method),"NE"] <- "NEAT"
+allframe[grep("e0",allframe$method),"E"] <- "0"
+allframe[grep("e5",allframe$method),"E"] <- "1"
+allframe[grep("e20",allframe$method),"E"] <- "2"
+allframe[grep("e50",allframe$method),"E"] <- "3"
+allframe[grep("e75",allframe$method),"E"] <- "4"
+allframe[grep("e100",allframe$method),"E"] <- "5"
+allframe[grep("s1",allframe$method),"E"] <- "0"
+allframe[grep("s0.75",allframe$method),"E"] <- "1"
+allframe[grep("s0.5",allframe$method),"E"] <- "2"
+allframe[grep("s0.2",allframe$method),"E"] <- "3"
+allframe[grep("s0.1",allframe$method),"E"] <- "4"
+allframe[grep("s0.05",allframe$method),"E"] <- "5"
+
+aggregate3 <- function(frame) {
+  newframe <- data.frame()
+  for(ne in unique(frame$NE)) {
+    for(e in unique(frame$E)) {
+      sub <- subset(frame, ne==NE & e==E)
+      val <- sum(sub$mean)
+      sd <- sqrt(sum(sub$sd ^ 2) / length(sub$sd))
+      se <- sd / sqrt(30) 
+      row <- sub[1,]
+      row["mean"] <- val
+      row["se"] <- se
+      newframe <- rbind(newframe, row)
+    }
+  }
+  return(newframe)
+}
+agg <- aggregate3(allframe)
+ggplot(agg, aes(x=E, y=mean, colour=NE, shape=NE)) + 
+  geom_line(position=position_dodge(.1),aes(group=NE)) +
+  geom_point(position=pd,size=3) + ylab("Accumulated uniformity") + xlab("Elite size / survival threshold") +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.25, position=position_dodge(.1)) +
+  scale_x_discrete(labels=c("0\n1.0","5\n0.75","20\n0.5","50\n0.2","75\n0.1","100\n0.05"))
+
+
+############################## growth rate
+
+allframe <- data.frame()
+for(maze in c("hard","zigzag","subset","multi","star","open")) {
+  setwd("~/exps/maze3/growth")
+  setwd(maze)
+  all <- sub("./", "", list.dirs())[-1]
+  data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=F))))
+  #r <- fitnessLevelReached(data,1)
+  #r <- fitnessLevels(data,level=1,use.max=1000)
+  data <- do.call(metaLoadData,c(all,list(params=list(jobs=30, load.behavs=T, behavs.sample=0.2, vars.group=c("x","y")))))
+  r <- uniformity(exploration.count(data,levels=10), mode="jsd")
+  
+  print(r$ttest)
+  frame <- r$summary
+  frame$method <- rownames(frame)
+  allframe <- rbind(allframe, cbind(frame, Maze=maze))
+}
+
+allframe[grep("anovel",allframe$method),"Archive"] <- "Novel"
+allframe[grep("arandom",allframe$method),"Archive"] <- "Random"
+allframe[grep("g0.01",allframe$method),"Growth"] <- "0.01"
+allframe[grep("g0.03",allframe$method),"Growth"] <- "0.03"
+allframe[grep("g0.07",allframe$method),"Growth"] <- "0.07"
+write.csv(allframe, file="~/Dropbox/Papers/GECCO15/growth_uniformity.csv")
+
+aggregate4 <- function(frame) {
+  newframe <- data.frame()
+  for(a in unique(frame$Archive)) {
+    for(g in unique(frame$Growth)) {
+      sub <- subset(frame, a==Archive & g==Growth)
+      val <- sum(sub$mean)
+      sd <- sqrt(sum(sub$sd ^ 2) / length(sub$sd))
+      se <- sd / sqrt(30) 
+      row <- sub[1,]
+      row["mean"] <- val
+      row["se"] <- se
+      newframe <- rbind(newframe, row)
+    }
+  }
+  return(newframe)
+}
+agg <- aggregate4(allframe)
+ggplot(agg, aes(x=Growth, y=mean, colour=Archive, shape=Archive)) + 
+  geom_line(position=position_dodge(.1),aes(group=Archive)) +
+  geom_point(position=position_dodge(.1),size=3) + ylab("Accumulated uniformity") + xlab("Growth rate") +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.25, position=position_dodge(.1))
+
+
+
+# mutation correlations
+load("mutation_success.rdata")
+load("mutation_generations.rdata")
+load("mutation_uniformity.rdata")
+agg <- aggregate2(allframe)
+cor(subset(agg, NE=="GA-Fit")$mean, subset(agg, NE=="GA-NS")$mean, method="pearson")
+cor(subset(agg, NE=="NEAT-Fit")$mean, subset(agg, NE=="NEAT-NS")$mean, method="pearson")
+cor(subset(agg, NE=="GA-NS")$mean, subset(agg, NE=="NEAT-NS")$mean, method="pearson")
+cor(subset(agg, NE=="GA-Fit")$mean, subset(agg, NE=="NEAT-Fit")$mean, method="pearson")
+
+
