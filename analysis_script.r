@@ -1284,7 +1284,7 @@ fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(400)), expset.nam
 data_d <- metaLoadData("s7_f2_p2_hyb_t1","s7_f2_p2_hyb_t5","s7_f2_p2_hyb_m125", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
 fullStatistics(data_d, fit.comp=T, fit.comp.par=list(snapshots=c(428)), expset.name="herd", show.only=T)
 
-setwd("~/exps/hybrid/herdfinal/")
+setwd("~/exps/AAMAS15//herdfinal/")
 data_d <- metaLoadData("s7_f2_p2_hyb_m100","s7_f2_p2_hyb_m110","s7_f2_p2_hyb_m125","s7_f2_p2_hyb_m150","s7_f2_p2_hyb_m175", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
 data_d <- metaLoadData("s7_f2_p2_hyb_t1","s7_f2_p2_hyb_t5","s7_f2_p2_hyb_m125_t10","s7_f2_p2_hyb_t20","s7_f2_p2_hyb_t40", params=list(jobs=20, load.behavs=F, use.evals=TRUE, gens=round(seq(0, 299300, length.out=428))))
 
@@ -1328,6 +1328,13 @@ fullStatistics(data, fit.comp=T, fit.comp.par=list(snapshots=c(400)), expset.nam
 
 fitnessLevels(data, c(1.5,2.5))
 fitnessLevels(data, c(1.5,2.5,3.5))
+
+
+
+
+
+
+
 
 
 

@@ -155,6 +155,10 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         fit.setEvaluationResults(state, eval, subpopulation);
         ind.evaluated = true;
     }
+    
+    public EvaluationFunction[] getEvalFunctions() {
+        return evalFunctions;
+    }
 
     public abstract EvaluationResult[] evaluateSolution(GroupController gc, long seed);
 }

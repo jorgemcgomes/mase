@@ -21,3 +21,6 @@ OUTPARENT="$(dirname "$OUTFOLDER")"
 echo $OUTPARENT
 scp -p -r jorge@10.20.0.243:$OUTFOLDER $OUTPARENT
 
+#echo "Cleaning results"
+#ssh jorge@10.20.0.243 rm -rf $OUTFOLDER
+

@@ -107,7 +107,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     }
 
     // from anything to [-PI,PI]
-    protected double normalizeAngle(double ang) {
+    public static double normalizeAngle(double ang) {
         if(ang > Math.PI * 2) {
             ang = ang % (Math.PI * 2);
         } else if(ang < -Math.PI * 2) {
@@ -174,11 +174,14 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     }
 
     protected boolean checkAgentCollisions(Double2D target) {
-        Bag objects = field.getNeighborsExactlyWithinDistance(target, radius * 2);
+        Bag objects = field.getNeighborsWithinDistance(target, radius * 5);
 
         for (Object o : objects) {
-            if (o != this && o instanceof EmboddiedAgent && ((EmboddiedAgent) o).agentCollisions) {
-                return false;
+            if (o != this && o instanceof EmboddiedAgent) {
+                EmboddiedAgent a = (EmboddiedAgent) o;
+                if(a.agentCollisions && a.distanceTo(target) <= radius) {
+                    return false;
+                }
             }
         }
         return true;
@@ -236,7 +239,11 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
      * @return From -PI to PI.
      */
     public double angleTo(Double2D point) {
-        Double2D agentToPoint = point.subtract(pos).normalize();
+        Double2D agentToPoint = point.subtract(pos);
+        if((agentToPoint.x == 0 && agentToPoint.y == 0) || Double.isInfinite(agentToPoint.x) || Double.isInfinite(agentToPoint.y) || Double.isNaN(agentToPoint.x) || Double.isNaN(agentToPoint.y)) {
+            return 0;
+        }
+        agentToPoint = agentToPoint.normalize();
         Double2D agentDir = new Double2D(FastMath.cos(orientation), FastMath.sin(orientation));
         return FastMath.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
     }

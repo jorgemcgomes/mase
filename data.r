@@ -92,7 +92,9 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
                 # & gen %in% data$gens
                 sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group))
                 if(behavs.sample < 1 & nrow(sub > 1)) {  # sample
-                    sub <- sub[sample(1:nrow(sub), round(nrow(sub) * behavs.sample)),]
+                  samp <- sample(1:nrow(sub), round(nrow(sub) * behavs.sample))
+                  samp <- samp[order(samp)]
+                    sub <- sub[samp,]
                 } 
                 # apply transformations
                 for(v in names(vars.transform)) {
@@ -142,7 +144,7 @@ transform <- function(v, t) {
     return((v + t[1]) * t[2])
 }
 
-filterJobs <- function(data, jobs=c()) {
+filterJobs <- function(data, jobs=c(),name=NULL) {
     for(j in data$jobs) {
         if(!(j %in% jobs)) {
             data[[j]] <- NULL
@@ -150,6 +152,9 @@ filterJobs <- function(data, jobs=c()) {
     }
     data$njobs <- length(jobs)
     data$jobs <- jobs
+    if(!is.null(name)) {
+      data$expname <- name
+    }
     return(data)
 }
 

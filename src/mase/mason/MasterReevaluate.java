@@ -14,7 +14,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import mase.evaluation.BehaviourResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonReevaluate.Reevaluation;
@@ -28,10 +27,12 @@ import mase.stat.SolutionPersistence;
 public class MasterReevaluate {
 
     public static final String FOLDER = "-f";
+    public static final String FORCE = "-force";
 
     public static void main(String[] args) throws Exception {
         List<File> folders = new ArrayList<File>();
         int reps = 0;
+        boolean force = false;
         for (int x = 0; x < args.length; x++) {
             if (args[x].equalsIgnoreCase(FOLDER)) {
                 File folder = new File(args[1 + x++]);
@@ -41,6 +42,8 @@ public class MasterReevaluate {
                 folders.add(folder);
             } else if (args[x].equalsIgnoreCase(MasonReevaluate.P_NREPS)) {
                 reps = Integer.parseInt(args[1 + x++]);
+            } else if (args[x].equalsIgnoreCase(FORCE)) {
+                force = true;
             }
         }
         if (folders.isEmpty()) {
@@ -50,7 +53,7 @@ public class MasterReevaluate {
 
         MasonSimulator sim = MasonPlayer.createSimulator(args);
         sim.repetitions = 1;
-        MasterReevaluate mt = new MasterReevaluate(sim, reps);
+        MasterReevaluate mt = new MasterReevaluate(sim, reps, force);
         for (File f : folders) {
             mt.reevaluateFolder(f);
         }
@@ -59,10 +62,12 @@ public class MasterReevaluate {
     private final MasonSimulator sim;
     private final ExecutorService executor;
     private final int reps;
+    private final boolean force;
 
-    public MasterReevaluate(MasonSimulator sim, int reps) {
+    public MasterReevaluate(MasonSimulator sim, int reps, boolean force) {
         this.sim = sim;
         this.reps = reps;
+        this.force = force;
         this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
@@ -70,14 +75,15 @@ public class MasterReevaluate {
         System.out.println(folder.getAbsolutePath());
         // Find all the relevant tars under the given folders
         List<File> tars = new ArrayList<File>();
-        int job = 0;
-        while (true) {
+        for(int job = 0 ; job < 100 ; job++) {
             File b0 = new File(folder, "job." + job + ".bests.tar.gz");
             if (b0.exists()) {
-                tars.add(b0);
-                job++;
-            } else {
-                break;
+                File re = new File(folder, "job." + job + ".refitness.stat");
+                if (re.exists() && !force) {
+                    System.out.println("Skipping " + b0.getAbsolutePath());
+                } else {
+                    tars.add(b0);
+                }
             }
         }
 
@@ -115,11 +121,11 @@ public class MasterReevaluate {
                 // Log behaviours
                 behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex() + " " + reev.meanFitness);
                 for (int j = 1; j < reev.mergedResults.length; j++) { // starts at 1 to skip fitness
-                    EvaluationResult br = reev.mergedResults[j];               
-                    if(br instanceof SubpopEvaluationResult) {
+                    EvaluationResult br = reev.mergedResults[j];
+                    if (br instanceof SubpopEvaluationResult) {
                         SubpopEvaluationResult ser = (SubpopEvaluationResult) br;
                         EvaluationResult[] brs = ser.getAllEvaluations();
-                        for(int x = 0 ; x < brs.length ; x++) {
+                        for (int x = 0; x < brs.length; x++) {
                             behavWriter.write(" " + x + " " + brs[x].toString());
                         }
                     } else {

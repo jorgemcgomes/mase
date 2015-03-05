@@ -18,7 +18,7 @@ import mase.novelty.NoveltyEvaluation;
  *
  * @author jorge
  */
-public class ArchiveReevaluation extends MultiPopCoevolutionaryEvaluator2 {
+public class ArchiveReevaluation extends MultiPopCoevolutionaryEvaluatorExtra {
 
     @Override
     public void evaluatePopulation(EvolutionState state) {

@@ -25,6 +25,8 @@ public class RangeBearingSensor extends AbstractSensor {
     private boolean sort = false;
     private double range = Double.POSITIVE_INFINITY;
     private int objectCount;
+    /*private int mode = BOTH;
+    public static final int BOTH = 2, RANGE = 1, BEARING = 0;*/
 
     public void setObjects(Collection<? extends Object> objs) {
         objects = new ArrayList<Object>(objs.size());
@@ -35,7 +37,11 @@ public class RangeBearingSensor extends AbstractSensor {
         }
         objectCount = objects.size();
     }
-    
+
+    /*public void setMode(int mode) {
+        this.mode = mode;
+    }*/
+
     public void setObjectCount(int count) {
         this.objectCount = count;
     }
@@ -50,30 +56,21 @@ public class RangeBearingSensor extends AbstractSensor {
 
     @Override
     public int valueCount() {
-        return objectCount * 2;
+        return /*mode == RANGE ? objectCount :*/ objectCount * 2;
     }
 
     @Override
     public double[] readValues() {
         List<Pair<Double, Double>> readings = new ArrayList<Pair<Double, Double>>(objects.size());
         for (Object o : objects) {
-            double dist = Double.POSITIVE_INFINITY;
-            double angle = 0;
-            if (o instanceof Double2D) {
-                Double2D p = (Double2D) o;
-                dist = ag.distanceTo(p);
-                angle = ag.angleTo(p);
+            double dist = distFunction.agentToObjectDistance(ag, o);
+            if (Double.isInfinite(range) || dist <= range) {
+                Double2D point = (o instanceof Double2D) ? (Double2D) o : field.getObjectLocation(o);
+                double angle = ag.angleTo(point);
+                readings.add(Pair.of(dist, angle));
             } else {
-                Double2D p = field.getObjectLocation(o);
-                if (p != null) {
-                    double d = distFunction.distance(ag, o);
-                    if(Double.isInfinite(range) || dist <= range) {
-                        dist = d;
-                        angle = ag.angleTo(p);
-                    }
-                }
+                readings.add(Pair.of(Double.POSITIVE_INFINITY, 0d));
             }
-            readings.add(Pair.of(dist, angle));
         }
 
         if (objectCount > 1 && sort) {
@@ -118,5 +115,4 @@ public class RangeBearingSensor extends AbstractSensor {
         this.setObjects(objects); // quick fix so that the own agent can be excluded from the object list
     }
 
-    
 }

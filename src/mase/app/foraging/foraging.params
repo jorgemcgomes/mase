@@ -1,0 +1,64 @@
+# remove sample stats
+stat.child.5 = ec.Statistics
+
+eval.base.problem =                mase.app.foraging.ForagingSimulator
+problem.number-evals =             5
+problem.trials-merge =             best
+problem.eval.0 =                   mase.app.foraging.ForagingFitness
+problem.eval.0.update-freq =       0
+problem.eval.1 =                   mase.app.foraging.ForagingGroupBehaviour
+problem.eval.1.update-freq =       5
+problem.eval.2 =                   mase.app.foraging.ForagingIndividualBehaviour
+problem.eval.2.update-freq =       5
+problem.eval.3 =                   mase.app.foraging.HeightFitness
+problem.eval.3.update-freq =       5
+problem.eval.4 =                   mase.app.foraging.WithinFitness
+problem.eval.4.update-freq =       5
+
+fitness.fitness-index =            0
+fitness.novelty-index =            1
+
+# general params
+problem.repetitions =               5
+problem.same-seed =                 false
+problem.max-steps =                 1000
+
+problem.item-radius =               2.5
+
+problem.item-placement-zone =       150
+problem.arena-size =                600,450
+problem.items =                     100,150-300,150-500,150-100,350-300,350-500,350
+problem.flying-start-pos =          50,25
+problem.flying-start-ori =          1.57
+problem.land-start-pos =            5,25
+problem.land-start-ori =            1.57
+#problem.flying-start-pos =         550,25
+
+problem.land-radius =               4
+problem.land-vision-angle =         1.047
+problem.land-sensing-range =        10
+problem.land-arcs =                 4
+problem.land-linear-speed =         3
+problem.land-turn-speed =           0.62
+
+problem.use-flying-robot =          true
+problem.flying-radius =             20
+problem.flying-vision-angle =       1.047
+problem.flying-arcs =               6
+problem.flying-linear-speed =       20
+problem.flying-linear-acc =         2
+problem.flying-ang-speed =          0.157
+problem.flying-ang-acc =            0.05
+
+problem.flying-vertical-move =      true
+problem.flying-max-height =         250
+problem.flying-start-height =       0
+
+pop.subpop.0 =                      mase.neat.NEATSubpop
+pop.subpop.1 =                      mase.neat.NEATSubpop
+
+pop.subpop.0.INPUT.NODES =          8    
+pop.subpop.0.OUTPUT.NODES =         2
+pop.subpop.1.INPUT.NODES =          15
+pop.subpop.1.OUTPUT.NODES =         4
+

@@ -20,6 +20,7 @@ public class DistanceSensorArcs extends AbstractSensor {
     private Class[] types = new Class[]{Object.class};
     private boolean binary = false;
     private Object[] closestObjects;
+    private boolean ignoreRadius = false;
 
     public void setArcs(double[] arcStart, double[] arcEnd) {
         if (arcStart.length != arcEnd.length) {
@@ -57,6 +58,10 @@ public class DistanceSensorArcs extends AbstractSensor {
     public void setBinary(boolean binary) {
         this.binary = binary;
     }
+    
+    public void ignoreRadius(boolean ignore) {
+        this.ignoreRadius = ignore;
+    }
 
     @Override
     public int valueCount() {
@@ -65,14 +70,21 @@ public class DistanceSensorArcs extends AbstractSensor {
 
     @Override
     public double[] readValues() {
-        Bag neighbours = Double.isInfinite(range) ? field.allObjects
-                : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
+        /*Bag neighbours = Double.isInfinite(range) ? field.allObjects
+                : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);*/
+        Bag neighbours = field.getAllObjects();
         double[] vals = new double[valueCount()];
         Arrays.fill(vals, Double.POSITIVE_INFINITY);
         Arrays.fill(closestObjects, null);
+        if(range < 0.001) {
+            return vals;
+        }
         for (Object n : neighbours) {
             if (objectMatch(n)) {
-                double dist = distFunction.distance(ag, n);
+                double dist = distFunction.agentToObjectDistance(ag, n);
+                if(ignoreRadius) {
+                    dist += ag.getRadius();
+                }
                 if (dist <= range) {
                     double angle = ag.angleTo(field.getObjectLocation(n));
                     for (int a = 0; a < arcStart.length; a++) {

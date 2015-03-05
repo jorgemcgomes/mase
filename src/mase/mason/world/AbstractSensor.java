@@ -21,6 +21,7 @@ public abstract class AbstractSensor implements Sensor {
     protected double fieldDiagonal;
     protected GenericDistanceFunction distFunction;
 
+    @Override
     public void setAgent(SimState state, Continuous2D field, EmboddiedAgent ag) {
         this.state = state;
         this.field = field;

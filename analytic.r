@@ -460,7 +460,6 @@ uniformity.ind <- function(count, t=0.0001, ...) {
     setlist[[names(count)[i]]] <- chis
   }
   a <- metaAnalysis(setlist)
-  print(a)
   return(a)
 }
 
@@ -500,6 +499,19 @@ count.uniformity <- function(vector, visited, mode="jsd", count.threshold=0.0001
     ideal <- rep(1 / length(visited), length(visited))
     vector <- vector / sum(vector)
     return(1 - jsd(vector, ideal))
+  } else if(mode == "diffs") {
+    ideal <- rep(1 / length(visited), length(visited))
+    vector <- vector / sum(vector)
+    worst <- c(rep(0, length(visited)-1),1)
+    totalDiff <- sum(abs(ideal - vector))
+    maxDiff <- sum(abs(ideal - worst))
+    return (1 - totalDiff / maxDiff)
+  } else if(mode == "chisq") {
+    chisq <- as.numeric(chisq.test(vector)$statistic)
+    return(chisq)
+  } else {
+    vector <- vector / sum(vector)
+    return (ineq(vector,type=mode))
   }
 }
 
@@ -526,256 +538,9 @@ kl <- function(p, q) {
   return(res)
 }
 
-# levels: number of levels per variable to consider for patch formation
-# exploration.count <- function(datalist, levels=5, vars=datalist[[1]]$vars.group) {    
-#     pb <- txtProgressBar(min=1, max=length(datalist)*length(datalist[[1]]$subpops)*length(datalist[[1]]$jobs) * length(datalist[[1]]$gens), style=3)
-#     pbindex <- 1
-#     
-#     # subdivide the space in same-size patches
-#     maxv <- list()
-#     minv <- list()
-#     for(data in datalist) {
-#         for(j in data$jobs) {
-#             for(s in data$subpops) {
-#                 for(v in vars) {
-#                     maxv[[v]] <- max(maxv[[v]], data[[j]][[s]][[v]])
-#                     minv[[v]] <- min(minv[[v]], data[[j]][[s]][[v]])
-#                 }
-#             }
-#         }
-#     }
-#     
-#     # count the patches visited in each method, each evolutionary run, each subpop
-#     maxFitness <- rep(0, levels ^ length(vars))
-#     counts <- list()
-#     for(data in datalist) { # experiment
-#         exp <- data$expname
-#         counts[[exp]] <- list()
-#         for(j in data$jobs) { # jobs
-#             counts[[exp]][[j]] <- list()
-#             for(s in data$subpops) { # subpops
-#                 counts[[exp]][[j]][[s]] <- list()
-#                 for(g in data$gens) { # gens
-#                     setTxtProgressBar(pb,pbindex)
-#                     pbindex <- pbindex + 1
-#                     
-#                     counts[[exp]][[j]][[s]][[g+1]] <- rep(0, levels ^ length(vars))
-#                     frame <- subset(data[[j]][[s]], gen == g, select=c("fitness",vars))
-#                     for(v in vars) {
-#                         frame[[v]] <- round((frame[[v]] - minv[[v]]) / (maxv[[v]] - minv[[v]]) * (levels - 1))
-#                     }
-#                     for(r in 1:nrow(frame)) {
-#                         vec <- as.numeric(frame[r,vars])
-#                         id <- sum(vec * levels ^ ((length(vec)-1):0))
-#                         counts[[exp]][[j]][[s]][[g+1]][id] <- counts[[exp]][[j]][[s]][[g+1]][id] + 1
-#                         maxFitness[id] <- max(maxFitness[id], frame[r,"fitness"])
-#                     }
-#                 }
-#             }
-#         }
-#     }
-#     counts$maxFitness <- maxFitness
-#     return(counts)
-# }
-
-# Divergence from the total exploration of each experiment to the uniform distribution
-# uniformity.group <- function(count, threshold=100, fitness.threshold=0) {
-#     all.count <- merge.counts(count)
-#     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-#     visited <- which(all.count > threshold & count$maxFitness > fitness.threshold)
-#     cat("All:", length(all.count), "| Visited:", length(visited),"\n")
-#     ideal <- rep(1 / length(visited), length(visited))
-#     setlist <- list()
-#     for(i in 1:(length(count)-1)) { # exps: -1 to discard the maxFitness column
-#         chis <- c()
-#         for(j in 1:length(count[[i]])) { # jobs
-#             job.counts <- merge.counts(count[[i]][[j]])[visited]
-#             if(sum(job.counts) > 0) {
-#                 job.counts <- job.counts / sum(job.counts)
-#                 chis <- c(chis, 1 - jsd(job.counts, ideal))
-#             } else {
-#                 chis <- c(chis, 0)
-#             }
-#             
-#         }
-#         setlist[[names(count)[i]]] <- chis
-#     }
-#     return(metaAnalysis(setlist))
-# }
-
-# total.group <- function(count, threshold=100, fitness.threshold=0) {
-#   all.count <- merge.counts(count)
-#   plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-#   visited <- which(all.count > threshold & count$maxFitness > fitness.threshold)
-#   visitedall <- which(all.count > threshold)  
-#   cat("All:", length(all.count), "| Visited:", length(visited),"\n")  
-#   
-#   setlist <- list()
-#   for(i in 1:(length(count)-1)) { # exps: -1 to discard the maxFitness column
-#     chis <- c()
-#     for(j in 1:length(count[[i]])) { # jobs
-#       merge <- merge.counts(count[[i]][[j]])
-#       chis <- c(chis, sum(merge[visited]) / sum(merge[visitedall]))
-#     }
-#     setlist[[names(count)[i]]] <- chis
-#   }
-#   return(metaAnalysis(setlist))
-# }
-
-# uniformity.group.alt <- function(count, threshold=100, count.threshold=0, fitness.threshold=0) {
-#     all.count <- merge.counts(count)
-#     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-#     visited <- which(all.count > threshold & count$maxFitness > fitness.threshold)
-#     cat("All:", length(all.count), "| Visited:", length(visited),"\n")
-#     
-#     setlist <- list()
-#     for(i in 1:(length(count)-1)) { # exps
-#         chis <- c()
-#         for(j in 1:length(count[[i]])) { # jobs
-#             job.counts <- merge.counts(count[[i]][[j]])[visited]
-#             chis <- c(chis, sum(job.counts > count.threshold) / length(visited))
-#         }
-#         setlist[[names(count)[i]]] <- chis
-#     }
-#     return(metaAnalysis(setlist))
-# }
-
-# uniformity.ind.alt <- function(count, threshold=100, count.threshold=0, fitness.threshold=0) {  
-#   subs <- names(count[[1]][[1]])
-#   visited <- list()
-#   for(s in subs) {
-#     subcount <- merge.counts.sub(count, s)
-#     visited[[s]] <- which(subcount > threshold & subcount$maxFitness > fitness.threshold)
-#     cat(s, "All:", length(subcount), "| Visited:", length(visited[[s]]),"\n")
-#   }
-#    
-#   setlist <- list()
-#   for(i in 1:(length(count)-1)) { # exps
-#     chis <- c()
-#     for(j in 1:length(count[[i]])) { # jobs
-#       subchis <- c()
-#       for(s in subs) { # subpops
-#         subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
-#         subchis <- c(subchis, sum(subcounts > count.threshold) / length(visited))
-#       }
-#       chis <- c(chis, mean(subchis))
-#     }
-#     setlist[[names(count)[i]]] <- chis
-#   }
-#   return(metaAnalysis(setlist))
-# }
-# 
-# 
-# 
-# # Divergence from the exploration of each subpop to the uniform distribution
-# uniformity.ind <- function(count, sub, threshold=100, fitness.threshold=0) {
-#     all.count <- merge.counts.sub(count, sub)
-#     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-#     visited <- which(all.count > threshold & count$maxFitness > fitness.threshold)
-#     cat("All:", length(all.count), "| Visited:", length(visited),"\n")
-#     print(summary(all.count[visited]))
-#     ideal <- rep(1 / length(visited), length(visited))
-#     setlist <- list()
-#     for(i in 1:(length(count)-1)) { # exps
-#         chis <- c()
-#         for(j in 1:length(count[[i]])) { # jobs
-#             subchis <- c()
-#             for(s in names(count[[i]][[j]])) { # subpops
-#                 if(is.null(sub) || sub == s) {
-#                     subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
-#                     subcounts <- subcounts / sum(subcounts)
-#                     subchis <- c(subchis, 1 - jsd(subcounts , ideal))
-#                 }
-#             }
-#             chis <- c(chis, mean(subchis))
-#         }
-#         setlist[[names(count)[i]]] <- chis
-#     }
-#     return(metaAnalysis(setlist))    
-# }
-# 
-# uniformity.ind.visited <- function(count, sub, threshold=1) {
-#     all.count <- merge.counts.sub(count, sub)
-#     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-#     visited <- which(all.count > threshold)
-#     cat("All:", length(all.count), "| Visited:", length(visited),"\n")
-#     print(summary(all.count[visited]))
-#     setlist <- list()
-#     for(i in 1:length(count)) { # exps
-#         chis <- c()
-#         for(j in 1:length(count[[i]])) { # jobs
-#             subchis <- c()
-#             for(s in names(count[[i]][[j]])) { # subpops
-#                 if(is.null(sub) || sub == s) {
-#                     subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
-#                     above <- length(which(subcounts > threshold))
-#                     subchis <- c(subchis, above / length(visited))
-#                 }
-#             }
-#             chis <- c(chis, mean(subchis))
-#         }
-#         setlist[[names(count)[i]]] <- chis
-#     }
-#     return(metaAnalysis(setlist))    
-# }
-# 
-# # Pairwise Jensen-Shannon divergence between the exploration of the subpops
-# uniformity.diff <- function(count, threshold=100) {
-#     all.count <- merge.counts(count)
-#     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-#     visited <- which(all.count > threshold)
-#     setlist <- list()
-#     for(i in 1:length(count)) { # exps
-#         chis <- c()
-#         for(j in 1:length(count[[i]])) { # jobs
-#             subchis <- c()
-#             for(s in 1:length(count[[i]][[j]])) { # subpops
-#                 for(s2 in 1:length(count[[i]][[j]])) {
-#                     if(s < s2) {
-#                         subcounts <- merge.counts(count[[i]][[j]][[s]])[visited]
-#                         subcounts <- subcounts / sum(subcounts)
-#                         subcounts2 <- merge.counts(count[[i]][[j]][[s2]])[visited]
-#                         subcounts2 <- subcounts2 / sum(subcounts2)
-#                         subchis <- c(subchis, jsd(subcounts , subcounts2))
-#                     }
-#                 }
-#             }
-#             chis <- c(chis, mean(subchis))
-#         }
-#         setlist[[names(count)[i]]] <- chis
-#     }
-#     return(metaAnalysis(setlist))      
-# }
-
-# uniformity.gen <- function(count, threshold=100) {
-#     all.count <- merge.counts(count)
-#     plot(sort(all.count[which(all.count > 0)], decreasing=T), type="p", pch=20, log="y")
-#     visited <- which(all.count > threshold)
-#     ideal <- rep(1 / length(visited), length(visited))
-#     setlist <- list()
-#     for(i in 1:length(count)) { # exps
-#         chis <- c()
-#         for(j in 1:length(count[[i]])) { # jobs
-#             subchis <- c()
-#             for(g in 1:length(count[[i]][[j]][[1]])) { # gens
-#                 templist <- list()
-#                 for(s in 1:length(count[[i]][[j]])) { # subpops
-#                     templist[[s]] <- count[[i]][[j]][[s]][[g]]
-#                 }
-#                 gen.count <- merge.counts(templist)[visited]
-#                 gen.count <- gen.count / sum(gen.count)
-#                 subchis <- c(subchis, 1 - jsd(gen.count , ideal))
-#             }
-#             chis <- c(chis, mean(subchis))
-#         }
-#         setlist[[names(count)[i]]] <- chis
-#     }
-#     return(metaAnalysis(setlist))    
-# }
-
 #### Generic generational data analysis ########################################
 
-analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, 
+analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, jobs=NULL,
                     splits=10, interval=F, t.tests=F, plot=T, boxplots=T, all=T, print=T, smooth=0, transform=list(), ylim=NULL, jitter=T) {
     
     # data loading
@@ -785,9 +550,9 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     for(i in 1:length(expsfolders)) {
         f <- expsfolders[[i]]
         index <- ifelse(is.null(exp.names), basename(f), exp.names[i])
-        data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens, transform=transform)
+        data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens, transform=transform, jobs=jobs)
     }
-        
+    
     if(is.null(gens)) {
       for(d in data) {
         for(j in d) {
@@ -820,7 +585,7 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
         }
         ylim <- c(min,max)
     }
-        
+            
     # assemble plot data
     plotframe <- data.frame(gen=gens)
     for(a in analyse) {  
@@ -861,6 +626,7 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
             }
           }
           print(printframe)
+          cat("Grand mean:\n", mean(plotframe[[paste(exp,a,sep=".")]]))
         }
     }
     
@@ -926,8 +692,13 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     }
 }
 
-loadExp <- function(folder, filename, transform=list(), ...) {
+loadExp <- function(folder, filename, transform=list(), jobs=NULL, ...) {
     files <- list.files(folder, pattern=filename, full.names=T)
+    if(!is.null(jobs)) {
+      jobnames <- paste0("job\\.",jobs,"\\.")
+      files <- files[grep(paste(jobnames,collapse="|"), files)]
+    }
+    print(files)
     exp <- list()
     for(f in files) {
         jobname <- basename(f)
@@ -1126,25 +897,6 @@ pressureAnalysis <- function(data, ...) {
     }    
     return(res)
 }
-
-# pressureAnalysisRun <- function(frame) {
-#     totalFit <- c()
-#     totalNov <- c()
-#     totalDiff <- c()
-#     gens <- unique(frame$gen)
-#     for(g in gens) {
-#         subgen <- subset(frame, gen == g, select=c("nov","fit","score"))
-#         novRange <- range(subgen[["nov"]])
-#         fitRange <- range(subgen[["fit"]])
-#         normNov <- (subgen[["nov"]] - novRange[1]) / (novRange[2] - novRange[1])
-#         normFit <- (subgen[["fit"]] - fitRange[1]) / (fitRange[2] - fitRange[1])
-#         totalFit <- c(totalFit, mean(normFit))
-#         totalNov <- c(totalNov, mean(normNov))
-#         totalDiff <- c(totalDiff, weighted.mean(normNov - normFit, subgen[["score"]]))
-#     }
-#     res <- data.frame(gen=gens, fit=totalFit, nov=totalNov, diff=totalDiff)
-#     return(res)
-# }
 
 pressureAnalysisRun <- function(frame, top=0.25) {
     totalFit <- c()

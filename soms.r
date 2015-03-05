@@ -2,11 +2,12 @@ buildSom <- function(..., variables=NULL, sample.size=25000, distance.filter=0, 
     dataList <- list(...)
     print("Going to sample")
     sample <- sampleData(dataList, sample.size, subpops)
-    sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample
-    trainData <- sample[,variables]
+    sample[is.na(sample)] <- 0.5 # rarely a NA can appear in the sample    
+    trainData <- subset(sample, select=variables)
+    
     rm(dataList)
     gc()
-    print("Sampling done")        
+    print("Sampling done")
     
     if(scale) {
         trainData <- scale(trainData)
@@ -78,7 +79,7 @@ countMap <- function(som, data) {
     variables <- colnames(som$codes)
     len = som$grid$xdim * som$grid$ydim
     res <- mat.or.vec(len,1)
-    data <- as.matrix(data[,variables])
+    data <- as.matrix(subset(data,select=variables))
     m <- map2(som, data)$unit.classif
     for(i in 1:len) {
         res[i] <- sum(m == i)
@@ -91,9 +92,9 @@ fitnessMapAvg <- function(som, data) {
     len = som$grid$xdim * som$grid$ydim
     accum <- mat.or.vec(len,1)
     count <- mat.or.vec(len,1)
-    m <- map2(som, as.matrix(data[,variables]))$unit.classif
+    m <- map2(som, as.matrix(subset(data,select=variables)))$unit.classif
     for(i in 1:length(m)) {
-        accum[m[i]] <- accum[m[i]] + data[i,"fitness"]
+        accum[m[i]] <- accum[m[i]] + data$fitness[i]
         count[m[i]] <- count[m[i]] + 1
     }
     res <- accum / count
@@ -105,9 +106,9 @@ fitnessMapMax <- function(som, data) {
     variables <- colnames(som$codes)
     len = som$grid$xdim * som$grid$ydim
     res <- rep(0, len)
-    m <- map2(som, as.matrix(data[,variables]))$unit.classif
+    m <- map2(som, as.matrix(subset(data,select=variables)))$unit.classif
     for(i in 1:length(m)) {
-        res[m[i]] <- max(res[m[i]], data[i,"fitness"])
+        res[m[i]] <- max(res[m[i]], data$fitness[i])
     }
     return(res)
 }
@@ -117,9 +118,9 @@ fitnessMapQuantile <- function(som, data, q=0.75) {
     len = som$grid$xdim * som$grid$ydim
     temp <- list()
     temp[[len]] <- 0
-    m <- map2(som, as.matrix(data[,variables]))$unit.classif
+    m <- map2(som, as.matrix(subset(data,select=variables)))$unit.classif
     for(i in 1:length(m)) {
-        temp[[m[i]]] <- c(temp[[m[i]]], data[i,"fitness"])
+        temp[[m[i]]] <- c(temp[[m[i]]], data$fitness[i])
     }
     for(i in 1:len) {
         if(is.null(temp[[i]])) {
@@ -193,7 +194,7 @@ identifyBests <- function(som, data, n=10, outfile) {
     idframe <- idframe[complete.cases(idframe),]
     
     # map data to som
-    m <- map2(som, idframe[,variables])$unit.classif
+    m <- map2(som, subset(idframe,select=variables))$unit.classif
     
     # pick bests
     bestsframe <- data.frame(x=rep(NA,100000), y=rep(NA,100000))

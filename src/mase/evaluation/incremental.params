@@ -1,0 +1,9 @@
+# Incremental evolution
+
+stat.child.8 =                  mase.app.evaluation.IncrementalEvolution
+
+incremental.num-stages =        5
+incremental.fitness-threshold = 1
+incremental.above-threshold =   0.2
+incremental.file =              $incremental.stat
+incremental.min-generations =   0

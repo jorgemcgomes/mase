@@ -44,9 +44,11 @@ public abstract class SmartAgent extends EmboddiedAgent {
 
     @Override
     public void step(SimState state) {
-        lastNormSensors = readNormalisedSensors();
-        lastActionOutput = ac.processInputs(lastNormSensors);
-        action(lastActionOutput);
+        if(ac != null) {
+            lastNormSensors = readNormalisedSensors();
+            lastActionOutput = ac.processInputs(lastNormSensors);
+            action(lastActionOutput);
+        }
     }
 
     public double[] readNormalisedSensors() {
@@ -115,4 +117,14 @@ public abstract class SmartAgent extends EmboddiedAgent {
     public String getRawActions() {
         return Arrays.toString(lastActionOutput);
     }
+
+    public List<Sensor> getSensors() {
+        return sensors;
+    }
+
+    public List<Effector> getEffectors() {
+        return effectors;
+    }
+    
+    
 }

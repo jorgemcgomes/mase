@@ -8,7 +8,8 @@ library(parallel)
 library(pbapply)
 library(energy)
 library(data.table)
-library(plyr)
+library(ineq)
+#library(plyr)
 
 SOURCE_DIR = "/home/jorge/Dropbox/mase/"
 source(file.path(SOURCE_DIR, "data.r"))
