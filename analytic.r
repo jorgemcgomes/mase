@@ -550,7 +550,7 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
     for(i in 1:length(expsfolders)) {
         f <- expsfolders[[i]]
         index <- ifelse(is.null(exp.names), basename(f), exp.names[i])
-        data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens, transform=transform, jobs=jobs)
+        data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens, transform=transform, jobs=jobs[[i]])
     }
     
     if(is.null(gens)) {
@@ -626,7 +626,6 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
             }
           }
           print(printframe)
-          cat("Grand mean:\n", mean(plotframe[[paste(exp,a,sep=".")]]))
         }
     }
     

@@ -160,19 +160,24 @@ analyse("fit", filename="rebehaviours.stat", jobs=paste0("job.",c(2,3,6,7,9,15,1
 
 
 # BASE CCEA
-data <- metaLoadData("~/exps/fl4/stable/fit","~/exps/fl4/stable_sep/fit","~/exps/fl4/down/fit","~/exps/fl4/down_sep/fit","~/exps/fl4/baseline", names=c("ST","SO","VT","VO","BL"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=F, behavs.sample=1, vars.ind=c("I/H","Proximity","Movement","Distance"),vars.group=c("Items","Within","Dispersion","AvgProximity")))
-fullStatistics(data, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="Base", som.group.par=list(distance.filter=0.25), fit.comp.par=list(snapshots=c(750),jitter=F))
+data <- metaLoadData("~/exps/fl4/stable/fit","~/exps/fl4/stable_sep/fit","~/exps/fl4/down/fit","~/exps/fl4/down_sep/fit","~/exps/fl4/baseline", names=c("Fix-Near","Fix-Sep","Var-Near","Var-Sep","Baseline"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=F, behavs.sample=1, vars.ind=c("I/H","Proximity","Movement","Distance"),vars.group=c("Items","Within","Dispersion","AvgProximity")))
+DEF_HEIGHT <- 2.75
+DEF_WIDTH <- 4.25
+fullStatistics(data, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="Base", som.group.par=list(distance.filter=0.25), fit.comp.par=list(snapshots=c(750),jitter=F,ylim=T))
 
 # Time within analysis
 
 setwd("~/exps/fl4")
-analyse("stable/fit", filename="rebehaviours.stat", exp.names=c("ST"), vars.pre=c("gen","pop","index","fitness","bg1","bg2","bg3","bg4"), vars.sub=c("sep","bi1","bi2","bi3","bi4"), vars.post=c("height","within"), analyse="within", splits=5, boxplots=F, plot=F, all=F, print=T)
-analyse("stable_sep/fit", filename="rebehaviours.stat", jobs=c(6,7,8,10,11,13,19,21,22,25,28,29), exp.names=c("SO-Good"), vars.pre=c("gen","pop","index","fitness","bg1","bg2","bg3","bg4"), vars.sub=c("sep","bi1","bi2","bi3","bi4"), vars.post=c("height","within"), analyse="within", splits=5, boxplots=F, plot=F, all=F, print=T)
-analyse("stable_sep/fit", filename="rebehaviours.stat", jobs=c(5,9,14,16,17,18,20,23,24,26), exp.names=c("SO-Bad"), vars.pre=c("gen","pop","index","fitness","bg1","bg2","bg3","bg4"), vars.sub=c("sep","bi1","bi2","bi3","bi4"), vars.post=c("height","within"), analyse="within", splits=5, boxplots=F, plot=F, all=F, print=T)
-analyse("down/fit", filename="rebehaviours.stat", jobs=c(1,5,12,14,18,20,21,22,24,25,26,27,28), exp.names=c("VT-Good"), vars.pre=c("gen","pop","index","fitness","bg1","bg2","bg3","bg4"), vars.sub=c("sep","bi1","bi2","bi3","bi4"), vars.post=c("height","within"), analyse="within", splits=5, boxplots=F, plot=F, all=F, print=T)
-analyse("down/fit", filename="rebehaviours.stat", jobs=c(2,3,6,7,8,9,10,15,17,19,29), exp.names=c("VT-Bad"), vars.pre=c("gen","pop","index","fitness","bg1","bg2","bg3","bg4"), vars.sub=c("sep","bi1","bi2","bi3","bi4"), vars.post=c("height","within"), analyse="within", splits=5, boxplots=F, plot=F, all=F, print=T)
-analyse("down_sep/fit", filename="rebehaviours.stat", jobs=c(14,17,19,22,24), exp.names=c("VO-Good"), vars.pre=c("gen","pop","index","fitness","bg1","bg2","bg3","bg4"), vars.sub=c("sep","bi1","bi2","bi3","bi4"), vars.post=c("height","within"), analyse="within", splits=5, boxplots=F, plot=F, all=F, print=T)
-analyse("down_sep/fit", filename="rebehaviours.stat", jobs=c(0,1,2,3,4,5,6,7,8,9,10,11,12,15,16,18,20,21,23,25,26,27,28,29), exp.names=c("VO-Bad"), vars.pre=c("gen","pop","index","fitness","bg1","bg2","bg3","bg4"), vars.sub=c("sep","bi1","bi2","bi3","bi4"), vars.post=c("height","within"), analyse="within", splits=5, boxplots=F, plot=F, all=F, print=T)
+analyse("stable/fit","stable_sep/fit","stable_sep/fit","down/fit","down/fit","down_sep/fit","down_sep/fit", jobs=list(
+  NULL,
+  c(6,7,8,10,11,13,19,21,22,25,28,29),
+  c(5,9,14,16,17,18,20,23,24,26), 
+  c(1,5,12,14,18,20,21,22,24,25,26,27,28),
+  c(2,3,6,7,8,9,10,15,17,19,29),
+  c(14,17,19,22,24),
+  c(0,1,2,3,4,5,6,7,8,9,10,11,12,15,16,18,20,21,23,25,26,27,28,29)),
+  exp.names=c("Fix-Near","Fix-Sep-Good","Fix-Sep-Bad","Var-Near-Good","Var-Near-Bad","Var-Sep-Good","Var-Sep-Bad"), 
+  filename="rebehaviours.stat", vars.pre=c("gen","pop","index","fitness","bg1","bg2","bg3","bg4"), vars.sub=c("sep","bi1","bi2","bi3","bi4"), vars.post=c("height","within"), analyse="within", splits=1, boxplots=F, plot=F, all=F, print=T, interval=T, t.tests=T)
 
 
 # Behaviour space analysis
@@ -243,6 +248,27 @@ fullStatistics(so, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F,
 fullStatistics(vo, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="VO", som.group.par=list(distance.filter=0.25), fit.comp.par=list(snapshots=c(750),jitter=F,ylim=T))
 
 
+# Improving coevolution -- fitness 2
+
+vars.group <- c("Items","Within","Dispersion","AvgProximity")
+setwd("~/exps/fl4/down")
+vt <- metaLoadData("fit","ns","staged","halted", names=c("B","N","I","J"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=F, behavs.sample=0.25, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+setwd("~/exps/fl4/stable_sep")
+so <- metaLoadData("fit","ns","staged","halted", names=c("B","N","I","J"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=F, behavs.sample=0.25, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+setwd("~/exps/fl4/down_sep")
+vo <- metaLoadData("fit","ns","staged","halted", names=c("B","N","I","J"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=F, behavs.sample=0.25, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+
+# line plots
+DEF_HEIGHT <- 2.5
+DEF_WIDTH <- 3.5
+fullStatistics(vt, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="VT", som.group.par=list(distance.filter=0.25), fit.comp.par=list(snapshots=c(750),jitter=F,ylim=T))
+fullStatistics(so, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="SO", som.group.par=list(distance.filter=0.25), fit.comp.par=list(snapshots=c(750),jitter=F,ylim=T))
+fullStatistics(vo, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="VO", som.group.par=list(distance.filter=0.25), fit.comp.par=list(snapshots=c(750),jitter=F,ylim=T))
+
+# boxplots
+DEF_HEIGHT <- 2.5
+DEF_WIDTH <- 2.3
+
 # Improving coevolution -- behaviour exploration
 
 st.count <- exploration.count(st, vars=vars.group)
@@ -259,11 +285,39 @@ uniformity(vt.count,mode="jsd")
 uniformity(so.count,mode="jsd")
 uniformity(vo.count,mode="jsd")
 
+# Behaviour analysis 2
+
+setwd("~/exps/fl4")
+data <- metaLoadData("stable/fit","stable_sep/fit","down/fit","down_sep/fit", names=c("ST","SO","VT","VO"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=0.25, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+vtGood <- filterJobs(data$VT, jobs=paste0("job.",c(1,5,12,14,18,20,21,22,24,25,26,27,28)), name="VT-Good")
+vtBad <- filterJobs(data$VT, jobs=paste0("job.",c(2,3,6,7,8,9,10,15,17,19,29)), name="VT-Bad")
+soGood <- filterJobs(data$SO, jobs=paste0("job.",c(6,7,8,10,11,13,19,21,22,25,28,29)),name="SO-Good")
+soBad <- filterJobs(data$SO, jobs=paste0("job.",c(5,9,14,16,17,18,20,23,24,26)),name="SO-Bad")
+voGood <- filterJobs(data$VO, jobs=paste0("job.",c(14,17,19,22,24)),name="VO-Good")
+voBad <- filterJobs(data$VO, jobs=paste0("job.",c(0,1,2,3,4,5,6,7,8,9,10,11,12,15,16,18,20,21,23,25,26,27,28,29)),name="VO-Bad")
+
+setwd("~/exps/fl4/stable")
+st <- metaLoadData("fit","ns", names=c("Base","NS"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=0.25, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+setwd("~/exps/fl4/down")
+vt <- metaLoadData("fit","ns","staged","halted", names=c("Base","NS","Inc","NInc"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=0.25, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+setwd("~/exps/fl4/stable_sep")
+so <- metaLoadData("fit","ns","staged","halted", names=c("Base","NS","Inc","NInc"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=0.25, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+setwd("~/exps/fl4/down_sep")
+vo <- metaLoadData("fit","ns","staged","halted", names=c("Base","NS","Inc","NInc"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=0.25, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+
+st.count <- exploration.count(st, vars=vars.group)
+vt.count <- exploration.count(c(vt,list(vtGood,vtBad)), vars=vars.group)
+so.count <- exploration.count(c(so,list(soGood,soBad)), vars=vars.group)
+vo.count <- exploration.count(c(vo,list(voGood,voBad)), vars=vars.group)
+uniformity(st.count,mode="Gini")
+uniformity(vt.count,mode="Gini")
+uniformity(so.count,mode="Gini")
+uniformity(vo.count,mode="Gini")
 
 
 # NS special
 
-failed.vo <- c(0.889,0.884,0.882,0.82,0.885,0.908,0.836,0.915,0.845,0.883,0.89,0.83,0.887,0.91,0.77)
+failed.vo <- c(0.889,0.884,0.882,0.82,0.885,0.908,0.836,0.915,0.845,0.883,0.89,0.83,0.887,0.91)
 failed.vt <- c(0.938,0.91)
 
 
