@@ -144,6 +144,7 @@ public class NEATGATrainingManager {
 		double terminationValue = Double.parseDouble(config.configElement("TERMINATION.VALUE"));
 		double maxPerturb = Double.parseDouble(config.configElement("MAX.PERTURB"));
 		double maxBiasPerturb = Double.parseDouble(config.configElement("MAX.BIAS.PERTURB"));
+                boolean copyBest = Boolean.valueOf(config.configElement("COPY.BEST"));
 
 		
 		NEATGADescriptor descriptor = new NEATGADescriptor();
@@ -180,7 +181,8 @@ public class NEATGATrainingManager {
 		descriptor.setTerminationValue(terminationValue);
 		descriptor.setMaxPerturb(maxPerturb);
 		descriptor.setMaxBiasPerturb(maxBiasPerturb);
-		
+		descriptor.setCopyBest(copyBest);
+                
 		return (descriptor);
 	}
 

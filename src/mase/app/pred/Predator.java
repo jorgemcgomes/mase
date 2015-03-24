@@ -30,34 +30,37 @@ public class Predator extends SmartAgent {
             this.enableAgentCollisions(true);
         }
 
-        if (sim.par.sensorMode == SensorMode.arcs) {
-            DistanceSensorArcs ds = new DistanceSensorArcs();
-            ds.setArcs(sim.par.sensorArcs);
-            ds.setRange(Double.POSITIVE_INFINITY);
-            ds.setObjectTypes(Prey.class);
-            super.addSensor(ds);
-        } else if (sim.par.sensorMode == SensorMode.closest) {
-            RangeBearingSensor rbs = new RangeBearingSensor();
-            rbs.setObjects(sim.preys);
-            rbs.setObjectCount(1);
-            rbs.setSort(true);
-            super.addSensor(rbs);
-        } else if (sim.par.sensorMode == SensorMode.otherpreds) {
-            RangeBearingSensor rbsOthers = new RangeBearingSensor();
-            rbsOthers.setObjects(sim.predators);
-            rbsOthers.setSort(true);
-            super.addSensor(rbsOthers);
-
-            RangeBearingSensor rbsPrey = new RangeBearingSensor();
-            rbsPrey.setObjects(sim.preys);
-            rbsPrey.setObjectCount(1);
-            rbsPrey.setSort(true);
-            super.addSensor(rbsPrey);
-        }
-
         DashMovementEffector dm = new DashMovementEffector();
         dm.setSpeeds(sim.par.predatorSpeed, sim.par.predatorRotateSpeed);
         super.addEffector(dm);
+    }
+
+    void setupSensors() {
+        PredatorPrey pp = (PredatorPrey) super.sim;
+        if (pp.par.sensorMode == SensorMode.arcs) {
+            DistanceSensorArcs ds = new DistanceSensorArcs();
+            ds.setArcs(pp.par.sensorArcs);
+            ds.setRange(Double.POSITIVE_INFINITY);
+            ds.setObjectTypes(Prey.class);
+            super.addSensor(ds);
+        } else if (pp.par.sensorMode == SensorMode.closest) {
+            RangeBearingSensor rbs = new RangeBearingSensor();
+            rbs.setObjects(pp.preys);
+            rbs.setObjectCount(1);
+            rbs.setSort(true);
+            super.addSensor(rbs);
+        } else if (pp.par.sensorMode == SensorMode.otherpreds) {
+            RangeBearingSensor rbsPrey = new RangeBearingSensor();
+            rbsPrey.setObjects(pp.preys);
+            rbsPrey.setObjectCount(1);
+            rbsPrey.setSort(true);
+            super.addSensor(rbsPrey);
+
+            RangeBearingSensor rbsOthers = new RangeBearingSensor();
+            rbsOthers.setObjects(pp.predators);
+            rbsOthers.setSort(true);
+            super.addSensor(rbsOthers);
+        }
     }
 
     @Override

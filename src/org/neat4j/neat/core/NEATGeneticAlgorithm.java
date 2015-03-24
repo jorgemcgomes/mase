@@ -310,8 +310,9 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
         double disjointCoeff = this.descriptor.getDisjointCoeff();
         double weightCoeff = this.descriptor.getWeightCoeff();
         double threshold = this.descriptor.getThreshold();
+        boolean copyBest = this.descriptor.getCopyBest();
 
-        NEATSpecie specie = new NEATSpecie(threshold, excessCoeff, disjointCoeff, weightCoeff, specieIdIdx++);
+        NEATSpecie specie = new NEATSpecie(threshold, excessCoeff, disjointCoeff, weightCoeff, specieIdIdx++, copyBest);
         specie.setMaxFitnessAge(this.descriptor.getMaxSpecieAge());
         specie.setAgePenalty(this.descriptor.getAgePenalty());
         specie.setAgeThreshold(this.descriptor.getSpecieAgeThreshold());

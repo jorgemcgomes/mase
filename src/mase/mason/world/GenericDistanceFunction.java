@@ -41,7 +41,7 @@ public class GenericDistanceFunction extends DistanceFunction {
         } else if (e2 instanceof SimplePortrayal2D) {
             if (e2 instanceof OvalPortrayal2D) {
                 OvalPortrayal2D a2 = (OvalPortrayal2D) e2;
-                return a1.getLocation().distance(field.getObjectLocation(a2)) - a1.getRadius() - a2.scale / 2;
+                return a1.getLocation().distance(field.getObjectLocation(a2)) - a1.getRadius()/* - a2.scale / 2*/;
             } else {
                 SimplePortrayal2D a2 = (SimplePortrayal2D) e2;
                 return a1.getLocation().distance(field.getObjectLocation(a2)) - a1.getRadius();

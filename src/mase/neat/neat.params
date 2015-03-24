@@ -74,6 +74,7 @@ neat.SPECIE.YOUTH.THRESHOLD =           10
 neat.SPECIE.OLD.PENALTY =               0.7
 neat.SPECIE.YOUTH.BOOST =               1.2
 neat.SPECIE.FITNESS.MAX =               15
+neat.COPY.BEST =                        true
 
 # GA Operators
 neat.OPERATOR.XOVER =                   org.neat4j.neat.core.xover.NEATCrossover

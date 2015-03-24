@@ -44,6 +44,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         # Fitness
         #ext <- read.table(file.path(folder, paste0(j,".",fitness.file)), header=FALSE, sep=" ", quote="", stringsAsFactors=F colClasses="numeric", comment.char="", multi.line=F)
         ext <- fread(file.path(folder, paste0(j,".",fitness.file)), header=F, sep=" ", stringsAsFactors=F)  
+        ext <- subset(ext, select=(colSums(is.na(ext)) != nrow(ext)))
         #ext <- ext[,colSums(is.na(ext)) != nrow(ext)]
         old.gen <- NULL
         if(is.null(data$gens)) {
@@ -63,19 +64,11 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
             }
             old.gen <- ext[[1]][rows]
             ext <- ext[rows,]
-            
-            # TEMPORARY STUFF
-            #hyb <- read.table(file.path(folder, paste0(j,".hybrid.stat")), header=FALSE, sep=" ")
-            #hyb <- hyb[rows,]
-            #data[[j]]$hybrid <- hyb
           } else {
             ext <- ext[which(ext[[1]] %in% data$gens),]
           }
         }
-        #bestfar <- ext[[ncol(ext)]]
-        #bestfar[which(bestfar > 1)] <- 1
-        #bestgen <- ext[[ncol(ext)-1]]
-        #bestgen[which(bestfar > 1)] <- 1
+
         data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)]], best.gen=ext[[ncol(ext)-1]], mean=ext[[ncol(ext)-2]])
         if(use.evals) {
           data[[j]]$fitness$old.gen <- old.gen

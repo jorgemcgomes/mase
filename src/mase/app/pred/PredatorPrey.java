@@ -110,6 +110,9 @@ public class PredatorPrey extends GUICompatibleSimState implements TaskDescripti
             newPred.setStopper(schedule.scheduleRepeating(newPred));
             predators.add(newPred);
         }
+        for(Predator pred : predators) {
+            pred.setupSensors();
+        }
     }
 
     public int getCaptureCount() {

@@ -362,7 +362,13 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
 
     protected boolean betterThan(Individual a, Individual b) {
         if (eliteMode == EliteMode.fitness) {
-            return ((ExpandedFitness) a.fitness).getFitnessScore() > ((ExpandedFitness) b.fitness).getFitnessScore();
+            double fa = ((ExpandedFitness) a.fitness).getFitnessScore();
+            double fb = ((ExpandedFitness) b.fitness).getFitnessScore();
+            if(fa != fb) {
+                return fa > fb;
+            } else {
+                return a.fitness.betterThan(b.fitness);
+            }
         } else if (eliteMode == EliteMode.novelty) {
             return ((NoveltyFitness) a.fitness).getNoveltyScore() > ((NoveltyFitness) b.fitness).getNoveltyScore();
         } else {

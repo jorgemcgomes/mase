@@ -107,7 +107,7 @@ public class NSGA2 implements PostEvaluator {
             for (List<Individual> rank : rankedInds) {
                 for (Individual ind : rank) {
                     double rankScore = rankedInds.size() - ind.rank;
-                    double distScore = Double.isInfinite(ind.crowdingDistance) ? 1 : ind.crowdingDistance;
+                    double distScore = Double.isInfinite(ind.crowdingDistance) ? 1 : ind.crowdingDistance / 2;
                     ind.score = rankScore + distScore;
                     NoveltyFitness nf = (NoveltyFitness) pop.individuals[ind.individualId].fitness;
                     nf.setFitness(state, (float) ind.score, false);

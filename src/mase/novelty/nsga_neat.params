@@ -13,4 +13,4 @@ neat.COMPATABILITY.CHANGE =             0
 neat.SPECIE.COUNT =                     1
 neat.SURVIVAL.THRESHOLD =               1
 neat.size =                             100
-neat.SPECIE.AGE.THRESHOLD =             79
+neat.COPY.BEST =                        false

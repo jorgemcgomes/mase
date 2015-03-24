@@ -1,0 +1,12 @@
+parent.0=oneprey.params
+
+problem.sensor-mode =              otherpreds
+problem.collisions =               false
+
+vector.species.genome-size =       78
+neural.input =                     6
+neural.hidden =                    8
+neural.output =                    2
+
+neat.INPUT.NODES =                 6
+neat.OUTPUT.NODES =                2

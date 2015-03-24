@@ -36,6 +36,10 @@ public class NeuralAgentController implements AgentController {
     public String toString() {
         return network.dumpWeights();
     }
+    
+    public BasicNetwork getNetwork() {
+        return network;
+    }
 
     @Override
     public AgentController clone() {

@@ -26,7 +26,7 @@ public class RangeBearingSensor extends AbstractSensor {
     private double range = Double.POSITIVE_INFINITY;
     private int objectCount;
     /*private int mode = BOTH;
-    public static final int BOTH = 2, RANGE = 1, BEARING = 0;*/
+     public static final int BOTH = 2, RANGE = 1, BEARING = 0;*/
 
     public void setObjects(Collection<? extends Object> objs) {
         objects = new ArrayList<Object>(objs.size());
@@ -39,9 +39,8 @@ public class RangeBearingSensor extends AbstractSensor {
     }
 
     /*public void setMode(int mode) {
-        this.mode = mode;
-    }*/
-
+     this.mode = mode;
+     }*/
     public void setObjectCount(int count) {
         this.objectCount = count;
     }
@@ -66,8 +65,12 @@ public class RangeBearingSensor extends AbstractSensor {
             double dist = distFunction.agentToObjectDistance(ag, o);
             if (Double.isInfinite(range) || dist <= range) {
                 Double2D point = (o instanceof Double2D) ? (Double2D) o : field.getObjectLocation(o);
-                double angle = ag.angleTo(point);
-                readings.add(Pair.of(dist, angle));
+                if (point != null) {
+                    double angle = ag.angleTo(point);
+                    readings.add(Pair.of(dist, angle));
+                } else {
+                    readings.add(Pair.of(Double.POSITIVE_INFINITY, 0d));
+                }
             } else {
                 readings.add(Pair.of(Double.POSITIVE_INFINITY, 0d));
             }

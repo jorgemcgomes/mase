@@ -32,12 +32,14 @@ public class NEATSpecie extends Specie {
     private int ageThreshold;
     private int youthThreshold;
     private double fitnessMultiplier = 1;
-
-    public NEATSpecie(double threshold, double excessCoeff, double disjointCoeff, double weightCoeff, int id) {
+    private boolean copyBest;
+    
+    public NEATSpecie(double threshold, double excessCoeff, double disjointCoeff, double weightCoeff, int id, boolean copyBest) {
         super(threshold, id);
         this.disjointCoeff = disjointCoeff;
         this.excessCoeff = excessCoeff;
         this.weightCoeff = weightCoeff;
+        this.copyBest = copyBest;
     }
 
     public boolean addSpecieMember(Chromosome specieMember) {
@@ -135,13 +137,13 @@ public class NEATSpecie extends Specie {
             matableMembers[i] = (NEATChromosome) sorted[i];
         }
 
-        if (count > 0 && this.ageThreshold != 79) { // !!!!REMOVE THIS LAST CONDITION!!!!
+        if (count > 0 && copyBest) {
             // copy best member.
             offspring[0] = this.cloneChromosome((NEATChromosome) sorted[0]);
         }
 
         try {
-            for (i = ageThreshold != 79 ? 1 : 0; i < offspring.length; i++) { // !!! REMOVE I INITIALIZATION CONDITION !!!!
+            for (i = (copyBest ? 1 : 0) ; i < offspring.length; i++) {
                 parents = selector.selectParents(matableMembers, false);
                 child = xOver.crossOver(this.cloneParents(parents));
                 offspring[i] = mut.mutate(child.nextChromosome());
