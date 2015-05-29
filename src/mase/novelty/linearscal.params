@@ -1,5 +1,0 @@
-parent.0 = novelty.params
-
-eval.num-post = 2
-eval.post.1 =                           mase.novelty.LinearScalarization
-eval.post.1.novelty-proportion =        0.5

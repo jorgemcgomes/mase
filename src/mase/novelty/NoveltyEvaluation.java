@@ -26,19 +26,24 @@ import mase.evaluation.VectorBehaviourResult;
  */
 public class NoveltyEvaluation implements PostEvaluator {
 
-    protected List<ArchiveEntry>[] archives;
+    public static final Parameter DEFAULT_BASE = new Parameter("novelty");
+    public static final String P_BEHAVIOUR_INDEX = "behaviour-index";
     public static final String P_K_NN = "knn";
     public static final String P_ARCHIVE_GROWTH = "archive-growth";
     public static final String P_ARCHIVE_SIZE_LIMIT = "archive-size";
     public static final String P_ARCHIVE_MODE = "archive-mode";
     public static final String P_ARCHIVE_CRITERIA = "archive-criteria";
     public static final String P_KD_TREE = "kd-tree";
+    public static final String P_SCORE_NAME = "score-name";
     protected ArchiveMode archiveMode;
     protected ArchiveCriteria archiveCriteria;
     protected int k;
     protected double archiveGrowth;
     protected int sizeLimit;
     protected boolean useKDTree;
+    protected int behaviourIndex;
+    protected String scoreName;
+    protected List<ArchiveEntry>[] archives;
     
     public enum ArchiveMode {
 
@@ -53,14 +58,16 @@ public class NoveltyEvaluation implements PostEvaluator {
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
-        this.k = state.parameters.getInt(base.push(P_K_NN), null);
-        this.archiveGrowth = state.parameters.getDouble(base.push(P_ARCHIVE_GROWTH), null);
-        this.sizeLimit = state.parameters.getInt(base.push(P_ARCHIVE_SIZE_LIMIT), null);
-        this.archiveMode = ArchiveMode.valueOf(state.parameters.getString(base.push(P_ARCHIVE_MODE), null));
-        this.archiveCriteria = ArchiveCriteria.valueOf(state.parameters.getString(base.push(P_ARCHIVE_CRITERIA), null));
-        this.useKDTree = state.parameters.getBoolean(base.push(P_KD_TREE), null, false);
-
-        int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this must be more flexible
+        this.k = state.parameters.getInt(base.push(P_K_NN), DEFAULT_BASE.push(P_K_NN));
+        this.archiveGrowth = state.parameters.getDouble(base.push(P_ARCHIVE_GROWTH), DEFAULT_BASE.push(P_ARCHIVE_GROWTH));
+        this.sizeLimit = state.parameters.getInt(base.push(P_ARCHIVE_SIZE_LIMIT), DEFAULT_BASE.push(P_ARCHIVE_SIZE_LIMIT));
+        this.archiveMode = ArchiveMode.valueOf(state.parameters.getString(base.push(P_ARCHIVE_MODE), DEFAULT_BASE.push(P_ARCHIVE_MODE)));
+        this.archiveCriteria = ArchiveCriteria.valueOf(state.parameters.getString(base.push(P_ARCHIVE_CRITERIA), DEFAULT_BASE.push(P_ARCHIVE_CRITERIA)));
+        this.useKDTree = state.parameters.getBoolean(base.push(P_KD_TREE), DEFAULT_BASE.push(P_KD_TREE), false);
+        this.behaviourIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), DEFAULT_BASE.push(P_BEHAVIOUR_INDEX));
+        this.scoreName = state.parameters.getStringWithDefault(base.push(P_SCORE_NAME), DEFAULT_BASE.push(P_SCORE_NAME), NoveltyFitness.NOVELTY_SCORE);
+        
+        int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this should be more flexible
         this.archives = new ArrayList[nPops];
         if (archiveMode == ArchiveMode.shared) {
             ArrayList<ArchiveEntry> arch = new ArrayList<ArchiveEntry>();
@@ -94,7 +101,7 @@ public class NoveltyEvaluation implements PostEvaluator {
             // Current population
             for (Individual ind : pop.subpops[p].individuals) {
                 NoveltyFitness indFit = (NoveltyFitness) ind.fitness;
-                pool.add(indFit.getNoveltyBehaviour());
+                pool.add(indFit.getBehaviour(behaviourIndex));
             }
             KNNDistanceCalculator calc = useKDTree && pool.size() >= k * 2 ?
                     new KDTreeCalculator() :
@@ -104,9 +111,10 @@ public class NoveltyEvaluation implements PostEvaluator {
             // Calculate novelty for each individual
             for (Individual ind : pop.subpops[p].individuals) {
                 NoveltyFitness indFit = (NoveltyFitness) ind.fitness;
-                BehaviourResult br = indFit.getNoveltyBehaviour();
-                indFit.noveltyScore = calc.getDistance(br, k);
-                indFit.setFitness(state, (float) indFit.noveltyScore, false);
+                BehaviourResult br = indFit.getBehaviour(behaviourIndex);
+                float novScore = (float) calc.getDistance(br, k);
+                indFit.scores().put(scoreName, novScore);
+                indFit.setFitness(state, novScore, false);
             }
         }
     }
@@ -216,7 +224,8 @@ public class NoveltyEvaluation implements PostEvaluator {
                     }
                 }
                 for (Individual ind : toAdd) {
-                    ArchiveEntry ar = new ArchiveEntry(state, ind);
+                    ArchiveEntry ar = new ArchiveEntry(state, ind, 
+                            ((NoveltyFitness) ind.fitness).getBehaviour(behaviourIndex));
                     if (archive.size() == sizeLimit) {
                         int index = state.random[0].nextInt(archive.size());
                         archive.set(index, ar);
@@ -238,10 +247,6 @@ public class NoveltyEvaluation implements PostEvaluator {
         protected Individual individual;
         protected int generation;
         protected float fitness;
-
-        protected ArchiveEntry(EvolutionState state, Individual ind) {
-            this(state, ind, (BehaviourResult) ((NoveltyFitness) ind.fitness).getNoveltyBehaviour());
-        }
 
         protected ArchiveEntry(EvolutionState state, Individual ind, BehaviourResult behaviour) {
             this.behaviour = behaviour;

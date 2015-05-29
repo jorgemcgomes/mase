@@ -117,7 +117,7 @@ batch.ttest <- function(setlist, ...) {
 
 #### Behaviour diversity metrics ###############################################
 
-euclideanDist <- function(x1, x2) {crossprod(x1-x2)} 
+euclideanDist <- function(x1, x2) {sqrt(sum((x1 - x2) ^ 2))} 
 
 metaGroupDiversity <- function(datalist) {
     setlist <- list()
@@ -461,13 +461,13 @@ filterSubCount <- function(counts, sub=NULL) {
   return(counts)
 }
 
-uniformity.all <- function(count, t=0.0001, ...) {
-  threshold <- t * sum(count$totalCount)
+uniformity.all <- function(count, t=0.0001, totalCount=count$totalCount, ...) {
+  threshold <- t * sum(totalCount)
   cat("Threshold:",threshold, "\n")
   
-  plot(sort(count$totalCount[which(count$totalCount > 0)], decreasing=T), type="p", pch=20, log="y")
-  visited <- which(count$totalCount > threshold)
-  cat("All:", length(count$totalCount), "| Visited:", length(which(count$totalCount > 0))  ,"| Filtered:", length(visited),"\n")
+  plot(sort(totalCount[which(totalCount > 0)], decreasing=T), type="p", pch=20, log="y")
+  visited <- which(totalCount > threshold)
+  cat("All:", length(totalCount), "| Visited:", length(which(totalCount > 0))  ,"| Filtered:", length(visited),"\n")
   
   setlist <- list()
   for(i in 1:(length(count)-1)) { # exps
@@ -480,6 +480,18 @@ uniformity.all <- function(count, t=0.0001, ...) {
   }
   a <- metaAnalysis(setlist)
   return(a)
+}
+
+uniformity.ind <- function(count, subs=names(count[[1]][[1]]), ...) {
+  res <- list()
+  for(sub in subs) {
+    f <- filterSubCount(count, sub)
+    u <- uniformity.all(f, ...)$data
+    for(n in rownames(u)) {
+      res[[n]] <- c(res[[n]], u[n,])
+    }
+  }
+  return(metaAnalysis(res))
 }
 
 uniformity.gen <- function(count, t=0.0001, ...) {

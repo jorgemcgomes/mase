@@ -8,8 +8,11 @@ import ec.EvolutionState;
 import ec.Fitness;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  *
@@ -18,6 +21,7 @@ import java.util.Comparator;
 public class ExpandedFitness extends SimpleFitness {
 
     public static final String P_FITNESS_EVAL_INDEX = "fitness-index";
+    public static final String FITNESS_SCORE = "fitness";
     protected int fitnessIndex;
 
     @Override
@@ -26,6 +30,7 @@ public class ExpandedFitness extends SimpleFitness {
     }
 
     protected EvaluationResult[] evalResults;
+    protected LinkedHashMap<String,Float> scores;
     protected int subpop;
 
     @Override
@@ -37,7 +42,14 @@ public class ExpandedFitness extends SimpleFitness {
     public void setEvaluationResults(EvolutionState state, EvaluationResult[] br, int subpop) {
         this.evalResults = br;
         this.subpop = subpop;
-        this.setFitness(state, getFitnessScore(), false);
+        float fit = getFitnessScoreAux();
+        this.setFitness(state, fit, false);
+        scores = new LinkedHashMap<String,Float>();
+        scores.put(FITNESS_SCORE, getFitnessScoreAux());
+    }
+    
+    public LinkedHashMap<String,Float> scores() {
+        return scores;
     }
     
     public void setFitnessIndex(int index) {
@@ -51,8 +63,12 @@ public class ExpandedFitness extends SimpleFitness {
     public EvaluationResult[] getEvaluationResults() {
         return evalResults;
     }
-
+    
     public float getFitnessScore() {
+        return scores.get(FITNESS_SCORE);
+    }
+
+    private float getFitnessScoreAux() {
         EvaluationResult er = evalResults[fitnessIndex];
         if (er instanceof SubpopEvaluationResult) {
             SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
@@ -98,17 +114,6 @@ public class ExpandedFitness extends SimpleFitness {
                 }
             });
             this.setContext(sortedFits[sortedFits.length / 2].getContext());
-            
-            /*Individual[] c = null;
-            float worstScore = Float.MAX_VALUE;
-            for(Fitness f : fitnesses) {
-                if(((ExpandedFitness) f).getFitnessScore() < worstScore) {
-                    worstScore = ((ExpandedFitness) f).getFitnessScore();
-                    c = f.getContext();
-                }
-            }
-            this.setContext(c);*/
         }
-
     }
 }

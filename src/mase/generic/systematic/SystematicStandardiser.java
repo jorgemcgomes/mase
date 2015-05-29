@@ -57,7 +57,7 @@ public class SystematicStandardiser implements PostEvaluator {
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 NoveltyFitness nf = (NoveltyFitness) ind.fitness;
-                results.add((SystematicResult) nf.getNoveltyBehaviour());
+                results.add((SystematicResult) nf.getBehaviour(1)); // TODO: FIX -- should not be static 1
             }
         }
         

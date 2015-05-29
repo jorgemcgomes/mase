@@ -15,10 +15,8 @@ metaLoadData <- function(..., params, names=NULL) {
 loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c(), 
                      vars.file=c(vars.group, vars.ind), vars.transform=list(),
                      subpops=1, expname=folder, gens=NULL, load.behavs=TRUE, 
-                     load.clusters=FALSE, new.clusters=TRUE, load.weights=FALSE, load.noveltyind=FALSE,
-                     behavs.sample=1, fitness.file="fitness.stat", behavs.file="behaviours.stat",
-                     clusters.file="genclusters.stat", weights.file="weights.stat",
-                     noveltyind.file="noveltyind.stat", use.evals=FALSE) {
+                     behavs.sample=1, behavs.bests=F, fitness.file="fitness.stat", behavs.file="behaviours.stat",
+                     use.evals=FALSE) {
     data <- NULL
     data$fitlim <- fitlim
     if(is.character(jobs)) {
@@ -42,10 +40,8 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
         data[[j]] <- list()
         
         # Fitness
-        #ext <- read.table(file.path(folder, paste0(j,".",fitness.file)), header=FALSE, sep=" ", quote="", stringsAsFactors=F colClasses="numeric", comment.char="", multi.line=F)
         ext <- fread(file.path(folder, paste0(j,".",fitness.file)), header=F, sep=" ", stringsAsFactors=F)  
         ext <- subset(ext, select=(colSums(is.na(ext)) != nrow(ext)))
-        #ext <- ext[,colSums(is.na(ext)) != nrow(ext)]
         old.gen <- NULL
         if(is.null(data$gens)) {
             data$gens <- ext[[1]]
@@ -74,20 +70,27 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
           data[[j]]$fitness$old.gen <- old.gen
         }
         
+        bestInGen <- function(g, data) {
+          s <- data[gen==g,]
+          ind <- which.max(s$fitness)
+          return(s[ind,])
+        }
+        
         # Behaviours
         if(load.behavs) {
-          #tab <- read.table(file.path(folder,paste0(j,".",behavs.file)), header=FALSE, sep=" ", stringsAsFactors=FALSE, quote="", colClasses="numeric", comment.char="", multi.line=F)
           tab <- fread(file.path(folder,paste0(j,".",behavs.file)), header=F, sep=" ", stringsAsFactors=F)  
           fixedvars <- c("gen","subpop","index","fitness")
             setnames(tab, c(fixedvars,vars.file))
-            #colnames(tab) <- c(fixedvars,vars.file)
             for(s in 0:(data$nsubs-1)) {
                 # & gen %in% data$gens
                 sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group))
-                if(behavs.sample < 1 & nrow(sub > 1)) {  # sample
+                if(behavs.bests) {
+                  bests <- lapply(data$gens, bestInGen, sub)
+                  sub <- do.call(rbind.data.frame, bests)
+                } else if(behavs.sample < 1 & nrow(sub > 1)) { # sample
                   samp <- sample(1:nrow(sub), round(nrow(sub) * behavs.sample))
                   samp <- samp[order(samp)]
-                    sub <- sub[samp,]
+                  sub <- sub[samp,]
                 } 
                 # apply transformations
                 for(v in names(vars.transform)) {
@@ -99,34 +102,6 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
                 data[[j]][[data$subpops[s+1]]] <- sub           
             }
         }
-        
-        # Clusters
-        if(load.clusters) {
-            cl <- read.table(file.path(folder, paste0(j,".",clusters.file)), header=FALSE, sep=" ", stringsAsFactors=F)
-            if(new.clusters) {
-                data$clustervars <- paste0("c",1:(ncol(cl)-3))
-                colnames(cl) <- c("gen","count","frequency",data$clustervars)
-            } else {
-                data$clustervars <- paste0("c",1:(ncol(cl)-2))
-                colnames(cl) <- c("gen","frequency",data$clustervars)
-            }
-            data[[j]]$clusters <- cl
-        }
-        
-        # Weights
-        if(load.weights) {
-            wg <- read.table(file.path(folder, paste0(j,".",weights.file)), header=FALSE, sep=" ", stringsAsFactors=F)
-            colnames(wg) <- c("gen",paste0("w",1:(ncol(wg)-1)))
-            data[[j]]$weights <- wg
-        }
-        
-        # Individual novelty stats
-        if(load.noveltyind) {
-            ni <- read.table(file.path(folder, paste0(j,".",noveltyind.file)), header=FALSE, sep=" ", stringsAsFactors=F)
-            colnames(ni) <- c("gen","subpop","ind","fit","nov","repocomp","score")
-            data[[j]]$noveltyind <- ni
-        }
-        
         prog <- prog + 1
         setTxtProgressBar(progress, prog)
     }

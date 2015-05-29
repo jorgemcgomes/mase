@@ -16,22 +16,9 @@ import mase.evaluation.BehaviourResult;
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
 public class NoveltyFitness extends ExpandedFitness {
-
-    public static final String P_NOVELTY_EVAL_INDEX = "novelty-index";
-    protected int noveltyIndex;
-    protected double noveltyScore;
-    protected int repoComparisons;
-
-    @Override
-    public void setup(EvolutionState state, Parameter base) {
-        super.setup(state, base);
-        this.noveltyIndex = state.parameters.getIntWithDefault(base.push(P_NOVELTY_EVAL_INDEX), defaultBase().push(P_NOVELTY_EVAL_INDEX), 1);
-    }
-
-    public BehaviourResult getNoveltyBehaviour() {
-        return getBehaviour(noveltyIndex);
-    }
-
+    
+    public static final String NOVELTY_SCORE = "novelty";
+    
     public BehaviourResult getBehaviour(int index) {
         EvaluationResult er = super.evalResults[index];
         BehaviourResult br;
@@ -43,8 +30,8 @@ public class NoveltyFitness extends ExpandedFitness {
         }
         return br;
     }
-
-    public double getNoveltyScore() {
-        return noveltyScore;
+    
+    public float getNoveltyScore() {
+        return scores.get(NOVELTY_SCORE);
     }
 }

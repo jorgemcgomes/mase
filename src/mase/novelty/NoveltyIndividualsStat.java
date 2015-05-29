@@ -9,6 +9,10 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import mase.MetaEvaluator;
+import mase.PostEvaluator;
 
 /**
  *
@@ -40,10 +44,11 @@ public class NoveltyIndividualsStat extends Statistics {
         for (int i = 0; i < state.population.subpops.length; i++) {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 NoveltyFitness nf = (NoveltyFitness) state.population.subpops[i].individuals[j].fitness;
-                state.output.print(state.generation + " " + i + " " + j + " " +
-                        nf.getFitnessScore() + " " +
-                        nf.noveltyScore + " " + 
-                        nf.repoComparisons + " " + nf.fitness() + "\n", log);
+                state.output.print(state.generation + " " + i + " " + j, log);
+                for(float score : nf.scores().values()) {
+                    state.output.print(" " + score, log);
+                }
+                state.output.println(" " + nf.fitness(), log);
             }
         }
     }

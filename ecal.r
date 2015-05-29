@@ -184,7 +184,8 @@ analyse("stable/fit","stable_sep/fit","stable_sep/fit","down/fit","down/fit","do
 
 vars.group <- c("Items","Within","Dispersion","AvgProximity")
 setwd("~/exps/fl4")
-data <- metaLoadData("stable/fit","stable_sep/fit","down/fit","down_sep/fit", names=c("ST","SO","VT","VO"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=1, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+data <- metaLoadData("stable/fit","stable_sep/fit","down/fit","down_sep/fit", names=c("ST","SO","VT","VO"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=0.1, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+#data <- metaLoadData("stable/fit","stable_sep/fit","down/fit","down_sep/fit", names=c("ST","SO","VT","VO"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
 
 st <- data$ST
 vtGood <- filterJobs(data$VT, jobs=paste0("job.",c(1,5,12,14,18,20,21,22,24,25,26,27,28)), name="VT-Good")
@@ -193,6 +194,8 @@ soGood <- filterJobs(data$SO, jobs=paste0("job.",c(6,7,8,10,11,13,19,21,22,25,28
 soBad <- filterJobs(data$SO, jobs=paste0("job.",c(5,9,14,16,17,18,20,23,24,26)),name="SO-Bad")
 voGood <- filterJobs(data$VO, jobs=paste0("job.",c(14,17,19,22,24)),name="VO-Good")
 voBad <- filterJobs(data$VO, jobs=paste0("job.",c(0,1,2,3,4,5,6,7,8,9,10,11,12,15,16,18,20,21,23,25,26,27,28,29)),name="VO-Bad")
+
+d <- diversity.group(list(st,vtGood,vtBad,soGood,soBad,voGood,voBad))
 
 st.count <- exploration.count(list(st), vars=vars.group)
 vt.count <- exploration.count(list(vtGood,vtBad), vars=vars.group)
@@ -285,6 +288,8 @@ uniformity(vt.count,mode="jsd")
 uniformity(so.count,mode="jsd")
 uniformity(vo.count,mode="jsd")
 
+
+
 # Behaviour analysis 2
 
 setwd("~/exps/fl4")
@@ -314,8 +319,29 @@ uniformity(vt.count,mode="Gini")
 uniformity(so.count,mode="Gini")
 uniformity(vo.count,mode="Gini")
 
+# behaviour analysis 3 -- Camera ready
+
+data <- metaLoadData("stable/fit","stable/ns","stable_sep/fit","stable_sep/staged","stable_sep/halted","stable_sep/ns","down/fit","down/staged/","down/halted","down/ns","down_sep/fit","down_sep/staged","down_sep/halted","down_sep/ns", names=c("ST.Fit","ST.NS","SO.Fit","SO.Inc","SO.NInc","SO.NS","VT.Fit","VT.Inc","VT.NInc","VT.NS","VO.Fit","VO.Inc","VO.NInc","VO.NS"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=0.1, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+div.group.all <- diversity.group(data)
+save(div.group.all, file="~/Dropbox/Work/Papers/ECAL/div.group.all")
+
 
 # NS special
+
+data <- metaLoadData("down/ns","down_sep/ns", names=c("VT.NS","VO.NS"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=F, behavs.sample=0.1, vars.group=vars.group, vars.file=c(vars.group,rep(NA,6))))
+
+d <- data[["VO.NS"]]
+failed <- c()
+i <- 1
+for(job in d$jobs) {
+  if(d[[job]]$fitness$best.sofar[750] <= 3) {
+    failed <- c(failed, i)
+  }
+  i <- i + 1
+}
+
+failed.vt <- div.group.all$data["VT.NS",failed]
+failed.vo <- div.group.all$data["VO.NS",failed]
 
 failed.vo <- c(0.889,0.884,0.882,0.82,0.885,0.908,0.836,0.915,0.845,0.883,0.89,0.83,0.887,0.91)
 failed.vt <- c(0.938,0.91)

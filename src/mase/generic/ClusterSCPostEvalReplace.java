@@ -9,7 +9,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
-import mase.novelty.WeightedNovelty;
+import mase.novelty.weighted.WeightedNovelty;
 
 /**
  *

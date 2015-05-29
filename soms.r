@@ -46,7 +46,7 @@ buildSom <- function(..., variables=NULL, sample.size=25000, distance.filter=0, 
     }
     
     
-    som <- som(as.matrix(somData), keep.data=FALSE, grid=somgrid(grid.size, grid.size, grid.type))
+    som <- som(as.matrix(somData), rlen=1000, keep.data=FALSE, grid=somgrid(grid.size, grid.size, grid.type))
     gc()
     som$fitmin <- min(sample$fitness)
     som$fitmax <- max(sample$fitness)

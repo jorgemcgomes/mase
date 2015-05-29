@@ -1,7 +1,7 @@
 setwd("~/exps/pred")
 theme_set(theme_bw())
-DEF_HEIGHT=3.5
-DEF_WIDTH=5
+DEF_HEIGHT=3
+DEF_WIDTH=4.5
 
 # DEF_HEIGHT=3
 # DEF_WIDTH=4.5
@@ -424,7 +424,7 @@ fullStatistics(data, fit.comp=T, fit.tests=T, show.only=T, som.group=F, som.allj
 
 # NEW ########################33
 
-setwd("~/exps/EC")
+setwd("~/exps/EC/pred")
 data <- metaLoadData("fit_e4","fit_e10","nov_e4","nov_e10", names=c("Fit4","Fit10","NS4","NS10"), params=list(jobs=10, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.sample=0.2, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 gfit4 <- groupDiversity(data$Fit4)
 gfit10 <- groupDiversity(data$Fit10)
@@ -490,22 +490,7 @@ frame <- data.frame(gen=s0$Gen, S0F4=s0$Fit4, S1F4=s1$Fit4, S2F4=s2$Fit4, S0F10=
 plotMultiline(frame,ylim=NULL)
 
 
-data <- metaLoadData("fit_e4","fit_e10", names=c("Fit4","Fit10"), params=list(jobs=5, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
-
-reduceToBests <- function(data) {
-  for(job in data$jobs) {
-    for(s in data$subpops) {
-      bests <- data.frame()
-      for(g in data$gens) {
-        sub <- subset(data[[job]][[s]], gen==g)
-        ind <- which.max(sub$fitness)
-        bests <- rbind(bests, sub[ind,])
-      }
-      data[[job]][[s]] <- bests
-    }
-  }
-  return(data)
-}
+data <- metaLoadData("fit_e4","fit_e10", names=c("Fit4","Fit10"), params=list(jobs=5, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 
 data4 <- reduceToBests(data$Fit4)
 sub0 <- subset(data4$job.0$sub.0, select=vars.ind)
@@ -603,29 +588,366 @@ points(sam$points[4501:6000,], pch=21, bg=color, col=NA)
 points(sam$points[4500+c(1,500,which.max(data13$job.0$sub.0$fitness)),], pch=4, col=c("blue","orange","red"),bg=NA,lwd=3)
 
 
+####### best-of-generation plots with REbehaviours ###############
+rebests <- list()
+rebests[["4"]] <- subset(fread("fit_e4/job.0.rebehaviours.stat"), select=c(4:8))
+rebests[["7"]] <- subset(fread("fit_e7/job.0.rebehaviours.stat"), select=c(4:8))
+rebests[["10"]] <- subset(fread("fit_e10/job.0.rebehaviours.stat"), select=c(4:8))
+rebests[["13"]] <- subset(fread("fit_e13/job.0.rebehaviours.stat"), select=c(4:8))
+all <- rbind(cbind(V="4",rebests[["4"]]),cbind(V="7",rebests[["7"]]),cbind(V="10",rebests[["10"]]),cbind(V="13",rebests[["13"]]))
+all.b <- subset(all, select=3:6)
+uni <- !duplicated(all.b)
+resam <- sammon(dist(all.b[uni,]))
+all[uni,"X"] <- resam$points[,1]
+all[uni,"Y"] <- resam$points[,2]
+color <- rgb(0,0,0,0.1)
+for(v in names(rebests)) {
+  plot(c(-0.25,1.1),c(-0.3,0.3), type="n", main=v)
+  sub <- subset(all, V==v)
+  pts <- subset(sub,select=c("X","Y"))
+  points(pts, pch=21, bg=color, col=NA)
+  points(pts[c(1,500,which.max(sub[[2]])),], pch=4, col=c("blue","orange","red"),bg=NA,lwd=3)
+}
+
+
+
+
 setwd("~/exps/EC/pred")
 data <- metaLoadData("nsga_e4_group","nov_e4","nsga_e4_mix50","nov_e4_indgroup","nsga_e4_ind","nov_e4_ind", names=c("NSGA.G","LS.G","NSGA.Mix","LS.Mix","NSGA.I","LS.I"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nsga_e7_group","nov_e7","nsga_e7_mix50","nov_e7_indgroup","nsga_e7_ind","nov_e7_ind", names=c("NSGA.G","LS.G","NSGA.Mix","LS.Mix","NSGA.I","LS.I"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nsga_e10_group","nov_e10","nsga_e10_mix50","nov_e10_indgroup","nsga_e10_ind","nov_e10_ind", names=c("NSGA.G","LS.G","NSGA.Mix","LS.Mix","NSGA.I","LS.I"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nsga_e13_group","nov_e13","nsga_e13_mix50","nov_e13_indgroup","nsga_e13_ind","nov_e13_ind", names=c("NSGA.G","LS.G","NSGA.Mix","LS.Mix","NSGA.I","LS.I"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 
-
 data <- metaLoadData("nsga_e4_group","nsga_e4_mix75","nsga_e4_mix50","nsga_e4_mix25","nsga_e4_ind", names=c("NSGA.Group","NSGA.Mix25","NSGA.Mix50","NSGA.Mix75","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nsga_e7_group","nsga_e7_mix75","nsga_e7_mix50","nsga_e7_mix25","nsga_e7_ind", names=c("NSGA.Group","NSGA.Mix25","NSGA.Mix50","NSGA.Mix75","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nsga_e10_group","nsga_e10_mix75","nsga_e10_mix50","nsga_e10_mix25","nsga_e10_ind", names=c("NSGA.Group","NSGA.Mix25","NSGA.Mix50","NSGA.Mix75","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nsga_e13_group","nsga_e13_mix75","nsga_e13_mix50","nsga_e13_mix25","nsga_e13_ind", names=c("NSGA.Group","NSGA.Mix25","NSGA.Mix50","NSGA.Mix75","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 
+data <- metaLoadData("nsga_e4_group","nsga_e4_mix","nsga_e4_mix50","nsga_e4_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Mix50","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("nsga_e7_group","nsga_e7_mix","nsga_e7_mix50","nsga_e7_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Mix50","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("nsga_e10_group","nsga_e10_mix","nsga_e10_mix50","nsga_e10_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Mix50","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("nsga_e13_group","nsga_e13_mix","nsga_e13_mix50","nsga_e13_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Mix50","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 
 data <- metaLoadData("nss_e4_group","nsf_e4_group","nsga_e4_group","fit_e4", names=c("NS.N","NS.F","NSGA","Fit"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nss_e7_group","nsf_e7_group","nsga_e7_group","fit_e7", names=c("NS.N","NS.F","NSGA","Fit"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nss_e10_group","nsf_e10_group","nsga_e10_group","fit_e10", names=c("NS.N","NS.F","NSGA","Fit"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 data <- metaLoadData("nss_e13_group","nsf_e13_group","nsga_e13_group","fit_e13", names=c("NS.N","NS.F","NSGA","Fit"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 
+data <- metaLoadData("nsga_e4_group","nsga_e4_mix","nsga_e4_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("nsga_e7_group","nsga_e7_mix","nsga_e7_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("nsga_e10_group","nsga_e10_mix","nsga_e10_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("nsga_e13_group","nsga_e13_mix","nsga_e13_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+
 fullStatistics(data, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="V4", fit.comp.par=list(snapshots=c(500),jitter=T,ylim=T))
 
 
 data <- metaLoadData("nsga_e7_group","nov_e7","nsga_e7_ind","nov_e7_ind", names=c("NSGA.G","LS.G","NSGA.I","LS.I"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.sample=0.25, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
 count <- exploration.count(data)
-uniformity.all(count)
+uniformity.all(count, type="Gini")
 count.ind <- exploration.count(data, vars=data[[1]]$vars.ind)
 uniformity.all(count.ind)
+
+data <- metaLoadData("fit_e4","fit_e7","fit_e10","fit_e13", names=c("V4","V7","V10","V13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+
+data <- metaLoadData("~/exps/EC/multirover/ls","/media/jorge//e6a53fea-fa90-483a-975e-44cc084dc551/jorge/EXPERIMENTAL RESULTS/EC/multirover/nov/","~/exps/EC/multirover/nsga/","~/exps/EC/multirover/nsga_scores/", names=c("LS.New","LS.Old","NSGA.True","NSGA.Scores"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,7), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+
+data <- metaLoadData("fit_e4","fit_e7","fit_e10", names=c("V4","V7","V10"), params=list(jobs=10, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.sample=1, vars.ind=c(NA,NA,NA),vars.group=c("GCap","GPreyD","GPredD","Time")))
+bests <- reduceToBests(data)
+fullStatistics(bests, fit.comp=F, show.only=T, som.group=T, som.alljobs=T, expset.name="fit", som.group.par=list(distance.filter=0.3),fit.comp.par=list(snapshots=c(500),jitter=F))
+count <- exploration.count(bests)
+uniformity.all(count, type="Gini")
+
+soms <- fullStatistics(data, fit.comp=F, show.only=T, som.group=T, som.alljobs=T, expset.name="fit", som.group.par=list(distance.filter=0),fit.comp.par=list(snapshots=c(500),jitter=F))
+
+data <- metaLoadData("fit_e4", names=c("V4"), params=list(jobs=5, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.sample=0.1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+soms <- fullStatistics(data, fit.comp=F, show.only=T, som.group=T, som.alljobs=T, expset.name="fit", som.group.par=list(distance.filter=0),fit.comp.par=list(snapshots=c(500),jitter=F))
+
+
+data <- metaLoadData("~/exps/EC/multirover/fit/","~/exps/EC/multirover/nsga_group/","~/exps/EC/multirover/nsga_ind/","~/exps/EC/multirover/nsga_mix", names=c("Fit","NS.T","NS.I","NS.M"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,5), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("~/exps/EC/herding/fit4/","~/exps/EC/herding/nsga_group/","~/exps/EC/herding/nsga_ind/","~/exps/EC/herding/nsga_mix/", names=c("Fit","NS.T","NS.I","NS.M"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+fullStatistics(data, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="V4", fit.comp.par=list(snapshots=c(500),jitter=T,ylim=T))
+
+
+data <- metaLoadData("nsga_e4_group","fit_e4","nsga_e7_group","fit_e7","nsga_e10_group","fit_e10","nsga_e13_group","fit_e13", names=c("NS4","Fit4","NS7","Fit7","NS10","Fit10","NS13","Fit13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=0.25, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+count <- exploration.count(data)
+count.ind <- exploration.count(data, vars=data[[1]]$vars.ind)
+uniformity.all(count, type="Gini", t=0.001)
+uniformity.ind(count.ind, subs=c("sub.0","sub.1","sub.2"), type="Gini")
+
+data <- metaLoadData("nsga_e7_group","nsga_e7_ind","nsga_e7_mix","fit_e7", names=c("Group","Ind","Mix","Fit"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=0.25, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+count <- exploration.count(data)
+count.ind <- exploration.count(data, vars=data[[1]]$vars.ind)
+uniformity.all(count, type="Gini")
+uniformity.ind(count.ind, type="Gini")
+fullStatistics(data, fit.tests=T, show.only=T, fit.ind=F, fit.comp=T, som.group=F, som.alljobs=F, expset.name="V4", fit.comp.par=list(snapshots=c(500),jitter=T,ylim=T))
+
+
+data <- metaLoadData("nsga_e7_group","nsga_e7_ind","nsga_e7_mix","fit_e7", names=c("Group","Ind","Mix","Fit"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=0.25, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+
+setwd("~/exps/EC/herding")
+data <- metaLoadData("fit","nsga_group","nsga_ind","nsga_mix", names=c("Fit","NS.T","NS.I","NS.Mix"), params=list(fitness.file="refitness.stat", jobs=30, subpops=4, load.behavs=T, behavs.bests=T, behavs.sample=0.2, vars.ind=c("sheepDist","curralDist","fox1Dist","fox2Dist"), vars.group=c("sheepCurral","time","sheepFence","sheepFox")))
+count <- exploration.count(data)
+uniformity.all(count, type="Gini")
+count.ind <- exploration.count(data, vars=data[[1]]$vars.ind)
+uniformity.ind(count.ind, type="Gini")
+
+setwd("~/exps/EC/multirover")
+data <- metaLoadData("fit","nsga_group","nsga_ind","nsga_mix", names=c("Fit","NS.T","NS.I","NS.Mix"), params=list(fitness.file="refitness.stat", offset=0, jobs=30, subpops=2, load.behavs=T, behavs.sample=0.2, vars.ind=c("ind.mov","ind.prox","lowActive","highActive"), vars.group=c("captured","distance","movement","proximity")))
+
+
+
+# SOM alternative
+
+data <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_mix","nsga_e4_ind","fit_e7","nsga_e7_group","nsga_e7_mix","nsga_e7_ind","fit_e10","nsga_e10_group","nsga_e10_mix","nsga_e10_ind","fit_e13","nsga_e13_group","nsga_e13_mix","nsga_e13_ind", names=c("F.4","NSG.4","NSM.4","NSI.4","F.7","NSG.7","NSM.7","NSI.7","F.10","NSG.10","NSM.10","NSI.10","F.13","NSG.13","NSM.13","NSI.13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.sample=0.1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_mix","nsga_e4_ind", names=c("F.4","NSG.4","NSM.4","NSI.4"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.sample=0.1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+databests <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_mix","nsga_e4_ind", names=c("F.4","NSG.4","NSM.4","NSI.4"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=0.1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+som <- do.call(buildSom, c(data, list(variables=data[[1]]$vars.group, distance.filter=0.2, grid.size=20, grid.type="rectangular")))
+
+map <- mapMergeSubpops(som, data[[1]])
+mapbests <- mapMergeSubpops(som, databests[[2]])
+fitnessSomPlot(som, data[[1]], map, show=T)
+fitnessSomPlot(som, data[[1]], mapbests, show=T)
+somPlotCount(som, mapbests[["job.0"]][["all"]], title="som", alpha=1, size.max=15, limit.min=0.00, limit.max=0.025)
+
+data <- metaLoadData("nsga_e7_group","nsga_e7_mix","nsga_e7_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("nsga_e10_group","nsga_e10_mix","nsga_e10_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- metaLoadData("nsga_e13_group","nsga_e13_mix","nsga_e13_ind", names=c("NSGA.Group","NSGA.Mix","NSGA.Ind"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+
+################### ECJ 2nd SUBMISSION #######################################################3
+
+setwd("~/exps/EC/pred")
+
+###### task difficulty - fitness ######################################
+
+data <- metaLoadData("fit_e4","fit_e7","fit_e10","fit_e13", names=c("V=4","V=7","V=10","V=13"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+fullStatistics(data, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit",fit.comp.par=list(snapshots=c(500),jitter=F,ylim=T))
+
+###### number of collaborators x setup - fitness #######################
+
+data0 <- metaLoadData("fit_e4_p2","fit_e4","fit_e7","fit_e10","fit_e13", names=c("V4/2", "V4","V7","V10","V13"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data2 <- metaLoadData("fit_e4_p2_r2","fit_e4_r2","fit_e7_r2","fit_e10_r2","fit_e13_r2", names=c("V4/2", "V4","V7","V10","V13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data5 <- metaLoadData("fit_e4_p2_r5","fit_e4_r5","fit_e7_r5","fit_e10_r5","fit_e13_r5", names=c("V4/2", "V4","V7","V10","V13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data10 <- metaLoadData("fit_e4_p2_r10","fit_e4_r10","fit_e7_r10","fit_e10_r10","fit_e13_r10", names=c("V4/2", "V4","V7","V10","V13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+
+frame <- cbind(fitnessSummary(data0), N="0")
+frame <- rbind(frame, cbind(fitnessSummary(data2), N="2"))
+frame <- rbind(frame, cbind(fitnessSummary(data5), N="5"))
+frame <- rbind(frame, cbind(fitnessSummary(data10), N="10"))
+frame$method <- factor(frame$method, c("V4/2","V4","V7","V10","V13"))
+
+pd <- position_dodge(.1) # move them .05 to the left and right
+ggplot(frame, aes(x=N, y=mean, colour=method)) + 
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.25, position=pd) +
+  geom_line(position=pd,aes(group=method)) + ylim(c(0,2)) +
+  geom_point(position=pd) + ylab("Highest team performance") + theme(legend.title=element_blank())
+
+##### BEHAVIOURAL METRICS -- NOVELTY ######################################
+
+data <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_mix","nsga_e4_ind","fit_e7","nsga_e7_group","nsga_e7_mix","nsga_e7_ind","fit_e10","nsga_e10_group","nsga_e10_mix","nsga_e10_ind","fit_e13","nsga_e13_group","nsga_e13_mix","nsga_e13_ind", names=c("Fit.4","NS.Team.4","NS.Mix.4","NS.Ind.4","Fit.7","NS.Team.7","NS.Mix.7","NS.Ind.7","Fit.10","NS.Team.10","NS.Mix.10","NS.Ind.10","Fit.13","NS.Team.13","NS.Mix.13","NS.Ind.13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.sample=0.2, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+databests <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_mix","nsga_e4_ind","fit_e7","nsga_e7_group","nsga_e7_mix","nsga_e7_ind","fit_e10","nsga_e10_group","nsga_e10_mix","nsga_e10_ind","fit_e13","nsga_e13_group","nsga_e13_mix","nsga_e13_ind", names=c("Fit.4","NS.Team.4","NS.Mix.4","NS.Ind.4","Fit.7","NS.Team.7","NS.Mix.7","NS.Ind.7","Fit.10","NS.Team.10","NS.Mix.10","NS.Ind.10","Fit.13","NS.Team.13","NS.Mix.13","NS.Ind.13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=TRUE, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+count <- exploration.count(data)
+save(count, file="~/Dropbox/Work/Papers/EC/count_group_all.rdata")
+count.ind <- exploration.count(data, vars=data[[1]]$vars.ind)
+save(count.ind, file="~/Dropbox/Work/Papers/EC/count_ind_all.rdata")
+countbests <- exploration.count(databests)
+save(countbests, file="~/Dropbox/Work/Papers/EC/count_group_bests.rdata")
+countbests.ind <- exploration.count(databests, vars=data[[1]]$vars.ind)
+save(countbests.ind, file="~/Dropbox/Work/Papers/EC/count_ind_bests.rdata")
+
+threshold <- 0.0001 ; type <- "Gini"
+uni.all.group <- uniformity.all(count, type=type, t=threshold)
+uni.all.ind <- uniformity.ind(count.ind, type=type, t=threshold)
+uni.bests.group <- uniformity.all(countbests, type=type, t=threshold)
+uni.bests.ind <- uniformity.ind(countbests.ind, type=type, t=threshold)
+
+frame <- data.frame()
+methods <- c("Fit","NS.Team","NS.Mix","NS.Ind") ; vs <- c("4","7","10","13")
+for(v in vs) {
+  names <- paste(methods,v, sep=".")
+  frame <- rbind(frame, cbind(uni.all.group$summary[names,], Type="Team exploration inequality", V=v, Method=methods))
+  frame <- rbind(frame, cbind(uni.all.ind$summary[names,], Type="Individual exploration inequality", V=v, Method=methods))
+  frame <- rbind(frame, cbind(uni.bests.group$summary[names,], Type="Team convergence", V=v, Method=methods))
+  frame <- rbind(frame, cbind(uni.bests.ind$summary[names,], Type="Individual convergence", V=v, Method=methods))
+}
+frame$Method <- factor(frame$Method, levels=c("Fit","NS.Team","NS.Ind","NS.Mix"))
+
+plots <- list()
+for(type in unique(frame$Type)) {
+  pd <- position_dodge(.1)
+  g <- ggplot(subset(frame, Type==type), aes(x=V, y=mean, colour=Method)) + 
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.5, position=pd) +
+    geom_line(position=pd,aes(group=Method)) +
+    geom_point(position=pd) + ylab(type) + theme(legend.title=element_blank())
+  plots <- c(plots, list(g))
+}
+plotListToPDF(plots)
+print(uni.all.group$ttest)
+print(uni.all.ind$ttest)
+print(uni.bests.group$ttest)
+print(uni.bests.ind$ttest)
+
+
+####### best-of-generation plots with REbehaviours ###############
+
+data <- metaLoadData("fit_e4","fit_e7","fit_e10","fit_e13","nsga_e4_group","nsga_e7_group","nsga_e10_group","nsga_e13_group","nsga_e4_ind","nsga_e7_ind","nsga_e10_ind","nsga_e13_ind","nsga_e4_mix","nsga_e7_mix","nsga_e10_mix","nsga_e13_mix", 
+                     names=c("Fit.4","Fit.7","Fit.10","Fit.13","NS.Team.4","NS.Team.7","NS.Team.10","NS.Team.13","NS.Ind.4","NS.Ind.7","NS.Ind.10","NS.Ind.13","NS.Mix.4","NS.Mix.7","NS.Mix.10","NS.Mix.13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+which.median <- function(x) which.min(abs(x - median(x)))
+rebests <- list()
+unifs <- list()
+maxfits <- list()
+for(d in data) {
+  fits <- c()
+  for(job in d$jobs) {
+    fits <- c(fits, d[[job]]$fitness$best.sofar[500])
+  }
+  medianjob <- which.median(fits)
+  cat(d$expname, " " ,medianjob, "\n")
+  rebests[[d$expname]] <- subset(fread(paste0(d$folder,"/job.",medianjob-1,".rebehaviours.stat")), select=c(4:8))
+  unifs[[d$expname]] <- uni.bests.group$data[d$expname,medianjob]
+  maxfits[[d$expname]] <- fits[medianjob]
+}
+
+all <- data.frame()
+for(n in names(rebests)) {all <- rbind(all, cbind(V=n, rebests[[n]]))}
+all.b <- subset(all, select=3:6)
+uni <- !duplicated(all.b)
+resam <- sammon(dist(all.b[uni,]))
+all[uni,"X"] <- resam$points[,1]
+all[uni,"Y"] <- resam$points[,2]
+plots <- list()
+for(v in names(rebests)) {
+  sub <- cbind(subset(all, V==v),T="G")
+  sub[1,"T"] <- "S"
+  sub[500,"T"] <- "E"
+  index.max <- which.max(sub[[2]])
+  sub[index.max,"T"] <- "B"
+  temp <- sub[499,] ; sub[499,] <- sub[index.max,] ; sub[index.max,] <- temp
+  sub$T <- factor(sub$T, levels=c("G","S","E","B"))
+  g <- ggplot(sub, aes(x=X, y=Y, shape=T, color=T, size=T)) + geom_point() + xlim(range(all$X,na.rm=T)) + ylim(range(all$Y,na.rm=T)) +
+    scale_shape_manual(values=c(3,15,16,17)) + scale_colour_manual(values=c("black","turquoise","orange","red")) +
+    scale_size_manual(values=c(1.5,4,4,4)) + 
+    ggtitle(paste0(v, ", F=", format(maxfits[[v]],digits=3), " C=", format(unifs[[v]],digits=3))) + 
+    theme(axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks=element_blank(),axis.title.x=element_blank(),axis.title.y=element_blank(),legend.position="none")
+  plots[[length(plots)+1]] <- g
+}
+plotListToPDF(plots, ncol=4, width=3, height=3.2)
+
+save(all, file="~/Dropbox/Work/Papers/EC/sammon.rdata")
+
+##### TEAM CONVERGENCE -- COLLABORATIONS ###############################
+
+data <- list()
+data[["V4/2"]] <- metaLoadData("fit_e4_p2","fit_e4_p2_r2","fit_e4_p2_r5","fit_e4_p2_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data[["V4"]] <- metaLoadData("fit_e4","fit_e4_r2","fit_e4_r5","fit_e4_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data[["V7"]] <- metaLoadData("fit_e7","fit_e7_r2","fit_e7_r5","fit_e7_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data[["V10"]] <- metaLoadData("fit_e10","fit_e10_r2","fit_e10_r5","fit_e10_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data[["V13"]] <- metaLoadData("fit_e13","fit_e13_r2","fit_e13_r5","fit_e13_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+count.col <- list()
+for(setup in names(data)) {
+  count.col[[setup]] <- exploration.count(data[[setup]])
+}
+save(count.col, file="~/Dropbox/Work/Papers/EC/collaborations_convergence.rdata")
+
+threshold <- 0.0001 ; type <- "Gini"
+frame <- data.frame()
+for(setup in names(count.col)) {
+  u <- uniformity.all(count.col[[setup]], type=type, t=threshold, totalCount=count$totalCount)
+  frame <- rbind(frame, cbind(u$summary, N=c("0","2","5","10"), Setup=setup))
+  print(u$ttest)
+}
+pd <- position_dodge(.1) 
+ggplot(frame, aes(x=N, y=mean, colour=Setup)) + 
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.5, position=pd) +
+  geom_line(position=pd,aes(group=Setup)) +
+  geom_point(position=pd) + ylab("Team convergence") + theme(legend.title=element_blank()) + scale_x_discrete(limits=c("0","2","5","10"))
+
+
+
+
+####### OVERCOMING PREMATURE CONVERGENCE -- FITNESS PLOTS
+
+data4 <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_ind","nsga_e4_mix", names=c("Fit","NS-Team","NS-Ind","NS-Mix"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data7 <- metaLoadData("fit_e7","nsga_e7_group","nsga_e7_ind","nsga_e7_mix", names=c("Fit","NS-Team","NS-Ind","NS-Mix"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data10 <- metaLoadData("fit_e10","nsga_e10_group","nsga_e10_ind","nsga_e10_mix", names=c("Fit","NS-Team","NS-Ind","NS-Mix"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data13 <- metaLoadData("fit_e13","nsga_e13_group","nsga_e13_ind","nsga_e13_mix", names=c("Fit","NS-Team","NS-Ind","NS-Mix"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat",fitlim=c(0,2), load.behavs=F))
+
+fullStatistics(data10, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit",fit.comp.par=list(snapshots=c(500),jitter=F,ylim=T))
+
+
+# task difficulty x fitness x method
+
+frame <- cbind(fitnessSummary(data4), V="4")
+frame <- rbind(frame, cbind(fitnessSummary(data7), V="7"))
+frame <- rbind(frame, cbind(fitnessSummary(data10), V="10"))
+frame <- rbind(frame, cbind(fitnessSummary(data13), V="13"))
+frame$method <- factor(frame$method, levels=c("Fit","NS-Team","NS-Ind","NS-Mix"))
+
+pd <- position_dodge(.1) # move them .05 to the left and right
+ggplot(frame, aes(x=V, y=mean, colour=method)) + 
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.5, position=pd) +
+  geom_line(position=pd,aes(group=method)) + ylim(c(0,2)) +
+  geom_point(position=pd) + ylab("Highest team performance") + theme(legend.title=element_blank())
+
+
+
+
+
+databests <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_mix","nsga_e4_ind","fit_e7","nsga_e7_group","nsga_e7_mix","nsga_e7_ind","fit_e10","nsga_e10_group","nsga_e10_mix","nsga_e10_ind","fit_e13","nsga_e13_group","nsga_e13_mix","nsga_e13_ind", names=c("Fit.4","NS.Team.4","NS.Mix.4","NS.Ind.4","Fit.7","NS.Team.7","NS.Mix.7","NS.Ind.7","Fit.10","NS.Team.10","NS.Mix.10","NS.Ind.10","Fit.13","NS.Team.13","NS.Mix.13","NS.Ind.13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=TRUE, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data <- list()
+data[["V4/2"]] <- metaLoadData("fit_e4_p2","fit_e4_p2_r2","fit_e4_p2_r5","fit_e4_p2_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data[["V4"]] <- metaLoadData("fit_e4","fit_e4_r2","fit_e4_r5","fit_e4_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data[["V7"]] <- metaLoadData("fit_e7","fit_e7_r2","fit_e7_r5","fit_e7_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data[["V10"]] <- metaLoadData("fit_e10","fit_e10_r2","fit_e10_r5","fit_e10_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+data[["V13"]] <- metaLoadData("fit_e13","fit_e13_r2","fit_e13_r5","fit_e13_r10", names=c("Fit-N0","Fit-N2","Fit-N5","Fit-N10"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=T, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+
+nov.div <- diversity(databests)
+
+
+
+bests.nov <- metaLoadData("fit_e7","nsga_e7_group","nsga_e7_mix","nsga_e7_ind", names=c("Fit.7","NS.Team.7","NS.Mix.7","NS.Ind.7"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=TRUE, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+bests.fit <- metaLoadData("fit_e4","fit_e7","fit_e10","fit_e13", names=c("Fit.4","Fit.7","Fit.10","Fit.13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=T, behavs.bests=TRUE, behavs.sample=1, vars.ind=c("ICap","IPreyD","IPredD"),vars.group=c("GCap","GPreyD","GPredD","Time")))
+bests.fit.div <- diversity(bests.fit)
+
+
+diversity <- function(datalist) {
+  setlist <- list()
+  cl <- makeCluster(8)
+  clusterEvalQ(cl, library(pdist))
+  for(data in datalist) {
+    for(job in data$jobs) {
+      print(job)
+      frame <- data.frame()
+      for(sub in data$subpops) {
+        frame <- rbind(frame, subset(data[[job]][[sub]], select=data$vars.group))
+      }
+      v <- meanDists(frame, cl)
+      setlist[[data$expname]] <- c(setlist[[data$expname]], v)
+    }
+  }
+  stopCluster(cl)
+  return(metaAnalysis(setlist))
+}
+
+meanDists <- function(data, cl) {
+  data <- as.matrix(data)
+  aux <- function(index) {
+    d <- pdist(data, indices.A=index, indices.B=((index+1):nrow(data)))
+    return(sum(attr(d, "dist")))
+  }
+  indexes <- sample.int(nrow(data)-1)
+  dists <- parSapply(cl, indexes, aux)
+  return(sum(dists) / (nrow(data) * nrow(data) / 2))
+}
+
+
+
+

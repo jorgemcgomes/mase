@@ -9,6 +9,7 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
 
@@ -20,7 +21,7 @@ public class NoveltyPopStat extends Statistics {
 
     public static final String P_STATISTICS_FILE = "file";
     public int log = 0;  // stdout by default
-    protected NoveltyEvaluation ne = null;
+    protected ArrayList<NoveltyEvaluation> neList = null;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -35,10 +36,10 @@ public class NoveltyPopStat extends Statistics {
             }
         }
 
+        neList = new ArrayList<NoveltyEvaluation>();
         for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
             if (pe instanceof NoveltyEvaluation) {
-                ne = (NoveltyEvaluation) pe;
-                break;
+                neList.add((NoveltyEvaluation) pe);
             }
         }
     }
@@ -46,32 +47,23 @@ public class NoveltyPopStat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        
+
         state.output.print(state.generation + "", log);
-        
-        for (int i = 0; i < state.population.subpops.length; i++) {
-            double averageNovScore = 0;
-            double maxNovScore = Double.NEGATIVE_INFINITY;
-            double minNovScore = Double.POSITIVE_INFINITY;
-            double avgFromRepo = 0;
-            double maxFromRepo = Double.NEGATIVE_INFINITY;
-            double minFromRepo = Double.POSITIVE_INFINITY;
-
-            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                NoveltyFitness nf = (NoveltyFitness) state.population.subpops[i].individuals[j].fitness;
-                averageNovScore += nf.noveltyScore;
-                avgFromRepo += nf.repoComparisons;
-                maxNovScore = Math.max(maxNovScore, nf.noveltyScore);
-                minNovScore = Math.min(minNovScore, nf.noveltyScore);
-                maxFromRepo = Math.max(maxFromRepo, nf.repoComparisons);
-                minFromRepo = Math.min(minFromRepo, nf.repoComparisons);
+        for (NoveltyEvaluation ne : neList) {
+            for (int i = 0; i < state.population.subpops.length; i++) {
+                double averageNovScore = 0;
+                double maxNovScore = Double.NEGATIVE_INFINITY;
+                double minNovScore = Double.POSITIVE_INFINITY;
+                for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
+                    NoveltyFitness nf = (NoveltyFitness) state.population.subpops[i].individuals[j].fitness;
+                    double nsScore = nf.scores().get(ne.scoreName);
+                    averageNovScore += nsScore;
+                    maxNovScore = Math.max(maxNovScore, nsScore);
+                    minNovScore = Math.min(minNovScore, nsScore);
+                }
+                averageNovScore /= state.population.subpops[i].individuals.length;
+                state.output.print(" " + ne.archives[i].size() + " " + minNovScore + " " + averageNovScore + " " + maxNovScore , log);
             }
-
-            avgFromRepo /= state.population.subpops[i].individuals.length;
-            averageNovScore /= state.population.subpops[i].individuals.length;
-
-            state.output.print(" " + ne.archives[i].size() + " " + averageNovScore + " " + maxNovScore + " " + minNovScore + " "
-                    + avgFromRepo + " " + maxFromRepo + " " + minFromRepo, log);
         }
         state.output.println("", log);
     }

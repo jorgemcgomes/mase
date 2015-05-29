@@ -51,26 +51,31 @@ aggregate <- function(frame) {
   newframe <- data.frame()
   for(m in unique(frame$Method)) {
     sub <- subset(frame, m==Method)
-    val <- mean(sub$mean)
     row <- sub[1,]
-    row["mean"] <- val
+    row["mean"] <- mean(sub$mean)
     row["min"] <- min(sub$min)
     row["max"] <- max(sub$max)
-    row["sd"] <- NA
-    row["se"] <- NA
+    row["sd"] <- sqrt(sum(sub$sd^2))
+    row["se"] <- row["sd"] / sqrt(nrow(sub)*30)
     newframe <- rbind(newframe, row)
   }
   return(newframe)
 }
 
-linePlots <- function(frame, xvar, lvar) {
+linePlots <- function(frame, xvar, lvar, ylims) {
   pd <- position_dodge()
   for(a in unique(frame$Analysis)) {
     sub <- subset(frame, a==Analysis)
     sub <- aggregate(sub)
     g <- ggplot(sub, aes_string(x=xvar, y="mean", colour=lvar, shape=lvar)) + 
-      geom_line(position=pd,aes_string(group=lvar)) +
-      geom_point(position=pd,size=3) + ylab(paste("Mean",a)) + ylim(c(0.4,0.65))
+      #geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.5, position=pd) +
+      geom_line(position=pd,aes_string(group=lvar)) + ylab(paste("Mean",a)) +
+      geom_point(position=pd,size=3)
+    if(!is.null(ylims[[a]])) {
+      g <- g + scale_y_continuous(breaks=pretty_breaks(n=7), limits=ylims[[a]])
+    } else {
+      g <- g + scale_y_continuous(breaks=pretty_breaks(n=7))
+    }
     print(g)
   }
 }
@@ -266,3 +271,11 @@ aggregateTest(batch$data, filter="k5_arandom")
 aggregateTest(batch$data, filter="k15_arandom")
 aggregateTest(batch$data, filter="k100_arandom")
 
+
+# figure 3
+load("~/Dropbox/Work/Papers/GECCO15/data/nspar.rdata")
+linePlots(subset(batch$frame, Method != "fit"), xvar="Knn", lvar="Archive", ylims=list(Success=c(0.3,0.75),Uniformity=c(0.35,0.65)))
+
+# figure 4
+load("~/Dropbox/Work/Papers/GECCO15/data/growth.rdata")
+linePlots(subset(batch$frame, Method != "fit"), xvar="Growth", lvar="Treatment", ylims=list(Success=c(0.3,0.75),Uniformity=c(0.35,0.65)))

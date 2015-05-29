@@ -200,14 +200,42 @@ somPlot <- function(som, mapping, title="som", alpha=0.70, gradient.low="blue", 
     return(g)
 }
 
+somPlotHeatmap <- function(som, mapping, title="som", gradient.low="white", gradient.high="black", colour.limits=c(), size.max=30, limit.min=0.00, limit.max=0.1) {
+  almost <- which(mapping$count > 0 & mapping$count < limit.min)
+  mapping$count[almost] <- limit.min
+  g <- ggplot(mapping, aes(somx, somy)) + 
+    geom_tile(aes(fill=count), colour="white") + 
+    scale_fill_gradient(limits=c(0,limit.max), low=gradient.low, high=gradient.high, space="lab") + 
+    scale_x_continuous(breaks = 1:som$grid$xdim) +
+    scale_y_continuous(breaks = 1:som$grid$ydim) +
+    ggtitle(title) + xlab("") + ylab("")
+  return(g)
+}
+
+
+somPlotCount <- function(som, mapping, title="som", alpha=0.70, size.max=30, limit.min=0.00, limit.max=0.05) {
+  almost <- which(mapping$count > 0 & mapping$count < limit.min)
+  mapping$count[almost] <- limit.min
+  g <- ggplot(mapping, aes(somx, somy)) + 
+    geom_point(aes(size=count), alpha=alpha) + 
+    scale_size(range=c(0,size.max), oob=squish, limits=c(0,limit.max)) + 
+    ggtitle(title)
+  return(g)
+}
+
+
 fitnessHeatmapPlots <- function(som, gradient.low="white", gradient.high="steelblue") {
     d <- data.frame(x = som$grid$pts[,1], y = som$grid$pts[,2], fitness.max = som$fitness.max, fitness.avg = som$fitness.avg)
     limits <- c(min(som$fitness.avg), max(som$fitness.max))
     p1 <- ggplot(d, aes(x, y)) + geom_tile(aes(fill = fitness.avg), colour="white") + 
         scale_fill_gradient(low=gradient.low, high=gradient.high, limits=limits) + 
+        scale_x_continuous(breaks = 1:som$grid$xdim) +
+        scale_y_continuous(breaks = 1:som$grid$ydim) +
         ggtitle("Avg fitness")
     p2 <- ggplot(d, aes(x, y)) + geom_tile(aes(fill = fitness.max), colour="white") + 
         scale_fill_gradient(low=gradient.low, high=gradient.high, limits=limits) + 
+        scale_x_continuous(breaks = 1:som$grid$xdim) +
+        scale_y_continuous(breaks = 1:som$grid$ydim) +
         ggtitle("Max fitness")
     return(list(p1,p2))
 }
