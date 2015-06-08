@@ -1,0 +1,81 @@
+#### PREDATOR-PREY EXPERIMENTS ####
+
+## Fitness-driven coevolution
+
+./evolve.sh -out ~/exps/pred/fit_v4 -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/cooperative.params -p parent.2=build/classes/mase/gax.params -p pop.default-subpop.size=150 -p generations=500 -p pop.subpops=3 -p problem.escape-distance=4
+
+.. for problem.escape-distance in {4,7,10,13}
+
+## Fitness-driven coevolution with random collaborators
+
+# with two predators
+
+./evolve.sh -out ~/exps/EC/pred/fit_v4p2_r2 -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/cooperative.params -p parent.2=build/classes/mase/gax.params -p pop.default-subpop.size=150 -p generations=500 -p pop.subpops=2 -p problem.escape-distance=4 -p problem.n-predators=2 -p eval.base.num-current=2
+
+./evolve.sh -out ~/exps/EC/pred/fit_v4p2_r5 -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/cooperative.params -p parent.2=build/classes/mase/gax.params -p pop.default-subpop.size=150 -p generations=500 -p pop.subpops=2 -p problem.escape-distance=4 -p problem.n-predators=2 -p eval.base.num-current=5
+
+./evolve.sh -out ~/exps/EC/pred/fit_v4p2_r10 -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/cooperative.params -p parent.2=build/classes/mase/gax.params -p pop.default-subpop.size=150 -p generations=500 -p pop.subpops=2 -p problem.escape-distance=4 -p problem.n-predators=2 -p eval.base.num-current=10
+
+# with three predators
+
+./evolve.sh -out ~/exps/EC/pred/fit_v4_r2 -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/cooperative.params -p parent.2=build/classes/mase/gax.params -p pop.default-subpop.size=150 -p generations=500 -p pop.subpops=3 -p problem.escape-distance=4 -p problem.n-predators=3 -p eval.base.num-current=2
+
+... for eval.base.num-current in {2,5,10} AND problem.escape-distance in {4,7,10,13}
+
+## NS-Team
+
+./evolve.sh -out ~/exps/EC/pred/nsga_v4_group -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/novelty/mo/nsga_ga.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/gax.params -p pop.default-subpop.size=75 -p generations=500 -p pop.subpops=3 -p problem.escape-distance=4
+
+... for problem.escape-distance in {4,7,10,13}
+
+## NS-Ind
+
+./evolve.sh -out ~/exps/EC/pred/nsga_v4_ind -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/novelty/mo/nsga_ga.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/gax.params -p pop.default-subpop.size=75 -p generations=500 -p pop.subpops=3 -p problem.escape-distance=4 -p fitness.novelty-index=2 -p eval.post.0.archive-mode=multiple
+
+... for problem.escape-distance in {4,7,10,13}
+
+## NS-Mix
+
+./evolve.sh -out ~/exps/EC/pred/nsga_v4_mix -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/novelty/nsga_mix.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/gax.params -p pop.default-subpop.size=75 -p generations=500 -p pop.subpops=3 -p problem.escape-distance=4
+
+... for problem.escape-distance in {4,7,10,13}
+
+## Scalability
+
+./evolve.sh -out ~/exps/EC/pred/nsga_p2v4 -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/novelty/mo/nsga_ga.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/gax.params -p pop.default-subpop.size=75 -p generations=500 -p pop.subpops=2 -p problem.n-predators=2 -p problem.escape-distance=4
+
+... for problem.n-predators + pop.subpops in {2,3,5,7} AND problem.escape-distance in {4,7,10,13} 
+
+## Pure novelty search
+
+./evolve.sh -out ~/exps/EC/pred/nss_v4_group -p jobs=30 -p parent.0=build/classes/mase/app/pred/oneprey.params -p parent.1=build/classes/mase/novelty/novelty.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/gax.params -p pop.default-subpop.size=150 -p generations=500 -p pop.subpops=3 -p problem.escape-distance=4
+
+... for problem.escape-distance in {4,7,10,13}
+
+
+
+#### MULTI-ROVER EXPERIMENTS ####
+
+./evolve.sh -out ~/exps/EC/multirover/fit -p jobs=30 -p parent.0=build/classes/mase/app/multirover/multirover.params -p parent.1=build/classes/mase/cooperative.params -p parent.2=build/classes/mase/neat/neat.params -p pop.default-subpop.size=150 -p generations=500 -p pop.subpops=2
+
+./evolve.sh -out ~/exps/EC/multirover/nsga_group -p jobs=30 -p parent.0=build/classes/mase/app/multirover/multirover.params -p parent.1=build/classes/mase/novelty/mo/nsga_scores.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/neat/neat.params -p neat.size=150 -p generations=500 -p pop.subpops=2
+
+./evolve.sh -out ~/exps/EC/multirover/nsga_ind -p jobs=30 -p parent.0=build/classes/mase/app/multirover/multirover.params -p parent.1=build/classes/mase/novelty/mo/nsga_scores.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/neat/neat.params -p neat.size=150 -p generations=500 -p pop.subpops=2 -p eval.post.0.behaviour-index=2 -p eval.post.0.archive-mode=multiple
+
+./evolve.sh -out ~/exps/EC/multirover/nsga_mix -p jobs=30 -p parent.0=build/classes/mase/app/multirover/multirover.params -p parent.1=build/classes/mase/novelty/nsga_scores_mix.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/neat/neat.params -p neat.size=150 -p generations=500 -p pop.subpops=2
+
+
+
+#### HERDING EXPERIMENTS ####
+
+./evolve.sh -out ~/exps/EC/herding/fit -p jobs=30 -p parent.0=build/classes/mase/app/herding/herding_passive.params -p parent.1=build/classes/mase/cooperative.params -p parent.2=build/classes/mase/neat/neat.params -p neat.size=150 -p generations=500 -p pop.subpops=4
+
+./evolve.sh -out ~/exps/EC/herding/nsga_group -p jobs=30 -p parent.0=build/classes/mase/app/herding/herding_passive.params -p parent.1=build/classes/mase/novelty/mo/nsga_scores.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/neat/neat.params -p neat.size=150 -p generations=500 -p pop.subpops=4
+
+./evolve.sh -out ~/exps/EC/herding/nsga_ind -p jobs=30 -p parent.0=build/classes/mase/app/herding/herding_passive.params -p parent.1=build/classes/mase/novelty/mo/nsga_scores.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/neat/neat.params -p neat.size=150 -p generations=500 -p pop.subpops=4 -p eval.post.0.behaviour-index=2 -p eval.post.0.archive-mode=multiple
+
+./evolve.sh -out ~/exps/EC/herding/nsga_mix -p jobs=30 -p parent.0=build/classes/mase/app/herding/herding_passive.params -p parent.1=build/classes/mase/novelty/nsga_scores_mix.params -p parent.2=build/classes/mase/cooperative.params -p parent.3=build/classes/mase/neat/neat.params -p neat.size=150 -p generations=500 -p pop.subpops=4
+
+
+
+

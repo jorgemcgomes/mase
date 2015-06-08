@@ -33,7 +33,7 @@ problem.fox-x = 0.9
 problem.random-fox-position = false
 problem.smart-fox = false
 
-problem.num-shepherds = 5
+problem.num-shepherds = 4
 problem.shepherd-x = 0.1
 problem.shepherd-speed = 1
 problem.shepherd-turn-speed = 0.4

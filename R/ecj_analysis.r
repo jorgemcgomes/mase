@@ -3,6 +3,103 @@ theme_set(theme_bw())
 DEF_HEIGHT=3
 DEF_WIDTH=4.5
 
+diversity.group <- function(datalist) {
+  pb <- txtProgressBar(min=1, max=length(datalist) * length(datalist[[1]]$jobs), style=3)
+  index <- 1
+  setlist <- list()
+  cl <- makeCluster(8)
+  clusterEvalQ(cl, library(pdist))
+  for(data in datalist) {
+    for(job in data$jobs) {
+      frame <- data.frame()
+      for(sub in data$subpops) {
+        frame <- rbind(frame, subset(data[[job]][[sub]], select=data$vars.group))
+      }
+      v <- meanDists(frame, cl)
+      setlist[[data$expname]] <- c(setlist[[data$expname]], v)
+      index <- index + 1
+      setTxtProgressBar(pb, index)
+    }
+  }
+  stopCluster(cl)
+  close(pb)
+  return(metaAnalysis(setlist))
+}
+
+diversity.ind <- function(datalist) {
+  pb <- txtProgressBar(min=1, max=length(datalist) * length(datalist[[1]]$jobs) * length(datalist[[1]]$subpops) , style=3)
+  index <- 1
+  setlist <- list()
+  cl <- makeCluster(8)
+  clusterEvalQ(cl, library(pdist))
+  for(data in datalist) {
+    for(job in data$jobs) {
+      for(sub in data$subpops) {
+        frame <- subset(data[[job]][[sub]], select=data$vars.ind)
+        v <- meanDists(frame, cl)
+        setlist[[data$expname]] <- c(setlist[[data$expname]], v)
+        index <- index + 1
+        setTxtProgressBar(pb, index)
+      }
+    }
+  }
+  stopCluster(cl)
+  close(pb)
+  return(metaAnalysis(setlist))  
+}
+
+meanDists <- function(data, cl) {
+  data <- as.matrix(data)
+  aux <- function(index) {
+    d <- pdist(data, indices.A=index, indices.B=((index+1):nrow(data)))
+    return(sum(attr(d, "dist")))
+  }
+  indexes <- sample.int(nrow(data)-1)
+  dists <- parSapply(cl, indexes, aux)
+  return(sum(dists) / (nrow(data) * nrow(data) / 2))
+}
+
+# threshold = distance / (diagonal / 2) , diagonal/2 = 141.42/2 = 70.71
+countNear <- function(folder, subpops, threshold, mode="best") {
+  files <- list.files(folder,pattern="rebehaviours.stat", full.names=T)
+  jobs <- c()
+  for(file in files) {
+    if(mode=="best") {
+      jobs <- c(jobs, countNearBest(file,subpops,threshold))
+    } else if(mode=="mean") {
+      jobs <- c(jobs, countNearMean(file,subpops,threshold))
+    }
+  }
+  return(jobs)
+}
+
+countNearMean <- function(file, subpops, threshold) {
+  tab <- read.table(file, header=F, sep=" ",fill=T)
+  count <- c()
+  for(r in 1:nrow(tab)) {
+    near <- 0
+    for(i in 0:(subpops-1)) {
+      if(tab[r,11+i*4] < threshold) {
+        near <- near + 1
+      } 
+    }
+    count <- c(count, near)
+  }
+  return(mean(count))
+}
+
+countNearBest <- function(file, subpops, threshold) {
+  tab <- read.table(file, header=F, sep=" ",fill=T)
+  best <- which.max(tab[,4])
+  near <- 0
+  for(i in 0:(subpops-1)) {
+    if(tab[best,11+i*4] < threshold) {
+      near <- near + 1
+    } 
+  }
+  return(near)
+}
+
 ################### ECJ 2nd SUBMISSION #######################################################3
 
 setwd("~/exps/EC/pred")
@@ -165,7 +262,6 @@ for(d in data) {
   for(job in d$jobs) {
     fits <- c(fits, d[[job]]$fitness$best.sofar[500])
   }
-  #medianjob <- which.median(fits)
   medianjob <- which.median(bests.group$data[d$expname,])
   cat(d$expname, " " ,medianjob, "\n")
   rebests[[d$expname]] <- subset(fread(paste0(d$folder,"/job.",medianjob-1,".rebehaviours.stat")), select=c(4:8))
@@ -225,11 +321,6 @@ identifyBests(som, data, outfile="~/Dropbox/Work/Papers/EC/newbests.csv")
 
 ####### SCALABILITY ################
 
-# data4 <- metaLoadData("fit_e4_p2","fit_e4","fit_p5v4","fit_p7v4", names=c("P2","P3","P5","P7"), params=list(jobs=30, subpops=1, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
-# data7 <- metaLoadData("fit_e7_p2","fit_e7","fit_e7_p5","fit_e7_p7", names=c("P2","P3","P5","P7"), params=list(jobs=30, subpops=1, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
-# data10 <- metaLoadData("fit_p2v10","fit_e10","fit_e10_p5","fit_p7v10", names=c("P2","P3","P5","P7"), params=list(jobs=30, subpops=1, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
-# data13 <- metaLoadData("fit_p2v13","fit_e13","fit_p5v13","fit_e13_p7",names=c("P2","P3","P5","P7"), params=list(jobs=30, subpops=1, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
-
 data4 <- metaLoadData("nsga_p2v4","nsga_e4_group","nsga_p5v4","nsga_p7v4", names=c("P2","P3","P5","P7"), params=list(jobs=30, subpops=1, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
 data7 <- metaLoadData("nsga_p2v7","nsga_e7_group","nsga_p5v7","nsga_p7v7", names=c("P2","P3","P5","P7"), params=list(jobs=30, subpops=1, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
 data10 <- metaLoadData("nsga_p2v10","nsga_e10_group","nsga_p5v10","nsga_p7v10", names=c("P2","P3","P5","P7"), params=list(jobs=30, subpops=1, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
@@ -248,7 +339,6 @@ ggplot(frame, aes(x=V, y=mean, colour=method)) +
   geom_line(position=pd,aes(group=method)) + ylim(c(0,2)) +
   geom_point(position=pd) + ylab("Best fitness") + xlab("V") + theme(legend.title=element_blank())
 
-
 ### scalability ALT
 
 pd <- position_dodge(.1) # move them .05 to the left and right
@@ -256,7 +346,6 @@ ggplot(frame, aes(x=method, y=mean, colour=V)) +
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.5, position=pd) +
   geom_line(position=pd,aes(group=V)) + ylim(c(0,2)) +
   geom_point(position=pd) + ylab("Best fitness") + xlab("Predators") + theme(legend.title=element_blank())
-
 
 ### scalability count near
 
@@ -384,6 +473,8 @@ save(mr.all.group, file="~/Dropbox/Work/Papers/EC/mr.all.group.rdata")
 save(mr.all.ind, file="~/Dropbox/Work/Papers/EC/mr.all.ind.rdata")
 
 
+# HERDING AND MULTIROVER BEST-OF-GENERATION DISPERSION
+
 # HERDING
 setwd("~/exps/EC/herding")
 jobs <- list(fit=0,nsga_group=0,nsga_ind=4,nsga_mix=0)
@@ -406,7 +497,6 @@ save(all, file="~/Dropbox/Work/Papers/EC/herd_sammon.rdata")
 
 save(all, file="~/Dropbox/Work/Papers/EC/mr_sammon.rdata")
 
-
 plots <- list()
 for(v in names(jobs)) {
   sub <- cbind(subset(all, V==v),T="G")
@@ -425,8 +515,6 @@ for(v in names(jobs)) {
 }
 plotListToPDF(plots, ncol=4, width=3, height=3.2)
 
-
-
 data <- read.csv("~/Dropbox/Work/Papers/EC/otherexps.csv")
 data$Type <- factor(data$Type, levels=c("BOD","TE","IE"))
 data$Method <- factor(data$Method, levels=c("Fit","NST","NSI","NSM"))
@@ -436,104 +524,4 @@ ggplot(data=subset(data, Task=="MR"), aes(x=Type, y=Mean, fill=Method)) +
 ggplot(data=subset(data, Task=="Herd"), aes(x=Type, y=Mean, fill=Method)) +
   geom_bar(stat="identity", position=position_dodge()) +
   geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.5, position=position_dodge(.9))
-
-
-
-
-diversity.group <- function(datalist) {
-  pb <- txtProgressBar(min=1, max=length(datalist) * length(datalist[[1]]$jobs), style=3)
-  index <- 1
-  setlist <- list()
-  cl <- makeCluster(8)
-  clusterEvalQ(cl, library(pdist))
-  for(data in datalist) {
-    for(job in data$jobs) {
-      frame <- data.frame()
-      for(sub in data$subpops) {
-        frame <- rbind(frame, subset(data[[job]][[sub]], select=data$vars.group))
-      }
-      v <- meanDists(frame, cl)
-      setlist[[data$expname]] <- c(setlist[[data$expname]], v)
-      index <- index + 1
-      setTxtProgressBar(pb, index)
-    }
-  }
-  stopCluster(cl)
-  close(pb)
-  return(metaAnalysis(setlist))
-}
-
-diversity.ind <- function(datalist) {
-  pb <- txtProgressBar(min=1, max=length(datalist) * length(datalist[[1]]$jobs) * length(datalist[[1]]$subpops) , style=3)
-  index <- 1
-  setlist <- list()
-  cl <- makeCluster(8)
-  clusterEvalQ(cl, library(pdist))
-  for(data in datalist) {
-    for(job in data$jobs) {
-      for(sub in data$subpops) {
-        frame <- subset(data[[job]][[sub]], select=data$vars.ind)
-        v <- meanDists(frame, cl)
-        setlist[[data$expname]] <- c(setlist[[data$expname]], v)
-        index <- index + 1
-        setTxtProgressBar(pb, index)
-      }
-    }
-  }
-  stopCluster(cl)
-  close(pb)
-  return(metaAnalysis(setlist))  
-}
-
-meanDists <- function(data, cl) {
-  data <- as.matrix(data)
-  aux <- function(index) {
-    d <- pdist(data, indices.A=index, indices.B=((index+1):nrow(data)))
-    return(sum(attr(d, "dist")))
-  }
-  indexes <- sample.int(nrow(data)-1)
-  dists <- parSapply(cl, indexes, aux)
-  return(sum(dists) / (nrow(data) * nrow(data) / 2))
-}
-
-# threshold = distance / (diagonal / 2) , diagonal/2 = 141.42/2 = 70.71
-countNear <- function(folder, subpops, threshold, mode="best") {
-  files <- list.files(folder,pattern="rebehaviours.stat", full.names=T)
-  jobs <- c()
-  for(file in files) {
-    if(mode=="best") {
-      jobs <- c(jobs, countNearBest(file,subpops,threshold))
-    } else if(mode=="mean") {
-      jobs <- c(jobs, countNearMean(file,subpops,threshold))
-    }
-  }
-  return(jobs)
-}
-
-countNearMean <- function(file, subpops, threshold) {
-  tab <- read.table(file, header=F, sep=" ",fill=T)
-  count <- c()
-  for(r in 1:nrow(tab)) {
-    near <- 0
-    for(i in 0:(subpops-1)) {
-      if(tab[r,11+i*4] < threshold) {
-        near <- near + 1
-      } 
-    }
-    count <- c(count, near)
-  }
-  return(mean(count))
-}
-
-countNearBest <- function(file, subpops, threshold) {
-  tab <- read.table(file, header=F, sep=" ",fill=T)
-  best <- which.max(tab[,4])
-  near <- 0
-  for(i in 0:(subpops-1)) {
-    if(tab[best,11+i*4] < threshold) {
-      near <- near + 1
-    } 
-  }
-  return(near)
-}
 
