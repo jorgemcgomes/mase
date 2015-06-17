@@ -13,9 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import mase.controllers.GroupController;
-import static mase.mason.MasonPlayer.createController;
-import static mase.mason.MasonPlayer.createSimulator;
 import mase.mason.world.EmboddiedAgent;
+import mase.stat.Reevaluate;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
 import sim.field.continuous.Continuous2D;
@@ -46,8 +45,6 @@ public class MasonTracer {
                 out = new File(args[1 + index++]);
             } else if (args[index].equals(SEED)) {
                 seed = Long.parseLong(args[1 + index++]);
-            } else if(args[index].equals(MasonPlayer.P_CONTROLLER)) {
-                gc = new File(args[1 + index++]);
             }
         }
         if(out == null && gc != null) {
@@ -55,8 +52,8 @@ public class MasonTracer {
         }
         
 
-        GroupController controller = createController(args);
-        MasonSimulator sim = createSimulator(args);
+        GroupController controller = Reevaluate.createController(args);
+        MasonSimulator sim = (MasonSimulator) Reevaluate.createSimulator(args);
         trace(controller, sim, seed, size, out);
 
     }

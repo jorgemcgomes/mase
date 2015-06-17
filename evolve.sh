@@ -1,6 +1,4 @@
 #!/bin/bash
-BASE="/home/jorge/Dropbox/mase/"
-CLASSPATH=$BASE"build/classes:"$BASE"lib/*"
-
+source classpath
 java -cp $CLASSPATH mase.MaseEvolve "$@"
 

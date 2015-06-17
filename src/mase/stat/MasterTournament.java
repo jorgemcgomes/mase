@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.mason;
+package mase.stat;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import mase.SimulationProblem;
 import mase.controllers.AgentController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.evaluation.BehaviourResult;
@@ -26,6 +27,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.stat.PersistentSolution;
+import mase.stat.Reevaluate;
 import mase.stat.SolutionPersistence;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
@@ -93,7 +95,7 @@ public class MasterTournament {
             return;
         }
 
-        MasonSimulator sim = MasonPlayer.createSimulator(args);
+        SimulationProblem sim = Reevaluate.createSimulator(args);
         MasterTournament mt = new MasterTournament(sampleFolders, testFolders, sim, name);
 
         if (individuals != null) {
@@ -108,11 +110,11 @@ public class MasterTournament {
     }
     private final List<File> sampleFolders;
     private final List<File> testFolders;
-    private final MasonSimulator sim;
+    private final SimulationProblem sim;
     private final ExecutorService executor;
     private final String name;
 
-    public MasterTournament(List<File> sampleFolders, List<File> testFolders, MasonSimulator sim, String name) {
+    public MasterTournament(List<File> sampleFolders, List<File> testFolders, SimulationProblem sim, String name) {
         this.sampleFolders = sampleFolders;
         this.testFolders = testFolders;
         this.sim = sim;

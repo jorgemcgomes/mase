@@ -33,9 +33,18 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     public static final String P_EVAL = "eval";
     protected EvaluationFunction[] evalFunctions;
     public static final String P_TRIALS_MERGE = "trials-merge";
-    public static final String V_BEST = "best", V_MEAN = "mean", V_MEDIAN = "median";
-    public static final int MERGE_BEST = 0, MERGE_MEAN = 1, MERGE_MEDIAN = 2;
-    protected int mergeMode;
+
+    public enum TrialsMergeMode {
+
+        best, mean, median
+    }
+    public static final String P_REPETITIONS = "repetitions";
+    public static final String P_SEED = "seed";
+    protected TrialsMergeMode mergeMode;
+    public static final String V_RANDOM_SEED = "random";
+    protected boolean sameSeed;
+    protected long seed;
+    protected int repetitions;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -55,19 +64,23 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
 
         /* trial merge */
         if (!state.parameters.exists(base.push(P_TRIALS_MERGE), null)) {
-            mergeMode = MERGE_BEST;
+            mergeMode = TrialsMergeMode.best;
             state.output.warning("Parameter not found. Going with best.", base.push(P_TRIALS_MERGE));
         } else {
-            String val = state.parameters.getString(base.push(P_TRIALS_MERGE), null);
-            if (val.equals(V_BEST)) {
-                mergeMode = MERGE_BEST;
-            } else if (val.equals(V_MEAN)) {
-                mergeMode = MERGE_MEAN;
-            } else if (val.equals(V_MEDIAN)) {
-                mergeMode = MERGE_MEDIAN;
-            } else {
-                state.output.fatal("Unknown parameter value.", base.push(P_TRIALS_MERGE));
-            }
+            mergeMode = TrialsMergeMode.valueOf(state.parameters.getString(base.push(P_TRIALS_MERGE), null));
+        }
+
+        String seedString = state.parameters.getStringWithDefault(base.push(P_SEED), null, V_RANDOM_SEED);
+        if (seedString.equalsIgnoreCase(V_RANDOM_SEED)) {
+            sameSeed = false;
+        } else {
+            sameSeed = true;
+            seed = Long.parseLong(seedString);
+        }
+
+        repetitions = state.parameters.getIntWithDefault(base.push(P_REPETITIONS), null, 1);
+        if (repetitions < 1) {
+            state.output.fatal("Parameter invalid value. Must be > 0.", base.push(P_REPETITIONS));
         }
     }
 
@@ -93,13 +106,13 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
                         trials[k] = (ExpandedFitness) ind.fitness.trials.get(k);
                     }
                     switch (mergeMode) {
-                        case MERGE_MEAN:
+                        case mean:
                             ind.fitness.setToMeanOf(state, trials);
                             break;
-                        case MERGE_MEDIAN:
+                        case median:
                             ind.fitness.setToMedianOf(state, trials);
                             break;
-                        case MERGE_BEST:
+                        case best:
                             ind.fitness.setToBestOf(state, trials);
                     }
                     ind.evaluated = true;
@@ -135,7 +148,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void evaluate(EvolutionState state, Individual[] ind, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
         GroupController gc = createController(state, ind);
-        EvaluationResult[] eval = evaluateSolution(gc, state.random[threadnum].nextLong());
+        EvaluationResult[] eval = evaluateSolution(gc, sameSeed ? seed : state.random[threadnum].nextLong());
         /* Save results */
         for (int i = 0; i < ind.length; i++) {
             if (updateFitness[i]) {
@@ -150,15 +163,21 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
         GroupController gc = createController(state, ind);
-        EvaluationResult[] eval = evaluateSolution(gc, state.random[threadnum].nextLong());
+        EvaluationResult[] eval = evaluateSolution(gc, sameSeed ? seed : state.random[threadnum].nextLong());
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
         fit.setEvaluationResults(state, eval, subpopulation);
         ind.evaluated = true;
     }
-    
+
     public EvaluationFunction[] getEvalFunctions() {
         return evalFunctions;
     }
 
     public abstract EvaluationResult[] evaluateSolution(GroupController gc, long seed);
+
+    public void setRepetitions(int repetitions) {
+        this.repetitions = repetitions;
+    }
+    
+    
 }

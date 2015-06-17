@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import mase.SimulationProblem;
 import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
 import mase.evaluation.SubpopEvaluationResult;
@@ -54,11 +55,11 @@ public class MasonReevaluate {
     /*
      * WARNING: assumes that fitness is always the first evaluation result
      */
-    public static Reevaluation reevaluate(PersistentSolution gc, MasonSimulator sim, int reps) {
+    public static Reevaluation reevaluate(PersistentSolution gc, SimulationProblem sim, int reps) {
         return reevaluate(gc.getController(), gc.getSubpop(), sim, reps);
     }
     
-    public static Reevaluation reevaluate(GroupController gc, int subpop, MasonSimulator sim, int reps) {
+    public static Reevaluation reevaluate(GroupController gc, int subpop, SimulationProblem sim, int reps) {
                 // Make simulations
         ArrayList<EvaluationResult[]> results = new ArrayList<EvaluationResult[]>(reps);
         for (int i = 0; i < reps; i++) {

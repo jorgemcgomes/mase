@@ -18,32 +18,18 @@ import sim.display.GUIState;
 public abstract class MasonSimulator extends SimulationProblem {
 
     public static final String P_MAX_STEPS = "max-steps";
-    public static final String P_REPETITIONS = "repetitions";
-    public static final String P_SAME_SEED = "same-seed";
     protected int maxSteps;
-    protected int repetitions;
-    protected boolean sameSeed;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         base = defaultBase();
-
-        /* Generic simulation parameters */
-        if (!state.parameters.exists(base.push(P_MAX_STEPS), null)) {
-            state.output.fatal("Parameter not found.", base.push(P_MAX_STEPS));
-        }
         maxSteps = state.parameters.getInt(base.push(P_MAX_STEPS), null);
-        repetitions = state.parameters.getIntWithDefault(base.push(P_REPETITIONS), null, 1);
-        if (repetitions < 1) {
-            state.output.fatal("Parameter invalid value. Must be > 0.", base.push(P_REPETITIONS));
-        }
-        sameSeed = state.parameters.getBoolean(base.push(P_SAME_SEED), null, false);
     }
 
     @Override
     public EvaluationResult[] evaluateSolution(GroupController gc, long seed) {
-        GUICompatibleSimState sim = createSimState(gc, sameSeed ? 0 : seed);
+        GUICompatibleSimState sim = createSimState(gc, seed);
         EvaluationResult[][] evalResults = new EvaluationResult[evalFunctions.length][repetitions];
         for (int r = 0; r < repetitions; r++) {
             MasonEvaluation[] evals = new MasonEvaluation[evalFunctions.length];
