@@ -9,8 +9,8 @@ OUTFOLDER=$2
 echo $OUTFOLDER
 
 echo "Cleaning classes"
-ssh jorge@10.20.0.243 rm -rf build lib
-ssh jorge@10.20.0.243 mkdir -p build/classes lib
+ssh $IP rm -rf build lib
+ssh $IP mkdir -p build/classes lib
 
 echo "Copying classes"
 IFS=':' read -ra ARRAY <<< "$CLASSPATH"
@@ -18,20 +18,20 @@ for i in "${ARRAY[@]}"; do
     echo $i
     if [[ -d $i ]]
     then
-	scp -q -r $i jorge@10.20.0.243:build
+	scp -q -r $i $IP:build
     else
-        scp -q -r $i jorge@10.20.0.243:lib
+        scp -q -r $i $IP:lib
     fi
 done
 
 echo "Running"
-ssh jorge@10.20.0.243 "java -cp build/classes:lib/* mase.MaseEvolve "$ARGS
+ssh $IP "java -cp build/classes:lib/* mase.MaseEvolve "$ARGS
 
 echo "Copying results"
 OUTPARENT="$(dirname "$OUTFOLDER")"
 echo $OUTPARENT
-scp -p -r jorge@10.20.0.243:$OUTFOLDER $OUTPARENT
+scp -p -r $IP:$OUTFOLDER $OUTPARENT
 
 #echo "Cleaning results"
-#ssh jorge@10.20.0.243 rm -rf $OUTFOLDER
+#ssh $IP rm -rf $OUTFOLDER
 
