@@ -45,6 +45,10 @@ public class BatchReevaluate {
                 force = true;
             }
         }
+        if(reps <= 0) {
+            System.out.println("Invalid number of repetitions: " + reps);
+            return;
+        }
         if (folders.isEmpty()) {
             System.out.println("Nothing to evaluate!");
             return;

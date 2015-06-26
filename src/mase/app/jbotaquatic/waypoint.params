@@ -1,0 +1,16 @@
+eval.base.problem =                mase.jbot.JBotSimulator
+problem.number-evals =             2
+problem.trials-merge =             best
+problem.eval.0 =                   mase.jbot.JBotFitnessWrapper
+problem.eval.1 =                   mase.app.jbotaquatic.WaypointBehaviourEval
+
+problem.jbot-config =              build/classes/mase/app/jbotaquatic/waypoint.conf
+
+fitness.fitness-index =            0
+fitness.novelty-index =            1
+
+problem.repetitions =              10
+problem.seed = random
+
+neat.INPUT.NODES =                 6
+neat.OUTPUT.NODES =                3

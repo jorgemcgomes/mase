@@ -1,0 +1,20 @@
+eval.base.problem =                mase.jbot.JBotSimulator
+problem.number-evals =             2
+problem.trials-merge =             best
+problem.eval.0 =                   mase.app.jbotaquatic.CoverageFitness
+problem.eval.0.distance =          8.33
+problem.eval.0.resolution =        5
+problem.eval.1 =                   mase.app.jbotaquatic.PatrolBehaviour
+ 
+
+problem.jbot-config =              build/classes/mase/app/jbotaquatic/patrol.conf
+
+
+fitness.fitness-index =            0
+fitness.novelty-index =           1
+
+problem.repetitions =              5
+problem.seed = random
+
+neat.INPUT.NODES =                 9
+neat.OUTPUT.NODES =                3

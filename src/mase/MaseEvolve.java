@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -43,6 +44,14 @@ public class MaseEvolve {
         // Get config file
         Map<String, String> pars = readParams(args);
         File config = writeConfig(args, pars, outDir);
+        
+        // DIRTY FIX FOR JBOT INTEGRATION
+        // Does nothing when jbot is not used
+        if(pars.containsKey("problem.jbot-config")) {
+            File jbot = new File(pars.get("problem.jbot-config"));
+            FileUtils.copyFile(jbot, new File(outDir, jbot.getName()));
+        }
+            
         Thread t = launchExperiment(config);
         System.out.println(t.getName());
     }
