@@ -224,8 +224,9 @@ public class NoveltyEvaluation implements PostEvaluator {
                     }
                 }
                 for (Individual ind : toAdd) {
-                    ArchiveEntry ar = new ArchiveEntry(state, ind, 
-                            ((NoveltyFitness) ind.fitness).getBehaviour(behaviourIndex));
+                    ArchiveEntry ar = new ArchiveEntry(state, 
+                            ((NoveltyFitness) ind.fitness).getBehaviour(behaviourIndex), 
+                            ((NoveltyFitness) ind.fitness).getFitnessScore());
                     if (archive.size() == sizeLimit) {
                         int index = state.random[0].nextInt(archive.size());
                         archive.set(index, ar);
@@ -244,23 +245,17 @@ public class NoveltyEvaluation implements PostEvaluator {
     public static class ArchiveEntry {
 
         protected BehaviourResult behaviour;
-        protected Individual individual;
         protected int generation;
         protected float fitness;
 
-        protected ArchiveEntry(EvolutionState state, Individual ind, BehaviourResult behaviour) {
+        protected ArchiveEntry(EvolutionState state, BehaviourResult behaviour, float fitness) {
             this.behaviour = behaviour;
-            this.fitness = ((NoveltyFitness) ind.fitness).getFitnessScore();
-            this.individual = ind;
+            this.fitness = fitness;
             this.generation = state.generation;
         }
 
         public BehaviourResult getBehaviour() {
             return behaviour;
-        }
-
-        public Individual getIndividual() {
-            return individual;
         }
 
         public int getGeneration() {

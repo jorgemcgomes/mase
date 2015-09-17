@@ -4,11 +4,8 @@
  */
 package mase.app.pred;
 
-import ec.EvolutionState;
-import ec.util.Parameter;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
-import mase.mason.MasonSimulator;
 import net.jafama.FastMath;
 import sim.util.Double2D;
 

@@ -5,23 +5,17 @@
  */
 package mase.jbot;
 
-import commoninterface.neuralnetwork.CINeuralNetwork;
-import controllers.DroneNeuralNetworkController;
 import evolutionaryrobotics.JBotEvolver;
 import gui.renderer.TwoDRenderer;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mase.controllers.AgentController;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import org.apache.commons.io.FileUtils;
 import simulation.Simulator;
-import simulation.robot.Robot;
 import simulation.util.Arguments;
 
 /**
@@ -60,6 +54,9 @@ public class JBotViewer extends javax.swing.JFrame {
         timeBar.setValue((int) (double) sim.getTime());
         renderer.drawFrame();
         renderer.validate();
+        if(sim.simulationFinished() && runThread != null) {
+            runThread.goOn = false;
+        }
     }
 
     private void setupSim() {

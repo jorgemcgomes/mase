@@ -3,13 +3,15 @@ problem.number-evals =             1
 problem.trials-merge =             best
 problem.eval.0 =                   mase.jbot.JBotFitnessWrapper
 
-problem.jbot-config =              build/classes/mase/app/jbotaquatic/aggregate.conf
+problem.jbot-config =              NULL
 
 fitness.fitness-index =            0
-fitness.novelty-index =            1
 
 problem.repetitions =              10
 problem.seed = random
 
-neat.INPUT.NODES =                 4
-neat.OUTPUT.NODES =                3
+neat.INPUT.NODES =                 0
+neat.OUTPUT.NODES =                2
+
+# disable individual sampling
+stat.child.5 = ec.Statistics

@@ -19,7 +19,9 @@ import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
+import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Bag;
+import sim.util.Double2D;
 import sim.util.Int2D;
 
 /**
@@ -68,19 +70,28 @@ public class MasonTracer {
 
         double scale = (double) size / Math.max(field.width, field.height);
 
+        SVGGraphics2D gr = new SVGGraphics2D((int) (field.width * scale), (int) (field.height * scale));
+        gr.setPaint(Color.WHITE);
+        gr.fillRect(0, 0, size, size);
+        gr.setPaint(Color.BLACK);
+        gr.drawPolygon(new int[]{0,size,size,0,0}, new int[]{0,0,size,size,0}, 5);        
+        
         Bag allObjects = field.getAllObjects();
         ArrayList<EmboddiedAgent> agents = new ArrayList<EmboddiedAgent>();
         for (Object o : allObjects) {
             if (o instanceof EmboddiedAgent) {
                 agents.add((EmboddiedAgent) o);
+            } else if(o instanceof OvalPortrayal2D) {
+                OvalPortrayal2D oval = (OvalPortrayal2D) o;
+                Double2D loc = field.getObjectLocation(oval);
+                int x = (int) Math.round((loc.x - oval.scale / 2) * scale);
+                int y = (int) Math.round((loc.y - oval.scale / 2) * scale);
+                int s = (int) Math.round(oval.scale * scale);
+                Color c = (Color) oval.paint;
+                gr.setPaint(c);
+                gr.fillOval(x, y, s, s);         
             }
         }
-
-        SVGGraphics2D gr = new SVGGraphics2D((int) (field.width * scale), (int) (field.height * scale));
-        gr.setPaint(Color.WHITE);
-        gr.fillRect(0, 0, size, size);
-        gr.setPaint(Color.BLACK);
-        gr.drawPolygon(new int[]{0,size,size,0,0}, new int[]{0,0,size,size,0}, 5);
         
         // draw initial positions
         for (EmboddiedAgent ag : agents) {

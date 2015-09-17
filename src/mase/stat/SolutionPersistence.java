@@ -78,6 +78,7 @@ public abstract class SolutionPersistence {
          BufferedInputStream bis = new BufferedInputStream(new FileInputStream(temp));
          IOUtils.copy(bis, out);*/
         out.closeArchiveEntry();
+        out.flush();
     }
 
     public static PersistentSolution readSolution(InputStream is) throws Exception {

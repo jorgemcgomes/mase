@@ -9,10 +9,6 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
 
 /**
  *
@@ -48,8 +44,9 @@ public class NoveltyIndividualsStat extends Statistics {
                 for(float score : nf.scores().values()) {
                     state.output.print(" " + score, log);
                 }
-                state.output.println(" " + nf.fitness(), log);
+                state.output.print(" " + nf.fitness() + "\n", log);
             }
+            state.output.println("", log); // flush
         }
     }
 }

@@ -11,7 +11,6 @@ import commoninterface.neuralnetwork.outputs.CINNOutput;
 import java.util.Arrays;
 import java.util.Vector;
 import mase.controllers.AgentController;
-import simulation.util.Arguments;
 
 /**
  *

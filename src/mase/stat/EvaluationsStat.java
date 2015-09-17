@@ -61,6 +61,7 @@ public class EvaluationsStat extends Statistics {
                 }
                 state.output.print("\n", log);
             }
+            state.output.println("", log); // flush this log
         }
     }
 }

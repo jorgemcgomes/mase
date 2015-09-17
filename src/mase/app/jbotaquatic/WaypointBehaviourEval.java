@@ -41,7 +41,7 @@ public class WaypointBehaviourEval extends JBotEvaluation {
         if (!configured) {
             ArrayList<Waypoint> waypoints = Waypoint.getWaypoints(drone);
             if (!waypoints.isEmpty()) {
-                wp = WaypointFitness.getWaypoint(drone);
+                wp = drone.getActiveWaypoint();
                 startingDist = WaypointFitness.calculateDistance(wp, drone);
             }
             configured = true;

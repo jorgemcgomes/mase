@@ -6,7 +6,6 @@
 package mase.jbot;
 
 //import commoninterface.neuralnetwork.CINEATNetwork;
-import commoninterface.neuralnetwork.CINEATNetwork;
 import controllers.DroneNeuralNetworkController;
 import ec.EvolutionState;
 import ec.util.Parameter;
@@ -21,8 +20,6 @@ import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
-import mase.neat.NEATAgentController;
-import mase.neat.NEATSerializer;
 import simulation.Simulator;
 import simulation.robot.Robot;
 
@@ -96,17 +93,17 @@ public class JBotSimulator extends SimulationProblem {
         for (int i = 0; i < robots.size(); i++) {
             AgentController ac = agentControllers[i];
             DroneNeuralNetworkController contr = (DroneNeuralNetworkController) robots.get(i).getController();
-            if (ac instanceof NEATAgentController) {
-                NEATAgentController nac = (NEATAgentController) ac;
-                CINEATNetwork neatNet = (CINEATNetwork) contr.getNeuralNetwork();
-                double[] weights = NEATSerializer.serializeToArray(nac.getNetwork());
-                neatNet.setWeights(weights);
-            } else {
-                MaseNetworkWrapper newNetwork = new MaseNetworkWrapper(
-                        contr.getNeuralNetwork().getInputs(), contr.getNeuralNetwork().getOutputs());
-                newNetwork.setRealController(ac);
-                contr.setNeuralNetwork(newNetwork);
-            }
+            /*if (contr.getNeuralNetwork() instanceof CINEATNetwork) {
+             NEATAgentController nac = (NEATAgentController) ac;
+             CINEATNetwork neatNet = (CINEATNetwork) contr.getNeuralNetwork();
+             double[] weights = NEATSerializer.serializeToArray(nac.getNetwork());
+             neatNet.setWeights(weights);
+             } else {*/
+            MaseNetworkWrapper newNetwork = new MaseNetworkWrapper(
+                    contr.getNeuralNetwork().getInputs(), contr.getNeuralNetwork().getOutputs());
+            newNetwork.setRealController(ac);
+            contr.setNeuralNetwork(newNetwork);
+            //}
         }
     }
 }
