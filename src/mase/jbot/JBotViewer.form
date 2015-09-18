@@ -65,12 +65,16 @@
                   <Component id="timeField" min="-2" pref="60" max="-2" attributes="0"/>
               </Group>
               <Group type="102" attributes="0">
+                  <Component id="renderPanel" max="-2" attributes="0"/>
+                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+              </Group>
+              <Group type="102" attributes="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="renderPanel" max="-2" attributes="0"/>
                       <Component id="solutionPath" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="jbotPath" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
+                  <Component id="fitnessField" min="-2" pref="150" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -94,9 +98,14 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="renderPanel" min="694" pref="694" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
-                  <Component id="solutionPath" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jbotPath" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <Component id="solutionPath" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jbotPath" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Component id="fitnessField" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
           </Group>
         </DimensionLayout>
@@ -178,6 +187,11 @@
         <Component class="javax.swing.JCheckBox" name="seedIncCheck">
           <Properties>
             <Property name="selected" type="boolean" value="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="fitnessField">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
           </Properties>
         </Component>
       </SubComponents>

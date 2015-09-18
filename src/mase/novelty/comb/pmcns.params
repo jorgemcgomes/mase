@@ -1,4 +1,4 @@
-parent.0 = novelty.params
+parent.0 = ../novelty.params
 
 eval.num-post = 2
 eval.post.1 =                           mase.novelty.comb.PMCNS

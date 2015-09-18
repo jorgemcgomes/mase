@@ -34,6 +34,7 @@ public class MaseNetworkWrapper extends CINeuralNetwork {
 
     @Override
     protected double[] propagateInputs(double[] inputValues) {
+        //System.out.println(Arrays.toString(inputValues));
         // transform inputs from [0,1] to [-1,1]
         double[] vals = Arrays.copyOf(inputValues, inputValues.length);
         for(int i = 0 ; i < vals.length ; i++) {

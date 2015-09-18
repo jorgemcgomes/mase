@@ -9,7 +9,6 @@ novelty.archive-mode =             shared
 novelty.archive-criteria =         random
 novelty.kd-tree =                  true
 novelty.behaviour-index =          1
-novelty.score-name =               
 
 stat.child.10 =                        mase.novelty.NoveltyPopStat
 stat.child.10.file =		       $noveltypop.stat

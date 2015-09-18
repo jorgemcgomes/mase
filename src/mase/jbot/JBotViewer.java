@@ -6,6 +6,7 @@
 package mase.jbot;
 
 import evolutionaryrobotics.JBotEvolver;
+import evolutionaryrobotics.evaluationfunctions.EvaluationFunction;
 import gui.renderer.TwoDRenderer;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,6 +27,7 @@ public class JBotViewer extends javax.swing.JFrame {
 
     private final TwoDRenderer renderer;
     private Simulator sim;
+    private EvaluationFunction eval;
     private final JBotEvolver evo;
     private final PersistentSolution sol;
     private Loop runThread;
@@ -52,6 +54,7 @@ public class JBotViewer extends javax.swing.JFrame {
         sim.performOneSimulationStep(sim.getTime() + 1);
         timeField.setText(sim.getTime() + "");
         timeBar.setValue((int) (double) sim.getTime());
+        fitnessField.setText(eval.getFitness() + "");
         renderer.drawFrame();
         renderer.validate();
         if(sim.simulationFinished() && runThread != null) {
@@ -64,6 +67,8 @@ public class JBotViewer extends javax.swing.JFrame {
         if(seedIncCheck.isSelected()) {
             seedSpinner.setValue(seedSpinner.getNextValue());            
         }
+        eval = evo.getEvaluationFunction();
+        sim.addCallback(eval);
         renderer.setSimulator(sim);
 
         timeBar.setMinimum(0);
@@ -115,6 +120,7 @@ public class JBotViewer extends javax.swing.JFrame {
         solutionPath = new javax.swing.JLabel();
         jbotPath = new javax.swing.JLabel();
         seedIncCheck = new javax.swing.JCheckBox();
+        fitnessField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("JBotPlayer");
@@ -171,6 +177,8 @@ public class JBotViewer extends javax.swing.JFrame {
 
         seedIncCheck.setSelected(true);
 
+        fitnessField.setEditable(false);
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
@@ -192,23 +200,25 @@ public class JBotViewer extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(timeField, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(mainPanelLayout.createSequentialGroup()
+                .addComponent(renderPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(mainPanelLayout.createSequentialGroup()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(renderPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(solutionPath)
                     .addComponent(jbotPath))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(fitnessField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(seedIncCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(stepButton)
-                            .addComponent(runButton)
-                            .addComponent(restartButton)
-                            .addComponent(seedSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(seedIncCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(stepButton)
+                        .addComponent(runButton)
+                        .addComponent(restartButton)
+                        .addComponent(seedSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(intervalSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(timeBar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -216,9 +226,12 @@ public class JBotViewer extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(renderPanel, 694, 694, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(solutionPath)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jbotPath))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addComponent(solutionPath)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jbotPath))
+                    .addComponent(fitnessField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -323,6 +336,7 @@ public class JBotViewer extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField fitnessField;
     private javax.swing.JSlider intervalSlider;
     private javax.swing.JLabel jbotPath;
     private javax.swing.JPanel mainPanel;

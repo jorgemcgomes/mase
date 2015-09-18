@@ -11,7 +11,7 @@ library(data.table)
 library(ineq)
 #library(plyr)
 
-SOURCE_DIR = "/home/jorge/Dropbox/mase/"
+SOURCE_DIR = "/home/jorge/Dropbox/mase/R"
 source(file.path(SOURCE_DIR, "data.r"))
 source(file.path(SOURCE_DIR, "analytic.r"))
 source(file.path(SOURCE_DIR, "soms.r"))
@@ -348,7 +348,7 @@ quickReport <- function(folder, jobs=NULL, snapshots=10, ...) {
         jobs <- length(files)
     }
     
-    data <- loadData(folder, jobs=jobs, load.behavs=F, load.clusters=F, load.weights=F, ...)
+    data <- loadData(folder, jobs=jobs, load.behavs=F, ...)
     frame <- data.frame(gen=data$gens)
     for(j in data$jobs) {
         frame[[j]] <- data[[j]]$fitness$best.sofar
