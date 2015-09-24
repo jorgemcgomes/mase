@@ -1776,3 +1776,22 @@ cor(subset(agg, NE=="GA-NS")$mean, subset(agg, NE=="NEAT-NS")$mean, method="pear
 cor(subset(agg, NE=="GA-Fit")$mean, subset(agg, NE=="NEAT-Fit")$mean, method="pearson")
 
 
+
+# AQUATIC DRONES STUFF #############################################
+
+setwd("~/labmag/exps/jbot/")
+pred <- metaLoadData("predprey_rb/nsga","predprey_rb/fit","predprey_rb/hom_nsga","predprey_rb/hom_fit", names=c("NSGA","Fit","HomNSGA","HomFit"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,2), behavs.file="behaviours.stat", load.behavs=T, behavs.sample=0.2, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+foraging <- metaLoadData("foraging2/nsga","foraging2/fit","foraging2/hom_nsga","foraging2/hom_fit", names=c("NSGA","Fit","HomNSGA","HomFit"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,6), behavs.file="behaviours.stat", load.behavs=T, behavs.sample=0.2, vars.group=c("Items","Dispersion","Proximity")))
+herding <- metaLoadData("herding_rb/nsga","herding_rb/fit","herding_rb/hom_nsga","herding_rb/hom_fit", names=c("NSGA","Fit","HomNSGA","HomFit"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,2), behavs.file="behaviours.stat", load.behavs=T, behavs.sample=0.2, vars.group=c("Time","SheepDist","ShephDispersion","ShephDist")))
+
+fullStatistics(pred, fit.comp=T, show.only=F, som.group=F, som.alljobs=T, expset.name="pred",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=F))
+fullStatistics(foraging, fit.comp=T, show.only=F, som.group=F, som.alljobs=T, expset.name="foraging",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=F))
+fullStatistics(herding, fit.comp=T, show.only=F, som.group=F, som.alljobs=T, expset.name="herding",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=F))
+
+pred <- metaLoadData("predprey_rb/fit","predprey_rb/hom_fit", names=c("CCEA","Homo"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,2), behavs.file="behaviours.stat", load.behavs=F, behavs.sample=0.2, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+foraging <- metaLoadData("foraging2/fit","foraging2/hom_fit", names=c("CCEA","Homo"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,6), behavs.file="behaviours.stat", load.behavs=F, behavs.sample=0.2, vars.group=c("Items","Dispersion","Proximity")))
+herding <- metaLoadData("herding_rb/fit","herding_rb/hom_fit", names=c("CCEA","Homo"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,6), behavs.file="behaviours.stat", load.behavs=F, behavs.sample=0.2, vars.group=c("Items","Dispersion","Proximity")))
+
+fitnessJobs(pred)
+fitnessJobs(foraging)
+fitnessJobs(herding)

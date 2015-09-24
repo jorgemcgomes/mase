@@ -45,7 +45,7 @@ public class BatchReevaluate {
                 force = true;
             }
         }
-        if(reps <= 0) {
+        if (reps <= 0) {
             System.out.println("Invalid number of repetitions: " + reps);
             return;
         }
@@ -57,9 +57,9 @@ public class BatchReevaluate {
         SimulationProblem sim = Reevaluate.createSimulator(args);
         BatchReevaluate mt = new BatchReevaluate(sim, reps, force);
         for (File f : folders) {
-            if(f.isDirectory()) {
+            if (f.isDirectory()) {
                 mt.reevaluateFolder(f);
-            } else if(f.isFile() && f.getName().endsWith("tar.gz")) {
+            } else if (f.isFile() && f.getName().endsWith("tar.gz")) {
                 mt.reevaluateTar(f);
             }
         }
@@ -103,55 +103,65 @@ public class BatchReevaluate {
         List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(tar);
         File fitnessLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", "refitness.stat"));
         File behavLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", "rebehaviours.stat"));
+        File bestFile = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", "rebest.ind"));
+
         BufferedWriter fitWriter = new BufferedWriter(new FileWriter(fitnessLog));
         BufferedWriter behavWriter = new BufferedWriter(new FileWriter(behavLog));
 
-        // Reevaluate solutions
-        List<Worker> workers = new ArrayList<Worker>(sols.size());
-        for (PersistentSolution sol : sols) {
-            workers.add(new Worker(sol));
-        }
-        List<Future<Reevaluation>> results = executor.invokeAll(workers);
-
-        // Log results
-        double bestFar = Double.NEGATIVE_INFINITY;
-        int bestIndex = -1;
-        EvaluationResult[] bestEval = null;
-        for (int i = 0; i < sols.size(); i++) {
-            Reevaluation reev = results.get(i).get();
-            // Log fitness
-            if (reev.meanFitness > bestFar) {
-                bestFar = reev.meanFitness;
-                bestEval = reev.mergedResults;
-                bestIndex = i;
+        try {
+            // Reevaluate solutions
+            List<Worker> workers = new ArrayList<Worker>(sols.size());
+            for (PersistentSolution sol : sols) {
+                workers.add(new Worker(sol));
             }
-            fitWriter.write(i + " 0 " + reev.meanFitness + " " + bestFar + " 0 " + reev.meanFitness + " " + bestFar);
-            fitWriter.newLine();
+            List<Future<Reevaluation>> results = executor.invokeAll(workers);
 
-            // Log behaviours
-            behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex() + " " + reev.meanFitness);
-            for (int j = 1; j < reev.mergedResults.length; j++) { // starts at 1 to skip fitness
-                EvaluationResult br = reev.mergedResults[j];
-                if (br instanceof SubpopEvaluationResult) {
-                    SubpopEvaluationResult ser = (SubpopEvaluationResult) br;
-                    EvaluationResult[] brs = ser.getAllEvaluations();
-                    for (int x = 0; x < brs.length; x++) {
-                        behavWriter.write(" " + x + " " + brs[x].toString());
-                    }
-                } else {
-                    behavWriter.write(" " + br.toString());
+            // Log results
+            double bestFar = Double.NEGATIVE_INFINITY;
+            int bestIndex = -1;
+            EvaluationResult[] bestEval = null;
+            for (int i = 0; i < sols.size(); i++) {
+                Reevaluation reev = results.get(i).get();
+                // Log fitness
+                if (reev.meanFitness > bestFar) {
+                    bestFar = reev.meanFitness;
+                    bestEval = reev.mergedResults;
+                    bestIndex = i;
                 }
-            }
-            behavWriter.newLine();
-        }
-        PersistentSolution best = sols.get(bestIndex);
-        best.setEvalResults(bestEval);
-        best.setFitness((float) bestFar);
-        File bestFile = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", "rebest.ind"));
-        SolutionPersistence.writeSolution(best, bestFile);
+                fitWriter.write(i + " 0 " + reev.meanFitness + " " + bestFar + " 0 " + reev.meanFitness + " " + bestFar);
+                fitWriter.newLine();
 
-        fitWriter.close();
-        behavWriter.close();
+                // Log behaviours
+                behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex() + " " + reev.meanFitness);
+                for (int j = 1; j < reev.mergedResults.length; j++) { // starts at 1 to skip fitness
+                    EvaluationResult br = reev.mergedResults[j];
+                    if (br instanceof SubpopEvaluationResult) {
+                        SubpopEvaluationResult ser = (SubpopEvaluationResult) br;
+                        EvaluationResult[] brs = ser.getAllEvaluations();
+                        for (int x = 0; x < brs.length; x++) {
+                            behavWriter.write(" " + x + " " + brs[x].toString());
+                        }
+                    } else {
+                        behavWriter.write(" " + br.toString());
+                    }
+                }
+                behavWriter.newLine();
+            }
+            PersistentSolution best = sols.get(bestIndex);
+            best.setEvalResults(bestEval);
+            best.setFitness((float) bestFar);
+            SolutionPersistence.writeSolution(best, bestFile);
+            fitWriter.close();
+            behavWriter.close();
+        } catch (Exception ex) {
+            System.out.println("Exception: " + ex.getMessage() + "\nDeleting all the logs...");
+            fitWriter.close();
+            behavWriter.close();
+            fitnessLog.delete();
+            behavLog.delete();
+            bestFile.delete();
+            ex.printStackTrace();
+        }
     }
 
     protected void shutdown() {

@@ -56,18 +56,60 @@ plotListToPDF <- function(plotlist, title="", nrow=NULL, ncol=NULL, width=DEF_WI
     if(is.null(file)) {
         file <- tempfile(fileext=".pdf")
     }
-    if(is.null(ncol) & length(plotlist) > 1) {
-        ncol <- 2
+    if(length(plotlist) == 1) {
+      nrow <- 1
+      ncol <- 1
+    } else if(!is.null(nrow) & is.null(ncol)) {
+      ncol <- ceiling(length(plotlist) / nrow)
+    } else if(!is.null(ncol) & is.null(nrow)) {
+      nrow <- ceiling(length(plotlist) / ncol)
+    } else if(is.null(ncol) & is.null(nrow)) {
+      ncol <- 2
+      nrow <- ceiling(length(plotlist) / ncol)
     }
-    if(is.null(nrow)) {
-        nrow <- ceiling(length(plotlist) / ncol)
-    }
-    plot <- do.call("arrangeGrob", c(plotlist, nrow=nrow, ncol=ncol, main=title))
-    ggsave(file, plot, width=width * ncol, height=height * nrow, units="in", limitsize=FALSE,...)
+      
+    pdf(file, width=width*ncol, height=height*nrow) ; multiplot(plotlist=plotlist, cols=ncol) ; dev.off() 
     if(show) {
         file.show(file)
     }
 }
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols), byrow=T)
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
 
 # Fitness stats ################################################################
 
@@ -546,6 +588,28 @@ fullStatistics <- function(..., fit.tests=FALSE, fit.ind=FALSE, fit.comp=FALSE, 
         rm(reduced) ; gc()
     }
     return(ksoms)
+}
+
+fitnessJobs <- function(datalist) {
+  for(data in datalist) {
+    fit <- c()
+    for(job in data$jobs) {
+      fit <- c(fit, tail(data[[job]]$fitness$best.sofar, 1))
+    }
+    order <- order(fit, decreasing=T)
+    sortedjobs <- data$jobs[order]
+    sortedfit <- fit[order]
+    f <- data.frame(job=sortedjobs, bestfit=sortedfit)
+    print(data$expname)
+    print(f)
+    
+    df <- data.frame(gen=data$gens)
+    for(job in sortedjobs) {
+      df[[job]] <- data[[job]]$fitness$best.sofar
+    }
+    g <- plotMultiline(df, ylim=NULL, title=data$expname, lty=NULL)
+    print(g)
+  }
 }
 
 fitnessRanking <- function(datalist, generation=NULL, name=NULL) {

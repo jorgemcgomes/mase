@@ -16,7 +16,6 @@ import org.apache.commons.lang3.tuple.Pair;
 public class HybridGroupController implements GroupController {
 
     private static final long serialVersionUID = 1;
-    //private final Pair<AgentController, List<Integer>>[] allocations;
     private final AgentController[] acs;
 
     public HybridGroupController(Pair<AgentController, List<Integer>>[] controllers) {
@@ -36,9 +35,6 @@ public class HybridGroupController implements GroupController {
 
     @Override
     public AgentController[] getAgentControllers(int nAgents) {
-        if (acs.length != nAgents) {
-            throw new RuntimeException("Unexpected controller size. Wanted: " + nAgents + ". Has: " + acs.length);
-        }
         return acs;
     }
 

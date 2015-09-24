@@ -19,9 +19,6 @@ public class HeterogeneousGroupController implements GroupController {
     
     @Override
     public AgentController[] getAgentControllers(int n) {
-        if(n != controllers.length) {
-            return null;
-        }
         return controllers;
     }
 

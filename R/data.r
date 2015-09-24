@@ -14,98 +14,119 @@ metaLoadData <- function(..., params, names=NULL) {
 
 loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c(), 
                      vars.file=c(vars.group, vars.ind), vars.transform=list(),
-                     subpops=1, expname=folder, gens=NULL, load.behavs=TRUE, 
+                     subpops=NULL, merge.subpops=F, expname=folder, gens=NULL, load.behavs=TRUE, 
                      behavs.sample=1, behavs.bests=F, fitness.file="fitness.stat", behavs.file="behaviours.stat",
                      use.evals=FALSE) {
-    data <- NULL
-    data$fitlim <- fitlim
-    if(is.character(jobs)) {
-        data$jobs <- jobs
-    } else {
-        data$jobs <- paste0("job.",0:(jobs-1))
-    }
-    data$njobs <- length(data$jobs)
-    data$vars.ind <- vars.ind
-    data$vars.group <- vars.group
+  data <- NULL
+  data$fitlim <- fitlim
+  if(is.character(jobs)) {
+    data$jobs <- jobs
+  } else {
+    data$jobs <- paste0("job.",0:(jobs-1))
+  }
+  data$njobs <- length(data$jobs)
+  data$vars.ind <- vars.ind
+  data$vars.group <- vars.group
+  data$folder <- folder
+  data$expname <- expname
+  data$gens <- gens
+  if(!is.null(subpops)) {
     data$subpops <- paste0("sub.",0:(subpops-1))
     data$nsubs <- length(data$subpops)
-    data$folder <- folder
-    data$expname <- expname
-    data$gens <- gens
-        
-    progress <- txtProgressBar(min = 0, max = data$njobs, initial = 0, char = "=", style = 3)
-    prog <- 0
-    for(j in data$jobs) {
-        gc()
-        data[[j]] <- list()
-        
-        # Fitness
-        ext <- fread(file.path(folder, paste0(j,".",fitness.file)), header=F, sep=" ", stringsAsFactors=F)  
-        ext <- subset(ext, select=(colSums(is.na(ext)) != nrow(ext)))
-        old.gen <- NULL
-        if(is.null(data$gens)) {
-            data$gens <- ext[[1]]
-        } else {
-          if(use.evals) {
-            rows <- c()
-            rowIndex <- 1
-            for(i in 1:length(data$gens)) {
-              for(r in rowIndex:nrow(ext)) {
-                if(ext[[2]][r] >= data$gens[i]) {
-                  rows <- c(rows,r)
-                  break
-                }
-                rowIndex <- rowIndex + 1
-              }
+  }
+  
+  progress <- txtProgressBar(min = 0, max = data$njobs, initial = 0, char = "=", style = 3)
+  prog <- 0
+  for(j in data$jobs) {
+    gc()
+    data[[j]] <- list()
+    
+    # Fitness
+    ext <- fread(file.path(folder, paste0(j,".",fitness.file)), header=F, sep=" ", stringsAsFactors=F)  
+    ext <- subset(ext, select=(colSums(is.na(ext)) != nrow(ext)))
+    old.gen <- NULL
+    if(is.null(data$gens)) {
+      data$gens <- ext[[1]]
+    } else {
+      if(use.evals) {
+        rows <- c()
+        rowIndex <- 1
+        for(i in 1:length(data$gens)) {
+          for(r in rowIndex:nrow(ext)) {
+            if(ext[[2]][r] >= data$gens[i]) {
+              rows <- c(rows,r)
+              break
             }
-            old.gen <- ext[[1]][rows]
-            ext <- ext[rows,]
-          } else {
-            ext <- ext[which(ext[[1]] %in% data$gens),]
+            rowIndex <- rowIndex + 1
           }
         }
-
-        data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)]], best.gen=ext[[ncol(ext)-1]], mean=ext[[ncol(ext)-2]])
-        if(use.evals) {
-          data[[j]]$fitness$old.gen <- old.gen
-        }
-        
-        bestInGen <- function(g, data) {
-          s <- data[gen==g,]
-          ind <- which.max(s$fitness)
-          return(s[ind,])
-        }
-        
-        # Behaviours
-        if(load.behavs) {
-          tab <- fread(file.path(folder,paste0(j,".",behavs.file)), header=F, sep=" ", stringsAsFactors=F)  
-          fixedvars <- c("gen","subpop","index","fitness")
-            setnames(tab, c(fixedvars,vars.file))
-            for(s in 0:(data$nsubs-1)) {
-                # & gen %in% data$gens
-                sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group))
-                if(behavs.bests) {
-                  bests <- lapply(data$gens, bestInGen, sub)
-                  sub <- do.call(rbind.data.frame, bests)
-                } else if(behavs.sample < 1 & nrow(sub > 1)) { # sample
-                  samp <- sample(1:nrow(sub), round(nrow(sub) * behavs.sample))
-                  samp <- samp[order(samp)]
-                  sub <- sub[samp,]
-                } 
-                # apply transformations
-                for(v in names(vars.transform)) {
-                    if(v %in% colnames(sub)) {
-                        sub[,v] <- parSapply(NULL, sub[,v], transform, vars.transform[[v]])
-                    }
-                }
-                sub <- na.omit(sub)
-                data[[j]][[data$subpops[s+1]]] <- sub           
-            }
-        }
-        prog <- prog + 1
-        setTxtProgressBar(progress, prog)
+        old.gen <- ext[[1]][rows]
+        ext <- ext[rows,]
+      } else {
+        ext <- ext[which(ext[[1]] %in% data$gens),]
+      }
     }
-    return(data)
+    
+    data[[j]]$fitness <- data.frame(gen=data$gens, best.sofar=ext[[ncol(ext)]], best.gen=ext[[ncol(ext)-1]], mean=ext[[ncol(ext)-2]])
+    if(use.evals) {
+      data[[j]]$fitness$old.gen <- old.gen
+    }
+    
+    bestInGen <- function(g, data) {
+      s <- data[gen==g,]
+      ind <- which.max(s$fitness)
+      return(s[ind,])
+    }
+    
+    # Behaviours
+    if(load.behavs) {
+      # fread instead of read.table
+      tab <- read.table(file.path(folder,paste0(j,".",behavs.file)), header=F, sep=" ", stringsAsFactors=F)
+      fixedvars <- c("gen","subpop","index","fitness")
+      setnames(tab, c(fixedvars,vars.file))
+      
+      if(is.null(subpops)) {
+        subpops <- length(unique(tab$subpop))
+        data$subpops <- paste0("sub.",0:(subpops-1))
+        data$nsubs <- length(data$subpops)
+      }
+      
+      for(s in 0:(data$nsubs-1)) {
+        # & gen %in% data$gens
+        sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group))
+        if(behavs.bests) {
+          bests <- lapply(data$gens, bestInGen, sub)
+          sub <- do.call(rbind.data.frame, bests)
+        } else if(behavs.sample < 1 & nrow(sub > 1)) { # sample
+          samp <- sample(1:nrow(sub), round(nrow(sub) * behavs.sample))
+          samp <- samp[order(samp)]
+          sub <- sub[samp,]
+        } 
+        # apply transformations
+        for(v in names(vars.transform)) {
+          if(v %in% colnames(sub)) {
+            sub[,v] <- parSapply(NULL, sub[,v], transform, vars.transform[[v]])
+          }
+        }
+        sub <- na.omit(sub)
+        if(merge.subpops) {
+          sub[,"subpop"] <- 0
+          merged <- rbind(data[[j]][[data$subpops[1]]], sub)
+          merged <- merged[with(merged,order(gen,subpop,index)),]
+          data[[j]][[data$subpops[1]]] <- merged
+        } else {
+          data[[j]][[data$subpops[s+1]]] <- sub
+        }
+      }
+      if(merge.subpops) {
+        data$subpops <- data$subpops[1]
+        data$nsubs <- 1
+      }
+    }
+    prog <- prog + 1
+    setTxtProgressBar(progress, prog)
+  }
+  return(data)
 }
 
 transform <- function(v, t) {
