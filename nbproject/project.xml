@@ -37,6 +37,14 @@
                 <id>jar</id>
             </reference>
             <reference>
+                <foreign-project>ECJ-1</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar</id>
+            </reference>
+            <reference>
                 <foreign-project>JBotAquatic</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
@@ -69,7 +77,23 @@
                 <id>jar</id>
             </reference>
             <reference>
+                <foreign-project>MASON-1</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar</id>
+            </reference>
+            <reference>
                 <foreign-project>NEAT4J</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar</id>
+            </reference>
+            <reference>
+                <foreign-project>NEAT4J-1</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>
