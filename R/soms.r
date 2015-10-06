@@ -175,10 +175,19 @@ mapMergeSubpopsAux <- function(job, som, data, gen.from=data$gens[1], gen.to=dat
     return(list(all=d))
 }
 
-identifyBests <- function(som, data, n=10, outfile) {
+identifyBests <- function(som, datalist, outfile, ...) {
+  all.frame <- data.frame()
+  for(data in datalist) {
+    bests <- identifyBests.aux(som, data, ...)
+    all.frame <- rbind(all.frame, cbind(Exp=data$expname, bests))
+  }
+  write.table(all.frame, file=outfile, row.names=F, col.names=T)
+}
+
+identifyBests.aux <- function(som, data, n=10, fitness.threshold=-Inf) {
     # create identification data frame
     variables <- colnames(som$codes)
-    idframe <- data.frame(job=rep(NA,100000), sub=rep(NA,100000), gen=rep(NA,100000), id=rep(NA,100000), fitness=rep(NA,100000))
+    idframe <- data.frame(job=rep(NA,100000), sub=rep(NA,100000), gen=rep(NA,100000), id=rep(NA,100000), fitness=rep(NA,100000), stringsAsFactors=F)
     for(var in variables) {
         idframe[[var]] <- rep(NA,100000)
     }
@@ -186,11 +195,15 @@ identifyBests <- function(som, data, n=10, outfile) {
     for(job in data$jobs) {
         print(job)
         for(sub in data$subpops) {
-            f <- cbind(job=job, sub=sub, subset(data[[job]][[sub]], select=c("gen","index","fitness",variables)))
-            idframe <- rbind(idframe, f)
+            d <- subset(data[[job]][[sub]], fitness >= fitness.threshold)
+            if(nrow(d) > 0) {
+              f <- cbind(job=job, sub=sub, subset(d, select=c("gen","index","fitness",variables)))
+              idframe <- rbind(idframe, f)
+            }
         }
     }
-    print(summary(idframe))
+    i <- sapply(idframe, is.factor)
+    idframe[i] <- lapply(idframe[i], as.character)
     idframe <- idframe[complete.cases(idframe),]
     
     # map data to som
@@ -214,6 +227,6 @@ identifyBests <- function(som, data, n=10, outfile) {
         }
     }
     bestsframe <- bestsframe[complete.cases(bestsframe),]
-    write.table(bestsframe, file=outfile, row.names=F, col.names=T)
+    return(bestsframe)
 }
 

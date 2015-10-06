@@ -1795,3 +1795,28 @@ herding <- metaLoadData("herding_rb/fit","herding_rb/hom_fit", names=c("CCEA","H
 fitnessJobs(pred)
 fitnessJobs(foraging)
 fitnessJobs(herding)
+
+
+pred_het <- metaLoadData("predprey/fit","predprey/fit_nonoise","predprey/fit_actnoise","predprey/fit_sensnoise", names=c("all.noise","no.noise","act.noise","sens.noise"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,1.5), behavs.file="behaviours.stat", load.behavs=F, behavs.sample=0.2, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+fullStatistics(pred_het, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=T))
+
+pred_hom <- metaLoadData("predprey/hom_fit","predprey/hom_fit_nonoise","predprey/hom_fit_actnoise","predprey/hom_fit_sensnoise", names=c("all.noise","no.noise","act.noise","sens.noise"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,1.5), behavs.file="behaviours.stat", load.behavs=F, behavs.sample=0.2, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+fullStatistics(pred_hom, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_hom",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=T))
+
+forg_het <- metaLoadData("foraging/fit","foraging/fit_nonoise","foraging/fit_actnoise","foraging/fit_sensnoise", names=c("all.noise","no.noise","act.noise","sens.noise"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,5), behavs.file="behaviours.stat", load.behavs=F, behavs.sample=0.2, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+fullStatistics(forg_het, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="forg_het",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=T))
+
+forg_hom <- metaLoadData("foraging/hom_fit","foraging/hom_fit_nonoise","foraging/hom_fit_actnoise","foraging/hom_fit_sensnoise", names=c("all.noise","no.noise","act.noise","sens.noise"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,5), behavs.file="behaviours.stat", load.behavs=F, behavs.sample=0.2, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+fullStatistics(forg_het, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="forg_hom",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=T))
+
+pred <- metaLoadData("predprey/nsga","predprey/fit","predprey/hom_nsga","predprey/hom_fit", names=c("NSGA","Fit","HomNSGA","HomFit"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,1.5), behavs.file="behaviours.stat", load.behavs=T, behavs.sample=0.5, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+som <- fullStatistics(pred, fit.comp=T, show.only=F, som.group=T, som.alljobs=T, expset.name="pred",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=T), som.group.par=list(distance.filter=0.4))
+
+
+pred <- metaLoadData("predprey/nsga","predprey/fit","predprey/hom_nsga","predprey/hom_fit", names=c("NSGA","Fit","HomNSGA","HomFit"), params=list(jobs=10, subpops=NULL, merge.subpops=T, fitness.file="refitness.stat", fitlim=c(0,1.5), behavs.file="behaviours.stat", load.behavs=T, behavs.sample=0.5, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+som <- fullStatistics(pred, fit.comp=T, show.only=F, som.group=T, som.alljobs=T, expset.name="pred",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=T), som.group.par=list(distance.filter=0.4))
+
+repred <- metaLoadData("predprey/nsga","predprey/fit", names=c("NSGA","Fit"), params=list(jobs=10, subpops=NULL, merge.subpops=F, fitness.file="refitness.stat", fitlim=c(0,1.5), behavs.file="rebehaviours.stat", load.behavs=T, behavs.sample=1, vars.group=c("Captured","PreyDist","Time","Dispersion")))
+som <- fullStatistics(repred, fit.comp=T, show.only=F, som.group=T, som.alljobs=T, expset.name="repred",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=T), som.group.par=list(distance.filter=0.5,grid.size=6))
+save(som, file="repred_som.rdata")
+identifyBests(som$group, repred, "repred_bests.csv", n=10, fitness.threshold=0.8)

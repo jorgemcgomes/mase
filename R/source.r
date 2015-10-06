@@ -231,7 +231,7 @@ individualSomPlots <- function(som, data, mapping, ...) {
     return(plots)
 }
 
-somPlot <- function(som, mapping, title="som", alpha=0.70, gradient.low="blue", gradient.high="red", colour.limits=c(), size.max=30, limit.min=0.00, limit.max=0.05) {
+somPlot <- function(som, mapping, title="som", alpha=0.70, gradient.low="blue", gradient.high="red", colour.limits=c(), size.max=30, limit.min=0.00, limit.max=1/nrow(som$grid$pts)*4) {
   almost <- which(mapping$count > 0 & mapping$count < limit.min)
   mapping$count[almost] <- limit.min
   g <- ggplot(mapping, aes(somx, somy)) + 
@@ -270,16 +270,18 @@ fitnessHeatmapPlots <- function(som, gradient.low="white", gradient.high="steelb
     d <- data.frame(x = som$grid$pts[,1], y = som$grid$pts[,2], fitness.max = som$fitness.max, fitness.avg = som$fitness.avg)
     limits <- c(min(som$fitness.avg), max(som$fitness.max))
     p1 <- ggplot(d, aes(x, y)) + geom_tile(aes(fill = fitness.avg), colour="white") + 
+        geom_text(aes(label = round(fitness.avg, 1)), size=3) +
         scale_fill_gradient(low=gradient.low, high=gradient.high, limits=limits) + 
         scale_x_continuous(breaks = 1:som$grid$xdim) +
         scale_y_continuous(breaks = 1:som$grid$ydim) +
         ggtitle("Avg fitness")
     p2 <- ggplot(d, aes(x, y)) + geom_tile(aes(fill = fitness.max), colour="white") + 
+        geom_text(aes(label = round(fitness.max, 1)), size=3) +  
         scale_fill_gradient(low=gradient.low, high=gradient.high, limits=limits) + 
         scale_x_continuous(breaks = 1:som$grid$xdim) +
         scale_y_continuous(breaks = 1:som$grid$ydim) +
         ggtitle("Max fitness")
-    return(list(p1,p2))
+    return(list(p2,p1))
 }
 
 explorationVideo <- function(som, data, mergeSubpops=TRUE, accumulate=TRUE, interval=10, fps=5, out=paste(data$expname,mergeSubpops,accumulate,data$jobs[1],"mp4",sep=".")) {

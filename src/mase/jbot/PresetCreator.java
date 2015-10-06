@@ -5,15 +5,10 @@
  */
 package mase.jbot;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.controllers.HomogeneousGroupController;
@@ -72,8 +67,8 @@ public class PresetCreator {
         String descr = "description=(" + file.getName().replace("preset_", "").replace(".conf", "") + ")";
 
         String content = IOUtils.toString(new FileInputStream(file));
-        content = content.replaceAll("weights\\s*=\\s*(.*)", sb.toString());
-        content = content.replaceAll("description\\s*=\\s*(.*)", descr);
+        content = content.replaceAll("weights\\s*=\\s*\\(.*\\)", sb.toString());
+        content = content.replaceAll("description\\s*=\\s*\\(.*\\)", descr);
         System.out.println("Writting: " + file.getAbsolutePath() + " " + weights.length + " weights.");
         IOUtils.write(content, new FileOutputStream(file));
     }
