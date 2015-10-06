@@ -6,7 +6,7 @@
 package mase.stat;
 
 import ec.*;
-import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
+import mase.MultiPopCoevolutionaryEvaluator2;
 import ec.util.*;
 import java.io.*;
 import mase.MetaEvaluator;

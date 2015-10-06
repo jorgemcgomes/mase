@@ -6,7 +6,6 @@ package mase;
 
 import ec.Evaluator;
 import ec.EvolutionState;
-import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
 import ec.util.Parameter;
 
 /**

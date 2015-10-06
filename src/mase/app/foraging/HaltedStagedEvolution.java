@@ -9,7 +9,7 @@ import ec.EvolutionState;
 import ec.Fitness;
 import ec.Individual;
 import ec.Subpopulation;
-import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
+import mase.MultiPopCoevolutionaryEvaluator2;
 import ec.util.Parameter;
 import mase.MetaEvaluator;
 import mase.controllers.AgentController;

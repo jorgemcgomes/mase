@@ -10,7 +10,7 @@ import ec.Exchanger;
 import ec.Individual;
 import ec.Population;
 import ec.Subpopulation;
-import ec.coevolve.MultiPopCoevolutionaryEvaluator2;
+import mase.MultiPopCoevolutionaryEvaluator2;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -216,7 +216,7 @@ public abstract class AbstractHybridExchanger extends Exchanger {
 
         @Override
         public int compare(Individual o1, Individual o2) {
-            return Float.compare(o2.fitness.fitness(), o1.fitness.fitness());
+            return Double.compare(o2.fitness.fitness(), o1.fitness.fitness());
         }
     }
 

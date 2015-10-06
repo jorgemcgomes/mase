@@ -12,7 +12,7 @@ import sim.util.MutableDouble2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class MultiPreyGroupEval extends OnePreyGroupEvalOriginal {
+public class MultiPreyGroupEval extends OnePreyGroupEval {
 
     protected float preyDispersion = 0;
 
@@ -52,7 +52,7 @@ public class MultiPreyGroupEval extends OnePreyGroupEvalOriginal {
     @Override
     public EvaluationResult getResult() {
         if (evaluation == null) {
-            evaluation = new VectorBehaviourResult(new float[]{captured, simTime, predatorDispersion, preyDispersion});
+            evaluation = new VectorBehaviourResult(new float[]{captured, time, predatorDispersion, preyDispersion});
         }
         return evaluation;
     }

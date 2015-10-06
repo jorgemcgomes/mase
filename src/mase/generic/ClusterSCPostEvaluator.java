@@ -7,12 +7,16 @@ package mase.generic;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import edu.wlu.cs.levy.CG.KDTree;
+import edu.wlu.cs.levy.CG.KeyDuplicateException;
+import edu.wlu.cs.levy.CG.KeySizeException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.MetaEvaluator;
 import mase.PostEvaluator;
 import mase.evaluation.BehaviourResult;
@@ -205,7 +209,12 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         for (int i = 0; i < cand.length; i++) {
             cand[i] = candidate[i];
         }
-        return clusterTree.nearest(cand);
+        try {
+            return clusterTree.nearest(cand);
+        } catch (KeySizeException ex) {
+            ex.printStackTrace();
+            return -1;
+        }
     }
 
     protected double centerDistance(double[] cluster, byte[] candidate) {
@@ -247,7 +256,11 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     protected void updateClusterTree() {
         clusterTree = new KDTree<Integer>(clusters[0].length);
         for (int i = 0; i < clusters.length; i++) {
-            clusterTree.insert(clusters[i], i);
+            try {
+                clusterTree.insert(clusters[i], i);
+            } catch (Exception ex) {
+                Logger.getLogger(ClusterSCPostEvaluator.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

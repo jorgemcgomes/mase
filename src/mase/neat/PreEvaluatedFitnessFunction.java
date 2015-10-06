@@ -14,16 +14,16 @@ import org.neat4j.neat.ga.core.Chromosome;
  */
 public class PreEvaluatedFitnessFunction extends NEATFitnessFunction {
 
-    private final Map<Chromosome, Float> scores;
+    private final Map<Chromosome, Double> scores;
 
-    public PreEvaluatedFitnessFunction(Map<Chromosome, Float> scores) {
+    public PreEvaluatedFitnessFunction(Map<Chromosome, Double> scores) {
         super(null, null);
         this.scores = scores;
     }
 
     @Override
     public double evaluate(Chromosome genoType) {
-        Float sc = scores.get(genoType);
+        Double sc = scores.get(genoType);
         if (sc == null) {
             throw new RuntimeException("Genotype not previously evaluated!");
         } else {

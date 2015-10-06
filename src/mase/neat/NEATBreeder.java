@@ -23,7 +23,7 @@ public class NEATBreeder extends SimpleBreeder {
     @Override
     public Population breedPopulation(EvolutionState state) {
         // Get scores from individuals
-        Map<Chromosome, Float> scores = new HashMap<Chromosome, Float>();
+        Map<Chromosome, Double> scores = new HashMap<Chromosome, Double>();
         for (Subpopulation subpop : state.population.subpops) {
             NEATSubpop sub = (NEATSubpop) subpop;
             for (Individual ind : sub.individuals) {

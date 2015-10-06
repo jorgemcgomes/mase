@@ -46,7 +46,7 @@ public class NEATStatistics extends Statistics {
             NEATGeneticAlgorithm neat = ((NEATSubpop) state.population.subpops[i]).getNEAT();
             state.output.print(" " + neat.getSpecies().specieList().size(), log);
             
-            float highestFitness = Float.NEGATIVE_INFINITY;
+            double highestFitness = Double.NEGATIVE_INFINITY;
             int[] bestDescr = null;
             double[] avgDescr = new double[3];
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {

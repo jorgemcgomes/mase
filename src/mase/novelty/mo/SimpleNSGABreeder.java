@@ -40,7 +40,7 @@ public class SimpleNSGABreeder extends SimpleBreeder {
 
                     @Override
                     public int compare(Individual o1, Individual o2) {
-                        return Float.compare(o2.fitness.fitness(), o1.fitness.fitness());
+                        return Double.compare(o2.fitness.fitness(), o1.fitness.fitness());
                     }
 
                 });

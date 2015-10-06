@@ -10,12 +10,16 @@ import ec.Population;
 import ec.util.Parameter;
 import edu.wlu.cs.levy.CG.Checker;
 import edu.wlu.cs.levy.CG.KDTree;
+import edu.wlu.cs.levy.CG.KeyDuplicateException;
+import edu.wlu.cs.levy.CG.KeySizeException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.PostEvaluator;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.VectorBehaviourResult;
@@ -163,25 +167,34 @@ public class NoveltyEvaluation implements PostEvaluator {
             this.tree = new KDTree<VectorBehaviourResult>(vbr.getBehaviour().length);
             for(BehaviourResult br : pool) {
                 vbr = (VectorBehaviourResult) br;
-                tree.insert(toDoubleArray(vbr.getBehaviour()), vbr);
+                try {
+                    tree.insert(toDoubleArray(vbr.getBehaviour()), vbr);
+                } catch (Exception ex) {
+                    Logger.getLogger(NoveltyEvaluation.class.getName()).log(Level.SEVERE, null, ex);
+                } 
             }
         }
 
         @Override
         public double getDistance(final BehaviourResult target, int k) {
-            VectorBehaviourResult vbr = (VectorBehaviourResult) target;
-            List<VectorBehaviourResult> nearest = tree.nearest(
-                    toDoubleArray(vbr.getBehaviour()), k, new Checker<VectorBehaviourResult>() {
-                @Override
-                public boolean usable(VectorBehaviourResult v) {
-                    return v != target;
+            try {
+                VectorBehaviourResult vbr = (VectorBehaviourResult) target;
+                List<VectorBehaviourResult> nearest = tree.nearest(
+                        toDoubleArray(vbr.getBehaviour()), k, new Checker<VectorBehaviourResult>() {
+                            @Override
+                            public boolean usable(VectorBehaviourResult v) {
+                                return v != target;
+                            }
+                        });
+                double dist = 0;
+                for(VectorBehaviourResult v : nearest) {
+                    dist += distance(target,v);
                 }
-            });
-            double dist = 0;
-            for(VectorBehaviourResult v : nearest) {
-                dist += distance(target,v);
+                return dist / k;
+            } catch (Exception ex) {
+                Logger.getLogger(NoveltyEvaluation.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return dist / k;
+            return Double.NaN;
         }
         
         private double[] toDoubleArray(float[] a) {
