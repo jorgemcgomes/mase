@@ -103,20 +103,20 @@ public class MultiPopCoevolutionaryEvaluator extends Evaluator
     // the number of elite partners selected from the previous generation
     public static final String P_NUM_ELITE = "num-elites";
     protected int numElite;
-    Individual[/*subpopulation*/][/*the elites*/] eliteIndividuals;
+    protected Individual[/*subpopulation*/][/*the elites*/] eliteIndividuals;
 
     // the number of random partners selected from the current and previous generations
     public final static String P_NUM_IND = "num-prev";
     protected int numPrev;
-    Population previousPopulation;
+    protected Population previousPopulation;
 
     // the selection method used to select the other partners from the previous generation
     public static final String P_SELECTION_METHOD_PREV = "select-prev";
-    SelectionMethod[] selectionMethodPrev;
+    protected SelectionMethod[] selectionMethodPrev;
 
     // the selection method used to select the other partners from the current generation
     public static final String P_SELECTION_METHOD_CURRENT = "select-current";
-    SelectionMethod[] selectionMethodCurrent;
+    protected SelectionMethod[] selectionMethodCurrent;
                         
     public void setup( final EvolutionState state, final Parameter base )
         {
@@ -261,9 +261,9 @@ public class MultiPopCoevolutionaryEvaluator extends Evaluator
         }
 
     // individuals to evaluate together
-    Individual[] inds = null;
+    protected Individual[] inds = null;
     // which individual should have its fitness updated as a result
-    boolean[] updates = null;
+    protected boolean[] updates = null;
         
 
 
@@ -464,7 +464,7 @@ public class MultiPopCoevolutionaryEvaluator extends Evaluator
         }
 
 
-    void loadElites( final EvolutionState state, int whichSubpop )
+    protected void loadElites( final EvolutionState state, int whichSubpop )
         {
         Subpopulation subpop = state.population.subpops[whichSubpop];
                 
