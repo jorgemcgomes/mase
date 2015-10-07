@@ -247,16 +247,6 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         Double2D agentDir = new Double2D(FastMath.cos(orientation), FastMath.sin(orientation));
         return FastMath.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
     }
-    
-    public static void main(String[] args) {
-        double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
-        for (int i = 0; i < 10000000; i++) {
-            double a = Math.atan2(Math.random() * 2 - 1, Math.random() * 2 - 1);
-            min = Math.min(min, a);
-            max = Math.max(max, a);
-        }
-        System.out.println(min + " , " + max);
-    }
 
     public double distanceTo(EmboddiedAgent other) {
         return Math.max(0, pos.distance(other.getLocation()) - other.radius - this.radius);

@@ -43,8 +43,8 @@ public class MetaEvaluator extends Evaluator {
             postEval.processPopulation(state);
         }
         // necessary hack
-        if (baseEvaluator instanceof MultiPopCoevolutionaryEvaluator2) {            
-            ((MultiPopCoevolutionaryEvaluator2) baseEvaluator).afterCoevolutionaryEvaluation(state, state.population, null);
+        if (baseEvaluator instanceof CoevolutionaryEvaluator) {            
+            ((CoevolutionaryEvaluator) baseEvaluator).afterCoevolutionaryEvaluation(state, state.population, null);
         }
     }
 

@@ -1,5 +1,5 @@
 # cooperative coevolution
-eval.base =                             ec.coevolve.MultiPopCoevolutionaryEvaluator2
+eval.base =                             mase.CoevolutionaryEvaluator
 eval.base.elite-mode =                  score
 eval.base.num-current =			0
 eval.base.num-elites =                  1

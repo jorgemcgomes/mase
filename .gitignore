@@ -1,3 +1,9 @@
 /nbproject/private/
 /build/
 /dist/
+/dependencies/ECJ/build/
+/dependencies/ECJ/dist/
+/dependencies/MASON/build/
+/dependencies/MASON/dist/
+/dependencies/NEAT4J/dist/
+/dependencies/NEAT4J/build/

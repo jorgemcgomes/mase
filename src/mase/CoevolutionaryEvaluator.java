@@ -23,7 +23,7 @@ import mase.novelty.NoveltyFitness;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEvaluator {
+public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
 
     public static final String P_LAST_CHAMPIONS = "num-last-champions";
     public static final String P_RANDOM_CHAMPIONS = "num-random-champions";
@@ -286,7 +286,7 @@ public class MultiPopCoevolutionaryEvaluator2 extends MultiPopCoevolutionaryEval
     }
 
     @Override
-    void loadElites(final EvolutionState state, int whichSubpop) {
+    protected void loadElites(final EvolutionState state, int whichSubpop) {
         Subpopulation subpop = state.population.subpops[whichSubpop];
 
         // Update hall of fame

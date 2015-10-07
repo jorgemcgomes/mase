@@ -6,7 +6,7 @@
 package mase.stat;
 
 import ec.*;
-import mase.MultiPopCoevolutionaryEvaluator2;
+import mase.CoevolutionaryEvaluator;
 import ec.util.*;
 import java.io.*;
 import mase.MetaEvaluator;
@@ -144,8 +144,8 @@ public class FitnessStat extends Statistics {
         int evals = 0;
         if(state.evaluator instanceof MetaEvaluator) {
             MetaEvaluator me = (MetaEvaluator) state.evaluator;
-            if(me.getBaseEvaluator() instanceof MultiPopCoevolutionaryEvaluator2) {
-                MultiPopCoevolutionaryEvaluator2 mpc = (MultiPopCoevolutionaryEvaluator2) me.getBaseEvaluator();
+            if(me.getBaseEvaluator() instanceof CoevolutionaryEvaluator) {
+                CoevolutionaryEvaluator mpc = (CoevolutionaryEvaluator) me.getBaseEvaluator();
                 evals = mpc.totalEvaluations;
             }
         }

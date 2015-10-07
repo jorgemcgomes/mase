@@ -5,6 +5,7 @@
  */
 package mase.app.maze;
 
+import mase.mason.ParamUtils.Param;
 import mase.mason.world.StaticPolygon;
 import sim.util.Double2D;
 
@@ -14,24 +15,23 @@ import sim.util.Double2D;
  */
 public class MazeParams {
 
-    public static final String P_MAZE = "maze";
-    public static final String P_LINEAR_SPEED = "linear-speed";
-    public static final String P_TURN_SPEED = "turn-speed";
-    public static final String P_AGENT_RADIUS = "agent-radius";
-    public static final String P_SENSOR_RANGE = "sensor-range";
-    //public static final String P_START_POS = "start-pos";
-    public static final String P_START_ORI = "start-orientation";
-    //public static final String P_TARGET_POS = "target-pos";
-    public static final String P_TARGET_RADIUS = "target-radius";
-
     protected StaticPolygon maze;
-    protected double linearSpeed;
-    protected double turnSpeed;
-    protected double agentRadius;
     protected Double2D startPos;
-    protected double startOrientation;
     protected Double2D targetPos;
-    protected double targetRadius;
-    protected double sensorRange;
+
+    @Param(name = "maze")
+    public String mazeFile;
+    @Param(name = "linear-speed")
+    public double linearSpeed;
+    @Param(name = "turn-speed")
+    public double turnSpeed;
+    @Param(name = "agent-radius")
+    public double agentRadius;
+    @Param(name = "start-orientation")
+    public double startOrientation;
+    @Param(name = "target-radius")
+    public double targetRadius;
+    @Param(name = "sensor-range")
+    public double sensorRange;
 
 }

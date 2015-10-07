@@ -19,6 +19,7 @@ import mase.controllers.GroupController;
 import mase.mason.GUICompatibleSimState;
 import mase.mason.GUIState2D;
 import mase.mason.MasonSimulator;
+import mase.mason.ParamUtils;
 import mase.mason.world.PolygonGenerator;
 import mase.mason.world.StaticPolygon;
 import sim.display.GUIState;
@@ -36,18 +37,12 @@ public class MazeSimulator extends MasonSimulator {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         par = new MazeParams();
-        Parameter df = defaultBase();
-        par.linearSpeed = state.parameters.getDouble(df.push(MazeParams.P_LINEAR_SPEED), null);
-        par.turnSpeed = state.parameters.getDouble(df.push(MazeParams.P_TURN_SPEED), null);
-        par.agentRadius = state.parameters.getDouble(df.push(MazeParams.P_AGENT_RADIUS), null);
-        par.sensorRange = state.parameters.getDouble(df.push(MazeParams.P_SENSOR_RANGE), null);
-        par.targetRadius = state.parameters.getDouble(df.push(MazeParams.P_TARGET_RADIUS), null);
+        ParamUtils.autoSetParameters(par, state.parameters, base, defaultBase());
 
         try {
-            String svgPath = state.parameters.getString(df.push(MazeParams.P_MAZE), null);
-            File svg = new File(svgPath);
+            File svg = new File(par.mazeFile);
             if (!svg.exists()) {
-                svg = new File(this.getClass().getResource(svgPath).toURI());
+                svg = new File(this.getClass().getResource(par.mazeFile).toURI());
             }
             state.output.message("Maze: " + svg.getAbsolutePath());
             MazeReader mr = new MazeReader(svg);
@@ -60,7 +55,7 @@ public class MazeSimulator extends MasonSimulator {
             Double2D dir = par.targetPos.subtract(par.startPos);
             par.startOrientation = dir.angle();
         } catch (Exception ex) {
-            state.output.fatal(ex.getMessage(), df.push(MazeParams.P_MAZE));
+            state.output.fatal(par.mazeFile + ": " + ex.getMessage());
         }
     }
 
