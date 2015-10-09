@@ -18,6 +18,7 @@ public abstract class AbstractEffector implements Effector {
     protected Continuous2D field;
     protected EmboddiedAgent ag;
 
+    @Override
     public void setAgent(SimState state, Continuous2D field, EmboddiedAgent ag) {
         this.state = state;
         this.field = field;
