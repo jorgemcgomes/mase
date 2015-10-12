@@ -55,10 +55,10 @@ public class MultiRoverIndEval extends MasonEvaluation {
         VectorBehaviourResult[] res = new VectorBehaviourResult[mr.rovers.size()];
         
         for(int i = 0 ; i < mr.rovers.size() ; i++) {
-            res[i] = new VectorBehaviourResult((float) (movement[i] / currentEvaluationStep / mr.par.speed),
-                    (float) (proximity[i] / currentEvaluationStep / (mr.par.size / 4)),
-                    (float) type1Active[i] / currentEvaluationStep,
-                    (float) type2Active[i] / currentEvaluationStep
+            res[i] = new VectorBehaviourResult( (movement[i] / currentEvaluationStep / mr.par.speed),
+                     (proximity[i] / currentEvaluationStep / (mr.par.size / 4)),
+                    (double) type1Active[i] / currentEvaluationStep,
+                    (double) type2Active[i] / currentEvaluationStep
             );
         }
         this.br = new SubpopEvaluationResult(res);

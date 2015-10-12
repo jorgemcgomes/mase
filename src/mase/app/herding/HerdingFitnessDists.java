@@ -43,7 +43,7 @@ public class HerdingFitnessDists extends MasonEvaluation {
             accum += gate.distance(herd.sheeps.get(0).getLocation()) * (maxEvaluationSteps - currentEvaluationStep);
         }
         double maxDist = FastMath.sqrt(FastMath.pow(herd.par.arenaSize, 2) + FastMath.pow(herd.par.arenaSize / 2, 2));
-        res = new FitnessResult((float) (1 - accum / maxEvaluationSteps / maxDist), FitnessResult.ARITHMETIC);
+        res = new FitnessResult( (1 - accum / maxEvaluationSteps / maxDist), FitnessResult.ARITHMETIC);
     }
 
     @Override

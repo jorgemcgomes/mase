@@ -31,7 +31,7 @@ public class MultiRoverFitness extends MasonEvaluation {
         for(int c : mr.scores) {
             count += c;
         }
-        fitnessResult = new FitnessResult((float) count, FitnessResult.HARMONIC);
+        fitnessResult = new FitnessResult( count, FitnessResult.HARMONIC);
     }
     
     

@@ -27,9 +27,9 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
     private int numPasses;
     private transient Keeper lastKeeper;
     private Double2D lastBallPos;
-    private float keeperDispersion;
-    private float ballTakerDistance;
-    private float keeperMovement;
+    private double keeperDispersion;
+    private double ballTakerDistance;
+    private double keeperMovement;
     private int maxSteps;
     private int passesNormalization;
 
@@ -91,13 +91,13 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         Keepaway kw = (Keepaway) sim;
-        float steps = sim.schedule.getSteps();
+        double steps = sim.schedule.getSteps();
         this.res = new VectorBehaviourResult(
-                numPasses / (float) passesNormalization,
+                numPasses / (double) passesNormalization,
                 //steps / maxSteps,
-                (float) (keeperDispersion / kw.keepers.size() / currentEvaluationStep / kw.par.size),
-                (float) (keeperMovement / kw.keepers.size() / currentEvaluationStep),
-                (float) (ballTakerDistance / kw.takers.size() / currentEvaluationStep / (kw.par.size / 2)));
+                 (keeperDispersion / kw.keepers.size() / currentEvaluationStep / kw.par.size),
+                 (keeperMovement / kw.keepers.size() / currentEvaluationStep),
+                 (ballTakerDistance / kw.takers.size() / currentEvaluationStep / (kw.par.size / 2)));
     }
 
     @Override

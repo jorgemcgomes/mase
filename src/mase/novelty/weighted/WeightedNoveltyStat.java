@@ -9,8 +9,8 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
 import static mase.novelty.comb.MCNoveltyStat.P_STATISTICS_FILE;
 
 /**

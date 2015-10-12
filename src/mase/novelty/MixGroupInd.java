@@ -9,7 +9,7 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
-import mase.PostEvaluator;
+import mase.evaluation.PostEvaluator;
 import mase.evaluation.ExpandedFitness;
 
 /**
@@ -46,12 +46,12 @@ public class MixGroupInd implements PostEvaluator {
             }
             // Mix individual scores and group scores
             for (Individual ind : subpop.individuals) {
-                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
+                ExpandedFitness nf = (ExpandedFitness) ind.fitness;
                 double groupScore = groupMin == groupMax ? 0 : (nf.scores().get(GROUP_NOVELTY) - groupMin) / (groupMax - groupMin);
                 double indScore = indMin == indMax ? 0 : (nf.scores().get(IND_NOVELTY) - indMin) / (indMax - indMin);
                 double noveltyScore = (1 - groupWeight) * indScore + groupWeight * groupScore;
-                nf.scores().put(MIX_NOVELTY, (float) noveltyScore);
-                nf.setFitness(state, (float) noveltyScore, false);
+                nf.scores().put(MIX_NOVELTY, noveltyScore);
+                nf.setFitness(state, noveltyScore, false);
             }
         }
     }

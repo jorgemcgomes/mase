@@ -7,8 +7,8 @@ package mase.generic;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
 import mase.novelty.weighted.WeightedNovelty;
 
 /**
@@ -45,7 +45,7 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEvaluator {
         if (state.generation > 0 && state.generation % replaceRate == 0) {
             replaced = true;
             // find the center with the lowest weight
-            float[] weights = wnov.getWeights();
+            double[] weights = wnov.getWeights();
             int minW = 0;
             for (int i = 1; i < weights.length; i++) {
                 if (weights[i] < weights[minW]) {
@@ -55,7 +55,7 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEvaluator {
 
             // randomly choose the parent
             // compute the total weight of all items together
-            float totalWeight = 0;
+            double totalWeight = 0;
             for (int i = 0; i < weights.length; i++) {
                 if (i != minW) {
                     totalWeight += weights[i];
@@ -63,7 +63,7 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEvaluator {
             }
             // pick the index
             int father = -1;
-            float random = state.random[0].nextFloat() * totalWeight;
+            double random = state.random[0].nextDouble()* totalWeight;
             for (int i = 0; i < weights.length; i++) {
                 if (i != minW) {
                     random -= weights[i];
@@ -76,10 +76,10 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEvaluator {
 
             // find the nearest parent's nearest neighbour
             int mother = -1;
-            float minDist = Float.POSITIVE_INFINITY;
+            double minDist = Double.POSITIVE_INFINITY;
             for (int i = 0; i < weights.length; i++) {
                 if (i != minW && i != father) {
-                    float d = dist(clusters[father], clusters[i]);
+                    double d = dist(clusters[father], clusters[i]);
                     if (d < minDist) {
                         mother = i;
                         minDist = d;
@@ -98,8 +98,8 @@ public class ClusterSCPostEvalReplace extends ClusterSCPostEvaluator {
         }
     }
 
-    private float dist(double[] a, double[] b) {
-        float d = 0;
+    private double dist(double[] a, double[] b) {
+        double d = 0;
         for (int i = 0; i < a.length; i++) {
             d += Math.pow(a[i] - b[i], 2);
         }

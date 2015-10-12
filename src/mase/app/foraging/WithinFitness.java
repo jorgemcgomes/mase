@@ -21,7 +21,7 @@ public class WithinFitness extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         super.postSimulation();
-        res = new FitnessResult((float) time / currentEvaluationStep, FitnessResult.ARITHMETIC);
+        res = new FitnessResult((double) time / currentEvaluationStep, FitnessResult.ARITHMETIC);
     }
 
     @Override

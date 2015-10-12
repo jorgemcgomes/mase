@@ -21,8 +21,8 @@ import simulation.robot.Robot;
 public class HerdingBehaviour extends JBotEvaluation {
 
     private VectorBehaviourResult vbr;
-    private float shepherdDist;
-    private float shepherdDispersion;
+    private double shepherdDist;
+    private double shepherdDispersion;
 
     @Override
     public EvaluationResult getResult() {
@@ -54,10 +54,10 @@ public class HerdingBehaviour extends JBotEvaluation {
         double sheepDist = env.getObjective().distanceTo(preyDrone.getPosition());
 
         vbr = new VectorBehaviourResult(
-                (float) (simulator.getTime() / env.getSteps()),
-                (float) (sheepDist / env.getWidth()),
-                (float) (shepherdDispersion / simulator.getTime() / (env.getWidth() / 2)),
-                (float) (shepherdDist / simulator.getTime() / (env.getWidth() / 2))
+                 (simulator.getTime() / env.getSteps()),
+                 (sheepDist / env.getWidth()),
+                 (shepherdDispersion / simulator.getTime() / (env.getWidth() / 2)),
+                 (shepherdDist / simulator.getTime() / (env.getWidth() / 2))
         );
     }
 }

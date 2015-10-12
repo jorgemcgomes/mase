@@ -16,7 +16,7 @@ import net.jafama.FastMath;
  */
 public class OnePreyIndividualEval extends MasonEvaluation {
 
-    protected float[] partnerAvgDist;
+    protected double[] partnerAvgDist;
     protected SubpopEvaluationResult evaluation;
 
     @Override
@@ -24,7 +24,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
         super.preSimulation();
         PredatorPrey predSim = (PredatorPrey) sim;
         int nAgents = predSim.predators.size();
-        partnerAvgDist = new float[nAgents];
+        partnerAvgDist = new double[nAgents];
 
     }
 
@@ -46,7 +46,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
     public void postSimulation() {
         super.postSimulation();
         PredatorPrey predSim = (PredatorPrey) sim;
-        float diagonal = (float) FastMath.sqrtQuick(FastMath.pow2(predSim.field.width) * 2);
+        double diagonal =  FastMath.sqrtQuick(FastMath.pow2(predSim.field.width) * 2);
 
         VectorBehaviourResult[] res = new VectorBehaviourResult[predSim.predators.size()];
         Prey prey = predSim.preys.get(0);
@@ -54,7 +54,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
             Predator pred = predSim.predators.get(i);
             partnerAvgDist[i] = Math.min(1, partnerAvgDist[i] / (diagonal / 2) / currentEvaluationStep / (predSim.predators.size() - 1));
 
-            float preyDist = (float) Math.min(1, pred.distanceTo(prey) / (diagonal / 2));
+            double preyDist =  Math.min(1, pred.distanceTo(prey) / (diagonal / 2));
 
             res[i] = new VectorBehaviourResult(pred.getCaptureCount(), preyDist, partnerAvgDist[i]);
         }

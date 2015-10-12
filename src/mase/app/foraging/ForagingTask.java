@@ -13,7 +13,6 @@ import mase.controllers.HeterogeneousGroupController;
 import mase.mason.GUICompatibleSimState;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
-import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.util.Double2D;
 
 /**
@@ -67,7 +66,7 @@ public class ForagingTask extends GUICompatibleSimState {
     }
 
     protected void staticPlaceItems() {
-        this.items = new LinkedList<Item>();
+        this.items = new LinkedList<>();
         for (Double2D p : par.items) {
             Double2D pos = p.add(new Double2D((random.nextDouble() - 0.5) * par.itemPlacementZone,
                     (random.nextDouble() - 0.5) * par.itemPlacementZone));
@@ -75,11 +74,6 @@ public class ForagingTask extends GUICompatibleSimState {
             items.add(it);
             field.setObjectLocation(it, pos);
         }
-    }
-
-    @Override
-    public FieldPortrayal2D createFieldPortrayal() {
-        return new ContinuousPortrayal2D();
     }
 
     @Override

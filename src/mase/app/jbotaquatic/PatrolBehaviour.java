@@ -120,10 +120,10 @@ public class PatrolBehaviour extends JBotEvaluation {
     public EvaluationResult getResult() {
         if(res == null) {
             res = new VectorBehaviourResult(
-                    /*(float) (v / max),*/
-                    (float) (pairwiseDistance / steps / numRobots / (diag / 4)),
-                    (float) (distanceClosest / steps / numRobots / (diag / 4)),
-                    (float) (distanceCenter / steps / numRobots / (diag / 4))
+                    /* (v / max),*/
+                     (pairwiseDistance / steps / numRobots / (diag / 4)),
+                     (distanceClosest / steps / numRobots / (diag / 4)),
+                     (distanceCenter / steps / numRobots / (diag / 4))
             );
         }
         return res;

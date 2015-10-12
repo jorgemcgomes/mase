@@ -24,8 +24,8 @@ public class MultiPreyFitness extends MasonEvaluation {
     public void postSimulation() {
         PredatorPrey predSim = (PredatorPrey) sim;
         int captureCount = predSim.getCaptureCount();
-        float captured = captureCount / (float) predSim.preys.size();
-        float time = captureCount < predSim.preys.size() ? 1 : sim.schedule.getSteps() / (float) maxSteps;
+        double captured = captureCount / (double) predSim.preys.size();
+        double time = captureCount < predSim.preys.size() ? 1 : sim.schedule.getSteps() / (double) maxSteps;
         fitnessResult = new FitnessResult(0.9f * captured + 0.1f * (1 - time));
     }
 }

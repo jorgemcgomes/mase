@@ -11,11 +11,11 @@ import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.List;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
+import mase.evaluation.ExpandedFitness;
 import mase.novelty.NoveltyEvaluation;
 import mase.novelty.NoveltyEvaluation.ArchiveEntry;
-import mase.novelty.NoveltyFitness;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -24,7 +24,8 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class SystematicStandardiser implements PostEvaluator {
 
-    private List<ArchiveEntry>[] archives;
+    protected List<ArchiveEntry>[] archives;
+    protected int behavIndex;
     public static final double BOUND = 3; // 68–95–99.7 rule -- three-sigma rule
     
     @Override
@@ -43,21 +44,22 @@ public class SystematicStandardiser implements PostEvaluator {
                 if (pe instanceof NoveltyEvaluation) {
                     NoveltyEvaluation ne = (NoveltyEvaluation) pe;
                     archives = ne.getArchives();
+                    behavIndex = ne.getBehaviourIndex();
                 }
             }
         }
 
         // join all behaviour results in one list
         // from archive
-        ArrayList<SystematicResult> results = new ArrayList<SystematicResult>(2000);
+        ArrayList<SystematicResult> results = new ArrayList<>(2000);
         for (ArchiveEntry ar : archives[0]) {
             results.add((SystematicResult) ar.getBehaviour());
         }
         // from the population
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
-                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
-                results.add((SystematicResult) nf.getBehaviour(1)); // TODO: FIX -- should not be static 1
+                ExpandedFitness nf = (ExpandedFitness) ind.fitness;
+                results.add((SystematicResult) nf.getCorrespondingEvaluation(behavIndex));
             }
         }
         

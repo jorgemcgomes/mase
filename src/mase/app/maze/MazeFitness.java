@@ -30,7 +30,7 @@ public class MazeFitness extends MasonEvaluation {
         double initDist = mt.par.startPos.distance(mt.par.targetPos) - mt.par.targetRadius - mt.par.agentRadius;
         double finalDist = mt.agent.distanceTo(mt.par.targetPos) - mt.par.targetRadius;
         double norm = (initDist - finalDist) / initDist;
-        res = new FitnessResult((float) Math.min(Math.max(norm, 0),1));
+        res = new FitnessResult( Math.min(Math.max(norm, 0),1));
     }
     
     

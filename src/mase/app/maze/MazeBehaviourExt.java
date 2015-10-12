@@ -41,11 +41,11 @@ public class MazeBehaviourExt extends MasonEvaluation {
         while (positions.size() < maxEvaluationSteps) {
             positions.add(mt.agent.getLocation());
         }
-        float[] vec = new float[positions.size() * 2];
+        double[] vec = new double[positions.size() * 2];
         int index = 0;
         for(Double2D p : positions) {
-            vec[index++] = (float) p.x;
-            vec[index++] = (float) p.y;
+            vec[index++] =  p.x;
+            vec[index++] =  p.y;
         }
         vbr = new VectorBehaviourResult(vec);
     }

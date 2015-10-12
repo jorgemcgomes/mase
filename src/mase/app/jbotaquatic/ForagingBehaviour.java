@@ -44,9 +44,9 @@ public class ForagingBehaviour extends JBotEvaluation {
             }
         }
 
-        br = new VectorBehaviourResult(env.getCaptureCount() / (float) env.getMaxNumItems(),
-                (float) (dispersion / simulator.getTime() / env.getWidth()),
-                (float) (proximity / simulator.getRobots().size() / simulator.getTime() / (env.getWidth() / 2))
+        br = new VectorBehaviourResult(env.getCaptureCount() / (double) env.getMaxNumItems(),
+                 (dispersion / simulator.getTime() / env.getWidth()),
+                 (proximity / simulator.getRobots().size() / simulator.getTime() / (env.getWidth() / 2))
         );
     }
 

@@ -54,7 +54,7 @@ public class KeepawayFitnessPasses extends MasonEvaluation {
 
     @Override
     protected void postSimulation() {
-        fitnessResult = new FitnessResult((float) numPasses);
+        fitnessResult = new FitnessResult( numPasses);
     }
 
     @Override

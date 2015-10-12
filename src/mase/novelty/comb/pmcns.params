@@ -4,5 +4,6 @@ eval.num-post = 2
 eval.post.1 =                           mase.novelty.comb.PMCNS
 eval.post.1.percentile =                50
 eval.post.1.change-rate =               0.25
+eval.post.1.novelty-score =             novelty
 stat.child.12 =                         mase.novelty.comb.PMCNSStat
 stat.child.12.file =                    $pmcns.stat

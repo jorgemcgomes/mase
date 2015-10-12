@@ -35,7 +35,7 @@ public class HeightFitness extends MasonEvaluation {
     protected void postSimulation() {
         super.postSimulation();
         ForagingTask ft = (ForagingTask) sim;
-        res = new FitnessResult((float) (1 - Math.min(1, height / ft.flyingBot.effector.getMaxHeight() / currentEvaluationStep)), FitnessResult.ARITHMETIC);
+        res = new FitnessResult( (1 - Math.min(1, height / ft.flyingBot.effector.getMaxHeight() / currentEvaluationStep)), FitnessResult.ARITHMETIC);
     }
 
     @Override

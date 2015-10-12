@@ -112,7 +112,7 @@ public class HeterogeneityCheck {
         int participant = 0;
         for (EvaluationResult er : e.getAllEvaluations()) { // for each agent
             VectorBehaviourResult vbr = (VectorBehaviourResult) er;
-            float[] behaviour = vbr.getBehaviour();
+            double[] behaviour = vbr.getBehaviour();
             for (int b = 1; b < behaviour.length; b++) { // for each distance
                 if (behaviour[b] <= threshold) {
                     participant++;

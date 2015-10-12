@@ -1,5 +1,5 @@
 # cooperative coevolution
-eval.base =                             mase.CoevolutionaryEvaluator
+eval.base =                             mase.evaluation.CoevolutionaryEvaluator
 eval.base.elite-mode =                  score
 eval.base.num-current =			0
 eval.base.num-elites =                  1

@@ -22,10 +22,10 @@ import sim.util.Double2D;
 public class PredcompBehaviourSimple extends MasonEvaluation {
     
     protected SubpopEvaluationResult res;
-    protected float[] movement;
+    protected double[] movement;
     protected Double2D[] lastPos;
-    protected float distanceToOther;
-    protected float maxSteps;
+    protected double distanceToOther;
+    protected double maxSteps;
     
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -36,7 +36,7 @@ public class PredcompBehaviourSimple extends MasonEvaluation {
     @Override
     protected void preSimulation() {
         super.preSimulation();
-        this.movement = new float[2];
+        this.movement = new double[2];
         this.distanceToOther = 0;
         this.lastPos = new Double2D[2];
     }    
@@ -61,14 +61,14 @@ public class PredcompBehaviourSimple extends MasonEvaluation {
         Predcomp pc = (Predcomp) sim;
         int steps = (int) sim.schedule.getSteps();
         this.res = new SubpopEvaluationResult(
-            new VectorBehaviourResult(new float[]{
+            new VectorBehaviourResult(new double[]{
                 steps / maxSteps, 
-                (float) (distanceToOther / steps / pc.par.size),
-                (float) (movement[0] / steps / pc.par.predatorSpeed)}),
-            new VectorBehaviourResult(new float[]{
+                 (distanceToOther / steps / pc.par.size),
+                 (movement[0] / steps / pc.par.predatorSpeed)}),
+            new VectorBehaviourResult(new double[]{
                 steps / maxSteps, 
-                (float) (distanceToOther / steps / pc.par.size),
-                (float) (movement[1] / steps / pc.par.preySpeed)}));
+                 (distanceToOther / steps / pc.par.size),
+                 (movement[1] / steps / pc.par.preySpeed)}));
     }
 
 

@@ -15,9 +15,9 @@ import sim.util.Double2D;
  */
 public class OnePreyFitness extends MasonEvaluation {
 
-    private float initialDistance, finalDistance;
+    private double initialDistance, finalDistance;
     private FitnessResult fitnessResult;
-    private float diagonal;
+    private double diagonal;
 
     @Override
     public FitnessResult getResult() {
@@ -33,7 +33,7 @@ public class OnePreyFitness extends MasonEvaluation {
             initialDistance += prey.distanceTo(pred);
         }
         initialDistance /= simState.predators.size();
-        diagonal = (float) FastMath.sqrtQuick(FastMath.pow2(simState.field.width) * 2);
+        diagonal =  FastMath.sqrtQuick(FastMath.pow2(simState.field.width) * 2);
     }
 
     @Override
@@ -50,9 +50,9 @@ public class OnePreyFitness extends MasonEvaluation {
         // normalisation
         initialDistance = initialDistance / diagonal;
         finalDistance = Math.min(finalDistance, diagonal) / diagonal;
-        float timeSpent = simState.schedule.getSteps() / (float) maxSteps;
+        double timeSpent = simState.schedule.getSteps() / (double) maxSteps;
         
-        float score = 0;
+        double score = 0;
         if (simState.getCaptureCount() == 1) {
             score = 2 - timeSpent  ; // 1..2
         } else {

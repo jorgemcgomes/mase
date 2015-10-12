@@ -22,12 +22,12 @@ import org.apache.commons.lang3.tuple.Pair;
 public class SCResult extends VectorBehaviourResult {
 
     private static final long serialVersionUID = 1;
-    protected Map<Integer, Float> counts;
+    protected Map<Integer, Double> counts;
     protected Map<Integer, byte[]> states;
     protected int removedByFilter;
-    protected float[] rawClusteredCount;
+    protected double[] rawClusteredCount;
 
-    public SCResult(Map<Integer, Float> counts, Map<Integer, byte[]> states, Distance dist) {
+    public SCResult(Map<Integer, Double> counts, Map<Integer, byte[]> states, Distance dist) {
         this.counts = counts;
         this.states = states;
         this.removedByFilter = 0;
@@ -46,8 +46,8 @@ public class SCResult extends VectorBehaviourResult {
 
     @Override
     public SCResult mergeEvaluations(EvaluationResult[] results) {
-        Map<Integer, Float> mergedCounts = new HashMap<Integer, Float>();
-        Map<Integer, byte[]> mergedStates = new HashMap<Integer, byte[]>();
+        Map<Integer, Double> mergedCounts = new HashMap<>();
+        Map<Integer, byte[]> mergedStates = new HashMap<>();
         for (EvaluationResult er : results) {
             SCPostEvaluator.mergeCountMap(mergedCounts, ((SCResult) er).getCounts());
             mergedStates.putAll(((SCResult) er).getStates());
@@ -56,15 +56,15 @@ public class SCResult extends VectorBehaviourResult {
     }
 
     @Override
-    public float distanceTo(BehaviourResult br) {
+    public double distanceTo(BehaviourResult br) {
         if (behaviour == null) {
             SCResult other = (SCResult) br;
             // make the counts vectors -- aligned by the same states
-            Set<Integer> shared = new HashSet<Integer>(this.counts.keySet());
+            Set<Integer> shared = new HashSet<>(this.counts.keySet());
             shared.retainAll(other.counts.keySet());
             int size = this.counts.size() + other.counts.size() - shared.size();
-            float[] v1 = new float[size];
-            float[] v2 = new float[size];
+            double[] v1 = new double[size];
+            double[] v2 = new double[size];
             int index = 0;
             // shared elements
             for (Integer h : shared) {
@@ -96,8 +96,8 @@ public class SCResult extends VectorBehaviourResult {
     public String toString() {
         //return "SC";
         StringBuilder sb = new StringBuilder();
-        for (Iterator<Entry<Integer, Float>> iter = counts.entrySet().iterator(); iter.hasNext();) {
-            Entry<Integer, Float> e = iter.next();
+        for (Iterator<Entry<Integer, Double>> iter = counts.entrySet().iterator(); iter.hasNext();) {
+            Entry<Integer, Double> e = iter.next();
             sb.append(e.getKey());
             sb.append(">");
             sb.append(e.getValue());
@@ -108,7 +108,7 @@ public class SCResult extends VectorBehaviourResult {
         return new String(sb);
     }
 
-    public Map<Integer, Float> getCounts() {
+    public Map<Integer, Double> getCounts() {
         return counts;
     }
 

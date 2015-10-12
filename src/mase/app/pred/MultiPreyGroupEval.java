@@ -14,7 +14,7 @@ import sim.util.MutableDouble2D;
  */
 public class MultiPreyGroupEval extends OnePreyGroupEval {
 
-    protected float preyDispersion = 0;
+    protected double preyDispersion = 0;
 
     @Override
     public void preSimulation() {
@@ -32,7 +32,7 @@ public class MultiPreyGroupEval extends OnePreyGroupEval {
                 centerMass.addIn(prey.getLocation());
             }
             centerMass.multiplyIn(1.0 / simState.preys.size());
-            float d = 0;
+            double d = 0;
             for (Prey prey : simState.activePreys) {
                 d += centerMass.distance(prey.getLocation());
             }
@@ -52,7 +52,7 @@ public class MultiPreyGroupEval extends OnePreyGroupEval {
     @Override
     public EvaluationResult getResult() {
         if (evaluation == null) {
-            evaluation = new VectorBehaviourResult(new float[]{captured, time, predatorDispersion, preyDispersion});
+            evaluation = new VectorBehaviourResult(new double[]{captured, time, predatorDispersion, preyDispersion});
         }
         return evaluation;
     }

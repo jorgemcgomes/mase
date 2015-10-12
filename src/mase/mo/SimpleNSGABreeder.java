@@ -3,28 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.novelty.mo;
+package mase.mo;
 
 import ec.EvolutionState;
 import ec.Individual;
 import ec.Population;
+import ec.simple.SimpleBreeder;
 import java.util.Arrays;
 import java.util.Comparator;
-import mase.neat.NEATBreeder;
 
 /**
- * This requires the use of NSGA2 PostEvaluator!!! 
- * neat.COMPATABILITY.THRESHOLD = 99999999
- * neat.COMPATABILITY.CHANGE = 0
- * neat.SPECIE.COUNT = 1
- * neat.SURVIVAL.THRESHOLD = 1
- * The population size should be halved
- * The "copy best" in NEATSpecies produceOffspring method must be removed
- * 
  *
  * @author jorge
  */
-public class NEATBreederNSGA extends NEATBreeder {
+public class SimpleNSGABreeder extends SimpleBreeder {
 
     private int[] originalPopSizes;
 

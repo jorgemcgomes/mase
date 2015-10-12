@@ -51,11 +51,6 @@ public class MazeTask extends GUICompatibleSimState {
     }
     
     @Override
-    public FieldPortrayal2D createFieldPortrayal() {
-        return new ContinuousPortrayal2D();
-    }
-
-    @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
     }

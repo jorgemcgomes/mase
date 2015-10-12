@@ -37,7 +37,7 @@ public class MazeSimulator extends MasonSimulator {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         par = new MazeParams();
-        ParamUtils.autoSetParameters(par, state.parameters, base, defaultBase());
+        ParamUtils.autoSetParameters(par, state.parameters, base, defaultBase(), false);
 
         try {
             File svg = new File(par.mazeFile);

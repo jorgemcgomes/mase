@@ -3,7 +3,7 @@
  Licensed under the Academic Free License version 3.0
  See the file "LICENSE" for more information
  */
-package mase;
+package mase.evaluation;
 
 import ec.*;
 import ec.coevolve.GroupedProblemForm;
@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import mase.evaluation.ExpandedFitness;
-import mase.novelty.NoveltyFitness;
 
 /**
  * Multi-threaded version
@@ -29,15 +28,11 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     public static final String P_RANDOM_CHAMPIONS = "num-random-champions";
     public static final String P_CURRENT_ELITE = "num-current-elite";
     public static final String P_ELITE_MODE = "elite-mode";
+    public static final String V_ELITE_SCORES = "score";
     public static final String P_MAX_EVALUATIONS = "max-evaluations";
+    
 
-    public enum EliteMode {
-
-        fitness, novelty, score
-
-    }
-
-    protected EliteMode eliteMode;
+    protected String eliteMode;
     public int totalEvaluations;
     public int maxEvaluations;
     protected int lastChampions;
@@ -60,7 +55,10 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
         maxEvaluations = state.parameters.getIntWithDefault(base.push(P_MAX_EVALUATIONS), null, -1);
         totalEvaluations = 0;
 
-        eliteMode = EliteMode.valueOf(state.parameters.getString(base.push(P_ELITE_MODE), null));
+        eliteMode = state.parameters.getString(base.push(P_ELITE_MODE), null);
+        if(eliteMode.equalsIgnoreCase(V_ELITE_SCORES)) {
+            eliteMode = null;
+        }
 
         lastChampions = state.parameters.getIntWithDefault(base.push(P_LAST_CHAMPIONS), null, 0);
         randomChampions = state.parameters.getIntWithDefault(base.push(P_RANDOM_CHAMPIONS), null, 0);
@@ -363,18 +361,12 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     }
 
     protected boolean betterThan(Individual a, Individual b) {
-        if (eliteMode == EliteMode.fitness) {
-            double fa = ((ExpandedFitness) a.fitness).getFitnessScore();
-            double fb = ((ExpandedFitness) b.fitness).getFitnessScore();
-            if(fa != fb) {
-                return fa > fb;
-            } else {
-                return a.fitness.betterThan(b.fitness);
-            }
-        } else if (eliteMode == EliteMode.novelty) {
-            return ((NoveltyFitness) a.fitness).getNoveltyScore() > ((NoveltyFitness) b.fitness).getNoveltyScore();
-        } else {
+        if(eliteMode == null) {
             return a.fitness.betterThan(b.fitness);
+        } else {
+            double sa = ((ExpandedFitness) a.fitness).getScore(eliteMode);
+            double sb = ((ExpandedFitness) b.fitness).getScore(eliteMode);
+            return sa > sb;
         }
     }
 }

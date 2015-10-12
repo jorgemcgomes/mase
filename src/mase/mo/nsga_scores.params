@@ -1,0 +1,10 @@
+parent.0 = ../novelty/novelty.params
+
+eval.base.elite-mode=fitness
+
+eval.num-post = 2
+eval.post.1 =                           mase.mo.NSGA2
+eval.post.1.ordinal-ranking =           false
+eval.post.1.scores =                    fitness,novelty
+stat.child.15 =                         mase.mo.NSGA2Stat
+stat.child.15.file =                    $nsga.stat

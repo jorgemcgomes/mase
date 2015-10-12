@@ -14,10 +14,10 @@ import mase.mason.MasonEvaluation;
  */
 public class RSBehaviourEval extends MasonEvaluation {
 
-    private float survivors;
-    private float averageEnergy;
-    private float averageMovement;
-    private float averageDistance;
+    private double survivors;
+    private double averageEnergy;
+    private double averageMovement;
+    private double averageDistance;
     private int totalEvals = 0;
     private VectorBehaviourResult vbr;
 
@@ -53,9 +53,9 @@ public class RSBehaviourEval extends MasonEvaluation {
         }
         survivors /= rs.agents.size();
         
-        vbr = new VectorBehaviourResult(survivors, (float) (averageEnergy / totalEvals / rs.par.maxEnergy),
-                (float) (averageMovement / totalEvals / rs.par.agentSpeed),
-                (float) Math.min(1, averageDistance / totalEvals / (rs.par.size / 2)));
+        vbr = new VectorBehaviourResult(survivors,  (averageEnergy / totalEvals / rs.par.maxEnergy),
+                 (averageMovement / totalEvals / rs.par.agentSpeed),
+                 Math.min(1, averageDistance / totalEvals / (rs.par.size / 2)));
     }
 
     @Override

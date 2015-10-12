@@ -30,7 +30,7 @@ public class AggregationFitnessMax extends MasonEvaluation {
             }
         }
         double diag = agg.par.size * FastMath.sqrtQuick(2);
-        res = new FitnessResult((float) (1 - maxDist / diag));
+        res = new FitnessResult( (1 - maxDist / diag));
     }
 
     @Override

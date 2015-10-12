@@ -31,14 +31,14 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
     private int numPasses;
     private transient Keeper lastKeeper;
     private Double2D lastPossession;
-    private float takerDist;
+    private double takerDist;
 
     private int allPassesCount;
-    private float passLength;
+    private double passLength;
 
-    float ballDist[];
+    double ballDist[];
 
-    float keeperDispersion;
+    double keeperDispersion;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -54,7 +54,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
         this.passLength = 0;
         this.allPassesCount = 0;
         this.takerDist = 0;
-        this.ballDist = new float[2];
+        this.ballDist = new double[2];
         this.keeperDispersion = 0;
     }
 
@@ -62,7 +62,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
     protected void evaluate() {
         Keepaway kw = (Keepaway) sim;
         // number of effective passes and pass length
-        float d = 0;
+        double d = 0;
         MutableDouble2D centre = new MutableDouble2D(0, 0);
         for (Keeper k : kw.keepers) {
             if (k.hasPossession) {
@@ -101,17 +101,17 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         Keepaway kw = (Keepaway) sim;
-        float steps = sim.schedule.getSteps();
+        double steps = sim.schedule.getSteps();
         this.res = new SubpopEvaluationResult(
                 new VectorBehaviourResult(
-                        numPasses / (float) passesNormalization,
-                        (float) (ballDist[0] / kw.par.size / steps),
-                        (float) (takerDist / kw.par.size / steps),
-                        allPassesCount == 0 ? 0 : (float) (passLength / allPassesCount / kw.par.size)),
+                        numPasses / (double) passesNormalization,
+                         (ballDist[0] / kw.par.size / steps),
+                         (takerDist / kw.par.size / steps),
+                        allPassesCount == 0 ? 0 :  (passLength / allPassesCount / kw.par.size)),
                 new VectorBehaviourResult(
-                        numPasses / (float) passesNormalization,
-                        (float) (ballDist[0] / kw.par.size / steps),
-                        (float) (takerDist / kw.par.size / steps)
+                        numPasses / (double) passesNormalization,
+                         (ballDist[0] / kw.par.size / steps),
+                         (takerDist / kw.par.size / steps)
                 ));
     }
 

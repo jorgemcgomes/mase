@@ -19,18 +19,18 @@ import sim.util.MutableDouble2D;
  */
 public class OnePreyGroupEvalOriginal extends MasonEvaluation {
 
-    protected float diagonal;
-    protected float predatorDispersion;
-    protected float finalDistance;
-    protected float captured;
-    protected float simTime;
+    protected double diagonal;
+    protected double predatorDispersion;
+    protected double finalDistance;
+    protected double captured;
+    protected double simTime;
     protected VectorBehaviourResult evaluation;
 
     @Override
     public void preSimulation() {
         super.preSimulation();
         predatorDispersion = 0;
-        diagonal = (float) FastMath.sqrtQuick(FastMath.pow2(((PredatorPrey) sim).field.width) * 2);
+        diagonal =  FastMath.sqrtQuick(FastMath.pow2(((PredatorPrey) sim).field.width) * 2);
     }
 
     @Override
@@ -60,14 +60,14 @@ public class OnePreyGroupEvalOriginal extends MasonEvaluation {
             finalDistance += p.distanceTo(pred);
         }
         finalDistance = Math.min(1, finalDistance / (diagonal / 2) / simState.predators.size());
-        captured = simState.getCaptureCount() / (float) simState.preys.size();
-        simTime = simState.schedule.getSteps() / (float) maxSteps;
+        captured = simState.getCaptureCount() / (double) simState.preys.size();
+        simTime = simState.schedule.getSteps() / (double) maxSteps;
     }
 
     @Override
     public EvaluationResult getResult() {
         if (evaluation == null) {
-            evaluation = new VectorBehaviourResult(new float[]{captured, simTime, finalDistance, predatorDispersion});
+            evaluation = new VectorBehaviourResult(new double[]{captured, simTime, finalDistance, predatorDispersion});
         }
         return evaluation;
     }

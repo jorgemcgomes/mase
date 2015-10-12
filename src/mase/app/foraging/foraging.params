@@ -23,36 +23,36 @@ problem.repetitions =               5
 problem.same-seed =                 false
 problem.max-steps =                 1000
 
-problem.item-radius =               2.5
+problem.itemRadius =                2.5
 
-problem.item-placement-zone =       150
-problem.arena-size =                600,450
-problem.items =                     100,150-300,150-500,150-100,350-300,350-500,350
-problem.flying-start-pos =          50,25
-problem.flying-start-ori =          1.57
-problem.land-start-pos =            5,25
-problem.land-start-ori =            1.57
-#problem.flying-start-pos =         550,25
+problem.itemPlacementZone =         150
+problem.arenaSize =                 600:450
+problem.items =                     100:150,300:150,500:150,100:350,300:350,500:350
+problem.flyingStartPos =            50:25
+problem.flyingStartOri =            1.57
+problem.landStartPos =              5:25
+problem.landStartOri =              1.57
+#problem.flying-start-pos =         550:25
 
-problem.land-radius =               4
-problem.land-vision-angle =         1.047
-problem.land-sensing-range =        10
-problem.land-arcs =                 4
-problem.land-linear-speed =         3
-problem.land-turn-speed =           0.62
+problem.landRadius =                4
+problem.landVisionAngle =           1.047
+problem.landSensingRange =          10
+problem.landArcs =                  4
+problem.landLinearSpeed =           3
+problem.landTurnSpeed =             0.62
 
-problem.use-flying-robot =          true
-problem.flying-radius =             20
-problem.flying-vision-angle =       1.047
-problem.flying-arcs =               6
-problem.flying-linear-speed =       20
-problem.flying-linear-acc =         2
-problem.flying-ang-speed =          0.157
-problem.flying-ang-acc =            0.05
+problem.useFlyingRobot =            true
+problem.flyingRadius =              20
+problem.flyingVisionAngle =         1.047
+problem.flyingArcs =                6
+problem.flyingLinearSpeed =         20
+problem.flyingLinearAcc =           2
+problem.flyingAngSpeed =            0.157
+problem.flyingAngAcc =              0.05
 
-problem.flying-vertical-move =      true
-problem.flying-max-height =         250
-problem.flying-start-height =       0
+problem.flyingVerticalMove =        true
+problem.flyingMaxHeight =           250
+problem.flyingStartHeight =         0
 
 pop.subpop.0 =                      mase.neat.NEATSubpop
 pop.subpop.1 =                      mase.neat.NEATSubpop

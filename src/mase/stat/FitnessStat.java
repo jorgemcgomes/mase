@@ -6,10 +6,10 @@
 package mase.stat;
 
 import ec.*;
-import mase.CoevolutionaryEvaluator;
+import mase.evaluation.CoevolutionaryEvaluator;
 import ec.util.*;
 import java.io.*;
-import mase.MetaEvaluator;
+import mase.evaluation.MetaEvaluator;
 import mase.evaluation.ExpandedFitness;
 
 /* 

@@ -26,7 +26,7 @@ public class ForagingFitness extends MasonEvaluation {
     protected void postSimulation() {
         super.postSimulation();
         ForagingTask ft = (ForagingTask) sim;
-        res = new FitnessResult((float) (ft.par.items.length - ft.items.size()), FitnessResult.ARITHMETIC);
+        res = new FitnessResult( (ft.par.items.length - ft.items.size()), FitnessResult.ARITHMETIC);
     }
     
     

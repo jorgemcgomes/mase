@@ -67,15 +67,15 @@ public class ForagingIndividualBehaviour extends MasonEvaluation {
         double diag = ft.par.arenaSize.length();
         ser = new SubpopEvaluationResult(
                 new VectorBehaviourResult(
-                        ft.items.size() / (float) ft.par.items.length,
-                        (float) Math.min(1, landProximity / currentEvaluationStep / diag),
-                        (float) Math.min(1, landMovement / currentEvaluationStep / (ft.par.landLinearSpeed * updateFrequency)),
-                        (float) Math.min(1, landFlyingDistance / currentEvaluationStep / diag)),
+                        ft.items.size() / (double) ft.par.items.length,
+                         Math.min(1, landProximity / currentEvaluationStep / diag),
+                         Math.min(1, landMovement / currentEvaluationStep / (ft.par.landLinearSpeed * updateFrequency)),
+                         Math.min(1, landFlyingDistance / currentEvaluationStep / diag)),
                 new VectorBehaviourResult(
-                        (float) Math.min(1.5, flyingHeight / currentEvaluationStep / ft.par.flyingMaxHeight),
-                        (float) Math.min(1, flyingProximity / currentEvaluationStep / diag),
-                        (float) Math.min(1, flyingMovement / currentEvaluationStep / (ft.par.flyingLinearSpeed * updateFrequency)),
-                        (float) Math.min(1, landFlyingDistance / currentEvaluationStep / diag))
+                         Math.min(1.5, flyingHeight / currentEvaluationStep / ft.par.flyingMaxHeight),
+                         Math.min(1, flyingProximity / currentEvaluationStep / diag),
+                         Math.min(1, flyingMovement / currentEvaluationStep / (ft.par.flyingLinearSpeed * updateFrequency)),
+                         Math.min(1, landFlyingDistance / currentEvaluationStep / diag))
         );
     }    
 

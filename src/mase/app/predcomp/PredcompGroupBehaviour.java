@@ -23,26 +23,20 @@ public class PredcompGroupBehaviour extends MasonEvaluation {
 
     private VectorBehaviourResult res;
 
-    protected float distanceToOther;
-    protected float maxSteps;
+    protected double distanceToOther;
     // wall proximity of both?
     // wall movement of both?
     
-    /*protected float[] wallProximity;
-    protected float[] movement;
+    /*protected double[] wallProximity;
+    protected double[] movement;
     protected Double2D[] lastPos;*/
-    
-    @Override
-    public void setup(EvolutionState state, Parameter base) {
-        super.setup(state, base); 
-        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
-    }    
+ 
     
     @Override
     protected void preSimulation() {
         super.preSimulation();
-        //this.wallProximity = new float[2];
-        //this.movement = new float[2];
+        //this.wallProximity = new double[2];
+        //this.movement = new double[2];
         this.distanceToOther = 0;
         //this.lastPos = new Double2D[2];
     }    
@@ -65,11 +59,11 @@ public class PredcompGroupBehaviour extends MasonEvaluation {
         wallProximity[1] += prox(pc.prey.getLocation());*/
     }
     
-    /*private float prox(Double2D loc) {
+    /*private double prox(Double2D loc) {
         double size = ((Predcomp) sim).par.size;
         double dx = size / 2 - Math.abs(loc.x - size / 2);
         double dy = size / 2 - Math.abs(loc.y - size / 2);
-        return (float) Math.min(dx, dy);
+        return  Math.min(dx, dy);
     }*/
         
     
@@ -77,18 +71,18 @@ public class PredcompGroupBehaviour extends MasonEvaluation {
     protected void postSimulation() {
         Predcomp pc = (Predcomp) sim;
         int steps = (int) sim.schedule.getSteps();
-        this.res = new VectorBehaviourResult(steps / maxSteps, (float) (distanceToOther / steps / pc.par.size));
+        this.res = new VectorBehaviourResult((double) steps / maxSteps,  (distanceToOther / steps / pc.par.size));
         /*this.res = new SubpopEvaluationResult(
-            new VectorBehaviourResult(new float[]{
+            new VectorBehaviourResult(new double[]{
                 steps / maxSteps, 
-                (float) (wallProximity[0] / steps / (pc.par.size / 2)),
-                (float) (distanceToOther / steps / pc.par.size),
-                (float) (movement[0] / steps / pc.par.predatorSpeed)}),
-            new VectorBehaviourResult(new float[]{
+                 (wallProximity[0] / steps / (pc.par.size / 2)),
+                 (distanceToOther / steps / pc.par.size),
+                 (movement[0] / steps / pc.par.predatorSpeed)}),
+            new VectorBehaviourResult(new double[]{
                 steps / maxSteps, 
-                (float) (wallProximity[1] / steps / (pc.par.size / 2)),
-                (float) (distanceToOther / steps / pc.par.size),
-                (float) (movement[1] / steps / pc.par.preySpeed)}));*/
+                 (wallProximity[1] / steps / (pc.par.size / 2)),
+                 (distanceToOther / steps / pc.par.size),
+                 (movement[1] / steps / pc.par.preySpeed)}));*/
     }
 
 

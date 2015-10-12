@@ -70,14 +70,14 @@ public class HerdingIndividualEval extends MasonEvaluation {
         VectorBehaviourResult[] res = new VectorBehaviourResult[herd.shepherds.size()];
         double maxD = herd.par.arenaSize;
         for (int i = 0; i < herd.shepherds.size(); i++) {
-            float[] br = new float[1 + herd.foxes.size() + herd.sheeps.size()];
+            double[] br = new double[1 + herd.foxes.size() + herd.sheeps.size()];
             int index = 0;
-            br[index++] = (float) (curralDist[i] / currentEvaluationStep / maxD);
+            br[index++] = curralDist[i] / currentEvaluationStep / maxD;
             for (int j = 0; j < foxDist[i].length; j++) {
-                br[index++] = (float) (foxDist[i][j] / currentEvaluationStep / maxD);
+                br[index++] = foxDist[i][j] / currentEvaluationStep / maxD;
             }
             for (int j = 0; j < sheepDist[i].length; j++) {
-                br[index++] = (float) (sheepDist[i][j] / sheepLife[j] / maxD);
+                br[index++] = sheepDist[i][j] / sheepLife[j] / maxD;
             }
             res[i] = new VectorBehaviourResult(br);
         }

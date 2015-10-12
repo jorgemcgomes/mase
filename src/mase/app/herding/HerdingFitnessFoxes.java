@@ -66,7 +66,7 @@ public class HerdingFitnessFoxes extends MasonEvaluation {
             closest += d / herd.field.width;
         }
         fitness += (1 - closest / closestShepherd.length);
-        res = new FitnessResult((float) fitness, FitnessResult.HARMONIC);
+        res = new FitnessResult( fitness, FitnessResult.HARMONIC);
     }
 
     @Override

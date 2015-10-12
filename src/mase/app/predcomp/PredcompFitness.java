@@ -31,8 +31,8 @@ public class PredcompFitness extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         ser = new SubpopEvaluationResult(
-                new FitnessResult((float) maxSteps - sim.schedule.getSteps(), FitnessResult.ARITHMETIC),
-                new FitnessResult((float) sim.schedule.getSteps(), FitnessResult.ARITHMETIC)
+                new FitnessResult( maxSteps - sim.schedule.getSteps(), FitnessResult.ARITHMETIC),
+                new FitnessResult( sim.schedule.getSteps(), FitnessResult.ARITHMETIC)
         );
     }
 

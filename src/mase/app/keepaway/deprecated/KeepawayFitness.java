@@ -58,7 +58,7 @@ public class KeepawayFitness extends MasonEvaluation {
 
     @Override
     protected void postSimulation() {
-        fitnessResult = new FitnessResult(numPasses + sim.schedule.getSteps() / (float) maxSteps);
+        fitnessResult = new FitnessResult(numPasses + sim.schedule.getSteps() / (double) maxSteps);
     }
 
     @Override

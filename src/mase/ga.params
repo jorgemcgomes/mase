@@ -11,7 +11,7 @@ generations =				500
 quit-on-run-complete =			false
 
 # Evaluation config
-eval =                                  mase.MetaEvaluator
+eval =                                  mase.evaluation.MetaEvaluator
 eval.base =                             ec.simple.SimpleEvaluator
 vector.species.fitness =                mase.evaluation.ExpandedFitness
 

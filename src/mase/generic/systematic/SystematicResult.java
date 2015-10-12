@@ -15,18 +15,18 @@ import mase.evaluation.VectorBehaviourResult;
 public class SystematicResult extends VectorBehaviourResult {
 
     private static final long serialVersionUID = 1;
-    protected float[] originalResult;
+    protected double[] originalResult;
 
-    public SystematicResult(float... bs) {
+    public SystematicResult(double... bs) {
         super(bs);
         this.originalResult = Arrays.copyOf(bs, bs.length);
     }
 
-    public float[] getOriginalResult() {
+    public double[] getOriginalResult() {
         return originalResult;
     }
 
-    public void setOriginalResult(float[] originalResult) {
+    public void setOriginalResult(double[] originalResult) {
         this.originalResult = originalResult;
     }
 

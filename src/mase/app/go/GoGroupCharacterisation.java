@@ -21,9 +21,9 @@ import mase.mason.MasonSimulator;
 public class GoGroupCharacterisation extends MasonEvaluation {
 
     private SubpopEvaluationResult ser;
-    protected float maxSteps;
-    protected float[] biggestGroupSize;
-    protected float[] groupNumber;
+    protected double maxSteps;
+    protected double[] biggestGroupSize;
+    protected double[] groupNumber;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -33,8 +33,8 @@ public class GoGroupCharacterisation extends MasonEvaluation {
 
     @Override
     protected void preSimulation() {
-        this.biggestGroupSize = new float[2];
-        this.groupNumber = new float[2];
+        this.biggestGroupSize = new double[2];
+        this.groupNumber = new double[2];
     }
 
     @Override
@@ -60,7 +60,7 @@ public class GoGroupCharacterisation extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         Go go = (Go) sim;
-        float d = go.schedule.getSteps() / 2.0f;
+        double d = go.schedule.getSteps() / 2.0f;
         ser = new SubpopEvaluationResult(
                 new VectorBehaviourResult(
                         go.state.captured[GoState.BLACK] / d,

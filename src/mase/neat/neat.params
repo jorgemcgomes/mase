@@ -20,7 +20,7 @@ neat.species.ind =                      mase.neat.NEATIndividual
 neat.species.pipe =                     mase.neat.DummyPipeline
 
 # Evaluation config
-eval =                                  mase.MetaEvaluator
+eval =                                  mase.evaluation.MetaEvaluator
 eval.base =                             ec.simple.SimpleEvaluator
 neat.species.fitness =                  mase.evaluation.ExpandedFitness
 

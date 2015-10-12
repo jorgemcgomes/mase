@@ -20,14 +20,14 @@ public class IndianaFitness3 extends MasonEvaluation {
 
     private FitnessResult res;
     private int maxSteps;
-    private float weight;
+    private double weight;
     public static final String P_WEIGHT = "weight";
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         this.maxSteps = state.parameters.getInt(new Parameter(MasonSimulator.P_PROBLEM).push(MasonSimulator.P_MAX_STEPS), null);
-        this.weight = state.parameters.getFloat(base.push(P_WEIGHT), null);
+        this.weight = state.parameters.getDouble(base.push(P_WEIGHT), null);
     }
 
     @Override
@@ -44,8 +44,8 @@ public class IndianaFitness3 extends MasonEvaluation {
                 count++;
             }
         }
-        float time = ind.gate.openTime == -1 ? 1 : ind.gate.openTime / (float) maxSteps;
-        float esc = (float) count / ind.agents.size();
+        double time = ind.gate.openTime == -1 ? 1 : ind.gate.openTime / (double) maxSteps;
+        double esc = (double) count / ind.agents.size();
         res = new FitnessResult(Math.max(0, esc - time * weight));
     }
 

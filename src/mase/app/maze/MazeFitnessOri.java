@@ -32,7 +32,7 @@ public class MazeFitnessOri extends MasonEvaluation {
         
         double finalDist = Math.max(0, mt.agent.distanceTo(mt.par.targetPos) - mt.par.targetRadius);
         
-        res = new FitnessResult((float) (1 - finalDist / NORM));
+        res = new FitnessResult( (1 - finalDist / NORM));
     }
     
     

@@ -61,10 +61,10 @@ public class IndianaBehaviourEval extends MasonEvaluation {
             }
         }
         res = new VectorBehaviourResult(
-                (float) count / ind.agents.size(),
-                ind.gate.openTime == -1 ? 1 : (float) ind.gate.openTime / maxSteps,
-                (float) (avgDist / ind.agents.size() / currentEvaluationStep / ind.par.size),
-                (float) (avgDisp / ind.agents.size() / currentEvaluationStep / (ind.par.size / 2)));
+                (double) count / ind.agents.size(),
+                ind.gate.openTime == -1 ? 1 : (double) ind.gate.openTime / maxSteps,
+                 (avgDist / ind.agents.size() / currentEvaluationStep / ind.par.size),
+                 (avgDisp / ind.agents.size() / currentEvaluationStep / (ind.par.size / 2)));
     }
 
     @Override

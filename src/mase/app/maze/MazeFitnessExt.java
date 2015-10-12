@@ -31,11 +31,11 @@ public class MazeFitnessExt extends MasonEvaluation {
 
         // Objective reached -- add time
         if (finalDist <= 0.001) {
-            float t = (super.maxSteps - mt.schedule.getSteps()) / (float) maxSteps;
+            double t = (super.maxSteps - mt.schedule.getSteps()) / (double) maxSteps;
             res = new FitnessResult(1 + t);
         } else {
             double norm = (initDist - finalDist) / initDist;
-            res = new FitnessResult((float) Math.min(Math.max(norm, 0), 1));
+            res = new FitnessResult( Math.min(Math.max(norm, 0), 1));
         }
     }
 

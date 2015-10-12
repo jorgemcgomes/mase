@@ -26,12 +26,12 @@ public class KeepawayBehaviourEval2 extends MasonEvaluation {
     private int numPasses;
     private transient Keeper lastKeeper;
     private Double2D lastPossession;
-    private float keeperDispersion;
+    private double keeperDispersion;
     private int maxSteps;
     private int passesNormalization;
     
     private int allPassesCount;
-    private float passLength;
+    private double passLength;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -84,12 +84,12 @@ public class KeepawayBehaviourEval2 extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         Keepaway kw = (Keepaway) sim;
-        float steps = sim.schedule.getSteps();
+        double steps = sim.schedule.getSteps();
         this.res = new VectorBehaviourResult(
-                numPasses / (float) passesNormalization,
+                numPasses / (double) passesNormalization,
                 steps / maxSteps,
-                (float) Math.min(1, keeperDispersion / kw.keepers.size() / currentEvaluationStep / kw.par.size),
-                allPassesCount == 0 ? 0 : (float) (passLength / allPassesCount / kw.par.size));
+                 Math.min(1, keeperDispersion / kw.keepers.size() / currentEvaluationStep / kw.par.size),
+                allPassesCount == 0 ? 0 :  (passLength / allPassesCount / kw.par.size));
     }
 
     @Override

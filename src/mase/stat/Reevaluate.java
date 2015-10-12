@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import mase.MetaEvaluator;
+import mase.evaluation.MetaEvaluator;
 import mase.SimulationProblem;
 import mase.controllers.AgentController;
 import mase.evaluation.EvaluationResult;

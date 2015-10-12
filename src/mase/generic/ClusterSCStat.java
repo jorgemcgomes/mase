@@ -13,8 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
 
 /**
  *

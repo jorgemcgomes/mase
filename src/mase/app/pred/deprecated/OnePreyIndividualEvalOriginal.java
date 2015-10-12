@@ -16,13 +16,13 @@ import net.jafama.FastMath;
  */
 public class OnePreyIndividualEvalOriginal extends MasonEvaluation {
 
-    protected float diagonal;
-    protected float[] avgDistance;
+    protected double diagonal;
+    protected double[] avgDistance;
     protected int avgDistanceSteps;
     protected int[] voidSteps;
-    protected float[] captured;
-    protected float[] movement;
-    protected float[] partnerAvgDist;
+    protected double[] captured;
+    protected double[] movement;
+    protected double[] partnerAvgDist;
     protected SubpopEvaluationResult evaluation;
 
     @Override
@@ -30,10 +30,10 @@ public class OnePreyIndividualEvalOriginal extends MasonEvaluation {
         super.preSimulation();
         PredatorPrey predSim = (PredatorPrey) sim;
         int nAgents = predSim.predators.size();
-        avgDistance = new float[nAgents];
-        captured = new float[nAgents];
-        movement = new float[nAgents];
-        partnerAvgDist = new float[nAgents];
+        avgDistance = new double[nAgents];
+        captured = new double[nAgents];
+        movement = new double[nAgents];
+        partnerAvgDist = new double[nAgents];
         avgDistanceSteps = 0;
         voidSteps = new int[nAgents];
         PredatorPrey simState = (PredatorPrey) sim;
@@ -43,7 +43,7 @@ public class OnePreyIndividualEvalOriginal extends MasonEvaluation {
             double d = pred.distanceTo(prey);
             voidSteps[i] = (int) Math.round(d / predSim.par.predatorSpeed);
         }
-        diagonal = (float) FastMath.sqrtQuick(FastMath.pow2(((PredatorPrey) sim).field.width) * 2);
+        diagonal =  FastMath.sqrtQuick(FastMath.pow2(((PredatorPrey) sim).field.width) * 2);
     }
 
     @Override
@@ -59,10 +59,10 @@ public class OnePreyIndividualEvalOriginal extends MasonEvaluation {
                 avgDistanceSteps++;
             }
             movement[i] += pred.getSpeed();
-            float closest = Float.POSITIVE_INFINITY;
+            double closest = double.POSITIVE_INFINITY;
             for(Predator pOther : simState.predators) {
                 if(pred != pOther) {
-                    float dPred = (float) pred.distanceTo(pOther);
+                    double dPred =  pred.distanceTo(pOther);
                     closest = Math.min(closest, dPred);
                     partnerAvgDist[i] += dPred;
                 }
@@ -88,7 +88,7 @@ public class OnePreyIndividualEvalOriginal extends MasonEvaluation {
         if (evaluation == null) {
             VectorBehaviourResult[] res = new VectorBehaviourResult[avgDistance.length];
             for (int i = 0; i < res.length; i++) {
-                float[] b = new float[]{captured[i], avgDistance[i], movement[i], partnerAvgDist[i]};
+                double[] b = new double[]{captured[i], avgDistance[i], movement[i], partnerAvgDist[i]};
                 res[i] = new VectorBehaviourResult(b);
             }
             evaluation = new SubpopEvaluationResult(res);

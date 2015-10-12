@@ -36,7 +36,7 @@ public class ProximityFitness extends MasonEvaluation {
     protected void postSimulation() {
         super.postSimulation();
         ForagingTask ft = (ForagingTask) sim;
-        res = new FitnessResult((float) (1 - Math.min(1, prox / ft.par.arenaSize.x / currentEvaluationStep)), FitnessResult.ARITHMETIC);
+        res = new FitnessResult( (1 - Math.min(1, prox / ft.par.arenaSize.x / currentEvaluationStep)), FitnessResult.ARITHMETIC);
     }
 
     @Override

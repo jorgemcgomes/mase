@@ -25,7 +25,7 @@ public class GoWinsFitness extends MasonEvaluation {
         int blackScore = go.state.getScore(GoState.BLACK);
         int whiteScore = go.state.getScore(GoState.WHITE);
         
-        float blackFit, whiteFit;
+        double blackFit, whiteFit;
         if(blackScore > whiteScore) {
             blackFit = 1;
             whiteFit = 0;

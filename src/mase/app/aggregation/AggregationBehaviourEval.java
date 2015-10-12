@@ -15,12 +15,12 @@ import sim.util.MutableDouble2D;
  */
 public class AggregationBehaviourEval extends MasonEvaluation {
 
-    private float[] centerMass;
+    private double[] centerMass;
     private VectorBehaviourResult vbr;
 
     @Override
     protected void preSimulation() {
-        this.centerMass = new float[super.maxEvaluationSteps];
+        this.centerMass = new double[super.maxEvaluationSteps];
     }
 
     @Override
@@ -36,7 +36,7 @@ public class AggregationBehaviourEval extends MasonEvaluation {
             dist += centre.distance(aa.getLocation());
         }
         dist = dist / agg.agents.size() / agg.par.size;
-        centerMass[super.currentEvaluationStep] = (float) dist;
+        centerMass[super.currentEvaluationStep] = dist;
     }
 
     @Override

@@ -16,10 +16,10 @@ import net.jafama.FastMath;
  */
 public class OnePreyGroupEval extends MasonEvaluation {
 
-    protected float predatorDispersion;
+    protected double predatorDispersion;
     protected VectorBehaviourResult evaluation;
-    protected float diagonal;
-    protected float time;
+    protected double diagonal;
+    protected double time;
     protected int captured;
 
     @Override
@@ -41,18 +41,18 @@ public class OnePreyGroupEval extends MasonEvaluation {
         
         PredatorPrey simState = (PredatorPrey) sim;
         TaskDescription td = simState.getTaskDescription();
-        diagonal = (float) FastMath.sqrtQuick(FastMath.pow2(simState.field.width) * 2);
+        diagonal =  FastMath.sqrtQuick(FastMath.pow2(simState.field.width) * 2);
         
         predatorDispersion = Math.min(1, predatorDispersion / currentEvaluationStep / (diagonal / 2) / simState.predators.size());
 
-        float finalDistance = 0;
+        double finalDistance = 0;
         Prey prey = simState.preys.get(0);
         for(Predator pred : simState.predators) {
             finalDistance += prey.distanceTo(pred);
         }
         finalDistance = Math.min(1, finalDistance / (diagonal / 2) / simState.predators.size());
         
-        time = currentEvaluationStep / (float) maxEvaluationSteps;
+        time = currentEvaluationStep / (double) maxEvaluationSteps;
         captured = simState.captureCount;
         
         evaluation = new VectorBehaviourResult(captured, finalDistance, time, predatorDispersion);

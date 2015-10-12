@@ -10,8 +10,9 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
+import mase.evaluation.ExpandedFitness;
 
 /**
  *
@@ -55,7 +56,7 @@ public class NoveltyPopStat extends Statistics {
                 double maxNovScore = Double.NEGATIVE_INFINITY;
                 double minNovScore = Double.POSITIVE_INFINITY;
                 for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                    NoveltyFitness nf = (NoveltyFitness) state.population.subpops[i].individuals[j].fitness;
+                    ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;
                     double nsScore = nf.scores().get(ne.scoreName);
                     averageNovScore += nsScore;
                     maxNovScore = Math.max(maxNovScore, nsScore);

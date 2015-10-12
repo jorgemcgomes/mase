@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
-import mase.PostEvaluator;
+import mase.evaluation.PostEvaluator;
 
 /**
  *
@@ -73,14 +73,14 @@ public class SCPostEvaluator implements PostEvaluator {
         // remove the entries with very low frequency count
         int numStates = res.getCounts().size();
         double total = 0;
-        for (Float f : res.getCounts().values()) {
+        for (Double f : res.getCounts().values()) {
             total += f;
         }
         double threshold = total * filter;
 
         List<Integer> toRemove = new LinkedList<Integer>();
-        Entry<Integer, Float> highestCount = null;
-        for (Entry<Integer, Float> e : res.getCounts().entrySet()) {
+        Entry<Integer, Double> highestCount = null;
+        for (Entry<Integer, Double> e : res.getCounts().entrySet()) {
             if (e.getValue() < threshold) {
                 toRemove.add(e.getKey());
             }
@@ -99,8 +99,8 @@ public class SCPostEvaluator implements PostEvaluator {
         res.removedByFilter = numStates - res.getCounts().size();
     }
 
-    protected static void mergeCountMap(Map<Integer, Float> map, Map<Integer, Float> other) {
-        for (Map.Entry<Integer, Float> e : other.entrySet()) {
+    protected static void mergeCountMap(Map<Integer, Double> map, Map<Integer, Double> other) {
+        for (Map.Entry<Integer, Double> e : other.entrySet()) {
             if (!map.containsKey(e.getKey())) {
                 map.put(e.getKey(), e.getValue());
             } else {

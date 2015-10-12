@@ -12,49 +12,49 @@ public class FitnessResult implements EvaluationResult {
 
     private static final long serialVersionUID = 1;
     public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3, MIN_PLUS = 4;
-    public static final float FLOAT_THRESHOLD = 0.0001f;
-    protected Float value;
+    public static final double FLOAT_THRESHOLD = 0.0001f;
+    protected double value;
     protected int combination;
 
-    public FitnessResult(Float value) {
+    public FitnessResult(double value) {
         this(value, HARMONIC);
     }
 
-    public FitnessResult(Float value, int combination) {
+    public FitnessResult(double value, int combination) {
         this.value = value;
         this.combination = combination;
     }
 
     @Override
-    public Float value() {
+    public Double value() {
         return value;
     }
 
     @Override
     public FitnessResult mergeEvaluations(EvaluationResult[] results) {
-        float score = 0;
+        double score = 0;
         switch (combination) {
             case MAX:
-                score = Float.NEGATIVE_INFINITY;
+                score = Double.NEGATIVE_INFINITY;
                 for (EvaluationResult f : results) {
-                    score = Math.max(score, (Float) f.value());
+                    score = Math.max(score, (Double) f.value());
                 }
                 break;
             case MIN:
-                score = Float.POSITIVE_INFINITY;
+                score = Double.POSITIVE_INFINITY;
                 for (EvaluationResult f : results) {
-                    score = Math.min(score, (Float) f.value());
+                    score = Math.min(score, (Double) f.value());
                 }
                 break;
             case ARITHMETIC:
                 for (EvaluationResult f : results) {
-                    score += (Float) f.value();
+                    score += (Double) f.value();
                 }
                 score /= results.length;
                 break;
             case HARMONIC:
                 for (EvaluationResult f : results) {
-                    Float val = (Float) f.value();
+                    Double val = (Double) f.value();
                     if (val > -FLOAT_THRESHOLD && val < FLOAT_THRESHOLD) {
                         score += 1 / FLOAT_THRESHOLD;
                     } else {
@@ -64,11 +64,11 @@ public class FitnessResult implements EvaluationResult {
                 score = results.length / score;
                 break;
             case MIN_PLUS:
-                float min = Float.MAX_VALUE;
-                float mean = 0;
+                double min = Double.MAX_VALUE;
+                double mean = 0;
                 for (EvaluationResult f : results) {
-                    mean += (Float) f.value();
-                    min = Math.min(min, (Float) f.value());
+                    mean += (Double) f.value();
+                    min = Math.min(min, (Double) f.value());
                 }
                 score = 0.01f * (mean / results.length) + 0.99f * min;
                 break;

@@ -28,7 +28,7 @@ public class MazeBehaviourFinal extends MasonEvaluation {
         super.postSimulation();
         MazeTask mt = (MazeTask) sim;
         Double2D loc = mt.agent.getLocation();
-        vbr = new VectorBehaviourResult((float) loc.x, (float) loc.y);
+        vbr = new VectorBehaviourResult( loc.x,  loc.y);
     }
 
 }

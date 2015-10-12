@@ -14,7 +14,7 @@ import net.jafama.FastMath;
 public class VectorBehaviourResult implements BehaviourResult {
 
     private static final long serialVersionUID = 1;
-    protected float[] behaviour;
+    protected double[] behaviour;
     protected Distance dist;
 
     public enum Distance {
@@ -22,19 +22,19 @@ public class VectorBehaviourResult implements BehaviourResult {
         COSINE, BRAY_CURTIS, EUCLIDEAN
     };
 
-    public VectorBehaviourResult(float... bs) {
+    public VectorBehaviourResult(double... bs) {
         this.behaviour = bs;
         this.dist = Distance.EUCLIDEAN;
     }
     
-    public VectorBehaviourResult(Distance dist, float... bs) {
+    public VectorBehaviourResult(Distance dist, double... bs) {
         this.behaviour = bs;
         this.dist = dist;
     }
 
     @Override
-    public float distanceTo(BehaviourResult other) {
-        return vectorDistance(behaviour, (float[]) other.value());
+    public double distanceTo(BehaviourResult other) {
+        return vectorDistance(behaviour, (double[]) other.value());
     }
 
     @Override
@@ -42,21 +42,21 @@ public class VectorBehaviourResult implements BehaviourResult {
         return getBehaviour();
     }
 
-    public void setBehaviour(float[] b) {
+    public void setBehaviour(double[] b) {
         this.behaviour = b;
     }
 
-    public float[] getBehaviour() {
+    public double[] getBehaviour() {
         return this.behaviour;
     }
 
     @Override
     public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
-        float[] merged = new float[behaviour.length];
+        double[] merged = new double[behaviour.length];
         Arrays.fill(merged, 0f);
         for (int i = 0; i < merged.length; i++) {
             for (EvaluationResult r : results) {
-                merged[i] += ((float[]) r.value())[i];
+                merged[i] += ((double[]) r.value())[i];
             }
             merged[i] /= results.length;
         }
@@ -73,11 +73,11 @@ public class VectorBehaviourResult implements BehaviourResult {
         return res;
     }
 
-    public float vectorDistance(float[] v1, float[] v2) {
+    public double vectorDistance(double[] v1, double[] v2) {
         switch (dist) {
             case BRAY_CURTIS:
-                float diffs = 0;
-                float total = 0;
+                double diffs = 0;
+                double total = 0;
                 for (int i = 0; i < v1.length; i++) {
                     diffs += Math.abs(v1[i] - v2[i]);
                     total += v1[i] + v2[i];
@@ -87,26 +87,26 @@ public class VectorBehaviourResult implements BehaviourResult {
                 return cosineSimilarity(v1, v2);
             default:
             case EUCLIDEAN:
-                float d = 0;
+                double d = 0;
                 for (int i = 0; i < v1.length; i++) {
                     d += FastMath.pow(v1[i] - v2[i], 2);
                 }
-                return (float) FastMath.sqrt(d);
+                return FastMath.sqrt(d);
         }
     }
 
-    private float cosineSimilarity(float[] docVector1, float[] docVector2) {
-        float dotProduct = 0.0f;
-        float magnitude1 = 0.0f;
-        float magnitude2 = 0.0f;
-        float cosineSimilarity;
+    private double cosineSimilarity(double[] docVector1, double[] docVector2) {
+        double dotProduct = 0.0f;
+        double magnitude1 = 0.0f;
+        double magnitude2 = 0.0f;
+        double cosineSimilarity;
         for (int i = 0; i < docVector1.length; i++) {
             dotProduct += docVector1[i] * docVector2[i];  //a.b
             magnitude1 += FastMath.pow2(docVector1[i]);  //(a^2)
             magnitude2 += FastMath.pow2(docVector2[i]); //(b^2)
         }
-        magnitude1 = (float) FastMath.sqrt(magnitude1);//sqrt(a^2)
-        magnitude2 = (float) FastMath.sqrt(magnitude2);//sqrt(b^2)
+        magnitude1 = FastMath.sqrt(magnitude1);//sqrt(a^2)
+        magnitude2 = FastMath.sqrt(magnitude2);//sqrt(b^2)
 
         if (magnitude1 != 0.0 | magnitude2 != 0.0) {
             cosineSimilarity = dotProduct / (magnitude1 * magnitude2);

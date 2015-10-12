@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.novelty.mo;
+package mase.mo;
 
 import ec.EvolutionState;
 import ec.Statistics;
@@ -13,9 +13,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
-import mase.novelty.mo.NSGA2.Individual;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
+import mase.mo.NSGA2.Individual;
 
 /**
  *

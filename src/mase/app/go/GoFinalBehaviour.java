@@ -20,7 +20,7 @@ import mase.mason.MasonSimulator;
 public class GoFinalBehaviour extends MasonEvaluation {
 
     private SubpopEvaluationResult ser;
-    protected float maxSteps;
+    protected double maxSteps;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -31,7 +31,7 @@ public class GoFinalBehaviour extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         Go go = (Go) sim;
-        float d = go.schedule.getSteps() / 2.0f;
+        double d = go.schedule.getSteps() / 2.0f;
         ser = new SubpopEvaluationResult(
                 new VectorBehaviourResult(
                         go.state.captured[GoState.BLACK] / d, 

@@ -22,17 +22,17 @@ public class GoScoreBehaviour extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         Go go = (Go) sim;
-        float d = go.schedule.getSteps() / 2.0f;
-        float s = FastMath.pow2(go.boardSize);
+        double d = go.schedule.getSteps() / 2.0f;
+        double s = FastMath.pow2(go.boardSize);
         ser = new SubpopEvaluationResult(
                 new VectorBehaviourResult(
                         go.state.captured[GoState.BLACK] / d,
                         go.state.possession[GoState.BLACK] / s,
-                        go.state.possession[GoState.BLACK] == 0 ? 0 : go.state.surrounded[GoState.BLACK] / (float) go.state.possession[GoState.BLACK]),
+                        go.state.possession[GoState.BLACK] == 0 ? 0 : go.state.surrounded[GoState.BLACK] / (double) go.state.possession[GoState.BLACK]),
                 new VectorBehaviourResult(
                         go.state.captured[GoState.WHITE] / d,
                         go.state.possession[GoState.WHITE] / s,
-                        go.state.possession[GoState.WHITE] == 0 ? 0 : go.state.surrounded[GoState.WHITE] / (float) go.state.possession[GoState.WHITE]));
+                        go.state.possession[GoState.WHITE] == 0 ? 0 : go.state.surrounded[GoState.WHITE] / (double) go.state.possession[GoState.WHITE]));
     }
 
     @Override

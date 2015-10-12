@@ -8,7 +8,7 @@ package mase.novelty.comb;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.util.Parameter;
-import mase.PostEvaluator;
+import mase.evaluation.PostEvaluator;
 import mase.evaluation.ExpandedFitness;
 
 /**

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.novelty.mo;
+package mase.mo;
 
 import ec.EvolutionState;
 import ec.Population;
@@ -14,9 +14,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import mase.PostEvaluator;
+import mase.evaluation.PostEvaluator;
 import mase.evaluation.ExpandedFitness;
-import mase.novelty.NoveltyFitness;
 
 /**
  *
@@ -26,7 +25,7 @@ public class NSGA2 implements PostEvaluator {
 
     protected List<Individual>[] allInds; // this is used just for stats
     public static final String P_ORDINAL_RANKING = "ordinal-ranking";
-    public static final String P_INCLUDE_SCORES = "include-scores";
+    public static final String P_INCLUDE_SCORES = "scores";
     protected boolean ordinalRanking;
     protected String[] include;
 
@@ -34,7 +33,7 @@ public class NSGA2 implements PostEvaluator {
     public void setup(EvolutionState state, Parameter base) {
         ordinalRanking = state.parameters.getBoolean(base.push(P_ORDINAL_RANKING), null, false);
         String str = state.parameters.getString(base.push(P_INCLUDE_SCORES), null);
-        include = str.split(",");
+        include = str.split("[,;\\s\\-]+");
     }
 
     @Override
@@ -105,7 +104,7 @@ public class NSGA2 implements PostEvaluator {
                     index = i;
                     ind.score = index;
                 }
-                NoveltyFitness nf = (NoveltyFitness) pop.individuals[ind.individualId].fitness;
+                ExpandedFitness nf = (ExpandedFitness) pop.individuals[ind.individualId].fitness;
                 nf.setFitness(state, (float) ind.score, false);
             }
         } else {
@@ -114,7 +113,7 @@ public class NSGA2 implements PostEvaluator {
                     double rankScore = rankedInds.size() - ind.rank;
                     double distScore = Double.isInfinite(ind.crowdingDistance) ? 1 : ind.crowdingDistance / 2;
                     ind.score = rankScore + distScore;
-                    NoveltyFitness nf = (NoveltyFitness) pop.individuals[ind.individualId].fitness;
+                    ExpandedFitness nf = (ExpandedFitness) pop.individuals[ind.individualId].fitness;
                     nf.setFitness(state, (float) ind.score, false);
                 }
             }

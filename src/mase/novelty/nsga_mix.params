@@ -14,11 +14,11 @@ eval.post.1.archive-mode =         multiple
 eval.post.1.behaviour-index =      2
 eval.post.1.score-name =           ind
 
-eval.post.2 =                           mase.novelty.mo.NSGA2
+eval.post.2 =                           mase.mo.NSGA2
 eval.post.2.ordinal-ranking =           true
-eval.post.2.include-scores =            fitness,group,ind
-stat.child.15 =                         mase.novelty.mo.NSGA2Stat
+eval.post.2.scores =                    fitness,group,ind
+stat.child.15 =                         mase.mo.NSGA2Stat
 stat.child.15.file =                    $nsga.stat
 
-breed =					mase.novelty.mo.SimpleNSGABreeder
+breed =					mase.mo.SimpleNSGABreeder
 breed.elite =                           0

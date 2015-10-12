@@ -65,7 +65,7 @@ public class BestSolutionGenStat extends SolutionWriterStat {
         for (int i = 0; i < state.population.subpops.length; i++) {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 Individual ind = state.population.subpops[i].individuals[j];
-                float fit = ((ExpandedFitness) ind.fitness).getFitnessScore();
+                double fit = ((ExpandedFitness) ind.fitness).getFitnessScore();
                 if (fit > bestFitness) {
                     bestFitness = fit;
                     best = ind;

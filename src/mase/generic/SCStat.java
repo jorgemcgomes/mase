@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -34,7 +34,7 @@ public class SCStat extends Statistics {
     private int genLog, statesLog;
     private boolean saveStates;
     private SCPostEvaluator sc;
-    protected Map<Integer, Float> globalCount;
+    protected Map<Integer, Double> globalCount;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -64,7 +64,7 @@ public class SCStat extends Statistics {
             state.output.fatal("No StateCountPostEvaluator to log.");
         }
 
-        this.globalCount = new HashMap<Integer, Float>(1000);
+        this.globalCount = new HashMap<>(1000);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class SCStat extends Statistics {
                         SCResult r = (SCResult) er;
                         filteredStatesDS.addValue(r.removedByFilter / (double) (r.removedByFilter + r.counts.size()));
                         visitedStatesDS.addValue(r.counts.size());
-                        for (Float f : r.counts.values()) {
+                        for (Double f : r.counts.values()) {
                             stateCountsDS.addValue(f);
                         }
                         SCPostEvaluator.mergeCountMap(globalCount, r.getCounts());
@@ -103,7 +103,7 @@ public class SCStat extends Statistics {
             Collections.sort(hashes, new Comparator<Integer>() {
                 @Override
                 public int compare(Integer h1, Integer h2) {
-                    return Float.compare(globalCount.get(h2), globalCount.get(h1));
+                    return Double.compare(globalCount.get(h2), globalCount.get(h1));
                 }
             });
             // Print visited states

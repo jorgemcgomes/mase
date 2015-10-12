@@ -161,7 +161,7 @@ public class SystematicEvaluator extends MasonEvaluation {
     protected void postSimulation() {
         if (timeMode == TimeMode.mean) {
             // Make averages
-            float[] res = new float[size + 1];
+            double[] res = new double[size + 1];
             for (int i = 0; i < size; i++) {
                 List<Double> featureSample = features.get(i);
                 double sum = 0;
@@ -172,12 +172,12 @@ public class SystematicEvaluator extends MasonEvaluation {
                         count++;
                     }
                 }
-                res[i] = (float) (count == 0 ? 0 : sum / count);
+                res[i] = (double) (count == 0 ? 0 : sum / count);
             }
             res[size] = sim.schedule.getSteps();
             vbr = new SystematicResult(res);
         } else if(timeMode == TimeMode.last) { 
-            float[] res = new float[size + 1];
+            double[] res = new double[size + 1];
             for (int i = 0; i < size; i++) {
                 List<Double> featureSample = features.get(i);
                 double last = 0;
@@ -186,12 +186,12 @@ public class SystematicEvaluator extends MasonEvaluation {
                         last = d;
                     }
                 }
-                res[i] = (float) last;
+                res[i] = (double) last;
             }
             res[size] = sim.schedule.getSteps();
             vbr = new SystematicResult(res);        
         } else if (timeMode == TimeMode.meanlast) {
-            float[] res = new float[size * 2 + 1];
+            double[] res = new double[size * 2 + 1];
             for (int i = 0; i < size; i++) {
                 List<Double> featureSample = features.get(i);
                 double last = 0;
@@ -204,14 +204,14 @@ public class SystematicEvaluator extends MasonEvaluation {
                         last = d;
                     }
                 }
-                res[i*2] = (float) (count == 0 ? 0 : sum / count);
-                res[i*2+1] = (float) last;
+                res[i*2] = (double) (count == 0 ? 0 : sum / count);
+                res[i*2+1] = (double) last;
             }
             res[size * 2] = sim.schedule.getSteps();
             vbr = new SystematicResult(res);
         } else if (timeMode == TimeMode.simplereg || timeMode == TimeMode.meanslope) {
             SimpleRegression reg = new SimpleRegression(true);
-            float[] res = new float[size * 2 + 1];
+            double[] res = new double[size * 2 + 1];
             for (int i = 0; i < size; i++) {
                 reg.clear();
                 double sum = 0;
@@ -225,11 +225,11 @@ public class SystematicEvaluator extends MasonEvaluation {
                 }
 
                 if (timeMode == TimeMode.simplereg) {
-                    res[i * 2] = (float) (reg.getN() >= 2 ? reg.getIntercept() : 0);
+                    res[i * 2] = (double) (reg.getN() >= 2 ? reg.getIntercept() : 0);
                 } else if (timeMode == TimeMode.meanslope) {
-                    res[i * 2] = (float) (reg.getN() > 0 ? sum / reg.getN() : 0);
+                    res[i * 2] = (double) (reg.getN() > 0 ? sum / reg.getN() : 0);
                 }
-                res[i * 2 + 1] = (float) (reg.getN() >= 2 ? reg.getSlope() : 0);
+                res[i * 2 + 1] = (double) (reg.getN() >= 2 ? reg.getSlope() : 0);
             }
             res[size * 2] = sim.schedule.getSteps();
             vbr = new SystematicResult(res);
@@ -248,7 +248,7 @@ public class SystematicEvaluator extends MasonEvaluation {
                 }
             }
 
-            float[] res = new float[size * timeFrames + 1];
+            double[] res = new double[size * timeFrames + 1];
             for (int t = 0; t < timeFrames; t++) {
                 for (int i = 0; i < size; i++) {
                     double sum = 0;
@@ -260,7 +260,7 @@ public class SystematicEvaluator extends MasonEvaluation {
                             count++;
                         }
                     }
-                    res[t * size + i] = (float) (count == 0 ? 0 : sum / count);
+                    res[t * size + i] = (double) (count == 0 ? 0 : sum / count);
                 }
             }
             res[size * timeFrames] = features.get(0).size();

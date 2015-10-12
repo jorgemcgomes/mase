@@ -22,14 +22,15 @@ public class ExpandedFitness extends SimpleFitness {
     public static final String FITNESS_SCORE = "fitness";
     protected int fitnessIndex;
 
+    protected EvaluationResult[] evalResults;
+    protected LinkedHashMap<String,Double> scores;
+    protected int subpop;
+    
+    
     @Override
     public Parameter defaultBase() {
         return new Parameter(P_FITNESS);
     }
-
-    protected EvaluationResult[] evalResults;
-    protected LinkedHashMap<String,Float> scores;
-    protected int subpop;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -37,17 +38,34 @@ public class ExpandedFitness extends SimpleFitness {
         this.fitnessIndex = state.parameters.getIntWithDefault(base.push(P_FITNESS_EVAL_INDEX), defaultBase().push(P_FITNESS_EVAL_INDEX), 0);
     }
 
+    public EvaluationResult[] getEvaluationResults() {
+        return evalResults;
+    }
+    
     public void setEvaluationResults(EvolutionState state, EvaluationResult[] br, int subpop) {
         this.evalResults = br;
         this.subpop = subpop;
-        float fit = getFitnessScoreAux();
+        double fit = getFitnessScoreAux();
         this.setFitness(state, fit, false);
-        scores = new LinkedHashMap<String,Float>();
-        scores.put(FITNESS_SCORE, getFitnessScoreAux());
+        scores = new LinkedHashMap<>();
+        scores.put(FITNESS_SCORE, fit);
     }
     
-    public LinkedHashMap<String,Float> scores() {
+    public EvaluationResult getCorrespondingEvaluation(int index) {
+        EvaluationResult er = evalResults[index];
+        if (er instanceof SubpopEvaluationResult) {
+            SubpopEvaluationResult aer = (SubpopEvaluationResult) er;
+            er = (EvaluationResult) aer.getSubpopEvaluation(getCorrespondingSubpop());
+        }
+        return er;
+    }    
+    
+    public LinkedHashMap<String,Double> scores() {
         return scores;
+    }
+    
+    public double getScore(String score) {
+        return scores.get(score);
     }
     
     public void setFitnessIndex(int index) {
@@ -57,23 +75,14 @@ public class ExpandedFitness extends SimpleFitness {
     public int getCorrespondingSubpop() {
         return subpop;
     }
-
-    public EvaluationResult[] getEvaluationResults() {
-        return evalResults;
-    }
     
-    public float getFitnessScore() {
+    public double getFitnessScore() {
         return scores.get(FITNESS_SCORE);
     }
 
-    private float getFitnessScoreAux() {
-        EvaluationResult er = evalResults[fitnessIndex];
-        if (er instanceof SubpopEvaluationResult) {
-            SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
-            return (Float) ser.getSubpopEvaluation(subpop).value();
-        } else {
-            return (Float) er.value();
-        }
+    private double getFitnessScoreAux() {
+        EvaluationResult er = getCorrespondingEvaluation(fitnessIndex);
+        return (double) er.value();
     }
 
     /**
@@ -107,7 +116,7 @@ public class ExpandedFitness extends SimpleFitness {
             Arrays.sort(sortedFits, new Comparator<Fitness>() {
                 @Override
                 public int compare(Fitness o1, Fitness o2) {
-                    return Float.compare(((ExpandedFitness) o2).getFitnessScore(), 
+                    return Double.compare(((ExpandedFitness) o2).getFitnessScore(), 
                             ((ExpandedFitness) o1).getFitnessScore());
                 }
             });

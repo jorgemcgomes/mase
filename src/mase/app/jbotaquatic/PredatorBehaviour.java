@@ -62,9 +62,9 @@ public class PredatorBehaviour extends JBotEvaluation {
         
         vbr = new VectorBehaviourResult(
                 caught ? 1 : 0,
-                (float) (finalDist / simulator.getEnvironment().getWidth()),
-                (float) (simulator.getTime() / simulator.getEnvironment().getSteps()),
-                (float) (accumDispersion / simulator.getTime() / simulator.getEnvironment().getWidth())
+                 (finalDist / simulator.getEnvironment().getWidth()),
+                 (simulator.getTime() / simulator.getEnvironment().getSteps()),
+                 (accumDispersion / simulator.getTime() / simulator.getEnvironment().getWidth())
         );  
     }
 }

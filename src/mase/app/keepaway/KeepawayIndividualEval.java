@@ -20,10 +20,10 @@ public class KeepawayIndividualEval extends MasonEvaluation {
 
     private int passesNormalization;
     private double minPass;
-    private float[] passNumber;
-    private float[] passLength;
-    private float[] distanceToOthers;
-    private float[] movement;
+    private double[] passNumber;
+    private double[] passLength;
+    private double[] distanceToOthers;
+    private double[] movement;
     private int[] allCount;
     private int lastKeeper;
     private Double2D lastPossession;
@@ -41,10 +41,10 @@ public class KeepawayIndividualEval extends MasonEvaluation {
         super.preSimulation();
         Keepaway kw = (Keepaway) sim;
         this.lastKeeper = -1;
-        this.passNumber = new float[kw.keepers.size()];
-        this.passLength = new float[kw.keepers.size()];
-        this.distanceToOthers = new float[kw.keepers.size()];
-        this.movement = new float[kw.keepers.size()];
+        this.passNumber = new double[kw.keepers.size()];
+        this.passLength = new double[kw.keepers.size()];
+        this.distanceToOthers = new double[kw.keepers.size()];
+        this.movement = new double[kw.keepers.size()];
         this.allCount = new int[kw.keepers.size()];
     }
 
@@ -99,9 +99,9 @@ public class KeepawayIndividualEval extends MasonEvaluation {
         for (int i = 0; i < kw.keepers.size(); i++) {
             passNumber[i] /= passesNormalization;
             if (allCount[i] > 0) {
-                passLength[i] = (float) (passLength[i] / allCount[i] / kw.par.size);
+                passLength[i] =  (passLength[i] / allCount[i] / kw.par.size);
             }
-            distanceToOthers[i] = (float) (distanceToOthers[i] / currentEvaluationStep / (kw.keepers.size() - 1) / kw.par.size);
+            distanceToOthers[i] =  (distanceToOthers[i] / currentEvaluationStep / (kw.keepers.size() - 1) / kw.par.size);
             movement[i] /= currentEvaluationStep;
         }
     }
@@ -112,7 +112,7 @@ public class KeepawayIndividualEval extends MasonEvaluation {
         if (evaluation == null) {
             VectorBehaviourResult[] res = new VectorBehaviourResult[kw.keepers.size()];
             for (int i = 0; i < res.length; i++) {
-                float[] b = new float[]{passNumber[i], passLength[i], distanceToOthers[i], movement[i]};
+                double[] b = new double[]{passNumber[i], passLength[i], distanceToOthers[i], movement[i]};
                 res[i] = new VectorBehaviourResult(b);
             }
             evaluation = new SubpopEvaluationResult(res);

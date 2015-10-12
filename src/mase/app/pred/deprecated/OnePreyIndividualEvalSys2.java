@@ -16,8 +16,8 @@ import net.jafama.FastMath;
  */
 public class OnePreyIndividualEvalSys2 extends MasonEvaluation {
 
-    protected float[] agentY;
-    protected float[] partnerAvgDist;
+    protected double[] agentY;
+    protected double[] partnerAvgDist;
     protected SubpopEvaluationResult evaluation;
 
     @Override
@@ -25,8 +25,8 @@ public class OnePreyIndividualEvalSys2 extends MasonEvaluation {
         super.preSimulation();
         PredatorPrey predSim = (PredatorPrey) sim;
         int nAgents = predSim.predators.size();
-        agentY = new float[nAgents];
-        partnerAvgDist = new float[nAgents];
+        agentY = new double[nAgents];
+        partnerAvgDist = new double[nAgents];
 
     }
 
@@ -49,17 +49,17 @@ public class OnePreyIndividualEvalSys2 extends MasonEvaluation {
     public void postSimulation() {
         super.postSimulation();
         PredatorPrey predSim = (PredatorPrey) sim;
-        float diagonal = (float) FastMath.sqrtQuick(FastMath.pow2(predSim.field.width) * 2);
+        double diagonal =  FastMath.sqrtQuick(FastMath.pow2(predSim.field.width) * 2);
 
         VectorBehaviourResult[] res = new VectorBehaviourResult[predSim.predators.size()];
         Prey prey = predSim.preys.get(0);
         for (int i = 0; i < predSim.predators.size(); i++) {
             Predator pred = predSim.predators.get(i);
-            agentY[i] = (float) (agentY[i] / predSim.field.height / currentEvaluationStep);
+            agentY[i] =  (agentY[i] / predSim.field.height / currentEvaluationStep);
             agentY[i] = Math.max(0, Math.min(agentY[i], 1));
             partnerAvgDist[i] = Math.min(1, partnerAvgDist[i] / (diagonal / 2) / currentEvaluationStep / (predSim.predators.size() - 1));
 
-            float preyDist = (float) Math.min(1, pred.distanceTo(prey) / (diagonal / 2));
+            double preyDist =  Math.min(1, pred.distanceTo(prey) / (diagonal / 2));
 
             res[i] = new VectorBehaviourResult(preyDist, partnerAvgDist[i], pred.getCaptureCount(), agentY[i]);
         }

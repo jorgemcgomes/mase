@@ -71,10 +71,10 @@ public class WaypointBehaviourEval extends JBotEvaluation {
     public EvaluationResult getResult() {
         if(result == null) {
             result = new VectorBehaviourResult(
-                    (float) (finalDist / startingDist),
-                    (float) (meanDist / startingDist / steps),
-                    (float) (travelled / diag),
-                    (float) (meanDistClosest / steps / (diag / 10))
+                     (finalDist / startingDist),
+                     (meanDist / startingDist / steps),
+                     (travelled / diag),
+                     (meanDistClosest / steps / (diag / 10))
             );
         }
         return result;

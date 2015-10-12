@@ -16,9 +16,9 @@ import mase.mason.MasonEvaluation;
 public class HerdingGroupEval extends MasonEvaluation {
 
     private VectorBehaviourResult vbr;
-    private float sheepFence;
-    private float sheepFox;
-    private float initSheepCurral, initSheepFox;
+    private double sheepFence;
+    private double sheepFox;
+    private double initSheepCurral, initSheepFox;
 
     @Override
     protected void preSimulation() {
@@ -26,7 +26,7 @@ public class HerdingGroupEval extends MasonEvaluation {
         sheepFence = 0;
         sheepFox = 0;
         Herding herd = (Herding) sim;
-        initSheepCurral = (float) herd.curral.closestDistance(herd.sheeps.get(0).getLocation());
+        initSheepCurral =  herd.curral.closestDistance(herd.sheeps.get(0).getLocation());
         initSheepFox = 0;
         for (Fox f : herd.foxes) {
             initSheepFox += herd.sheeps.get(0).distanceTo(f) / herd.foxes.size();
@@ -54,10 +54,10 @@ public class HerdingGroupEval extends MasonEvaluation {
         double sheepCurral = herd.curral.closestDistance(s.getLocation());
 
         vbr = new VectorBehaviourResult(
-                (float) (sheepCurral / initSheepCurral),
-                (float) currentEvaluationStep / maxEvaluationSteps,
-                (float) (sheepFence / currentEvaluationStep / (herd.par.arenaSize / 2)),
-                (float) (sheepFox / currentEvaluationStep / herd.par.numFoxes / initSheepFox)
+                 (sheepCurral / initSheepCurral),
+                (double) currentEvaluationStep / maxEvaluationSteps,
+                 (sheepFence / currentEvaluationStep / (herd.par.arenaSize / 2)),
+                 (sheepFox / currentEvaluationStep / herd.par.numFoxes / initSheepFox)
         );
     }
 

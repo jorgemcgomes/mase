@@ -20,7 +20,7 @@ public class PersistentSolution implements Serializable, Comparable<PersistentSo
     
     private GroupController controller;
     private EvaluationResult[] evalResults;
-    private float fitness;
+    private double fitness;
     private int generation;
     private int subpop;
     private int index;
@@ -68,11 +68,11 @@ public class PersistentSolution implements Serializable, Comparable<PersistentSo
         this.userData = userData;
     }
     
-    public void setFitness(float fitness) {
+    public void setFitness(double fitness) {
         this.fitness = fitness;
     }
     
-    public float getFitness() {
+    public double getFitness() {
         return fitness;
     }
     @Override

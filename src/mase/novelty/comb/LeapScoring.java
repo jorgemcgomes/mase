@@ -8,44 +8,49 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Population;
 import ec.util.Parameter;
-import mase.PostEvaluator;
-import mase.novelty.NoveltyFitness;
+import mase.evaluation.PostEvaluator;
+import mase.evaluation.ExpandedFitness;
 
 /**
- * ONLY WORKS WITH ONE NOVELTY SCORE
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class LeapNovelty implements PostEvaluator {
+public class LeapScoring implements PostEvaluator {
 
     public static final String P_CHANGE_PROB = "change-prob";
+    public static final String P_BASE_SCORE = "base-score";
+    public static final String P_LEAP_SCORE = "leap-score";
+    protected String baseScore, leapScore;
     protected double changeProb;
-    protected int currentNovelty;
+    protected int currentLeap;
+    
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         // the mean number of generations it will stay on each subpop is roughly 1/changeProb and stdev is roughly the same as the mean
         this.changeProb = state.parameters.getDouble(base.push(P_CHANGE_PROB), null);
-        this.currentNovelty = -1;
+        this.currentLeap = -1;
+        baseScore = state.parameters.getString(base.push(P_BASE_SCORE), null);
+        leapScore = state.parameters.getString(base.push(P_LEAP_SCORE), null);
     }
 
     @Override
     public void processPopulation(EvolutionState state) {
         Population pop = state.population;
-        boolean change = currentNovelty == -1 ? true : state.random[0].nextBoolean(changeProb);
+        boolean change = currentLeap == -1 ? true : state.random[0].nextBoolean(changeProb);
         if (change) {
-            int previousNovelty = currentNovelty;
+            int previousNovelty = currentLeap;
             do {
-                currentNovelty = state.random[0].nextInt(pop.subpops.length);
-            } while (currentNovelty == previousNovelty);
+                currentLeap = state.random[0].nextInt(pop.subpops.length);
+            } while (currentLeap == previousNovelty);
         }
 
         for (int s = 0; s < pop.subpops.length; s++) {
             for (Individual ind : pop.subpops[s].individuals) {
-                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
-                if (s == currentNovelty) {
-                    nf.setFitness(state, (float) nf.getNoveltyScore(), false);
+                ExpandedFitness nf = (ExpandedFitness) ind.fitness;
+                if (s == currentLeap) {
+                    nf.setFitness(state, nf.getScore(leapScore), false);
                 } else {
-                    nf.setFitness(state, nf.getFitnessScore(), false);
+                    nf.setFitness(state, nf.getScore(baseScore), false);
                 }
             }
         }

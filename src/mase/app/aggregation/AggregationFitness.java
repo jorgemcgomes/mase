@@ -30,7 +30,7 @@ public class AggregationFitness extends MasonEvaluation {
             dist += centre.distance(aa.getLocation());
         }
         dist = dist / agg.agents.size() / agg.par.size;
-        res = new FitnessResult(Math.max(0, 1 - (float) dist));
+        res = new FitnessResult(Math.max(0, 1 -  dist));
     }
 
     @Override

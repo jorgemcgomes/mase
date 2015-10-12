@@ -25,7 +25,7 @@ public class SCEvaluator extends MasonEvaluation {
     private int bins;
     private Distance distance;
     private HashMap<Integer, byte[]> key;
-    private HashMap<Integer, Float> count;
+    private HashMap<Integer, Double> count;
     private SCResult res;
 
     @Override
@@ -56,8 +56,8 @@ public class SCEvaluator extends MasonEvaluation {
 
     @Override
     protected void preSimulation() {
-        this.key = new HashMap<Integer, byte[]>(100);
-        this.count = new HashMap<Integer, Float>(100);
+        this.key = new HashMap<>(100);
+        this.count = new HashMap<>(100);
     }
 
     @Override
@@ -69,10 +69,10 @@ public class SCEvaluator extends MasonEvaluation {
             double[] lastAction = a.lastOutputs();
             byte[] d = discretise(lastSensors, lastAction);
             int h = hashVector(d);
-            Float c = count.get(h);
+            Double c = count.get(h);
             if (c == null) {
                 key.put(h, d);
-                c = 0f;
+                c = 0d;
             }
             count.put(h, c + 1);
         }

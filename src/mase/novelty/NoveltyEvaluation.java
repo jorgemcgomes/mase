@@ -10,8 +10,6 @@ import ec.Population;
 import ec.util.Parameter;
 import edu.wlu.cs.levy.CG.Checker;
 import edu.wlu.cs.levy.CG.KDTree;
-import edu.wlu.cs.levy.CG.KeyDuplicateException;
-import edu.wlu.cs.levy.CG.KeySizeException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,8 +18,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mase.PostEvaluator;
+import mase.evaluation.PostEvaluator;
 import mase.evaluation.BehaviourResult;
+import mase.evaluation.ExpandedFitness;
 import mase.evaluation.VectorBehaviourResult;
 
 /**
@@ -30,8 +29,9 @@ import mase.evaluation.VectorBehaviourResult;
  */
 public class NoveltyEvaluation implements PostEvaluator {
 
-    public static final Parameter DEFAULT_BASE = new Parameter("novelty");
     public static final String P_BEHAVIOUR_INDEX = "behaviour-index";
+    
+    public static final Parameter DEFAULT_BASE = new Parameter("novelty");
     public static final String P_K_NN = "knn";
     public static final String P_ARCHIVE_GROWTH = "archive-growth";
     public static final String P_ARCHIVE_SIZE_LIMIT = "archive-size";
@@ -69,20 +69,24 @@ public class NoveltyEvaluation implements PostEvaluator {
         this.archiveCriteria = ArchiveCriteria.valueOf(state.parameters.getString(base.push(P_ARCHIVE_CRITERIA), DEFAULT_BASE.push(P_ARCHIVE_CRITERIA)));
         this.useKDTree = state.parameters.getBoolean(base.push(P_KD_TREE), DEFAULT_BASE.push(P_KD_TREE), false);
         this.behaviourIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), DEFAULT_BASE.push(P_BEHAVIOUR_INDEX));
-        this.scoreName = state.parameters.getStringWithDefault(base.push(P_SCORE_NAME), DEFAULT_BASE.push(P_SCORE_NAME), NoveltyFitness.NOVELTY_SCORE);
+        this.scoreName = state.parameters.getString(base.push(P_SCORE_NAME), DEFAULT_BASE.push(P_SCORE_NAME));
         
-        int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this should be more flexible
+        int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this should be more flexible?
         this.archives = new ArrayList[nPops];
         if (archiveMode == ArchiveMode.shared) {
-            ArrayList<ArchiveEntry> arch = new ArrayList<ArchiveEntry>();
+            ArrayList<ArchiveEntry> arch = new ArrayList<>();
             for (int i = 0; i < nPops; i++) {
                 archives[i] = arch;
             }
         } else if (archiveMode == ArchiveMode.multiple) {
             for (int i = 0; i < nPops; i++) {
-                archives[i] = new ArrayList<ArchiveEntry>();
+                archives[i] = new ArrayList<>();
             }
         }
+    }
+    
+    public int getBehaviourIndex() {
+        return behaviourIndex;
     }
 
     @Override
@@ -104,8 +108,8 @@ public class NoveltyEvaluation implements PostEvaluator {
             }
             // Current population
             for (Individual ind : pop.subpops[p].individuals) {
-                NoveltyFitness indFit = (NoveltyFitness) ind.fitness;
-                pool.add(indFit.getBehaviour(behaviourIndex));
+                ExpandedFitness indFit = (ExpandedFitness) ind.fitness;
+                pool.add((BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex));
             }
             KNNDistanceCalculator calc = useKDTree && pool.size() >= k * 2 ?
                     new KDTreeCalculator() :
@@ -114,9 +118,9 @@ public class NoveltyEvaluation implements PostEvaluator {
 
             // Calculate novelty for each individual
             for (Individual ind : pop.subpops[p].individuals) {
-                NoveltyFitness indFit = (NoveltyFitness) ind.fitness;
-                BehaviourResult br = indFit.getBehaviour(behaviourIndex);
-                float novScore = (float) calc.getDistance(br, k);
+                ExpandedFitness indFit = (ExpandedFitness) ind.fitness;
+                BehaviourResult br = (BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex);
+                double novScore = calc.getDistance(br, k);
                 indFit.scores().put(scoreName, novScore);
                 indFit.setFitness(state, novScore, false);
             }
@@ -142,7 +146,7 @@ public class NoveltyEvaluation implements PostEvaluator {
 
         @Override
         public double getDistance(BehaviourResult target, int k) {
-            ArrayList<Float> distances = new ArrayList<Float>();
+            ArrayList<Double> distances = new ArrayList<>();
             for (BehaviourResult br : pool) {
                 if (target != br) {
                     distances.add(distance(target,br));
@@ -168,7 +172,7 @@ public class NoveltyEvaluation implements PostEvaluator {
             for(BehaviourResult br : pool) {
                 vbr = (VectorBehaviourResult) br;
                 try {
-                    tree.insert(toDoubleArray(vbr.getBehaviour()), vbr);
+                    tree.insert(vbr.getBehaviour(), vbr);
                 } catch (Exception ex) {
                     Logger.getLogger(NoveltyEvaluation.class.getName()).log(Level.SEVERE, null, ex);
                 } 
@@ -180,7 +184,7 @@ public class NoveltyEvaluation implements PostEvaluator {
             try {
                 VectorBehaviourResult vbr = (VectorBehaviourResult) target;
                 List<VectorBehaviourResult> nearest = tree.nearest(
-                        toDoubleArray(vbr.getBehaviour()), k, new Checker<VectorBehaviourResult>() {
+                        vbr.getBehaviour(), k, new Checker<VectorBehaviourResult>() {
                             @Override
                             public boolean usable(VectorBehaviourResult v) {
                                 return v != target;
@@ -207,7 +211,7 @@ public class NoveltyEvaluation implements PostEvaluator {
 
     }
 
-    protected float distance(BehaviourResult br1, BehaviourResult br2) {
+    protected double distance(BehaviourResult br1, BehaviourResult br2) {
         return br1.distanceTo(br2);
     }
 
@@ -227,8 +231,8 @@ public class NoveltyEvaluation implements PostEvaluator {
                     Arrays.sort(copy, new Comparator<Individual>() {
                         @Override
                         public int compare(Individual o1, Individual o2) {
-                            double nov1 = ((NoveltyFitness) o1.fitness).getNoveltyScore();
-                            double nov2 = ((NoveltyFitness) o2.fitness).getNoveltyScore();
+                            double nov1 = ((ExpandedFitness) o1.fitness).getScore(scoreName);
+                            double nov2 = ((ExpandedFitness) o2.fitness).getScore(scoreName);
                             return Double.compare(nov2, nov1);
                         }
                     });
@@ -238,8 +242,8 @@ public class NoveltyEvaluation implements PostEvaluator {
                 }
                 for (Individual ind : toAdd) {
                     ArchiveEntry ar = new ArchiveEntry(state, 
-                            ((NoveltyFitness) ind.fitness).getBehaviour(behaviourIndex), 
-                            ((NoveltyFitness) ind.fitness).getFitnessScore());
+                            (BehaviourResult) ((ExpandedFitness) ind.fitness).getCorrespondingEvaluation(behaviourIndex), 
+                            ((ExpandedFitness) ind.fitness).getFitnessScore());
                     if (archive.size() == sizeLimit) {
                         int index = state.random[0].nextInt(archive.size());
                         archive.set(index, ar);
@@ -259,9 +263,9 @@ public class NoveltyEvaluation implements PostEvaluator {
 
         protected BehaviourResult behaviour;
         protected int generation;
-        protected float fitness;
+        protected double fitness;
 
-        protected ArchiveEntry(EvolutionState state, BehaviourResult behaviour, float fitness) {
+        protected ArchiveEntry(EvolutionState state, BehaviourResult behaviour, double fitness) {
             this.behaviour = behaviour;
             this.fitness = fitness;
             this.generation = state.generation;
@@ -275,7 +279,7 @@ public class NoveltyEvaluation implements PostEvaluator {
             return generation;
         }
 
-        public float getFitness() {
+        public double getFitness() {
             return fitness;
         }
     }

@@ -52,7 +52,7 @@ public class KeepawayFitnessLength extends MasonEvaluation {
 
     @Override
     protected void postSimulation() {
-        fitnessResult = new FitnessResult((float) sumPasses);
+        fitnessResult = new FitnessResult( sumPasses);
     }
 
     @Override

@@ -9,6 +9,7 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import mase.evaluation.ExpandedFitness;
 
 /**
  *
@@ -39,9 +40,9 @@ public class NoveltyIndividualsStat extends Statistics {
 
         for (int i = 0; i < state.population.subpops.length; i++) {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                NoveltyFitness nf = (NoveltyFitness) state.population.subpops[i].individuals[j].fitness;
+                ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;
                 state.output.print(state.generation + " " + i + " " + j, log);
-                for(float score : nf.scores().values()) {
+                for(double score : nf.scores().values()) {
                     state.output.print(" " + score, log);
                 }
                 state.output.print(" " + nf.fitness() + "\n", log);

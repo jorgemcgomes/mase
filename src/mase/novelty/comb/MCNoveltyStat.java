@@ -11,7 +11,9 @@ import ec.Subpopulation;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import mase.novelty.NoveltyFitness;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
+import mase.evaluation.ExpandedFitness;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -39,18 +41,25 @@ public class MCNoveltyStat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
+        MCNovelty mcn = null;
+        for(PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
+            if(pe instanceof MCNovelty) {
+                mcn = (MCNovelty) pe;
+                break;
+            }
+        }
         state.output.print(state.generation + "", log);
         for (Subpopulation sub : state.population.subpops) {
-            float maxFit = Float.NEGATIVE_INFINITY;
+            double maxFit = Float.NEGATIVE_INFINITY;
             DescriptiveStatistics dsNov = new DescriptiveStatistics(sub.individuals.length);
             for (Individual ind : sub.individuals) {
-                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
+                ExpandedFitness nf = (ExpandedFitness) ind.fitness;
                 maxFit = Math.max(maxFit, nf.getFitnessScore());
-                dsNov.addValue(nf.getNoveltyScore());
+                dsNov.addValue(nf.getScore(mcn.noveltyScore));
             }
             int boostCount = 0;
             for (Individual ind : sub.individuals) {
-                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
+                ExpandedFitness nf = (ExpandedFitness) ind.fitness;
                 if (nf.fitness() > maxFit) {
                     boostCount++;
                 }

@@ -9,8 +9,8 @@ import ec.Individual;
 import ec.Population;
 import ec.Subpopulation;
 import ec.util.Parameter;
-import mase.PostEvaluator;
-import mase.novelty.NoveltyFitness;
+import mase.evaluation.PostEvaluator;
+import mase.evaluation.ExpandedFitness;
 
 /**
  * ONLY WORKS WITH ONE NOVELTY SCORE
@@ -19,11 +19,15 @@ import mase.novelty.NoveltyFitness;
 public class MCNovelty implements PostEvaluator {
 
     public static final String P_NOVELTY_THRESHOLD = "novelty-threshold";
+    public static final String P_NOVELTY_SCORE = "novelty-score";
+
     protected double noveltyThreshold;
+    protected String noveltyScore;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         this.noveltyThreshold = state.parameters.getDouble(base.push(P_NOVELTY_THRESHOLD), null);
+        this.noveltyScore = state.parameters.getString(base.push(P_NOVELTY_SCORE), null);
     }
 
     @Override
@@ -32,18 +36,18 @@ public class MCNovelty implements PostEvaluator {
         for (Subpopulation sub : pop.subpops) {
             // calculate average novelty inside subpop and max fitness
             double avgNovelty = 0;
-            float maxFit = Float.NEGATIVE_INFINITY;
+            double maxFit = Float.NEGATIVE_INFINITY;
             for (Individual ind : sub.individuals) {
-                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
-                avgNovelty += nf.getNoveltyScore();
+                ExpandedFitness nf = (ExpandedFitness) ind.fitness;
+                avgNovelty += nf.getScore(noveltyScore);
                 maxFit = Math.max(maxFit, nf.getFitnessScore());
             }
             avgNovelty /= sub.individuals.length;
 
             // assign final scores
             for (Individual ind : sub.individuals) {
-                NoveltyFitness nf = (NoveltyFitness) ind.fitness;
-                if (nf.getNoveltyScore() > avgNovelty * noveltyThreshold) {
+                ExpandedFitness nf = (ExpandedFitness) ind.fitness;
+                if (nf.getScore(noveltyScore) > avgNovelty * noveltyThreshold) {
                     nf.setFitness(state, maxFit + nf.getFitnessScore(), false);
                 } else {
                     nf.setFitness(state, nf.getFitnessScore(), false);

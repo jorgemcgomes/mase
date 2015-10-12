@@ -46,7 +46,7 @@ public class HerdingFitness extends MasonEvaluation {
                 fitness += Math.max(0, 1 - sheep.distanceTo(gate) / initialDistances.get(sheep));
             }      
         }
-        res = new FitnessResult((float) fitness, FitnessResult.HARMONIC);
+        res = new FitnessResult( fitness, FitnessResult.HARMONIC);
     }
 
     @Override

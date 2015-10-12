@@ -59,10 +59,10 @@ public class ForagingGroupBehaviour extends MasonEvaluation {
         ForagingTask ft = (ForagingTask) sim;
         double diag = ft.par.arenaSize.length();
         vbr = new VectorBehaviourResult(
-                ft.items.size() / (float) ft.par.items.length,
-                (float) timeWithin / currentEvaluationStep,
-                (float) Math.min(1, dispersion / currentEvaluationStep / diag),
-                (float) Math.min(1, averageProximity / currentEvaluationStep / diag)
+                ft.items.size() / (double) ft.par.items.length,
+                (double) timeWithin / currentEvaluationStep,
+                 Math.min(1, dispersion / currentEvaluationStep / diag),
+                 Math.min(1, averageProximity / currentEvaluationStep / diag)
         );
     }    
     

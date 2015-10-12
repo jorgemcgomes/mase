@@ -47,7 +47,7 @@ public class RSFitness extends MasonEvaluation {
         }
         survivors = count / (double) rs.par.numAgents;
         averageEnergy = averageEnergy / rs.par.numAgents / rs.par.maxEnergy / currentEvaluationStep;
-        float res = (float) (averageEnergy * weight + survivors * (1 - weight));
+        double res =  (averageEnergy * weight + survivors * (1 - weight));
         //System.out.println(survivors + " , " + averageEnergy + " = " + res);
         result = new FitnessResult(res);
     }

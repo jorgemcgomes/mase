@@ -17,8 +17,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mase.MetaEvaluator;
-import mase.PostEvaluator;
+import mase.evaluation.MetaEvaluator;
+import mase.evaluation.PostEvaluator;
 import mase.evaluation.BehaviourResult;
 import static mase.generic.SCPostEvaluator.mergeCountMap;
 import mase.novelty.NoveltyEvaluation;
@@ -39,7 +39,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     protected int[] counts;
     protected KDTree<Integer> clusterTree;
     protected Map<Integer, Integer> assignements; // state-cluster assignments
-    protected Map<Integer, Float> buffer; // counts of the above elements
+    protected Map<Integer, Double> buffer; // counts of the above elements
     protected List<ArchiveEntry> archive;
     protected int updateFrequency;
     protected int maxUpdateFrequency;
@@ -51,8 +51,8 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         super.setup(state, base);
         this.numClusters = state.parameters.getInt(base.push(P_NUM_CLUSTERS),
                 new Parameter(P_STATECOUNT_BASE).push(P_NUM_CLUSTERS));
-        this.buffer = new HashMap<Integer, Float>(1000);
-        this.assignements = new HashMap<Integer, Integer>(1000);
+        this.buffer = new HashMap<>(1000);
+        this.assignements = new HashMap<>(1000);
         this.updateFrequency = 1;
         this.lastUpdate = 0;
         this.allowedChange = state.parameters.getDouble(base.push(P_ALLOWED_CHANGE),
@@ -194,9 +194,9 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
     }
 
     protected void computeClusteredCount(SCResult scr) {
-        float[] clusterCount = new float[clusters.length];
+        double[] clusterCount = new double[clusters.length];
         Arrays.fill(clusterCount, 0);
-        for (Entry<Integer, Float> e : scr.getCounts().entrySet()) {
+        for (Entry<Integer, Double> e : scr.getCounts().entrySet()) {
             int clusterIndex = assignements.get(e.getKey());
             clusterCount[clusterIndex] += e.getValue();
         }

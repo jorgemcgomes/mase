@@ -9,12 +9,11 @@ novelty.archive-mode =             shared
 novelty.archive-criteria =         random
 novelty.kd-tree =                  true
 novelty.behaviour-index =          1
+novelty.score-name =               novelty
 
 stat.child.10 =                        mase.novelty.NoveltyPopStat
 stat.child.10.file =		       $noveltypop.stat
 stat.child.11 =                        mase.novelty.NoveltyIndividualsStat
 stat.child.11.file =		       $noveltyind.stat
 
-vector.species.fitness =               mase.novelty.NoveltyFitness
-neat.species.fitness =                 mase.novelty.NoveltyFitness
 neat.SPECIE.FITNESS.MAX =              1000

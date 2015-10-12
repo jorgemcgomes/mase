@@ -10,18 +10,18 @@ import ec.Exchanger;
 import ec.Individual;
 import ec.Population;
 import ec.Subpopulation;
-import mase.CoevolutionaryEvaluator;
+import mase.evaluation.CoevolutionaryEvaluator;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import mase.MetaEvaluator;
+import mase.evaluation.MetaEvaluator;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.EvaluationResult;
+import mase.evaluation.ExpandedFitness;
 import mase.evaluation.SubpopEvaluationResult;
-import mase.novelty.NoveltyFitness;
 
 /**
  *
@@ -234,7 +234,7 @@ public abstract class AbstractHybridExchanger extends Exchanger {
     }
 
     protected BehaviourResult getAgentBR(Individual ind, int agent) {
-        NoveltyFitness nf = (NoveltyFitness) ind.fitness;
+        ExpandedFitness nf = (ExpandedFitness) ind.fitness;
         for (EvaluationResult er : nf.getEvaluationResults()) {
             if (er instanceof SubpopEvaluationResult) {
                 SubpopEvaluationResult ser = (SubpopEvaluationResult) er;

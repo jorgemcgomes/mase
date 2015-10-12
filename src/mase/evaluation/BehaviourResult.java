@@ -10,6 +10,6 @@ package mase.evaluation;
  */
 public interface BehaviourResult extends EvaluationResult {
 
-    public float distanceTo(BehaviourResult other);
+    public double distanceTo(BehaviourResult other);
     
 }

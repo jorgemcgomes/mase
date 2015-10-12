@@ -46,10 +46,10 @@ public class MultiRoverGroupEval extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         MultiRover mr = (MultiRover) sim;
-        br = new VectorBehaviourResult(mr.scores[2] / (float) mr.par.numRocks,
-                (float) (dispersion / mr.rovers.size() / currentEvaluationStep / (mr.par.size / 2)),
-                (float) (movement / mr.rovers.size() / currentEvaluationStep / mr.par.speed),
-                (float) (proximity / mr.rovers.size() / currentEvaluationStep / (mr.par.size / 4))
+        br = new VectorBehaviourResult(mr.scores[2] / (double) mr.par.numRocks,
+                 (dispersion / mr.rovers.size() / currentEvaluationStep / (mr.par.size / 2)),
+                 (movement / mr.rovers.size() / currentEvaluationStep / mr.par.speed),
+                 (proximity / mr.rovers.size() / currentEvaluationStep / (mr.par.size / 4))
         );
     }
 

@@ -41,9 +41,9 @@ public class IndianaFitness2 extends MasonEvaluation {
                 count++;
             }
         }
-        float time = ind.gate.openTime == -1 ? 0 : 1 - ind.gate.openTime / (float) maxSteps;
-        float esc = (float) count / ind.agents.size();
-        float w = 1 / (1 + (float) ind.agents.size());
+        double time = ind.gate.openTime == -1 ? 0 : 1 - ind.gate.openTime / (double) maxSteps;
+        double esc = (double) count / ind.agents.size();
+        double w = 1 / (1 + (double) ind.agents.size());
         res = new FitnessResult(esc * (1 - w) + time * w);
     }
 

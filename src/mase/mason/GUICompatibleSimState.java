@@ -4,10 +4,9 @@
  */
 package mase.mason;
 
-import mase.mason.world.SmartAgent;
-import java.util.List;
 import sim.engine.SimState;
 import sim.portrayal.FieldPortrayal2D;
+import sim.portrayal.continuous.ContinuousPortrayal2D;
 
 /**
  *
@@ -19,8 +18,10 @@ public abstract class GUICompatibleSimState extends SimState {
         super(seed);
     }
     
-    public abstract FieldPortrayal2D createFieldPortrayal();
-    
+    public FieldPortrayal2D createFieldPortrayal() {
+        return new ContinuousPortrayal2D();
+    }
+
     public abstract void setupPortrayal(FieldPortrayal2D port);
         
 }
