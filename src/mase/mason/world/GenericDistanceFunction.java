@@ -33,24 +33,25 @@ public class GenericDistanceFunction extends DistanceFunction {
     }
 
     public double agentToObjectDistance(EmboddiedAgent a1, Object e2) {
+        double res = Double.NaN;
         if (e2 instanceof EmboddiedAgent) {
             EmboddiedAgent a2 = (EmboddiedAgent) e2;
-            return a1.distanceTo(a2);
+            res = a1.distanceTo(a2);
         } else if (e2 instanceof Double2D) {
-            return a1.distanceTo((Double2D) e2);
+            res = a1.distanceTo((Double2D) e2);
         } else if (e2 instanceof SimplePortrayal2D) {
             if (e2 instanceof OvalPortrayal2D) {
                 OvalPortrayal2D a2 = (OvalPortrayal2D) e2;
-                return a1.getLocation().distance(field.getObjectLocation(a2)) - a1.getRadius()/* - a2.scale / 2*/;
+                res = a1.getLocation().distance(field.getObjectLocation(a2)) - a1.getRadius() - a2.scale / 2;
             } else {
                 SimplePortrayal2D a2 = (SimplePortrayal2D) e2;
-                return a1.getLocation().distance(field.getObjectLocation(a2)) - a1.getRadius();
+                res = a1.getLocation().distance(field.getObjectLocation(a2)) - a1.getRadius();
             }
         } else if (e2 instanceof StaticPolygon) {
             StaticPolygon a2 = (StaticPolygon) e2;
-            return a2.closestDistance(a1.getLocation()) - a1.getRadius();
+            res = a2.closestDistance(a1.getLocation()) - a1.getRadius();
         }
-        return Double.NaN;
+        return Double.isNaN(res) ? Double.NaN : Math.max(0, res);
     }
 
     private double distance(Object e1, Object e2, boolean reverse) {
@@ -62,15 +63,15 @@ public class GenericDistanceFunction extends DistanceFunction {
             StaticPolygon a1 = (StaticPolygon) e2;
             if (e2 instanceof StaticPolygon) {
                 StaticPolygon a2 = (StaticPolygon) e2;
-                return a1.closestDistance(a2);
+                res = a1.closestDistance(a2);
             } else if (e2 instanceof SimplePortrayal2D) {
                 SimplePortrayal2D a2 = (SimplePortrayal2D) e2;
-                return a1.closestDistance(field.getObjectLocation(a2));
+                res = a1.closestDistance(field.getObjectLocation(a2));
             }
         } else if (e1 instanceof SimplePortrayal2D && e2 instanceof SimplePortrayal2D) {
             SimplePortrayal2D a1 = (SimplePortrayal2D) e1;
             SimplePortrayal2D a2 = (SimplePortrayal2D) e2;
-            return field.getObjectLocation(a1).distance(field.getObjectLocation(a2));
+            res = field.getObjectLocation(a1).distance(field.getObjectLocation(a2));
         }
 
         if (Double.isNaN(res) && !reverse) {

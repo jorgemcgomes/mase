@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
  */
 public class ExpandedFitness extends SimpleFitness {
 
+    public static final String AUTO_FITNESS_PREFIX = "eval.";
     public static final String P_FITNESS_EVAL_INDEX = "fitness-index";
     public static final String FITNESS_SCORE = "fitness";
     protected int fitnessIndex;
@@ -49,6 +50,15 @@ public class ExpandedFitness extends SimpleFitness {
         this.setFitness(state, fit, false);
         scores = new LinkedHashMap<>();
         scores.put(FITNESS_SCORE, fit);
+        
+        // Automatically add all fitness results as scores
+        for(int i = 0 ; i < br.length ; i++) {
+            EvaluationResult e = br[i];
+            if(e instanceof FitnessResult) {
+                FitnessResult fr = (FitnessResult) e;
+                scores.put(AUTO_FITNESS_PREFIX + i, fr.value());
+            }
+        }
     }
     
     public EvaluationResult getCorrespondingEvaluation(int index) {

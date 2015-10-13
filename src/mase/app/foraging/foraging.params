@@ -50,7 +50,7 @@ problem.flyingLinearAcc =           2
 problem.flyingAngSpeed =            0.157
 problem.flyingAngAcc =              0.05
 
-problem.flyingVerticalMove =        true
+problem.flyingVerticalMovement =    true
 problem.flyingMaxHeight =           250
 problem.flyingStartHeight =         0
 

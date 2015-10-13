@@ -1,6 +1,6 @@
 parent.0 = foraging.params
 
-problem.flyingVerticalMove =        false
+problem.flyingVerticalMovement =    false
 problem.flyingStartHeight =         250
 
 pop.subpop.1.INPUT.NODES =          14

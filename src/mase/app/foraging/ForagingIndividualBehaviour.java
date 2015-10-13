@@ -67,7 +67,7 @@ public class ForagingIndividualBehaviour extends MasonEvaluation {
         double diag = ft.par.arenaSize.length();
         ser = new SubpopEvaluationResult(
                 new VectorBehaviourResult(
-                        ft.items.size() / (double) ft.par.items.length,
+                         ft.items.size() / (double) ft.par.items.length,
                          Math.min(1, landProximity / currentEvaluationStep / diag),
                          Math.min(1, landMovement / currentEvaluationStep / (ft.par.landLinearSpeed * updateFrequency)),
                          Math.min(1, landFlyingDistance / currentEvaluationStep / diag)),

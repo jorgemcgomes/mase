@@ -12,6 +12,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import sim.util.Double2D;
 import sim.util.Int2D;
 
@@ -21,9 +22,9 @@ import sim.util.Int2D;
  */
 public class ParamUtils {
 
-    public static final String SEPARATOR_2D = ":";
-    public static final String SEPARATOR_ARRAY = ",";
-    public static final int MAX_NUM_ROBOTS = 100;
+    public static final String SEPARATOR_2D = "[:\\-]+";
+    public static final String SEPARATOR_ARRAY = "[,;]+";
+    public static final int MAX_NUM_ROBOTS = 20;
 
     /**
      * Use this annotation in the parameters that need to be automatically
@@ -53,6 +54,13 @@ public class ParamUtils {
 
         int numRobots() default 0;
     }
+    
+    /**
+     * Force a parameter to be ignored during the auto-fill
+     * 
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface IgnoreParam {}    
 
     /**
      * Search the ParameterDatabase to automatically fill the object's fields.
@@ -69,6 +77,10 @@ public class ParamUtils {
         Field[] fields = params.getClass().getDeclaredFields();
         for (Field field : fields) {
             try {
+                if(field.isAnnotationPresent(IgnoreParam.class)) {
+                    System.out.println("- " + field.getName() + ": IGNORED. Using default: " + field.get(params));
+                    continue;
+                }
                 if (field.isAnnotationPresent(RobotParam.class)) {
                     RobotParam annotation = field.getAnnotation(RobotParam.class);
                     Class<?> type = field.getType();
@@ -84,22 +96,23 @@ public class ParamUtils {
                             }
                         }
                         field.set(params, array);
+                        System.out.println("V " + field.getName() + ": SET RobotParam: " + Arrays.toString((Object[]) array));
                     } else {
-                        System.out.println("*** Parameter " + field.getName() + " is not an array.");
+                        System.out.println("X " + field.getName() + ": Field is not an array");
                     }
                 } else if (field.isAnnotationPresent(Param.class) || useAll) {
                     Param annotation = field.getAnnotation(Param.class);
-                    String name = annotation.name().equals("") ? field.getName() : annotation.name();
+                    String name = (annotation == null || annotation.name().equals("")) ? field.getName() : annotation.name();
                     if (db.exists(base.push(name), defaultBase.push(name))) {
                         Object value = getValue(field.getType(), db, base.push(name), defaultBase.push(name));
                         field.set(params, value);
+                        System.out.println("V " + field.getName() + ": SET Param: " + value);
                     } else {
-                        System.out.println("*** Parameter " + name + " not found: " + base.push(name) + " OR " + defaultBase.push(name));
-                        System.out.println("*** Using default value: " + field.get(params));
+                        System.out.println("X " + field.getName() + ": Parameter not found (" + base.push(name) + " OR " + defaultBase.push(name) + "). Using default: " + field.get(params));
                     }
                 } 
             } catch (Exception ex) {
-                ex.printStackTrace();
+                System.out.println("X " + field.getName() + ": FATAL EXCEPTION: " + ex.getMessage());
             }
         }
     }    
@@ -136,19 +149,19 @@ public class ParamUtils {
         } else if (type.equals(File.class)) {
             return new File(stringVal);
         } else if (type.equals(Double2D.class)) {
-            String[] split = stringVal.split("-");
+            String[] split = stringVal.split(SEPARATOR_2D);
             if (split.length != 2) {
-                throw new Exception("*** Unexpected split when parsing Double2D: " + stringVal);
+                throw new Exception("Unexpected split when parsing Double2D: " + stringVal);
             }
             return new Double2D(Double.parseDouble(split[0]), Double.parseDouble(split[1]));
         } else if (type.equals(Int2D.class)) {
-            String[] split = stringVal.split("-");
+            String[] split = stringVal.split(SEPARATOR_2D);
             if (split.length != 2) {
-                throw new Exception("*** Unexpected split when parsing Int2D: " + stringVal);
+                throw new Exception("Unexpected split when parsing Int2D: " + stringVal);
             }
             return new Double2D(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
         } else {
-            throw new Exception("*** Unknown type: " + type.getName());
+            throw new Exception("Unknown type: " + type.getName());
         }
     }
 

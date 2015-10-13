@@ -13,34 +13,34 @@ import sim.util.Double2D;
  */
 public class ForagingPar implements Cloneable {
     
-    protected double flyingRadius;
-    protected double flyingVisionAngle;
-    protected int flyingArcs;
-    protected double landVisionAngle;
-    protected double landSensingRange;
-    protected int landArcs;
+    public double flyingRadius;
+    public double flyingVisionAngle;
+    public int flyingArcs;
+    public double landVisionAngle;
+    public double landSensingRange;
+    public int landArcs;
 
-    protected double landRadius;
-    protected double landLinearSpeed;
-    protected double landTurnSpeed;
-    protected double flyingLinearSpeed;
-    protected double flyingLinearAcc;
-    protected double flyingAngSpeed;
-    protected double flyingAngAcc;
-    protected double flyingMaxHeight;
-    protected boolean useFlyingRobot;
+    public double landRadius;
+    public double landLinearSpeed;
+    public double landTurnSpeed;
+    public double flyingLinearSpeed;
+    public double flyingLinearAcc;
+    public double flyingAngSpeed;
+    public double flyingAngAcc;
+    public double flyingMaxHeight;
+    public boolean useFlyingRobot;
 
-    protected Double2D arenaSize;
-    protected Double2D[] items;
-    protected double itemPlacementZone;
-    protected double itemRadius;
+    public Double2D arenaSize;
+    public Double2D[] items;
+    public double itemPlacementZone;
+    public double itemRadius;
     
-    protected Double2D flyingStartPos;
-    protected Double2D landStartPos;
-    protected double flyingStartHeight;
-    protected double flyingStartOri;
-    protected double landStartOri;
+    public Double2D flyingStartPos;
+    public Double2D landStartPos;
+    public double flyingStartHeight;
+    public double flyingStartOri;
+    public double landStartOri;
             
-    protected boolean flyingVerticalMovement;
+    public boolean flyingVerticalMovement;
 
 }

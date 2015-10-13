@@ -168,11 +168,14 @@ public class NoveltyEvaluation implements PostEvaluator {
         @Override
         public void setPool(List<BehaviourResult> pool) {
             VectorBehaviourResult vbr = (VectorBehaviourResult) pool.get(0);
-            this.tree = new KDTree<VectorBehaviourResult>(vbr.getBehaviour().length);
+            this.tree = new KDTree<>(vbr.getBehaviour().length);
             for(BehaviourResult br : pool) {
                 vbr = (VectorBehaviourResult) br;
+                double[] key = vbr.getBehaviour();
                 try {
-                    tree.insert(vbr.getBehaviour(), vbr);
+                    if(tree.search(key) == null) {
+                        tree.insert(key, vbr);
+                    }
                 } catch (Exception ex) {
                     Logger.getLogger(NoveltyEvaluation.class.getName()).log(Level.SEVERE, null, ex);
                 } 
@@ -200,15 +203,6 @@ public class NoveltyEvaluation implements PostEvaluator {
             }
             return Double.NaN;
         }
-        
-        private double[] toDoubleArray(float[] a) {
-            double[] d = new double[a.length];
-            for(int i = 0 ; i < a.length ; i++) {
-                d[i] = a[i];
-            }
-            return d;
-        }
-
     }
 
     protected double distance(BehaviourResult br1, BehaviourResult br2) {
