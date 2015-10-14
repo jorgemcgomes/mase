@@ -13,6 +13,10 @@ import sim.util.Double2D;
  */
 public class ForagingPar implements Cloneable {
     
+    public enum PlacementMode {
+        fixed, semirandom, random;
+    }
+    
     public double flyingRadius;
     public double flyingVisionAngle;
     public int flyingArcs;
@@ -35,6 +39,8 @@ public class ForagingPar implements Cloneable {
     public double itemPlacementZone;
     public double itemRadius;
     
+    public PlacementMode flyingPlacement;
+    public PlacementMode landPlacement;
     public Double2D flyingStartPos;
     public Double2D landStartPos;
     public double flyingStartHeight;

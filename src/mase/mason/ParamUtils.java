@@ -146,15 +146,29 @@ public class ParamUtils {
             return Boolean.parseBoolean(stringVal);
         } else if (type.equals(String.class)) {
             return stringVal;
+        } else if(type.isEnum()) {
+            Object[] consts = type.getEnumConstants();
+            for(Object o : consts) {
+                if(o.toString().equalsIgnoreCase(stringVal)) {
+                    return o;
+                }
+            }
+            throw new Exception("Unknown constant:" + stringVal);
         } else if (type.equals(File.class)) {
             return new File(stringVal);
         } else if (type.equals(Double2D.class)) {
+            if(stringVal.trim().equalsIgnoreCase("null")) {
+                return null;
+            }
             String[] split = stringVal.split(SEPARATOR_2D);
             if (split.length != 2) {
                 throw new Exception("Unexpected split when parsing Double2D: " + stringVal);
             }
             return new Double2D(Double.parseDouble(split[0]), Double.parseDouble(split[1]));
         } else if (type.equals(Int2D.class)) {
+            if(stringVal.trim().equalsIgnoreCase("null")) {
+                return null;
+            }
             String[] split = stringVal.split(SEPARATOR_2D);
             if (split.length != 2) {
                 throw new Exception("Unexpected split when parsing Int2D: " + stringVal);

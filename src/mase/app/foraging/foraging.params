@@ -16,10 +16,9 @@ problem.eval.4 =                   mase.app.foraging.WithinFitness
 problem.eval.4.update-freq =       5
 
 fitness.fitness-index =            0
-fitness.novelty-index =            1
 
 # general params
-problem.repetitions =               5
+problem.repetitions =               10
 problem.same-seed =                 false
 problem.max-steps =                 1000
 
@@ -54,11 +53,16 @@ problem.flyingVerticalMovement =    true
 problem.flyingMaxHeight =           250
 problem.flyingStartHeight =         0
 
-pop.subpop.0 =                      mase.neat.NEATSubpop
-pop.subpop.1 =                      mase.neat.NEATSubpop
+problem.landPlacement =             semirandom
+problem.flyingPlacement =           semirandom
 
+pop.subpops =                       2
+pop.subpop.0 =                      mase.neat.NEATSubpop
+pop.subpop.0.size =                 150
 pop.subpop.0.INPUT.NODES =          8    
 pop.subpop.0.OUTPUT.NODES =         2
+pop.subpop.1 =                      mase.neat.NEATSubpop
+pop.subpop.1.size =                 150
 pop.subpop.1.INPUT.NODES =          15
 pop.subpop.1.OUTPUT.NODES =         4
 
