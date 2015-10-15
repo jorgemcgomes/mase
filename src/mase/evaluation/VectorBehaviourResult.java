@@ -15,19 +15,17 @@ public class VectorBehaviourResult implements BehaviourResult {
 
     private static final long serialVersionUID = 1;
     protected double[] behaviour;
-    protected Distance dist;
+    protected int dist;
+    public static final String V_COSINE = "cosine", V_BRAY_CURTIS = "bray_curtis", V_EUCLIDEAN = "euclidean";
+    public static final int COSINE = 0, BRAY_CURTIS = 1, EUCLIDEAN = 2;
 
-    public enum Distance {
-
-        COSINE, BRAY_CURTIS, EUCLIDEAN
-    };
 
     public VectorBehaviourResult(double... bs) {
         this.behaviour = bs;
-        this.dist = Distance.EUCLIDEAN;
+        this.dist = EUCLIDEAN;
     }
     
-    public VectorBehaviourResult(Distance dist, double... bs) {
+    public VectorBehaviourResult(int dist, double... bs) {
         this.behaviour = bs;
         this.dist = dist;
     }

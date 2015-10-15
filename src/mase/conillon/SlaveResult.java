@@ -5,7 +5,9 @@
  */
 package mase.conillon;
 
+import java.util.ArrayList;
 import mase.evaluation.EvaluationResult;
+import mase.evaluation.SubpopEvaluationResult;
 import result.Result;
 
 /**
@@ -14,16 +16,34 @@ import result.Result;
  */
 public class SlaveResult extends Result {
     
-    private final EvaluationResult[] results;
-    private final int id;
+    private ArrayList<EvaluationResult> results;
+    private int id;
     
-    public SlaveResult(EvaluationResult[] results, int id) {
+    public SlaveResult(ArrayList<EvaluationResult> results, int id) {
         this.results = results;
         this.id = id;
     }
     
-    public EvaluationResult[] getEvaluationResults() {
-        return results;
+    public ArrayList<EvaluationResult> getEvaluationResults() {
+        /*
+        Dirty fix to avoid SubpopEvaluationResults (causing problems with Conillon)
+        Restore the SubpopEvaluationResults, contained in the list between nulls
+        */
+        ArrayList<EvaluationResult> resList = new ArrayList<>();
+        ArrayList<EvaluationResult> temp = null;
+        for(EvaluationResult er : results) {
+            if(er == null && temp == null) { // start new SER
+                temp = new ArrayList<>();
+            } else if(er != null && temp != null) { // add to existing SER
+                temp.add(er);
+            } else if(er == null && temp != null) { // end existing SER
+                resList.add(new SubpopEvaluationResult(temp));
+                temp = null;
+            } else { // not SER
+                resList.add(er);
+            }
+        }
+        return resList;
     }
     
     public int getID() {

@@ -8,9 +8,10 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.HashMap;
 import java.util.List;
-import mase.evaluation.VectorBehaviourResult.Distance;
-import mase.generic.systematic.TaskDescriptionProvider;
-import mase.mason.GUICompatibleSimState;
+import mase.evaluation.VectorBehaviourResult;
+import static mase.evaluation.VectorBehaviourResult.V_BRAY_CURTIS;
+import static mase.evaluation.VectorBehaviourResult.V_COSINE;
+import static mase.evaluation.VectorBehaviourResult.V_EUCLIDEAN;
 import mase.mason.MasonEvaluation;
 import mase.mason.world.SmartAgent;
 
@@ -23,7 +24,7 @@ public class SCEvaluator extends MasonEvaluation {
     public static final String P_DISCRETIZATION = "discretisation";
     public static final String P_DISTANCE = "distance";
     private int bins;
-    private Distance distance;
+    private int distance;
     private HashMap<Integer, byte[]> key;
     private HashMap<Integer, Double> count;
     private SCResult res;
@@ -34,13 +35,18 @@ public class SCEvaluator extends MasonEvaluation {
         Parameter df = defaultBase();
         this.bins = state.parameters.getInt(base.push(P_DISCRETIZATION), df.push(P_DISCRETIZATION));
         String dist = state.parameters.getString(base.push(P_DISTANCE), df.push(P_DISTANCE));
-        for(Distance d : SCResult.Distance.values()) {
-            if(dist.equalsIgnoreCase(d.toString())) {
-                distance = d;
-            }
-        }
-        if(distance == null) {
-            state.output.fatal("Unknown distance measure.", base.push(P_DISTANCE));
+        switch(dist) {
+            case V_EUCLIDEAN:
+                distance = VectorBehaviourResult.EUCLIDEAN;
+                break;
+            case V_BRAY_CURTIS:
+                distance = VectorBehaviourResult.BRAY_CURTIS;
+                break;
+            case V_COSINE:
+                distance = VectorBehaviourResult.COSINE;
+                break;
+            default:
+                state.output.fatal("Unknown distance measure.", base.push(P_DISTANCE));
         }
     }
 

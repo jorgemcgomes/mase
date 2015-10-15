@@ -4,13 +4,19 @@
  */
 package mase.neat;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.controllers.AgentController;
 import org.neat4j.neat.core.NEATNeuralNet;
 import org.neat4j.neat.core.NEATNeuron;
+import org.neat4j.neat.core.control.NEAT;
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.data.csv.CSVInput;
+import org.neat4j.neat.nn.core.NeuralNet;
+import org.neat4j.neat.nn.core.NeuralNetDescriptor;
 import org.neat4j.neat.nn.core.NeuralNetFactory;
+import org.neat4j.neat.nn.core.NeuralNetType;
 import org.neat4j.neat.nn.core.Synapse;
 
 /**
@@ -39,15 +45,25 @@ public class NEATAgentController implements AgentController {
 
     @Override
     public void reset() {
-        this.network = (NEATNeuralNet) NeuralNetFactory.getFactory().createNN(network.netDescriptor());
-        this.network.updateNetStructure();
+        this.network = createNet(network.netDescriptor());
     }
 
     @Override
     public AgentController clone() {
-        NEATNeuralNet newNet = (NEATNeuralNet) NeuralNetFactory.getFactory().createNN(network.netDescriptor());
-        newNet.updateNetStructure();
-        return new NEATAgentController(newNet);
+        try {
+            NEATAgentController ac = (NEATAgentController) super.clone();
+            ac.network = createNet(network.netDescriptor());
+            return ac;
+        } catch (CloneNotSupportedException ex) {
+        }
+        return null;
+    }
+
+    private NEATNeuralNet createNet(NeuralNetDescriptor nnd) {
+        NEATNeuralNet net = new NEATNeuralNet();
+        net.createNetStructure(nnd);
+        net.updateNetStructure();
+        return net;
     }
 
     @Override
@@ -58,13 +74,13 @@ public class NEATAgentController implements AgentController {
             if (((NEATNeuron) s.getFrom()).id() == ((NEATNeuron) s.getTo()).id()) {
                 selfRecurr++;
             }
-            if(((NEATNeuron) s.getFrom()).neuronDepth() < ((NEATNeuron) s.getTo()).neuronDepth()) {
+            if (((NEATNeuron) s.getFrom()).neuronDepth() < ((NEATNeuron) s.getTo()).neuronDepth()) {
                 recurr++;
             }
         }
-        return "Neurons:" + network.neurons().length + " Con:" + network.connections().length + 
-                " Self-rec:" + selfRecurr + " Rec:" + recurr + "\n\n" + 
-                NEATSerializer.serializeToString(network); 
+        return "Neurons:" + network.neurons().length + " Con:" + network.connections().length
+                + " Self-rec:" + selfRecurr + " Rec:" + recurr + "\n\n"
+                + NEATSerializer.serializeToString(network);
     }
 
 }

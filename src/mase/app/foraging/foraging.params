@@ -1,7 +1,7 @@
 # remove sample stats
 stat.child.5 = ec.Statistics
 
-eval.base.problem =                mase.app.foraging.ForagingSimulator
+eval.base.problem =                mase.app.foraging.ForagingStandaloneProblem
 problem.number-evals =             5
 problem.trials-merge =             best
 problem.eval.0 =                   mase.app.foraging.ForagingFitness
@@ -53,8 +53,8 @@ problem.flyingVerticalMovement =    true
 problem.flyingMaxHeight =           250
 problem.flyingStartHeight =         0
 
-problem.landPlacement =             semirandom
-problem.flyingPlacement =           semirandom
+problem.landPlacement =             1
+problem.flyingPlacement =           1
 
 pop.subpops =                       2
 pop.subpop.0 =                      mase.neat.NEATSubpop

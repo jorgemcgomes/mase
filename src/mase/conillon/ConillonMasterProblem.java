@@ -7,11 +7,12 @@ import ec.Individual;
 import ec.eval.MasterProblem;
 import ec.util.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import mase.SimulationProblem;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
+import mase.mason.MasonStandaloneProblem;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -64,7 +65,7 @@ public class ConillonMasterProblem extends MasterProblem {
     public void prepareToEvaluate(EvolutionState state, int threadnum) {
         jobs = new HashMap<>();
         idCounter = 0;
-        client.setDesc("MASE generation " + state.generation);
+        client.setDesc("MASE / job " + state.job[0] + " / gen " + state.generation);
     }
 
     @Override
@@ -75,7 +76,9 @@ public class ConillonMasterProblem extends MasterProblem {
         }
         for (SlaveResult r : resList) {
             Evaluation j = jobs.get(r.getID());
-            EvaluationResult[] eval = r.getEvaluationResults();
+            ArrayList<EvaluationResult> evalList = r.getEvaluationResults();
+            EvaluationResult[] eval = new EvaluationResult[evalList.size()];
+            evalList.toArray(eval);
             if (j.ind.length == 1) { // non coevolution
                 ExpandedFitness fit = (ExpandedFitness) j.ind[0].fitness;
                 fit.setEvaluationResults(state, eval, j.subpops[0]);
@@ -96,15 +99,15 @@ public class ConillonMasterProblem extends MasterProblem {
     @Override
     public void evaluate(EvolutionState state, Individual[] inds, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
         Evaluation job = new Evaluation();
-        job.ind = inds;
-        job.updateFitness = updateFitness;
+        job.ind = Arrays.copyOf(inds, inds.length);
+        job.updateFitness = Arrays.copyOf(updateFitness, updateFitness.length);
         job.countVictoriesOnly = countVictoriesOnly;
-        job.subpops = subpops;
+        job.subpops = Arrays.copyOf(subpops, subpops.length);
         job.threadnum = threadnum;
-        SimulationProblem simProblem = (SimulationProblem) problem;
-        GroupController gc = simProblem.createController(state, inds);
+        MasonStandaloneProblem simProblem = (MasonStandaloneProblem) problem;
+        GroupController gc = simProblem.createController(state, job.ind);
         int id = nextID();
-        SlaveTask task = new SlaveTask(simProblem, gc, simProblem.nextSeed(state, threadnum), id);
+        SlaveTask task = new SlaveTask(simProblem.getSimulator(), gc, simProblem.nextSeed(state, threadnum), id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
         jobs.put(id, job);
         client.commit(task);
     }
@@ -117,10 +120,10 @@ public class ConillonMasterProblem extends MasterProblem {
         job.countVictoriesOnly = false;
         job.subpops = new int[]{subpopulation};
         job.threadnum = threadnum;
-        SimulationProblem simProblem = (SimulationProblem) problem;
+        MasonStandaloneProblem simProblem = (MasonStandaloneProblem) problem;
         GroupController gc = simProblem.createController(state, ind);
         int id = nextID();
-        SlaveTask task = new SlaveTask(simProblem, gc, simProblem.nextSeed(state, threadnum), id);
+        SlaveTask task = new SlaveTask(simProblem.getSimulator(), gc, simProblem.nextSeed(state, threadnum), id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
         jobs.put(id, job);
         client.commit(task);
     }
@@ -138,9 +141,8 @@ public class ConillonMasterProblem extends MasterProblem {
     @Override
     public void initializeContacts(EvolutionState state) {
         ClientPriority priority = getPriority(priorityNumber);
-        //String desc = jBotEvolver.getArguments().get("--output").getCompleteArgumentString();
-        client = new Client("MASE initialisation", priority, serverName, serverPort, serverName, codePort);
-        client.setTotalNumberOfTasks(state.generation * state.population.subpops.length * state.population.subpops[0].individuals.length);
+        client = new Client("MASE / job " + state.job[0], priority, serverName, serverPort, serverName, codePort);
+        client.setTotalNumberOfTasks(state.numGenerations * state.population.subpops.length * state.population.subpops[0].individuals.length);
         state.output.message("***********************************\n*** CONILLON CLIENT INITIALIZED ***\n***********************************");
     }
 

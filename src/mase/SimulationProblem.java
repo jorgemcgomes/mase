@@ -178,13 +178,17 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     public void setRepetitions(int repetitions) {
         this.repetitions = repetitions;
     }
-    
+
+    public int getRepetitions() {
+        return repetitions;
+    }
+
     public long nextSeed(EvolutionState state, int threadnum) {
-        if(sameSeed) {
+        if (sameSeed) {
             return seed;
         } else {
             return state.random[threadnum].nextLong();
         }
     }
-    
-} 
+
+}

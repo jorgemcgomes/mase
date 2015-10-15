@@ -10,12 +10,12 @@ import java.io.Serializable;
  *
  * @author jorge
  */
-public interface AgentController extends Serializable {
+public interface AgentController extends Serializable, Cloneable {
     
     public double[] processInputs(double[] input);
     
     public void reset();
     
     public AgentController clone();
-    
+        
 }

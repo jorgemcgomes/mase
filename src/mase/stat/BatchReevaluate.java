@@ -137,9 +137,9 @@ public class BatchReevaluate {
                     EvaluationResult br = reev.mergedResults[j];
                     if (br instanceof SubpopEvaluationResult) {
                         SubpopEvaluationResult ser = (SubpopEvaluationResult) br;
-                        EvaluationResult[] brs = ser.getAllEvaluations();
-                        for (int x = 0; x < brs.length; x++) {
-                            behavWriter.write(" " + x + " " + brs[x].toString());
+                        ArrayList<EvaluationResult> allEvals = ser.getAllEvaluations();
+                        for (int x = 0; x < allEvals.size(); x++) {
+                            behavWriter.write(" " + x + " " + allEvals.get(x).toString());
                         }
                     } else {
                         behavWriter.write(" " + br.toString());

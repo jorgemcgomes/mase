@@ -27,7 +27,7 @@ public class SCResult extends VectorBehaviourResult {
     protected int removedByFilter;
     protected double[] rawClusteredCount;
 
-    public SCResult(Map<Integer, Double> counts, Map<Integer, byte[]> states, Distance dist) {
+    public SCResult(Map<Integer, Double> counts, Map<Integer, byte[]> states, int dist) {
         this.counts = counts;
         this.states = states;
         this.removedByFilter = 0;

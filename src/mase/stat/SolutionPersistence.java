@@ -6,6 +6,7 @@ package mase.stat;
 
 import ec.EvolutionState;
 import ec.Individual;
+import ec.eval.MasterProblem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,7 +33,9 @@ import org.apache.commons.lang3.SerializationUtils;
 public abstract class SolutionPersistence {
 
     public static PersistentSolution createPersistentController(EvolutionState state, Individual ind, int sub, int index) {
-        SimulationProblem sp = (SimulationProblem) state.evaluator.p_problem;
+        SimulationProblem sp = (SimulationProblem) (state.evaluator.p_problem instanceof MasterProblem ?
+                ((MasterProblem) state.evaluator.p_problem).problem :
+                state.evaluator.p_problem);
         PersistentSolution pc = new PersistentSolution();
         GroupController gc = ind.fitness.getContext() == null ? 
                 sp.createController(state, ind) : 

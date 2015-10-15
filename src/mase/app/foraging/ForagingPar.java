@@ -5,17 +5,18 @@
  */
 package mase.app.foraging;
 
+import java.io.Serializable;
+import mase.mason.ParamUtils.IgnoreParam;
 import sim.util.Double2D;
 
 /**
  *
  * @author jorge
  */
-public class ForagingPar implements Cloneable {
+public class ForagingPar implements Cloneable, Serializable {
     
-    public enum PlacementMode {
-        fixed, semirandom, random;
-    }
+    @IgnoreParam()
+    public static final int FIXED = 0, SEMI_RANDOM = 1, RANDOM = 2;
     
     public double flyingRadius;
     public double flyingVisionAngle;
@@ -39,8 +40,8 @@ public class ForagingPar implements Cloneable {
     public double itemPlacementZone;
     public double itemRadius;
     
-    public PlacementMode flyingPlacement;
-    public PlacementMode landPlacement;
+    public int flyingPlacement;
+    public int landPlacement;
     public Double2D flyingStartPos;
     public Double2D landStartPos;
     public double flyingStartHeight;
