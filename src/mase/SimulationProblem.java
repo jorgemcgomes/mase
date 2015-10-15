@@ -148,7 +148,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void evaluate(EvolutionState state, Individual[] ind, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
         GroupController gc = createController(state, ind);
-        EvaluationResult[] eval = evaluateSolution(gc, sameSeed ? seed : state.random[threadnum].nextLong());
+        EvaluationResult[] eval = evaluateSolution(gc, nextSeed(state, threadnum));
         /* Save results */
         for (int i = 0; i < ind.length; i++) {
             if (updateFitness[i]) {
@@ -163,7 +163,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
         GroupController gc = createController(state, ind);
-        EvaluationResult[] eval = evaluateSolution(gc, sameSeed ? seed : state.random[threadnum].nextLong());
+        EvaluationResult[] eval = evaluateSolution(gc, nextSeed(state, threadnum));
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
         fit.setEvaluationResults(state, eval, subpopulation);
         ind.evaluated = true;
@@ -179,5 +179,12 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         this.repetitions = repetitions;
     }
     
+    public long nextSeed(EvolutionState state, int threadnum) {
+        if(sameSeed) {
+            return seed;
+        } else {
+            return state.random[threadnum].nextLong();
+        }
+    }
     
 } 

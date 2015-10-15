@@ -149,7 +149,7 @@ public class BatchReevaluate {
             }
             PersistentSolution best = sols.get(bestIndex);
             best.setEvalResults(bestEval);
-            best.setFitness((float) bestFar);
+            best.setFitness(bestFar);
             SolutionPersistence.writeSolution(best, bestFile);
             fitWriter.close();
             behavWriter.close();

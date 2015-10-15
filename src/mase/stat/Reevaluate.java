@@ -151,12 +151,12 @@ public class Reevaluate {
 
         DescriptiveStatistics ds = new DescriptiveStatistics(results.size());
         for (EvaluationResult[] rs : results) {
-            float fit;
+            double fit;
             if (rs[0] instanceof SubpopEvaluationResult) {
                 SubpopEvaluationResult ser = (SubpopEvaluationResult) rs[0];
-                fit = (Float) ser.getSubpopEvaluation(subpop).value();
+                fit = (Double) ser.getSubpopEvaluation(subpop).value();
             } else {
-                fit = (Float) rs[0].value();
+                fit = (Double) rs[0].value();
             }
             ds.addValue(fit);
         }
