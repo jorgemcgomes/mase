@@ -34,8 +34,7 @@ public class SlaveTask extends Task {
     }
 
     @Override
-    public Result getResult() {
-        //return new SlaveResult(resList, id);
+    public SlaveResult getResult() {
         return res;
     }
 

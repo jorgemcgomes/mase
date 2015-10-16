@@ -104,11 +104,12 @@ public class FitnessStat extends Statistics {
     public long[] totalIndsThisGen;                         // total assessed individuals
     public double[] totalFitnessThisGen;                    // per-subpop mean fitness this generation
     public Individual[] bestOfGeneration;   // per-subpop best individual this generation
+    public File statisticsFile;
 
     @Override
     public void setup(final EvolutionState state, final Parameter base) {
         super.setup(state, base);
-        File statisticsFile = state.parameters.getFile(
+        statisticsFile = state.parameters.getFile(
                 base.push(P_STATISTICS_FILE), null);
 
         if (statisticsFile != null) {
