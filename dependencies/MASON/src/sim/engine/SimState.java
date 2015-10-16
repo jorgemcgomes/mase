@@ -6,7 +6,6 @@
 
 package sim.engine;
 import ec.util.*;
-import java.util.*;
 import java.io.*;
 import java.util.zip.*;
 import java.text.*;
@@ -36,9 +35,9 @@ public class SimState implements java.io.Serializable
     public Schedule schedule;
     
     // All registered AsynchronousSteppables
-    HashSet asynchronous = new HashSet();
+    //HashSet asynchronous = new HashSet();
     // Lock for accessing the HashSet
-    Object asynchronousLock = new boolean[1];  // an array is a unique, serializable object
+    //Object asynchronousLock = new boolean[1];  // an array is a unique, serializable object
     // Are we cleaning house and replacing the HashSet?
     boolean cleaningAsynchronous = false;
         
@@ -112,7 +111,7 @@ public class SimState implements java.io.Serializable
         // prime the generator so it's got better statistial properties
         random = primeGenerator(random);
         // just in case
-        cleanupAsynchronous();
+        //cleanupAsynchronous();
         // reset schedule
         schedule.reset();
         }
@@ -135,7 +134,7 @@ public class SimState implements java.io.Serializable
         for the next timestep which calls state.kill(). */
     public void kill()
         {
-        cleanupAsynchronous();
+        //cleanupAsynchronous();
         schedule.clear();
         schedule.seal();
         }
@@ -149,7 +148,7 @@ public class SimState implements java.io.Serializable
         to the same registry -- if it's there it's there.  Returns false if the AsynchronousSteppable could
         not be added, either because the simulation is stopped or in the process of finish()ing.
     */
-    public boolean addToAsynchronousRegistry(AsynchronousSteppable stop)
+    /*public boolean addToAsynchronousRegistry(AsynchronousSteppable stop)
         {
         if (stop==null) return false;
         synchronized(asynchronousLock) 
@@ -158,12 +157,12 @@ public class SimState implements java.io.Serializable
             asynchronous.add(stop);
             return true;
             }
-        }
+        }*/
         
     /**
        Unregisters an AsynchronousSteppable from the asynchronous registry.
     */
-    public void removeFromAsynchronousRegistry(AsynchronousSteppable stop)
+    /*public void removeFromAsynchronousRegistry(AsynchronousSteppable stop)
         {
         if (stop==null) return;
         synchronized(asynchronousLock) 
@@ -171,10 +170,10 @@ public class SimState implements java.io.Serializable
             if (!cleaningAsynchronous) 
                 asynchronous.remove(stop);
             }
-        }
+        }*/
         
     /** Returns all the AsynchronousSteppable items presently in the registry.  The returned array is not used internally -- you are free to modify it. */
-    public AsynchronousSteppable[] asynchronousRegistry()
+    /*public AsynchronousSteppable[] asynchronousRegistry()
         {
         synchronized(asynchronousLock)
             {
@@ -185,14 +184,14 @@ public class SimState implements java.io.Serializable
                 b[x++] = (AsynchronousSteppable)(i.next());
             return b;
             }
-        }
+        }*/
         
     /*
       Calls all the registered Asynchronnous.  During this period, any methods which attempt to
       register things for the schedule will simply be ignored.  
     */
     // perhaps use a LinkedHashSet instead of a HashSet?
-    void cleanupAsynchronous()
+    /*void cleanupAsynchronous()
         {
         AsynchronousSteppable[] b = null;
         synchronized(asynchronousLock)
@@ -207,7 +206,7 @@ public class SimState implements java.io.Serializable
             asynchronous = new HashSet(asynchronous.size());
             cleaningAsynchronous = false;
             }
-        }
+        }*/
 
 
     /** Called just before the SimState is being checkpointed (serialized out to a file to be
@@ -215,9 +214,9 @@ public class SimState implements java.io.Serializable
         your SimState object appropriately. Be sure to call super.preCheckpoint(). */
     public void preCheckpoint()
         {
-        AsynchronousSteppable[] b = asynchronousRegistry();
+        /*AsynchronousSteppable[] b = asynchronousRegistry();
         final int len = b.length;
-        for(int x=0;x<len;x++) b[x].pause();
+        for(int x=0;x<len;x++) b[x].pause();*/
         }
     
     /** Called just after the SimState was checkpointed (serialized out to a file to be
@@ -225,9 +224,9 @@ public class SimState implements java.io.Serializable
         Be sure to call super.postCheckpoint(). */
     public void postCheckpoint()
         {
-        AsynchronousSteppable[] b = asynchronousRegistry();
+        /*AsynchronousSteppable[] b = asynchronousRegistry();
         final int len = b.length;
-        for(int x=0;x<len;x++) b[x].resume(false);
+        for(int x=0;x<len;x++) b[x].resume(false);*/
         }
 
     /** Called after the SimState was created by reading from a checkpointed object.  You should
@@ -235,9 +234,9 @@ public class SimState implements java.io.Serializable
         anything that may no longer exist.  Be sure to call super.awakeFromCheckpoint(). */
     public void awakeFromCheckpoint()
         {
-        AsynchronousSteppable[] b = asynchronousRegistry();
+        /*AsynchronousSteppable[] b = asynchronousRegistry();
         final int len = b.length;
-        for(int x=0;x<len;x++) b[x].resume(true);
+        for(int x=0;x<len;x++) b[x].resume(true);*/
         }
 
     /** Serializes out the SimState, and the entire simulation state (not including the graphical interfaces)

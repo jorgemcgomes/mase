@@ -266,20 +266,20 @@ public class AsynchronousSteppable implements Stoppable
         If it's already running, nothing happens. */
     public final synchronized void step(SimState state)
         {
-        if (running) return;
+        /*if (running) return;
         running = true;
         this.state = state;
         state.addToAsynchronousRegistry(this);
         thread = new Thread(new Runnable() { public void run() { AsynchronousSteppable.this.run(false, false); } });
         thread.setDaemon(true);
         thread.setName("Asynchronous Steppable: " + this);
-        thread.start();
+        thread.start();*/
         }
     
     /** Requests that the AsynchronousSteppable shut down its thread, and blocks until this occurs. If it's already stopped, nothing happens. */
     public final synchronized void stop()
         {
-        boolean joined = false;
+        /*boolean joined = false;
         if (!running) return;
         halt(false);
         while (!joined)         // force joining regardless of interruptedexceptions
@@ -292,7 +292,7 @@ public class AsynchronousSteppable implements Stoppable
                 }
             }
         state.removeFromAsynchronousRegistry(this);
-        running = false;
+        running = false;*/
         }
     
     /** Requests that the AsynchronousSteppable shut down its thread (temporarily) and blocks until this occurs. If it's already paused or not running, nothing happens.  */
