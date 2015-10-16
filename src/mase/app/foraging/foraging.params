@@ -1,7 +1,7 @@
 # remove sample stats
 stat.child.5 = ec.Statistics
 
-eval.base.problem =                mase.app.foraging.ForagingStandaloneProblem
+eval.base.problem =                mase.app.foraging.ForagingSimulator
 problem.number-evals =             5
 problem.trials-merge =             best
 problem.eval.0 =                   mase.app.foraging.ForagingFitness

@@ -14,7 +14,7 @@ import mase.controllers.GroupController;
 import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.StaticPolygon.Segment;
@@ -27,12 +27,11 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Herding extends GUICompatibleSimState implements TaskDescriptionProvider {
+public class Herding extends MasonSimState implements TaskDescriptionProvider {
 
     protected TaskDescription td;
     protected HerdingParams par;
     protected Continuous2D field;
-    protected GroupController gc;
     protected List<Shepherd> shepherds;
     protected List<Fox> foxes;
     protected List<Sheep> sheeps;
@@ -44,9 +43,8 @@ public class Herding extends GUICompatibleSimState implements TaskDescriptionPro
     };
 
     public Herding(long seed, HerdingParams par, GroupController gc) {
-        super(seed);
+        super(gc, seed);
         this.par = par;
-        this.gc = gc;
 
         // Static environment
         fence = new StaticPolygon(new Segment(0, 0, par.arenaSize, 0),

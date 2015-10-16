@@ -16,7 +16,7 @@ import mase.generic.SmartAgentProvider;
 import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.SmartAgent;
@@ -32,13 +32,12 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Indiana extends GUICompatibleSimState implements TaskDescriptionProvider, SmartAgentProvider {
+public class Indiana extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
     protected IndianaParams par;
     protected List<IndianaAgent> agents;
     protected List<IndianaAgent> activeAgents;
     protected Continuous2D field;
-    protected GroupController gc;
     protected StaticPolygon walls;
     protected Gate gate;
     protected TaskDescription td;
@@ -54,9 +53,8 @@ public class Indiana extends GUICompatibleSimState implements TaskDescriptionPro
     }
 
     public Indiana(long seed, IndianaParams par, GroupController gc) {
-        super(seed);
+        super(gc, seed);
         this.par = par;
-        this.gc = gc;
 
         this.walls = new StaticPolygon(new Double2D[]{
             new Double2D(0, par.size / 2 + par.gateSize / 2),

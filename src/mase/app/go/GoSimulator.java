@@ -9,16 +9,16 @@ import ec.util.Parameter;
 import java.awt.Color;
 import mase.app.go.Go.ControllerMode;
 import mase.controllers.GroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.GUIState2D;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.display.GUIState;
 
 /**
  *
  * @author Jorge
  */
-public class GoSimulator extends MasonSimulator {
+public class GoSimulator extends MasonSimulationProblem {
 
     public static final String P_CONTROLLER_MODE = "controller-mode";
     public static final String P_BOARD_SIZE = "board-size";
@@ -36,7 +36,7 @@ public class GoSimulator extends MasonSimulator {
     
     
     @Override
-    public GUICompatibleSimState createSimState(GroupController gc, long seed) {
+    public MasonSimState createSimState(GroupController gc, long seed) {
         return new Go(seed, gc, mode, size);
     }
 

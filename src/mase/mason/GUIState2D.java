@@ -26,7 +26,7 @@ public class GUIState2D extends GUIState {
     protected Color background;
     protected FieldPortrayal2D portrayal;
 
-    public GUIState2D(GUICompatibleSimState state, String title, int w, int h, Color background) {
+    public GUIState2D(MasonSimState state, String title, int w, int h, Color background) {
         super(state);
         this.title = title;
         this.w = w;
@@ -48,7 +48,7 @@ public class GUIState2D extends GUIState {
     }
 
     public void setupPortrayals() {
-        GUICompatibleSimState mss = (GUICompatibleSimState) state;
+        MasonSimState mss = (MasonSimState) state;
         mss.setupPortrayal(portrayal);
         // reschedule the displayer
         display.reset();

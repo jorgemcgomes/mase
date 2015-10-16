@@ -10,7 +10,7 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.util.Double2D;
@@ -19,19 +19,17 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class ForagingTask extends GUICompatibleSimState {
+public class ForagingTask extends MasonSimState {
 
     protected ForagingPar par;
     protected Continuous2D field;
-    protected GroupController gc;
     protected FlyingRobot flyingBot;
     protected LandRobot landBot;
     protected List<Item> items;
 
     public ForagingTask(long seed, ForagingPar par, GroupController gc) {
-        super(seed);
+        super(gc, seed);
         this.par = par;
-        this.gc = gc;
     }
 
     @Override

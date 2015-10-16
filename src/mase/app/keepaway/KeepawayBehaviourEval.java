@@ -10,7 +10,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.world.EmboddiedAgent;
 import mase.mason.MasonEvaluation;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.util.Double2D;
 import sim.util.MutableDouble2D;
 
@@ -37,7 +37,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         this.passLength = state.parameters.getDouble(base.push(P_PASS_LENGTH), null);
-        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
+        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulationProblem.P_MAX_STEPS), null);
         this.passesNormalization = state.parameters.getInt(base.push(P_PASS_NORMALIZATION), null);
     }
 

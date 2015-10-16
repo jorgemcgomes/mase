@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
 import sim.field.grid.IntGrid2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -21,7 +21,7 @@ import sim.util.gui.SimpleColorMap;
  *
  * @author Jorge
  */
-public class Go extends GUICompatibleSimState {
+public class Go extends MasonSimState {
 
     /*public static void main(String[] args) {
      Go game = new Go(1, null);
@@ -32,7 +32,6 @@ public class Go extends GUICompatibleSimState {
     protected IntGrid2D grid;
     protected GoPlayer black;
     protected GoPlayer white;
-    protected GroupController gc;
     protected LinkedList<GoState> history;
     protected ControllerMode mode;
     protected int boardSize;
@@ -46,8 +45,7 @@ public class Go extends GUICompatibleSimState {
     BLACK = controller[0] ; WHITE = controller[1]
     */
     public Go(long seed, GroupController gc, ControllerMode mode, int boardSize) {
-        super(seed);
-        this.gc = gc;
+        super(gc, seed);
         this.mode = mode;
         this.boardSize = boardSize;
     }

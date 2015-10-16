@@ -55,13 +55,13 @@ public class MasonTracer {
         
 
         GroupController controller = Reevaluate.createController(args);
-        MasonSimulator sim = (MasonSimulator) Reevaluate.createSimulator(args);
+        MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args);
         trace(controller, sim, seed, size, out);
 
     }
 
-    public static void trace(GroupController gc, MasonSimulator sim, long seed, int size, File out) throws IOException {
-        GUICompatibleSimState simState = sim.createSimState(gc, seed);
+    public static void trace(GroupController gc, MasonSimulationProblem sim, long seed, int size, File out) throws IOException {
+        MasonSimState simState = sim.createSimState(gc, seed);
 
         simState.start();
         FieldPortrayal2D port = simState.createFieldPortrayal();

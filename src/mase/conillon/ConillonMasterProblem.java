@@ -12,7 +12,8 @@ import java.util.HashMap;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
-import mase.mason.MasonStandaloneProblem;
+import mase.mason.MasonSimState;
+import mase.mason.MasonSimulationProblem;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -104,10 +105,11 @@ public class ConillonMasterProblem extends MasterProblem {
         job.countVictoriesOnly = countVictoriesOnly;
         job.subpops = Arrays.copyOf(subpops, subpops.length);
         job.threadnum = threadnum;
-        MasonStandaloneProblem simProblem = (MasonStandaloneProblem) problem;
+        MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
         GroupController gc = simProblem.createController(state, job.ind);
         int id = nextID();
-        SlaveTask task = new SlaveTask(simProblem.getSimulator(), gc, simProblem.nextSeed(state, threadnum), id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
+        MasonSimState sim = simProblem.createSimState(gc, simProblem.nextSeed(state, threadnum));
+        SlaveTask task = new SlaveTask(sim, id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
         jobs.put(id, job);
         client.commit(task);
     }
@@ -120,10 +122,11 @@ public class ConillonMasterProblem extends MasterProblem {
         job.countVictoriesOnly = false;
         job.subpops = new int[]{subpopulation};
         job.threadnum = threadnum;
-        MasonStandaloneProblem simProblem = (MasonStandaloneProblem) problem;
+        MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
         GroupController gc = simProblem.createController(state, ind);
         int id = nextID();
-        SlaveTask task = new SlaveTask(simProblem.getSimulator(), gc, simProblem.nextSeed(state, threadnum), id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
+        MasonSimState sim = simProblem.createSimState(gc, simProblem.nextSeed(state, threadnum));
+        SlaveTask task = new SlaveTask(sim, id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
         jobs.put(id, job);
         client.commit(task);
     }

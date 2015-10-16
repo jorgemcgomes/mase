@@ -10,9 +10,9 @@ import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.controllers.GroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.GUIState2D;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.display.GUIState;
 import sim.util.Double2D;
 
@@ -20,7 +20,7 @@ import sim.util.Double2D;
  *
  * @author Jorge
  */
-public class KeepawaySimulator extends MasonSimulator {
+public class KeepawaySimulator extends MasonSimulationProblem {
 
     protected KeepawayParams par;
 
@@ -80,7 +80,7 @@ public class KeepawaySimulator extends MasonSimulator {
     }
 
     @Override
-    public GUICompatibleSimState createSimState(GroupController gc, long seed) {
+    public MasonSimState createSimState(GroupController gc, long seed) {
         return new Keepaway(seed, par, gc);
     }
 

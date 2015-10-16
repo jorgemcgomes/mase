@@ -13,7 +13,7 @@ import mase.generic.SmartAgentProvider;
 import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -25,17 +25,16 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class ResourceSharing extends GUICompatibleSimState implements TaskDescriptionProvider, SmartAgentProvider {
+public class ResourceSharing extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
     protected RSParams par;
     protected List<RSAgent> agents, activeAgents;
     protected Continuous2D field;
-    protected GroupController gc;
     protected Resource resource;
     protected TaskDescription td;
 
     public ResourceSharing(long seed, RSParams par, GroupController gc) {
-        super(seed);
+        super(gc, seed);
         this.par = par;
         this.gc = gc;
     }

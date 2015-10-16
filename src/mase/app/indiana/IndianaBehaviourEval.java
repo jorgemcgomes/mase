@@ -11,7 +11,7 @@ import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.util.MutableDouble2D;
 
 /**
@@ -28,7 +28,7 @@ public class IndianaBehaviourEval extends MasonEvaluation {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        this.maxSteps = state.parameters.getInt(new Parameter(MasonSimulator.P_PROBLEM).push(MasonSimulator.P_MAX_STEPS), null);
+        this.maxSteps = state.parameters.getInt(new Parameter(MasonSimulationProblem.P_PROBLEM).push(MasonSimulationProblem.P_MAX_STEPS), null);
     }
 
     @Override

@@ -12,7 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonEvaluation;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 
 /**
  *
@@ -26,7 +26,7 @@ public class PredcompFitnessWins extends MasonEvaluation {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
+        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulationProblem.P_MAX_STEPS), null);
     }
 
     @Override

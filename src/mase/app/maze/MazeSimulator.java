@@ -16,9 +16,9 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.controllers.GroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.GUIState2D;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import mase.mason.ParamUtils;
 import mase.mason.world.PolygonGenerator;
 import mase.mason.world.StaticPolygon;
@@ -29,7 +29,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class MazeSimulator extends MasonSimulator {
+public class MazeSimulator extends MasonSimulationProblem {
 
     private MazeParams par;
 
@@ -60,7 +60,7 @@ public class MazeSimulator extends MasonSimulator {
     }
 
     @Override
-    public GUICompatibleSimState createSimState(GroupController gc, long seed) {
+    public MasonSimState createSimState(GroupController gc, long seed) {
         return new MazeTask(seed, par, gc);
     }
 

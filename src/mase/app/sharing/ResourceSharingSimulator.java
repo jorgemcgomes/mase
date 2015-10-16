@@ -8,16 +8,16 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
 import mase.controllers.GroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.GUIState2D;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.display.GUIState;
 
 /**
  *
  * @author jorge
  */
-public class ResourceSharingSimulator extends MasonSimulator {
+public class ResourceSharingSimulator extends MasonSimulationProblem {
 
     protected RSParams par;
 
@@ -43,7 +43,7 @@ public class ResourceSharingSimulator extends MasonSimulator {
     }
 
     @Override
-    public GUICompatibleSimState createSimState(GroupController gc, long seed) {
+    public MasonSimState createSimState(GroupController gc, long seed) {
         return new ResourceSharing(seed, par, gc);
     }
 

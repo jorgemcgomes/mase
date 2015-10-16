@@ -12,7 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.util.Double2D;
 
 /**

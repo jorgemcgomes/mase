@@ -6,12 +6,10 @@
 package mase.conillon;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import mase.controllers.GroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
-import mase.mason.MasonStandaloneSimulator;
+import mase.mason.MasonSimState;
 import result.Result;
 import tasks.Task;
 
@@ -21,20 +19,15 @@ import tasks.Task;
  */
 public class SlaveTask extends Task {
 
-    private MasonStandaloneSimulator sim;
+    private MasonSimState sim;
     private EvaluationFunction[] functions;
     private int repetitions;
     private int maxSteps;
-    private GroupController gc;
-    private long seed;
     private SlaveResult res;
-    //private ArrayList<EvaluationResult> resList;
 
-    public SlaveTask(MasonStandaloneSimulator sim, GroupController gc, long seed, int id, EvaluationFunction[] functions, int repetitions, int maxSteps) {
+    public SlaveTask(MasonSimState sim, int id, EvaluationFunction[] functions, int repetitions, int maxSteps) {
         super(id);
         this.sim = sim;
-        this.gc = gc;
-        this.seed = seed;
         this.functions = functions;
         this.repetitions = repetitions;
         this.maxSteps = maxSteps;
@@ -48,7 +41,7 @@ public class SlaveTask extends Task {
 
     @Override
     public void run() {
-        EvaluationResult[] evalResults = sim.evaluateSolution(gc, seed, repetitions, maxSteps, functions);
+        EvaluationResult[] evalResults = sim.evaluate(repetitions, maxSteps, functions);
         ArrayList<EvaluationResult> resList = new ArrayList<>();
         /*
         Dirty fix to remove SubpopEvaluationResults (causing problems with Conillon)

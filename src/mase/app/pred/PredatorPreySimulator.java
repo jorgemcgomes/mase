@@ -10,13 +10,13 @@ import java.awt.Color;
 import mase.app.pred.PredParams.SensorMode;
 import mase.controllers.GroupController;
 import mase.mason.GUIState2D;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.display.GUIState;
 
 /**
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredatorPreySimulator extends MasonSimulator {
+public class PredatorPreySimulator extends MasonSimulationProblem {
 
     private PredParams par;
 

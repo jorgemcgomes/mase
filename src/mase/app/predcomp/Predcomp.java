@@ -11,7 +11,7 @@ import mase.app.predcomp.PredcompParams.ORIENTATION;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -22,18 +22,16 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Predcomp extends GUICompatibleSimState {
+public class Predcomp extends MasonSimState {
 
     protected PredcompParams par;
-    protected GroupController gc;
     protected Prey prey;
     protected Predator predator;
     protected Continuous2D field;
 
     public Predcomp(long seed, PredcompParams par, GroupController gc) {
-        super(seed);
+        super(gc, seed);
         this.par = par;
-        this.gc = gc;
     }
 
     @Override

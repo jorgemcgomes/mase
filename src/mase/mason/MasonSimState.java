@@ -1,38 +1,44 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
+ * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package mase.mason;
 
-import java.io.Serializable;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
-import sim.display.GUIState;
+import sim.engine.SimState;
+import sim.portrayal.FieldPortrayal2D;
+import sim.portrayal.continuous.ContinuousPortrayal2D;
 
 /**
  *
- * @author jorge
+ * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class MasonStandaloneSimulator implements Serializable {
+public abstract class MasonSimState extends SimState {
+    
+    protected GroupController gc;
 
-    public EvaluationResult[] evaluateSolution(GroupController gc, long seed, int repetitions, int maxSteps, EvaluationFunction[] evalFunctions) {
-        GUICompatibleSimState sim = createSimState(gc, seed);
+    public MasonSimState(GroupController gc, long seed) {
+        super(seed);
+        this.gc = gc;
+    }
+
+    public EvaluationResult[] evaluate(int repetitions, int maxSteps, EvaluationFunction[] evalFunctions) {
         EvaluationResult[][] evalResults = new EvaluationResult[evalFunctions.length][repetitions];
         for (int r = 0; r < repetitions; r++) {
             MasonEvaluation[] evals = new MasonEvaluation[evalFunctions.length];
             for (int i = 0; i < evalFunctions.length; i++) {
                 evals[i] = (MasonEvaluation) evalFunctions[i].clone();
-                evals[i].setSimulationModel(sim);
+                evals[i].setSimulationModel(this);
             }
 
-            sim.start();
+            start();
             for (int i = 0; i < evals.length; i++) {
                 evals[i].preSimulation();
             }
-            while (sim.schedule.getSteps() < maxSteps) {
-                boolean b = sim.schedule.step(sim);
+            while (schedule.getSteps() < maxSteps) {
+                boolean b = schedule.step(this);
                 for (int i = 0; i < evals.length; i++) {
                     evals[i].evaluationStep();
                 }
@@ -44,7 +50,7 @@ public abstract class MasonStandaloneSimulator implements Serializable {
                 evals[i].postSimulation();
                 evalResults[i][r] = evals[i].getResult();
             }
-            sim.finish();
+            finish();
         }
 
         EvaluationResult[] mergedResult = new EvaluationResult[evalFunctions.length];
@@ -54,7 +60,10 @@ public abstract class MasonStandaloneSimulator implements Serializable {
         return mergedResult;
     }
 
-    public abstract GUICompatibleSimState createSimState(GroupController gc, long seed);
+    public FieldPortrayal2D createFieldPortrayal() {
+        return new ContinuousPortrayal2D();
+    }
 
-    public abstract GUIState createSimStateWithUI(GroupController gc, long seed);
+    public abstract void setupPortrayal(FieldPortrayal2D port);
+
 }

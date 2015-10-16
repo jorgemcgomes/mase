@@ -13,7 +13,7 @@ import mase.generic.SmartAgentProvider;
 import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.SmartAgent;
@@ -27,9 +27,8 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Keepaway extends GUICompatibleSimState implements TaskDescriptionProvider, SmartAgentProvider {
+public class Keepaway extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
-    protected GroupController gc;
     protected KeepawayParams par;
     protected Continuous2D field;
     protected List<Keeper> keepers;
@@ -42,8 +41,7 @@ public class Keepaway extends GUICompatibleSimState implements TaskDescriptionPr
     public static final double BALL_OFFSET = 5;
     
     public Keepaway(long seed, KeepawayParams par, GroupController gc) {
-        super(seed);
-        this.gc = gc;
+        super(gc, seed);
         this.par = par;
     }
 

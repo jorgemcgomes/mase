@@ -9,7 +9,7 @@ package mase.app.maze;
 import java.awt.Color;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -21,17 +21,15 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class MazeTask extends GUICompatibleSimState {
+public class MazeTask extends MasonSimState {
     
-    private GroupController gc;
     protected MazeParams par;
     protected Continuous2D field;
     protected MazeAgent agent;
 
     public MazeTask(long seed, MazeParams par, GroupController gc) {
-        super(seed);
+        super(gc, seed);
         this.par = par;
-        this.gc = gc;
     }
 
     @Override

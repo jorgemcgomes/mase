@@ -11,14 +11,14 @@ import ec.util.Parameter;
 import java.awt.Color;
 import mase.controllers.GroupController;
 import mase.mason.GUIState2D;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.display.GUIState;
 
 /**
  *
  * @author jorge
  */
-public class MultiRoverSimulator extends MasonSimulator {
+public class MultiRoverSimulator extends MasonSimulationProblem {
     
         private MRParams par;
 

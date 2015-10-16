@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.mason.GUICompatibleSimState;
+import mase.mason.MasonSimState;
 import mase.mason.world.StaticPolygon;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -23,19 +23,17 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class MultiRover extends GUICompatibleSimState {
+public class MultiRover extends MasonSimState {
 
     protected Continuous2D field;
-    protected GroupController gc;
     protected MRParams par;
     protected int[] scores;
     protected List<Rover> rovers;
     protected List<RedRock> rocks;
 
     public MultiRover(long seed, MRParams par, GroupController gc) {
-        super(seed);
+        super(gc, seed);
         this.par = par;
-        this.gc = gc;
         this.scores = new int[RedRock.RockType.values().length];
 
     }

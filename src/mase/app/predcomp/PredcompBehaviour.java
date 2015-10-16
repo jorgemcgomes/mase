@@ -12,7 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
-import mase.mason.MasonSimulator;
+import mase.mason.MasonSimulationProblem;
 import sim.util.Double2D;
 
 /**
@@ -31,7 +31,7 @@ public class PredcompBehaviour extends MasonEvaluation {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base); 
-        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulator.P_MAX_STEPS), null);
+        this.maxSteps = state.parameters.getInt(base.pop().pop().push(MasonSimulationProblem.P_MAX_STEPS), null);
     }    
     
     @Override

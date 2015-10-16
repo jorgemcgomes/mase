@@ -17,7 +17,7 @@ public class MasonPlayer {
     public static void main(String[] args) throws Exception {
         GroupController controller = Reevaluate.createController(args);
         long startSeed = 0;
-        MasonSimulator sim = (MasonSimulator) Reevaluate.createSimulator(args);
+        MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args);
         GUIState gui = sim.createSimStateWithUI(controller, startSeed);
         gui.createController();
     }
