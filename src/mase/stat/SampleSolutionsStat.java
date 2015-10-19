@@ -28,7 +28,7 @@ public class SampleSolutionsStat extends SolutionWriterStat {
     protected boolean compress;
     protected int sampleSize;
     protected File outFile;
-    protected TarArchiveOutputStream taos;
+    protected transient TarArchiveOutputStream taos;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -54,7 +54,11 @@ public class SampleSolutionsStat extends SolutionWriterStat {
 
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
-        super.postInitializationStatistics(state);
+        super.postEvaluationStatistics(state);
+        if (taos == null && compress) { // can happen in case of resuming from checkpoint
+            taos = SolutionWriterStat.reopen(outFile);
+        }
+
         int[] subs = new int[sampleSize];
         int[] inds = new int[sampleSize];
         for (int i = 0; i < sampleSize;) {

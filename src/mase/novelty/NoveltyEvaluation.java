@@ -10,6 +10,7 @@ import ec.Population;
 import ec.util.Parameter;
 import edu.wlu.cs.levy.CG.Checker;
 import edu.wlu.cs.levy.CG.KDTree;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -253,7 +254,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         return archives;
     }
 
-    public static class ArchiveEntry {
+    public static class ArchiveEntry implements Serializable {
 
         protected BehaviourResult behaviour;
         protected int generation;

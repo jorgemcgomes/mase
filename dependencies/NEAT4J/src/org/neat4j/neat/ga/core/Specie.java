@@ -6,6 +6,7 @@
  */
 package org.neat4j.neat.ga.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.neat4j.neat.core.NEATChromosome;
@@ -19,7 +20,7 @@ import org.neat4j.neat.core.NEATNodeGene;
  *
  * Controls addition of specie members and provides specie behaviour. 
  */
-public abstract class Specie implements Comparable {
+public abstract class Specie implements Comparable, Serializable {
 	private ArrayList specieMembers;
 	private double bestFitness;
 	private double avFitness = 0;

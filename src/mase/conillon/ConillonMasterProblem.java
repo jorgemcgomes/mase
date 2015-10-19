@@ -190,7 +190,7 @@ public class ConillonMasterProblem extends MasterProblem {
     public void initializeContacts(EvolutionState state) {
         ClientPriority priority = getPriority(priorityNumber);
         client = new Client("MASE / job " + state.job[0], priority, serverName, serverPort, serverName, codePort);
-        client.setTotalNumberOfTasks(state.numGenerations * state.population.subpops.length * state.population.subpops[0].individuals.length);
+        client.setTotalNumberOfTasks(state.numGenerations * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
         state.output.message("***********************************\n*** CONILLON CLIENT INITIALIZED ***\n***********************************");
     }
 

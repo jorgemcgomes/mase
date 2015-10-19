@@ -6,6 +6,7 @@
  */
 package org.neat4j.neat.ga.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.neat4j.neat.core.NEATChromosome;
@@ -16,7 +17,7 @@ import org.neat4j.neat.core.NEATSpecie;
  *
  * Generic specie handling
  */
-public class Species {
+public class Species implements Serializable {
 	private ArrayList specieList;
 	
 	public Species() {

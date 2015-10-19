@@ -25,3 +25,8 @@ done
 scp "conillonevolve.sh" $IP:$FOLDER
 ssh $IP mv $FOLDER/conillonevolve.sh $FOLDER/evolve.sh
 ssh $IP chmod 777 $FOLDER"/evolve.sh"
+
+scp "conillonrun.sh" $IP:$FOLDER
+ssh $IP mv $FOLDER/conillonrun.sh $FOLDER/run.sh
+ssh $IP chmod 777 $FOLDER"/run.sh"
+

@@ -29,7 +29,7 @@ public class BestSolutionGenStat extends SolutionWriterStat {
     public static final String LAST = "last.ind";
     protected File outFile;
     protected File last;
-    protected TarArchiveOutputStream taos;
+    protected transient TarArchiveOutputStream taos;
     protected boolean compress;
 
     @Override
@@ -58,6 +58,10 @@ public class BestSolutionGenStat extends SolutionWriterStat {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postInitializationStatistics(state);
+        if(taos == null && compress) { // can happen in case of resuming from checkpoint
+            taos = SolutionWriterStat.reopen(outFile);
+        }
+        
         double bestFitness = Double.NEGATIVE_INFINITY;
         Individual best = null;
         int sub = -1;

@@ -10,6 +10,12 @@ pop = 					ec.Population
 generations =				500
 quit-on-run-complete =			false
 
+# Checkpointing
+checkpoint =                            true
+checkpoint-prefix =                     checkpoint
+checkpoint-directory =                  $
+checkpoint-modulo =                     25
+
 # Evaluation config
 eval =                                  mase.evaluation.MetaEvaluator
 eval.base =                             ec.simple.SimpleEvaluator
@@ -70,4 +76,5 @@ stat.child.5 =                          mase.stat.SampleSolutionsStat
 stat.child.5.file =                     $sample.tar.gz
 stat.child.5.compress =                 true
 stat.child.5.sample-size =              10
-
+stat.child.6 =                          mase.stat.LastCheckpointStat
+stat.child.6.file =                     $lastgen.gz

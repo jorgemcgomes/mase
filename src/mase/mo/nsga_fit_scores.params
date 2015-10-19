@@ -1,0 +1,8 @@
+eval.base.elite-mode=fitness
+
+eval.num-post = 1
+eval.post.0 =                           mase.mo.NSGA2
+eval.post.0.ordinal-ranking =           false
+eval.post.0.scores =                    fitness
+stat.child.15 =                         mase.mo.NSGA2Stat
+stat.child.15.file =                    $nsga.stat

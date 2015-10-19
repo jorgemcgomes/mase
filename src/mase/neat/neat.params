@@ -10,6 +10,13 @@ pop = 					ec.Population
 generations =				500
 quit-on-run-complete =			false
 
+# Checkpointing
+checkpoint =                            true
+checkpoint-prefix =                     checkpoint
+checkpoint-directory =                  $
+checkpoint-modulo =                     25
+
+
 # Populations configuration
 pop.subpops =                           1
 pop.default-subpop = 			mase.neat.NEATSubpop
@@ -49,6 +56,8 @@ stat.child.5.compress =                 true
 stat.child.5.sample-size =              10
 stat.child.6 =                          mase.neat.NEATStatistics
 stat.child.6.file =                     $neat.stat
+stat.child.7 =                          mase.stat.LastCheckpointStat
+stat.child.7.file =                     $lastgen.gz
 
 # GA Probabilites
 neat.PROBABILITY.MUTATION =             0.25
