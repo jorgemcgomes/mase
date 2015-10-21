@@ -6,7 +6,7 @@ eval.base.masterproblem.server-name =           evolve.dcti.iscte.pt
 eval.base.masterproblem.server-port =           0
 eval.base.masterproblem.code-port =             0
 eval.base.masterproblem.priority =              10 
-eval.base.masterproblem.job-size =              10
+eval.base.masterproblem.job-size =              5
 
 # the following params are not used for anything
 eval.base.masterproblem.debug-info =            false

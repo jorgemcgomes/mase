@@ -29,13 +29,13 @@ public class LinearScalarization implements PostEvaluator {
     
     @Override
     public void setup(EvolutionState state, Parameter base) {
-        String ws = state.parameters.getString(base.push(P_SCORES), null);
+        String ws = state.parameters.getString(base.push(P_WEIGHTS), null);
         String[] wsA = ws.split("[,;\\s\\-]+");
         weights = new double[wsA.length];
         for(int i = 0 ; i < wsA.length ; i++) {
             weights[i] = Double.parseDouble(wsA[i]);
         }
-        String ss = state.parameters.getString(base.push(P_WEIGHTS), null);
+        String ss = state.parameters.getString(base.push(P_SCORES), null);
         scores = ss.split("[,;\\s\\-]+");
         this.normalise = state.parameters.getBoolean(base.push(P_NORMALISE), null, true);
         if(scores.length != weights.length || scores.length < 1) {

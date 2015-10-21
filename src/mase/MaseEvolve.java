@@ -26,8 +26,9 @@ public class MaseEvolve {
 
     public static final String OUT_DIR_OPTION = "-out";
     public static final File OUT_DIR_DEFAULT = new File("exps");
+    public static final String DEFAULT_CONFIG = "config.params";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         File outDir = getOutDir(args);
         if (!outDir.exists()) {
             outDir.mkdirs();
@@ -84,23 +85,47 @@ public class MaseEvolve {
         return t;
     }
 
-    public static Map<String, String> readParams(String[] args) throws IOException {
-        // Write command line parameters in a temp file
-        File tempFile = new File("temp" + (int) (Math.random() * 10000)); // Generate random file name
-        BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
+    public static Map<String, String> readParams(String[] args) throws Exception {
+        // Read command line parameters to a map
+        // Checks the parent order
+        File tempFile = File.createTempFile("temp", ".params", new File("."));
+        Map<String, String> argsPars = new LinkedHashMap<>();
+        int parentOrder = 0;
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-p")) {
-                bw.write(args[i + 1]);
-                bw.newLine();
+                String par = args[i + 1];
+                String[] kv = par.split("=");
+                if(kv[0].startsWith("parent")) { // Parent parameter
+                    if(kv[0].equals("parent")) { // Parent with no number
+                        argsPars.put("parent." + parentOrder, kv[1]);
+                        parentOrder++;
+                    } else { // Numbered parent
+                        String[] split = kv[0].split("\\.");
+                        int num = Integer.parseInt(split[1]);
+                        if(num != parentOrder) {
+                            throw new Exception("Parent out of order: " + par);
+                        }
+                        argsPars.put("parent." + num, kv[1]);
+                        parentOrder++;
+                    }
+                } else { // Not a parent parameter
+                    argsPars.put(kv[0], kv[1]);
+                }
             } else if (args[i].equals("-file")) {
-                bw.write("parent.0=" + args[i + 1]);
-                bw.newLine();
+                argsPars.put("parent.0", args[i + 1]);
             }
+        }
+        
+        // Write command line parameters in a temp file
+        BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
+        for(Entry<String,String> e : argsPars.entrySet()) {
+            bw.write(e.getKey()+ " = " + e.getValue());
+            bw.newLine();
         }
         bw.close();
 
         // Load all the parameter files
-        Map<String, String> pars = new LinkedHashMap<String, String>();
+        Map<String, String> pars = new LinkedHashMap<>();
         loadParams(pars, tempFile);
         tempFile.delete();
         return pars;
@@ -108,7 +133,7 @@ public class MaseEvolve {
 
     private static void loadParams(Map<String, String> pars, File file) throws FileNotFoundException, IOException {
         // Read the file contents
-        Map<String, String> filePars = new LinkedHashMap<String, String>();
+        Map<String, String> filePars = new LinkedHashMap<>();
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = null;
         while ((line = br.readLine()) != null) {
@@ -139,7 +164,7 @@ public class MaseEvolve {
     }
 
     public static File writeConfig(String[] args, Map<String, String> params, File outDir) throws IOException {
-        File configFile = new File(outDir, "config.params");
+        File configFile = new File(outDir, DEFAULT_CONFIG);
 
         // Write the parameter map into a new file
         BufferedWriter bw = new BufferedWriter(new FileWriter(configFile));

@@ -1820,3 +1820,26 @@ repred <- metaLoadData("predprey/nsga","predprey/fit", names=c("NSGA","Fit"), pa
 som <- fullStatistics(repred, fit.comp=T, show.only=F, som.group=T, som.alljobs=T, expset.name="repred",fit.comp.par=list(snapshots=c(250),jitter=F,ylim=T), som.group.par=list(distance.filter=0.5,grid.size=6))
 save(som, file="repred_som.rdata")
 identifyBests(som$group, repred, "repred_bests.csv", n=10, fitness.threshold=0.8)
+
+
+setwd("~/exps/ecal2/")
+down_tog <- metaLoadData("down_tog/fit","down_tog/nst","down_tog/nsmix","down_tog/moea","down_tog/staged","down_tog/inc", names=c("Fit","NS-T","NS-M","MOEA","Staged","Inc"), params=list(jobs=10, gens=0:499, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(down_tog, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+down_sep <- metaLoadData("down_sep/fit","down_sep/nst","down_sep/nsmix","down_sep/moea","down_sep/staged","down_sep/inc", names=c("Fit","NS-T","NS-M","MOEA","Staged","Inc"), params=list(jobs=10, gens=0:499, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(down_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+stable_sep <- metaLoadData("stable_sep/fit","stable_sep/nst","stable_sep/nsmix","stable_sep/moea","stable_sep/staged","stable_sep/inc", names=c("Fit","NS-T","NS-M","MOEA","Staged","Inc"), params=list(jobs=10, gens=0:499, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(stable_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+up_sep <- metaLoadData("stable_sep/fit","stable_sep/inc", names=c("Fit","Inc"), params=list(jobs=10, gens=0:499, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(up_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+stable_tog <- metaLoadData("stable_tog/fit", names=c("Fit"), params=list(jobs=10, gens=0:499, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(stable_tog, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+up_sep <- metaLoadData("up_sep/fit", names=c("Fit"), params=list(jobs=10, gens=0:499, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(up_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit","up_sep/fit", names=c("Down-Tog","Down-Sep","Stable-Sep","Stable-Tog","Up-Sep"), params=list(jobs=10, gens=0:499, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(fit, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))

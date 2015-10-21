@@ -19,7 +19,7 @@ public class ForagingIncremental extends IncrementalEvolution {
     public static final String P_STARTING_RATIO = "starting-ratio";
     protected double startingRatio;
     protected double currentRatio;
-    protected Double2D oriArenaSize, oriFlyingPos;
+    protected Double2D oriArenaSize;
     protected Double2D[] oriItems;
     protected double oriZone;
     
@@ -33,7 +33,6 @@ public class ForagingIncremental extends IncrementalEvolution {
         
         ForagingSimulator fs = (ForagingSimulator) state.evaluator.p_problem;
         oriArenaSize = fs.par.arenaSize;
-        oriFlyingPos = fs.par.flyingStartPos;
         oriItems = fs.par.items;
         oriZone = fs.par.itemPlacementZone;
     }
@@ -48,9 +47,6 @@ public class ForagingIncremental extends IncrementalEvolution {
         ForagingSimulator fs = (ForagingSimulator) state.evaluator.p_problem;
         fs.par.arenaSize = new Double2D(oriArenaSize.x * currentRatio, oriArenaSize.y * currentRatio);
         fs.par.itemPlacementZone = oriZone * currentRatio;
-        if(oriFlyingPos.x > 100) {
-            fs.par.flyingStartPos = new Double2D(oriFlyingPos.x * currentRatio, oriFlyingPos.y);
-        }
         Double2D[] itemPos = new Double2D[oriItems.length];
         for(int i = 0 ; i < itemPos.length ; i++) {
             itemPos[i] = new Double2D(oriItems[i].x * currentRatio, oriItems[i].y * currentRatio);

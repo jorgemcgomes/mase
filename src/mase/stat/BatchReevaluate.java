@@ -7,7 +7,9 @@ package mase.stat;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -27,11 +29,16 @@ public class BatchReevaluate {
 
     public static final String FOLDER = "-f";
     public static final String FORCE = "-force";
+    public static final String RECURSIVE = "-recursive";
+    public static final String PREFIX = "-prefix";
+    public static final String DEFAULT_PREFIX = "re";
 
     public static void main(String[] args) throws Exception {
-        List<File> folders = new ArrayList<File>();
+        List<File> folders = new ArrayList<>();
         int reps = 0;
+        boolean recursive = false;
         boolean force = false;
+        String prefix = DEFAULT_PREFIX;
         for (int x = 0; x < args.length; x++) {
             if (args[x].equalsIgnoreCase(FOLDER)) {
                 File folder = new File(args[1 + x++]);
@@ -43,6 +50,10 @@ public class BatchReevaluate {
                 reps = Integer.parseInt(args[1 + x++]);
             } else if (args[x].equalsIgnoreCase(FORCE)) {
                 force = true;
+            } else if (args[x].equalsIgnoreCase(RECURSIVE)) {
+                recursive = true;
+            } else if (args[x].equalsIgnoreCase(PREFIX)) {
+                prefix = args[1 + x++];
             }
         }
         if (reps <= 0) {
@@ -53,38 +64,76 @@ public class BatchReevaluate {
             System.out.println("Nothing to evaluate!");
             return;
         }
+        
+        BatchReevaluate mt = new BatchReevaluate(reps, force, prefix);
 
-        SimulationProblem sim = Reevaluate.createSimulator(args);
-        BatchReevaluate mt = new BatchReevaluate(sim, reps, force);
         for (File f : folders) {
-            if (f.isDirectory()) {
-                mt.reevaluateFolder(f);
-            } else if (f.isFile() && f.getName().endsWith("tar.gz")) {
-                mt.reevaluateTar(f);
+            try {
+                if (f.isDirectory()) {
+                    processDir(f, args, mt, recursive);
+                } else if (f.getName().endsWith("tar.gz")) {
+                    SimulationProblem sim = Reevaluate.createSimulator(args, f.getParentFile());
+                    mt.reevaluateTar(f, sim);
+                } else {
+                    System.out.println("Cannot handle file: " + f.getAbsolutePath());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+        
         mt.shutdown();
     }
-    private final SimulationProblem sim;
-    private final ExecutorService executor;
+
+    private static void processDir(File f, String[] args, BatchReevaluate mt, boolean recursive) throws Exception {
+        System.out.println(f.getAbsolutePath());
+        
+        // Reevaluate this folder if there are any files here
+        File[] list = f.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String name) {
+                return name.startsWith("job.");
+            }
+        });
+        if (!recursive || list.length > 0) {
+            SimulationProblem sim = Reevaluate.createSimulator(args, f);
+            mt.reevaluateFolder(f, sim);
+        }
+
+        // Recursive step
+        if (recursive) {
+            File[] subdirs = f.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File current) {
+                    return current.isDirectory();
+                }
+            });
+            for (File sub : subdirs) {
+                processDir(sub, args, mt, recursive);
+            }
+        }
+    }
+
     private final int reps;
     private final boolean force;
+    private final String prefix;
+    private final ExecutorService executor;
 
-    public BatchReevaluate(SimulationProblem sim, int reps, boolean force) {
-        this.sim = sim;
+    public BatchReevaluate(int reps, boolean force, String prefix) {
         this.reps = reps;
         this.force = force;
+        this.prefix = prefix;
         this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
-    public void reevaluateFolder(File folder) throws Exception {
+    public void reevaluateFolder(File folder, SimulationProblem sim) throws Exception {
         System.out.println(folder.getAbsolutePath());
         // Find all the relevant tars under the given folders
-        List<File> tars = new ArrayList<File>();
+        List<File> tars = new ArrayList<>();
         for (int job = 0; job < 100; job++) {
             File b0 = new File(folder, "job." + job + ".bests.tar.gz");
             if (b0.exists()) {
-                File re = new File(folder, "job." + job + ".refitness.stat");
+                File re = new File(folder, "job." + job + "." + prefix + "fitness.stat");
                 if (re.exists() && !force) {
                     System.out.println("Skipping " + b0.getAbsolutePath());
                 } else {
@@ -93,26 +142,28 @@ public class BatchReevaluate {
             }
         }
         for (File tar : tars) {
-            reevaluateTar(tar);
+            reevaluateTar(tar, sim);
         }
     }
 
-    protected void reevaluateTar(File tar) throws Exception {
+    protected void reevaluateTar(File tar, SimulationProblem sim) throws Exception {
         System.out.println("\n" + tar.getAbsolutePath());
-        // IO
-        List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(tar);
-        File fitnessLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", "refitness.stat"));
-        File behavLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", "rebehaviours.stat"));
-        File bestFile = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", "rebest.ind"));
+        // Output files
+        File fitnessLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "fitness.stat"));
+        File behavLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "behaviours.stat"));
+        File bestFile = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "best.ind"));
 
         BufferedWriter fitWriter = new BufferedWriter(new FileWriter(fitnessLog));
         BufferedWriter behavWriter = new BufferedWriter(new FileWriter(behavLog));
 
         try {
+            // Read solutions
+            List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(tar);
+            
             // Reevaluate solutions
-            List<Worker> workers = new ArrayList<Worker>(sols.size());
+            List<Worker> workers = new ArrayList<>(sols.size());
             for (PersistentSolution sol : sols) {
-                workers.add(new Worker(sol));
+                workers.add(new Worker(sol, sim));
             }
             List<Future<Reevaluation>> results = executor.invokeAll(workers);
 
@@ -171,9 +222,11 @@ public class BatchReevaluate {
     private class Worker implements Callable<Reevaluation> {
 
         private final PersistentSolution sol;
+        private final SimulationProblem sim;
 
-        public Worker(PersistentSolution sol) {
+        public Worker(PersistentSolution sol, SimulationProblem sim) {
             this.sol = sol;
+            this.sim = sim;
         }
 
         @Override

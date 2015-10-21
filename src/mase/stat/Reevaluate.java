@@ -12,7 +12,9 @@ import ec.util.ParameterDatabase;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import mase.MaseEvolve;
 import mase.evaluation.MetaEvaluator;
 import mase.SimulationProblem;
 import mase.controllers.AgentController;
@@ -49,12 +51,34 @@ public class Reevaluate {
         sim.setup(state, base);
         sim.setRepetitions(1);
         return sim;
+    }    
+    
+    public static SimulationProblem createSimulator(String[] args, File searchDir) {
+        boolean found = false;
+        for(String a : args) {
+            if(a.equalsIgnoreCase(Evolve.A_FILE)) {
+                found = true;
+                break;
+            }
+        }
+        if(!found) {
+            File config = new File(searchDir, MaseEvolve.DEFAULT_CONFIG);
+            if(!config.exists()) {
+                System.out.println("File does not exist: " + config.getAbsolutePath());
+            } else {
+                String[] newArgs = Arrays.copyOf(args, args.length + 2);
+                newArgs[newArgs.length - 2] = Evolve.A_FILE;
+                newArgs[newArgs.length - 1] = config.getAbsolutePath();
+                args = newArgs;
+            }
+        }
+        return createSimulator(args);
     }
 
     public static GroupController createController(String[] args) throws Exception {
         // Parameter loading
         File gc = null;
-        ArrayList<File> controllers = new ArrayList<File>();
+        ArrayList<File> controllers = new ArrayList<>();
         int x;
         for (x = 0; x < args.length; x++) {
             if (args[x].equals(P_CONTROLLER)) {
@@ -100,7 +124,7 @@ public class Reevaluate {
         }
         return -1;
     }
-
+    
     public static class Reevaluation {
 
         public List<EvaluationResult[]> allResults;
