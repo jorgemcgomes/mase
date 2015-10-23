@@ -6,6 +6,8 @@
 package mase.app.foraging;
 
 import ec.EvolutionState;
+import ec.Problem;
+import ec.eval.MasterProblem;
 import ec.util.Parameter;
 import mase.evaluation.IncrementalEvolution;
 import sim.util.Double2D;
@@ -31,7 +33,9 @@ public class ForagingIncremental extends IncrementalEvolution {
         startingRatio = state.parameters.getDouble(base.push(P_STARTING_RATIO), 
                 new Parameter(IncrementalEvolution.DEFAULT_BASE).push(P_STARTING_RATIO));
         
-        ForagingSimulator fs = (ForagingSimulator) state.evaluator.p_problem;
+        Problem p = state.evaluator.p_problem;
+        ForagingSimulator fs = (ForagingSimulator) (p instanceof MasterProblem ? ((MasterProblem) p).problem : p);
+        
         oriArenaSize = fs.par.arenaSize;
         oriItems = fs.par.items;
         oriZone = fs.par.itemPlacementZone;

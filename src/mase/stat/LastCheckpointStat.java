@@ -39,7 +39,7 @@ public class LastCheckpointStat extends SolutionWriterStat {
                                     new BufferedOutputStream(
                                             new FileOutputStream(outFile))));
 
-            s.writeObject(state);
+            s.writeObject(state.population);
             s.close();
         } catch (Exception e) {
             e.printStackTrace();

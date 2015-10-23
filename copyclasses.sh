@@ -1,7 +1,7 @@
 #!/bin/bash
 source classpath
 
-IP=${1-robot@10.40.50.133}
+IP=${1-robot@10.40.50.135}
 FOLDER=${2-mase}
 echo "IP: "$IP
 echo "FOLDER: "$FOLDER

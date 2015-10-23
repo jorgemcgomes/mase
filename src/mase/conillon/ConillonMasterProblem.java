@@ -10,6 +10,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
@@ -32,6 +39,7 @@ public class ConillonMasterProblem extends MasterProblem {
     public static final String P_CODE_PORT = "code-port";
     public static final String P_PRIORITY = "priority";
     public static final String P_SERVER_NAME = "server-name";
+    public static final String P_TIMEOUT = "timeout";
 
     private static class Evaluation {
 
@@ -52,6 +60,7 @@ public class ConillonMasterProblem extends MasterProblem {
     private String serverName;
     private int jobSize;
     private int lastNumberOfTasks;
+    private long timeout;
 
     private synchronized int nextID() {
         idCounter++;
@@ -66,6 +75,7 @@ public class ConillonMasterProblem extends MasterProblem {
         codePort = state.parameters.getInt(base.push(P_CODE_PORT), defaultBase().push(P_CODE_PORT));
         priorityNumber = state.parameters.getInt(base.push(P_PRIORITY), defaultBase().push(P_PRIORITY));
         serverName = state.parameters.getString(base.push(P_SERVER_NAME), defaultBase().push(P_SERVER_NAME));
+        timeout = state.parameters.getLong(base.push(P_TIMEOUT), defaultBase().push(P_TIMEOUT));
     }
 
     @Override
@@ -78,7 +88,39 @@ public class ConillonMasterProblem extends MasterProblem {
     }
 
     @Override
-    public void finishEvaluating(EvolutionState state, int threadnum) {
+    public void finishEvaluating(final EvolutionState state, final int threadnum) {
+        final ArrayList<SlaveTask> tasksCopy = new ArrayList<>(tasks);
+        boolean done = false;
+        boolean repeat = false;
+        while (!done) {
+            final boolean rep = repeat;
+            try {
+                ArrayList<SlaveResult> resList = runWithTimeout(new Callable<ArrayList<SlaveResult>>() {
+                    @Override
+                    public ArrayList<SlaveResult> call() throws Exception {
+                        // If it is the second try, try to open a new client
+                        if(rep) {
+                            initializeContacts(state);
+                        }
+                        // Send tasks to client
+                        commitTasks(tasksCopy, state, threadnum);
+                        // Wait and receive results
+                        ArrayList<SlaveResult> res = receiveResults(state, threadnum);
+                        return res;
+                    }
+                }, timeout, TimeUnit.SECONDS);
+                parseResults(resList, state, threadnum);
+                done = true;
+            } catch (Exception e) {
+                // Something went wrong or timeout
+                System.out.println("ERROR EVALUATING WITH CONILON... TRYING AGAIN...");
+                e.printStackTrace();
+                repeat = true;
+            }
+        }
+    }
+
+    private void commitTasks(ArrayList<SlaveTask> tasks, EvolutionState state, int threadnum) {
         if (jobSize == 1) {
             for (SlaveTask t : tasks) {
                 client.commit(t);
@@ -108,6 +150,9 @@ public class ConillonMasterProblem extends MasterProblem {
             }
         }
 
+    }
+
+    private ArrayList<SlaveResult> receiveResults(EvolutionState state, int threadnum) {
         ArrayList<SlaveResult> resList = new ArrayList<>();
         if (jobSize == 1) {
             for (int i = 0; i < lastNumberOfTasks; i++) {
@@ -119,7 +164,10 @@ public class ConillonMasterProblem extends MasterProblem {
                 resList.addAll(meta.getResults());
             }
         }
+        return resList;
+    }
 
+    private void parseResults(ArrayList<SlaveResult> resList, EvolutionState state, int threadnum) {
         for (SlaveResult r : resList) {
             Evaluation j = jobs.get(r.getID());
             ArrayList<EvaluationResult> evalList = r.getEvaluationResults();
@@ -140,6 +188,30 @@ public class ConillonMasterProblem extends MasterProblem {
                 }
             }
         }
+    }
+
+    public static <T> T runWithTimeout(Callable<T> callable, long timeout, TimeUnit timeUnit) throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final Future<T> future = executor.submit(callable);
+        executor.shutdown(); // This does not cancel the already-scheduled task.
+        try {
+            return future.get(timeout, timeUnit);
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            throw e;
+        } catch (ExecutionException e) {
+            throw e;
+        }
+    }
+
+    public static void runWithTimeout(final Runnable runnable, long timeout, TimeUnit timeUnit) throws Exception {
+        runWithTimeout(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                runnable.run();
+                return null;
+            }
+        }, timeout, timeUnit);
     }
 
     @Override
@@ -183,22 +255,14 @@ public class ConillonMasterProblem extends MasterProblem {
 
     @Override
     public void reinitializeContacts(EvolutionState state) {
-        // TODO: initialize CLIENT
+
     }
 
     @Override
     public void initializeContacts(EvolutionState state) {
-        ClientPriority priority = getPriority(priorityNumber);
-        client = new Client("MASE / job " + state.job[0], priority, serverName, serverPort, serverName, codePort);
+        client = new Client("MASE / job " + state.job[0], ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
         client.setTotalNumberOfTasks(state.numGenerations * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
         state.output.message("***********************************\n*** CONILLON CLIENT INITIALIZED ***\n***********************************");
-    }
-
-    private ClientPriority getPriority(int priority) {
-        return (priority < 2) ? ClientPriority.VERY_HIGH
-                : (priority < 4) ? ClientPriority.HIGH
-                        : (priority < 7) ? ClientPriority.NORMAL
-                                : ClientPriority.LOW;
     }
 
 }

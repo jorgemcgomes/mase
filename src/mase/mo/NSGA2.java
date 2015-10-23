@@ -9,6 +9,7 @@ import ec.EvolutionState;
 import ec.Population;
 import ec.Subpopulation;
 import ec.util.Parameter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -195,7 +196,7 @@ public class NSGA2 implements PostEvaluator {
         }
     }
 
-    protected static class Individual implements Comparable<Individual> {
+    protected static class Individual implements Comparable<Individual>, Serializable {
 
         double[] objectives;
         int rank;
@@ -208,7 +209,7 @@ public class NSGA2 implements PostEvaluator {
         Individual(int individualId, double[] objectives) {
             this.individualId = individualId;
             this.objectives = objectives;
-            this.S = new ArrayList<Individual>();
+            this.S = new ArrayList<>();
             this.n = 0;
         }
 

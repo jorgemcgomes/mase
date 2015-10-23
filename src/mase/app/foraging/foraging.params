@@ -25,8 +25,8 @@ problem.max-steps =                 1000
 problem.itemRadius =                2.5
 
 problem.itemPlacementZone =         150
-problem.arenaSize =                 600:450
-problem.items =                     100:150,300:150,500:150,100:350,300:350,500:350
+problem.arenaSize =                 600:400
+problem.items =                     100:100,300:100,500:100,100:300,300:300,500:300
 problem.flyingStartPos =            50:25
 problem.flyingStartOri =            1.57
 problem.landStartPos =              5:25
