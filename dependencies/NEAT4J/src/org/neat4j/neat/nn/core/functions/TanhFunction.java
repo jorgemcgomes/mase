@@ -23,7 +23,7 @@ public class TanhFunction implements ActivationFunction {
 		} else if (neuronIp > 20) {
 			op = 1;
 		} else {
-			op = (1 - FastMath.exp(-2 * neuronIp)) / (1 + FastMath.exp(-2 * neuronIp));
+			op = (1 - FastMath.expQuick(-2 * neuronIp)) / (1 + FastMath.expQuick(-2 * neuronIp)); // TODO: expQuick
 		}
 		return (op);
 	}
