@@ -1846,4 +1846,7 @@ fullStatistics(fit, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.
 nst <- metaLoadData("down_tog/nst","down_sep/nst","stable_sep/nst","up_sep/nst", names=c("Down-Tog","Down-Sep","Stable-Sep","Up-Sep"), params=list(jobs=10, gens=0:499, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
 fullStatistics(nst, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
 
+setwd("~/exps/ecaln/")
+fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit", names=c("Down-Tog","Down-Sep","Stable-Sep","Stable-Tog"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(fit, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(699),jitter=F,ylim=T))
 

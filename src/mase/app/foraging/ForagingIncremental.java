@@ -33,9 +33,7 @@ public class ForagingIncremental extends IncrementalEvolution {
         startingRatio = state.parameters.getDouble(base.push(P_STARTING_RATIO), 
                 new Parameter(IncrementalEvolution.DEFAULT_BASE).push(P_STARTING_RATIO));
         
-        Problem p = state.evaluator.p_problem;
-        ForagingSimulator fs = (ForagingSimulator) (p instanceof MasterProblem ? ((MasterProblem) p).problem : p);
-        
+        ForagingSimulator fs = (ForagingSimulator) problem;
         oriArenaSize = fs.par.arenaSize;
         oriItems = fs.par.items;
         oriZone = fs.par.itemPlacementZone;
@@ -48,7 +46,7 @@ public class ForagingIncremental extends IncrementalEvolution {
         currentRatio = startingRatio + stage * increment;
         state.output.message("New size ratio: " + currentRatio);
         
-        ForagingSimulator fs = (ForagingSimulator) state.evaluator.p_problem;
+        ForagingSimulator fs = (ForagingSimulator) problem;
         fs.par.arenaSize = new Double2D(oriArenaSize.x * currentRatio, oriArenaSize.y * currentRatio);
         fs.par.itemPlacementZone = oriZone * currentRatio;
         Double2D[] itemPos = new Double2D[oriItems.length];

@@ -88,39 +88,81 @@ public class ConillonMasterProblem extends MasterProblem {
     }
 
     @Override
+    public void evaluate(EvolutionState state, Individual[] inds, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
+        Evaluation job = new Evaluation();
+        job.ind = Arrays.copyOf(inds, inds.length);
+        job.updateFitness = Arrays.copyOf(updateFitness, updateFitness.length);
+        job.countVictoriesOnly = countVictoriesOnly;
+        job.subpops = Arrays.copyOf(subpops, subpops.length);
+        job.threadnum = threadnum;
+        MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
+        GroupController gc = simProblem.createController(state, job.ind);
+        int id = nextID();
+        MasonSimState sim = simProblem.createSimState(gc, simProblem.nextSeed(state, threadnum));
+        SlaveTask task = new SlaveTask(sim, id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
+        jobs.put(id, job);
+        tasks.add(task);
+    }
+
+    @Override
+    public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
+        Evaluation job = new Evaluation();
+        job.ind = new Individual[]{ind};
+        job.updateFitness = null;
+        job.countVictoriesOnly = false;
+        job.subpops = new int[]{subpopulation};
+        job.threadnum = threadnum;
+        MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
+        GroupController gc = simProblem.createController(state, ind);
+        int id = nextID();
+        MasonSimState sim = simProblem.createSimState(gc, simProblem.nextSeed(state, threadnum));
+        SlaveTask task = new SlaveTask(sim, id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
+        jobs.put(id, job);
+        tasks.add(task);
+    }    
+    
+    @Override
     public void finishEvaluating(final EvolutionState state, final int threadnum) {
-        final ArrayList<SlaveTask> tasksCopy = new ArrayList<>(tasks);
-        boolean done = false;
-        boolean repeat = false;
-        while (!done) {
-            final boolean rep = repeat;
+        while (true) {
             try {
-                ArrayList<SlaveResult> resList = runWithTimeout(new Callable<ArrayList<SlaveResult>>() {
-                    @Override
-                    public ArrayList<SlaveResult> call() throws Exception {
-                        // If it is the second try, try to open a new client
-                        if(rep) {
-                            initializeContacts(state);
-                        }
-                        // Send tasks to client
-                        commitTasks(tasksCopy, state, threadnum);
-                        // Wait and receive results
-                        ArrayList<SlaveResult> res = receiveResults(state, threadnum);
-                        return res;
-                    }
-                }, timeout, TimeUnit.SECONDS);
+                ArrayList<SlaveResult> resList = runWithTimeout(new EvaluationExecutor(state), timeout, TimeUnit.SECONDS);
                 parseResults(resList, state, threadnum);
-                done = true;
+                break;
             } catch (Exception e) {
                 // Something went wrong or timeout
                 System.out.println("ERROR EVALUATING WITH CONILON... TRYING AGAIN...");
                 e.printStackTrace();
-                repeat = true;
+                client = null; // to force the init of new client
             }
         }
     }
+    
+    private class EvaluationExecutor implements Callable<ArrayList<SlaveResult>> {
 
-    private void commitTasks(ArrayList<SlaveTask> tasks, EvolutionState state, int threadnum) {
+        private final EvolutionState state;
+
+        public EvaluationExecutor(EvolutionState state) {
+            this.state = state;
+        }
+        
+        @Override
+        public ArrayList<SlaveResult> call() throws Exception {
+            if(client == null) {
+                client = new Client("MASE resume", ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
+                client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
+                state.output.message("***********************************\n*** CONILLON CLIENT RECONECTED ***\n***********************************");
+            }
+            // Send tasks to client
+            ArrayList<SlaveTask> tasksCopy = new ArrayList<>(tasks);
+            commitTasks(tasksCopy);
+            // Wait and receive results
+            ArrayList<SlaveResult> res = receiveResults();
+            return res;
+        }
+        
+    }
+
+    private void commitTasks(ArrayList<SlaveTask> tasks) {
         if (jobSize == 1) {
             for (SlaveTask t : tasks) {
                 client.commit(t);
@@ -152,7 +194,7 @@ public class ConillonMasterProblem extends MasterProblem {
 
     }
 
-    private ArrayList<SlaveResult> receiveResults(EvolutionState state, int threadnum) {
+    private ArrayList<SlaveResult> receiveResults() {
         ArrayList<SlaveResult> resList = new ArrayList<>();
         if (jobSize == 1) {
             for (int i = 0; i < lastNumberOfTasks; i++) {
@@ -202,50 +244,6 @@ public class ConillonMasterProblem extends MasterProblem {
         } catch (ExecutionException e) {
             throw e;
         }
-    }
-
-    public static void runWithTimeout(final Runnable runnable, long timeout, TimeUnit timeUnit) throws Exception {
-        runWithTimeout(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                runnable.run();
-                return null;
-            }
-        }, timeout, timeUnit);
-    }
-
-    @Override
-    public void evaluate(EvolutionState state, Individual[] inds, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
-        Evaluation job = new Evaluation();
-        job.ind = Arrays.copyOf(inds, inds.length);
-        job.updateFitness = Arrays.copyOf(updateFitness, updateFitness.length);
-        job.countVictoriesOnly = countVictoriesOnly;
-        job.subpops = Arrays.copyOf(subpops, subpops.length);
-        job.threadnum = threadnum;
-        MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
-        GroupController gc = simProblem.createController(state, job.ind);
-        int id = nextID();
-        MasonSimState sim = simProblem.createSimState(gc, simProblem.nextSeed(state, threadnum));
-        SlaveTask task = new SlaveTask(sim, id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
-        jobs.put(id, job);
-        tasks.add(task);
-    }
-
-    @Override
-    public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
-        Evaluation job = new Evaluation();
-        job.ind = new Individual[]{ind};
-        job.updateFitness = null;
-        job.countVictoriesOnly = false;
-        job.subpops = new int[]{subpopulation};
-        job.threadnum = threadnum;
-        MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
-        GroupController gc = simProblem.createController(state, ind);
-        int id = nextID();
-        MasonSimState sim = simProblem.createSimState(gc, simProblem.nextSeed(state, threadnum));
-        SlaveTask task = new SlaveTask(sim, id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
-        jobs.put(id, job);
-        tasks.add(task);
     }
 
     @Override

@@ -7,8 +7,10 @@ package mase.evaluation;
 
 import ec.EvolutionState;
 import ec.Individual;
+import ec.Problem;
 import ec.Statistics;
 import ec.Subpopulation;
+import ec.eval.MasterProblem;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +36,8 @@ public class IncrementalEvolution extends Statistics {
     protected double[] aboveThreshold;
     protected int minGenerations;
     protected int statisticslog;
+    
+    protected Problem problem;
 
     public Parameter defaultBase() {
         return new Parameter(DEFAULT_BASE);
@@ -82,6 +86,10 @@ public class IncrementalEvolution extends Statistics {
                 state.output.fatal("An IOException occurred while trying to create the log " + statisticsFile + ":\n" + i);
             }
         }
+        
+        this.problem = state.evaluator.p_problem instanceof MasterProblem ? 
+                ((MasterProblem) state.evaluator.p_problem).problem : 
+                state.evaluator.p_problem;
     }
 
     @Override
