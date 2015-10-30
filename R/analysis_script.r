@@ -1847,6 +1847,29 @@ nst <- metaLoadData("down_tog/nst","down_sep/nst","stable_sep/nst","up_sep/nst",
 fullStatistics(nst, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
 
 setwd("~/exps/ecaln/")
-fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit", names=c("Down-Tog","Down-Sep","Stable-Sep","Stable-Tog"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit","up_sep/fit", names=c("Down-Tog","Down-Sep","Stable-Sep","Stable-Tog","Up-Sep"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
 fullStatistics(fit, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(699),jitter=F,ylim=T))
+
+nst <- metaLoadData("down_tog/nst","down_sep/nst","stable_sep/nst", names=c("Down-Tog","Down-Sep","Stable-Sep"), params=list(jobs=15, subpops=NULL, gens=0:499,fitlim=c(0,6),merge.subpops=T, fitness.file="fitness.stat",load.behavs=F))
+fullStatistics(nst, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+staged <- metaLoadData("down_tog/staged","down_sep/staged","stable_sep/staged", names=c("Down-Tog","Down-Sep","Stable-Sep"), params=list(jobs=9, subpops=NULL, gens=0:499,fitlim=c(0,6),merge.subpops=T, fitness.file="fitness.stat",load.behavs=F))
+fullStatistics(staged, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+down_sep <- metaLoadData("down_sep/fit","down_sep/nst","down_sep/staged","down_sep/moea", names=c("Fit","NS-T","Staged","MOEA"), params=list(jobs=9, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="fitness.stat",load.behavs=F))
+fullStatistics(down_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=F,ylim=T))
+
+
+fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit","up_sep/fit", names=c("Down-Tog","Down-Sep","Stable-Sep","Stable-Tog","Up-Sep"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(fit, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(699),jitter=T,ylim=T))
+
+down_tog <- metaLoadData("down_tog/fit","down_tog/nst","down_tog/halted","down_tog/staged", names=c("Fit","NS-T","Halted","Staged"), params=list(jobs=15, subpops=NULL, gens=0:499, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(down_tog, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=T,ylim=T))
+
+down_sep <- metaLoadData("down_sep/fit","down_sep/nst","down_sep/moea","down_sep/staged", names=c("Fit","NS-T","MOEA","Staged"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(down_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(699),jitter=T,ylim=T))
+
+stable_sep <- metaLoadData("stable_sep/fit","stable_sep/nst","stable_sep/moea","stable_sep/staged","stable_sep/halted", names=c("Fit","NS-T","MOEA","Staged","Halted"), params=list(jobs=15, gens=0:499,subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+fullStatistics(stable_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=T,ylim=T))
+
 

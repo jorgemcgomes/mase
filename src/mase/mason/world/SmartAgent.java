@@ -28,8 +28,8 @@ public abstract class SmartAgent extends EmboddiedAgent {
     public SmartAgent(SimState sim, Continuous2D field, double radius, Color c, AgentController ac) {
         super(sim, field, radius, c);
         this.ac = ac;
-        this.sensors = new ArrayList<Sensor>();
-        this.effectors = new ArrayList<Effector>();
+        this.sensors = new ArrayList<>();
+        this.effectors = new ArrayList<>();
     }
     
     public void addSensor(Sensor s) {
@@ -47,6 +47,11 @@ public abstract class SmartAgent extends EmboddiedAgent {
         if(ac != null) {
             lastNormSensors = readNormalisedSensors();
             lastActionOutput = ac.processInputs(lastNormSensors);
+            for(int i = 0 ; i < lastActionOutput.length ; i++) {
+                if(Double.isNaN(lastActionOutput[i]) || Double.isInfinite(lastActionOutput[i])) {
+                    lastActionOutput[i] = 0.5;
+                }
+            }
             action(lastActionOutput);
         }
     }

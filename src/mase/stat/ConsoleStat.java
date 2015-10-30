@@ -65,7 +65,7 @@ public class ConsoleStat extends Statistics {
                 + " | Job: " + DurationFormatUtils.formatDuration(jobTime, "HH:mm:ss")
                 + " | Job ETA: " + df.format(jobEta) + " (" + DurationFormatUtils.formatDuration(remainingJobTime, "HH:mm:ss") + ")"
                 + " | Batch ETA: " + df.format(batchEta) + " (" + DurationFormatUtils.formatDuration(remainingBatchTime, "HH:mm:ss") + ")");
-
+        
         lastTime = currentTime;
     }
 
@@ -94,6 +94,8 @@ public class ConsoleStat extends Statistics {
                 bestFitness = ds.getMax();
             }
         }
+        FitnessStat stat = (FitnessStat) state.statistics.children[1];
+        state.output.message("Exp:" + stat.statisticsFile.getParent() + " Job: " + state.job[0]);
         state.output.message("Best gen: " + nf.format(maxGen) + " | "
                 + "Best so far: " + nf.format(bestFitness));
     }
