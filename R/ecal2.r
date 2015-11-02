@@ -3,37 +3,6 @@ DEF_WIDTH=4
 theme_set(theme_bw())
 
 
-
-
-setwd("~/labmag/exps/ecaln/")
-
-vars.group <- c("Items","Within","Dispersion","AvgProximity")
-vars.ind <- c("I1","I2","I3","I4")
-fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit", names=c("DownTog","DownSep","StableSep","StableTog"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=T,behavs.sample=0.2, vars.group=vars.group, vars.ind=vars.ind, vars.file=c(vars.group,vars.ind,NA,NA)))
-
-### SEPARATE GOOD AND BAD RUNS ################
-
-fl <- fitnessLevelReached(fit, 4)
-dt.over <- as.logical(fl$data["DownTog",])
-dt.good <- filterJobs(fit$DownTog, jobs=fit$DownTog$jobs[dt.over])
-dt.bad <- filterJobs(fit$DownTog, jobs=fit$DownTog$jobs[!dt.over])
-ds.over <- as.logical(fl$data["DownSep",])
-ds.good <- filterJobs(fit$DownSep, jobs=fit$DownSep$jobs[ds.over])
-ds.bad <- filterJobs(fit$DownSep, jobs=fit$DownSep$jobs[!ds.over])
-ss.over <- as.logical(fl$data["StableSep",])
-ss.good <- filterJobs(fit$StableSep, jobs=fit$StableSep$jobs[ss.over])
-ss.bad <- filterJobs(fit$StableSep, jobs=fit$StableSep$jobs[!ss.over])
-st.over <- as.logical(fl$data["StableTog",])
-st.good <- filterJobs(fit$StableTog, jobs=fit$StableTog$jobs[st.over])
-st.bad <- filterJobs(fit$StableTog, jobs=fit$StableTog$jobs[!st.over])
-
-
-
-
-
-####################################################################################################3
-
-
 generationalStats <- function(data, fun="sd", args=list(), threshold=0.1) {
   df <- list()
   dfc <- list()
@@ -71,6 +40,108 @@ generationalStats <- function(data, fun="sd", args=list(), threshold=0.1) {
   colnames(res) <- c("gen",paste0("v.",data$subpops),paste0("c.",data$subpops))
   return(res)
 }
+
+rsd <- function(vec){
+  s <- sd(vec, na.rm=T)
+  m <- mean(vec,na.rm=T)
+  if(is.na(m) | m < 0.0001) {
+    return(0)
+  } else {
+    return(s/m)
+  }
+}
+
+
+setwd("~/labmag/exps/ecaln/")
+
+vars.group <- c("Items","Within","Dispersion","AvgProximity")
+vars.ind <- c("I1","I2","I3","I4")
+vars.extra <- c("Height","TimeWithin")
+fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit", names=c("DownTog","DownSep","StableSep","StableTog"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=F, fitness.file="refitness.stat",load.behavs=T,behavs.sample=0.5, vars.group=vars.group, vars.ind=vars.ind, vars.extra=vars.extra))
+
+### SEPARATE GOOD AND BAD RUNS ################
+
+fl <- fitnessLevelReached(fit, 4)
+dt.over <- as.logical(fl$data["DownTog",])
+dt.good <- filterJobs(fit$DownTog, jobs=fit$DownTog$jobs[dt.over])
+dt.bad <- filterJobs(fit$DownTog, jobs=fit$DownTog$jobs[!dt.over])
+ds.over <- as.logical(fl$data["DownSep",])
+ds.good <- filterJobs(fit$DownSep, jobs=fit$DownSep$jobs[ds.over])
+ds.bad <- filterJobs(fit$DownSep, jobs=fit$DownSep$jobs[!ds.over])
+ss.over <- as.logical(fl$data["StableSep",])
+ss.good <- filterJobs(fit$StableSep, jobs=fit$StableSep$jobs[ss.over])
+ss.bad <- filterJobs(fit$StableSep, jobs=fit$StableSep$jobs[!ss.over])
+st.over <- as.logical(fl$data["StableTog",])
+st.good <- filterJobs(fit$StableTog, jobs=fit$StableTog$jobs[st.over])
+st.bad <- filterJobs(fit$StableTog, jobs=fit$StableTog$jobs[!st.over])
+
+
+### TIME WITHIN ##############################
+
+listmean <- function(l) {
+  return(mean(as.numeric(l)))
+}
+
+analyseVar <- function(datalist, var) {
+  allres <- list()
+  for(data in datalist) {
+    res <- list()
+    for(g in data$gens) {
+      res[[g+1]] <- list()
+    }
+    print(length(res))
+    for(job in data$jobs) {
+      print(job)
+      for(sub in data$subpops) {
+        for(g in data$gens) {
+          s <- subset(data[[job]][[sub]], gen==g)[[var]]
+          res[[g+1]] <- c(res[[g+1]],mean(s))
+        }
+      }
+    }
+    allres[[data$expname]] <- lapply(res, listmean)
+  }
+  return(allres)
+}
+
+a <- analyseVar(list(ss.good,ss.bad),"Within.1")
+b <- c()
+d <- as.data.frame(a)
+
+plotMultiline(d, ylim=NULL,ylabel="Time within")
+
+### FITNESS DIVERSITY ########################
+
+st.good.rsd <- generationalStats(st.good, fun="rsd", threshold=0.1)
+dt.good.rsd <- generationalStats(dt.good, fun="rsd", threshold=0.1)
+dt.bad.rsd <- generationalStats(dt.bad, fun="rsd", threshold=0.1)
+ss.good.rsd <- generationalStats(ss.good, fun="rsd", threshold=0.1)
+ss.bad.rsd <- generationalStats(ss.bad, fun="rsd", threshold=0.1)
+ds.good.rsd <- generationalStats(ds.good, fun="rsd", threshold=0.1)
+ds.bad.rsd <- generationalStats(ds.bad, fun="rsd", threshold=0.1)
+
+summary(st.good.rsd)
+summary(dt.good.rsd) 
+summary(dt.bad.rsd) 
+summary(ss.good.rsd)
+summary(ss.bad.rsd)
+summary(ds.good.rsd)
+summary(ds.bad.rsd)
+
+
+### BEHAVIOURAL DIVERSITY #####################
+
+div.group.all <- diversity.group(fit)
+
+
+
+
+
+
+####################################################################################################3
+
+
+
 
 
 data <- metaLoadData("~/exps/fl3/fit_down","~/exps/fl3/ns_down","~/exps/fl3/nsga_down", names=c("Fit","NS","NSGA"), params=list(jobs=20, subpops=2, fitness.file="refitness.stat", fitlim=c(0,6), load.behavs=T, behavs.sample=1, vars.ind=c("I/H","Proximity","Movement","Distance"),vars.group=c("Items","Within","Dispersion","AvgProximity")))

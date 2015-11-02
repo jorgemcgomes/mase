@@ -6,6 +6,7 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.eval.MasterProblem;
 import ec.util.Parameter;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,17 +52,17 @@ public class ConillonMasterProblem extends MasterProblem {
         int threadnum;
     }
 
-    private HashMap<Integer, Evaluation> jobs;
-    private ArrayList<SlaveTask> tasks;
-    private int idCounter;
-    private Client client;
     private int serverPort;
     private int codePort;
-    //private int priorityNumber;
     private String serverName;
     private int jobSize;
     private long timeout;
     private int maxTries;
+
+    private HashMap<Integer, Evaluation> jobs;
+    private ArrayList<SlaveTask> tasks;
+    private int idCounter;
+    private Client client;
     private int tries;
 
     private synchronized int nextID() {
@@ -86,8 +87,13 @@ public class ConillonMasterProblem extends MasterProblem {
         jobs = new HashMap<>();
         tasks = new ArrayList<>();
         idCounter = 0;
-        FitnessStat stat = (FitnessStat) state.statistics.children[1];
-        client.setDesc(stat.statisticsFile.getParent() + " / job " + state.job[0] + " / gen " + state.generation + " (" + state.numGenerations + ")");
+    }
+
+    private String getDesc(EvolutionState state) {
+        File statFile = ((FitnessStat) state.statistics.children[1]).statisticsFile;
+        String exp =  statFile.getParentFile().getParentFile().getParentFile().getName() + "/" + statFile.getParentFile().getParentFile().getName() +"/" + statFile.getParentFile().getName() ;
+        String desc = exp + " / job " + state.job[0] + " / gen " + state.generation + " (" + state.numGenerations + ")";
+        return desc;
     }
 
     @Override
@@ -130,43 +136,33 @@ public class ConillonMasterProblem extends MasterProblem {
         boolean done = false;
         while (!done && tries < maxTries) {
             try {
+                client.setDesc(getDesc(state));
                 // Old client failed, needs to create new one
                 if (tries > 0) {
                     // try to kill existing client -- no problem if it doesnt work
                     try {
-                        runWithTimeout(new Callable() {
-                            @Override
-                            public Object call() throws Exception {
-                                client.disconnect();
-                                return null;
-                            }
-                        }, 1, TimeUnit.MINUTES);
+                        closeContacts(state, 0);
                     } catch (Exception e) {
-                        state.output.message("*** ERROR DISCONNECTING CLIENT. CONTINUING AS NORMAL ***");
-                        e.printStackTrace();
+                        state.output.message("*** ERROR DISCONNECTING CLIENT " + client.getMyID() + ". CONTINUING AS NORMAL ***");
                     }
                     // try to create new client -- abort if it doesnt work
                     state.output.message("*** TRYING TO CONNECT NEW CLIENT ***");
-                    client = runWithTimeout(new Callable<Client>() {
-                        @Override
-                        public Client call() throws Exception {
-                            Client c = new Client("MASE resume", ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
-                            c.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
-                            state.output.message("*** CONILLON CLIENT CONNECTED ***");
-                            return c;
-                        }
-                    }, timeout, TimeUnit.SECONDS);
+                    initializeContacts(state);
+
+                    // replace client in Prototype
+                    ConillonMasterProblem prob = (ConillonMasterProblem) state.evaluator.masterproblem;
+                    prob.client = this.client;
                 }
                 // try to execute tasks
-                state.output.message("*** SENDING TASKS FOR CONILLON EXECUTION ***");
+                state.output.message("*** SENDING TASKS FOR CLIENT " + client.getMyID() + " ***");
                 ArrayList<SlaveResult> resList = runWithTimeout(
-                        new EvaluationExecutor(client, tasks, jobSize),
+                        new EvaluationExecutor(this.client, tasks, jobSize),
                         timeout, TimeUnit.SECONDS);
                 parseResults(resList, state, threadnum);
                 done = true;
             } catch (Exception e) {
                 // Something went wrong or timeout
-                state.output.message("*** ERROR WITH CONILLON ***");
+                state.output.message("*** ERROR WITH CLIENT " + client.getMyID() + " / TRY " + tries + "***");
                 e.printStackTrace();
                 tries++;
             }
@@ -280,14 +276,16 @@ public class ConillonMasterProblem extends MasterProblem {
 
     @Override
     public void closeContacts(EvolutionState state, int result) {
+        client.cancelAllTasks();
         client.disconnect();
+        state.output.message("*** CLIENT " + client.getMyID() + " CLOSED ***");
     }
 
     @Override
     public void initializeContacts(EvolutionState state) {
-        client = new Client("MASE / job " + state.job[0], ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
-        client.setTotalNumberOfTasks(state.numGenerations * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
-        state.output.message("*** CONILLON CLIENT INITIALIZED ***");
+        client = new Client(getDesc(state), ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
+        client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
+        state.output.message("*** CONILLON CLIENT " + client.getMyID() + " INITIALIZED ***");
     }
 
 }

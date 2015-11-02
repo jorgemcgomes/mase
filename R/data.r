@@ -12,8 +12,8 @@ metaLoadData <- function(..., params, names=NULL) {
     return(datas)
 }
 
-loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c(), 
-                     vars.file=c(vars.group, vars.ind), vars.transform=list(),
+loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c(), vars.extra=c(),
+                     vars.file=c(vars.group, vars.ind, vars.extra), vars.transform=list(),
                      subpops=NULL, merge.subpops=F, expname=folder, gens=NULL, load.behavs=TRUE, 
                      behavs.sample=1, behavs.bests=F, fitness.file="fitness.stat", behavs.file="behaviours.stat",
                      use.evals=FALSE) {
@@ -27,6 +27,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
   data$njobs <- length(data$jobs)
   data$vars.ind <- vars.ind
   data$vars.group <- vars.group
+  data$vars.extra <- vars.extra
   data$folder <- folder
   data$expname <- expname
   data$gens <- gens
@@ -93,7 +94,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
       
       for(s in 0:(data$nsubs-1)) {
         # & gen %in% data$gens
-        sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group))
+        sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group, data$vars.extra))
         if(behavs.bests) {
           bests <- lapply(data$gens, bestInGen, sub)
           sub <- do.call(rbind.data.frame, bests)
