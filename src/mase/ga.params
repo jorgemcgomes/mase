@@ -26,7 +26,7 @@ ec.subpop.species = 			ec.vector.FloatVectorSpecies
 vector.species.min-gene =               -1
 vector.species.max-gene =               1
 vector.species.ind =                    mase.controllers.NeuralControllerIndividual
-neural.structure =                      feed-forward
+neural.structure =                      jordan
 neural.tanh =                           false
 #neural.genome-size =                    3
 #neural.input =                          2
@@ -41,8 +41,8 @@ ec.subpop.duplicate-retries =           10
 ec.subpop.size = 			200
 
 # Elitism configuration (pre-breeding)
-breed.elite =				5
-breed.reevaluate-elites =               true
+#breed.elite =				5
+#breed.reevaluate-elites =               true
 
 # Breeding
 vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline

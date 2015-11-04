@@ -1,21 +1,21 @@
 parent.0=ga.params
 
 # Breeding
-vector.species.pipe =                               ec.breed.MultiBreedingPipeline
-breed.multibreed.num-sources =                      2
+vector.species.pipe =                   ec.breed.MultiBreedingPipeline
+breed.multibreed.num-sources =          2
 
-pop.default-subpop.species.pipe.source.0 =          ec.vector.breed.VectorMutationPipeline
-pop.default-subpop.species.pipe.source.0.prob =     0.5
-vector.mutate.source.0 =                            ec.select.TournamentSelection
-vector.species.mutation-type =                      gauss
-vector.species.mutation-stdev =                     0.50
-vector.species.mutation-prob =                      0.05
-vector.species.mutation-bounded =                   TRUE
+breed.multibreed.source.0 =             ec.vector.breed.VectorMutationPipeline
+vector.mutate.prob =                    0.5
+vector.mutate.source.0 =                ec.select.TournamentSelection
+vector.species.mutation-type =          gauss
+vector.species.mutation-stdev =         0.50
+vector.species.mutation-prob =          0.05
+vector.species.mutation-bounded =       TRUE
 
-pop.default-subpop.species.pipe.source.1 =          ec.vector.breed.VectorCrossoverPipeline
-pop.default-subpop.species.pipe.source.1.prob =     0.5
-vector.xover.source.0 =                             ec.select.TournamentSelection
-vector.xover.source.1 =                             same
-vector.species.crossover-type =                     one
+breed.multibreed.source.1 =             ec.vector.breed.VectorCrossoverPipeline
+vector.xover.prob =                     0.5
+vector.xover.source.0 =                 ec.select.TournamentSelection
+vector.xover.source.1 =                 same
+vector.species.crossover-type =         one
 
-select.tournament.size =                            5
+select.tournament.size =                5

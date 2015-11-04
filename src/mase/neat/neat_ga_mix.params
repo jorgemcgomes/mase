@@ -1,0 +1,48 @@
+parent.0=neat.params
+
+# needs to define mandatory:
+#neural.genome-size =                   3
+#neural.input =                         2
+#neural.hidden =                        0
+#neural.output =                        1
+#
+# optional:
+#breed.elite =				5
+#breed.reevaluate-elites =              true
+#
+# example:
+# -p pop.subpop.0=ec.Subpopulation -p breed.elite.0=5 -p breed.reevaluate-elites.0=true -p pop.subpop.0.species.genome-size=61 -p pop.subpop.0.species.ind.input=8 -p pop.subpop.0.species.ind.output=2 -p pop.subpop.0.species.ind.hidden=5
+# -p pop.subpop.1=ec.Subpopulation -p breed.elite.1=5 -p breed.reevaluate-elites.1=true -p pop.subpop.1.species.genome-size=180 -p pop.subpop.1.species.ind.input=15 -p pop.subpop.1.species.ind.output=4 -p pop.subpop.1.species.ind.hidden=8
+
+# Population configuration
+vector.species.fitness =                mase.evaluation.ExpandedFitness
+ec.subpop.duplicate-retries =           10
+ec.subpop.size = 			150
+
+# Individual configuration
+ec.subpop.species = 			ec.vector.FloatVectorSpecies
+vector.species.min-gene =               -1
+vector.species.max-gene =               1
+vector.species.ind =                    mase.controllers.NeuralControllerIndividual
+neural.structure =                      jordan
+neural.tanh =                           false
+
+# Breeding with xover
+vector.species.pipe =                   ec.breed.MultiBreedingPipeline
+breed.multibreed.num-sources =          2
+
+breed.multibreed.source.0 =             ec.vector.breed.VectorMutationPipeline
+vector.mutate.prob =                    0.5
+vector.mutate.source.0 =                ec.select.TournamentSelection
+vector.species.mutation-type =          gauss
+vector.species.mutation-stdev =         0.50
+vector.species.mutation-prob =          0.05
+vector.species.mutation-bounded =       TRUE
+
+breed.multibreed.source.1 =             ec.vector.breed.VectorCrossoverPipeline
+vector.xover.prob =                     0.5
+vector.xover.source.0 =                 ec.select.TournamentSelection
+vector.xover.source.1 =                 same
+vector.species.crossover-type =         one
+
+select.tournament.size =                5

@@ -1,11 +1,13 @@
 parent.0=../base.params
 
+breedthreads = 1
+
 # Generational configuration
 state = 				ec.simple.SimpleEvolutionState
 finish = 	        		ec.simple.SimpleFinisher
 exch = 					ec.simple.SimpleExchanger
 init = 					mase.neat.NEATInitializer
-breed =					mase.neat.NEATBreeder
+breed =					ec.simple.SimpleBreeder
 pop = 					ec.Population
 generations =				500
 quit-on-run-complete =			false
@@ -24,7 +26,7 @@ neat.species = 		                mase.neat.NEATSpecies
 neat.size =                             200
 neat.duplicate-retries =                100
 neat.species.ind =                      mase.neat.NEATIndividual
-neat.species.pipe =                     mase.neat.DummyPipeline
+neat.species.pipe =                     mase.neat.NEATPipeline
 
 # Evaluation config
 eval =                                  mase.evaluation.MetaEvaluator

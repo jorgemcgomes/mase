@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,12 +28,14 @@ public class MaseEvolve {
     public static final String OUT_DIR_OPTION = "-out";
     public static final File OUT_DIR_DEFAULT = new File("exps");
     public static final String DEFAULT_CONFIG = "config.params";
+    public static final String FORCE = "-force";
 
     public static void main(String[] args) throws Exception {
         File outDir = getOutDir(args);
+        boolean force = Arrays.asList(args).contains(FORCE);
         if (!outDir.exists()) {
             outDir.mkdirs();
-        } else {
+        } else if (!force) {
             System.out.println("Folder already exists: " + outDir.getAbsolutePath() + ". Waiting 5 sec.");
             try {
                 Thread.sleep(5000);
