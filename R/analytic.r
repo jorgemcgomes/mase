@@ -119,6 +119,105 @@ batch.ttest <- function(setlist, ...) {
 
 euclideanDist <- function(x1, x2) {sqrt(sum((x1 - x2) ^ 2))} 
 
+diversity.group <- function(datalist) {
+  pb <- txtProgressBar(min=1, max=length(datalist) * length(datalist[[1]]$jobs), style=3)
+  index <- 1
+  setlist <- list()
+  cl <- makeCluster(8)
+  clusterEvalQ(cl, library(pdist))
+  for(data in datalist) {
+    for(job in data$jobs) {
+      frame <- data.frame()
+      for(sub in data$subpops) {
+        frame <- rbind(frame, subset(data[[job]][[sub]], select=data$vars.group))
+      }
+      v <- meanDists(frame, cl)
+      setlist[[data$expname]] <- c(setlist[[data$expname]], v)
+      index <- index + 1
+      setTxtProgressBar(pb, index)
+    }
+  }
+  stopCluster(cl)
+  close(pb)
+  return(metaAnalysis(setlist))
+}
+
+diversity.ind <- function(datalist) {
+  pb <- txtProgressBar(min=1, max=length(datalist) * length(datalist[[1]]$jobs) * length(datalist[[1]]$subpops) , style=3)
+  index <- 1
+  setlist <- list()
+  cl <- makeCluster(8)
+  clusterEvalQ(cl, library(pdist))
+  for(data in datalist) {
+    for(job in data$jobs) {
+      for(sub in data$subpops) {
+        frame <- subset(data[[job]][[sub]], select=data$vars.ind)
+        v <- meanDists(frame, cl)
+        setlist[[data$expname]] <- c(setlist[[data$expname]], v)
+        index <- index + 1
+        setTxtProgressBar(pb, index)
+      }
+    }
+  }
+  stopCluster(cl)
+  close(pb)
+  return(metaAnalysis(setlist))  
+}
+
+meanDists <- function(data, cl) {
+  data <- as.matrix(data)
+  aux <- function(index) {
+    d <- pdist(data, indices.A=index, indices.B=((index+1):nrow(data)))
+    return(sum(attr(d, "dist")))
+  }
+  indexes <- sample.int(nrow(data)-1)
+  dists <- parSapply(cl, indexes, aux)
+  return(sum(dists) / (nrow(data) * nrow(data) / 2))
+}
+
+# threshold = distance / (diagonal / 2) , diagonal/2 = 141.42/2 = 70.71
+countNear <- function(folder, subpops, threshold, mode="best") {
+  files <- list.files(folder,pattern="rebehaviours.stat", full.names=T)
+  jobs <- c()
+  for(file in files) {
+    if(mode=="best") {
+      jobs <- c(jobs, countNearBest(file,subpops,threshold))
+    } else if(mode=="mean") {
+      jobs <- c(jobs, countNearMean(file,subpops,threshold))
+    }
+  }
+  return(jobs)
+}
+
+countNearMean <- function(file, subpops, threshold) {
+  tab <- read.table(file, header=F, sep=" ",fill=T)
+  count <- c()
+  for(r in 1:nrow(tab)) {
+    near <- 0
+    for(i in 0:(subpops-1)) {
+      if(tab[r,11+i*4] < threshold) {
+        near <- near + 1
+      } 
+    }
+    count <- c(count, near)
+  }
+  return(mean(count))
+}
+
+countNearBest <- function(file, subpops, threshold) {
+  tab <- read.table(file, header=F, sep=" ",fill=T)
+  best <- which.max(tab[,4])
+  near <- 0
+  for(i in 0:(subpops-1)) {
+    if(tab[best,11+i*4] < threshold) {
+      near <- near + 1
+    } 
+  }
+  return(near)
+}
+
+
+
 metaGroupDiversity <- function(datalist) {
     setlist <- list()
     for(data in datalist) {

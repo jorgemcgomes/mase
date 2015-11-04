@@ -16,7 +16,7 @@ import ec.util.Parameter;
 public class StagedEvolution extends IncrementalEvolution {
 
     public static final String P_SEQUENCE = "sequence";
-    private int[] sequence;
+    protected int[] sequence;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {

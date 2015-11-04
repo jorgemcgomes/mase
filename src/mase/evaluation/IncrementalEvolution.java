@@ -102,6 +102,18 @@ public class IncrementalEvolution extends Statistics {
     public void postEvaluationStatistics(EvolutionState state) {
         super.preEvaluationStatistics(state);
 
+        double aboveFraction = countAboveFraction(state);
+        state.output.println(state.generation + " " + aboveFraction + " " + aboveThreshold[currentStage] + " " + fitnessThreshold[currentStage] + " " + currentStage, statisticslog);
+
+        if (state.generation - currentStageStart >= minGenerations && aboveFraction >= aboveThreshold[currentStage] && currentStage < numStages - 1) {
+            currentStage++;
+            currentStageStart = state.generation;
+            changeStage(state, currentStage);
+        }
+
+    }
+    
+    protected double countAboveFraction(EvolutionState state) {
         int above = 0;
         int all = 0;
         for (Subpopulation sub : state.population.subpops) {
@@ -113,17 +125,7 @@ public class IncrementalEvolution extends Statistics {
                 all++;
             }
         }
-
-        double aboveFraction = (double) above / all;
-
-        state.output.println(state.generation + " " + aboveFraction + " " + aboveThreshold[currentStage] + " " + fitnessThreshold[currentStage] + " " + currentStage, statisticslog);
-
-        if (state.generation - currentStageStart >= minGenerations && aboveFraction >= aboveThreshold[currentStage] && currentStage < numStages - 1) {
-            currentStage++;
-            currentStageStart = state.generation;
-            changeStage(state, currentStage);
-        }
-
+        return (double) above / all;
     }
 
     public void changeStage(EvolutionState state, int stage) {

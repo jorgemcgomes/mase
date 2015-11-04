@@ -52,28 +52,39 @@ rsd <- function(vec){
 }
 
 
-setwd("~/labmag/exps/ecaln/")
-
+setwd("~/exps/ecalf/")
 vars.group <- c("Items","Within","Dispersion","AvgProximity")
 vars.ind <- c("I1","I2","I3","I4")
 vars.extra <- c("Height","TimeWithin")
-fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit", names=c("DownTog","DownSep","StableSep","StableTog"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=F, fitness.file="refitness.stat",load.behavs=T,behavs.sample=0.5, vars.group=vars.group, vars.ind=vars.ind, vars.extra=vars.extra))
+
+fit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit", names=c("DownTog","DownSep","StableSep","StableTog"), params=list(jobs=18, subpops=NULL, fitlim=c(0,6),merge.subpops=F, fitness.file="refitness.stat",load.behavs=T,behavs.sample=0.5, vars.group=vars.group, vars.ind=vars.ind, vars.extra=vars.extra))
+save(fit, file="~/Dropbox/mase/R/ecal2.fit.rdata")
+
+bestfit <- metaLoadData("down_tog/fit","down_sep/fit","stable_sep/fit","stable_tog/fit", names=c("DownTog","DownSep","StableSep","StableTog"), params=list(jobs=18, subpops=2, fitlim=c(0,6),merge.subpops=F, fitness.file="refitness.stat", behavs.file="rebehaviours.stat",load.behavs=T,behavs.sample=1, vars.group=vars.group, vars.extra=vars.extra, vars.file=c(vars.group,rep(NA,10),vars.extra)))
+fit <- bestfit
+
+### FITNESS PLOTS #############################
+
+fullStatistics(fit, fit.tests=T, show.only=T, fit.comp=T, som.group=F, som.alljobs=F, expset.name="Fit", fit.comp.par=list(snapshots=c(699),jitter=F))
+
+### SUCCESS RATIO #############################
+
+fl <- fitnessLevelReached(fit, 4)
 
 ### SEPARATE GOOD AND BAD RUNS ################
 
-fl <- fitnessLevelReached(fit, 4)
 dt.over <- as.logical(fl$data["DownTog",])
-dt.good <- filterJobs(fit$DownTog, jobs=fit$DownTog$jobs[dt.over])
-dt.bad <- filterJobs(fit$DownTog, jobs=fit$DownTog$jobs[!dt.over])
+dt.good <- filterJobs(fit$DownTog, jobs=fit$DownTog$jobs[dt.over], name="dt.good")
+dt.bad <- filterJobs(fit$DownTog, jobs=fit$DownTog$jobs[!dt.over], name="dt.bad")
 ds.over <- as.logical(fl$data["DownSep",])
-ds.good <- filterJobs(fit$DownSep, jobs=fit$DownSep$jobs[ds.over])
-ds.bad <- filterJobs(fit$DownSep, jobs=fit$DownSep$jobs[!ds.over])
+ds.good <- filterJobs(fit$DownSep, jobs=fit$DownSep$jobs[ds.over], name="ds.good")
+ds.bad <- filterJobs(fit$DownSep, jobs=fit$DownSep$jobs[!ds.over], name="ds.bad")
 ss.over <- as.logical(fl$data["StableSep",])
-ss.good <- filterJobs(fit$StableSep, jobs=fit$StableSep$jobs[ss.over])
-ss.bad <- filterJobs(fit$StableSep, jobs=fit$StableSep$jobs[!ss.over])
+ss.good <- filterJobs(fit$StableSep, jobs=fit$StableSep$jobs[ss.over], name="ss.good")
+ss.bad <- filterJobs(fit$StableSep, jobs=fit$StableSep$jobs[!ss.over], name="ss.bad")
 st.over <- as.logical(fl$data["StableTog",])
-st.good <- filterJobs(fit$StableTog, jobs=fit$StableTog$jobs[st.over])
-st.bad <- filterJobs(fit$StableTog, jobs=fit$StableTog$jobs[!st.over])
+st.good <- filterJobs(fit$StableTog, jobs=fit$StableTog$jobs[st.over], name="st.good")
+st.bad <- filterJobs(fit$StableTog, jobs=fit$StableTog$jobs[!st.over], name="st.bad")
 
 
 ### TIME WITHIN ##############################
@@ -89,26 +100,24 @@ analyseVar <- function(datalist, var) {
     for(g in data$gens) {
       res[[g+1]] <- list()
     }
-    print(length(res))
     for(job in data$jobs) {
       print(job)
-      for(sub in data$subpops) {
+      frame <- rbind(data[[job]][["sub.0"]], data[[job]][["sub.1"]])
         for(g in data$gens) {
-          s <- subset(data[[job]][[sub]], gen==g)[[var]]
+          s <- subset(frame, gen==g)[[var]]
           res[[g+1]] <- c(res[[g+1]],mean(s))
         }
-      }
     }
     allres[[data$expname]] <- lapply(res, listmean)
+    allres[[data$expname]] <- as.vector(allres[[data$expname]], mode="numeric")
   }
+  allres <- cbind(gen=datalist[[1]]$gens, as.data.frame(allres))
   return(allres)
 }
 
-a <- analyseVar(list(ss.good,ss.bad),"Within.1")
-b <- c()
-d <- as.data.frame(a)
-
-plotMultiline(d, ylim=NULL,ylabel="Time within")
+time.within <- analyseVar(list(dt.good,dt.bad,ds.good,ds.bad,st.good,st.bad,ss.good,ss.bad),"TimeWithin")
+time.within <- time.within[,!apply(time.within, 2 , function(x) all(is.na(x)))]
+plotMultiline(smoothFrame(time.within,5), ylim=NULL,ylabel="Time within")
 
 ### FITNESS DIVERSITY ########################
 
@@ -131,11 +140,28 @@ summary(ds.bad.rsd)
 
 ### BEHAVIOURAL DIVERSITY #####################
 
-div.group.all <- diversity.group(fit)
+d <- diversity.group(list(st.good,dt.good,dt.bad,ss.good,ss.bad,ds.good,ds.bad))
+
+
+### IPROVING CCEA - FITNESS ###################
+
+down_tog <- metaLoadData("down_tog/fit","down_tog/nst","down_tog/moea","down_tog/staged","down_tog/halted","down_tog/inc", names=c("Fit","NS-T","MOEA","Staged","Halted","Inc"), params=list(jobs=15, subpops=NULL, gens=0:499, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+down_sep <- metaLoadData("down_sep/fit","down_sep/nst","down_sep/moea","down_sep/staged","down_sep/halted","down_sep/inc", names=c("Fit","NS-T","MOEA","Staged","Halted","Inc"), params=list(jobs=15, subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+stable_sep <- metaLoadData("stable_sep/fit","stable_sep/nst","stable_sep/moea","stable_sep/staged","stable_sep/halted", names=c("Fit","NS-T","MOEA","Staged","Halted"), params=list(jobs=15, gens=0:499,subpops=NULL, fitlim=c(0,6),merge.subpops=T, fitness.file="refitness.stat",load.behavs=F))
+
+fullStatistics(down_tog, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=T,ylim=T))
+fullStatistics(down_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(699),jitter=T,ylim=T))
+fullStatistics(stable_sep, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=T,ylim=T))
+
+fitnessLevelReached(down_tog,4)
+fitnessLevelReached(down_sep,4)
+fitnessLevelReached(stable_sep,4)
 
 
 
-
+stable_sep1 <- metaLoadData("stable_sep/nst", names=c("NS-T"), params=list(jobs=15, gens=0:499,subpops=NULL, fitlim=c(0,6),merge.subpops=F, fitness.file="refitness.stat",load.behavs=F))
+stable_sep2 <- metaLoadData("stable_sep/nst", names=c("NS-T"), params=list(jobs=15, gens=0:499,subpops=NULL, fitlim=c(0,6),merge.subpops=F, fitness.file="longfitness.stat",load.behavs=F))
+fullStatistics(stable_sep2, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="pred_het",fit.comp.par=list(snapshots=c(499),jitter=T,ylim=T))
 
 
 ####################################################################################################3
