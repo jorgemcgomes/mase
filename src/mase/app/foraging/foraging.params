@@ -55,6 +55,7 @@ problem.flyingStartHeight =         0
 
 problem.landPlacement =             1
 problem.flyingPlacement =           1
+problem.flyingMaxDist =             -1
 
 pop.subpops =                       2
 pop.subpop.0 =                      mase.neat.NEATSubpop

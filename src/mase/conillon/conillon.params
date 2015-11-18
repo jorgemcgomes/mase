@@ -1,4 +1,5 @@
 evalthreads =   1
+seed.0 = time
 
 eval.base.masterproblem =                       mase.conillon.ConillonMasterProblem
 

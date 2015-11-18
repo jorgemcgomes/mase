@@ -82,7 +82,8 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
     # Behaviours
     if(load.behavs) {
       # fread instead of read.table
-      tab <- read.table(file.path(folder,paste0(j,".",behavs.file)), header=F, sep=" ", stringsAsFactors=F)
+      #tab <- read.table(file.path(folder,paste0(j,".",behavs.file)), header=F, sep=" ", stringsAsFactors=F)
+      tab <- fread(file.path(folder,paste0(j,".",behavs.file)), header=F, sep=" ", stringsAsFactors=F)
       fixedvars <- c("gen","subpop","index","fitness")
       setnames(tab, c(fixedvars,vars.file))
       
@@ -94,7 +95,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
       
       for(s in 0:(data$nsubs-1)) {
         # & gen %in% data$gens
-        sub <- subset(tab, subpop == s, select=c(fixedvars, data$vars.ind, data$vars.group, data$vars.extra))
+        sub <- subset(tab, subpop == s, select=na.omit(c(fixedvars, data$vars.ind, data$vars.group, data$vars.extra)))
         if(behavs.bests) {
           bests <- lapply(data$gens, bestInGen, sub)
           sub <- do.call(rbind.data.frame, bests)
@@ -216,7 +217,10 @@ sampleData <- function(dataList, sample.size, subpops=NULL) {
 smoothFrame <- function(frame, window) {
     if(window > 0) {
         for(c in 2:ncol(frame)) {
+          if(is.numeric(frame[[c]])) {
             frame[[c]] <- smooth(frame[[c]], window=window)
+          }
+            
         }
     }
     return(frame)

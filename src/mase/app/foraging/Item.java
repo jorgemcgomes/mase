@@ -19,7 +19,7 @@ public class Item extends OvalPortrayal2D {
     protected final Double2D position;
 
     public Item(double radius, Double2D position) {
-        super(Color.RED, radius * 2, true);
+        super(Color.MAGENTA, radius * 2, true);
         this.radius = radius;
         this.position = position;
     }

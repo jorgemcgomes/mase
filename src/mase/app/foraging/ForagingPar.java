@@ -47,6 +47,7 @@ public class ForagingPar implements Cloneable, Serializable {
     public double flyingStartHeight;
     public double flyingStartOri;
     public double landStartOri;
+    public double flyingMaxDist = -1;
             
     public boolean flyingVerticalMovement;
 

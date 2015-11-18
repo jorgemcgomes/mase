@@ -74,6 +74,25 @@ public class Reevaluate {
         }
         return createSimulator(args);
     }
+    
+    /**
+     * In case there is no GroupController, but multiple AgentControllers, the file of the first AC is returned
+     * @param args
+     * @return 
+     */
+    public static File findControllerFile(String[] args) {
+        File gc = null;
+        for(int i = 0 ; i < args.length - 1 ; i++) {
+            if(args[i].equalsIgnoreCase(P_CONTROLLER) || args[i].equalsIgnoreCase(P_AGENT_CONTROLLER)) {
+                gc = new File(args[i+1]);
+                break;
+            }
+        }
+        if(gc != null) {
+            return gc;
+        }
+        return null;
+    }
 
     public static GroupController createController(String[] args) throws Exception {
         // Parameter loading

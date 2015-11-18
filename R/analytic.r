@@ -120,26 +120,60 @@ batch.ttest <- function(setlist, ...) {
 euclideanDist <- function(x1, x2) {sqrt(sum((x1 - x2) ^ 2))} 
 
 diversity.group <- function(datalist) {
-  pb <- txtProgressBar(min=1, max=length(datalist) * length(datalist[[1]]$jobs), style=3)
-  index <- 1
   setlist <- list()
   cl <- makeCluster(8)
   clusterEvalQ(cl, library(pdist))
   for(data in datalist) {
     for(job in data$jobs) {
+      print(job)
       frame <- data.frame()
       for(sub in data$subpops) {
         frame <- rbind(frame, subset(data[[job]][[sub]], select=data$vars.group))
       }
       v <- meanDists(frame, cl)
       setlist[[data$expname]] <- c(setlist[[data$expname]], v)
-      index <- index + 1
-      setTxtProgressBar(pb, index)
     }
   }
   stopCluster(cl)
-  close(pb)
   return(metaAnalysis(setlist))
+}
+
+diversity.group.gens <- function(datalist, ...) {
+  cl <- makeCluster(8)
+  clusterEvalQ(cl, library(pdist))
+  all.results <- data.frame()
+  for(data in datalist) {
+    if(length(data$jobs) > 0) {
+      print(data$expname)
+      res <- diversity.group.gens.aux(data, cl, ...)
+      all.results <- rbind(all.results, cbind(Exp=data$expname,res))
+    }
+  }
+  stopCluster(cl)
+  return(all.results)
+}
+
+diversity.group.gens.aux <- function(data, cl, interval, accum=T) {
+  steps <- seq(from=interval-1,to=tail(data$gens,1), by=interval)
+  result <- data.frame()
+  for(job in data$jobs) {
+    print(job)
+    for(s in 1:length(steps)) {
+      frame <- data.frame()
+      for(sub in data$subpops) {
+        frame <- rbind(frame, subset(data[[job]][[sub]], 
+                                     gen >= ifelse(accum | s == 1, 0, steps[s - 1]) & gen <= steps[s], 
+                                     select=data$vars.group))
+      }
+      v <- meanDists(frame, cl)
+      result[s,job] <- v
+    }
+  }
+  sumRes <- data.frame(Step=steps)
+  sumRes[["Mean"]] <- rowMeans(result)
+  sumRes[["SD"]] <- apply(result, 1, sd)
+  sumRes[["SE"]] <- sumRes[["SD"]] / sqrt(ncol(result))
+  return(sumRes)
 }
 
 diversity.ind <- function(datalist) {

@@ -24,7 +24,7 @@ public class FlyingRobot extends SmartAgent {
     protected FlyingEffector effector;
     protected DistanceSensorArcs itemArcs, botArcs;
     protected RangeBearingSensor centre;
-    public static final Color COLOR = Color.YELLOW;
+    public static final Color COLOR = Color.RED;
 
     public FlyingRobot(ForagingTask sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.flyingRadius, COLOR, ac);

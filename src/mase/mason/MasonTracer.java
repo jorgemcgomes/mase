@@ -33,13 +33,13 @@ public class MasonTracer {
     public static final String SIZE = "-s";
     public static final String OUT = "-o";
     public static final String SEED = "-seed";
+    //public static final String DRAW_AREA = "-draw-area";
 
     public static void main(String[] args) throws Exception {
         int size = 0;
         File out = null;
         int index;
         long seed = new Random().nextLong();
-        File gc = null;
         for (index = 0; index < args.length; index++) {
             if (args[index].equals(SIZE)) {
                 size = Integer.parseInt(args[1 + index++]);
@@ -49,13 +49,13 @@ public class MasonTracer {
                 seed = Long.parseLong(args[1 + index++]);
             }
         }
+        File gc = Reevaluate.findControllerFile(args);
         if(out == null && gc != null) {
             out = new File(gc.getParentFile(), gc.getName() + ".svg");
         }
-        
 
         GroupController controller = Reevaluate.createController(args);
-        MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args);
+        MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args, gc.getParentFile());
         trace(controller, sim, seed, size, out);
 
     }
@@ -70,11 +70,17 @@ public class MasonTracer {
 
         double scale = (double) size / Math.max(field.width, field.height);
 
-        SVGGraphics2D gr = new SVGGraphics2D((int) (field.width * scale), (int) (field.height * scale));
+        int w = (int) (field.width * scale);
+        int h = (int) (field.height * scale);
+        
+        // create canvas
+        SVGGraphics2D gr = new SVGGraphics2D(w,h);
         gr.setPaint(Color.WHITE);
-        gr.fillRect(0, 0, size, size);
+        
+        // draw area
+        gr.fillRect(0, 0, w, h);
         gr.setPaint(Color.BLACK);
-        gr.drawPolygon(new int[]{0,size,size,0,0}, new int[]{0,0,size,size,0}, 5);        
+        gr.drawPolygon(new int[]{0,w,w,0,0}, new int[]{0,0,h,h,0}, 5);        
         
         Bag allObjects = field.getAllObjects();
         ArrayList<EmboddiedAgent> agents = new ArrayList<EmboddiedAgent>();
