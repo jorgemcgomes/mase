@@ -95,7 +95,7 @@ loadData <- function(folder, jobs=1, fitlim=c(0,1), vars.ind=c(), vars.group=c()
       
       for(s in 0:(data$nsubs-1)) {
         # & gen %in% data$gens
-        sub <- subset(tab, subpop == s, select=na.omit(c(fixedvars, data$vars.ind, data$vars.group, data$vars.extra)))
+        sub <- subset(tab, subpop == s & gen %in% data$gens, select=na.omit(c(fixedvars, data$vars.ind, data$vars.group, data$vars.extra)))
         if(behavs.bests) {
           bests <- lapply(data$gens, bestInGen, sub)
           sub <- do.call(rbind.data.frame, bests)
@@ -148,6 +148,30 @@ filterJobs <- function(data, jobs=c(),name=NULL) {
     }
     return(data)
 }
+
+splitJobs <- function(datalist, verbose=F, threshold.good, threshold.bad=threshold.good) {
+  all.split <- list()
+  fl.good <- fitnessLevelReached(datalist, threshold.good)
+  fl.bad <- fitnessLevelReached(datalist, threshold.bad)
+  if(verbose) {
+    print(fl.good)
+    print(fl.bad)
+  }
+  for(d in datalist) {
+    over <- as.logical(fl.good$data[d$expname,])
+    good <- filterJobs(d, jobs=d$jobs[over], name=paste(d$expname,"good",sep="."))
+    if(length(good$jobs) > 0) {
+      all.split[[good$expname]] <- good
+    }
+    under <- !as.logical(fl.bad$data[d$expname,])
+    bad <- filterJobs(d, jobs=d$jobs[under], name=paste(d$expname,"bad",sep="."))
+    if(length(bad$jobs) > 0) {
+      all.split[[bad$expname]] <- bad
+    }
+  }
+  return(all.split)
+}
+
 
 filterSubs <- function(data, subs) {
     data[["subpops"]] <- subs
@@ -251,6 +275,18 @@ smooth <- function(data, window=5, weighted=TRUE) {
         }
     }
     return(newData)
+}
+
+filterByFitness <- function(datalist, threshold) {
+  for(data in names(datalist)) {
+    d <- datalist[[data]]
+    for(job in d$jobs) {
+      for(sub in d$subpops) {
+        datalist[[data]][[job]][[sub]] <- subset(d[[job]][[sub]], fitness > threshold)
+      }
+    }
+  }
+  return(datalist)
 }
 
 # assumes that all frames in framelist have the same columns and same number of rows

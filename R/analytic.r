@@ -18,32 +18,6 @@ metaAnalysis <- function(setlist, ...) {
     return(list(summary=res, ttest=tt,data=dd))
 }
 
-fitnessSummary <- function(datalist, snapshots=NULL) {
-  frame <- data.frame()
-  for(data in datalist) {
-    if(is.null(snapshots)) {
-      snapshots <- c(length(data$gens))
-    }
-    for(s in snapshots) {
-      fits <- c()
-      for(job in data$jobs) {
-        fits <- c(fits, data[[job]]$fitness$best.sofar[s])
-      }
-      index <- nrow(frame) + 1
-      frame[index, "method"] <- data$expname
-      frame[index, "gen"] <- s
-      frame[index, "n"] <- length(fits)
-      frame[index, "mean"] <- mean(fits)
-      frame[index, "sd"] <- sd(fits)
-      frame[index, "se"] <- sd(fits) / sqrt(length(fits))
-    }
-  }
-  return(frame)
-}
-
-
-
-
 
 #### Generational t-tests ######################################################
 
@@ -114,24 +88,172 @@ batch.ttest <- function(setlist, ...) {
     return(result)
 }
 
+#### Fitness analysis ##################################################
 
-#### Behaviour diversity metrics ###############################################
+fitnessSummary <- function(datalist, snapshots=NULL) {
+  frame <- data.frame()
+  for(data in datalist) {
+    if(is.null(snapshots)) {
+      snapshots <- c(length(data$gens))
+    }
+    for(s in snapshots) {
+      fits <- c()
+      for(job in data$jobs) {
+        fits <- c(fits, data[[job]]$fitness$best.sofar[s])
+      }
+      index <- nrow(frame) + 1
+      frame[index, "method"] <- data$expname
+      frame[index, "gen"] <- s
+      frame[index, "n"] <- length(fits)
+      frame[index, "mean"] <- mean(fits)
+      frame[index, "sd"] <- sd(fits)
+      frame[index, "se"] <- sd(fits) / sqrt(length(fits))
+    }
+  }
+  return(frame)
+}
+
+se <- function(x, na.rm=F){
+  if(na.rm) {
+    x <- x[!is.na(x)]
+  }
+  sqrt(var(x)/length(x))
+}
+
+fitnessStatistics <- function(datalist) {
+  resultFrame <- data.frame()
+  for(data in datalist) {
+    frame <- data.frame(gen=data$gens)
+    genframe <- data.frame(gen=data$gens)
+    for(j in data$jobs) {
+      frame <- cbind(frame,data[[j]]$fitness$best.sofar)
+      genframe <- cbind(frame,data[[j]]$fitness$best.gen)
+    }
+    frame <- frame[,-1] # delete gens column
+    genframe <- genframe[,-1]
+    resultFrame <- rbind(resultFrame, data.frame(
+      Exp=data$expname,
+      Generation=data$gens,
+      Bestfar.Mean=apply(frame,1,mean),
+      Bestfar.SD=apply(frame,1,sd),
+      Bestfar.SE=apply(frame,1,se),
+      Bestgen.Mean=apply(genframe,1,mean),
+      Bestgen.SD=apply(genframe,1,sd),
+      Bestgen.SE=apply(genframe,1,se)
+    ))
+  }
+  return(resultFrame)
+}
+
+fitnessBests <- function(datalist, ttests=F, ...) {
+  resultList <- list()
+  for(data in datalist) {
+    for(j in data$jobs) {
+      f <- tail(data[[j]]$fitness$best.sofar,1)
+      resultList[[length(resultList)+1]] <- c(data$expname,j,f)
+    }
+  }
+  df <- do.call(rbind.data.frame, resultList)
+  colnames(df) <- c("Exp","Job","Fitness")
+  df$Fitness <- as.numeric(as.character(df$Fitness))
+
+  if(ttests) {
+    setlist <- list()
+    for(e in unique(df$Exp)) {
+      setlist[[e]] <- subset(df, Exp==e)$Fitness
+    }
+    print(metaAnalysis(setlist, ...))
+  }  
+  return(df)  
+}
+
+fitnessLevels <- function(data, ...) {
+  setlist <- list()
+  for(exp in names(data)) {
+    metric <- c()
+    for(job in data[[exp]]$jobs) {
+      l <- fitnessLevelAux(data[[exp]][[job]]$fitness, ...)
+      metric <- c(metric, l)
+    }
+    setlist[[exp]] <- metric[which(!is.na(metric))]
+  }
+  return(metaAnalysis(setlist))
+}
+
+fitnessLevelAux <- function(fitness, level, use.max=NULL) {
+  for(r in 1:nrow(fitness)) {
+    if(fitness[r,"best.sofar"] >= level) {
+      return(fitness[r,"gen"])
+    }
+    if(r == nrow(fitness)) {
+      if(is.null(use.max)) {
+        return(NA)
+      } else {
+        return(use.max)
+      }
+    }
+  }
+}
+
+fitnessLevelReached <- function(datalist, level) {
+  setlist <- list()
+  for(data in datalist) {      
+    fits <- c()
+    for(job in data$jobs) {
+      fitness.list <- data[[job]]$fitness$best.sofar
+      f <- fitness.list[length(fitness.list)]
+      if(f >= level) {
+        fits <- c(fits,1)
+      } else {
+        fits <- c(fits,0)
+      }
+    }
+    setlist[[data$expname]] <- fits
+  }
+  return(metaAnalysis(setlist))
+}
+
+
+#### Behaviour analysis #################################################################
+
+analyseVars <- function(datalist, vars) {
+  result <- data.frame()
+  for(data in datalist) {
+    if(length(data$jobs) > 0) {
+      df <- data.frame()
+      for(job in data$jobs) {
+        for(sub in data$subpops) {
+          df <- rbind(df, subset(data[[job]][[sub]], select=c("gen",vars)))
+        }
+      }
+      m <- aggregate(. ~ gen, data=df, mean)
+      result <- rbind(result, cbind(Exp=data$expname,m))      
+    }
+  }
+  return(result)
+}
+
+
+#### Behaviour diversity based on mean distance #########################################
 
 euclideanDist <- function(x1, x2) {sqrt(sum((x1 - x2) ^ 2))} 
 
-diversity.group <- function(datalist) {
+diversity.group <- function(datalist, min.number=10) {
   setlist <- list()
-  cl <- makeCluster(8)
+  cl <- makeCluster(detectCores(logical=T))
   clusterEvalQ(cl, library(pdist))
   for(data in datalist) {
+    print(data$expname)
     for(job in data$jobs) {
       print(job)
       frame <- data.frame()
       for(sub in data$subpops) {
         frame <- rbind(frame, subset(data[[job]][[sub]], select=data$vars.group))
       }
-      v <- meanDists(frame, cl)
-      setlist[[data$expname]] <- c(setlist[[data$expname]], v)
+      if(nrow(frame) > min.number) {
+        v <- meanDists(frame, cl)
+        setlist[[data$expname]] <- c(setlist[[data$expname]], v)
+      }
     }
   }
   stopCluster(cl)
@@ -139,7 +261,7 @@ diversity.group <- function(datalist) {
 }
 
 diversity.group.gens <- function(datalist, ...) {
-  cl <- makeCluster(8)
+  cl <- makeCluster(detectCores(logical=T))
   clusterEvalQ(cl, library(pdist))
   all.results <- data.frame()
   for(data in datalist) {
@@ -198,6 +320,8 @@ diversity.ind <- function(datalist) {
   return(metaAnalysis(setlist))  
 }
 
+### OTHER BEHAVIOURAL ANALYSIS #############################################################
+
 meanDists <- function(data, cl) {
   data <- as.matrix(data)
   aux <- function(index) {
@@ -249,8 +373,6 @@ countNearBest <- function(file, subpops, threshold) {
   }
   return(near)
 }
-
-
 
 metaGroupDiversity <- function(datalist) {
     setlist <- list()
@@ -698,6 +820,54 @@ kl <- function(p, q) {
 
 #### Generic generational data analysis ########################################
 
+analyse.raw <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, jobs=NULL, transform=list(), include.jobs=F) {
+  # data loading
+  print("Loading data...")
+  expsfolders <- list(...)
+  data <- list()
+  for(i in 1:length(expsfolders)) {
+    f <- expsfolders[[i]]
+    index <- ifelse(is.null(exp.names), basename(f), exp.names[i])
+    data[[index]] <- loadExp(f, filename, vars.pre, vars.sub, vars.post, gens, transform=transform, jobs=jobs[[i]])
+  }
+  
+  if(is.null(gens)) {
+    for(d in data) {
+      for(j in d) {
+        if(length(j[["gen"]]) > length(gens)) {
+          gens <- j[["gen"]]
+        }
+      }
+    }
+  }
+
+  # assemble data
+  resframe <- data.frame()
+  for(a in analyse) {  
+    for(exp in names(data)) {
+      mean <- list()
+      for(job in names(data[[exp]])) {
+        d <- data[[exp]][[job]][[a]][gens+1]
+        mean[[job]] <- d
+      }  
+      df <- as.data.frame(mean)
+      varframe <- data.frame(
+        Generation=gens,
+        Var=a,
+        Exp=exp,
+        Mean=apply(df,1,mean,na.rm=T),
+        SD=apply(df,1,sd,na.rm=T),
+        SE=apply(df,1,se,na.rm=T)
+      )
+      if(include.jobs) {
+        varframe <- cbind(varframe,df)        
+      }
+      resframe <- rbind(resframe,varframe)
+    }
+  }
+  return(resframe)
+}
+
 analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c(), vars.post=c(), analyse=NULL, gens=NULL, jobs=NULL,
                     splits=10, interval=F, t.tests=F, plot=T, boxplots=T, all=T, print=T, smooth=0, transform=list(), ylim=NULL, jitter=T) {
     
@@ -847,6 +1017,7 @@ analyse <- function(..., filename="", exp.names=NULL, vars.pre=c(), vars.sub=c()
         }
         
     }
+    return(plotframe)
 }
 
 loadExp <- function(folder, filename, transform=list(), jobs=NULL, ...) {
@@ -1253,49 +1424,4 @@ diffs2 <- function(folder, all.name, bvars=3) {
     print(summary(corrs1))
 }
 
-fitnessLevels <- function(data, ...) {
-    setlist <- list()
-    for(exp in names(data)) {
-      metric <- c()
-      for(job in data[[exp]]$jobs) {
-        l <- fitnessLevelAux(data[[exp]][[job]]$fitness, ...)
-        metric <- c(metric, l)
-      }
-      setlist[[exp]] <- metric[which(!is.na(metric))]
-    }
-  return(metaAnalysis(setlist))
-}
-
-fitnessLevelAux <- function(fitness, level, use.max=NULL) {
-  for(r in 1:nrow(fitness)) {
-    if(fitness[r,"best.sofar"] >= level) {
-      return(fitness[r,"gen"])
-    }
-    if(r == nrow(fitness)) {
-      if(is.null(use.max)) {
-        return(NA)
-      } else {
-        return(use.max)
-      }
-    }
-  }
-}
-
-fitnessLevelReached <- function(datalist, level) {
-  setlist <- list()
-  for(data in datalist) {      
-    fits <- c()
-    for(job in data$jobs) {
-      fitness.list <- data[[job]]$fitness$best.sofar
-      f <- fitness.list[length(fitness.list)]
-      if(f >= level) {
-        fits <- c(fits,1)
-      } else {
-        fits <- c(fits,0)
-      }
-    }
-    setlist[[data$expname]] <- fits
-  }
-  return(metaAnalysis(setlist))
-}
 

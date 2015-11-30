@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import mase.app.foraging.Item;
 import mase.controllers.GroupController;
 import mase.mason.world.EmboddiedAgent;
 import mase.stat.Reevaluate;
@@ -50,17 +51,27 @@ public class MasonTracer {
             }
         }
         File gc = Reevaluate.findControllerFile(args);
-        if(out == null && gc != null) {
+        if (out == null && gc != null) {
             out = new File(gc.getParentFile(), gc.getName() + ".svg");
         }
 
         GroupController controller = Reevaluate.createController(args);
         MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args, gc.getParentFile());
-        trace(controller, sim, seed, size, out);
-
+        MasonTracer tracer = new MasonTracer(size);
+        tracer.trace(controller, sim, seed, out);
     }
 
-    public static void trace(GroupController gc, MasonSimulationProblem sim, long seed, int size, File out) throws IOException {
+    private final int size;
+    public boolean drawInitialPositions = true;
+    public boolean drawFinalPositions = true;
+    public boolean drawArena = true;
+    public boolean drawOthers = false;
+
+    public MasonTracer(int size) {
+        this.size = size;
+    }
+
+    public void trace(GroupController gc, MasonSimulationProblem sim, long seed, File out) throws IOException {
         MasonSimState simState = sim.createSimState(gc, seed);
 
         simState.start();
@@ -72,22 +83,25 @@ public class MasonTracer {
 
         int w = (int) (field.width * scale);
         int h = (int) (field.height * scale);
-        
+
         // create canvas
-        SVGGraphics2D gr = new SVGGraphics2D(w,h);
+        SVGGraphics2D gr = new SVGGraphics2D(w, h);
         gr.setPaint(Color.WHITE);
-        
+
         // draw area
-        gr.fillRect(0, 0, w, h);
-        gr.setPaint(Color.BLACK);
-        gr.drawPolygon(new int[]{0,w,w,0,0}, new int[]{0,0,h,h,0}, 5);        
-        
+        if (drawArena) {
+            gr.fillRect(0, 0, w, h);
+            gr.setPaint(Color.BLACK);
+            gr.drawPolygon(new int[]{0, w, w, 0, 0}, new int[]{0, 0, h, h, 0}, 5);
+        }
+
+        // draw other objects
         Bag allObjects = field.getAllObjects();
-        ArrayList<EmboddiedAgent> agents = new ArrayList<EmboddiedAgent>();
+        ArrayList<EmboddiedAgent> agents = new ArrayList<>();
         for (Object o : allObjects) {
             if (o instanceof EmboddiedAgent) {
                 agents.add((EmboddiedAgent) o);
-            } else if(o instanceof OvalPortrayal2D) {
+            } else if (o instanceof OvalPortrayal2D && drawOthers) {
                 OvalPortrayal2D oval = (OvalPortrayal2D) o;
                 Double2D loc = field.getObjectLocation(oval);
                 int x = (int) Math.round((loc.x - oval.scale / 2) * scale);
@@ -95,18 +109,28 @@ public class MasonTracer {
                 int s = (int) Math.round(oval.scale * scale);
                 Color c = (Color) oval.paint;
                 gr.setPaint(c);
-                gr.fillOval(x, y, s, s);         
+                gr.fillOval(x, y, s, s);
             }
         }
-        
+
+        // Foraging exclusive
+        ArrayList<Item> items = new ArrayList<>();
+        for (Object o : allObjects) {
+            if (o instanceof Item) {
+                items.add((Item) o);
+            }
+        }
+
         // draw initial positions
-        for (EmboddiedAgent ag : agents) {
-            int x = (int) Math.round((ag.getLocation().x - ag.getRadius() / 2) * scale);
-            int y = (int) Math.round((ag.getLocation().y - ag.getRadius() / 2) * scale);
-            int s = (int) Math.round(ag.getRadius() * scale);
-            Color c = (Color) ag.paint;
-            gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
-            gr.fillRect(x, y, s, s);
+        if (drawInitialPositions) {
+            for (EmboddiedAgent ag : agents) {
+                int x = (int) Math.round((ag.getLocation().x - ag.getRadius() / 2) * scale);
+                int y = (int) Math.round((ag.getLocation().y - ag.getRadius() / 2) * scale);
+                int s = (int) Math.round(ag.getRadius() * scale);
+                Color c = (Color) ag.paint;
+                gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
+                gr.fillRect(x, y, s, s);
+            }
         }
 
         // record paths
@@ -117,13 +141,13 @@ public class MasonTracer {
                 if (!points.containsKey(ag)) {
                     points.put(ag, new ArrayList<Int2D>());
                 }
-                points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale), 
+                points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale),
                         (int) Math.round(ag.getLocation().y * scale)));
             }
             keepGoing = simState.schedule.step(simState);
         }
         for (EmboddiedAgent ag : agents) {
-            points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale), 
+            points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale),
                     (int) Math.round(ag.getLocation().y * scale)));
         }
 
@@ -143,13 +167,28 @@ public class MasonTracer {
         }
 
         // last positions
-        for (EmboddiedAgent ag : agents) {
-            int x = (int) Math.round((ag.getLocation().x - ag.getRadius()) * scale);
-            int y = (int) Math.round((ag.getLocation().y - ag.getRadius()) * scale);
-            int s = (int) Math.round(ag.getRadius() * 2 * scale);
-            Color c = (Color) ag.paint;
-            gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
-            gr.fillOval(x, y, s, s);
+        if (drawFinalPositions) {
+            for (EmboddiedAgent ag : agents) {
+                int x = (int) Math.round((ag.getLocation().x - ag.getRadius()) * scale);
+                int y = (int) Math.round((ag.getLocation().y - ag.getRadius()) * scale);
+                int s = (int) Math.round(ag.getRadius() * 2 * scale);
+                Color c = (Color) ag.paint;
+                gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
+                gr.fillOval(x, y, s, s);
+            }
+        }
+
+        // foraging task exclusive
+        for (Item it : items) {
+            Double2D loc = it.getLocation();
+            int x = (int) Math.round(loc.x * scale);
+            int y = (int) Math.round(loc.y * scale);
+            int s = (int) Math.round(it.scale * scale * 3);
+            Color c = (Color) it.paint;
+            gr.setPaint(c);
+            gr.drawRect(x - s / 2, y - s / 2, s, s);
+            gr.drawLine(x - s / 2, y - s / 2, x + s / 2, y + s / 2);
+            gr.drawLine(x + s / 2, y - s / 2, x - s / 2, y + s / 2);
         }
 
         SVGUtils.writeToSVG(out, gr.getSVGElement());

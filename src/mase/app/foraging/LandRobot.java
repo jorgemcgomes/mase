@@ -31,6 +31,7 @@ public class LandRobot extends SmartAgent {
         this.enableCollisionRebound(sim.par.flyingStartHeight < 5);
         this.enableBoundedArena(false);
         this.enablePolygonCollisions(false);
+        //this.setOrientationShowing(false);
 
         // movement effector
         dm = new DashMovementEffector();

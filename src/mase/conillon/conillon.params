@@ -7,7 +7,7 @@ eval.base.masterproblem.server-name =           evolve.dcti.iscte.pt
 eval.base.masterproblem.server-port =           0
 eval.base.masterproblem.code-port =             0
 eval.base.masterproblem.priority =              10 
-eval.base.masterproblem.job-size =              5
+eval.base.masterproblem.job-size =              3
 eval.base.masterproblem.timeout =               1800
 eval.base.masterproblem.maxtries =              25
 
