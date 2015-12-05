@@ -47,8 +47,8 @@ public class ForagingTask extends MasonSimState {
             }
         }       
 
-        landBot = new LandRobot(this, field, acs[0]);
-        flyingBot = new FlyingRobot(this, field, acs[1]);
+        landBot = new LandRobot(this, field, acs[0] == null ? null : acs[0].clone());
+        flyingBot = new FlyingRobot(this, field, acs[1] == null ? null : acs[1].clone());
 
         if(par.landPlacement == ForagingPar.FIXED) {
             landBot.setLocation(par.landStartPos);

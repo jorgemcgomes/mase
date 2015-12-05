@@ -36,7 +36,8 @@ public class Reevaluate {
 
     public static void main(String[] args) throws Exception {
         int reps = getRepetitions(args);
-        SimulationProblem simulator = createSimulator(args);
+        File gc = findControllerFile(args);
+        SimulationProblem simulator = createSimulator(args, gc.getParentFile());
         GroupController controller = createController(args);
         Reevaluation res = reevaluate(controller, simulator, reps);
         System.out.println(res);
