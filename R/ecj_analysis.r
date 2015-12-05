@@ -11,7 +11,12 @@ setwd("~/exps/EC/pred")
 ###### task difficulty - fitness ######################################
 
 data <- metaLoadData("fit_e4","fit_e7","fit_e10","fit_e13", names=c("V4","V7","V10","V13"), params=list(jobs=30, subpops=2, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
-fullStatistics(data, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit",fit.comp.par=list(snapshots=c(500),jitter=F,ylim=T))
+
+base.fitness <- fitnessStatistics(data)
+ggplot(base.fitness, aes(Generation,Bestfar.Mean,group=Exp)) + geom_line(aes(colour=Exp)) + ylim(0,2) + ylab("Team performance") +
+  geom_ribbon(aes(ymax = Bestfar.Mean + Bestfar.SE, ymin = Bestfar.Mean - Bestfar.SE), alpha = 0.15)
+ggsave("~/Dropbox/Work/Papers/EC/base_lines.pdf", width=4.25,height=2.7)
+
 
 ###### number of collaborators x setup - fitness #######################
 
@@ -71,10 +76,24 @@ ggplot(frame, aes(Setup, Value)) +
 
 ####### OVERCOMING PREMATURE CONVERGENCE -- FITNESS PLOTS
 
-data4 <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_ind","nsga_e4_mix", names=c("F","T","I","M"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
-data7 <- metaLoadData("fit_e7","nsga_e7_group","nsga_e7_ind","nsga_e7_mix", names=c("F","T","I","M"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
-data10 <- metaLoadData("fit_e10","nsga_e10_group","nsga_e10_ind","nsga_e10_mix", names=c("F","T","I","M"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
-data13 <- metaLoadData("fit_e13","nsga_e13_group","nsga_e13_ind","nsga_e13_mix", names=c("F","T","I","M"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat",fitlim=c(0,2), load.behavs=F))
+data4 <- metaLoadData("fit_e4","nsga_e4_group","nsga_e4_ind","nsga_e4_mix", names=c("Fit","NS-Team","NS-Ind","NS-Mix"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data7 <- metaLoadData("fit_e7","nsga_e7_group","nsga_e7_ind","nsga_e7_mix", names=c("Fit","NS-Team","NS-Ind","NS-Mix"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data10 <- metaLoadData("fit_e10","nsga_e10_group","nsga_e10_ind","nsga_e10_mix", names=c("Fit","NS-Team","NS-Ind","NS-Mix"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
+data13 <- metaLoadData("fit_e13","nsga_e13_group","nsga_e13_ind","nsga_e13_mix", names=c("Fit","NS-Team","NS-Ind","NS-Mix"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat",fitlim=c(0,2), load.behavs=F))
+
+allframe <- rbind(
+    cbind(fitnessStatistics(data4),Task="V4"),
+    cbind(fitnessStatistics(data7),Task="V7"),
+    cbind(fitnessStatistics(data10),Task="V10"),
+    cbind(fitnessStatistics(data13),Task="V13")
+  )
+
+ggplot(allframe, aes(Generation,Bestfar.Mean,group=Exp)) + geom_line(aes(colour=Exp,lty=Exp)) + ylim(0,2) + ylab("Team performance") +
+  geom_ribbon(aes(ymax = Bestfar.Mean + Bestfar.SE, ymin = Bestfar.Mean - Bestfar.SE), alpha = 0.15) + facet_wrap(~ Task, nrow=1) +
+  theme(legend.position="bottom")
+ggsave("~/Dropbox/Work/Papers/EC/improv_lines.pdf", width=9,height=3.25)
+
+
 
 DEF_WIDTH <- 3.25 ; DEF_HEIGHT <- 2.5
 fullStatistics(data4, fit.comp=T, show.only=T, som.group=F, som.alljobs=F, expset.name="fit",fit.comp.par=list(snapshots=c(500),jitter=F,ylim=T))
@@ -155,6 +174,7 @@ ggplot(subset(frame, Type=="Best-of-gen team dispersion"), aes(x=V, y=mean, colo
 
 ####### best-of-generation plots with REbehaviours ###############
 
+setwd("~/exps/EC/pred")
 data <- metaLoadData("fit_e4","fit_e7","fit_e10","fit_e13","nsga_e4_group","nsga_e7_group","nsga_e10_group","nsga_e13_group","nsga_e4_ind","nsga_e7_ind","nsga_e10_ind","nsga_e13_ind","nsga_e4_mix","nsga_e7_mix","nsga_e10_mix","nsga_e13_mix", 
                      names=c("Fit.4","Fit.7","Fit.10","Fit.13","NS.Team.4","NS.Team.7","NS.Team.10","NS.Team.13","NS.Ind.4","NS.Ind.7","NS.Ind.10","NS.Ind.13","NS.Mix.4","NS.Mix.7","NS.Mix.10","NS.Mix.13"), params=list(jobs=30, subpops=3, fitness.file="refitness.stat", fitlim=c(0,2), load.behavs=F))
 which.median <- function(x) which.min(abs(x - median(x)))
@@ -182,24 +202,24 @@ all[uni,"X"] <- resam$points[,1]
 all[uni,"Y"] <- resam$points[,2]
 save(all, file="~/Dropbox/Work/Papers/EC/sammon.rdata")
 
-plots <- list()
-for(v in names(rebests)) {
-  sub <- cbind(subset(all, V==v),T="G")
-  sub[1,"T"] <- "S"
-  sub[500,"T"] <- "E"
-  index.max <- which.max(sub[[2]])
-  sub[index.max,"T"] <- "B"
-  temp <- sub[499,] ; sub[499,] <- sub[index.max,] ; sub[index.max,] <- temp
-  sub$T <- factor(sub$T, levels=c("G","S","E","B"))
-  g <- ggplot(sub, aes(x=X, y=Y, shape=T, color=T, size=T)) + geom_point() + xlim(range(all$X,na.rm=T)) + ylim(range(all$Y,na.rm=T)) +
-    scale_shape_manual(values=c(3,15,16,17)) + scale_colour_manual(values=c("black","turquoise","orange","red")) +
-    scale_size_manual(values=c(1.5,4,4,4)) + 
-    ggtitle(paste0(v, ", F=", format(maxfits[[v]],digits=3), " D=", format(unifs[[v]],digits=3))) + 
-    theme(axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks=element_blank(),axis.title.x=element_blank(),axis.title.y=element_blank(),legend.position="none")
-  plots[[length(plots)+1]] <- g
-}
-plotListToPDF(plots, ncol=4, width=3, height=3.2)
+load("~/Dropbox/Work/Papers/EC/sammon.rdata")
+#colnames(all) <- c("Exp","Fitness","B1","B2","B3","B4","X","Y")
+#all$Exp <- factor(all$Exp, 
+#                  levels=c("Fit.4","Fit.7","Fit.10","Fit.13","NS.Team.4","NS.Team.7","NS.Team.10","NS.Team.13","NS.Ind.4","NS.Ind.7","NS.Ind.10","NS.Ind.13","NS.Mix.4","NS.Mix.7","NS.Mix.10","NS.Mix.13"),
+#                  labels=c("Fit, V4","Fit, V7","Fit, V10","Fit, V13","NS-Team, V4","NS-Team, V7","NS-Team, V10","NS-Team, V13","NS-Ind, V4","NS-Ind, V7","NS-Ind, V10","NS-Ind, V13","NS-Mix, V4","NS-Mix, V7","NS-Mix, V10","NS-Mix, V13"))
+#all$Generation <- rep(seq(1,500),16)
 
+bests <- data.frame()
+for(e in unique(all$Exp)) {
+  sub <- subset(all, Exp==e)
+  bests <- rbind(bests,sub[which.max(sub$Fitness),])
+}
+ggplot(all, aes(x=X, y=Y)) + geom_point(aes(colour=Fitness), shape=4, size=1.5) + 
+  geom_point(data=subset(all,Generation==1), color="orange", shape=15, size=4) +
+  geom_point(data=bests, color="red", shape=17, size=4) +
+  facet_wrap(~ Exp, ncol=4) +
+  theme(axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks=element_blank(),axis.title.x=element_blank(),axis.title.y=element_blank(),legend.position="bottom")
+ggsave(file="~/Dropbox/Work/Papers/EC/pred_scatter.pdf", width=9, height=9)
 
 ################ DIVERSITY
 
@@ -398,8 +418,30 @@ resam <- sammon(dist(all.b[uni,]))
 all[uni,"X"] <- resam$points[,1] ; all[uni,"Y"] <- resam$points[,2]
 
 save(all, file="~/Dropbox/Work/Papers/EC/herd_sammon.rdata")
-
 save(all, file="~/Dropbox/Work/Papers/EC/mr_sammon.rdata")
+
+load("~/Dropbox/Work/Papers/EC/herd_sammon.rdata")
+load("~/Dropbox/Work/Papers/EC/mr_sammon.rdata")
+
+#colnames(all) <- c("Exp","Fitness","B1","B2","B3","B4","X","Y")
+#all$Exp <- factor(all$Exp, levels=c("fit","nsga_group","nsga_ind","nsga_mix"), labels=c("Fit","NS-Team","NS-Ind","NS-Mix"))
+#all$Generation <- rep(seq(1,500),4)
+
+bests <- data.frame()
+for(e in unique(all$Exp)) {
+  sub <- subset(all, Exp==e)
+  bests <- rbind(bests,sub[which.max(sub$Fitness),])
+}
+ggplot(all, aes(x=X, y=Y)) + geom_point(aes(colour=Fitness), shape=4, size=1.5) + 
+  geom_point(data=subset(all,Generation==1), color="orange", shape=15, size=4) +
+  geom_point(data=bests, color="red", shape=17, size=4) +
+  facet_wrap(~ Exp, ncol=4) +
+  theme(axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks=element_blank(),axis.title.x=element_blank(),axis.title.y=element_blank(),legend.position="bottom")
+
+ggsave(file="~/Dropbox/Work/Papers/EC/herd_scatter.pdf", width=9, height=3.3)
+ggsave(file="~/Dropbox/Work/Papers/EC/mr_scatter.pdf", width=9, height=3.3)
+
+
 
 plots <- list()
 for(v in names(jobs)) {

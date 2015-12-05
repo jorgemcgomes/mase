@@ -337,7 +337,7 @@ a <- fit.pops[fit.pops$Setup=="g150.a150",]
 a$VaryingPopSize <- "Ground robot pop. size = 150"
 fit.pops <- rbind(fit.pops,a)
 
-pd <- position_dodge(5)
+pd <- position_dodge(0)
 ggplot(fit.pops, aes(x=PopSize, y=mean, colour=Task, group=Task)) + 
   geom_errorbar(aes(ymin=mean-se, ymax=mean+se),width=20, position=pd) + 
   geom_line(aes(lty=Task)) +  theme(legend.position="bottom") +

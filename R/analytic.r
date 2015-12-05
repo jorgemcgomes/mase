@@ -162,7 +162,9 @@ fitnessBests <- function(datalist, ttests=F, ...) {
     for(e in unique(df$Exp)) {
       setlist[[e]] <- subset(df, Exp==e)$Fitness
     }
-    print(metaAnalysis(setlist, ...))
+    m <- metaAnalysis(setlist, ...)
+    print(m$summary)
+    print(m$ttest)
   }  
   return(df)  
 }
