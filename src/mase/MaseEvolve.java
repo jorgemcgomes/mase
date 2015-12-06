@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,24 +43,26 @@ public class MaseEvolve {
             } catch (InterruptedException ex) {
             }
         }
-        
-        System.out.println(Thread.currentThread().getName());
 
         // Get config file
         Map<String, String> pars = readParams(args);
+
+        // Write config to system temp file
         File config = writeConfig(args, pars, outDir);
-        
-        // DIRTY FIX FOR JBOT INTEGRATION
+
+        // Copy config to outdir
+        FileUtils.copyFile(config, new File(outDir, DEFAULT_CONFIG));
+
+        // JBOT INTEGRATION: copy jbot config file to the outdir
         // Does nothing when jbot is not used
-        if(pars.containsKey("problem.jbot-config")) {
+        if (pars.containsKey("problem.jbot-config")) {
             File jbot = new File(pars.get("problem.jbot-config"));
             FileUtils.copyFile(jbot, new File(outDir, jbot.getName()));
         }
-            
-        Thread t = launchExperiment(config);
-        System.out.println(t.getName());
+
+        launchExperiment(config);
     }
-    
+
     public static File getOutDir(String[] args) {
         File outDir = null;
         for (int i = 0; i < args.length; i++) {
@@ -67,17 +70,16 @@ public class MaseEvolve {
                 outDir = new File(args[i + 1]);
             }
         }
-        if(outDir == null) {
+        if (outDir == null) {
             System.out.println("-out parameter not found. Going with default: " + OUT_DIR_DEFAULT);
             outDir = OUT_DIR_DEFAULT;
         }
         return outDir;
-    }    
+    }
 
     public static Thread launchExperiment(File config) throws IOException {
         // Call ec.Evolve
         final String[] args = new String[]{"-file", config.getAbsolutePath()};
-        
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -91,21 +93,21 @@ public class MaseEvolve {
     public static Map<String, String> readParams(String[] args) throws Exception {
         // Read command line parameters to a map
         // Checks the parent order
-        File tempFile = File.createTempFile("temp", ".params", new File("."));
+        File tempFile = File.createTempFile("masetemp", ".params", new File("."));
         Map<String, String> argsPars = new LinkedHashMap<>();
         int parentOrder = 0;
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-p")) {
                 String par = args[i + 1];
                 String[] kv = par.split("=");
-                if(kv[0].startsWith("parent")) { // Parent parameter
-                    if(kv[0].equals("parent")) { // Parent with no number
+                if (kv[0].startsWith("parent")) { // Parent parameter
+                    if (kv[0].equals("parent")) { // Parent with no number
                         argsPars.put("parent." + parentOrder, kv[1]);
                         parentOrder++;
                     } else { // Numbered parent
                         String[] split = kv[0].split("\\.");
                         int num = Integer.parseInt(split[1]);
-                        if(num != parentOrder) {
+                        if (num != parentOrder) {
                             throw new Exception("Parent out of order: " + par);
                         }
                         argsPars.put("parent." + num, kv[1]);
@@ -118,11 +120,11 @@ public class MaseEvolve {
                 argsPars.put("parent.0", args[i + 1]);
             }
         }
-        
-        // Write command line parameters in a temp file
+
+        // Write command line parameters to a temp file -- the root file
         BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
-        for(Entry<String,String> e : argsPars.entrySet()) {
-            bw.write(e.getKey()+ " = " + e.getValue());
+        for (Entry<String, String> e : argsPars.entrySet()) {
+            bw.write(e.getKey() + " = " + e.getValue());
             bw.newLine();
         }
         bw.close();
@@ -167,10 +169,11 @@ public class MaseEvolve {
     }
 
     public static File writeConfig(String[] args, Map<String, String> params, File outDir) throws IOException {
-        File configFile = new File(outDir, DEFAULT_CONFIG);
+        File configFile = File.createTempFile("maseconfig", ".params");
 
         // Write the parameter map into a new file
         BufferedWriter bw = new BufferedWriter(new FileWriter(configFile));
+
         // Write the command line arguments in a comment
         bw.write("#");
         for (String arg : args) {
@@ -197,5 +200,4 @@ public class MaseEvolve {
 
         return configFile;
     }
-
 }

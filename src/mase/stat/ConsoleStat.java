@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mase.MaseEvolve;
 import mase.evaluation.ExpandedFitness;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -99,10 +100,7 @@ public class ConsoleStat extends Statistics {
             }
         }
         FitnessStat stat = (FitnessStat) state.statistics.children[1];
-        String ip = "unknown";
-        try {
-            ip = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException ex) {}
+        String ip = RunStatistics.getComputerName();
         state.output.message("Exp:" + stat.statisticsFile.getParent() + " Job: " + state.job[0] + " IP: " + ip);
         state.output.message("Best gen: " + nf.format(maxGen) + " | "
                 + "Best so far: " + nf.format(bestFitness));

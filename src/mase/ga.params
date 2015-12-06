@@ -78,3 +78,5 @@ stat.child.5.compress =                 true
 stat.child.5.sample-size =              10
 #stat.child.6 =                          mase.stat.LastCheckpointStat
 #stat.child.6.file =                     $lastgen.gz
+stat.child.8 =                          mase.stat.RunStatistics
+stat.child.8.file =                     $run.params

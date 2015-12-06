@@ -58,6 +58,7 @@ public class ConillonMasterProblem extends MasterProblem {
     private int jobSize;
     private long timeout;
     private int maxTries;
+    private long currentTimeout;
 
     private HashMap<Integer, Evaluation> jobs;
     private ArrayList<SlaveTask> tasks;
@@ -91,7 +92,7 @@ public class ConillonMasterProblem extends MasterProblem {
 
     private String getDesc(EvolutionState state) {
         File statFile = ((FitnessStat) state.statistics.children[1]).statisticsFile;
-        String exp =  statFile.getParentFile().getParentFile().getParentFile().getName() + "/" + statFile.getParentFile().getParentFile().getName() +"/" + statFile.getParentFile().getName() ;
+        String exp = statFile.getParentFile().getParentFile().getParentFile().getName() + "/" + statFile.getParentFile().getParentFile().getName() + "/" + statFile.getParentFile().getName();
         String desc = exp + " / job " + state.job[0] + " / gen " + state.generation + " (" + state.numGenerations + ")";
         return desc;
     }
@@ -134,20 +135,32 @@ public class ConillonMasterProblem extends MasterProblem {
     public void finishEvaluating(final EvolutionState state, final int threadnum) {
         tries = 0;
         boolean done = false;
+        currentTimeout = 60;
         while (!done && tries < maxTries) {
             try {
                 client.setDesc(getDesc(state));
                 // Old client failed, needs to create new one
                 if (tries > 0) {
                     // try to kill existing client -- no problem if it doesnt work
+                    state.output.message("*** CLOSING EXISTING CLIENT " + client.getMyID() + " ***");
                     try {
-                        closeContacts(state, 0);
+                        runWithTimeout(new Runnable() {
+                            @Override
+                            public void run() {
+                                closeContacts(state, 0);
+                            }
+                        }, 30, TimeUnit.SECONDS);
                     } catch (Exception e) {
                         state.output.message("*** ERROR DISCONNECTING CLIENT " + client.getMyID() + ". CONTINUING AS NORMAL ***");
                     }
                     // try to create new client -- abort if it doesnt work
                     state.output.message("*** TRYING TO CONNECT NEW CLIENT ***");
-                    initializeContacts(state);
+                    runWithTimeout(new Runnable() {
+                        @Override
+                        public void run() {
+                            initializeContacts(state);
+                        }
+                    }, currentTimeout, TimeUnit.SECONDS);
 
                     // replace client in Prototype
                     ConillonMasterProblem prob = (ConillonMasterProblem) state.evaluator.masterproblem;
@@ -157,13 +170,14 @@ public class ConillonMasterProblem extends MasterProblem {
                 state.output.message("*** SENDING TASKS FOR CLIENT " + client.getMyID() + " ***");
                 ArrayList<SlaveResult> resList = runWithTimeout(
                         new EvaluationExecutor(this.client, tasks, jobSize),
-                        timeout, TimeUnit.SECONDS);
+                        currentTimeout, TimeUnit.SECONDS);
                 parseResults(resList, state, threadnum);
                 done = true;
             } catch (Exception e) {
                 // Something went wrong or timeout
                 state.output.message("*** ERROR WITH CLIENT " + client.getMyID() + " / TRY " + tries + "***");
                 e.printStackTrace();
+                currentTimeout = Math.min(currentTimeout * 2, timeout);
                 tries++;
             }
         }
@@ -268,6 +282,18 @@ public class ConillonMasterProblem extends MasterProblem {
         executor.shutdown(); // This does not cancel the already-scheduled task.
         try {
             return future.get(timeout, timeUnit);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            future.cancel(true);
+            throw e;
+        }
+    }
+
+    public static void runWithTimeout(Runnable runnable, long timeout, TimeUnit timeUnit) throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final Future future = executor.submit(runnable);
+        executor.shutdown(); // This does not cancel the already-scheduled task.
+        try {
+            future.get(timeout, timeUnit);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             future.cancel(true);
             throw e;

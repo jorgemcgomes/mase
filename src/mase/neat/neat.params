@@ -60,6 +60,11 @@ stat.child.6 =                          mase.neat.NEATStatistics
 stat.child.6.file =                     $neat.stat
 #stat.child.7 =                          mase.stat.LastCheckpointStat
 #stat.child.7.file =                     $lastgen.gz
+stat.child.8 =                          mase.stat.RunStatistics
+stat.child.8.file =                     $run.params
+stat.child.9 =                          mase.stat.PostEvaluationStat
+stat.child.9.repetitions =              50
+stat.child.9.prefix =                   post
 
 # GA Probabilites
 neat.PROBABILITY.MUTATION =             0.25
