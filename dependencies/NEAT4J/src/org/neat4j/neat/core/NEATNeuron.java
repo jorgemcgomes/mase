@@ -19,6 +19,8 @@ import org.neat4j.neat.nn.core.Synapse;
  * Specific NEAT neuron
  */
 public class NEATNeuron implements Neuron {
+        private static final long serialVersionUID = -4271581501033634190L;
+    
 	private double lastActivation;
 	private double bias;
 	private double[] weights;
@@ -29,6 +31,8 @@ public class NEATNeuron implements Neuron {
 	private NEATNeuron[] sourceNeurons;
 	private Synapse[] incomingSynapses;
 	private boolean isInput = false;
+        
+        protected int auxIndex;
 
 	public NEATNeuron(ActivationFunction function, int id, int type) {		
 		this.activationFunction = function;
