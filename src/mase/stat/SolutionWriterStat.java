@@ -40,28 +40,4 @@ public class SolutionWriterStat extends Statistics {
         }
     }
 
-    public static TarArchiveOutputStream reopen(File file) {
-        try {
-            File temp = File.createTempFile("tararchive", ".gz");
-            FileUtils.copyFile(file, temp);
-            TarArchiveInputStream tais = new TarArchiveInputStream(
-                    new GZIPInputStream(
-                            new BufferedInputStream(new FileInputStream(temp))));
-            file.delete();
-            TarArchiveOutputStream taos = new TarArchiveOutputStream(
-                    new GZIPOutputStream(
-                            new BufferedOutputStream(new FileOutputStream(file))));
-
-            ArchiveEntry nextEntry;
-            while ((nextEntry = tais.getNextEntry()) != null) {
-                taos.putArchiveEntry(nextEntry);
-                IOUtils.copy(tais, taos, (int) nextEntry.getSize());
-                taos.closeArchiveEntry();
-            }
-            return taos;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

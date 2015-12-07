@@ -20,29 +20,31 @@ import java.util.zip.GZIPOutputStream;
 public class LastCheckpointStat extends SolutionWriterStat {
 
     public static final String P_FILE = "file";
+    private static final long serialVersionUID = 1L;
     protected File outFile;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         outFile = state.parameters.getFile(base.push(P_FILE), null);
-        outFile = new File(outFile.getParent(), jobPrefix + outFile.getName());
     }
 
     @Override
-    public void finalStatistics(EvolutionState state, int result) {
-        super.finalStatistics(state, result);
-        try {
-            ObjectOutputStream s
-                    = new ObjectOutputStream(
-                            new GZIPOutputStream(
-                                    new BufferedOutputStream(
-                                            new FileOutputStream(outFile))));
-
-            s.writeObject(state.population);
-            s.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void postEvaluationStatistics(EvolutionState state) {
+        super.postEvaluationStatistics(state);
+        if (state.generation == state.numGenerations - 1) {
+            File out = new File(outFile.getParent(), jobPrefix + state.generation + "." + outFile.getName());
+            try {
+                ObjectOutputStream s
+                        = new ObjectOutputStream(
+                                new GZIPOutputStream(
+                                        new BufferedOutputStream(
+                                                new FileOutputStream(out))));
+                s.writeObject(state);
+                s.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

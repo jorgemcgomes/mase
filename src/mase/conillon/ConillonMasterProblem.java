@@ -308,6 +308,13 @@ public class ConillonMasterProblem extends MasterProblem {
     }
 
     @Override
+    public void reinitializeContacts(EvolutionState state) {
+        initializeContacts(state);
+    }
+    
+    
+
+    @Override
     public void initializeContacts(EvolutionState state) {
         client = new Client(getDesc(state), ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
         client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);

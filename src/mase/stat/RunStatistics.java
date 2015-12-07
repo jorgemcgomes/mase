@@ -29,7 +29,7 @@ public class RunStatistics extends Statistics {
         super.setup(state, base);
         File file = state.parameters.getFile(base.push(P_FILE), null);
         try {
-            log = state.output.addLog(file, false);
+            log = state.output.addLog(file, true);
         } catch (IOException ex) {
             state.output.fatal("An IOException occurred while trying to create the log " + file);
         }
@@ -63,7 +63,7 @@ public class RunStatistics extends Statistics {
             }
         }
     }
-
+    
     @Override
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);

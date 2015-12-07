@@ -59,7 +59,7 @@ public class BestSolutionGenStat extends SolutionWriterStat {
     public void postEvaluationStatistics(EvolutionState state) {
         super.postInitializationStatistics(state);
         if(taos == null && compress) { // can happen in case of resuming from checkpoint
-            taos = SolutionWriterStat.reopen(outFile);
+            taos = SolutionPersistence.reopen(outFile);
         }
         
         double bestFitness = Double.NEGATIVE_INFINITY;

@@ -7,6 +7,8 @@ package mase.stat;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.eval.MasterProblem;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,12 +20,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import mase.SimulationProblem;
 import mase.controllers.GroupController;
 import mase.evaluation.ExpandedFitness;
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
 /**
@@ -33,13 +39,13 @@ import org.apache.commons.lang3.SerializationUtils;
 public abstract class SolutionPersistence {
 
     public static PersistentSolution createPersistentController(EvolutionState state, Individual ind, int sub, int index) {
-        SimulationProblem sp = (SimulationProblem) (state.evaluator.p_problem instanceof MasterProblem ?
-                ((MasterProblem) state.evaluator.p_problem).problem :
-                state.evaluator.p_problem);
+        SimulationProblem sp = (SimulationProblem) (state.evaluator.p_problem instanceof MasterProblem
+                ? ((MasterProblem) state.evaluator.p_problem).problem
+                : state.evaluator.p_problem);
         PersistentSolution pc = new PersistentSolution();
-        GroupController gc = ind.fitness.getContext() == null ? 
-                sp.createController(state, ind) : 
-                sp.createController(state, ind.fitness.getContext());
+        GroupController gc = ind.fitness.getContext() == null
+                ? sp.createController(state, ind)
+                : sp.createController(state, ind.fitness.getContext());
         pc.setController(gc);
 
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
@@ -89,12 +95,12 @@ public abstract class SolutionPersistence {
         PersistentSolution controller = (PersistentSolution) ois.readObject();
         return controller;
     }
-    
+
     public static List<PersistentSolution> readSolutionsFromTar(File tarFile) throws Exception {
         GZIPInputStream gis = new GZIPInputStream(new FileInputStream(tarFile));
         TarArchiveInputStream tis = new TarArchiveInputStream(gis);
 
-        ArrayList<PersistentSolution> gcs = new ArrayList<PersistentSolution>();        
+        ArrayList<PersistentSolution> gcs = new ArrayList<PersistentSolution>();
         TarArchiveEntry e;
         while ((e = tis.getNextTarEntry()) != null) {
             PersistentSolution gc = readSolution(tis);
@@ -104,5 +110,30 @@ public abstract class SolutionPersistence {
 
         Collections.sort(gcs);
         return gcs;
+    }
+
+    public static TarArchiveOutputStream reopen(File file) {
+        try {
+            File temp = File.createTempFile("tararchive", ".gz");
+            FileUtils.copyFile(file, temp);
+            TarArchiveInputStream tais = new TarArchiveInputStream(
+                    new GZIPInputStream(
+                            new BufferedInputStream(new FileInputStream(temp))));
+            file.delete();
+            TarArchiveOutputStream taos = new TarArchiveOutputStream(
+                    new GZIPOutputStream(
+                            new BufferedOutputStream(new FileOutputStream(file))));
+
+            ArchiveEntry nextEntry;
+            while ((nextEntry = tais.getNextEntry()) != null) {
+                taos.putArchiveEntry(nextEntry);
+                IOUtils.copy(tais, taos, (int) nextEntry.getSize());
+                taos.closeArchiveEntry();
+            }
+            return taos;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

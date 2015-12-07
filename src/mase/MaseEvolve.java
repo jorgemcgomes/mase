@@ -5,6 +5,7 @@
  */
 package mase;
 
+import ec.Evolve;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -79,7 +80,7 @@ public class MaseEvolve {
 
     public static Thread launchExperiment(File config) throws IOException {
         // Call ec.Evolve
-        final String[] args = new String[]{"-file", config.getAbsolutePath()};
+        final String[] args = new String[]{Evolve.A_FILE, config.getAbsolutePath()};
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
