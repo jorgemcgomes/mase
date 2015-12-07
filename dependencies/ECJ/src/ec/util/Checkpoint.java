@@ -47,12 +47,12 @@ public class Checkpoint
         {
         try
             {
-            File file = new File("" + state.checkpointPrefix + /*"." + state.generation +*/ ".gz");
+            File file = new File("" + state.checkpointPrefix + "." + state.generation + ".gz");
             
             if (state.checkpointDirectory != null)
                 {
                 file = new File(state.checkpointDirectory, 
-                    "" + state.checkpointPrefix + /*"." + state.generation +*/ ".gz");
+                    "" + state.checkpointPrefix + "." + state.generation + ".gz");
                 }
             ObjectOutputStream s = 
                 new ObjectOutputStream(

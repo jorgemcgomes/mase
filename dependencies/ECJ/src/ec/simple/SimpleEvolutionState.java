@@ -88,15 +88,29 @@ public class SimpleEvolutionState extends EvolutionState
         evaluator.initializeContacts(this);
         }
 
+    protected boolean startFromCheckpoint = false;
+    
+    @Override
+    public void startFromCheckpoint() {
+        super.startFromCheckpoint();
+        this.startFromCheckpoint = true;
+    }
+
+    
+    
     public int evolve()
         {
         if (generation > 0) 
             output.message("Generation " + generation);
 
         // EVALUATION
-        statistics.preEvaluationStatistics(this);
-        evaluator.evaluatePopulation(this);
-        statistics.postEvaluationStatistics(this);
+        if(!startFromCheckpoint) {
+            statistics.preEvaluationStatistics(this);
+            evaluator.evaluatePopulation(this);
+            statistics.postEvaluationStatistics(this);
+        } else {
+            startFromCheckpoint = false;
+        }
 
         // SHOULD WE QUIT?
         if (evaluator.runComplete(this) && quitOnRunComplete)
