@@ -31,6 +31,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
     public static final String FEED_FORWARD = "feed-forward";
     public static final String ELMAN = "elman";
     public static final String JORDAN = "jordan";
+    private static final long serialVersionUID = 1L;
     private BasicNetwork prototypeNetwork;
 
     @Override
@@ -39,31 +40,12 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         Parameter def = defaultBase();
 
         // Create network
-        String structure = state.parameters.getStringWithDefault(base.push(P_STRUCTURE), def.push(P_STRUCTURE), FEED_FORWARD);
+        String structure = state.parameters.getString(base.push(P_STRUCTURE), def.push(P_STRUCTURE));
         int input = state.parameters.getInt(base.push(P_INPUTS), def.push(P_INPUTS));
         int hidden = state.parameters.getInt(base.push(P_HIDDEN), def.push(P_HIDDEN));
         int output = state.parameters.getInt(base.push(P_OUTPUTS), def.push(P_OUTPUTS));
         boolean tanh = state.parameters.getBoolean(base.push(P_TANH), def.push(P_TANH), false);
-
-        final ActivationFunction act = tanh ? new ActivationTANH() : new ActivationSigmoid();
-
-        NeuralNetworkPattern pattern = null;
-        if (structure.equalsIgnoreCase(ELMAN)) {
-            pattern = new ElmanPattern2();
-        } else if (structure.equalsIgnoreCase(JORDAN)) {
-            pattern = new JordanPattern();
-        } else if (structure.equalsIgnoreCase(FEED_FORWARD)) {
-            pattern = new FeedForwardPattern();
-        } else {
-            state.output.fatal("Unknown structure: " + structure, base.push(P_STRUCTURE));
-        }
-
-        pattern.setActivationFunction(act);
-        pattern.setInputNeurons(input);
-        pattern.addHiddenLayer(hidden);
-        pattern.setOutputNeurons(output);
-        prototypeNetwork = (BasicNetwork) pattern.generate();
-        //prototypeNetwork.reset();
+        prototypeNetwork = createPrototypeNetwork(structure, input, hidden, output, tanh);
 
         int genomeSize = ((FloatVectorSpecies) species).genomeSize;
         if (genomeSize != prototypeNetwork.getStructure().calculateSize()) {
@@ -81,5 +63,24 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         BasicNetwork network = (BasicNetwork) prototypeNetwork.clone();
         network.decodeFromArray(genome);
         return new NeuralAgentController(network);
+    }
+    
+    protected static BasicNetwork createPrototypeNetwork(String structure, int in, int hidden, int out, boolean tanh) {
+        ActivationFunction act = tanh ? new ActivationTANH() : new ActivationSigmoid();
+        NeuralNetworkPattern pattern = null;
+        if (structure.equalsIgnoreCase(ELMAN)) {
+            pattern = new ElmanPattern2();
+        } else if (structure.equalsIgnoreCase(JORDAN)) {
+            pattern = new JordanPattern();
+        } else if (structure.equalsIgnoreCase(FEED_FORWARD)) {
+            pattern = new FeedForwardPattern();
+        } else {
+            return null;
+        }
+        pattern.setActivationFunction(act);
+        pattern.setInputNeurons(in);
+        pattern.addHiddenLayer(hidden);
+        pattern.setOutputNeurons(out);
+        return (BasicNetwork) pattern.generate();
     }
 }

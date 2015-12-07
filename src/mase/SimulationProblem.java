@@ -18,6 +18,7 @@ import mase.controllers.AgentControllerIndividual;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.controllers.HomogeneousGroupController;
+import mase.controllers.MultiAgentControllerIndividual;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
@@ -123,24 +124,34 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
 
     // TODO: Bad dependence -- should be improved with interfaces
     public GroupController createController(EvolutionState state, Individual... ind) {
-        AgentController[] acs = new AgentController[ind.length];
+        ArrayList<AgentController> acs = new ArrayList<>();
         for (int i = 0; i < ind.length; i++) {
-            acs[i] = ((AgentControllerIndividual) ind[i]).decodeController();
+            if(ind[i] instanceof AgentControllerIndividual) {
+                acs.add(((AgentControllerIndividual) ind[i]).decodeController());
+            } else if(ind[i] instanceof MultiAgentControllerIndividual) {
+                AgentController[] as = ((MultiAgentControllerIndividual) ind[i]).decodeControllers();
+                for(AgentController a : as) {
+                    acs.add(a);
+                }
+            }
         }
         GroupController gc = null;
-        if (acs.length == 1) {
-            gc = new HomogeneousGroupController(acs[0]);
+        if (acs.size() == 1) {
+            gc = new HomogeneousGroupController(acs.get(0));
         } else {
+            AgentController[] acsArray = new AgentController[acs.size()];
+            acs.toArray(acsArray);
+            
             if (state.exchanger instanceof AbstractHybridExchanger) {
                 AbstractHybridExchanger exc = (AbstractHybridExchanger) state.exchanger;
                 int[] allocations = exc.getAllocations();
                 AgentController[] temp = new AgentController[allocations.length];
                 for (int i = 0; i < allocations.length; i++) {
-                    temp[i] = acs[allocations[i]].clone();
+                    temp[i] = acsArray[allocations[i]].clone();
                 }
-                acs = temp;
+                acsArray = temp;
             }
-            gc = new HeterogeneousGroupController(acs);
+            gc = new HeterogeneousGroupController(acsArray);
         }
         return gc;
     }
