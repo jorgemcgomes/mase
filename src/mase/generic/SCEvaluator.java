@@ -23,6 +23,7 @@ public class SCEvaluator extends MasonEvaluation {
 
     public static final String P_DISCRETIZATION = "discretisation";
     public static final String P_DISTANCE = "distance";
+    private static final long serialVersionUID = 1L;
     private int bins;
     private int distance;
     private HashMap<Integer, byte[]> key;

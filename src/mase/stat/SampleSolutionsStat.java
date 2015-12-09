@@ -20,11 +20,12 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class SampleSolutionsStat extends SolutionWriterStat {
+public class SampleSolutionsStat extends FileWriterStat {
 
     public static final String P_FILE = "file";
     public static final String P_SAMPLE_SIZE = "sample-size";
     public static final String P_COMPRESS = "compress";
+    private static final long serialVersionUID = 1L;
     protected boolean compress;
     protected int sampleSize;
     protected File outFile;

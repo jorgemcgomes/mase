@@ -19,6 +19,7 @@ import org.neat4j.neat.ga.core.Chromosome;
  * @author jorge
  */
 public class NEATPipeline extends BreedingPipeline {
+    private static final long serialVersionUID = 1L;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {

@@ -20,6 +20,8 @@ import org.neat4j.neat.core.NEATNeuralNet;
  */
 public class NEATIndividual extends Individual implements AgentControllerIndividual {
 
+    private static final long serialVersionUID = 1L;
+
     private NEATChromosome genome;
     private NEATNeuralNet network;
 

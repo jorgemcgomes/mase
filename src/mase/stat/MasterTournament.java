@@ -26,9 +26,6 @@ import mase.evaluation.BehaviourResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.evaluation.SubpopEvaluationResult;
-import mase.stat.PersistentSolution;
-import mase.stat.Reevaluate;
-import mase.stat.SolutionPersistence;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -49,8 +46,8 @@ public class MasterTournament {
     public static final String INDIVIDUALS = "-inds";
 
     public static void main(String[] args) throws Exception {
-        List<File> sampleFolders = new ArrayList<File>();
-        List<File> testFolders = new ArrayList<File>();
+        List<File> sampleFolders = new ArrayList<>();
+        List<File> testFolders = new ArrayList<>();
         int freq = 0;
         String name = "";
         boolean self = false;

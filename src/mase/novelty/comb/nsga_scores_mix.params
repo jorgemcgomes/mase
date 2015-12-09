@@ -1,6 +1,6 @@
-parent.0 = novelty.params
+parent.0 = ../novelty.params
 
-eval.base.elite-mode=fitness
+eval.base.elite-score = fitness
 
 eval.num-post = 3
 
@@ -14,8 +14,9 @@ eval.post.1.archive-mode =         multiple
 eval.post.1.behaviour-index =      2
 eval.post.1.score-name =           ind
 
-eval.post.2 =                           mase.mo.NSGA2
-eval.post.2.ordinal-ranking =           false
-eval.post.2.scores =                    fitness,group,ind
-stat.child.15 =                         mase.mo.NSGA2Stat
-stat.child.15.file =                    $nsga.stat
+eval.post.2 =                      mase.mo.NSGA2
+eval.post.2.ordinal-ranking =      false
+eval.post.2.scores =               fitness,group,ind
+
+stat.child.15 =                    mase.mo.NSGA2Stat
+stat.child.15.file =               $nsga.stat

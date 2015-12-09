@@ -20,6 +20,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
  * @author jorge
  */
 public class SystematicEvaluator extends MasonEvaluation {
+    private static final long serialVersionUID = 1L;
 
     @Override
     public Parameter defaultBase() {

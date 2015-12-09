@@ -1,6 +1,6 @@
-parent.0 = ../novelty/novelty.params
+parent.0 = ../novelty.params
 
-eval.base.elite-mode=fitness
+eval.base.elite-score = fitness
 
 eval.num-post = 2
 eval.post.1 =                           mase.mo.NSGA2

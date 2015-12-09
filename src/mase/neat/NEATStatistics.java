@@ -21,6 +21,7 @@ import org.neat4j.neat.nn.core.Synapse;
 public class NEATStatistics extends Statistics {
 
     public static final String P_FILE = "file";
+    private static final long serialVersionUID = 1L;
     public int log;
 
     @Override

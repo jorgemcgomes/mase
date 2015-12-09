@@ -11,15 +11,19 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * This requires the use of NSGA2 PostEvaluator!!! neat.COMPATABILITY.THRESHOLD
- * = 99999999 neat.COMPATABILITY.CHANGE = 0 neat.SPECIE.COUNT = 1
- * neat.SURVIVAL.THRESHOLD = 1 The population size should be halved The "copy
- * best" in NEATSpecies produceOffspring method must be removed
- *
+ * This requires the following parameters:
+ * NSGA2 PostEvaluator with ordinal-ranking=true 
+ * neat.COMPATABILITY.THRESHOLD=99999999 
+ * neat.COMPATABILITY.CHANGE = 0
+ * neat.SPECIE.COUNT = 1
+ * neat.SURVIVAL.THRESHOLD=1
+ * neat.COPY.BEST=false
+ * The population size should be halved
  *
  * @author jorge
  */
 public class NEATPipelineNSGA extends NEATPipeline {
+    private static final long serialVersionUID = 1L;
 
     private int[] originalPopSizes;
 

@@ -22,6 +22,7 @@ import org.apache.commons.io.FileUtils;
 public class RunStatistics extends Statistics {
 
     public static final String P_FILE = "file";
+    private static final long serialVersionUID = 1L;
     private int log;
     
     @Override

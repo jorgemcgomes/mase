@@ -1,22 +1,67 @@
 # ECJ options
 evalthreads =   			auto
 breedthreads = 				auto
-checkpoint =				false
-checkpoint-modulo =                     1
-checkpoint-prefix = 			ec
+generations =				500
+quit-on-run-complete =			false
 
+# Basic generational configuration
+state = 				ec.simple.SimpleEvolutionState
+init = 					ec.simple.SimpleInitializer
+finish = 	        		ec.simple.SimpleFinisher
+exch = 					ec.simple.SimpleExchanger
+breed =					ec.simple.SimpleBreeder
+pop = 					ec.Population
+pop.subpops =                           1
+pop.default-subpop = 			0
+
+# Evaluation config
+eval =                                  mase.evaluation.MetaEvaluator
+eval.base =                             ec.simple.SimpleEvaluator
+vector.species.fitness =                mase.evaluation.ExpandedFitness
+
+# Checkpointing
+checkpoint =                            false
+checkpoint-prefix =                     checkpoint
+checkpoint-directory =                  $
+checkpoint-modulo =                     25
+
+# Statistics
 stat =                                  mase.stat.ConsoleStat
 stat.num-children = 			30
-stat.child.0 =                          ec.Statistics
-stat.child.1 =                          ec.Statistics
-stat.child.2 =                          ec.Statistics
-stat.child.3 =                          ec.Statistics
-stat.child.4 =                          ec.Statistics
+stat.child.0 = 				ec.simple.SimpleShortStatistics
+stat.child.0.file =			$extended.stat
+stat.child.0.do-time =                  true
+stat.child.0.do-size =                  false
+stat.child.0.do-subpops =               true
+stat.child.1 =                          mase.stat.FitnessStat
+stat.child.1.file =			$fitness.stat
+stat.child.1.do-subpops =               true
+stat.child.2 =                          mase.stat.BestEverSolutionStat
+stat.child.2.file =                     $best.ind
+stat.child.2.last =                     $last.ind
+stat.child.3 =                          mase.stat.EvaluationsStat
+stat.child.3.do-behaviours =            true
+stat.child.3.file =                     $behaviours.stat
+stat.child.4 =                          mase.stat.BestSolutionGenStat
+stat.child.4.file =                     $bests.tar.gz
+stat.child.4.keep-last =                true
+stat.child.4.compress =                 true
 stat.child.5 =                          ec.Statistics
-stat.child.6 =                          ec.Statistics
-stat.child.7 =                          ec.Statistics
-stat.child.8 =                          ec.Statistics
-stat.child.9 =                          ec.Statistics
+#stat.child.5 =                          mase.stat.SampleSolutionsStat
+#stat.child.5.file =                     $sample.tar.gz
+#stat.child.5.compress =                 true
+#stat.child.5.sample-size =              10
+stat.child.6 =                          mase.stat.LastCheckpointStat
+stat.child.6.file =                     $checkpoint.gz
+stat.child.7 =                          mase.stat.RunStatistics
+stat.child.7.file =                     $run.params
+stat.child.8 =                          mase.stat.FinalPostEvaluationStat
+stat.child.8.repetitions =              50
+stat.child.8.prefix =                   post
+stat.child.9 =                          mase.stat.ScoresStat
+stat.child.9.file =		        $scores.stat
+
+# Placeholders for other statistics
 stat.child.10 =                         ec.Statistics
 stat.child.11 =                         ec.Statistics
 stat.child.12 =                         ec.Statistics

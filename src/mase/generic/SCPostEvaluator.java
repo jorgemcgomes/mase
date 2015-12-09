@@ -28,6 +28,7 @@ public class SCPostEvaluator implements PostEvaluator {
     public static final String P_FILTER = "filter-threshold";
     public static final String P_DO_FILTER = "do-filter";
     public static final String P_DO_TFIDF = "do-tf-idf";
+    private static final long serialVersionUID = 1L;
     protected double filter;
     protected boolean doFilter;
     protected boolean doTfIdf;

@@ -32,6 +32,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
 
     public static final String P_EVAL_NUMBER = "number-evals";
     public static final String P_EVAL = "eval";
+    private static final long serialVersionUID = 1L;
     protected EvaluationFunction[] evalFunctions;
     public static final String P_TRIALS_MERGE = "trials-merge";
 
@@ -88,9 +89,9 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void preprocessPopulation(EvolutionState state, Population pop, boolean[] prepareForFitnessAssessment, boolean countVictoriesOnly) {
         for (int i = 0; i < pop.subpops.length; i++) {
-            for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
+            for (Individual individual : pop.subpops[i].individuals) {
                 if (prepareForFitnessAssessment[i]) {
-                    pop.subpops[i].individuals[j].fitness.trials = new ArrayList();
+                    individual.fitness.trials = new ArrayList();
                 }
             }
         }
@@ -99,9 +100,9 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void postprocessPopulation(EvolutionState state, Population pop, boolean[] assessFitness, boolean countVictoriesOnly) {
         for (int i = 0; i < pop.subpops.length; i++) {
-            for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
+            for (Individual individual : pop.subpops[i].individuals) {
                 if (assessFitness[i]) {
-                    Individual ind = pop.subpops[i].individuals[j];
+                    Individual ind = individual;
                     ExpandedFitness[] trials = Arrays.copyOf(ind.fitness.trials.toArray(), ind.fitness.trials.size(), ExpandedFitness[].class);
                     for (int k = 0; k < trials.length; k++) {
                         trials[k] = (ExpandedFitness) ind.fitness.trials.get(k);
@@ -125,17 +126,15 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     // TODO: Bad dependence -- should be improved with interfaces
     public GroupController createController(EvolutionState state, Individual... ind) {
         ArrayList<AgentController> acs = new ArrayList<>();
-        for (int i = 0; i < ind.length; i++) {
-            if(ind[i] instanceof AgentControllerIndividual) {
-                acs.add(((AgentControllerIndividual) ind[i]).decodeController());
-            } else if(ind[i] instanceof MultiAgentControllerIndividual) {
-                AgentController[] as = ((MultiAgentControllerIndividual) ind[i]).decodeControllers();
-                for(AgentController a : as) {
-                    acs.add(a);
-                }
+        for (Individual ind1 : ind) {
+            if (ind1 instanceof AgentControllerIndividual) {
+                acs.add(((AgentControllerIndividual) ind1).decodeController());
+            } else if (ind1 instanceof MultiAgentControllerIndividual) {
+                AgentController[] as = ((MultiAgentControllerIndividual) ind1).decodeControllers();
+                acs.addAll(Arrays.asList(as));
             }
         }
-        GroupController gc = null;
+        GroupController gc;
         if (acs.size() == 1) {
             gc = new HomogeneousGroupController(acs.get(0));
         } else {

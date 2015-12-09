@@ -22,11 +22,12 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
  *
  * @author jorge
  */
-public class CompetitiveBestStat extends SolutionWriterStat {
+public class CompetitiveBestStat extends FileWriterStat {
 
     public static final String P_FILE = "file";
     public static final String P_KEEP_LAST = "keep-last";
     public static final String P_COMPRESS = "compress";
+    private static final long serialVersionUID = 1L;
     protected TarArchiveOutputStream[] taos;
     protected File[] outFile;
     protected File[] last;

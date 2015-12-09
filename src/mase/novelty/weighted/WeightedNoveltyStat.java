@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.PostEvaluator;
-import static mase.novelty.comb.MCNoveltyStat.P_STATISTICS_FILE;
 
 /**
  *
@@ -21,6 +20,7 @@ public class WeightedNoveltyStat extends Statistics {
 
     public static final String P_CORR_FILE = "corr-file";
     public static final String P_WEIGHT_FILE = "weight-file";
+    private static final long serialVersionUID = 1L;
     protected int corrLog = 0, weightLog = 0;
     protected WeightedNovelty evaluator;
 

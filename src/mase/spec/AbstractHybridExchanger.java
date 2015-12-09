@@ -30,6 +30,7 @@ import mase.evaluation.SubpopEvaluationResult;
 public abstract class AbstractHybridExchanger extends Exchanger {
 
     public static final String P_HOMOGENEOUS_START = "homogeneous-start";
+    private static final long serialVersionUID = 1L;
     int popSize, nAgents;
     boolean homogeneousStart;
     List<MetaPopulation> metaPops;

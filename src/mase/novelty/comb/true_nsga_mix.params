@@ -1,0 +1,6 @@
+parent.0 = nsga_scores_mix.params
+
+eval.post.2.ordinal-ranking =      true
+
+breed =                            mase.mo.SimpleNSGABreeder
+breed.elite.0 =                    0

@@ -1,6 +1,6 @@
 # cooperative coevolution
 eval.base =                             mase.evaluation.CoevolutionaryEvaluator
-eval.base.elite-mode =                  score
+eval.base.elite-score =                 fitness
 eval.base.num-current =			0
 eval.base.num-elites =                  1
 eval.base.num-current-elite =           1
@@ -9,4 +9,4 @@ eval.base.num-shuffled =                0
 eval.base.select-current =		ec.select.RandomSelection
 eval.base.select-prev = 		ec.select.RandomSelection
 
-pop.subpops =                           3
+pop.subpops =                           2

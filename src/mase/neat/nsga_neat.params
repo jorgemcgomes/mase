@@ -1,16 +1,6 @@
-parent.0 = ../novelty.params
-parent.1 = ../../neat/neat.params
+# add this config over neat.params and the MO
 
-eval.base.elite-mode=fitness
-
-eval.num-post = 2
-eval.post.1 =                           mase.mo.NSGA2
-eval.post.1.ordinal-ranking =           true
-eval.post.1.scores =                    fitness,novelty
-stat.child.15 =                         mase.mo.NSGA2Stat
-stat.child.15.file =                    $nsga.stat
-
-breed =					mase.neat.NEATBreederNSGA
+neat.species.pipe =                     mase.neat.NEATPipeline
 neat.COMPATABILITY.THRESHOLD =          99999999
 neat.COMPATABILITY.CHANGE =             0
 neat.SPECIE.COUNT =                     1

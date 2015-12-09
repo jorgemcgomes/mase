@@ -69,7 +69,7 @@ public class NEATSerializer {
     }
 
     public static NEATNeuralNet deserialize(double[] weights) {
-        ArrayList<Gene> genes = new ArrayList<Gene>();
+        ArrayList<Gene> genes = new ArrayList<>();
         for (int i = 0; i < weights.length; ) {
             double type = weights[i++];
             if (type == NODE) {

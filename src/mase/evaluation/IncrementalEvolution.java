@@ -28,6 +28,7 @@ public class IncrementalEvolution extends Statistics {
     public static final String P_ABOVE_THRESHOLD = "above-threshold";
     public static final String P_FILE = "file";
     public static final String P_MIN_GENERATIONS = "min-generations";
+    private static final long serialVersionUID = 1L;
     
     protected int currentStage;
     protected int currentStageStart;

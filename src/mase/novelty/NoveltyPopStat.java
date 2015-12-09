@@ -21,6 +21,7 @@ import mase.evaluation.ExpandedFitness;
 public class NoveltyPopStat extends Statistics {
 
     public static final String P_STATISTICS_FILE = "file";
+    private static final long serialVersionUID = 1L;
     public int log = 0;  // stdout by default
     protected ArrayList<NoveltyEvaluation> neList = null;
 
@@ -37,7 +38,7 @@ public class NoveltyPopStat extends Statistics {
             }
         }
 
-        neList = new ArrayList<NoveltyEvaluation>();
+        neList = new ArrayList<>();
         for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
             if (pe instanceof NoveltyEvaluation) {
                 neList.add((NoveltyEvaluation) pe);

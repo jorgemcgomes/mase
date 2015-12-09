@@ -4,19 +4,13 @@
  */
 package mase.neat;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mase.controllers.AgentController;
 import org.neat4j.neat.core.NEATNeuralNet;
 import org.neat4j.neat.core.NEATNeuron;
-import org.neat4j.neat.core.control.NEAT;
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.data.csv.CSVInput;
-import org.neat4j.neat.nn.core.NeuralNet;
 import org.neat4j.neat.nn.core.NeuralNetDescriptor;
-import org.neat4j.neat.nn.core.NeuralNetFactory;
-import org.neat4j.neat.nn.core.NeuralNetType;
 import org.neat4j.neat.nn.core.Synapse;
 
 /**

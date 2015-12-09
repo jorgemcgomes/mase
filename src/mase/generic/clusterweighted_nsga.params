@@ -28,10 +28,8 @@ neat.SPECIE.FITNESS.MAX =               1000
 
 eval.post.2 =                          mase.novelty.NSGA2
 
-stat.child.10 =                        mase.novelty.NoveltyPopStat
-stat.child.10.file =		       $noveltypop.stat
-stat.child.11 =                        mase.novelty.NoveltyIndividualsStat
-stat.child.11.file =		       $noveltyind.stat
+stat.child.11 =                        mase.novelty.NoveltyPopStat
+stat.child.11.file =		       $noveltypop.stat
 
 stat.child.12 =                          mase.novelty.WeightedNoveltyStat
 stat.child.12.weight-file =              $weights.stat

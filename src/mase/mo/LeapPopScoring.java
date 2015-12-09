@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.novelty.comb;
+package mase.mo;
 
 import ec.EvolutionState;
 import ec.Individual;
@@ -14,11 +14,12 @@ import mase.evaluation.ExpandedFitness;
 /**
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class LeapScoring implements PostEvaluator {
+public class LeapPopScoring implements PostEvaluator {
 
     public static final String P_CHANGE_PROB = "change-prob";
     public static final String P_BASE_SCORE = "base-score";
-    public static final String P_LEAP_SCORE = "leap-score";
+    public static final String P_LEAP_SCORE = "alt-score";
+    private static final long serialVersionUID = 1L;
     protected String baseScore, leapScore;
     protected double changeProb;
     protected int currentLeap;

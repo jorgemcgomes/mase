@@ -24,6 +24,7 @@ public class ClusterSCStat extends Statistics {
 
     public static final String P_FINAL_CLUSTERS = "final-clusters";
     public static final String P_GEN_CLUSTERS = "gen-clusters";
+    private static final long serialVersionUID = 1L;
     private int genLog, finalLog;
     private ClusterSCPostEvaluator sc;
 

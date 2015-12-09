@@ -22,6 +22,7 @@ import mase.evaluation.PostEvaluator;
 public class MOEAStagedEvolution extends IncrementalEvolution {
 
     public static final String P_SEQUENCE = "sequence";
+    private static final long serialVersionUID = 1L;
     protected String[] sequence;    
     protected NSGA2 moea;
     

@@ -16,10 +16,11 @@ import mase.evaluation.ExpandedFitness;
  * ONLY WORKS WITH ONE NOVELTY SCORE
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class MCNovelty implements PostEvaluator {
+public class MinimalNoveltyCriteria implements PostEvaluator {
 
     public static final String P_NOVELTY_THRESHOLD = "novelty-threshold";
     public static final String P_NOVELTY_SCORE = "novelty-score";
+    private static final long serialVersionUID = 1L;
 
     protected double noveltyThreshold;
     protected String noveltyScore;

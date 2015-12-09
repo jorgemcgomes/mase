@@ -13,6 +13,7 @@ import org.neat4j.neat.ga.core.Chromosome;
  * @author jorge
  */
 public class PreEvaluatedFitnessFunction extends NEATFitnessFunction {
+    private static final long serialVersionUID = 1L;
 
     private final Map<Chromosome, Double> scores;
 

@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import mase.evaluation.ExpandedFitness;
 
 /**
  * Multi-threaded version
@@ -27,12 +26,13 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     public static final String P_LAST_CHAMPIONS = "num-last-champions";
     public static final String P_RANDOM_CHAMPIONS = "num-random-champions";
     public static final String P_CURRENT_ELITE = "num-current-elite";
-    public static final String P_ELITE_MODE = "elite-mode";
+    public static final String P_ELITE_MODE = "elite-score";
     public static final String V_ELITE_SCORES = "score";
     public static final String P_MAX_EVALUATIONS = "max-evaluations";
+    private static final long serialVersionUID = 1L;
     
 
-    protected String eliteMode;
+    protected String eliteScore;
     public int totalEvaluations;
     public int maxEvaluations;
     protected int lastChampions;
@@ -55,9 +55,9 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
         maxEvaluations = state.parameters.getIntWithDefault(base.push(P_MAX_EVALUATIONS), null, -1);
         totalEvaluations = 0;
 
-        eliteMode = state.parameters.getString(base.push(P_ELITE_MODE), null);
-        if(eliteMode.equalsIgnoreCase(V_ELITE_SCORES)) {
-            eliteMode = null;
+        eliteScore = state.parameters.getString(base.push(P_ELITE_MODE), null);
+        if(eliteScore.equalsIgnoreCase(V_ELITE_SCORES)) {
+            eliteScore = null;
         }
 
         lastChampions = state.parameters.getIntWithDefault(base.push(P_LAST_CHAMPIONS), null, 0);
@@ -361,11 +361,11 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     }
 
     protected boolean betterThan(Individual a, Individual b) {
-        if(eliteMode == null) {
+        if(eliteScore == null) {
             return a.fitness.betterThan(b.fitness);
         } else {
-            double sa = ((ExpandedFitness) a.fitness).getScore(eliteMode);
-            double sb = ((ExpandedFitness) b.fitness).getScore(eliteMode);
+            double sa = ((ExpandedFitness) a.fitness).getScore(eliteScore);
+            double sb = ((ExpandedFitness) b.fitness).getScore(eliteScore);
             return sa > sb;
         }
     }

@@ -8,24 +8,13 @@ package mase.stat;
 import ec.EvolutionState;
 import ec.Statistics;
 import ec.util.Parameter;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
  * @author jorge
  */
-public class SolutionWriterStat extends Statistics {
+public class FileWriterStat extends Statistics {
+    private static final long serialVersionUID = 1L;
 
     protected String jobPrefix;
 

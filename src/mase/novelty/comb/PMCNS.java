@@ -24,6 +24,7 @@ public class PMCNS implements PostEvaluator {
     public static final String P_CHANGE_RATE = "change-rate";
     public static final String P_NOVELTY_SCORE = "novelty-score";
     public static final double DISAPPEAR = 0.0001;
+    private static final long serialVersionUID = 1L;
     protected double percentile;
     protected double changeRate;
     protected int[] aptCount;

@@ -17,7 +17,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author jorge
  */
-public class LastCheckpointStat extends SolutionWriterStat {
+public class LastCheckpointStat extends FileWriterStat {
 
     public static final String P_FILE = "file";
     private static final long serialVersionUID = 1L;

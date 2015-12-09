@@ -18,6 +18,7 @@ import org.neat4j.neat.core.InnovationDatabase;
 public class NEATInitializer extends SimpleInitializer {
 
     public static final String P_SHARED_DB = "shared-database";
+    private static final long serialVersionUID = 1L;
     protected InnovationDatabase innovDB = null;
     protected boolean shareDB;
 

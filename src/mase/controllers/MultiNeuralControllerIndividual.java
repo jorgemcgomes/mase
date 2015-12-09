@@ -47,11 +47,11 @@ public class MultiNeuralControllerIndividual extends DoubleVectorIndividual impl
         
         for(int i = 0 ; i < numAgents ; i++) {
             // Create network
-            String structure = state.parameters.getString(def.push(""+i).push(P_STRUCTURE), def.push(P_STRUCTURE));
-            int input = state.parameters.getInt(def.push(""+i).push(P_INPUTS), def.push(P_INPUTS));
-            int hidden = state.parameters.getInt(def.push(""+i).push(P_HIDDEN), def.push(P_HIDDEN));
-            int output = state.parameters.getInt(def.push(""+i).push(P_OUTPUTS), def.push(P_OUTPUTS));
-            boolean tanh = state.parameters.getBoolean(def.push(""+i).push(P_TANH), def.push(P_TANH), false);
+            String structure = state.parameters.getString(def.push(P_STRUCTURE).push(""+i), def.push(P_STRUCTURE));
+            int input = state.parameters.getInt(def.push(P_INPUTS).push(""+i), def.push(P_INPUTS));
+            int hidden = state.parameters.getInt(def.push(P_HIDDEN).push(""+i), def.push(P_HIDDEN));
+            int output = state.parameters.getInt(def.push(P_OUTPUTS).push(""+i), def.push(P_OUTPUTS));
+            boolean tanh = state.parameters.getBoolean(def.push(P_TANH).push(""+i), def.push(P_TANH), false);
             prototypeNetworks[i] = NeuralControllerIndividual.createPrototypeNetwork(structure, input, hidden, output, tanh);
             int size = prototypeNetworks[i].getStructure().calculateSize();
             lengths[i] = size;

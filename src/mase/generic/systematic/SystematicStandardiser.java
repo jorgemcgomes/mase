@@ -23,7 +23,8 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  * @author jorge
  */
 public class SystematicStandardiser implements PostEvaluator {
-
+    
+    private static final long serialVersionUID = 1L;
     protected List<ArchiveEntry>[] archives;
     protected int behavIndex;
     public static final double BOUND = 3; // 68–95–99.7 rule -- three-sigma rule

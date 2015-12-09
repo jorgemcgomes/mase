@@ -1,4 +1,4 @@
-parent.0 = novelty.params
+parent.0 = ../novelty.params
 
 eval.post.0 =                           mase.novelty.WeightedNovelty
 eval.post.0.correlation =               spearman

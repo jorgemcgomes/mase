@@ -27,7 +27,6 @@ package mase.novelty.weighted;
  */
 import weka.attributeSelection.CfsSubsetEval;
 
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;

@@ -20,6 +20,7 @@ import mase.evaluation.PostEvaluator;
 public class PMCNSStat extends Statistics {
 
     public static final String P_FILE = "file";
+    private static final long serialVersionUID = 1L;
     protected int log = 0;
     protected PMCNS evaluator;
 

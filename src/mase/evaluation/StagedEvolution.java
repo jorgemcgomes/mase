@@ -16,6 +16,7 @@ import ec.util.Parameter;
 public class StagedEvolution extends IncrementalEvolution {
 
     public static final String P_SEQUENCE = "sequence";
+    private static final long serialVersionUID = 1L;
     protected int[] sequence;
 
     @Override

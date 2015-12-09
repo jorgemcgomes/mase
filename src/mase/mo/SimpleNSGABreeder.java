@@ -17,6 +17,7 @@ import java.util.Comparator;
  * @author jorge
  */
 public class SimpleNSGABreeder extends SimpleBreeder {
+    private static final long serialVersionUID = 1L;
 
     private int[] originalPopSizes;
 

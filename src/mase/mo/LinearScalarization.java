@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.novelty.comb;
+package mase.mo;
 
 import ec.EvolutionState;
 import ec.Individual;
@@ -22,6 +22,7 @@ public class LinearScalarization implements PostEvaluator {
     public static final String P_SCORES = "scores";
     public static final String P_WEIGHTS = "weights";
     public static final String P_NORMALISE = "normalise";
+    private static final long serialVersionUID = 1L;
     
     protected String[] scores;
     protected double[] weights;

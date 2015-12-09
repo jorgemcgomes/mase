@@ -1,9 +1,0 @@
-parent.0 = ../novelty.params
-
-eval.num-post = 2
-eval.post.1 =                           mase.novelty.comb.MCNovelty
-eval.post.1.novelty-threshold =         1.0
-eval.post.1.novelty-score =             novelty
-
-stat.child.12 =                         mase.novelty.comb.MCNoveltyStat
-stat.child.12.file =                    $mcn.stat

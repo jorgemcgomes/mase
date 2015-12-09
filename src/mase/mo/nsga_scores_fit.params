@@ -1,4 +1,4 @@
-eval.base.elite-mode=fitness
+eval.base.elite-score = fitness
 
 eval.num-post = 1
 eval.post.0 =                           mase.mo.NSGA2

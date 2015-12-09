@@ -1,13 +1,14 @@
-# coevolution
-eval.base =                             ec.coevolve.MultiPopCoevolutionaryEvaluator2
-eval.base.num-current=			0
+# competitive coevolution
+eval.base =                             mase.evaluation.CoevolutionaryEvaluator
+eval.base.elite-score =                 fitness
+eval.base.num-current =			0
 eval.base.num-elites =			10
+eval.base.num-current-elite =           10
 eval.base.num-prev =			0
 eval.base.num-shuffled =                0
-eval.base.fitness-only-elite =          true
 eval.base.select-current =		ec.select.RandomSelection
 eval.base.select-prev = 		ec.select.RandomSelection
 
 pop.subpops =                           2
 
-stat.child.4 =                          mase.stat.CompetitiveBestStat
+stat.child.11 =                          mase.stat.CompetitiveBestStat

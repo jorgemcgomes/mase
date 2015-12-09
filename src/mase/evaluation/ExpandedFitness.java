@@ -21,6 +21,7 @@ public class ExpandedFitness extends SimpleFitness {
     public static final String AUTO_FITNESS_PREFIX = "eval.";
     public static final String P_FITNESS_EVAL_INDEX = "fitness-index";
     public static final String FITNESS_SCORE = "fitness";
+    private static final long serialVersionUID = 1L;
     protected int fitnessIndex;
 
     protected EvaluationResult[] evalResults;

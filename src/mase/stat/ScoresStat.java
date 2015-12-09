@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.novelty;
+package mase.stat;
 
 import ec.EvolutionState;
 import ec.Statistics;
@@ -15,9 +15,10 @@ import mase.evaluation.ExpandedFitness;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class NoveltyIndividualsStat extends Statistics {
+public class ScoresStat extends Statistics {
 
     public static final String P_STATISTICS_FILE = "file";
+    private static final long serialVersionUID = 1L;
     public int log = 0;  // stdout by default
 
     @Override

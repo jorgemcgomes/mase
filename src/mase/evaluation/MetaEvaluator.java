@@ -17,6 +17,7 @@ public class MetaEvaluator extends Evaluator {
     public static final String P_NUM_POST_EVAL = "num-post";
     public static final String P_POST_EVAL = "post";
     public static final String P_BASE_EVAL = "base";
+    private static final long serialVersionUID = 1L;
     private Evaluator baseEvaluator;
     private PostEvaluator[] postEvaluators;
 

@@ -96,6 +96,7 @@ public class FitnessStat extends Statistics {
 
     public static final String P_DO_SUBPOPS = "do-subpops";
     public static final String P_STATISTICS_FILE = "file";
+    private static final long serialVersionUID = 1L;
     public int statisticslog = 0;  // stdout by default
     public boolean doSubpops;
     public Individual[] bestSoFar;

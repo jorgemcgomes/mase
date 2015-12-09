@@ -29,10 +29,10 @@ import mase.evaluation.VectorBehaviourResult;
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
 public class NoveltyEvaluation implements PostEvaluator {
+    private static final long serialVersionUID = 1L;
 
-    public static final String P_BEHAVIOUR_INDEX = "behaviour-index";
-    
     public static final Parameter DEFAULT_BASE = new Parameter("novelty");
+    public static final String P_BEHAVIOUR_INDEX = "behaviour-index";   
     public static final String P_K_NN = "knn";
     public static final String P_ARCHIVE_GROWTH = "archive-growth";
     public static final String P_ARCHIVE_SIZE_LIMIT = "archive-size";
@@ -102,7 +102,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         for (int p = 0; p < pop.subpops.length; p++) {
             // Set the individuals pool that will be used to compute novelty
             List<ArchiveEntry> archive = archives[p];
-            List<BehaviourResult> pool = new ArrayList<BehaviourResult>();
+            List<BehaviourResult> pool = new ArrayList<>();
             // Archive
             for (ArchiveEntry e : archive) {
                 pool.add(e.getBehaviour());
@@ -215,7 +215,7 @@ public class NoveltyEvaluation implements PostEvaluator {
             for (int i = 0; i < pop.subpops.length; i++) {
                 Individual[] popInds = pop.subpops[i].individuals;
                 List<ArchiveEntry> archive = archives[i];
-                LinkedHashSet<Individual> toAdd = new LinkedHashSet<Individual>();
+                LinkedHashSet<Individual> toAdd = new LinkedHashSet<>();
                 if (archiveCriteria == ArchiveCriteria.random) {
                     while (toAdd.size() < archiveGrowth * popInds.length) {
                         int index = state.random[0].nextInt(popInds.length);
@@ -255,6 +255,7 @@ public class NoveltyEvaluation implements PostEvaluator {
     }
 
     public static class ArchiveEntry implements Serializable {
+        private static final long serialVersionUID = 1L;
 
         protected BehaviourResult behaviour;
         protected int generation;

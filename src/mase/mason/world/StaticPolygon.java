@@ -19,6 +19,7 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class StaticPolygon extends ShapePortrayal2D implements Entity {
+    private static final long serialVersionUID = 1L;
 
     private final Segment[] segments;
     private final Double2D[] points;

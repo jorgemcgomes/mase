@@ -14,10 +14,11 @@ import mase.SimulationProblem;
  *
  * @author jorge
  */
-public class PostEvaluationStat extends Statistics {
+public class FinalPostEvaluationStat extends Statistics {
 
     public static final String P_REPETITIONS = "repetitions";
     public static final String P_PREFIX = "prefix";
+    private static final long serialVersionUID = 1L;
     
     private int repetitions;
     private String prefix;

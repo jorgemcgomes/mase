@@ -21,12 +21,13 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class BestSolutionGenStat extends SolutionWriterStat {
+public class BestSolutionGenStat extends FileWriterStat {
 
     public static final String P_FILE = "file";
     public static final String P_KEEP_LAST = "keep-last";
     public static final String P_COMPRESS = "compress";
     public static final String LAST = "last.ind";
+    private static final long serialVersionUID = 1L;
     protected File outFile;
     protected File last;
     protected transient TarArchiveOutputStream taos;

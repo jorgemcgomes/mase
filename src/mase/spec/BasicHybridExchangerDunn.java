@@ -17,6 +17,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @author jorge
  */
 public class BasicHybridExchangerDunn extends BasicHybridExchanger {
+    private static final long serialVersionUID = 1L;
 
 
     /* Similar to bottom-up (agglomerative) hierarchical clustering */

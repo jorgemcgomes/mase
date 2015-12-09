@@ -23,6 +23,7 @@ public class EvaluationsStat extends Statistics {
 
     public static final String P_BEHAVIOURS_FILE = "file";
     public static final String P_DO_BEHAVS = "do-behaviours";
+    private static final long serialVersionUID = 1L;
     public int log;
     public boolean doBehaviours;
 

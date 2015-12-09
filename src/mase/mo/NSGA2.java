@@ -23,6 +23,7 @@ import mase.evaluation.ExpandedFitness;
  * @author jorge
  */
 public class NSGA2 implements PostEvaluator {
+    private static final long serialVersionUID = 1L;
 
     protected List<Individual>[] allInds; // this is used just for stats
     public static final String P_ORDINAL_RANKING = "ordinal-ranking";

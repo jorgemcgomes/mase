@@ -6,9 +6,6 @@
 
 package mase.generic.systematic;
 
-import java.util.List;
-import mase.mason.world.SmartAgent;
-
 /**
  *
  * @author jorge

@@ -8,15 +8,10 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Statistics;
 import ec.util.Parameter;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import mase.MaseEvolve;
 import mase.evaluation.ExpandedFitness;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -28,6 +23,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class ConsoleStat extends Statistics {
 
     static final double SMOOTH_CONSTANT = 0.5;
+    private static final long serialVersionUID = 1L;
     long startTime;
     long lastTime;
     long genDuration;

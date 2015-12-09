@@ -31,6 +31,7 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
     public static final String P_STABILITY_TIME = "stability-time";
     public static final String P_ELITE_PORTION = "elite-portion";
     public static final String P_SPLIT_MODE = "split-mode";
+    private static final long serialVersionUID = 1L;
 
     public enum PickMode {
 

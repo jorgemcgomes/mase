@@ -24,6 +24,7 @@ import mase.mo.NSGA2.Individual;
 public class NSGA2Stat extends Statistics {
 
     public static final String P_FILE = "file";
+    private static final long serialVersionUID = 1L;
     protected int log = 0;
     protected NSGA2 evaluator;
 

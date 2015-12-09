@@ -1,7 +1,7 @@
 parent.0 = ../novelty.params
 
 eval.num-post =          2
-eval.post.1 =            mase.novelty.comb.LinearScalarization
+eval.post.1 =            mase.mo.LinearScalarization
 eval.post.1.scores =     fitness,novelty
 eval.post.1.weights =    0.5,0.5
 eval.post.1.normalise =  true

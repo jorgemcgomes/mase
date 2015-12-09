@@ -22,6 +22,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public class HybridStat extends Statistics {
 
     public static final String P_STATISTICS_FILE = "file";
+    private static final long serialVersionUID = 1L;
     public int log = 0;  // stdout by default
     private int selfIndividuals = 0;
     private int foreignIndividuals = 0;

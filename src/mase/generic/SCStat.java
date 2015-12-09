@@ -31,6 +31,7 @@ public class SCStat extends Statistics {
     public static final String P_LOG_FILE = "log-file";
     public static final String P_STATES_FILE = "states-file";
     public static final String P_SAVE_STATES = "save-states";
+    private static final long serialVersionUID = 1L;
     private int genLog, statesLog;
     private boolean saveStates;
     private SCPostEvaluator sc;

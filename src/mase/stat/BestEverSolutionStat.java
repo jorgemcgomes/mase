@@ -17,9 +17,10 @@ import mase.evaluation.ExpandedFitness;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class BestEverSolutionStat extends SolutionWriterStat {
+public class BestEverSolutionStat extends FileWriterStat {
 
     public static final String P_FILE = "file";
+    private static final long serialVersionUID = 1L;
     protected File bestFile;
     protected double bestSoFar;
 

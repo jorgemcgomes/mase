@@ -21,6 +21,7 @@ public class SafeHybridExchanger extends BasicHybridExchanger {
 
     public static final String P_FOREIGN_MODE = "foreign-mode";
     public static final String P_DIFFERENCE_MODE = "difference-mode";
+    private static final long serialVersionUID = 1L;
     PickMode foreignMode;
     DifferenceMode differenceMode;
     Set<MetaPopulation> newChilds;

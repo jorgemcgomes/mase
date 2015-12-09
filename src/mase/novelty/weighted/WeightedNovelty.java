@@ -41,6 +41,7 @@ import weka.filters.unsupervised.attribute.Discretize;
  * @author jorge
  */
 public class WeightedNovelty extends NoveltyEvaluation {
+    private static final long serialVersionUID = 1L;
 
     public static enum SelectionMethod {
 

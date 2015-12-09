@@ -20,9 +20,10 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class MCNoveltyStat extends Statistics {
+public class MinimalNoveltyCriteriaStat extends Statistics {
 
     public static final String P_STATISTICS_FILE = "file";
+    private static final long serialVersionUID = 1L;
     public int log = 0;  // stdout by default
 
     @Override
@@ -41,10 +42,10 @@ public class MCNoveltyStat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        MCNovelty mcn = null;
+        MinimalNoveltyCriteria mcn = null;
         for(PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
-            if(pe instanceof MCNovelty) {
-                mcn = (MCNovelty) pe;
+            if(pe instanceof MinimalNoveltyCriteria) {
+                mcn = (MinimalNoveltyCriteria) pe;
                 break;
             }
         }

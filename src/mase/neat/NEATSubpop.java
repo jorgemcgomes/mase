@@ -11,7 +11,6 @@ import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.Collections;
 import org.neat4j.core.AIConfig;
-import org.neat4j.neat.core.InnovationDatabase;
 import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATConfig;
 import org.neat4j.neat.core.NEATGADescriptor;
@@ -39,6 +38,7 @@ public class NEATSubpop extends Subpopulation {
         "MAX.PERTURB", "MAX.BIAS.PERTURB", "FEATURE.SELECTION", "RECURRENCY.ALLOWED",
         "INPUT.NODES", "OUTPUT.NODES", "ELE.EVENTS", "ELE.SURVIVAL.COUNT", "ELE.EVENT.TIME",
         "KEEP.BEST.EVER", "EXTRA.FEATURE.COUNT", "NATURAL.ORDER.STRATEGY", "TERMINATION.VALUE", "COPY.BEST"};
+    private static final long serialVersionUID = 1L;
     private NEATGeneticAlgorithm neat;
 
     // parameters

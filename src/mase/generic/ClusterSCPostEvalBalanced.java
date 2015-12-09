@@ -14,6 +14,7 @@ import java.util.HashMap;
  * @author jorge
  */
 public class ClusterSCPostEvalBalanced extends ClusterSCPostEvaluator {
+    private static final long serialVersionUID = 1L;
 
     /*
      Meaning: The elements from this generation should account for at least 
