@@ -14,7 +14,6 @@ import ec.EvolutionState;
 import ec.Population;
 import ec.util.Parameter;
 import ec.util.*;
-import java.util.Arrays;
 
 /* 
  * SimpleBreeder.java
@@ -175,7 +174,6 @@ public class SimpleBreeder extends Breeder
                 if (state.parameters.exists(base.push(P_ELITE).push(""+defaultSubpop),null))
                     {
                     elite[x] = state.parameters.getIntWithDefault(base.push(P_ELITE).push(""+defaultSubpop),null,0);
-
                     if (elite[x] < 0)
                         state.output.warning("Invalid default subpopulation elite value.");  // we'll fail later
                     }
@@ -207,9 +205,6 @@ public class SimpleBreeder extends Breeder
                 reevaluateElites[x] = state.parameters.getBoolean(base.push(P_REEVALUATE_ELITES).push(""+x), null, false);
                 }
             }
-        
-        System.out.println(Arrays.toString(elite));
-        System.out.println(Arrays.toString(reevaluateElites));
 
         state.output.exitIfErrors();
         }
