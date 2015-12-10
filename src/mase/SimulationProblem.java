@@ -89,9 +89,9 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void preprocessPopulation(EvolutionState state, Population pop, boolean[] prepareForFitnessAssessment, boolean countVictoriesOnly) {
         for (int i = 0; i < pop.subpops.length; i++) {
-            for (Individual individual : pop.subpops[i].individuals) {
+            for (Individual ind : pop.subpops[i].individuals) {
                 if (prepareForFitnessAssessment[i]) {
-                    individual.fitness.trials = new ArrayList();
+                    ind.fitness.trials = new ArrayList();
                 }
             }
         }
@@ -100,9 +100,8 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     @Override
     public void postprocessPopulation(EvolutionState state, Population pop, boolean[] assessFitness, boolean countVictoriesOnly) {
         for (int i = 0; i < pop.subpops.length; i++) {
-            for (Individual individual : pop.subpops[i].individuals) {
+            for (Individual ind : pop.subpops[i].individuals) {
                 if (assessFitness[i]) {
-                    Individual ind = individual;
                     ExpandedFitness[] trials = Arrays.copyOf(ind.fitness.trials.toArray(), ind.fitness.trials.size(), ExpandedFitness[].class);
                     for (int k = 0; k < trials.length; k++) {
                         trials[k] = (ExpandedFitness) ind.fitness.trials.get(k);
@@ -116,7 +115,9 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
                             break;
                         case best:
                             ind.fitness.setToBestOf(state, trials);
+                            break;
                     }
+                    ind.fitness.trials = null;
                     ind.evaluated = true;
                 }
             }
@@ -165,6 +166,8 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
                 ExpandedFitness trial = (ExpandedFitness) ind[i].fitness.clone();
                 trial.setEvaluationResults(state, eval, subpops[i]);
                 trial.setContext(ind);
+                trial.trials = null;
+                
                 ind[i].fitness.trials.add(trial);
             }
         }
@@ -193,7 +196,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         return repetitions;
     }
 
-    public long nextSeed(EvolutionState state, int threadnum) {
+    public synchronized long nextSeed(EvolutionState state, int threadnum) {
         if (sameSeed) {
             return seed;
         } else {

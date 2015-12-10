@@ -39,7 +39,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     protected int randomChampions;
     protected int currentElite;
     protected List<Individual>[] hallOfFame;
-    protected Individual[][] competitors;
+    protected Individual[][] teamMembers;
 
     public Individual[][] getEliteIndividuals() {
         return eliteIndividuals;
@@ -84,7 +84,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
             if (lastChampions > 0 || randomChampions > 0) {
                 hallOfFame = new ArrayList[state.population.subpops.length];
                 for (int i = 0; i < hallOfFame.length; i++) {
-                    hallOfFame[i] = new ArrayList<Individual>();
+                    hallOfFame[i] = new ArrayList<>();
                 }
             }
         }
@@ -143,9 +143,9 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
             }
         }
 
-        this.competitors = new Individual[state.population.subpops.length][];
+        this.teamMembers = new Individual[state.population.subpops.length][];
         for (int p = 0; p < population.subpops.length; p++) {
-            loadCompetitors(state, p);
+            loadTeamMembers(state, p);
         }
 
         /* subpops evaluation -- multi-threaded */
@@ -249,14 +249,14 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
             int upperbound = from[p] + numinds[p];
             for (int x = from[p]; x < upperbound; x++) {
                 Individual individual = pop.subpops[p].individuals[x];
-                // Test against the competitors
-                for (int k = 0; k < competitors[p].length; k++) {
+                // Test with the team members
+                for (int k = 0; k < teamMembers[p].length; k++) {
                     for (int ind = 0; ind < tInds.length; ind++) {
                         if (ind == p) {
                             tInds[ind] = individual;
                             tUpdates[ind] = true;
                         } else {
-                            tInds[ind] = competitors[ind][k];
+                            tInds[ind] = teamMembers[ind][k];
                             tUpdates[ind] = false;
                         }
                     }
@@ -267,11 +267,9 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
         ((Problem) prob).finishEvaluating(state, threadnum);
     }
 
-    void loadCompetitors(EvolutionState state, int whichSubpop) {
-        ArrayList<Individual> tInds = new ArrayList<Individual>();
-        for (Individual ind : eliteIndividuals[whichSubpop]) {
-            tInds.add(ind);
-        }
+    void loadTeamMembers(EvolutionState state, int whichSubpop) {
+        ArrayList<Individual> tInds = new ArrayList<>();
+        tInds.addAll(Arrays.asList(eliteIndividuals[whichSubpop]));
         for (int i = 0; i < numCurrent; i++) {
             tInds.add(produceCurrent(whichSubpop, state, 0));
         }
@@ -280,14 +278,14 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
         }
         Individual[] tIndsA = new Individual[tInds.size()];
         tInds.toArray(tIndsA);
-        competitors[whichSubpop] = tIndsA;
+        teamMembers[whichSubpop] = tIndsA;
     }
 
     @Override
     protected void loadElites(final EvolutionState state, int whichSubpop) {
         Subpopulation subpop = state.population.subpops[whichSubpop];
 
-        // Update hall of fame
+        // Update hall of fame if it exists
         if (hallOfFame != null) {
             int best = 0;
             Individual[] oldinds = subpop.individuals;
@@ -301,25 +299,24 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
 
         int index = 0;
 
-        // Last champions
+        // Add last champions
         if (lastChampions > 0) {
             for (int i = 1; i <= lastChampions && i <= hallOfFame[whichSubpop].size(); i++) {
                 eliteIndividuals[whichSubpop][index++]
                         = (Individual) hallOfFame[whichSubpop].get(hallOfFame[whichSubpop].size() - i).clone();
             }
         }
-
-        double randChamps = randomChampions;
-
-        // Random champions
-        if (randChamps > 0) {
-            // Choose random positions
-            ArrayList<Integer> pos = new ArrayList<Integer>(hallOfFame[whichSubpop].size());
+        
+        // Add random champions
+        if (randomChampions > 0) {
+            // Choose random positions from the Hall of Fame
+            ArrayList<Integer> pos = new ArrayList<>(hallOfFame[whichSubpop].size());
             for (int i = 0; i < hallOfFame[whichSubpop].size(); i++) {
                 pos.add(i);
             }
             Collections.shuffle(pos);
-            for (int i = 0; i < pos.size() && i < randChamps; i++) {
+            // Add the individuals
+            for (int i = 0; i < pos.size() && i < randomChampions; i++) {
                 eliteIndividuals[whichSubpop][index++]
                         = (Individual) hallOfFame[whichSubpop].get(pos.get(i)).clone();
             }

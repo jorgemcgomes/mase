@@ -112,15 +112,15 @@ public class ExpandedFitness extends SimpleFitness {
             this.setContext(fitnesses[0].getContext());
         } else {
             // Merge evaluation results
-            EvaluationResult[] evalFunctions = new EvaluationResult[((ExpandedFitness) fitnesses[0]).evalResults.length];
-            for (int i = 0; i < evalFunctions.length; i++) { // for each evaluation function
+            EvaluationResult[] evalRes = new EvaluationResult[((ExpandedFitness) fitnesses[0]).evalResults.length];
+            for (int i = 0; i < evalRes.length; i++) { // for each evaluation function
                 EvaluationResult[] evalTrials = new EvaluationResult[fitnesses.length];
                 for (int j = 0; j < fitnesses.length; j++) { // for each trial
                     evalTrials[j] = ((ExpandedFitness) fitnesses[j]).evalResults[i];
                 }
-                evalFunctions[i] = (EvaluationResult) evalTrials[0].mergeEvaluations(evalTrials);
+                evalRes[i] = (EvaluationResult) evalTrials[0].mergeEvaluations(evalTrials);
             }
-            this.setEvaluationResults(state, evalFunctions, subpop);
+            this.setEvaluationResults(state, evalRes, subpop);
             
             // Context corresponding to the individual with the median fitness score
             Fitness[] sortedFits = Arrays.copyOf(fitnesses, fitnesses.length);
