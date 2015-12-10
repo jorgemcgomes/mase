@@ -25,6 +25,8 @@ import sim.util.Double2D;
  */
 public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Steppable, Oriented2D, Entity {
 
+    private static final long serialVersionUID = 1L;
+
     protected Continuous2D field;
     private Double2D pos;
     private double orientation;
@@ -42,6 +44,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     private boolean isAlive;
     private double turningSpeed;
     private List<StaticPolygon> obstacleList;
+    private final int hash;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
         super(new OvalPortrayal2D(c, radius * 2, true), 0, radius,
@@ -59,7 +62,20 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.isAlive = true;
         this.setLocation(new Double2D(0, 0));
         this.setOrientation(0);
+        this.hash = System.identityHashCode(this);
     }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj;
+    }
+    
+    
 
     public double getRadius() {
         return radius;
@@ -151,7 +167,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     protected boolean checkPolygonCollisions(Double2D target) {
         // initialisation
         if(obstacleList == null) {
-            obstacleList = new ArrayList<StaticPolygon>();
+            obstacleList = new ArrayList<>();
             for(Object o : field.allObjects) {
                 if(o instanceof StaticPolygon) {
                     obstacleList.add((StaticPolygon) o);
@@ -174,8 +190,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     }
 
     protected boolean checkAgentCollisions(Double2D target) {
-        Bag objects = field.getNeighborsWithinDistance(target, radius * 5);
-
+        Bag objects = field.getNeighborsWithinDistance(target, radius, false, true);
         for (Object o : objects) {
             if (o != this && o instanceof EmboddiedAgent) {
                 EmboddiedAgent a = (EmboddiedAgent) o;

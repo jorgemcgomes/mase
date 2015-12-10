@@ -21,6 +21,8 @@ import sim.util.Double2D;
  */
 public class ForagingTask extends MasonSimState {
 
+    private static final long serialVersionUID = 1L;
+
     protected ForagingPar par;
     protected Continuous2D field;
     protected FlyingRobot flyingBot;
