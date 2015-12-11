@@ -15,7 +15,6 @@ import mase.mason.MasonSimState;
 import mase.mason.world.StaticPolygon;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
-import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.util.Bag;
 import sim.util.Double2D;
 
@@ -24,6 +23,8 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class MultiRover extends MasonSimState {
+
+    private static final long serialVersionUID = 1L;
 
     protected Continuous2D field;
     protected MRParams par;
@@ -35,7 +36,6 @@ public class MultiRover extends MasonSimState {
         super(gc, seed);
         this.par = par;
         this.scores = new int[RedRock.RockType.values().length];
-
     }
 
     @Override
@@ -61,7 +61,7 @@ public class MultiRover extends MasonSimState {
     protected void placeRovers() {
         // align predators in a row in the bottom
         AgentController[] controllers = gc.getAgentControllers(par.numAgents);
-        rovers = new ArrayList<Rover>(par.numAgents);
+        rovers = new ArrayList<>(par.numAgents);
         for (int i = 0; i < par.numAgents;) {
             double x = Rover.RADIUS + random.nextDouble() * (par.size - Rover.RADIUS * 2);
             double y = Rover.RADIUS + random.nextDouble() * (par.size - Rover.RADIUS * 2);
@@ -90,16 +90,16 @@ public class MultiRover extends MasonSimState {
 
     protected void placeRocks() {
 
-        this.rocks = new LinkedList<RedRock>();
+        this.rocks = new LinkedList<>();
         int count = 0;
-        while (count < par.numRocks) {
+        while (count < par.rocks.length) {
             double x = par.rockRadius + random.nextDouble() * (par.size - par.rockRadius * 2);
             double y = par.rockRadius + random.nextDouble() * (par.size - par.rockRadius * 2);
             Bag close = field.getNeighborsExactlyWithinDistance(new Double2D(x, y), par.rockRadius * 4);
             if (!close.isEmpty()) {
                 continue;
             }
-            RedRock newRock = new RedRock(this, RedRock.RockType.C);
+            RedRock newRock = new RedRock(this, par.rocks[count]);
             field.setObjectLocation(newRock, new Double2D(x, y));
             newRock.setStopper(schedule.scheduleRepeating(newRock));
             count++;
@@ -109,68 +109,8 @@ public class MultiRover extends MasonSimState {
     }
 
     @Override
-    public FieldPortrayal2D createFieldPortrayal() {
-        return new ContinuousPortrayal2D();
-    }
-
-    @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
     }
 
 }
-
-       /*RedRock rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.1 * field.width, 0.3 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.366 * field.width, 0.3 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.633 * field.width, 0.3 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.9 * field.width, 0.3 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.233 * field.width, 0.6 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.5 * field.width, 0.6 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.766 * field.width, 0.6 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.1 * field.width, 0.9 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.366 * field.width, 0.9 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.633 * field.width, 0.9 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);
-
-         rock = new RedRock(this, RedRock.RockType.C);
-         field.setObjectLocation(rock, new Double2D(0.9 * field.width, 0.9 * field.height));
-         rock.setStopper(schedule.scheduleRepeating(rock));
-         rocks.add(rock);*/

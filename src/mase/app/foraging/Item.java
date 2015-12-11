@@ -15,6 +15,8 @@ import sim.util.Double2D;
  */
 public class Item extends OvalPortrayal2D {
 
+    private static final long serialVersionUID = 1L;
+
     protected final double radius;
     protected final Double2D position;
 

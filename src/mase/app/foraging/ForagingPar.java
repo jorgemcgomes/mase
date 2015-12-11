@@ -15,6 +15,8 @@ import sim.util.Double2D;
  */
 public class ForagingPar implements Cloneable, Serializable {
     
+    private static final long serialVersionUID = 1L;
+
     @IgnoreParam()
     public static final int FIXED = 0, SEMI_RANDOM = 1, RANDOM = 2;
     

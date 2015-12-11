@@ -19,6 +19,8 @@ import sim.field.continuous.Continuous2D;
  * @author jorge
  */
 public class LandRobot extends SmartAgent {
+
+    private static final long serialVersionUID = 1L;
     
     protected DistanceSensorArcs itemArcs;
     protected DistanceSensorArcs botArcs;

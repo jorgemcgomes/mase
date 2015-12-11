@@ -13,6 +13,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import javassist.Modifier;
 import sim.util.Double2D;
 import sim.util.Int2D;
 
@@ -37,13 +38,13 @@ public class ParamUtils {
     }
 
     /**
-     * Use this annotation in parameters that are defined multiple times for different robots.
-     * Example:
-     * @RobotParam
-     * problem.robot.radius = 1 --> Default value
-     * problem.robot.0.radius = 2 --> Override
-     * problem.robot.1.radius = 3 --> Override
-     * The attribute MUST be an array to store the different values for different robots
+     * Use this annotation in parameters that are defined multiple times for
+     * different robots. Example:
+     *
+     * @RobotParam problem.robot.radius = 1 --> Default value
+     * problem.robot.0.radius = 2 --> Override problem.robot.1.radius = 3 -->
+     * Override The attribute MUST be an array to store the different values for
+     * different robots
      */
     @Retention(RetentionPolicy.RUNTIME)
     public @interface RobotParam {
@@ -54,13 +55,14 @@ public class ParamUtils {
 
         int numRobots() default 0;
     }
-    
+
     /**
      * Force a parameter to be ignored during the auto-fill
-     * 
+     *
      */
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface IgnoreParam {}    
+    public @interface IgnoreParam {
+    }
 
     /**
      * Search the ParameterDatabase to automatically fill the object's fields.
@@ -77,20 +79,29 @@ public class ParamUtils {
         Field[] fields = params.getClass().getDeclaredFields();
         for (Field field : fields) {
             try {
-                if(field.isAnnotationPresent(IgnoreParam.class)) {
-                    System.out.println("- " + field.getName() + ": IGNORED. Using default: " + field.get(params));
+                if (Modifier.isPrivate(field.getModifiers())) {
+                    System.out.println("- " + field.getName() + ": IGNORED (PRIVATE)");
+                    continue;
+                }
+                field.setAccessible(true);
+                if (Modifier.isStatic(field.getModifiers())) {
+                    System.out.println("- " + field.getName() + ": IGNORED (STATIC). Using default: " + field.get(params));
+                    continue;
+                }
+                if (field.isAnnotationPresent(IgnoreParam.class)) {
+                    System.out.println("- " + field.getName() + ": IGNORED (ANNOTATION). Using default: " + field.get(params));
                     continue;
                 }
                 if (field.isAnnotationPresent(RobotParam.class)) {
                     RobotParam annotation = field.getAnnotation(RobotParam.class);
                     Class<?> type = field.getType();
-                    if(type.isArray()) {
+                    if (type.isArray()) {
                         String name = annotation.name().equals("") ? field.getName() : annotation.name();
                         Parameter defaultRobot = base.push(annotation.base()).push(name);
                         Object array = Array.newInstance(type.getComponentType(), MAX_NUM_ROBOTS);
                         for (int i = 0; i < (annotation.numRobots() != 0 ? annotation.numRobots() : MAX_NUM_ROBOTS); i++) {
                             Parameter paramRobot = base.push(annotation.base()).push(i + "").push(name);
-                            if(db.exists(paramRobot, defaultRobot)) {
+                            if (db.exists(paramRobot, defaultRobot)) {
                                 Object value = getValue(type.getComponentType(), db, paramRobot, defaultRobot);
                                 Array.set(array, i, value);
                             }
@@ -110,12 +121,12 @@ public class ParamUtils {
                     } else {
                         System.out.println("X " + field.getName() + ": Parameter not found (" + base.push(name) + " OR " + defaultBase.push(name) + "). Using default: " + field.get(params));
                     }
-                } 
+                }
             } catch (Exception ex) {
                 System.out.println("X " + field.getName() + ": FATAL EXCEPTION: " + ex.getMessage());
             }
         }
-    }    
+    }
 
     public static Object getValue(Class<?> type, ParameterDatabase db, Parameter baseParam, Parameter defaultBaseParam) throws Exception {
         String val = db.getString(baseParam, defaultBaseParam);
@@ -123,7 +134,7 @@ public class ParamUtils {
             Class<?> componentType = type.getComponentType();
             String[] split = val.split(SEPARATOR_ARRAY);
             Object newArray = Array.newInstance(componentType, split.length);
-            for(int i = 0 ; i < split.length ; i++) {
+            for (int i = 0; i < split.length; i++) {
                 Object parse = parseType(componentType, split[i]);
                 Array.set(newArray, i, parse);
             }
@@ -146,10 +157,10 @@ public class ParamUtils {
             return Boolean.parseBoolean(stringVal);
         } else if (type.equals(String.class)) {
             return stringVal;
-        } else if(type.isEnum()) {
+        } else if (type.isEnum()) {
             Object[] consts = type.getEnumConstants();
-            for(Object o : consts) {
-                if(o.toString().equalsIgnoreCase(stringVal)) {
+            for (Object o : consts) {
+                if (o.toString().equalsIgnoreCase(stringVal)) {
                     return o;
                 }
             }
@@ -157,7 +168,7 @@ public class ParamUtils {
         } else if (type.equals(File.class)) {
             return new File(stringVal);
         } else if (type.equals(Double2D.class)) {
-            if(stringVal.trim().equalsIgnoreCase("null")) {
+            if (stringVal.trim().equalsIgnoreCase("null")) {
                 return null;
             }
             String[] split = stringVal.split(SEPARATOR_2D);
@@ -166,7 +177,7 @@ public class ParamUtils {
             }
             return new Double2D(Double.parseDouble(split[0]), Double.parseDouble(split[1]));
         } else if (type.equals(Int2D.class)) {
-            if(stringVal.trim().equalsIgnoreCase("null")) {
+            if (stringVal.trim().equalsIgnoreCase("null")) {
                 return null;
             }
             String[] split = stringVal.split(SEPARATOR_2D);

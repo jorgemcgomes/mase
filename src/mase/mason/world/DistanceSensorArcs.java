@@ -20,6 +20,8 @@ public class DistanceSensorArcs extends AbstractSensor {
     private Class[] types = new Class[]{Object.class};
     private boolean binary = false;
     private Object[] closestObjects;
+    private double[] lastDistances;
+
     private boolean ignoreRadius = false;
 
     public void setArcs(double[] arcStart, double[] arcEnd) {
@@ -73,11 +75,11 @@ public class DistanceSensorArcs extends AbstractSensor {
         /*Bag neighbours = Double.isInfinite(range) ? field.allObjects
                 : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);*/
         Bag neighbours = field.getAllObjects();
-        double[] vals = new double[valueCount()];
-        Arrays.fill(vals, Double.POSITIVE_INFINITY);
+        lastDistances = new double[valueCount()];
+        Arrays.fill(lastDistances, Double.POSITIVE_INFINITY);
         Arrays.fill(closestObjects, null);
         if(range < 0.001) {
-            return vals;
+            return lastDistances;
         }
         for (Object n : neighbours) {
             if (objectMatch(n)) {
@@ -90,8 +92,8 @@ public class DistanceSensorArcs extends AbstractSensor {
                     for (int a = 0; a < arcStart.length; a++) {
                         if ((angle >= arcStart[a] && angle <= arcEnd[a])
                                 || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a]))) {
-                            if (dist < vals[a]) {
-                                vals[a] = dist;
+                            if (dist < lastDistances[a]) {
+                                lastDistances[a] = dist;
                                 closestObjects[a] = n;
                             }
                         }
@@ -99,11 +101,15 @@ public class DistanceSensorArcs extends AbstractSensor {
                 }
             }
         }
-        return vals;
+        return lastDistances;
     }
 
     public Object[] getClosestObjects() {
         return closestObjects;
+    }
+    
+    public double[] getLastDistances() {
+        return lastDistances;
     }
 
     protected boolean objectMatch(Object o) {

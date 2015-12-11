@@ -18,6 +18,8 @@ import sim.field.continuous.Continuous2D;
  */
 public abstract class SmartAgent extends EmboddiedAgent {
 
+    private static final long serialVersionUID = 1L;
+
     protected AgentController ac;
     protected double[] lastRawSensors;
     protected double[] lastNormSensors;

@@ -15,6 +15,7 @@ import mase.mason.MasonEvaluation;
  */
 public class ForagingGroupBehaviour extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
     private double dispersion;
     private double averageProximity;
     private int timeWithin;

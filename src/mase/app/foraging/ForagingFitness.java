@@ -14,8 +14,9 @@ import mase.mason.MasonEvaluation;
  * @author jorge
  */
 public class ForagingFitness extends MasonEvaluation {
-    
-        private FitnessResult res;
+
+    private static final long serialVersionUID = 1L;
+    private FitnessResult res;
 
     @Override
     public EvaluationResult getResult() {

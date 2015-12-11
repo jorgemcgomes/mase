@@ -11,8 +11,6 @@ finish = 	        		ec.simple.SimpleFinisher
 exch = 					ec.simple.SimpleExchanger
 breed =					ec.simple.SimpleBreeder
 pop = 					ec.Population
-pop.subpops =                           1
-pop.default-subpop = 			0
 
 # Evaluation config
 eval =                                  mase.evaluation.MetaEvaluator

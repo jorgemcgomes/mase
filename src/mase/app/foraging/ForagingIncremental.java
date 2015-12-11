@@ -6,8 +6,6 @@
 package mase.app.foraging;
 
 import ec.EvolutionState;
-import ec.Problem;
-import ec.eval.MasterProblem;
 import ec.util.Parameter;
 import mase.evaluation.IncrementalEvolution;
 import sim.util.Double2D;
@@ -19,6 +17,7 @@ import sim.util.Double2D;
 public class ForagingIncremental extends IncrementalEvolution {
 
     public static final String P_STARTING_RATIO = "starting-ratio";
+    private static final long serialVersionUID = 1L;
     protected double startingRatio;
     protected double currentRatio;
     protected double oriFlyingMaxDist;

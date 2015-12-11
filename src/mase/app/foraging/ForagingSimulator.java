@@ -21,6 +21,8 @@ import sim.display.GUIState;
  */
 public class ForagingSimulator extends MasonSimulationProblem {
 
+    private static final long serialVersionUID = 1L;
+
     protected ForagingPar par;
 
     @Override

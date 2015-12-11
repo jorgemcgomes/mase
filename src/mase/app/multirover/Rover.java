@@ -20,11 +20,14 @@ import sim.field.continuous.Continuous2D;
  */
 public class Rover extends SmartAgent {
 
+    private static final long serialVersionUID = 1L;
+
     public static final double RADIUS = 2;
     public static final Color COLOUR = Color.BLACK;
-    public static final int LOW = -1, NONE = 0, HIGH = 1;
+    public static final int NO_ACTIVATION = -1;
+    public static final double ACTIVATION_THRESHOLD = 0.5;
 
-    protected int actuatorType;
+    protected int actuatorType = NO_ACTIVATION;
     protected long lastActivation = -10000;
     protected int numActivations = 0;
     protected int captured = 0;
@@ -34,6 +37,7 @@ public class Rover extends SmartAgent {
         this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
 
+        // Obstacle sensor
         DistanceSensorRays dw = new DistanceSensorRays();
         dw.setAgent(sim, field, this);
         dw.setRays(5.0, -Math.PI / 6, Math.PI / 6);
@@ -41,7 +45,6 @@ public class Rover extends SmartAgent {
         super.addSensor(dw);
 
         // redrock sensor
-        //TypeDistanceSensor ds = new TypeDistanceSensor();
         DistanceSensorArcs ds = new DistanceSensorArcs();
         ds.setArcs(new double[]{-Math.PI / 2, -Math.PI / 6, Math.PI / 6}, new double[]{-Math.PI / 6, Math.PI / 6, Math.PI / 2});
         ds.setRange(sim.par.sensorRange);
@@ -56,22 +59,27 @@ public class Rover extends SmartAgent {
         super.addSensor(dsr);
 
         // closest rovers type
-        TypeSensor ts = new TypeSensor(dsr);
-        super.addSensor(ts);
+        for (int i = 0; i < sim.par.numActuators; i++) {
+            TypeSensor ts = new TypeSensor(dsr, i);
+            super.addSensor(ts);
+        }
 
         // movement effector
         DashMovementEffector dm = new DashMovementEffector();
-        dm.setSpeeds(sim.par.speed, sim.par.rotationSpeed);
+        dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
+        dm.allowBackwardMove(false);
         super.addEffector(dm);
 
     }
 
     private static class TypeSensor extends AbstractSensor {
 
-        DistanceSensorArcs ds;
+        private final DistanceSensorArcs ds;
+        private final int type;
 
-        TypeSensor(DistanceSensorArcs ds) {
+        TypeSensor(DistanceSensorArcs ds, int type) {
             this.ds = ds;
+            this.type = type;
         }
 
         @Override
@@ -80,19 +88,22 @@ public class Rover extends SmartAgent {
         }
 
         @Override
-        /*
-        WARNING: ONLY WORKS FOR 2-Agent setups!!!
-        */
         public double[] readValues() {
             Object[] rovers = ds.getClosestObjects();
-            
-            int closestType = 0;
+            double[] dists = ds.getLastDistances();
+            double closestDist = Double.POSITIVE_INFINITY;
+            Rover closestRover = null;
             for (int i = 0; i < rovers.length; i++) {
-                if (rovers[i] != null) {
-                    closestType = ((Rover) rovers[i]).getActuatorType();
+                if (rovers[i] != null && dists[i] < closestDist) {
+                    closestDist = dists[i];
+                    closestRover = (Rover) rovers[i];
                 }
             }
-            return new double[]{closestType};
+            if (closestRover != null && closestRover.getActuatorType() == type) {
+                return new double[]{1};
+            } else {
+                return new double[]{-1};
+            }
         }
 
         @Override
@@ -108,16 +119,26 @@ public class Rover extends SmartAgent {
 
     @Override
     public void action(double[] output) {
-        if (sim.schedule.getSteps() - lastActivation > ((MultiRover) sim).par.minActivationTime) {
-            if (output[2] > 0.5 || output[3] > 0.5) {
-                int newType = output[2] > output[3]? LOW : HIGH;
-                if (actuatorType != newType) {
-                    lastActivation = sim.schedule.getSteps();
-                    actuatorType = newType;
-                    numActivations++;
+        MRParams par = ((MultiRover) sim).par;
+        if (sim.schedule.getSteps() - lastActivation < par.minActivationTime) {
+            // locked in the actuator -- do not move
+        } else {
+            int newActuator = NO_ACTIVATION;
+            double highestActivation = 0;
+            for (int i = 0; i < par.numActuators; i++) {
+                if (output[2 + i] > ACTIVATION_THRESHOLD && output[2 + i] > highestActivation) {
+                    highestActivation = output[2 + i];
+                    newActuator = i;
                 }
-            } else {
-                actuatorType = NONE;
+            }
+            if(newActuator != actuatorType) {
+                lastActivation = sim.schedule.getSteps();
+                actuatorType = newActuator;
+                numActivations++;
+            }
+            // Only move if there is no actuator active or if there is no minActivationTime
+            if(newActuator == NO_ACTIVATION || par.minActivationTime == 0) {
+                actuatorType = newActuator;
                 super.action(output);
             }
         }

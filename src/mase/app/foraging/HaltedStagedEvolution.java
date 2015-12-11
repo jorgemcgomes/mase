@@ -22,6 +22,8 @@ import mase.evaluation.StagedEvolution;
  */
 public class HaltedStagedEvolution extends StagedEvolution {
 
+    private static final long serialVersionUID = 1L;
+
     private Subpopulation backup;
 
     @Override

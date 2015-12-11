@@ -20,6 +20,8 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class FlyingRobot extends SmartAgent {
+
+    private static final long serialVersionUID = 1L;
     
     protected FlyingEffector effector;
     protected DistanceSensorArcs itemArcs, botArcs;

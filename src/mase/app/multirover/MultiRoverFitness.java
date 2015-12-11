@@ -16,6 +16,8 @@ import mase.mason.MasonEvaluation;
  */
 public class MultiRoverFitness extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private FitnessResult fitnessResult;
     
     @Override
@@ -31,7 +33,7 @@ public class MultiRoverFitness extends MasonEvaluation {
         for(int c : mr.scores) {
             count += c;
         }
-        fitnessResult = new FitnessResult( count, FitnessResult.HARMONIC);
+        fitnessResult = new FitnessResult(count, FitnessResult.ARITHMETIC);
     }
     
     

@@ -17,6 +17,8 @@ import sim.util.MutableDouble2D;
  */
 public class MultiRoverGroupEval extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private VectorBehaviourResult br;
     private double dispersion;
     private double proximity;
@@ -46,9 +48,9 @@ public class MultiRoverGroupEval extends MasonEvaluation {
     @Override
     protected void postSimulation() {
         MultiRover mr = (MultiRover) sim;
-        br = new VectorBehaviourResult(mr.scores[2] / (double) mr.par.numRocks,
+        br = new VectorBehaviourResult(mr.scores[2] / (double) mr.par.rocks.length,
                  (dispersion / mr.rovers.size() / currentEvaluationStep / (mr.par.size / 2)),
-                 (movement / mr.rovers.size() / currentEvaluationStep / mr.par.speed),
+                 (movement / mr.rovers.size() / currentEvaluationStep / mr.par.linearSpeed),
                  (proximity / mr.rovers.size() / currentEvaluationStep / (mr.par.size / 4))
         );
     }

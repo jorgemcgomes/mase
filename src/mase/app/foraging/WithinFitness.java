@@ -15,6 +15,8 @@ import mase.mason.MasonEvaluation;
  */
 public class WithinFitness extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private FitnessResult res;
     private int time;
 

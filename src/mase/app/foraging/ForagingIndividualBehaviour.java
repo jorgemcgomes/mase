@@ -17,6 +17,8 @@ import sim.util.Double2D;
  */
 public class ForagingIndividualBehaviour extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private double landFlyingDistance;
     private double landProximity, flyingProximity;
     private double landMovement, flyingMovement;

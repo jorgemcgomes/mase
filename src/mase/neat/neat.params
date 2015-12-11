@@ -5,6 +5,10 @@ breedthreads = 1
 # Populations configuration
 init = 					mase.neat.NEATInitializer
 neat.shared-database=false
+
+pop.subpops =                           1
+pop.subpop.0 =                          mase.neat.NEATSubpop
+pop.default-subpop = 			0
 neat.species = 		                mase.neat.NEATSpecies
 neat.size =                             200
 neat.duplicate-retries =                100

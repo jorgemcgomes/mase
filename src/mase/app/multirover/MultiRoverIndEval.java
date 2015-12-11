@@ -17,6 +17,8 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class MultiRoverIndEval extends MasonEvaluation {
+
+    private static final long serialVersionUID = 1L;
     
     private SubpopEvaluationResult br;
     private double dispersion;
@@ -55,7 +57,7 @@ public class MultiRoverIndEval extends MasonEvaluation {
         VectorBehaviourResult[] res = new VectorBehaviourResult[mr.rovers.size()];
         
         for(int i = 0 ; i < mr.rovers.size() ; i++) {
-            res[i] = new VectorBehaviourResult( (movement[i] / currentEvaluationStep / mr.par.speed),
+            res[i] = new VectorBehaviourResult( (movement[i] / currentEvaluationStep / mr.par.linearSpeed),
                      (proximity[i] / currentEvaluationStep / (mr.par.size / 4)),
                     (double) type1Active[i] / currentEvaluationStep,
                     (double) type2Active[i] / currentEvaluationStep
@@ -91,8 +93,8 @@ public class MultiRoverIndEval extends MasonEvaluation {
             movement[i] += r.getLocation().distance(lastPosition[i]);
             lastPosition[i] = r.getLocation();
             
-            type1Active[i] += r.getActuatorType() == Rover.LOW ? 1 : 0;
-            type2Active[i] += r.getActuatorType() == Rover.HIGH ? 1 : 0;
+            type1Active[i] += r.getActuatorType() == 0 ? 1 : 0;
+            type2Active[i] += r.getActuatorType() == 1 ? 1 : 0;
             
             i++;
         }

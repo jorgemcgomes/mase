@@ -9,29 +9,29 @@ problem.eval.2 =                   mase.app.multirover.MultiRoverIndEval
 problem.eval.2.update-freq =       1
 
 fitness.fitness-index =            0
-fitness.novelty-index =            1
 
 problem.repetitions =              10
 problem.max-steps =                1000
-problem.size =                     150
-problem.discretization = 30
-problem.num-agents = 2
-problem.separation = 15
-problem.speed = 1
-problem.rotation-speed = 0.4
-problem.sensor-arcs = 6
-problem.sensor-range = 25
-problem.num-rocks = 8
-problem.rock-radius = 6
-problem.min-activation-time = 25
 
-vector.species.genome-size =       46
-neural.input =                     2
-neural.hidden =                    8
+problem.size =                     150
+problem.discretization =           30
+problem.numAgents =                2
+problem.linearSpeed =              1
+problem.turnSpeed =                0.4
+problem.sensorRange =              25
+problem.rocks =                    D,D,D,D,D,D,D,D
+problem.rockRadius =               6
+problem.collectionTime =           0
+problem.enableTypeActuator =       false
+problem.minActivationTime =        25
+
+vector.species.genome-size =       72
+neural.input =                     8
+neural.hidden =                    6
 neural.output =                    2
 neural.structure =                 jordan
 neural.tanh =                      false
 
-neat.INPUT.NODES =                 9
+#neat.INPUT.NODES =                 9
 #neat.OUTPUT.NODES =                3
-neat.OUTPUT.NODES =                4
+#neat.OUTPUT.NODES =                4
