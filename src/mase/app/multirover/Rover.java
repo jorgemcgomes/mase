@@ -131,13 +131,14 @@ public class Rover extends SmartAgent {
                     newActuator = i;
                 }
             }
-            if(newActuator != actuatorType) {
+            if(newActuator != actuatorType && newActuator != NO_ACTIVATION) {
                 lastActivation = sim.schedule.getSteps();
-                actuatorType = newActuator;
                 numActivations++;
             }
+            actuatorType = newActuator;
+
             // Only move if there is no actuator active or if there is no minActivationTime
-            if(newActuator == NO_ACTIVATION || par.minActivationTime == 0) {
+            if(actuatorType == NO_ACTIVATION || par.minActivationTime == 0) {
                 actuatorType = newActuator;
                 super.action(output);
             }
