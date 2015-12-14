@@ -29,6 +29,8 @@ import sim.util.Double2D;
  */
 public class Herding extends MasonSimState implements TaskDescriptionProvider {
 
+    private static final long serialVersionUID = 1L;
+
     protected TaskDescription td;
     protected HerdingParams par;
     protected Continuous2D field;
@@ -37,10 +39,6 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
     protected List<Sheep> sheeps;
     protected List<Sheep> activeSheeps;
     protected final StaticPolygon fence, openSide, curral;
-    public static final Double2D[] FOX_POSITIONS = new Double2D[]{
-        new Double2D(0.95, 0.05), new Double2D(0.95, 0.95), new Double2D(0.95, 0.5),
-        new Double2D(0.5, 0.95), new Double2D(0.5, 0.05)
-    };
 
     public Herding(long seed, HerdingParams par, GroupController gc) {
         super(gc, seed);
@@ -85,7 +83,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
     }
 
     protected void placeSheeps() {
-        sheeps = new ArrayList<Sheep>(par.numSheeps);
+        sheeps = new ArrayList<>(par.numSheeps);
         double range = par.arenaSize / par.numSheeps;
         for (int i = 0; i < par.numSheeps; i++) {
             Sheep sheep = new Sheep(this, field);
@@ -100,11 +98,11 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
             sheep.setStopper(schedule.scheduleRepeating(sheep));
             sheeps.add(sheep);
         }
-        activeSheeps = new ArrayList<Sheep>(sheeps);
+        activeSheeps = new ArrayList<>(sheeps);
     }
 
     protected void placeFoxes() {
-        foxes = new ArrayList<Fox>(par.numFoxes);
+        foxes = new ArrayList<>(par.numFoxes);
 
         double range = par.arenaSize / par.numFoxes;
 
@@ -125,8 +123,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
     }
 
     protected void placeShepherds() {
-        shepherds = new ArrayList<Shepherd>(par.numShepherds);
-        //double x = par.agentRadius + 1;
+        shepherds = new ArrayList<>(par.numShepherds);
         double x = par.shepherdX * par.arenaSize;
         double startY = (field.width - par.shepherdSeparation * (par.numShepherds - 1)) / 2;
         AgentController[] controllers = gc.getAgentControllers(par.numShepherds);

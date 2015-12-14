@@ -7,8 +7,6 @@ package mase.app.herding;
 
 import java.awt.Color;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
@@ -22,6 +20,8 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class Shepherd extends SmartAgent {
+
+    private static final long serialVersionUID = 1L;
     
     public Shepherd(Herding sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, Color.BLUE, ac);
@@ -57,7 +57,7 @@ public class Shepherd extends SmartAgent {
         }
         
         DashMovementEffector dm = new DashMovementEffector();
-        dm.setSpeeds(sim.par.shepherdSpeed, sim.par.shepherdTurnSpeed);
+        dm.setSpeeds(sim.par.shepherdLinearSpeed, sim.par.shepherdTurnSpeed);
         super.addEffector(dm);
         
     }

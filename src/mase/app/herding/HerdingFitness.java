@@ -10,7 +10,6 @@ import java.util.Map;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
-import org.apache.commons.math3.util.FastMath;
 import sim.util.Double2D;
 
 /**
@@ -18,6 +17,8 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class HerdingFitness extends MasonEvaluation {
+
+    private static final long serialVersionUID = 1L;
 
     private FitnessResult res;
     private Map<Sheep, Double> initialDistances;
@@ -28,7 +29,7 @@ public class HerdingFitness extends MasonEvaluation {
         super.preSimulation();
         Herding herd = (Herding) super.sim;
         gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
-        initialDistances = new HashMap<Sheep,Double>();
+        initialDistances = new HashMap<>();
         for(Sheep s : herd.sheeps) {
             initialDistances.put(s, s.distanceTo(gate));
         }

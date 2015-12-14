@@ -17,6 +17,8 @@ import sim.util.Double2D;
  */
 public class HerdingIndividualEval extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private int[] sheepLife;
     private double[][] sheepDist;
     private double[][] foxDist;

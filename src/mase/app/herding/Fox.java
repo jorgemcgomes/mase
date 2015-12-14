@@ -18,6 +18,8 @@ import sim.util.Double2D;
  */
 public class Fox extends EmboddiedAgent {
 
+    private static final long serialVersionUID = 1L;
+
     public Fox(Herding sim, Continuous2D field) {
         super(sim, field, sim.par.agentRadius, Color.RED);
         this.enableBoundedArena(true);

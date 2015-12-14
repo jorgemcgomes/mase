@@ -20,6 +20,7 @@ import sim.util.Double2D;
 public class Sheep extends EmboddiedAgent {
 
     public static final int HISTORY_SIZE = 10;
+    private static final long serialVersionUID = 1L;
     protected int corraledTime = -1;
     protected LinkedList<Double2D> positionHistory;
     protected Double2D realVelocity = new Double2D(0,0);
@@ -28,7 +29,7 @@ public class Sheep extends EmboddiedAgent {
         super(sim, field, sim.par.agentRadius, Color.GREEN);
         this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
-        this.positionHistory = new LinkedList<Double2D>();
+        this.positionHistory = new LinkedList<>();
     }
 
     @Override

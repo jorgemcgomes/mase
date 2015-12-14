@@ -20,6 +20,8 @@ import sim.util.Double2D;
  */
 public class HerdingFitnessFoxes extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private FitnessResult res;
     private Map<Sheep, Double> initialDistances;
     private double[] closestShepherd;

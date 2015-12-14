@@ -5,64 +5,41 @@
  */
 package mase.app.herding;
 
+import java.io.Serializable;
+
 /**
  *
  * @author jorge
  */
-public class HerdingParams {
+public class HerdingParams implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     protected double arenaSize;
     protected double gateSize;
     protected double discretization;
 
     protected double agentRadius;
-    protected double herdingRange; // used for Sheep & Fox
+    protected double herdingRange; // used for both the Sheep & Fox
 
     protected int numSheeps;
-    protected boolean activeSheep;
+    protected boolean activeSheep; // the sheep will run towards the open side
     protected double sheepSpeed;
-    protected boolean randomSheepPosition;
+    protected boolean randomSheepPosition; // only in the y-axis
     protected double sheepX;
     
     protected int numFoxes;
+    protected boolean smartFox; // the fox will go towards the sheep *avoiding* the shepherds
     protected double foxSpeed;
+    protected boolean randomFoxPosition; // only in the y-axis
     protected double foxX;
-    protected boolean randomFoxPosition;
-    protected boolean smartFox;
 
     protected int numShepherds;
-    protected double shepherdSpeed;
-    protected double shepherdSensorRange;
-    protected boolean shepherdArcSensor;
+    protected double shepherdLinearSpeed;
     protected double shepherdTurnSpeed;
-    protected double shepherdSeparation;
+    protected double shepherdSensorRange; // used for all sensors where applicable
+    protected boolean shepherdArcSensor; // for the fox sensor, if false uses RangeBearingSensor
+    protected double shepherdSeparation; // in the y-axis
     protected double shepherdX;
-
-    public static final String P_ARENA_SIZE = "arena-size";
-    public static final String P_GATE_SIZE = "gate-size";
-    public static final String P_DISCRETIZATION = "discretization";
-
-    public static final String P_AGENT_RADIUS = "agent-radius";
-    public static final String P_HERDING_RANGE = "herding-range";
-
-    public static final String P_NUM_SHEEPS = "num-sheeps";
-    public static final String P_ACTIVE_SHEEP = "active-sheep";
-    public static final String P_SHEEP_SPEED = "sheep-speed";
-    public static final String P_RANDOM_SHEEP_POSITION = "random-sheep-position";
-    public static final String P_SHEEP_X = "sheep-x";
-
-    public static final String P_NUM_FOXES = "num-foxes";
-    public static final String P_FOX_SPEED = "fox-speed";
-    public static final String P_FOX_X = "fox-x";
-    public static final String P_RANDOM_FOX_POSITION = "random-fox-position";
-    public static final String P_SMART_FOX = "smart-fox";
-
-    public static final String P_NUM_SHEPHERDS = "num-shepherds";
-    public static final String P_SHEPHERD_SPEED = "shepherd-speed";
-    public static final String P_SHEPHERD_TURN_SPEED = "shepherd-turn-speed";
-    public static final String P_SHEPHERD_SENSOR_RANGE = "shepherd-sensor-range";
-    public static final String P_SHEPHERD_SEPARATION = "shepherd-separation";
-    public static final String P_SHEPHERD_X = "shepherd-x";
-    public static final String P_SHEPHERD_ARC_SENSOR = "shepherd-fox-arcs";
 
 }

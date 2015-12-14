@@ -9,38 +9,37 @@ problem.eval.2 =                   mase.app.herding.HerdingIndividualEval
 problem.eval.2.update-freq =       1
 
 fitness.fitness-index =            0
-fitness.novelty-index =            1
 
 problem.repetitions =              1
-problem.same-seed =                true
+problem.seed =                     0
 problem.max-steps =                500
 
-problem.arena-size = 150
-problem.gate-size = 25
+problem.arenaSize = 150
+problem.gateSize = 25
 problem.discretization = 25
 
-problem.agent-radius = 2.5
-problem.herding-range = 5
+problem.agentRadius = 2.5
+problem.herdingRange = 5
 
-problem.num-sheeps = 2
-problem.sheep-x = 0.1
-problem.active-sheep = false
-problem.sheep-speed = 1
-problem.random-sheep-position = false
+problem.numSheeps = 2
+problem.activeSheep = false
+problem.sheepSpeed = 1
+problem.randomSheepPosition = false
+problem.sheepX = 0.1
 
-problem.num-foxes = 2
-problem.fox-speed = 1
-problem.fox-x = 0.9
-problem.random-fox-position = false
-problem.smart-fox = false
+problem.numFoxes = 2
+problem.smartFox = false
+problem.foxSpeed = 1
+problem.randomFoxPosition = false
+problem.foxX = 0.9
 
-problem.num-shepherds = 7
-problem.shepherd-x = 0.5
-problem.shepherd-speed = 1
-problem.shepherd-turn-speed = 0.4
-problem.shepherd-sensor-range = 25
-problem.shepherd-separation = 7
-problem.shepherd-fox-arcs = false
+problem.numShepherds = 7
+problem.shepherdLinearSpeed = 1
+problem.shepherdTurnSpeed = 0.4
+problem.shepherdSensorRange = 25
+problem.shepherdArcSensor = false
+problem.shepherdSeparation = 7
+problem.shepherdX = 0.5
 
 vector.species.genome-size =       92
 neural.input =                     14

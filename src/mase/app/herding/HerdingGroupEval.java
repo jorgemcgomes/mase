@@ -15,6 +15,8 @@ import mase.mason.MasonEvaluation;
  */
 public class HerdingGroupEval extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private VectorBehaviourResult vbr;
     private double sheepFence;
     private double sheepFox;
