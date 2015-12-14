@@ -20,6 +20,7 @@ public class Prey extends EmboddiedAgent {
 
     public static final double RADIUS = 1.5;
     public static final Color COLOUR = Color.BLUE;
+    private static final long serialVersionUID = 1L;
     protected PredatorPrey predSim;
 
     public Prey(PredatorPrey sim, Continuous2D field) {
@@ -27,9 +28,6 @@ public class Prey extends EmboddiedAgent {
         super.setOrientationShowing(false);
         this.predSim = sim;
         this.enableAgentCollisions(false);
-        /*if(sim.par.collisions) {
-            this.enableCollisionDetection(true);
-        }*/
     }
 
     @Override
@@ -51,12 +49,9 @@ public class Prey extends EmboddiedAgent {
             }
         } else if (predSim.par.escapeStrategy == PredParams.V_MEAN_VECTOR) { // escape having in consideration all the predators within the danger area
             MutableDouble2D escape = new MutableDouble2D(0, 0);
-            //int count = 0;
             for (Object o : objects.objs) {
                 if (o instanceof Predator) {
                     Predator pred = ((Predator) o);
-                    //escape.addIn(pred.getLocation());
-                    //count++;
                     double dist = pred.distanceTo(this);
                     if (dist < predSim.par.escapeDistance && dist > 0) {
                         MutableDouble2D vec = new MutableDouble2D(getLocation());
@@ -68,13 +63,6 @@ public class Prey extends EmboddiedAgent {
                     }
                 }
             }
-            /*if(count > 0) {
-                escape.multiplyIn(1.0 / count);
-                MutableDouble2D vec = new MutableDouble2D(getLocation());
-                vec.subtractIn(escape);
-                vec.normalize();
-                escape.setTo(vec);
-            }*/
             escapeVec = new Double2D(escape);
         }
         
@@ -83,7 +71,6 @@ public class Prey extends EmboddiedAgent {
         }
         if (getLocation().x > predSim.par.size || getLocation().y > predSim.par.size || getLocation().x < 0 || getLocation().y < 0) {
             disappear();
-            
         }
     }
 

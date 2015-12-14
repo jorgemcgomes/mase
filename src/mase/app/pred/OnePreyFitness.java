@@ -15,6 +15,8 @@ import sim.util.Double2D;
  */
 public class OnePreyFitness extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private double initialDistance, finalDistance;
     private FitnessResult fitnessResult;
     private double diagonal;

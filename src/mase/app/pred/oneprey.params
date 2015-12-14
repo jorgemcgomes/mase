@@ -10,26 +10,33 @@ problem.eval.2 =                   mase.app.pred.OnePreyIndividualEval
 problem.eval.2.update-freq =       1
 
 fitness.fitness-index =            0
-fitness.novelty-index =            1
 
 problem.repetitions =              5
 problem.max-steps =                300
+problem.seed =                     random
+
 problem.size =                     100
 problem.discretization =           15
-problem.n-preys =                  1
-problem.prey-placement =           random
-problem.prey-margin =              45
-problem.prey-speed =               1
-problem.escape-distance =          7
-problem.n-predators =              3
-problem.predator-separation =      10
-problem.predator-speed =           1
-# max turn speed = max speed / distance between wheels
-problem.predator-rotate-speed =    0.785
-problem.capture-distance =         0
-problem.escape-strategy =          mean-vector
-problem.sensor-mode =              closest
 problem.collisions =               FALSE
+
+problem.nPreys =                  1
+problem.preySpeed =               1
+problem.escapeStrategy =          0
+problem.escapeDistance =          7
+problem.preyPlacement =           0
+problem.preyMargin =              45
+problem.preySeparation =          0
+
+problem.nPredators =              3
+problem.predatorLinearSpeed =     1
+problem.predatorTurnSpeed =       0.39
+problem.captureDistance =         0
+problem.preySensorMode =          1
+problem.preySensorRange =         Infinity
+problem.predatorSensorMode =      0
+problem.predatorSensorRange =     0
+problem.sensorArcs =              0
+problem.predatorSeparation =      10
 
 vector.species.genome-size =       46
 neural.input =                     2

@@ -72,9 +72,9 @@ public class DistanceSensorArcs extends AbstractSensor {
 
     @Override
     public double[] readValues() {
-        /*Bag neighbours = Double.isInfinite(range) ? field.allObjects
-                : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);*/
-        Bag neighbours = field.getAllObjects();
+        Bag neighbours = Double.isInfinite(range) ? field.allObjects
+                : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
+        //Bag neighbours = field.getAllObjects();
         lastDistances = new double[valueCount()];
         Arrays.fill(lastDistances, Double.POSITIVE_INFINITY);
         Arrays.fill(closestObjects, null);
@@ -82,7 +82,7 @@ public class DistanceSensorArcs extends AbstractSensor {
             return lastDistances;
         }
         for (Object n : neighbours) {
-            if (objectMatch(n)) {
+            if (objectMatch(n) && field.exists(n)) {
                 double dist = distFunction.agentToObjectDistance(ag, n);
                 if(ignoreRadius) {
                     dist += ag.getRadius();

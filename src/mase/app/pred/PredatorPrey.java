@@ -31,6 +31,8 @@ import sim.util.Double2D;
  */
 public class PredatorPrey extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
+    private static final long serialVersionUID = 1L;
+
     protected PredParams par;
     protected Continuous2D field;
     protected List<Predator> predators;
@@ -68,14 +70,14 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
 
     protected void placePreys() {
         // randomly place preys, in the opposite half of the field
-        preys = new ArrayList<Prey>();
+        preys = new ArrayList<>();
         while (preys.size() < par.nPreys) {
             double x = 0;
             double y = 0;
-            if (par.preyPlacement.equalsIgnoreCase(PredParams.V_CENTER)) {
+            if (par.preyPlacement == PredParams.V_CENTER) {
                 x = par.size / 2;
                 y = par.size / 2;
-            } else if (par.preyPlacement.equalsIgnoreCase(PredParams.V_RANDOM)) {
+            } else if (par.preyPlacement == PredParams.V_RANDOM) {
                 x = par.preyMargin + random.nextDouble() * (par.size - par.preyMargin * 2);
                 y = par.preyMargin + random.nextDouble() * (par.size - par.preyMargin * 2);
                 Bag close = field.getNeighborsExactlyWithinDistance(new Double2D(x, y), par.preySeparation + Prey.RADIUS * 2);
@@ -88,7 +90,7 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
             newPrey.setStopper(schedule.scheduleRepeating(newPrey));
             preys.add(newPrey);
         }
-        activePreys = new LinkedList<Prey>(preys);
+        activePreys = new LinkedList<>(preys);
     }
 
     protected void placePredators() {
@@ -96,7 +98,7 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
         double w = par.predatorSeparation * (par.nPredators - 1);
         double y = 0;
         double startX = (field.width - w) / 2;
-        predators = new ArrayList<Predator>(par.nPredators);
+        predators = new ArrayList<>(par.nPredators);
         AgentController[] controllers = gc.getAgentControllers(par.nPredators);
         for (int i = 0; i < par.nPredators; i++) {
             double x = startX + i * par.predatorSeparation;
@@ -115,11 +117,6 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
 
     public int getCaptureCount() {
         return captureCount;
-    }
-
-    @Override
-    public FieldPortrayal2D createFieldPortrayal() {
-        return new ContinuousPortrayal2D();
     }
 
     @Override

@@ -14,6 +14,8 @@ import sim.util.MutableDouble2D;
  */
 public class MultiPreyGroupEval extends OnePreyGroupEval {
 
+    private static final long serialVersionUID = 1L;
+
     protected double preyDispersion = 0;
 
     @Override

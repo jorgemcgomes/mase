@@ -4,50 +4,41 @@
  */
 package mase.app.pred;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredParams {
+public class PredParams implements Serializable {
 
-    public static final String P_SIZE = "size";
-    public static final String P_DISCRETIZATION = "discretization";
-    public static final String P_PREY_SPEED = "prey-speed";
-    public static final String P_ESCAPE_DISTANCE = "escape-distance";
-    public static final String P_PREDATOR_SPEED = "predator-speed";
-    public static final String P_PREDATOR_ROTATE_SPEED = "predator-rotate-speed";
-    public static final String P_CAPTURE_DISTANCE = "capture-distance";
-    public static final String P_PREDATOR_SEPARATION = "predator-separation";
-    public static final String P_PREY_MARGIN = "prey-margin";
-    public static final String P_PREY_SEPARATION = "prey-separation";
-    public static final String P_NPREYS = "n-preys";
-    public static final String P_NPREDATORS = "n-predators";
-    public static final String P_PREY_PLACEMENT = "prey-placement";
-    public static final String V_RANDOM = "random", V_CENTER = "center", V_RANDOM_CENTER = "random-center";
-    public static final String P_ESCAPE_STRATEGY = "escape-strategy";
-    public static final String V_MEAN_VECTOR = "mean-vector", V_NEAREST = "nearest";
-    public static final String P_SENSOR_MODE = "sensor-mode";
-    public static final String P_SENSOR_ARCS = "n-arcs";
-    public static final String P_COLLISIONS = "collisions";
+    private static final long serialVersionUID = 1L;
+    
+    public static final int V_RANDOM = 0, V_CENTER = 1;
+    public static final int V_MEAN_VECTOR = 0, V_NEAREST = 1;
+    public static final int V_NONE = 0, V_RBS_CLOSEST = 1, V_RBS_ALL = 2, V_ARCS = 3;
+
     public double size = 100d;
     public double discretization = 10d;
-    public double preySpeed = 1d;
-    public double preyMargin = 5d;
-    public double escapeDistance = 10d;
-    public double predatorSpeed = 1d;
-    public double predatorRotateSpeed = Math.PI / 2;
-    public double captureDistance = 5d;
-    public double predatorSeparation = 20d;
-    public double preySeparation = 5d;
-    public int nPreys = 1;
-    public int nPredators = 3;
-    public String preyPlacement = V_CENTER;
-    public String escapeStrategy = V_MEAN_VECTOR;
-    public SensorMode sensorMode;
-    public int sensorArcs;
     public boolean collisions;
     
-    public enum SensorMode {
-        closest, arcs, otherpreds
-    }
+    public int nPreys = 1;
+    public double preySpeed = 1d;
+    public int escapeStrategy = V_MEAN_VECTOR;
+    public double escapeDistance = 10d;
+    public int preyPlacement = V_RANDOM;
+    public double preyMargin = 5d;    
+    public double preySeparation = 5d;
+    
+    public int nPredators = 3;
+    public double predatorLinearSpeed = 1d;
+    public double predatorTurnSpeed = Math.PI / 2;
+    public double captureDistance = 5d;
+    public int preySensorMode = V_RBS_CLOSEST;
+    public double preySensorRange = Double.POSITIVE_INFINITY;
+    public int predatorSensorMode = V_NONE;
+    public double predatorSensorRange = Double.POSITIVE_INFINITY;
+    public int sensorArcs;
+    public double predatorSeparation = 20d;
+
 }

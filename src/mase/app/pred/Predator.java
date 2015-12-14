@@ -5,14 +5,12 @@
 package mase.app.pred;
 
 import java.awt.Color;
-import mase.app.pred.PredParams.SensorMode;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.RangeBearingSensor;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
-import sim.util.Bag;
 
 /**
  *
@@ -22,6 +20,7 @@ public class Predator extends SmartAgent {
 
     public static final double RADIUS = 1.5;
     public static final Color COLOUR = Color.RED;
+    private static final long serialVersionUID = 1L;
     protected int captureCount = 0;
 
     public Predator(PredatorPrey sim, Continuous2D field, AgentController ac) {
@@ -31,35 +30,44 @@ public class Predator extends SmartAgent {
         }
 
         DashMovementEffector dm = new DashMovementEffector();
-        dm.setSpeeds(sim.par.predatorSpeed, sim.par.predatorRotateSpeed);
+        dm.setSpeeds(sim.par.predatorLinearSpeed, sim.par.predatorTurnSpeed);
         super.addEffector(dm);
     }
 
     void setupSensors() {
         PredatorPrey pp = (PredatorPrey) super.sim;
-        if (pp.par.sensorMode == SensorMode.arcs) {
+        // Prey sensor
+        if (pp.par.preySensorMode == PredParams.V_ARCS) {
             DistanceSensorArcs ds = new DistanceSensorArcs();
             ds.setArcs(pp.par.sensorArcs);
-            ds.setRange(Double.POSITIVE_INFINITY);
+            ds.setRange(pp.par.preySensorRange);
             ds.setObjectTypes(Prey.class);
             super.addSensor(ds);
-        } else if (pp.par.sensorMode == SensorMode.closest) {
+        } else if (pp.par.preySensorMode == PredParams.V_RBS_CLOSEST || pp.par.preySensorMode == PredParams.V_RBS_ALL) {
             RangeBearingSensor rbs = new RangeBearingSensor();
             rbs.setObjects(pp.preys);
-            rbs.setObjectCount(1);
             rbs.setSort(true);
+            if (pp.par.preySensorMode == PredParams.V_RBS_CLOSEST) {
+                rbs.setObjectCount(1);
+            }
             super.addSensor(rbs);
-        } else if (pp.par.sensorMode == SensorMode.otherpreds) {
-            RangeBearingSensor rbsPrey = new RangeBearingSensor();
-            rbsPrey.setObjects(pp.preys);
-            rbsPrey.setObjectCount(1);
-            rbsPrey.setSort(true);
-            super.addSensor(rbsPrey);
-
-            RangeBearingSensor rbsOthers = new RangeBearingSensor();
-            rbsOthers.setObjects(pp.predators);
-            rbsOthers.setSort(true);
-            super.addSensor(rbsOthers);
+        }
+        
+        // Predator sensor
+        if (pp.par.predatorSensorMode == PredParams.V_ARCS) {
+            DistanceSensorArcs ds = new DistanceSensorArcs();
+            ds.setArcs(pp.par.sensorArcs);
+            ds.setRange(pp.par.predatorSensorRange);
+            ds.setObjectTypes(Predator.class);
+            super.addSensor(ds);
+        } else if (pp.par.predatorSensorMode == PredParams.V_RBS_CLOSEST || pp.par.predatorSensorMode == PredParams.V_RBS_ALL) {
+            RangeBearingSensor rbs = new RangeBearingSensor();
+            rbs.setObjects(pp.predators);
+            rbs.setSort(true);
+            if (pp.par.predatorSensorMode == PredParams.V_RBS_CLOSEST) {
+                rbs.setObjectCount(1);
+            }
+            super.addSensor(rbs);
         }
     }
 

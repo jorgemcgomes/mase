@@ -13,6 +13,8 @@ import mase.mason.MasonEvaluation;
  */
 public class MultiPreyFitness extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private FitnessResult fitnessResult;
 
     @Override

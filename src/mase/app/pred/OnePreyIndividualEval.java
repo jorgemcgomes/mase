@@ -16,6 +16,8 @@ import net.jafama.FastMath;
  */
 public class OnePreyIndividualEval extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     protected double[] partnerAvgDist;
     protected SubpopEvaluationResult evaluation;
 

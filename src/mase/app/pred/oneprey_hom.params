@@ -1,7 +1,7 @@
 parent.0=oneprey.params
 
-problem.sensor-mode =              otherpreds
-problem.collisions =               false
+problem.predatorSensorMode =       2
+problem.predatorSensorRange =      Infinity
 
 vector.species.genome-size =       78
 neural.input =                     6

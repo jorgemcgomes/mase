@@ -8,35 +8,42 @@ problem.eval.1 =                   mase.app.pred.MultiPreyGroupEval
 problem.eval.1.update-freq =       1
 
 fitness.fitness-index =            0
-fitness.novelty-index =            1
 
-problem.repetitions =              10
-problem.max-steps =                500
-problem.size =                     100
-problem.discretization =           15
-problem.n-preys =                  5
-problem.prey-placement =           random
-problem.prey-margin =              20
-problem.prey-speed =               1
-problem.escape-distance =          5
-problem.n-predators =              3
-problem.predator-separation =      10
-problem.predator-speed =           1
-problem.predator-rotate-speed =    0.2
-problem.capture-distance =         1
-problem.escape-strategy =          mean-vector
-problem.sensor-mode =              arcs
-problem.n-arcs =                   4
-problem.collisions =               TRUE
+problem.repetitions =             10
+problem.max-steps =               500
+problem.seed =                    random
+
+problem.size =                    100
+problem.discretization =          15
+problem.collisions =              true
+
+problem.nPreys =                  5
+problem.preySpeed =               1
+problem.escapeStrategy =          0
+problem.escapeDistance =          7
+problem.preyPlacement =           0
+problem.preyMargin =              20
+problem.preySeparation =          5
+
+problem.nPredators =              3
+problem.predatorLinearSpeed =     1
+problem.predatorTurnSpeed =       0.39
+problem.captureDistance =         0
+problem.preySensorMode =          3
+problem.preySensorRange =         Infinity
+problem.predatorSensorMode =      0
+problem.predatorSensorRange =     0
+problem.sensorArcs =              4
+problem.predatorSeparation =      10
 
 neat.INPUT.NODES =                 4
 neat.OUTPUT.NODES =                2
 
-vector.species.genome-size =       63
+vector.species.genome-size =       62
 neural.input =                     4
-neural.hidden =                    5
+neural.hidden =                    8
 neural.output =                    2
-neural.structure =                 feed-forward
+neural.structure =                 jordan
 neural.tanh =                      false
 
 

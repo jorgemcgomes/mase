@@ -16,6 +16,8 @@ import net.jafama.FastMath;
  */
 public class OnePreyGroupEval extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     protected double predatorDispersion;
     protected VectorBehaviourResult evaluation;
     protected double diagonal;
