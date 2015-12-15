@@ -32,7 +32,8 @@ public class MultiRoverSimulator extends MasonSimulationProblem {
         ParamUtils.autoSetParameters(par, state.parameters, base, super.defaultBase(), true);
         
         // Validate rock types
-        for(RockType r : par.rocks) {
+        for(String rStr : par.rocks) {
+            RockType r = RockType.valueOf(rStr);
             if(r.actuators.length > par.numAgents) {
                 state.output.fatal("Invalid rock type: " + r.name() + ". More agents required than available.");
             }

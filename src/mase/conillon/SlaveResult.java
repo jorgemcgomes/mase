@@ -15,6 +15,8 @@ import result.Result;
  * @author jorge
  */
 public class SlaveResult extends Result {
+
+    private static final long serialVersionUID = 1L;
     
     private ArrayList<EvaluationResult> results;
     private int id;

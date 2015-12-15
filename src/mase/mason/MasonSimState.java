@@ -16,6 +16,8 @@ import sim.portrayal.continuous.ContinuousPortrayal2D;
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
 public abstract class MasonSimState extends SimState {
+
+    private static final long serialVersionUID = 1L;
     
     protected GroupController gc;
 

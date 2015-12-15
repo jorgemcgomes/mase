@@ -38,12 +38,17 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
     protected List<Fox> foxes;
     protected List<Sheep> sheeps;
     protected List<Sheep> activeSheeps;
-    protected final StaticPolygon fence, openSide, curral;
+    protected StaticPolygon fence, openSide, curral;
 
     public Herding(long seed, HerdingParams par, GroupController gc) {
         super(gc, seed);
         this.par = par;
+    }
 
+    @Override
+    public void start() {
+        super.start();
+        
         // Static environment
         fence = new StaticPolygon(new Segment(0, 0, par.arenaSize, 0),
                 new Segment(par.arenaSize, 0, par.arenaSize, par.arenaSize / 2 - par.gateSize / 2),
@@ -57,11 +62,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
         curral = new StaticPolygon(new Segment(par.arenaSize, par.arenaSize / 2 - par.gateSize / 2,
                 par.arenaSize, par.arenaSize / 2 + par.gateSize / 2));
         curral.paint = Color.BLUE;
-    }
-
-    @Override
-    public void start() {
-        super.start();
+        
         this.field = new Continuous2D(par.discretization, par.arenaSize, par.arenaSize);
 
         placeSheeps();

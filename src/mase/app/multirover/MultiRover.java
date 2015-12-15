@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import mase.app.multirover.RedRock.RockType;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.MasonSimState;
@@ -35,13 +36,13 @@ public class MultiRover extends MasonSimState {
     public MultiRover(long seed, MRParams par, GroupController gc) {
         super(gc, seed);
         this.par = par;
-        this.scores = new int[RedRock.RockType.values().length];
     }
 
     @Override
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
+        this.scores = new int[RedRock.RockType.values().length];
         Arrays.fill(scores, 0);
 
         StaticPolygon walls = new StaticPolygon(new Double2D[]{
@@ -99,7 +100,7 @@ public class MultiRover extends MasonSimState {
             if (!close.isEmpty()) {
                 continue;
             }
-            RedRock newRock = new RedRock(this, par.rocks[count]);
+            RedRock newRock = new RedRock(this, RockType.valueOf(par.rocks[count]));
             field.setObjectLocation(newRock, new Double2D(x, y));
             newRock.setStopper(schedule.scheduleRepeating(newRock));
             count++;

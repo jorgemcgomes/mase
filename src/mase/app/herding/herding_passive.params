@@ -25,7 +25,7 @@ problem.numSheeps = 1
 problem.activeSheep = false
 problem.sheepSpeed = 1
 problem.randomSheepPosition = false
-problem.sheepX = 0.3
+problem.sheepX = 0.1
 
 problem.numFoxes = 2
 problem.smartFox = false
@@ -39,13 +39,13 @@ problem.shepherdTurnSpeed = 0.4
 problem.shepherdSensorRange = 25
 problem.shepherdArcSensor = false
 problem.shepherdSeparation = 7
-problem.shepherdX = 0.1
+problem.shepherdX = 0.5
 
-vector.species.genome-size =       92
+vector.species.genome-size =       96
 neural.input =                     12
 neural.hidden =                    6
 neural.output =                    2
-neural.structure =                 feed-forward
+neural.structure =                 jordan
 neural.tanh =                      false
 neat.INPUT.NODES =                 12
 neat.OUTPUT.NODES =                2 

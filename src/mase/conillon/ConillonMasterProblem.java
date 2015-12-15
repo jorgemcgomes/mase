@@ -42,6 +42,7 @@ public class ConillonMasterProblem extends MasterProblem {
     public static final String P_SERVER_NAME = "server-name";
     public static final String P_TIMEOUT = "timeout";
     public static final String P_MAX_TRIES = "maxtries";
+    private static final long serialVersionUID = 1L;
 
     private static class Evaluation {
 
@@ -58,13 +59,13 @@ public class ConillonMasterProblem extends MasterProblem {
     private int jobSize;
     private long timeout;
     private int maxTries;
-    private long currentTimeout;
 
-    private HashMap<Integer, Evaluation> jobs;
-    private ArrayList<SlaveTask> tasks;
-    private int idCounter;
-    private Client client;
-    private int tries;
+    private transient HashMap<Integer, Evaluation> jobs;
+    private transient ArrayList<SlaveTask> tasks;
+    private transient Client client;
+    private transient int idCounter;
+    private transient int tries;
+    private transient long currentTimeout;
 
     private synchronized int nextID() {
         idCounter++;

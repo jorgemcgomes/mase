@@ -10,7 +10,6 @@ import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonSimState;
-import result.Result;
 import tasks.Task;
 
 /**
@@ -18,6 +17,8 @@ import tasks.Task;
  * @author jorge
  */
 public class SlaveTask extends Task {
+
+    private static final long serialVersionUID = 1L;
 
     private MasonSimState sim;
     private EvaluationFunction[] functions;

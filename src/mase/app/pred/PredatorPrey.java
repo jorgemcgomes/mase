@@ -21,7 +21,6 @@ import mase.mason.world.StaticPolygon;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
-import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.util.Bag;
 import sim.util.Double2D;
 
@@ -39,19 +38,20 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
     protected List<Prey> preys;
     protected List<Prey> activePreys;
     protected int captureCount;
-    protected final StaticPolygon boundaries;
+    protected StaticPolygon boundaries;
     protected TaskDescription td;
 
     public PredatorPrey(long seed, PredParams params, GroupController gc) {
         super(gc, seed);
         this.par = params;
-        this.boundaries = new StaticPolygon(new Double2D(0, 0), new Double2D(par.size, 0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0, 0));
-        boundaries.paint = Color.WHITE;
     }
 
     @Override
     public void start() {
         super.start();
+        this.boundaries = new StaticPolygon(new Double2D(0, 0), new Double2D(par.size, 0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0, 0));
+        boundaries.paint = Color.WHITE;
+        
         this.field = new Continuous2D(par.discretization, par.size, par.size);
         field.setObjectLocation(boundaries, new Double2D(0, 0));
 

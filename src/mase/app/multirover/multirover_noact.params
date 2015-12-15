@@ -19,16 +19,16 @@ problem.numAgents =                2
 problem.linearSpeed =              1
 problem.turnSpeed =                0.4
 problem.sensorRange =              25
-problem.rocks =                    B,B,B,B,B,B,B,B
+problem.rocks =                    D,D,D,D,D,D,D,D
 problem.rockRadius =               6
 problem.collectionTime =           25
-problem.numActuators =             2
-problem.minActivationTime =        25
+problem.numActuators =             0
+problem.minActivationTime =        0
 
-vector.species.genome-size =       125
-neural.input =                     10
-neural.hidden =                    7
-neural.output =                    4
+vector.species.genome-size =       61
+neural.input =                     8
+neural.hidden =                    5
+neural.output =                    2
 neural.structure =                 jordan
 neural.tanh =                      false
 

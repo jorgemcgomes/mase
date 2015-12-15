@@ -7,7 +7,6 @@
 package mase.app.multirover;
 
 import java.io.Serializable;
-import mase.app.multirover.RedRock.RockType;
 
 /**
  *
@@ -27,6 +26,5 @@ public class MRParams implements Serializable {
     protected int minActivationTime;
     protected int collectionTime;
     protected int numActuators;
-    protected RockType[] rocks;
-    
+    protected String[] rocks;    
 }

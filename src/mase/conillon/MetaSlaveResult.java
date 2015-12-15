@@ -13,6 +13,8 @@ import result.Result;
  * @author jorge
  */
 public class MetaSlaveResult extends Result {
+
+    private static final long serialVersionUID = 1L;
     
     ArrayList<SlaveResult> results;
     

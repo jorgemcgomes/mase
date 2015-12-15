@@ -14,6 +14,8 @@ import tasks.Task;
  * @author jorge
  */
 public class MetaSlaveTask extends Task {
+
+    private static final long serialVersionUID = 1L;
     
     ArrayList<SlaveTask> tasks;
     MetaSlaveResult res;
