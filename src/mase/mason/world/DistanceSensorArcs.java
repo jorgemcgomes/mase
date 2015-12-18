@@ -23,6 +23,10 @@ public class DistanceSensorArcs extends AbstractSensor {
     private double[] lastDistances;
 
     private boolean ignoreRadius = false;
+    public static final int UNIFORM = 0, GAUSSIAN = 1;
+    private double orientationNoise = 0;
+    private double rangeNoise = 0;
+    private int noiseType;
 
     public void setArcs(double[] arcStart, double[] arcEnd) {
         if (arcStart.length != arcEnd.length) {
@@ -53,6 +57,18 @@ public class DistanceSensorArcs extends AbstractSensor {
         this.range = range;
     }
 
+    public void setOrientationNoise(double noise) {
+        this.orientationNoise = noise;
+    }
+
+    public void setRangeNoise(double noise) {
+        this.rangeNoise = noise;
+    }
+
+    public void setNoiseType(int type) {
+        this.noiseType = type;
+    }
+
     public void setObjectTypes(Class... types) {
         this.types = types;
     }
@@ -60,7 +76,7 @@ public class DistanceSensorArcs extends AbstractSensor {
     public void setBinary(boolean binary) {
         this.binary = binary;
     }
-    
+
     public void ignoreRadius(boolean ignore) {
         this.ignoreRadius = ignore;
     }
@@ -74,21 +90,28 @@ public class DistanceSensorArcs extends AbstractSensor {
     public double[] readValues() {
         Bag neighbours = Double.isInfinite(range) ? field.allObjects
                 : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
-        //Bag neighbours = field.getAllObjects();
         lastDistances = new double[valueCount()];
         Arrays.fill(lastDistances, Double.POSITIVE_INFINITY);
         Arrays.fill(closestObjects, null);
-        if(range < 0.001) {
+        if (range < 0.001) {
             return lastDistances;
         }
         for (Object n : neighbours) {
             if (objectMatch(n) && field.exists(n)) {
                 double dist = distFunction.agentToObjectDistance(ag, n);
-                if(ignoreRadius) {
+                if (ignoreRadius) {
                     dist += ag.getRadius();
+                }
+                if (rangeNoise > 0) {
+                    dist += rangeNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                    dist = Math.max(dist, 0);
                 }
                 if (dist <= range) {
                     double angle = ag.angleTo(field.getObjectLocation(n));
+                    if (orientationNoise > 0) {
+                        angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                        angle = EmboddiedAgent.normalizeAngle(angle);
+                    }
                     for (int a = 0; a < arcStart.length; a++) {
                         if ((angle >= arcStart[a] && angle <= arcEnd[a])
                                 || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a]))) {
@@ -107,7 +130,7 @@ public class DistanceSensorArcs extends AbstractSensor {
     public Object[] getClosestObjects() {
         return closestObjects;
     }
-    
+
     public double[] getLastDistances() {
         return lastDistances;
     }

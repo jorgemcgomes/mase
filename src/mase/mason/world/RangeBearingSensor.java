@@ -25,8 +25,10 @@ public class RangeBearingSensor extends AbstractSensor {
     private boolean sort = false;
     private double range = Double.POSITIVE_INFINITY;
     private int objectCount;
-    /*private int mode = BOTH;
-     public static final int BOTH = 2, RANGE = 1, BEARING = 0;*/
+    public static final int UNIFORM = 0, GAUSSIAN = 1;
+    private double orientationNoise = 0;
+    private double rangeNoise = 0;
+    private int noiseType;
 
     public void setObjects(Collection<? extends Object> objs) {
         objects = new ArrayList<Object>(objs.size());
@@ -38,9 +40,6 @@ public class RangeBearingSensor extends AbstractSensor {
         objectCount = objects.size();
     }
 
-    /*public void setMode(int mode) {
-     this.mode = mode;
-     }*/
     public void setObjectCount(int count) {
         this.objectCount = count;
     }
@@ -52,21 +51,41 @@ public class RangeBearingSensor extends AbstractSensor {
     public void setRange(double range) {
         this.range = range;
     }
+    
+    public void setOrientationNoise(double noise) {
+        this.orientationNoise = noise;
+    }
+    
+    public void setRangeNoise(double noise) {
+        this.rangeNoise = noise;
+    }
+    
+    public void setNoiseType(int type) {
+        this.noiseType = type;
+    }    
 
     @Override
     public int valueCount() {
-        return /*mode == RANGE ? objectCount :*/ objectCount * 2;
+        return objectCount * 2;
     }
 
     @Override
     public double[] readValues() {
-        List<Pair<Double, Double>> readings = new ArrayList<Pair<Double, Double>>(objects.size());
+        List<Pair<Double, Double>> readings = new ArrayList<>(objects.size());
         for (Object o : objects) {
             double dist = distFunction.agentToObjectDistance(ag, o);
+            if(rangeNoise > 0) {
+                dist += rangeNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                dist = Math.max(dist, 0);
+            }
             if (Double.isInfinite(range) || dist <= range) {
                 Double2D point = (o instanceof Double2D) ? (Double2D) o : field.getObjectLocation(o);
                 if (point != null) {
                     double angle = ag.angleTo(point);
+                    if(orientationNoise > 0) {
+                        angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                        angle = EmboddiedAgent.normalizeAngle(angle);
+                    }
                     readings.add(Pair.of(dist, angle));
                 } else {
                     readings.add(Pair.of(Double.POSITIVE_INFINITY, 0d));
