@@ -23,6 +23,7 @@ public class ForagingTask extends MasonSimState {
 
     private static final long serialVersionUID = 1L;
 
+    protected ForagingPar originalPar;
     protected ForagingPar par;
     protected Continuous2D field;
     protected FlyingRobot flyingBot;
@@ -31,23 +32,35 @@ public class ForagingTask extends MasonSimState {
 
     public ForagingTask(long seed, ForagingPar par, GroupController gc) {
         super(gc, seed);
-        this.par = par;
+        this.originalPar = par;
     }
 
     @Override
     public void start() {
         super.start();
+        try {
+            par = originalPar.clone();
+            par.flyingVisionAngle += par.flyingVisionAngle * par.sensorOffset * (random.nextDouble() * 2 - 1);
+            par.landVisionAngle += par.landVisionAngle * par.sensorOffset * (random.nextDouble() * 2 - 1);
+            par.flyingMaxHeight += par.flyingMaxHeight * par.maxHeightOffset * (random.nextDouble() * 2 - 1);
+            par.landSensingRange += par.landSensingRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
+            par.landLinearSpeed += par.landLinearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+            par.landTurnSpeed += par.landTurnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+            par.flyingAngSpeed += par.flyingAngSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+            par.flyingLinearSpeed += par.flyingLinearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        };
+
         this.field = new Continuous2D(100, par.arenaSize.x, par.arenaSize.y);
         AgentController[] acs;
         if(gc instanceof HeterogeneousGroupController) {
             acs = gc.getAgentControllers(2);
+        } else if (par.useFlyingRobot) {
+            acs = new AgentController[]{null, gc.getAgentControllers(1)[0]};
         } else {
-            if(par.useFlyingRobot) {
-                acs = new AgentController[]{null, gc.getAgentControllers(1)[0]};
-            } else {
-                acs = new AgentController[]{gc.getAgentControllers(1)[0], null};
-            }
-        }       
+            acs = new AgentController[]{gc.getAgentControllers(1)[0], null};
+        }
 
         landBot = new LandRobot(this, field, acs[0] == null ? null : acs[0].clone());
         flyingBot = new FlyingRobot(this, field, acs[1] == null ? null : acs[1].clone());
@@ -67,7 +80,7 @@ public class ForagingTask extends MasonSimState {
             landBot.setLocation(pos);
             landBot.setOrientation(random.nextDouble() * Math.PI * 2);
         }
-        
+
         // start in the specified position
         if(par.flyingPlacement == ForagingPar.FIXED) {
             flyingBot.setLocation(par.flyingStartPos);

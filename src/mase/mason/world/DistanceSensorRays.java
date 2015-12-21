@@ -19,6 +19,7 @@ public class DistanceSensorRays extends AbstractSensor {
     private double range;
     public static final int UNIFORM = 0, GAUSSIAN = 1;
     private double rangeNoise = 0;
+    private double orientationNoise = 0;
     private int noiseType;
     private double[] angles;
     
@@ -55,13 +56,16 @@ public class DistanceSensorRays extends AbstractSensor {
         this.binary = binary;
     }
 
-    public void setRangeNoise(double noise) {
-        this.rangeNoise = noise;
-    }
-    
-    public void setNoiseType(int type) {
+    /**
+     * @param rangeNoise In percentage, relative to current range
+     * @param orientationNoise In radians
+     * @param type Uniform (0) or Gaussian (1)
+     */
+    public void setNoise(double rangeNoise, double orientationNoise, int type) {
+        this.rangeNoise = rangeNoise;
+        this.orientationNoise = orientationNoise;
         this.noiseType = type;
-    }        
+    }
     
     @Override
     public int valueCount() {
@@ -77,13 +81,15 @@ public class DistanceSensorRays extends AbstractSensor {
         } else {
             Arrays.fill(vals, Double.POSITIVE_INFINITY);
         }
+        double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
         for (int i = 0; i < rayStarts.length; i++) {
             Double2D rs = rayStarts[i].rotate(ag.orientation2D()).add(ag.getLocation());
             Double2D re;
             if(rangeNoise > 0) {
-                double newRange = range + rangeNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                double newRange = range + rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 newRange = Math.max(0, newRange);
-                re = new Double2D(ag.getRadius() + newRange, 0).rotate(angles[i] + ag.orientation2D()).add(ag.getLocation());
+                double newOrientation = angles[i] + orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                re = new Double2D(ag.getRadius() + newRange, 0).rotate(newOrientation + ag.orientation2D()).add(ag.getLocation());
             } else {
                 re = rayEnds[i].rotate(ag.orientation2D()).add(ag.getLocation());
             }

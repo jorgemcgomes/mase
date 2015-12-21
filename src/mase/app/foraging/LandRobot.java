@@ -40,6 +40,7 @@ public class LandRobot extends SmartAgent {
         super.addEffector(dm);
         dm.allowBackwardMove(false);
         dm.setSpeeds(sim.par.landLinearSpeed, sim.par.landTurnSpeed);
+        dm.setNoise(sim.par.actuatorNoise, sim.par.actuatorNoise);
 
         itemArcs = new DistanceSensorArcs();
         super.addSensor(itemArcs);
@@ -47,6 +48,7 @@ public class LandRobot extends SmartAgent {
         itemArcs.setArcs(sim.par.landArcs);
         itemArcs.setBinary(true);
         itemArcs.setObjectTypes(Item.class);
+        itemArcs.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
 
         botArcs = new DistanceSensorArcs();
         super.addSensor(botArcs);
@@ -56,6 +58,7 @@ public class LandRobot extends SmartAgent {
         botArcs.setArcs(sim.par.landArcs);
         botArcs.setBinary(true);
         botArcs.setObjectTypes(FlyingRobot.class);
+        botArcs.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
     }
 
     @Override

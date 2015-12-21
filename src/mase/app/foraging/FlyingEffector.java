@@ -38,6 +38,9 @@ public class FlyingEffector extends AbstractEffector {
     private double rotationDragCoeff = 0;
 
     private boolean enableAltitude;
+    
+    private double noise = 0;
+
 
     public void setAccelerationLimits(double linear, double turn) {
         this.maxLinearAcc = linear;
@@ -73,14 +76,26 @@ public class FlyingEffector extends AbstractEffector {
         this.height = h;
     }
 
+    /**
+     * @param linearNoise In percentage, relative to max linear speed
+     * @param turnNoise In percentage, relative to max turn speed
+     * @param type Uniform (0) or Gaussian (1)
+     */
+    public void setNoise(double noise) {
+        this.noise = noise;
+    }    
+    
     @Override
     public void action(double[] values) {
-
         if (height > 0.1) {
             // PLANAR MOVEMENT
             double xThrust = (values[1] * 2 - 1) * maxLinearAcc; // left -- right
             double yThrust = (values[0] * 2 - 1) * maxLinearAcc; // forward -- backwards
-
+            if(noise > 0) {
+                xThrust += xThrust * (state.random.nextDouble() * 2 - 1) * noise;
+                yThrust += yThrust * (state.random.nextDouble() * 2 - 1) * noise;
+            }
+            
             double xDrag = xVelocity * linearDragCoeff;
             double yDrag = yVelocity * linearDragCoeff;
 
@@ -96,6 +111,9 @@ public class FlyingEffector extends AbstractEffector {
 
             // ROTATION
             double rThrust = (values[2] * 2 - 1) * maxAngularAcc; // left -- right// rotation around the axis
+            if(noise > 0) {
+                rThrust += rThrust * (state.random.nextDouble() * 2 - 1) * noise;
+            }
             double rDrag = /*FastMath.pow2*/ (rVelocity) * rotationDragCoeff;
             double rAcc = rThrust - rDrag;
             rVelocity = rVelocity + rAcc;
@@ -111,6 +129,9 @@ public class FlyingEffector extends AbstractEffector {
         // VERTICAL MOVEMENT
         if (enableAltitude) {
             double zThrust = (values[3] * 2 - 1) * maxLinearAcc;
+            if(noise > 0) {
+                zThrust += zThrust * (state.random.nextDouble() * 2 - 1) * noise;
+            }
             double zDrag = zVelocity * linearDragCoeff;
             zVelocity = zVelocity + zThrust - zDrag;
             if (height + zVelocity < 0) {

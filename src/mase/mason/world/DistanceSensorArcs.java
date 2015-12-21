@@ -57,15 +57,14 @@ public class DistanceSensorArcs extends AbstractSensor {
         this.range = range;
     }
 
-    public void setOrientationNoise(double noise) {
-        this.orientationNoise = noise;
-    }
-
-    public void setRangeNoise(double noise) {
-        this.rangeNoise = noise;
-    }
-
-    public void setNoiseType(int type) {
+    /**
+     * @param rangeNoise In percentage, relative to current range
+     * @param orientationNoise In radians
+     * @param type Uniform (0) or Gaussian (1)
+     */
+    public void setNoise(double rangeNoise, double orientationNoise, int type) {
+        this.rangeNoise = rangeNoise;
+        this.orientationNoise = orientationNoise;
         this.noiseType = type;
     }
 
@@ -96,14 +95,15 @@ public class DistanceSensorArcs extends AbstractSensor {
         if (range < 0.001) {
             return lastDistances;
         }
+        double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
         for (Object n : neighbours) {
             if (objectMatch(n) && field.exists(n)) {
                 double dist = distFunction.agentToObjectDistance(ag, n);
                 if (ignoreRadius) {
                     dist += ag.getRadius();
                 }
-                if (rangeNoise > 0) {
-                    dist += rangeNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                if (rangeNoiseAbs > 0) {
+                    dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                     dist = Math.max(dist, 0);
                 }
                 if (dist <= range) {

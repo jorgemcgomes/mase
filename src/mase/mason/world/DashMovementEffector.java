@@ -11,13 +11,11 @@ package mase.mason.world;
  */
 public class DashMovementEffector extends AbstractEffector {
 
-    public static final int UNIFORM = 0, GAUSSIAN = 1;
     private double linearSpeed;
     private double turnSpeed;
     private boolean backward = false;
     private double turnNoise = 0;
     private double linearNoise = 0;
-    private int noiseType;
 
     public void setSpeeds(double linear, double turn) {
         this.linearSpeed = linear;
@@ -28,16 +26,13 @@ public class DashMovementEffector extends AbstractEffector {
         this.backward = allow;
     }
 
-    public void setTurnNoise(double noise) {
-        this.turnNoise = noise;
-    }
-
-    public void setLinearNoise(double noise) {
-        this.linearNoise = noise;
-    }
-
-    public void setNoiseType(int type) {
-        this.noiseType = type;
+    /**
+     * @param linearNoise In percentage, relative to max linear speed
+     * @param turnNoise In percentage, relative to max turn speed
+     */
+    public void setNoise(double linearNoise, double turnNoise) {
+        this.linearNoise = linearNoise;
+        this.turnNoise = turnNoise;
     }
 
     @Override
@@ -49,12 +44,12 @@ public class DashMovementEffector extends AbstractEffector {
     public void action(double[] values) {
         double maxSpeed = linearSpeed;
         if (linearNoise > 0) {
-            maxSpeed += linearNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+            maxSpeed += (linearNoise * maxSpeed) * (state.random.nextDouble() * 2 - 1);
             maxSpeed = Math.max(0, maxSpeed);
         }
         double maxTurnSpeed = turnSpeed;
         if (turnNoise > 0) {
-            maxTurnSpeed += turnNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+            maxTurnSpeed += (turnNoise * maxTurnSpeed) * (state.random.nextDouble() * 2 - 1);
             maxTurnSpeed = Math.max(0, maxTurnSpeed);
         }
         double forward = backward ? (values[0] * 2 - 1) * maxSpeed : values[0] * maxSpeed;

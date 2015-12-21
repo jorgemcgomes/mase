@@ -31,7 +31,7 @@ public class RangeBearingSensor extends AbstractSensor {
     private int noiseType;
 
     public void setObjects(Collection<? extends Object> objs) {
-        objects = new ArrayList<Object>(objs.size());
+        objects = new ArrayList<>(objs.size());
         for (Object o : objs) {
             if (o != ag) {
                 objects.add(o);
@@ -52,17 +52,16 @@ public class RangeBearingSensor extends AbstractSensor {
         this.range = range;
     }
     
-    public void setOrientationNoise(double noise) {
-        this.orientationNoise = noise;
-    }
-    
-    public void setRangeNoise(double noise) {
-        this.rangeNoise = noise;
-    }
-    
-    public void setNoiseType(int type) {
+    /**
+     * @param rangeNoise In percentage, relative to current range
+     * @param orientationNoise In radians
+     * @param type Uniform (0) or Gaussian (1)
+     */
+    public void setNoise(double rangeNoise, double orientationNoise, int type) {
+        this.rangeNoise = rangeNoise;
+        this.orientationNoise = orientationNoise;
         this.noiseType = type;
-    }    
+    }
 
     @Override
     public int valueCount() {
@@ -71,11 +70,12 @@ public class RangeBearingSensor extends AbstractSensor {
 
     @Override
     public double[] readValues() {
+        double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
         List<Pair<Double, Double>> readings = new ArrayList<>(objects.size());
         for (Object o : objects) {
             double dist = distFunction.agentToObjectDistance(ag, o);
-            if(rangeNoise > 0) {
-                dist += rangeNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+            if(rangeNoiseAbs > 0) {
+                dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 dist = Math.max(dist, 0);
             }
             if (Double.isInfinite(range) || dist <= range) {

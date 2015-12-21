@@ -43,6 +43,7 @@ public class FlyingRobot extends SmartAgent {
         effector.setMaxHeight(sim.par.flyingMaxHeight);
         effector.setAccelerationLimits(sim.par.flyingLinearAcc, sim.par.flyingAngAcc);
         effector.calculateDragCoefficients(sim.par.flyingLinearSpeed, sim.par.flyingAngSpeed);
+        effector.setNoise(sim.par.actuatorNoise);
         
         double vRange = sim.par.flyingStartHeight * FastMath.tan(sim.par.flyingVisionAngle / 2);
 
@@ -53,6 +54,7 @@ public class FlyingRobot extends SmartAgent {
         itemArcs.setArcs(sim.par.flyingArcs);
         itemArcs.setBinary(false);
         itemArcs.setObjectTypes(Item.class);
+        itemArcs.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         
         botArcs = new DistanceSensorArcs();
         super.addSensor(botArcs);
@@ -61,18 +63,20 @@ public class FlyingRobot extends SmartAgent {
         botArcs.setArcs(sim.par.flyingArcs);
         botArcs.setBinary(false);
         botArcs.setObjectTypes(LandRobot.class);
+        botArcs.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         
         if(sim.par.flyingVerticalMovement) {
             HeightSensor hs = new HeightSensor();
             hs.setFlyingEffector(effector);
+            hs.setNoise(sim.par.sensorRangeNoise);
             super.addSensor(hs);
-            
             effector.updateHeight();
         }
         
         centre = new RangeBearingSensor();
         centre.setObjects(Collections.singletonList(new Double2D(sim.par.arenaSize.x / 2, sim.par.arenaSize.y / 2)));
         centre.setRange(Double.POSITIVE_INFINITY);
+        centre.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         super.addSensor(centre);        
     }
 }

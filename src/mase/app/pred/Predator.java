@@ -25,12 +25,11 @@ public class Predator extends SmartAgent {
 
     public Predator(PredatorPrey sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, COLOUR, ac);
-        if (sim.par.collisions) {
-            this.enableAgentCollisions(true);
-        }
+        this.enableAgentCollisions(sim.par.collisions);
 
         DashMovementEffector dm = new DashMovementEffector();
         dm.setSpeeds(sim.par.predatorLinearSpeed, sim.par.predatorTurnSpeed);
+        dm.setNoise(sim.par.speedsNoise, sim.par.speedsNoise);
         super.addEffector(dm);
     }
 
@@ -42,6 +41,7 @@ public class Predator extends SmartAgent {
             ds.setArcs(pp.par.sensorArcs);
             ds.setRange(pp.par.preySensorRange);
             ds.setObjectTypes(Prey.class);
+            ds.setNoise(pp.par.rangeNoise, pp.par.orientationNoise, DistanceSensorArcs.UNIFORM);
             super.addSensor(ds);
         } else if (pp.par.preySensorMode == PredParams.V_RBS_CLOSEST || pp.par.preySensorMode == PredParams.V_RBS_ALL) {
             RangeBearingSensor rbs = new RangeBearingSensor();
@@ -50,6 +50,7 @@ public class Predator extends SmartAgent {
             if (pp.par.preySensorMode == PredParams.V_RBS_CLOSEST) {
                 rbs.setObjectCount(1);
             }
+            rbs.setNoise(pp.par.rangeNoise, pp.par.orientationNoise, RangeBearingSensor.UNIFORM);
             super.addSensor(rbs);
         }
         
@@ -59,6 +60,7 @@ public class Predator extends SmartAgent {
             ds.setArcs(pp.par.sensorArcs);
             ds.setRange(pp.par.predatorSensorRange);
             ds.setObjectTypes(Predator.class);
+            ds.setNoise(pp.par.rangeNoise, pp.par.orientationNoise, DistanceSensorArcs.UNIFORM);
             super.addSensor(ds);
         } else if (pp.par.predatorSensorMode == PredParams.V_RBS_CLOSEST || pp.par.predatorSensorMode == PredParams.V_RBS_ALL) {
             RangeBearingSensor rbs = new RangeBearingSensor();
@@ -67,6 +69,7 @@ public class Predator extends SmartAgent {
             if (pp.par.predatorSensorMode == PredParams.V_RBS_CLOSEST) {
                 rbs.setObjectCount(1);
             }
+            rbs.setNoise(pp.par.rangeNoise, pp.par.orientationNoise, RangeBearingSensor.UNIFORM);
             super.addSensor(rbs);
         }
     }

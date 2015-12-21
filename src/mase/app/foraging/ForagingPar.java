@@ -52,5 +52,16 @@ public class ForagingPar implements Cloneable, Serializable {
     public double flyingMaxDist = -1;
             
     public boolean flyingVerticalMovement;
-
+    
+    @Override
+    public ForagingPar clone() throws CloneNotSupportedException {
+        return (ForagingPar) super.clone();
+    }
+    
+    public double actuatorNoise = 0; // percentage
+    public double sensorRangeNoise = 0; // percentage
+    public double sensorAngleNoise = 0; // radians
+    public double sensorOffset = 0; // percentage
+    public double actuatorOffset = 0; // percentage
+    public double maxHeightOffset = 0; // percentage
 }
