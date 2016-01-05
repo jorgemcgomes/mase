@@ -54,7 +54,7 @@ public class ForagingTask extends MasonSimState {
 
         this.field = new Continuous2D(100, par.arenaSize.x, par.arenaSize.y);
         AgentController[] acs;
-        if(gc instanceof HeterogeneousGroupController) {
+        if (gc instanceof HeterogeneousGroupController) {
             acs = gc.getAgentControllers(2);
         } else if (par.useFlyingRobot) {
             acs = new AgentController[]{null, gc.getAgentControllers(1)[0]};
@@ -65,16 +65,16 @@ public class ForagingTask extends MasonSimState {
         landBot = new LandRobot(this, field, acs[0] == null ? null : acs[0].clone());
         flyingBot = new FlyingRobot(this, field, acs[1] == null ? null : acs[1].clone());
 
-        if(par.landPlacement == ForagingPar.FIXED) {
+        if (par.landPlacement == ForagingPar.FIXED) {
             landBot.setLocation(par.landStartPos);
             landBot.setOrientation(par.landStartOri);
-        } else if(par.landPlacement == ForagingPar.SEMI_RANDOM) {
+        } else if (par.landPlacement == ForagingPar.SEMI_RANDOM) {
             // place in any corner
             double x = super.random.nextInt(2) * field.width;
             double y = super.random.nextInt(2) * field.height;
-            landBot.setLocation(new Double2D(x,y));
+            landBot.setLocation(new Double2D(x, y));
             landBot.setOrientation(random.nextDouble() * Math.PI * 2);
-        } else if(par.landPlacement == ForagingPar.RANDOM) {
+        } else if (par.landPlacement == ForagingPar.RANDOM) {
             // place anywhere
             Double2D pos = new Double2D(random.nextDouble() * field.width, random.nextDouble() * field.height);
             landBot.setLocation(pos);
@@ -82,22 +82,33 @@ public class ForagingTask extends MasonSimState {
         }
 
         // start in the specified position
-        if(par.flyingPlacement == ForagingPar.FIXED) {
+        if (par.flyingPlacement == ForagingPar.FIXED) {
             flyingBot.setLocation(par.flyingStartPos);
             flyingBot.setOrientation(par.flyingStartOri);
-        } else if(par.flyingPlacement == ForagingPar.SEMI_RANDOM) { // start near the land robot
+        } else if (par.flyingPlacement == ForagingPar.SEMI_RANDOM) { // start near the land robot
             Double2D landPos = landBot.getLocation();
             double displacement = par.flyingRadius + par.landRadius * 2;
             double x = landPos.x < field.width / 2 ? landPos.x + displacement : landPos.x - displacement;
             double y = landPos.y < field.height / 2 ? landPos.y + displacement : landPos.y - displacement;
-            flyingBot.setLocation(new Double2D(x,y));
+            flyingBot.setLocation(new Double2D(x, y));
             flyingBot.setOrientation(random.nextDouble() * Math.PI * 2);
-        } else if(par.flyingPlacement == ForagingPar.RANDOM) { // start anywhere inside the arena
+        } else if (par.flyingPlacement == ForagingPar.RANDOM) { // start anywhere inside the arena
             Double2D pos = null;
-            while(pos == null) {
-                Double2D candidate = new Double2D(random.nextDouble() * field.width, random.nextDouble() * field.height);
-                if(candidate.distance(landBot.getLocation()) > par.flyingRadius + par.landRadius *2 &&
-                        (par.flyingMaxDist <= 0 || candidate.distance(landBot.getLocation()) < par.flyingMaxDist)) {
+            while (pos == null) {
+                Double2D candidate;
+                if (par.flyingMaxDist < 0) { // use the entire field
+                    candidate = new Double2D(random.nextDouble() * field.width, random.nextDouble() * field.height);
+                } else {
+                    Double2D l = landBot.getLocation();
+                    double xmin = Math.max(0, l.x - par.flyingMaxDist - par.flyingRadius - par.landRadius);
+                    double xmax = Math.min(field.width, l.x + par.flyingMaxDist + par.flyingRadius + par.landRadius);
+                    double ymin = Math.max(0, l.y - par.flyingMaxDist - par.flyingRadius - par.landRadius);
+                    double ymax = Math.min(field.height, l.y + par.flyingMaxDist + par.flyingRadius + par.landRadius);
+                    candidate = new Double2D(random.nextDouble() * (xmax - xmin) + xmin, random.nextDouble() * (ymax - ymin) + ymin);
+                }
+
+                double dist = landBot.distanceTo(candidate) - par.flyingRadius;
+                if (dist > par.landRadius && (par.flyingMaxDist < 0 || dist <= par.flyingMaxDist)) { // leave at least landRadius distance between them
                     pos = candidate;
                 }
             }

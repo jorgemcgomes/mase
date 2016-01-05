@@ -32,7 +32,6 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
 
     private static final long serialVersionUID = 1L;
 
-    protected PredParams original;
     protected PredParams par;
     protected Continuous2D field;
     protected List<Predator> predators;
@@ -41,23 +40,17 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
     protected int captureCount;
     protected StaticPolygon boundaries;
     protected TaskDescription td;
+    protected double escapeDistance;
 
     public PredatorPrey(long seed, PredParams params, GroupController gc) {
         super(gc, seed);
-        this.original = params;
+        this.par = params;
     }
 
     @Override
     public void start() {
         super.start();
-        try {
-            this.par = original.clone();
-            par.escapeDistance += (random.nextDouble() * 2 - 1) * par.escapeDistanceRandom;
-            par.predatorLinearSpeed += par.predatorLinearSpeed * (random.nextDouble() * 2 - 1) * par.speedsOffset;
-            par.predatorTurnSpeed += par.predatorTurnSpeed * (random.nextDouble() * 2 - 1) * par.speedsOffset;
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+        this.escapeDistance = par.escapeDistanceRandom == 0 ? par.escapeDistance : par.escapeDistance + (random.nextDouble() * 2 - 1) * par.escapeDistanceRandom;
         this.boundaries = new StaticPolygon(new Double2D(0, 0), new Double2D(par.size, 0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0, 0));
         boundaries.paint = Color.WHITE;
         

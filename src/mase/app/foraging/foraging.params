@@ -53,16 +53,16 @@ problem.flyingMaxHeight =           250
 problem.flyingStartHeight =         0
 
 problem.landPlacement =             1
-problem.flyingPlacement =           1
-problem.flyingMaxDist =             -1
+problem.flyingPlacement =           2
+problem.flyingMaxDist =             15
 
 pop.subpops =                       2
-pop.subpop.0 =                      mase.neat.NEATSubpop
-pop.subpop.0.size =                 150
-pop.subpop.0.INPUT.NODES =          8    
-pop.subpop.0.OUTPUT.NODES =         2
-pop.subpop.1 =                      mase.neat.NEATSubpop
-pop.subpop.1.size =                 150
-pop.subpop.1.INPUT.NODES =          15
-pop.subpop.1.OUTPUT.NODES =         4
+#pop.subpop.0 =                      mase.neat.NEATSubpop
+#pop.subpop.0.size =                 150
+#pop.subpop.0.INPUT.NODES =          8    
+#pop.subpop.0.OUTPUT.NODES =         2
+#pop.subpop.1 =                      mase.neat.NEATSubpop
+#pop.subpop.1.size =                 150
+#pop.subpop.1.INPUT.NODES =          15
+#pop.subpop.1.OUTPUT.NODES =         4
 

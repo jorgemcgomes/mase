@@ -28,7 +28,9 @@ public class Predator extends SmartAgent {
         this.enableAgentCollisions(sim.par.collisions);
 
         DashMovementEffector dm = new DashMovementEffector();
-        dm.setSpeeds(sim.par.predatorLinearSpeed, sim.par.predatorTurnSpeed);
+        double linearSpeed = sim.par.speedsOffset == 0 ? sim.par.predatorLinearSpeed : sim.par.predatorLinearSpeed + sim.par.predatorLinearSpeed * (sim.random.nextDouble() * 2 - 1) * sim.par.speedsOffset;
+        double turnSpeed = sim.par.speedsOffset == 0 ? sim.par.predatorTurnSpeed : sim.par.predatorTurnSpeed + sim.par.predatorTurnSpeed * (sim.random.nextDouble() * 2 - 1) * sim.par.speedsOffset;
+        dm.setSpeeds(linearSpeed, turnSpeed);
         dm.setNoise(sim.par.speedsNoise, sim.par.speedsNoise);
         super.addEffector(dm);
     }

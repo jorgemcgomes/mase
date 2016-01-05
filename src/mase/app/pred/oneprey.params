@@ -2,7 +2,6 @@ eval.base.problem =                mase.app.pred.PredatorPreySimulator
 problem.trials-merge =             best
 problem.number-evals =             3
 problem.eval.0 =                   mase.app.pred.OnePreyFitness
-problem.eval.0.combination =       harmonic
 problem.eval.0.update-freq =       0
 problem.eval.1 =                   mase.app.pred.OnePreyGroupEval
 problem.eval.1.update-freq =       1
@@ -11,9 +10,9 @@ problem.eval.2.update-freq =       1
 
 fitness.fitness-index =            0
 
-problem.repetitions =              5
-problem.max-steps =                300
+problem.repetitions =              10
 problem.seed =                     random
+problem.max-steps =                300
 
 problem.size =                     100
 problem.discretization =           15
@@ -22,7 +21,7 @@ problem.collisions =               FALSE
 problem.nPreys =                  1
 problem.preySpeed =               1
 problem.escapeStrategy =          0
-problem.escapeDistance =          7
+problem.escapeDistance =          4
 problem.preyPlacement =           0
 problem.preyMargin =              45
 problem.preySeparation =          0
@@ -46,3 +45,5 @@ neural.structure =                 jordan
 neural.tanh =                      false
 neat.INPUT.NODES =                 2
 neat.OUTPUT.NODES =                2
+
+pop.subpops=3

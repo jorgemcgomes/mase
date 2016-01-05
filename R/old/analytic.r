@@ -322,18 +322,9 @@ diversity.ind <- function(datalist) {
   return(metaAnalysis(setlist))  
 }
 
-### OTHER BEHAVIOURAL ANALYSIS #############################################################
 
-meanDists <- function(data, cl) {
-  data <- as.matrix(data)
-  aux <- function(index) {
-    d <- pdist(data, indices.A=index, indices.B=((index+1):nrow(data)))
-    return(sum(attr(d, "dist")))
-  }
-  indexes <- sample.int(nrow(data)-1)
-  dists <- parSapply(cl, indexes, aux)
-  return(sum(dists) / (nrow(data) * nrow(data) / 2))
-}
+
+### OTHER BEHAVIOURAL ANALYSIS #############################################################
 
 # threshold = distance / (diagonal / 2) , diagonal/2 = 141.42/2 = 70.71
 countNear <- function(folder, subpops, threshold, mode="best") {

@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredParams implements Cloneable, Serializable {
+public class PredParams implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
@@ -46,11 +46,5 @@ public class PredParams implements Cloneable, Serializable {
     public double speedsNoise = 0; // percentage
     public double speedsOffset = 0; // percentage
     public double escapeDistanceRandom = 0; // unit length
-
-    @Override
-    protected PredParams clone() throws CloneNotSupportedException {
-        return (PredParams) super.clone();
-    }
-    
     
 }

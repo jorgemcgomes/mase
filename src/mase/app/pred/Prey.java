@@ -32,7 +32,7 @@ public class Prey extends EmboddiedAgent {
 
     @Override
     public void step(SimState state) {
-        Bag objects = field.getNeighborsWithinDistance(getLocation(), predSim.par.escapeDistance + Prey.RADIUS + Predator.RADIUS, false);
+        Bag objects = field.getNeighborsWithinDistance(getLocation(), predSim.escapeDistance + Prey.RADIUS + Predator.RADIUS, false);
         Double2D escapeVec = null;
         
         if (predSim.par.escapeStrategy == PredParams.V_NEAREST) { // escape from the nearest one, ignoring all the others
@@ -41,7 +41,7 @@ public class Prey extends EmboddiedAgent {
                 if (o instanceof Predator) {
                     Predator pred = (Predator) o;
                      double dist = pred.distanceTo(this);
-                    if (dist < closest && dist < predSim.par.escapeDistance) {
+                    if (dist < closest && dist < predSim.escapeDistance) {
                         escapeVec = getLocation().subtract(pred.getLocation());
                         closest = dist;
                     }
@@ -53,7 +53,7 @@ public class Prey extends EmboddiedAgent {
                 if (o instanceof Predator) {
                     Predator pred = ((Predator) o);
                     double dist = pred.distanceTo(this);
-                    if (dist < predSim.par.escapeDistance && dist > 0) {
+                    if (dist < predSim.escapeDistance && dist > 0) {
                         MutableDouble2D vec = new MutableDouble2D(getLocation());
                         vec.subtractIn(pred.getLocation()); // predator to prey vector
                         dist = 1 / dist;
