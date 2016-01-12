@@ -9,9 +9,6 @@ import ec.util.Parameter;
 import java.util.HashMap;
 import java.util.List;
 import mase.evaluation.VectorBehaviourResult;
-import static mase.evaluation.VectorBehaviourResult.V_BRAY_CURTIS;
-import static mase.evaluation.VectorBehaviourResult.V_COSINE;
-import static mase.evaluation.VectorBehaviourResult.V_EUCLIDEAN;
 import mase.mason.MasonEvaluation;
 import mase.mason.world.SmartAgent;
 
@@ -21,6 +18,7 @@ import mase.mason.world.SmartAgent;
  */
 public class SCEvaluator extends MasonEvaluation {
 
+    public static final String V_COSINE = "cosine", V_BRAY_CURTIS = "bray_curtis", V_EUCLIDEAN = "euclidean";
     public static final String P_DISCRETIZATION = "discretisation";
     public static final String P_DISTANCE = "distance";
     private static final long serialVersionUID = 1L;

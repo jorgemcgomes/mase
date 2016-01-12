@@ -9,8 +9,10 @@ library(data.table)
 library(plyr)
 library(doBy)
 library(pdist)
+library(RColorBrewer)
 
 theme_set(theme_bw())
+theme_update(plot.margin=unit(c(0,0,0,0),"mm"))
 #theme_set(theme_bw(base_size = 10))
 #theme_update(plot.title = element_text(size=10))
 
@@ -22,13 +24,19 @@ registerDoParallel(cl, cores=length(cl))
 
 #### Data loading #########################################################################
 
-
 # options: list of lists in the form of list(function1=list(options1),function2=list(options2))
-metaLoadData <- function(folders, filenames=NULL, functions, options, ...) {
+#metaLoadData <- function(folders, filenames=NULL, functions, options, ...) {
   # TODO
   # for each function, get the options
   # if more than one options, use all sets
+#}
+
+# load from multiple files, using the same loading function and same options
+metaLoadData <- function(folders, filenames=NULL, filename.ids=filenames, ids=list(), ...) {
+  aux <- function(x) loadData(folders, filename=filenames[x], ids=c(ids,File=filename.ids[x]), ...)
+  return(ldply(as.list(1:length(filenames)), aux, .progress="text"))
 }
+
 
 # Loads the content of files into a single dataframe
 # folders: a vector of folders to be searched
@@ -81,7 +89,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
   
   if(parallel) {
     clusterExport(cl, list(fun))
-    clusterEvalQ(cl, library(data.table))    
+    clusterEvalQ(cl, library(data.table))
   }
   result <- ldply(allfiles, aux, ..., .progress="text", .parallel = parallel)
   setDT(result)
@@ -104,14 +112,21 @@ loadWideFile <- function(file, separator=" ", pre=c(), repeating=c(), post=c(), 
   
 }
 
+# sample: [0,1] percentage of behaviours to retain
+# behaviour vars, following the four first fixed (Gen,Sub,Index,Fit)
+# columns with NA will be excluded
+# bestsOnly: keep only the best (highest fitness) individual of each generation and subpop. sample is ignored
 loadBehaviours <- function(file, sample=1, vars=NULL, bestsOnly=F) {
   frame <- fread(file, header=F, sep=" ", stringsAsFactors=F)
   fixedvars <- c("Generation","Subpop","Index","Fitness")
   if(is.null(vars)) {
     vars <- paste0("B",1:(ncol(frame)-length(fixedvars)))
   }
-  setnames(frame, c(fixedvars,vars))
-  
+  vars <- c(fixedvars,vars)
+  # remove columns with NA in vars
+  set(frame, j=which(is.na(vars)), value=NULL)
+  setnames(frame, vars[!is.na(vars)])
+
   frame <- frame[,which(unlist(lapply(frame, function(x)!all(is.na(x))))),with=F] # remove columns with NA only
   frame <- na.omit(frame) # remove rows with NAs
   frame$Subpop <- factor(frame$Subpop)
@@ -239,6 +254,111 @@ diversityGens <- function(data, vars, interval, accum=T, subpops=F, parallel=T) 
     return(result)
   }  
   return(ddply(data, split, aux, .progress="text", .parallel=parallel))
+}
+
+#### Behaviour plotting functions #########################################################
+
+# prepare data for buildSom (optional)
+# vars: vars to be used in the som
+# sampleSize: number of vectors to be used in the som
+# cluster: cluster data to avoid large amounts of repeated vectors
+preSomProcess <- function(data, vars=NULL, sampleSize=25000, cluster=0, ...) {
+  data <- subset(data[sample(1:nrow(data),sampleSize),], select=c("Fitness",vars))
+  if(cluster > 0) {
+    require(Rclusterpp) # see https://cran.r-project.org/web/packages/Rclusterpp/vignettes/Rclusterpp.pdf
+    h <- Rclusterpp.hclust(subset(data,select=-c(Fitness)), method="ward")
+    c <- cutree(h, k=cluster)
+    data <- data[!duplicated(c),] # get one arbitrary element from each cluster
+  }
+  return(data)
+}
+
+# data: behaviours, with only the variables to be considered + Fitness, and already sampled as needed
+# returns som object
+buildSom <- function(data, grid.size=10, grid.type="rectangular", scale=T) {
+  somData <- as.matrix(subset(data,select=-c(Fitness)))
+  if(scale) {
+    somData <- scale(somData)
+    print("Scale done")
+  }
+  som <- som(somData, rlen=1000, keep.data=FALSE, grid=somgrid(grid.size, grid.size, grid.type))
+  gc()
+  print("Som done")
+  if(scale) {
+    som$scaled.center <- attr(somData, "scaled:center")
+    som$scaled.scale <- attr(somData, "scaled:scale")
+  }
+  som$map <- mapBehaviours(som, data)
+  print("Mapping done")
+  return(som)
+}
+
+# map a set of behaviours to an already built som
+# data: the data to be mapped, with the variables to be considered + Fitness
+mapBehaviours <- function(som, data, parallel=F) {
+  m <- mapScale(som, data)
+  aux <- function(i) {
+    subFit <- data[m==i,]$Fitness
+    row <- c(som$grid$pts[i,"x"], som$grid$pts[i,"y"], 
+             Count=length(subFit), Frequency=length(subFit)/nrow(data), 
+             Fitness.mean=mean(subFit), Fitness.min=min(subFit),
+             Fitness.max=max(subFit), Fitness.q90=quantile(subFit, probs=0.9, names=F))
+    return(row)
+  }
+  map <- ldply(as.list(1:nrow(som$grid$pts)), aux, .parallel=parallel)
+  return(map)
+}
+
+# wrapper to som.map function, making the necessary data transformations and scaling if necessary
+mapScale <- function(som, data) {
+  data <- as.matrix(subset(data,select=colnames(som$codes)))
+  if(!is.null(som$scaled.center)) {
+    data <- scale(data, center=som$scaled.center, scale=som$scaled.scale)
+  }
+  return(map(som, data)$unit.classif)
+}
+
+# maxLimit: the maximum frequency
+# maxQuantile is ignored if maxLimit is set
+plotSomFrequency <- function(som, mapping, maxLimit=NULL, maxQuantile=0.975, palette="Spectral") {
+  if(is.null(maxLimit)) maxLimit <- quantile(mapping$Frequency, maxQuantile)
+  mapping$Frequency[which(mapping$Frequency > maxLimit)] <- maxLimit
+  g <- ggplot(mapping, aes(x, y, fill=Frequency)) + 
+    geom_tile(colour="white") + 
+    scale_fill_distiller(limits=c(0,maxLimit),type="seq", palette=palette) + 
+    scale_x_continuous(breaks = 1:max(mapping$x), expand = c(0, 0)) +
+    scale_y_continuous(breaks = 1:max(mapping$y), expand = c(0, 0)) + coord_fixed(ratio = max(mapping$y) / max(mapping$x))
+  return(g)
+}
+
+# maxLimit: the maximum frequency
+# maxQuantile is ignored if maxLimit is set
+# alpha: alpha [0,1] of each bubble -- useful for overlap
+# maxSize: maximum size of each bubble
+plotSomBubble <- function(som, mapping, maxLimit=NULL, maxQuantile=0.975, palette="RdYlGn", alpha=0.75, maxSize=30) {
+  if(is.null(maxLimit)) maxLimit <- quantile(mapping$Frequency, maxQuantile)
+  mapping$Frequency[which(mapping$Frequency > maxLimit)] <- maxLimit
+  mapping$Fitness.max <- som$map$Fitness.max  # use the som fitness, not the fitness from this mapping
+  g <- ggplot(mapping, aes(x, y)) + 
+    geom_point(aes(size=Frequency, colour=Fitness.max), alpha=alpha) + 
+    scale_colour_distiller(palette=palette, space="Lab", direction=1) + 
+    scale_size(range=c(0,maxSize), limits=c(0,maxLimit)) +
+    scale_x_continuous(breaks = 1:max(mapping$x), minor_breaks=NULL) +
+    scale_y_continuous(breaks = 1:max(mapping$y), minor_breaks=NULL) +
+    coord_fixed(ratio = max(mapping$y) / max(mapping$x))
+  return(g)  
+}
+
+# code can take the values "segments", "stars" and "lines", or NULL
+plotSom <- function(som, palette="YlOrRd", code=NULL) {
+  colorScale <- brewer.pal(8,palette)
+  ramp <- colorRampPalette(colorScale)
+  colors <- ramp(1000)
+  scale <- round(rescale(som$map$Fitness.max, to=c(1,1000)))
+  cols <- colors[scale]
+  print(plot(som, bgcol=cols, codeRendering=code))
+  cat("Min: ", min(som$map$Fitness.max), " Max: ", max(som$map$Fitness.max))
+  #print(plot(som, type="property", property=som$map$Fitness.max, ncolors=20, palette.name=ramp, heatkeywidth=.5))
 }
 
 

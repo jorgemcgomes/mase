@@ -38,7 +38,6 @@ stat.child.2 =                          mase.stat.BestEverSolutionStat
 stat.child.2.file =                     $best.ind
 stat.child.2.last =                     $last.ind
 stat.child.3 =                          mase.stat.EvaluationsStat
-stat.child.3.do-behaviours =            true
 stat.child.3.file =                     $behaviours.stat
 stat.child.4 =                          mase.stat.BestSolutionGenStat
 stat.child.4.file =                     $bests.tar.gz

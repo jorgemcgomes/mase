@@ -58,7 +58,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
 
             double preyDist =  Math.min(1, pred.distanceTo(prey) / (diagonal / 2));
 
-            res[i] = new VectorBehaviourResult(pred.getCaptureCount(), preyDist, partnerAvgDist[i]);
+            res[i] = new VectorBehaviourResult((double)pred.getCaptureCount(), preyDist, partnerAvgDist[i]);
         }
         evaluation = new SubpopEvaluationResult(res);
 

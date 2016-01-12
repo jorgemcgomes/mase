@@ -16,7 +16,6 @@ public class VectorBehaviourResult implements BehaviourResult {
     private static final long serialVersionUID = 1;
     protected double[] behaviour;
     protected int dist;
-    public static final String V_COSINE = "cosine", V_BRAY_CURTIS = "bray_curtis", V_EUCLIDEAN = "euclidean";
     public static final int COSINE = 0, BRAY_CURTIS = 1, EUCLIDEAN = 2;
 
 
@@ -25,8 +24,7 @@ public class VectorBehaviourResult implements BehaviourResult {
         this.dist = EUCLIDEAN;
     }
     
-    public VectorBehaviourResult(int dist, double... bs) {
-        this.behaviour = bs;
+    public void setDistance(int dist) {
         this.dist = dist;
     }
 

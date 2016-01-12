@@ -57,7 +57,7 @@ public class OnePreyGroupEval extends MasonEvaluation {
         time = currentEvaluationStep / (double) maxEvaluationSteps;
         captured = simState.captureCount;
         
-        evaluation = new VectorBehaviourResult(captured, finalDistance, time, predatorDispersion);
+        evaluation = new VectorBehaviourResult((double)captured, finalDistance, time, predatorDispersion);
     }
 
     @Override
