@@ -356,9 +356,25 @@ plotSom <- function(som, palette="YlOrRd", code=NULL) {
   colors <- ramp(1000)
   scale <- round(rescale(som$map$Fitness.max, to=c(1,1000)))
   cols <- colors[scale]
-  print(plot(som, bgcol=cols, codeRendering=code))
+  print(plot(som, bgcol=cols, codeRendering=code, lwd=2))
   cat("Min: ", min(som$map$Fitness.max), " Max: ", max(som$map$Fitness.max))
   #print(plot(som, type="property", property=som$map$Fitness.max, ncolors=20, palette.name=ramp, heatkeywidth=.5))
+}
+
+identifyBests <- function(som, data, n=10, interactive=T) {
+  if(interactive) {
+    plotSom(som)
+    ids <- identify(som)    
+  } else {
+    ids <- 1:nrow(som$grid$pts)
+  }
+  map <- mapScale(som,data)
+  aux <- function(id) {
+    submap <- data[map==id,]
+    submap <- submap[order(Fitness,decreasing=T),]
+    return(cbind(x=som$grid$pts[id,"x"], y=som$grid$pts[id,"y"], head(submap,n)))
+  }
+  return(ldply(as.list(ids), aux))
 }
 
 

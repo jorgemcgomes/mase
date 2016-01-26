@@ -12,7 +12,7 @@ import java.io.Serializable;
  *
  * @author jorge
  */
-public class MRParams implements Serializable {
+public class MRParams implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     
@@ -26,5 +26,21 @@ public class MRParams implements Serializable {
     protected int minActivationTime;
     protected int collectionTime;
     protected int numActuators;
-    protected String[] rocks;    
+    protected String[] rocks;
+    
+    protected double actuatorNoise = 0; // percentage
+    protected double sensorRangeNoise = 0; // percentage
+    protected double sensorAngleNoise = 0; // radians
+    protected double sensorOffset = 0; // percentage
+    protected double actuatorOffset = 0; // percentage
+    
+    @Override
+    public MRParams clone() {
+        try {
+            return (MRParams) super.clone();
+        } catch (CloneNotSupportedException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }        
 }

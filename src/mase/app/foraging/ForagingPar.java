@@ -54,8 +54,13 @@ public class ForagingPar implements Cloneable, Serializable {
     public boolean flyingVerticalMovement;
     
     @Override
-    public ForagingPar clone() throws CloneNotSupportedException {
-        return (ForagingPar) super.clone();
+    public ForagingPar clone() {
+        try {
+            return (ForagingPar) super.clone();
+        } catch (CloneNotSupportedException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
     
     public double actuatorNoise = 0; // percentage

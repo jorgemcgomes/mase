@@ -33,6 +33,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
 
     protected TaskDescription td;
     protected HerdingParams par;
+    protected final HerdingParams originalPar;
     protected Continuous2D field;
     protected List<Shepherd> shepherds;
     protected List<Fox> foxes;
@@ -42,13 +43,18 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
 
     public Herding(long seed, HerdingParams par, GroupController gc) {
         super(gc, seed);
-        this.par = par;
+        this.originalPar = par;
     }
 
     @Override
     public void start() {
         super.start();
-        
+
+        par = originalPar.clone();
+        par.shepherdLinearSpeed += par.shepherdLinearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+        par.shepherdTurnSpeed += par.shepherdTurnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+        par.shepherdSensorRange += par.shepherdSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
+
         // Static environment
         fence = new StaticPolygon(new Segment(0, 0, par.arenaSize, 0),
                 new Segment(par.arenaSize, 0, par.arenaSize, par.arenaSize / 2 - par.gateSize / 2),
@@ -62,7 +68,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
         curral = new StaticPolygon(new Segment(par.arenaSize, par.arenaSize / 2 - par.gateSize / 2,
                 par.arenaSize, par.arenaSize / 2 + par.gateSize / 2));
         curral.paint = Color.BLUE;
-        
+
         this.field = new Continuous2D(par.discretization, par.arenaSize, par.arenaSize);
 
         placeSheeps();
@@ -95,7 +101,12 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
             } else {
                 newLoc = new Double2D(par.sheepX * par.arenaSize, i * range + range / 2);
             }
-            sheep.setLocation(newLoc);            
+            if(par.sheepPositionOffset > 0) {
+                Double2D deviation = new Double2D((random.nextDouble() * 2 - 1) * par.sheepPositionOffset,
+                        (random.nextDouble() * 2 - 1) * par.sheepPositionOffset);
+                newLoc = newLoc.add(deviation);
+            }
+            sheep.setLocation(newLoc);
             sheep.setStopper(schedule.scheduleRepeating(sheep));
             sheeps.add(sheep);
         }

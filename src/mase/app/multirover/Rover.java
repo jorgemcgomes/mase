@@ -6,6 +6,7 @@
 package mase.app.multirover;
 
 import java.awt.Color;
+import mase.app.multirover.RedRock.RockType;
 import mase.controllers.AgentController;
 import mase.mason.world.AbstractSensor;
 import mase.mason.world.DashMovementEffector;
@@ -42,6 +43,7 @@ public class Rover extends SmartAgent {
         dw.setAgent(sim, field, this);
         dw.setRays(5.0, -Math.PI / 6, Math.PI / 6);
         dw.setBinary(true);
+        dw.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
         super.addSensor(dw);
 
         // redrock sensor
@@ -49,6 +51,7 @@ public class Rover extends SmartAgent {
         ds.setArcs(new double[]{-Math.PI / 2, -Math.PI / 6, Math.PI / 6}, new double[]{-Math.PI / 6, Math.PI / 6, Math.PI / 2});
         ds.setRange(sim.par.sensorRange);
         ds.setObjectTypes(RedRock.class);
+        ds.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
         super.addSensor(ds);
 
         // closest rovers distance
@@ -56,29 +59,71 @@ public class Rover extends SmartAgent {
         dsr.setArcs(new double[]{-Math.PI / 2, -Math.PI / 6, Math.PI / 6}, new double[]{-Math.PI / 6, Math.PI / 6, Math.PI / 2});
         dsr.setRange(sim.par.sensorRange);
         dsr.setObjectTypes(Rover.class);
+        dsr.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
         super.addSensor(dsr);
 
         // closest rovers type
         for (int i = 0; i < sim.par.numActuators; i++) {
-            TypeSensor ts = new TypeSensor(dsr, i);
+            NeighbourTypeSensor ts = new NeighbourTypeSensor(dsr, i);
             super.addSensor(ts);
+        }
+        
+        // rock type sensor
+        for(RockType t : sim.types) {
+            RockTypeSensor rts = new RockTypeSensor(ds, t);
+            super.addSensor(rts);
         }
 
         // movement effector
         DashMovementEffector dm = new DashMovementEffector();
         dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
         dm.allowBackwardMove(false);
+        dm.setNoise(sim.par.actuatorNoise, sim.par.actuatorNoise);
         super.addEffector(dm);
 
     }
+    
+    private static class RockTypeSensor extends AbstractSensor {
 
-    private static class TypeSensor extends AbstractSensor {
+        private final DistanceSensorArcs rockSensor;
+        private final RockType type;
+        
+        RockTypeSensor(DistanceSensorArcs rockSensor, RockType type) {
+            this.rockSensor = rockSensor;
+            this.type = type;
+        }
+        
+        @Override
+        public int valueCount() {
+            return 1;
+        }
 
-        private final DistanceSensorArcs ds;
+        @Override
+        public double[] readValues() {
+            Object[] rocks = rockSensor.getClosestObjects();
+            double[] dists = rockSensor.getLastDistances();
+            for (int i = 0; i < rocks.length; i++) {
+                if (rocks[i] != null && dists[i] <= 0 && ((RedRock) rocks[i]).getType() == type) { // agent is over a rock of the given type
+                    return new double[]{1};
+                }
+            }
+            return new double[]{-1};
+        }
+
+        @Override
+        public double[] normaliseValues(double[] vals) {
+            return vals;
+        }
+        
+    }
+
+    private static class NeighbourTypeSensor extends AbstractSensor {
+
+        private final DistanceSensorArcs roverSensor;
         private final int type;
 
-        TypeSensor(DistanceSensorArcs ds, int type) {
-            this.ds = ds;
+        NeighbourTypeSensor(DistanceSensorArcs roverSensor, int type) {
+            this.roverSensor = roverSensor;
             this.type = type;
         }
 
@@ -89,8 +134,8 @@ public class Rover extends SmartAgent {
 
         @Override
         public double[] readValues() {
-            Object[] rovers = ds.getClosestObjects();
-            double[] dists = ds.getLastDistances();
+            Object[] rovers = roverSensor.getClosestObjects();
+            double[] dists = roverSensor.getLastDistances();
             double closestDist = Double.POSITIVE_INFINITY;
             Rover closestRover = null;
             for (int i = 0; i < rovers.length; i++) {
@@ -110,9 +155,8 @@ public class Rover extends SmartAgent {
         public double[] normaliseValues(double[] vals) {
             return vals;
         }
-
     }
-
+    
     public int getActuatorType() {
         return actuatorType;
     }

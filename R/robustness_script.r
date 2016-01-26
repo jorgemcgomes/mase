@@ -1,9 +1,10 @@
 ### CCEA ROBUSTNESS ####################################################
 
 setwd("~/exps/rob/")
+setwd("/media/jorge/Orico/rob2/rob/")
 
 # generalisation comparison ccea-best vs single (evolved without noise, post-evaluated with noises)
-data <- metaLoadData("*/*/bl", filenames=c("postfitness.stat","enfitness.stat","tvlfitness.stat","tvmfitness.stat","tvhfitness.stat","allfitness.stat"), 
+data <- metaLoadData("*/*/bl", filenames=c("postfitness.stat","anfitness.stat","enfitness.stat","tvlfitness.stat","tvmfitness.stat","tvhfitness.stat","allfitness.stat"), 
                      filename.ids=c("BL","AN","EN","TVL","TVM","TVH","All"), fun="loadFitness")
 
 ggplot(lastGen(data), aes(x=File,y=BestSoFar,fill=ID2)) + geom_boxplot() + 
@@ -76,6 +77,36 @@ ggplot(agg, aes(x=ID3,y=BestSoFar.mean,colour=ID2,group=ID2)) +
   ggtitle("CCEA vs Single: Evolution of robust controllers") + xlab("Task setup (evolution and post-evaluation)") + ylab("Highest fitness") +
   scale_colour_discrete(name="Evolutionary setup") + theme(legend.position="bottom")
 ggsave("sum_ccea_single_evolution.pdf", width=8, height=5)
+
+
+# evolution for conditions vs generalisation to conditions
+
+data <- loadData(c("*/*/an","*/*/en","*/*/tvl","*/*/tvm","*/*/tvh","*/*/all"), filename="postfitness.stat", fun="loadFitness")
+data2 <- metaLoadData("*/*/bl", filenames=c("postfitness.stat","anfitness.stat","enfitness.stat","tvlfitness.stat","tvmfitness.stat","tvhfitness.stat","allfitness.stat"), 
+                     filename.ids=c("bl","an","en","tvl","tvm","tvh","all"), fun="loadFitness")
+data2$ID3 <- data2$File ; data2$File <- NULL
+datac <- rbind(cbind(data2,Type="Evolved with BL"),cbind(data,Type="Evolved with test conditions"))
+
+ggplot(lastGen(datac), aes(x=ID3,y=BestSoFar,fill=Type)) + geom_boxplot() + 
+  facet_grid(ID1 ~ ID2, scales="free") + geom_jitter(position=position_jitterdodge(jitter.width=.1),colour="grey",size=1) + 
+  ylim(0,NA) + xlab("Post-evaluation task setup") + ylab("Highest fitness") + scale_fill_discrete(name="Evolutionary conditions") + 
+  theme(legend.position="bottom") + ggtitle("CCEA vs Single: Robustness comparison")
+ggsave("box_ccea_single_generalization_comparison.pdf", width=8.5, height=8.5)
+
+agg <- summaryBy(BestSoFar ~ ID1 + ID2 + ID3 + Type, lastGen(datac), FUN=c(mean,se))
+pd <- position_dodge(0)
+ggplot(agg, aes(x=ID3,y=BestSoFar.mean,colour=Type,group=Type)) +
+  geom_errorbar(aes(ymin=BestSoFar.mean-BestSoFar.se, ymax=BestSoFar.mean+BestSoFar.se), width=.5, position=pd) +
+  geom_line(position=pd) + geom_point(position=pd) +
+  facet_grid(ID1 ~ ID2, scales="free") + ylim(0,NA) +
+  ggtitle("CCEA vs Single: Evolution of robust controllers") + xlab("Post-evaluation task setup") + ylab("Highest fitness") +
+  scale_colour_discrete(name="Evolutionary conditions") + theme(legend.position="bottom")
+ggsave("sum_ccea_single_generalization_comparison.pdf", width=8.5, height=8.5)
+
+
+
+
+
 
 
 data <- loadData("pred/ccea/bl", filename="behaviours.stat", fun="loadBehaviours", sample=0.1, vars=c("G1","G2","G3",rep(NA,2)), parallel=T)

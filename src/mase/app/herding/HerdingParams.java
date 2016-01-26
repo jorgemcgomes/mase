@@ -11,7 +11,7 @@ import java.io.Serializable;
  *
  * @author jorge
  */
-public class HerdingParams implements Serializable {
+public class HerdingParams implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,5 +41,22 @@ public class HerdingParams implements Serializable {
     protected boolean shepherdArcSensor; // for the fox sensor, if false uses RangeBearingSensor
     protected double shepherdSeparation; // in the y-axis
     protected double shepherdX;
+    
+    protected double actuatorNoise = 0; // percentage
+    protected double sensorRangeNoise = 0; // percentage
+    protected double sensorAngleNoise = 0; // radians
+    protected double sensorOffset = 0; // percentage
+    protected double actuatorOffset = 0; // percentage
+    protected double sheepPositionOffset = 0; // max. absolute deviation
 
+    @Override
+    public HerdingParams clone() {
+        try {
+            return (HerdingParams) super.clone();
+        } catch (CloneNotSupportedException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }    
+    
 }

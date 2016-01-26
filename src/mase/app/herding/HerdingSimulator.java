@@ -27,7 +27,7 @@ public class HerdingSimulator extends MasonSimulationProblem {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        par = new HerdingParams();        
+        par = new HerdingParams();    
         ParamUtils.autoSetParameters(par, state.parameters, base, super.defaultBase(), true);
     }
 

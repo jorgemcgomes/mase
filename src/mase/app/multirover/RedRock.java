@@ -64,7 +64,7 @@ public class RedRock extends OvalPortrayal2D implements Steppable {
 
         // find near rovers
         for (Rover r : mr.rovers) {
-            if (r.getLocation().distance(pos) < mr.par.rockRadius) {
+            if (r.getLocation().distance(pos) <= mr.par.rockRadius) {
                 Long time = cache.get(r);
                 if (time == null) {
                     // rover just arrived at the rock, add it

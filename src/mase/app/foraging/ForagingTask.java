@@ -23,7 +23,7 @@ public class ForagingTask extends MasonSimState {
 
     private static final long serialVersionUID = 1L;
 
-    protected ForagingPar originalPar;
+    protected final ForagingPar originalPar;
     protected ForagingPar par;
     protected Continuous2D field;
     protected FlyingRobot flyingBot;
@@ -38,19 +38,15 @@ public class ForagingTask extends MasonSimState {
     @Override
     public void start() {
         super.start();
-        try {
-            par = originalPar.clone();
-            par.flyingVisionAngle += par.flyingVisionAngle * par.sensorOffset * (random.nextDouble() * 2 - 1);
-            par.landVisionAngle += par.landVisionAngle * par.sensorOffset * (random.nextDouble() * 2 - 1);
-            par.flyingMaxHeight += par.flyingMaxHeight * par.maxHeightOffset * (random.nextDouble() * 2 - 1);
-            par.landSensingRange += par.landSensingRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
-            par.landLinearSpeed += par.landLinearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
-            par.landTurnSpeed += par.landTurnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
-            par.flyingAngSpeed += par.flyingAngSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
-            par.flyingLinearSpeed += par.flyingLinearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        };
+        par = originalPar.clone();
+        par.flyingVisionAngle += par.flyingVisionAngle * par.sensorOffset * (random.nextDouble() * 2 - 1);
+        par.landVisionAngle += par.landVisionAngle * par.sensorOffset * (random.nextDouble() * 2 - 1);
+        par.flyingMaxHeight += par.flyingMaxHeight * par.maxHeightOffset * (random.nextDouble() * 2 - 1);
+        par.landSensingRange += par.landSensingRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
+        par.landLinearSpeed += par.landLinearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+        par.landTurnSpeed += par.landTurnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+        par.flyingAngSpeed += par.flyingAngSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+        par.flyingLinearSpeed += par.flyingLinearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
 
         this.field = new Continuous2D(100, par.arenaSize.x, par.arenaSize.y);
         AgentController[] acs;

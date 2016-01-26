@@ -7,8 +7,10 @@ package mase.app.multirover;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import mase.app.multirover.RedRock.RockType;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
@@ -29,18 +31,26 @@ public class MultiRover extends MasonSimState {
 
     protected Continuous2D field;
     protected MRParams par;
+    protected final MRParams originalPar;
     protected int[] scores;
     protected List<Rover> rovers;
     protected List<RedRock> rocks;
+    protected Set<RockType> types;
 
     public MultiRover(long seed, MRParams par, GroupController gc) {
         super(gc, seed);
-        this.par = par;
+        this.originalPar = par;
     }
 
     @Override
     public void start() {
         super.start();
+        
+        par = originalPar.clone();
+        par.linearSpeed += par.linearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+        par.turnSpeed += par.turnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
+        par.sensorRange += par.sensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
+        
         this.field = new Continuous2D(par.discretization, par.size, par.size);
         this.scores = new int[RedRock.RockType.values().length];
         Arrays.fill(scores, 0);
@@ -90,8 +100,9 @@ public class MultiRover extends MasonSimState {
     }
 
     protected void placeRocks() {
-
+        
         this.rocks = new LinkedList<>();
+        this.types = new HashSet<>();
         int count = 0;
         while (count < par.rocks.length) {
             double x = par.rockRadius + random.nextDouble() * (par.size - par.rockRadius * 2);
@@ -100,11 +111,13 @@ public class MultiRover extends MasonSimState {
             if (!close.isEmpty()) {
                 continue;
             }
-            RedRock newRock = new RedRock(this, RockType.valueOf(par.rocks[count]));
+            RockType t = RockType.valueOf(par.rocks[count]);
+            RedRock newRock = new RedRock(this, t);
             field.setObjectLocation(newRock, new Double2D(x, y));
             newRock.setStopper(schedule.scheduleRepeating(newRock));
             count++;
             rocks.add(newRock);
+            types.add(t);
         }
 
     }
