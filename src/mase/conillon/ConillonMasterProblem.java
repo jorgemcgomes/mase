@@ -40,7 +40,8 @@ public class ConillonMasterProblem extends MasterProblem {
     public static final String P_CODE_PORT = "code-port";
     public static final String P_PRIORITY = "priority";
     public static final String P_SERVER_NAME = "server-name";
-    public static final String P_TIMEOUT = "timeout";
+    public static final String P_MIN_TIMEOUT = "min-timeout";
+    public static final String P_MAX_TIMEOUT = "max-timeout";
     public static final String P_MAX_TRIES = "maxtries";
     private static final long serialVersionUID = 1L;
 
@@ -57,7 +58,8 @@ public class ConillonMasterProblem extends MasterProblem {
     private int codePort;
     private String serverName;
     private int jobSize;
-    private long timeout;
+    private long minTimeout;
+    private long maxTimeout;
     private int maxTries;
 
     private transient HashMap<Integer, Evaluation> jobs;
@@ -80,7 +82,8 @@ public class ConillonMasterProblem extends MasterProblem {
         codePort = state.parameters.getInt(base.push(P_CODE_PORT), defaultBase().push(P_CODE_PORT));
         //priorityNumber = state.parameters.getInt(base.push(P_PRIORITY), defaultBase().push(P_PRIORITY));
         serverName = state.parameters.getString(base.push(P_SERVER_NAME), defaultBase().push(P_SERVER_NAME));
-        timeout = state.parameters.getLong(base.push(P_TIMEOUT), defaultBase().push(P_TIMEOUT));
+        minTimeout = state.parameters.getLong(base.push(P_MIN_TIMEOUT), defaultBase().push(P_MIN_TIMEOUT));
+        maxTimeout = state.parameters.getLong(base.push(P_MAX_TIMEOUT), defaultBase().push(P_MAX_TIMEOUT));        
         maxTries = state.parameters.getInt(base.push(P_MAX_TRIES), defaultBase().push(P_MAX_TRIES));
     }
 
@@ -136,7 +139,7 @@ public class ConillonMasterProblem extends MasterProblem {
     public void finishEvaluating(final EvolutionState state, final int threadnum) {
         tries = 0;
         boolean done = false;
-        currentTimeout = 60;
+        currentTimeout = minTimeout;
         while (!done && tries < maxTries) {
             try {
                 client.setDesc(getDesc(state));
@@ -178,7 +181,7 @@ public class ConillonMasterProblem extends MasterProblem {
                 // Something went wrong or timeout
                 state.output.message("*** ERROR WITH CLIENT " + client.getMyID() + " / TRY " + tries + "***");
                 e.printStackTrace();
-                currentTimeout = Math.min(currentTimeout * 2, timeout);
+                currentTimeout = Math.min(currentTimeout * 2, maxTimeout);
                 tries++;
             }
         }

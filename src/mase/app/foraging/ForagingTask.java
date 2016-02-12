@@ -92,7 +92,7 @@ public class ForagingTask extends MasonSimState {
             Double2D pos = null;
             while (pos == null) {
                 Double2D candidate;
-                if (par.flyingMaxDist < 0) { // use the entire field
+                if (par.flyingMaxDist <= 0) { // use the entire field
                     candidate = new Double2D(random.nextDouble() * field.width, random.nextDouble() * field.height);
                 } else {
                     Double2D l = landBot.getLocation();
@@ -104,7 +104,7 @@ public class ForagingTask extends MasonSimState {
                 }
 
                 double dist = landBot.distanceTo(candidate) - par.flyingRadius;
-                if (dist > par.landRadius && (par.flyingMaxDist < 0 || dist <= par.flyingMaxDist)) { // leave at least landRadius distance between them
+                if (dist > par.landRadius && (par.flyingMaxDist <= 0 || dist <= par.flyingMaxDist)) { // leave at least landRadius distance between them
                     pos = candidate;
                 }
             }

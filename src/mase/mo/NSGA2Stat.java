@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.PostEvaluator;
-import mase.mo.NSGA2.Individual;
+import mase.mo.NSGA2.NSGAIndividual;
 
 /**
  *
@@ -51,15 +51,15 @@ public class NSGA2Stat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        List<Individual>[] inds = evaluator.allInds;
+        List<NSGAIndividual>[] inds = evaluator.indsRank;
         for (int s = 0; s < inds.length; s++) {
-            Collections.sort(inds[s], new Comparator<Individual>() {
+            Collections.sort(inds[s], new Comparator<NSGAIndividual>() {
                 @Override
-                public int compare(Individual o1, Individual o2) {
+                public int compare(NSGAIndividual o1, NSGAIndividual o2) {
                     return Double.compare(o2.score, o1.score);
                 }
             });
-            for (Individual i : inds[s]) {
+            for (NSGAIndividual i : inds[s]) {
                 state.output.print(state.generation + " " + s + " " + i.score + " " + i.rank + " " + i.crowdingDistance, log);
                 for (double o : i.objectives) {
                     state.output.print(" " + o, log);

@@ -8,7 +8,8 @@ eval.base.masterproblem.server-port =           0
 eval.base.masterproblem.code-port =             0
 eval.base.masterproblem.priority =              10 
 eval.base.masterproblem.job-size =              3
-eval.base.masterproblem.timeout =               1800
+eval.base.masterproblem.min-timeout =           300
+eval.base.masterproblem.max-timeout =           1800
 eval.base.masterproblem.maxtries =              1000
 
 # the following params are not used for anything

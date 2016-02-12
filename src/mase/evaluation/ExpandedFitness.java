@@ -11,6 +11,7 @@ import ec.util.Parameter;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 /**
  *
@@ -133,5 +134,14 @@ public class ExpandedFitness extends SimpleFitness {
             });
             this.setContext(sortedFits[sortedFits.length / 2].getContext());
         }
+    }
+
+    @Override
+    public String toString() {
+        String str = "";
+        for(Entry<String,Double> e : scores.entrySet()) {
+            str += e.getKey() + ":\t" + e.getValue() + "\n";
+        }
+        return str;
     }
 }
