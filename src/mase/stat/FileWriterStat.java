@@ -14,6 +14,7 @@ import ec.util.Parameter;
  * @author jorge
  */
 public class FileWriterStat extends Statistics {
+
     private static final long serialVersionUID = 1L;
 
     protected String jobPrefix;
@@ -21,12 +22,8 @@ public class FileWriterStat extends Statistics {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        if (state.parameters.getIntWithDefault(new Parameter("jobs"), null, 1) > 1) {
-            int jobN = (Integer) state.job[0];
-            jobPrefix = "job." + jobN + ".";
-        } else {
-            jobPrefix = "";
-        }
+        int jobN = (Integer) state.job[0];
+        jobPrefix = "job." + jobN + ".";
     }
 
 }

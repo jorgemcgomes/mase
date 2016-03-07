@@ -10,9 +10,10 @@ library(plyr)
 library(doBy)
 library(pdist)
 library(RColorBrewer)
+library(formula.tools)
 
 theme_set(theme_bw())
-theme_update(plot.margin=unit(c(0,0,0,0),"mm"))
+theme_update(plot.margin=unit(c(1,1,1,1),"mm"), legend.position="bottom")
 #theme_set(theme_bw(base_size = 10))
 #theme_update(plot.title = element_text(size=10))
 
@@ -49,7 +50,7 @@ metaLoadData <- function(folders, filenames=NULL, filename.ids=filenames, ids=li
 # parallel: use multiple cores for data loading (no progress bar)
 # fun: function to be called to load one file
 # ...: parameters to fun
-loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto.ids.sep="/", jobs=NULL, jobprefix="job", recursive=F, parallel=F, fun="loadFile", ...) {
+loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto.ids.names=NULL, auto.ids.sep="/", jobs=NULL, jobprefix="job", recursive=F, parallel=F, fun="loadFile", ...) {
   folders <- Sys.glob(folders) # expand
   if(recursive) {
     folders <- as.vector(sapply(folders,list.dirs))
@@ -60,7 +61,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
   if(is.null(names)) names <- folders
   if(auto.ids) {
     auto <- tstrsplit(folders,auto.ids.sep)
-    names(auto) <- paste0("ID",1:length(auto))
+    names(auto) <- if(is.null(auto.ids.names)) paste0("ID",1:length(auto)) else auto.ids.names
     ids <- c(ids,auto)
   }
   ids <- c(list(Setup=names),ids)
@@ -382,65 +383,75 @@ identifyBests <- function(som, data, n=10, interactive=T) {
 
 se <- function(x){sd(x)/sqrt(length(x))}
 
-metaAnalysis <- function(setlist, ...) {
-  res <- data.frame(mean=NULL, sd=NULL, min=NULL, max=NULL)
-  for(s in names(setlist)) {
-    res[s,"n"] <- length(setlist[[s]])
-    res[s,"mean"] <- mean(setlist[[s]])
-    res[s,"sd"] <- sd(setlist[[s]])
-    res[s,"se"] <- res[s,"sd"] / sqrt(length(setlist[[s]]))
-    res[s,"min"] <- min(setlist[[s]])
-    res[s,"max"] <- max(setlist[[s]])
+# ex: metaAnalysis(lastGen(data), BestSoFar~Setup, ~ID1)
+metaAnalysis <- function(frame, formula, split=NULL, ...) {
+  if(is.null(split)) {
+    return(frameAnalysis(frame,formula, ...))
+  } else {
+    res <- dlply(frame,split,frameAnalysis,formula, ...)
+    return(res)
   }
-  tt <- batch.ttest(setlist, ...)
-  
-  maxlen <- max(as.numeric(lapply(setlist, length)))
-  norm <- lapply(setlist, function(v){c(v,rep(NA,maxlen-length(v)))})
-  dd <- t(as.data.frame(norm))
-  return(list(summary=res, ttest=tt,data=dd))
 }
 
-batch.ttest <- function(setlist, ...) {
-  for(n in names(setlist)) {
-    if(length(setlist[[n]]) < 3) {
-      setlist[[n]] <- NULL
-    } else {
-      setlist[[n]] <- as.numeric(setlist[[n]])
-    }
+frameAnalysis <- function(frame, formula, summary=T, ttests=T, data=F, ...) {
+  res <- list()
+  if(summary) {
+    res[["summary"]] <- summaryBy(formula, frame, FUN=c(length,mean,sd,se,min,max))
   }
-  if(length(setlist) < 2) {
+  split <- splitBy(get.vars(formula)[-1], frame)
+  split <- lapply(split, function(x) x[[get.vars(formula)[1]]])
+  if(ttests) {
+    res[["ttest"]] <- batch.ttest(split, ...)
+  }
+  if(data) {
+    res[["data"]] <- split
+  }
+  return(res)
+}
+
+# ... : parameters to be passed to wilcox.test
+batch.ttest <- function(setlist, adjust.method="holm", ...) {
+  for(n in names(setlist)) { # remove vectors with less than 3 elements
+    setlist[[n]] <- if(length(setlist[[n]]) < 3) NULL else as.numeric(setlist[[n]])
+  }
+  if(length(setlist) < 2) { # there must be at least 2 sets to compare
     return(NULL)
-  } 
+  }
+  
+  # matrixes to store the pvalues
   matrix <- matrix(data = NA, nrow = length(setlist), ncol=length(setlist))
   rownames(matrix) <- names(setlist)
   colnames(matrix) <- names(setlist)
-  
   adj.matrix <- matrix
-  tests <- c()
+  
+  # Mann-Whitney tests
+  pvalues <- c()
   for(i in 1:length(setlist)) {
     for(j in 1:length(setlist)) {
-      if(i != j) {
-        pvalue <- wilcox.test(as.numeric(setlist[[i]]), as.numeric(setlist[[j]]), ...)$p.value
-        matrix[i,j] <- pvalue
-        tests <- c(tests, pvalue)
+      if(i < j) {
+        matrix[i,j] <- wilcox.test(as.numeric(setlist[[i]]), as.numeric(setlist[[j]]), ...)$p.value
+        matrix[j,i] <- matrix[i,j]
+        pvalues <- c(pvalues, matrix[i,j])
       }
     }
   }
   
-  adjusted <- p.adjust(tests, method="holm")
+  # Adjusted pvalues
+  adjusted <- p.adjust(pvalues, method=adjust.method)
   index <- 1
   for(i in 1:length(setlist)) {
     for(j in 1:length(setlist)) {
-      if(i != j) {
+      if(i < j) {
         adj.matrix[i,j] <- adjusted[index]
+        adj.matrix[j,i] <- adj.matrix[i,j]
         index <- index + 1
       }
     }
   }
   
+  # Kruskal-Wallis test
   kruskal <- kruskal.test(setlist)
   
-  result <- list(kruskal=kruskal, uncorrected=matrix, holm=adj.matrix)
-  return(result)
+  return(list(kruskal=kruskal, uncorrected=matrix, holm=adj.matrix))
 }
 

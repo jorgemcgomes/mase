@@ -235,6 +235,24 @@ analyseVars <- function(datalist, vars) {
   return(result)
 }
 
+analyseVars2 <- function(datalist, vars) {
+  require(doBy)
+  result <- data.frame()
+  for(data in datalist) {
+    if(length(data$jobs) > 0) {
+      df <- data.frame()
+      for(job in data$jobs) {
+        for(sub in data$subpops) {
+          df <- rbind(df, subset(data[[job]][[sub]], select=c("gen",vars)))
+        }
+      }
+      m <- df
+      #m <- summaryBy(. ~ gen, data=df, FUN=c(mean,sd,se,min,max))
+      result <- rbind(result, cbind(Exp=data$expname,m))      
+    }
+  }
+  return(result)
+}
 
 #### Behaviour diversity based on mean distance #########################################
 

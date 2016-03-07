@@ -43,7 +43,7 @@ public class MetaEvaluator extends Evaluator {
         for (PostEvaluator postEval : postEvaluators) {
             postEval.processPopulation(state);
         }
-        // necessary hack
+        // necessary hack to load the elites in the CoevolutionaryEvaluator
         if (baseEvaluator instanceof CoevolutionaryEvaluator) {            
             ((CoevolutionaryEvaluator) baseEvaluator).afterCoevolutionaryEvaluation(state, state.population, null);
         }

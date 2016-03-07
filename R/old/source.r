@@ -11,7 +11,7 @@ library(data.table)
 library(ineq)
 #library(plyr)
 
-SOURCE_DIR = "/home/jorge/Dropbox/mase/R"
+SOURCE_DIR = "/home/jorge/Dropbox/mase/R/old"
 source(file.path(SOURCE_DIR, "data.r"))
 source(file.path(SOURCE_DIR, "analytic.r"))
 source(file.path(SOURCE_DIR, "soms.r"))

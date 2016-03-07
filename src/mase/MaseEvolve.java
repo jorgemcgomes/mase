@@ -14,7 +14,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,11 +47,15 @@ public class MaseEvolve {
         // Get config file
         Map<String, String> pars = readParams(args);
 
-        // Write config to system temp file
-        File config = writeConfig(args, pars, outDir);
-
         // Copy config to outdir
-        FileUtils.copyFile(config, new File(outDir, DEFAULT_CONFIG));
+        try {
+            File rawConfig = writeConfig(args, pars, outDir, false);
+            File destiny = new File(outDir, DEFAULT_CONFIG);
+            destiny.delete();
+            FileUtils.moveFile(rawConfig, new File(outDir, DEFAULT_CONFIG));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         // JBOT INTEGRATION: copy jbot config file to the outdir
         // Does nothing when jbot is not used
@@ -61,6 +64,9 @@ public class MaseEvolve {
             FileUtils.copyFile(jbot, new File(outDir, jbot.getName()));
         }
 
+        // Write config to system temp file
+        File config = writeConfig(args, pars, outDir, true);
+        // Launch
         launchExperiment(config);
     }
 
@@ -169,7 +175,7 @@ public class MaseEvolve {
         }
     }
 
-    public static File writeConfig(String[] args, Map<String, String> params, File outDir) throws IOException {
+    public static File writeConfig(String[] args, Map<String, String> params, File outDir, boolean replaceDirWildcard) throws IOException {
         File configFile = File.createTempFile("maseconfig", ".params");
 
         // Write the parameter map into a new file
@@ -190,7 +196,7 @@ public class MaseEvolve {
 
         for (Entry<String, String> e : params.entrySet()) {
             String value = e.getValue();
-            if (value.contains("$")) {
+            if (value.contains("$") && replaceDirWildcard) {
                 File f = new File(outDir, value.replace("$", ""));
                 value = f.getAbsolutePath();
             }

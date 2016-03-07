@@ -383,7 +383,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
             for(int i = 0 ; i < eliteScore.length ; i++) {
                 List<Individual> indsList = Arrays.asList(subpop.individuals);
                 final String currentScore = eliteScore[i];
-                indsList.sort(new Comparator<Individual>() {
+                Collections.sort(indsList, new Comparator<Individual>() {
                     @Override
                     public int compare(Individual o1, Individual o2) {
                         double s1 = ((ExpandedFitness) o1.fitness).getScore(currentScore);

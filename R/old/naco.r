@@ -26,7 +26,7 @@ addTaskInfo <- function(data,expvar=NULL) {
   data$Task <- factor(data$Task, levels=c("Fix-Tog","Fix-Sep","Var-Tog","Var-Mid","Var-Sep"))
   data$Type <- factor(data$Type, levels=c("Successful","Failed"))
   data$Method <- factor(data$Method, levels=c("Fit","Inc","NInc","MOEA","Env","NS"))
-  data <- data[, colSums(is.na(data)) != nrow(data)]
+  #data <- data[, colSums(is.na(data)) != nrow(data)]
   return(data)
 }
 
@@ -124,8 +124,8 @@ fit <- metaLoadData("down_tog/fit","down_sep/fit","down_mid/fit","stable_sep/fit
 fit.split <- splitJobs(fit,F,4)
 behavTrajectory <- analyseVars(fit.split, c("fitness","TimeWithin"))
 behavTrajectory <- addTaskInfo(behavTrajectory, "Exp")
-ggplot(behavTrajectory,aes(x=TimeWithin,y=fitness)) + geom_path(aes(colour=Type)) + facet_grid(. ~ Task) + 
-  xlim(0,1) + ylim(0,6) + xlab("Time within range") + ylab("Number of items collected")
+#ggplot(behavTrajectory,aes(x=TimeWithin,y=fitness)) + geom_path(aes(colour=Type)) + facet_grid(. ~ Task) + 
+#  xlim(0,1) + ylim(0,6) + xlab("Time within range") + ylab("Number of items collected")
 
 behavTrajectory$gen[behavTrajectory$Type=="Failed"] <- -behavTrajectory$gen[behavTrajectory$Type=="Failed"]
 ggplot(behavTrajectory,aes(x=TimeWithin,y=fitness)) + geom_path(data=subset(behavTrajectory,Type=="Successful"),aes(colour=gen))+ 
@@ -135,6 +135,20 @@ ggplot(behavTrajectory,aes(x=TimeWithin,y=fitness)) + geom_path(data=subset(beha
   theme(axis.text.x = element_text(angle = 90, vjust=0.5))
 
 ggsave("~/Dropbox/Work/Papers/NACO/plots/basic_fitness_tw.pdf", width=10,height=2.5)
+
+# individual runs
+df <- data.frame()
+for(job in paste0("job.",c(0,3,6,9,12,15,18,21,24,27))) {
+  fit <- metaLoadData("down_tog/fit","down_sep_long/fit","down_mid/fit","stable_sep/fit","stable_tog/fit", names=c("dt.fit","ds.fit","dm.fit","ss.fit","st.fit"), params=list(jobs=job, subpops=2, fitlim=c(0,6),merge.subpops=F, fitness.file="postfitness.stat", behavs.file="postbehaviours.stat",load.behavs=T,behavs.sample=1, vars.group=vars.group, vars.extra=vars.extra, vars.file=c(vars.group,rep(NA,10),vars.extra)))
+  behavTrajectory <- analyseVars(fit, c("fitness","TimeWithin"))
+  behavTrajectory <- addTaskInfo(behavTrajectory, "Exp")
+  df <- rbind(df, cbind(Run=job,behavTrajectory))
+}
+ggplot(df,aes(x=TimeWithin,y=fitness)) + geom_path(aes(colour=gen)) + facet_grid(Task ~ Run, labeller=label_both) + 
+  xlim(0,1) + ylim(0,6) + xlab("Time within range") + ylab("Number of items collected") + 
+  theme(axis.text.x = element_text(angle = 90, vjust=0.5)) +
+  scale_colour_distiller(palette="Spectral") + guides(colour=guide_colorbar(title="Generation")) + theme(legend.position="bottom")
+ggsave("~/Dropbox/Work/Papers/NACO/plots/average_behaviour_fit.pdf", width=20,height=10)
 
 
 ### Basic CCEA behavioural diversity #############
@@ -237,6 +251,23 @@ ggplot(improvTrajectory,aes(x=TimeWithin,y=fitness)) + geom_path(data=subset(imp
   scale_color_gradientn(colours=c("blue4","skyblue1","pink1","red"), values=c(1,0.5001,0.4999,0)) +
   theme(axis.text.x = element_text(angle = 90, vjust=0.5))
 ggsave("~/Dropbox/Work/Papers/NACO/plots/improv_fitness_tw.pdf", width=10,height=10)
+
+# individual runs
+for(method in c("moea","staged","halted","nst")) {
+  df <- data.frame()
+  for(job in paste0("job.",c(0,3,6,9,12,15,18,21,24,27))) {
+    fit <- metaLoadData(paste0("down_tog/",method),paste0("down_sep_long/",method),paste0("down_mid/",method),paste0("stable_sep/",method), names=paste0(c("dt.","ds.","dm.","ss."),method), params=list(jobs=job, subpops=2, fitlim=c(0,6),merge.subpops=F, fitness.file="postfitness.stat", behavs.file="postbehaviours.stat",load.behavs=T,behavs.sample=1, vars.group=vars.group, vars.extra=vars.extra, vars.file=c(vars.group,rep(NA,10),vars.extra)))
+    behavTrajectory <- analyseVars(fit, c("fitness","TimeWithin"))
+    behavTrajectory <- addTaskInfo(behavTrajectory, "Exp")
+    df <- rbind(df, cbind(Run=job,behavTrajectory))
+  }
+  ggplot(df,aes(x=TimeWithin,y=fitness)) + geom_path(aes(colour=gen)) + facet_grid(Task ~ Run, labeller=label_both) + 
+    xlim(0,1) + ylim(0,6) + xlab("Time within range") + ylab("Number of items collected") + 
+    theme(axis.text.x = element_text(angle = 90, vjust=0.5)) +
+    scale_colour_distiller(palette="Spectral") + guides(colour=guide_colorbar(title="Generation")) + theme(legend.position="bottom")
+  ggsave(paste0("~/Dropbox/Work/Papers/NACO/plots/average_behaviour_",method,".pdf"), width=20,height=9)
+}
+
 
 
 ### Incremental Evo Stages ###############

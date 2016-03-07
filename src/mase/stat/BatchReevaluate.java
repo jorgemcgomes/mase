@@ -31,7 +31,7 @@ public class BatchReevaluate {
     public static final String FORCE = "-force";
     public static final String RECURSIVE = "-recursive";
     public static final String PREFIX = "-prefix";
-    public static final String DEFAULT_PREFIX = "re";
+    public static final String DEFAULT_PREFIX = "post";
 
     public static void main(String[] args) throws Exception {
         List<File> folders = new ArrayList<>();

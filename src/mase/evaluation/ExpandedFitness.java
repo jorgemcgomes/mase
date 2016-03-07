@@ -138,9 +138,12 @@ public class ExpandedFitness extends SimpleFitness {
 
     @Override
     public String toString() {
-        String str = "";
+        String str = super.fitness() + "";
+        if(scores == null) {
+            return str + " ; no_set_results";
+        }
         for(Entry<String,Double> e : scores.entrySet()) {
-            str += e.getKey() + ":\t" + e.getValue() + "\n";
+            str += " ; " + e.getKey() + ":" + e.getValue();
         }
         return str;
     }
