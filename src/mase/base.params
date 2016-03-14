@@ -4,6 +4,16 @@ breedthreads = 				auto
 generations =				500
 quit-on-run-complete =			false
 
+# ECJ freaks out when seed parameters are not defined and evalthreads and breedthreads != auto
+seed.0=time
+seed.1=time
+seed.2=time
+seed.3=time
+seed.4=time
+seed.5=time
+seed.6=time
+seed.7=time
+
 # Basic generational configuration
 state = 				ec.simple.SimpleEvolutionState
 init = 					ec.simple.SimpleInitializer
