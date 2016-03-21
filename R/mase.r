@@ -22,6 +22,10 @@ theme_update(plot.margin=unit(c(1,1,1,1),"mm"), legend.position="bottom")
 if(exists("cl")) stopCluster(cl)
 cl <- makeCluster(detectCores(logical=T))
 registerDoParallel(cl, cores=length(cl))
+clusterEvalQ(cl, library(ggplot2))
+clusterEvalQ(cl, library(data.table))
+clusterEvalQ(cl, theme_set(theme_bw()))
+clusterEvalQ(cl, theme_update(plot.margin=unit(c(1,1,1,1),"mm")))
 
 #### Data loading #########################################################################
 
@@ -177,8 +181,8 @@ bestSoFarFitness <- function(data) {
 
 fitnessBoxplots <- function(data, generation=max(data$Generation), ttests=T) {
   data <- subset(data, Generation==generation & Subpop=="Any")
-  g <- ggplot(data, aes(x=Setup, y=BestSoFar,fill=Setup)) + geom_boxplot() + 
-    geom_point(position=position_jitterdodge(jitter.width=0.3, jitter.height=0)) 
+  g <- ggplot(data, aes(x=Setup, y=BestSoFar,fill=Setup)) + geom_boxplot() +
+    geom_point(position=position_jitterdodge(jitter.width=0.3, jitter.height=0), colour="gray") 
   if(ttests) print(fitnessTtests(data,generation=generation))
   return(g)
 }
@@ -227,6 +231,18 @@ meanDist <- function(data) {
   }
   dists <- sapply(1:(nrow(data)-1), aux)
   return(sum(dists) / (nrow(data) * nrow(data) / 2))
+}
+
+# calculate the mean pairwise distance between the two datasets (must have same variables)
+meanDistSets <- function(data1, data2) {
+  require(pdist)
+  m1 <- as.matrix(data1)
+  m2 <- as.matrix(data2)
+  dist <- as.matrix(pdist(m1,m2))
+  if(identical(data1,data2)) {
+    dist[upper.tri(dist,diag=T)] <- NA
+  }
+  return(mean(dist,na.rm=T))
 }
 
 # calculate behavioural diversity per-run, based on vars
@@ -321,14 +337,20 @@ mapScale <- function(som, data) {
 
 # maxLimit: the maximum frequency
 # maxQuantile is ignored if maxLimit is set
-plotSomFrequency <- function(som, mapping, maxLimit=NULL, maxQuantile=0.975, palette="Spectral") {
+plotSomFrequency <- function(som, mapping, maxLimit=NULL, maxQuantile=0.975, palette="Greys", showMaxFitness=F) {
   if(is.null(maxLimit)) maxLimit <- quantile(mapping$Frequency, maxQuantile)
   mapping$Frequency[which(mapping$Frequency > maxLimit)] <- maxLimit
-  g <- ggplot(mapping, aes(x, y, fill=Frequency)) + 
-    geom_tile(colour="white") + 
-    scale_fill_distiller(limits=c(0,maxLimit),type="seq", palette=palette) + 
+  mapping$Frequency[which(mapping$Frequency == 0)] <- NA
+  mapping$Fitness.max[which(is.infinite(mapping$Fitness.max))] <- NA
+  g <- ggplot(mapping, aes(x, y)) + 
+    geom_tile(aes(fill=Frequency), colour="white") + 
+    scale_fill_distiller(limits=c(0,maxLimit),type="seq", palette=palette, direction=1, na.value="white") + 
     scale_x_continuous(breaks = 1:max(mapping$x), expand = c(0, 0)) +
-    scale_y_continuous(breaks = 1:max(mapping$y), expand = c(0, 0)) + coord_fixed(ratio = max(mapping$y) / max(mapping$x))
+    scale_y_continuous(breaks = 1:max(mapping$y), expand = c(0, 0)) + coord_fixed(ratio = max(mapping$y) / max(mapping$x)) +
+    xlab(NULL) + ylab(NULL)
+  if(showMaxFitness) {
+    g <- g + geom_label(aes(label = round(Fitness.max, 2)), na.rm=T)
+  }
   return(g)
 }
 
@@ -336,10 +358,10 @@ plotSomFrequency <- function(som, mapping, maxLimit=NULL, maxQuantile=0.975, pal
 # maxQuantile is ignored if maxLimit is set
 # alpha: alpha [0,1] of each bubble -- useful for overlap
 # maxSize: maximum size of each bubble
-plotSomBubble <- function(som, mapping, maxLimit=NULL, maxQuantile=0.975, palette="RdYlGn", alpha=0.75, maxSize=30) {
+plotSomBubble <- function(som, mapping, maxLimit=NULL, maxQuantile=0.975, useSomFitness=T, palette="RdYlGn", alpha=0.75, maxSize=30) {
   if(is.null(maxLimit)) maxLimit <- quantile(mapping$Frequency, maxQuantile)
+  if(useSomFitness) mapping$Fitness.max <- som$map$Fitness.max  # use the som fitness, not the fitness from this mapping
   mapping$Frequency[which(mapping$Frequency > maxLimit)] <- maxLimit
-  mapping$Fitness.max <- som$map$Fitness.max  # use the som fitness, not the fitness from this mapping
   g <- ggplot(mapping, aes(x, y)) + 
     geom_point(aes(size=Frequency, colour=Fitness.max), alpha=alpha) + 
     scale_colour_distiller(palette=palette, space="Lab", direction=1) + 
