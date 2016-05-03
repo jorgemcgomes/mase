@@ -107,7 +107,8 @@ public class DistanceSensorArcs extends AbstractSensor {
                     dist = Math.max(dist, 0);
                 }
                 if (dist <= range) {
-                    double angle = ag.angleTo(field.getObjectLocation(n));
+                    double angle = 0;
+                    angle = ag.angleTo(field.getObjectLocation(n));
                     if (orientationNoise > 0) {
                         angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                         angle = EmboddiedAgent.normalizeAngle(angle);

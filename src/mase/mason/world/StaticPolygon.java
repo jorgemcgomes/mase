@@ -90,6 +90,19 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
         }
         return min;
     }
+    
+    public Pair<Double,Segment> closestSegment(Double2D testPoint) {
+        double min = Double.POSITIVE_INFINITY;
+        Segment s = null;
+        for (Segment seg : segments) {
+            double d = distToSegment(testPoint, seg.start, seg.end);
+            if(d < min) {
+                min = d;
+                s = seg;
+            }
+        }
+        return Pair.of(min, s);        
+    }
 
     public double closestDistance(StaticPolygon other) {
         double closest = Double.NEGATIVE_INFINITY;
@@ -147,6 +160,11 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
             path.lineTo(seg.end.x, seg.end.y);
         }
         return path;
+    }
+    
+    // Is p left of the line vw?
+    public static boolean isLeftOf(Double2D p, Double2D v, Double2D w) {
+        return (p.y-v.y)*(w.x-v.x) > (p.x-v.x)*(w.y-v.y);
     }
 
     // Return minimum distance between line segment vw and point p

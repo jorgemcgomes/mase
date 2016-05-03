@@ -1,4 +1,4 @@
-setwd("~/Dropbox/Work/Papers/GECCO-Real/")
+setwd("~/Dropbox/Work/Papers/PPSN16/")
 
 # b1: caught / not caught
 # b2: average final distance of predators to prey
@@ -47,7 +47,7 @@ cutCaptured <- function(log, captureDist=2) {
   return(subset(log,step <= s))
 }
 
-cutEscape <- function(log, envwidth=75) {
+cutEscape <- function(log, envwidth) {
   preysub <- subset(log, Type=="prey")
   cutIdx <- which(preysub$x > envwidth/2 | preysub$x < -envwidth / 2 | preysub$y > envwidth/2 | preysub$y < -envwidth / 2)
   if(length(cutIdx) > 0) {
@@ -70,7 +70,7 @@ averageDispersion <- function(log) {
   return(mean(disps,na.rm=T))
 }
 
-fitness <- function(behavs, maxtime=996, envwidth=75) {
+fitness <- function(behavs, maxtime, envwidth) {
   for(r in 1:nrow(behavs)) {
     if(behavs$Captured[r]) {
       behavs$Fitness[r] <- 2 - behavs$Time[r] / maxtime
@@ -83,16 +83,18 @@ fitness <- function(behavs, maxtime=996, envwidth=75) {
 
 ### DATA LOADING #############
 
-logs <- read.table("predprey_logs2.csv",header=F,sep=" ",col.names=c("Controller","Sample","NRobots","Date","Duration","step","robot","x","y","orientation"))
+logs <- read.table("real_predprey_logs.csv",header=T,sep=" ")
 logs$robot <- factor(logs$robot, labels=c("pred0","pred1","pred2","prey"))
 logs$Type <- "pred"
 logs$Type[logs$robot=="prey"] <- "prey"
 logs$Type <- factor(logs$Type)
-logs$Controller <- factor(logs$Controller, labels=c("Fit","NS1","NS2","NS3","NS4"))
+logs$Controller <- factor(logs$Controller, levels=c(0,1,3,2,4), labels=c("Fit1","NS1","NS2","NS3","NS4"))
 logs$Sample <- factor(logs$Sample)
 
+write.table(logs,"real_logs.csv",row.names=F,col.names=T)
+
 cut <- as.data.table(ddply(logs, .(Controller,Sample), cutCaptured, .progress="text"))
-cut <- as.data.table(ddply(cut, .(Controller,Sample), cutEscape, envwidth=80, .progress="text"))
+cut <- as.data.table(ddply(cut, .(Controller,Sample), cutEscape, envwidth=100, .progress="text"))
 #cut$y <- -cut$y # invert y
 
 ### BEHAV CHARACTERISATION ###########
@@ -105,86 +107,116 @@ binitial <- ddply(cut, .(Controller,Sample), initialDist, .progress="text")
 
 behavs <- data.frame(Controller=bcaught$Controller, Sample=bcaught$Sample, Captured=as.numeric(bcaught$V1), 
                      PreyDist=bfinal$V1,Time=bsteps$V1, Dispersion=bdisp$V1, InitialDist=binitial$V1)
-behavs <- fitness(behavs, max(logs$step))
+behavs <- fitness(behavs, max(logs$step), 100)
 
 behavs$Time <- behavs$Time / max(logs$step)
-behavs$PreyDist <- behavs$PreyDist / 75
-behavs$Dispersion <- behavs$Dispersion / 75
+behavs$PreyDist <- behavs$PreyDist / 100
+behavs$Dispersion <- behavs$Dispersion / 100
 behavs$InitialDist <- NULL
 
 ### JOIN WITH SIMULATION RESULTS ################
 
-sim <- read.table("evaluation_sim.csv",sep=" ", header=T)
-sim$Controller <- factor(sim$Controller, labels=levels(logs$Controller))
+sim <- read.table("evaluation_sim_large.csv",sep=",", header=T) # same size and time, no prey randomness
+sim$Controller <- factor(sim$Controller, levels=c(0,1,3,2,4), labels=levels(logs$Controller))
 all <- rbind.fill(cbind(behavs,Environment="Real"),cbind(sim, Environment="Simulated"))
 
 save(all, file="all.rdata")
 
 ### BEHAVIOR ANALYSIS #################
 
-m <- melt(all)
-agg <- aggregate(value ~ Controller + Environment + variable, m, mean)
-ggplot(agg, aes(x=Controller,y=value,colour=Environment)) + geom_point(aes(shape=Environment),data=m,size=2) +
-  geom_line(aes(group=Environment)) + facet_wrap(~ variable, scales="free_y")
-
-d <- subset(m,variable=="Fitness")
+d <- melt(all)
+d$variable <- factor(d$variable, levels=c("Fitness","Captured","Dispersion","Time","PreyDist"), labels=c("Fitness score","Behaviour: Prey captured","Behaviour: Predator dispersion","Behaviour: Trial length","Behaviour: Distance to prey"))
 ggplot(d, aes(x=Controller,y=value,colour=Environment)) + 
-  geom_violin(data=subset(d,Environment=="Simulated"), adjust=.75) +
-  geom_point(aes(shape=Environment),data=subset(d,Environment=="Real"),size=4,shape=8) + ylab("Fitness")
-  #geom_line(aes(group=Environment),data=subset(agg,variable=="Fitness"))
-ggsave("real_fitness.pdf", width=5, height=4)
+  geom_violin(data=subset(d,Environment=="Simulated")) +
+  geom_point(aes(shape=Environment),data=subset(d,Environment=="Real"),size=2,shape=8) +
+  facet_wrap(~ variable, scales="free_y") + ylim(0,NA) + ylab("Score")
+ggsave("real_features.pdf", width=8, height=6)
 
-d <- subset(m,variable!="Fitness")
-ggplot(d, aes(x=Controller,y=value,colour=Environment)) + 
-  geom_violin(data=subset(d,Environment=="Simulated"), adjust=.75) +
-  geom_point(aes(shape=Environment),data=subset(d,Environment=="Real"),size=4,shape=8) +
-  facet_wrap(~ variable, scales="free_y") + ylim(0,NA) + ylab("Behaviour feature value")
-ggsave("real_behavs.pdf", width=6, height=6)
+agg <- summaryBy(value ~ Controller + Environment + variable, melt(all), FUN=list(mean,sd))
+agg <- subset(agg, variable!="Fitness")
+ggplot(subset(agg,Environment=="Simulated"), aes(variable,value.mean)) + geom_line(aes(colour=Controller,group=Controller))
+ggplot(subset(agg,Environment=="Real"), aes(variable,value.mean)) + geom_line(aes(colour=Controller,group=Controller))
+
+# d <- subset(melt(all),variable=="Fitness")
+# ggplot(d, aes(x=Controller,y=value,colour=Environment)) + 
+#   geom_violin(data=subset(d,Environment=="Simulated"), adjust=.8) +
+#   geom_point(aes(shape=Environment),data=subset(d,Environment=="Real"),size=2,shape=8) + ylab("Fitness")
+# #geom_line(aes(group=Environment),data=subset(agg,variable=="Fitness"))
+# ggsave("real_fitness.pdf", width=5, height=3)
+# 
+# d <- subset(melt(all),variable!="Fitness")
+# ggplot(d, aes(x=Controller,y=value,colour=Environment)) + 
+#   geom_violin(data=subset(d,Environment=="Simulated")) +
+#   geom_point(aes(shape=Environment),data=subset(d,Environment=="Real"),size=2,shape=8) +
+#   facet_wrap(~ variable, scales="free_y") + ylim(0,NA) + ylab("Behaviour feature value")
+# ggsave("real_behavs.pdf", width=6, height=5)
 
 
 ### ROBOT TRACES ##############
 
-start <- unique(cut[step==0], by=c("Controller","Sample","robot"),fromLast=F)
-final <- as.data.table(ddply(cut, .(Controller,Sample), function(x){subset(x,step==max(step))}))
-final <- unique(final, by=c("Controller","Sample","robot"),fromLast=T)
+start <- unique(cut, by=c("Controller","Sample","robot"),fromLast=F)
+final <- unique(cut, by=c("Controller","Sample","robot"),fromLast=T)
+traces <- ddply(cut, .(Controller,Sample), function(x){x$step <- x$step/max(x$step) ; return(x)})
 
-ggplot(cut, aes(x,y,colour=Type)) + geom_path(aes(group=robot)) + facet_grid(Controller ~ Sample, labeller=label_both) + coord_fixed(ratio=1, xlim=c(-40,40),ylim=c(-40,40)) +
-  geom_point(data=start,shape=20) + geom_point(data=final,shape=4,size=2) 
-ggsave("alltraces.pdf", width=7, height=12)
+ggplot(traces, aes(x,y,colour=Type)) + geom_path(aes(group=robot,alpha=step)) + facet_grid(Controller ~ Sample, labeller=label_both) + coord_fixed(ratio=1, xlim=c(-50,50),ylim=c(-50,50)) +
+  geom_point(data=start,shape=15) + geom_point(data=final,shape=20,size=2)  + guides(colour=FALSE,shape=FALSE, alpha=FALSE)
+ggsave("traces_all_trials.pdf", width=12, height=20)
 
-expsamples <- list(Fit=0, NS1=1, NS2=0, NS3=0, NS4=0)
-for(c in names(expsamples)) {
-  s <- expsamples[[c]]
-  g <- ggplot(cut[Controller==c & Sample==s], aes(x,y,colour=Type)) + geom_path(aes(group=robot)) + geom_point(data=start[Controller==c & Sample==s],shape=20,size=3) + 
-    geom_point(data=final[Controller==c & Sample==s],shape=4,size=3) + coord_fixed(ratio=1) + ggtitle(c) + xlab(NULL) + ylab(NULL) + guides(colour=FALSE,shape=FALSE)
-  ggsave(paste0("trace_",c,".pdf"), width=4, height=5)
-  print(g)
-}
+sub <- cut[Controller=="Fit1" & Sample==2 | Controller=="NS1" & Sample==1 | Controller=="NS3" & Sample==0 | Controller=="NS2" & Sample==1 | Controller=="NS4" & Sample==0]
+start <- unique(sub, by=c("Controller","Sample","robot"),fromLast=F)
+final <- unique(sub, by=c("Controller","Sample","robot"),fromLast=T)
+sub <- ddply(sub, .(Controller,Sample), function(x){x$step <- x$step/max(x$step) ; return(x)})
+ggplot(sub, aes(x,y,colour=Type)) + geom_path(aes(group=robot,alpha=step)) + coord_fixed(ratio=1, xlim=c(-27,26),ylim=c(-46,12)) +
+  geom_point(data=start,shape=15) + geom_point(data=final,shape=20)  + guides(colour=FALSE,shape=FALSE, alpha=FALSE) +
+  facet_wrap(~ Controller) + xlab(NULL) + ylab(NULL)
+ggsave("selectedtraces.pdf", width=6, height=4.8)
+
+#expsamples <- list(Fit=2, NS1=1, NS2=0, NS3=1, NS4=0)
+#for(c in names(expsamples)) {
+#  s <- expsamples[[c]]
+#  g <- ggplot(cut[Controller==c & Sample==s], aes(x,y,colour=Type)) + geom_path(aes(group=robot,alpha=step)) + geom_point(data=start[Controller==c & Sample==s],shape=20,size=3) + 
+#    geom_point(data=final[Controller==c & Sample==s],shape=4,size=3) + 
+#    coord_fixed(ratio=1) + ggtitle(c) + xlab(NULL) + ylab(NULL) + guides(colour=FALSE,shape=FALSE, alpha=FALSE)
+#  ggsave(paste0("trace_",c,".pdf"), width=4, height=5)
+#}
+
 
 ### ROBOT VIDEO ####
 
-video <- function(log, outfolder=paste0(log$Controller[1],"_",log$Sample[1])) {
+video <- function(log, outfolder=paste0(log$Controller[1],"_",log$Sample[1]), finalframes=60) {
   dir.create(outfolder)
   xrange <- c(min(log$x)-2, max(log$x)+2)
   yrange <- c(min(log$y)-2, max(log$y)+2)
-  aux <- function(steplog) {
-    step <- steplog$step[1]
+  steps <- c(unique(log$step), rep(max(log$step),finalframes))
+  aux <- function(snr) {
+    s <- steps[snr]
+    steplog <- subset(log, step <= s)
     pos <- unique(as.data.table(steplog), by="robot",fromLast=T)
-    pos$vx <- pos$x + cos(pos$orientation) * 1.5 
-    pos$vy <- pos$y + sin(pos$orientation) * 1.5
-    g <- ggplot(pos, aes(x,y,colour=Type)) + geom_point(shape=20,size=3) + geom_segment(aes(xend = vx, yend = vy)) +
-      xlab(NULL) + ylab(NULL) + guides(colour=FALSE,shape=FALSE) + xlim(xrange) + ylim(yrange) +
-      ggtitle(paste(formatC(step/10, digits=1, format="f", width=4),"s"))
-    ggsave(paste0(outfolder,"/",step/2,".png"), plot=g, width=4, height=5)
+    pos$c1x <- pos$x + cos(pos$orientation) * 0.355 
+    pos$c1y <- pos$y + sin(pos$orientation) * 0.355
+    pos$c2x <- pos$x + cos(pos$orientation + 2.44) * 0.309 
+    pos$c2y <- pos$y + sin(pos$orientation + 2.44) * 0.309    
+    pos$c3x <- pos$x + cos(pos$orientation - 2.44) * 0.309 
+    pos$c3y <- pos$y + sin(pos$orientation - 2.44) * 0.309   
+    g <- ggplot(pos, aes(x, y, colour=Type)) + 
+      geom_segment(aes(x=c1x, y=c1y, xend = c2x, yend = c2y)) +
+      geom_segment(aes(x=c1x, y=c1y, xend = c3x, yend = c3y)) +
+      geom_segment(aes(x=c2x, y=c2y, xend = c3x, yend = c3y)) +
+      xlab(NULL) + ylab(NULL) + guides(colour=FALSE,shape=FALSE) +
+      coord_fixed(ratio=1, xlim=xrange, ylim=yrange) +
+      geom_path(aes(group=robot,alpha=step),data=steplog) +
+      ggtitle(paste(formatC(s/10, digits=1, format="f", width=4),"s")) +
+      scale_alpha(range = c(0, 0.5)) + guides(alpha=FALSE,colour=FALSE)
+    ggsave(paste0(outfolder,"/",snr,".png"), plot=g, width=4, height=4)
+    return(NULL)
   }
-  dlply(log, .(step), aux, .parallel=T)
+  llply(1:length(steps), aux, .parallel=T)
   return(NULL)
 }
 
-# ffmpeg -r 20 -i %d.png -b:v 10000k fit.mp4
+# ffmpeg -r 20 -i %d.png -y -b:v 10000k fit.mp4
 dlply(cut, .(Controller,Sample), video, .progress = "text")
 #video(cut[Controller=="Fit" & Sample==0], "testvideo")
-
 
 ### SOM ANALYSIS ##########
 
@@ -192,14 +224,15 @@ load("repred_som.rdata")
 
 data <- loadData(c("predprey/fit/","predprey/nsga/"), names=c("Fit","NS-T"), filename="rebehaviours.stat", fun="loadBehaviours", vars=c("Captured","PreyDist","Time","Dispersion"))
 
-plotSomFrequency(som, mapBehaviours(som,data[Setup=="Fit"]), showMaxFitness=T, maxLimit=0.2, palette="Greys") + ggtitle("Fit")
-ggsave("som_fit.pdf", width=4, height=5)
-plotSomFrequency(som, mapBehaviours(som,data[Setup=="NS-T"]), showMaxFitness=T, maxLimit=0.2) + ggtitle("NS-T")
-ggsave("som_ns.pdf", width=4, height=5)
+plotSomFrequency(som, mapBehaviours(som,data[Setup=="Fit"]), showMaxFitness=F, maxLimit=0.2, palette="Greys") + ggtitle("Fit")
+ggsave("som_fit.pdf", width=3, height=4)
+plotSomFrequency(som, mapBehaviours(som,data[Setup=="NS-T"]), showMaxFitness=F, maxLimit=0.2) + ggtitle("NS-T")
+ggsave("som_ns.pdf", width=3, height=4)
 
 plotSomBubble(som, mapBehaviours(som,data[Setup=="Fit"]), useSomFitness = T)
 plotSomBubble(som, mapBehaviours(som,data[Setup=="NS-T"]), useSomFitness = T)
 
+#theme(axis.line=element_blank(),axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks=element_blank())
 
 ### BEHAV DISTANCE ANALYSIS #####
 
@@ -264,3 +297,5 @@ ggplot(lastGen(data), aes(x=Setup, y=BestSoFar,fill=Setup)) + geom_boxplot() + g
 ggsave("fitness_final.pdf", width=3, height=3)
 
 data <- loadData(c("predprey/fit/","predprey/nsga/","predprey/hom_fit","predprey/hom_nsga"), names=c("Fit","NS-T","Hom-Fit","Hom-NS-T"), filename="refitness.stat", fun="loadFitness")
+
+summaryBy(BestSoFar ~ Setup, lastGen(data), FUN=list(mean,sd))

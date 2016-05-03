@@ -44,7 +44,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     protected int currentElite;
     protected int paretoFront;
     protected List<Individual>[] hallOfFame;
-    protected Individual[][] teamMembers;
+    protected Individual[][] collaborators;
 
     public Individual[][] getEliteIndividuals() {
         return eliteIndividuals;
@@ -106,7 +106,6 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
         for (int i = 0; i < state.population.subpops.length; i++) {
             postAssessFitness[i] = shouldEvaluateSubpop(state, i, 0);
             preAssessFitness[i] = postAssessFitness[i] || (state.generation == 0);  // always prepare (set up trials) on generation 0
-            totalEvaluations += state.population.subpops[i].individuals.length;
         }
 
         // first generation initialization
@@ -151,7 +150,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
             }
         }
 
-        this.teamMembers = new Individual[state.population.subpops.length][];
+        this.collaborators = new Individual[state.population.subpops.length][];
         for (int p = 0; p < population.subpops.length; p++) {
             loadTeamMembers(state, p);
         }
@@ -258,16 +257,17 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
             for (int x = from[p]; x < upperbound; x++) {
                 Individual individual = pop.subpops[p].individuals[x];
                 // Test with the team members
-                for (int k = 0; k < teamMembers[p].length; k++) {
+                for (int k = 0; k < collaborators[p].length; k++) {
                     for (int ind = 0; ind < tInds.length; ind++) {
                         if (ind == p) {
                             tInds[ind] = individual;
                             tUpdates[ind] = true;
                         } else {
-                            tInds[ind] = teamMembers[ind][k];
+                            tInds[ind] = collaborators[ind][k];
                             tUpdates[ind] = false;
                         }
                     }
+                    totalEvaluations++;
                     prob.evaluate(state, tInds, tUpdates, false, subpops, 0);
                 }
             }
@@ -286,7 +286,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
         }
         Individual[] tIndsA = new Individual[tInds.size()];
         tInds.toArray(tIndsA);
-        teamMembers[whichSubpop] = tIndsA;
+        collaborators[whichSubpop] = tIndsA;
     }
 
     @Override

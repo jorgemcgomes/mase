@@ -215,15 +215,38 @@ public class MaseManager {
         listener.message("Added " + failed.size() + " jobs to waiting list");
         failed.clear();
     }
+    
+    private String optionValue(String args, String option) {
+        String v = StringUtils.substringBetween(args, option, " ");
+        if(v == null) {
+            v = StringUtils.substringAfter(args, option).trim();
+            if(v.isEmpty()) {
+                v = null;
+            }
+        }
+        return v;
+    }
 
     public void addJob(String args) {
-        String out = StringUtils.substringBetween(args, "-out ", " ");
-        out = StringUtils.removePattern(out, "/home/\\w+/"); // Strip the absolute path
-        int jobs = Integer.parseInt(StringUtils.substringBetween(args, "-p jobs=", " "));
-        int currentJob = 0;
-        if (args.contains("-p current-job")) {
-            currentJob = Integer.parseInt(StringUtils.substringBetween(args, "-p current-job=", " "));
+        String out = optionValue(args, "-out ");
+        if(out == null) {
+            listener.error(args + "\nNo -out directory speciefied");
+            return;
         }
+        out = StringUtils.remove(out, "~/");
+        out = StringUtils.removePattern(out, "/home/\\w+/"); // Strip the absolute path
+        
+        String jobsStr = optionValue(args, "-p jobs=");
+        if(jobsStr == null) {
+            listener.error(args + "\nNo jobs specified");
+        }
+        int jobs = Integer.parseInt(jobsStr);
+        int currentJob = 0;
+        String curJobStr = optionValue(args, "-p current-job=");
+        if(curJobStr != null) {
+            currentJob = Integer.parseInt(curJobStr);
+        }
+
         boolean checkRepetitions = !args.contains("-force");
 
         String clean = StringUtils.removePattern(args, "-p jobs=\\d+");
@@ -231,7 +254,7 @@ public class MaseManager {
         clean = StringUtils.removePattern(clean, "-out\\s\\S+\\s");
 
         String[] options = StringUtils.substringsBetween(clean, "{", "}");
-        if (options.length == 0) {
+        if (options == null || options.length == 0) {
             addJob(out, currentJob, jobs, clean, checkRepetitions);
         } else {
             List<List<String>> optionsList = new ArrayList<>();
@@ -272,7 +295,7 @@ public class MaseManager {
             } else {
                 Job newJob = new Job();
                 newJob.outfolder = out;
-                newJob.params = " -p current-job=" + j + " -p jobs=" + (j + 1) + cleanParams + " -force";
+                newJob.params = " -p current-job=" + j + " -p jobs=" + (j + 1) + " " + cleanParams + " -force";
                 newJob.jobNumber = j;
                 newJob.submitted = new Date();
                 newJob.id = strId + j;
@@ -411,7 +434,7 @@ public class MaseManager {
             }
         });
     }
-
+    
     public interface StatusListener {
 
         public void message(String str);
@@ -433,6 +456,10 @@ public class MaseManager {
         @Override
         public String toString() {
             return id + ":" + outfolder + "(" + jobNumber + ")";
+        }
+        
+        public String detailedToString() {
+            return toString() + "\n" + params;
         }
     }
 
@@ -539,8 +566,14 @@ public class MaseManager {
 
             boolean jobSuccess = process.waitFor() == 0;
             boolean copySuccess = false;
+            String localDestiny = absolute(job.outfolder);
+            File localDestinyFolder = new File(localDestiny);
+            if(!localDestinyFolder.exists()) {
+                localDestinyFolder.mkdirs();
+            }
+            
             if (jobSuccess) {
-                copySuccess = Runtime.getRuntime().exec("scp -q -r " + ip + ":" + tempOut + "/* " + absolute(job.outfolder)).waitFor() == 0;
+                copySuccess = Runtime.getRuntime().exec("scp -q -r " + ip + ":" + tempOut + "/* " + localDestiny).waitFor() == 0;
             }
             if (copySuccess || !jobSuccess) {
                 try {
@@ -557,9 +590,13 @@ public class MaseManager {
     private static String absolute(String path) {
         String home = System.getProperty("user.home");
         if (!path.startsWith(home)) {
-            path = home + "/" + path;
+            path = home + "/" + path + "/";
         }
-        return path;
+        if(path.endsWith("/")) {
+            return path;
+        } else {
+            return path + "/";
+        }
     }
 
     public class ConillonRunner extends JobRunner {

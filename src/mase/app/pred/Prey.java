@@ -25,7 +25,7 @@ public class Prey extends EmboddiedAgent {
 
     public Prey(PredatorPrey sim, Continuous2D field) {
         super(sim, field, RADIUS, COLOUR);
-        super.setOrientationShowing(false);
+        super.orientedPortrayal.setOrientationShowing(false);
         this.predSim = sim;
         this.enableAgentCollisions(false);
     }

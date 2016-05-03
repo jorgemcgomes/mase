@@ -19,6 +19,7 @@ import sim.display.GUIState;
 public abstract class MasonSimulationProblem extends SimulationProblem {
 
     public static final String P_MAX_STEPS = "max-steps";
+    private static final long serialVersionUID = 1L;
     protected int maxSteps;
 
     @Override

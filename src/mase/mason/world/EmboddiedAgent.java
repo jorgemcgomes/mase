@@ -23,35 +23,41 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Steppable, Oriented2D, Entity {
+public abstract class EmboddiedAgent extends WorldObject implements Steppable, Oriented2D, Entity {
 
     private static final long serialVersionUID = 1L;
 
-    protected Continuous2D field;
-    private Double2D pos;
     private double orientation;
-    private final double radius;
     private double speed;
+    private double turningSpeed;
     private boolean collisionStatus;
     private Stoppable stopper;
     private boolean agentCollisions;
     private boolean boundedArena;
     private boolean polygonCollisions;
     private boolean collisionRebound;
-    protected SimState sim;
     public static final double COLLISION_SPEED_DECAY = 0.5;
     public static final double COLLISION_DIRECTION = Math.PI / 2;
     private boolean isAlive;
-    private double turningSpeed;
     private List<StaticPolygon> obstacleList;
-    private final int hash;
+    private boolean rotate = true;
+
+    protected OvalPortrayal2D ovalPortrayal;
+    protected OrientedPortrayal2D orientedPortrayal;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
-        super(new OvalPortrayal2D(c, radius * 2, true), 0, radius,
-                new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
-        this.sim = sim;
-        this.radius = radius;
-        this.field = field;
+        super(new OrientedPortrayal2D(new OvalPortrayal2D()), sim, field, radius);
+
+        this.orientedPortrayal = (OrientedPortrayal2D) this.child;
+        this.orientedPortrayal.offset = 0;
+        this.orientedPortrayal.scale = radius;
+
+        this.ovalPortrayal = (OvalPortrayal2D) orientedPortrayal.child;
+        this.ovalPortrayal.scale = radius * 2;
+        this.ovalPortrayal.filled = true;
+
+        this.setColor(c);
+
         this.collisionStatus = false;
         this.speed = 0;
         this.turningSpeed = 0;
@@ -60,57 +66,53 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.polygonCollisions = false;
         this.collisionRebound = true;
         this.isAlive = true;
-        this.setLocation(new Double2D(0, 0));
         this.setOrientation(0);
-        this.hash = System.identityHashCode(this);
     }
 
-    @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return this == obj;
-    }
-    
-    
-
-    public double getRadius() {
-        return radius;
-    }
-    
     public boolean isAlive() {
         return isAlive;
     }
 
     @Override
-    public double[] getStateVariables() {
-        return new double[] {getLocation().x, getLocation().y, getTurningSpeed(), getSpeed()};
+    public void setColor(Color c) {
+        super.setColor(c);
+        this.ovalPortrayal.paint = c;
+        this.orientedPortrayal.paint = new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue());
     }
 
-    public void enableAgentCollisions(boolean enable) {
+    @Override
+    public double[] getStateVariables() {
+        return new double[]{getLocation().x, getLocation().y, getTurningSpeed(), getSpeed()};
+    }
+
+    public final void enableRotation(boolean r) {
+        this.rotate = r;
+        orientedPortrayal.setOrientationShowing(r);
+    }
+
+    public final void enableAgentCollisions(boolean enable) {
         this.agentCollisions = enable;
     }
 
-    public void enableBoundedArena(boolean enable) {
+    public final void enableBoundedArena(boolean enable) {
         this.boundedArena = enable;
     }
-    
-    public void enablePolygonCollisions(boolean enable) {
+
+    public final void enablePolygonCollisions(boolean enable) {
         this.polygonCollisions = enable;
     }
-    
-    public void enableCollisionRebound(boolean enable) {
+
+    public final void enableCollisionRebound(boolean enable) {
         this.collisionRebound = enable;
     }
 
     protected boolean move(double orientation, double speed) {
         double o = normalizeAngle(orientation);
-        this.turningSpeed = o - this.orientation;
-        this.orientation = o;
-        
+        if (rotate) {
+            this.turningSpeed = o - this.orientation;
+            this.orientation = o;
+        }
+
         if (!attemptMove(orientation, speed) && collisionRebound) { // cannot move
             // try to escape to both sides with a random order
             double angle = sim.random.nextBoolean() ? COLLISION_DIRECTION : -COLLISION_DIRECTION;
@@ -124,9 +126,9 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
 
     // from anything to [-PI,PI]
     public static double normalizeAngle(double ang) {
-        if(ang > Math.PI * 2) {
+        if (ang > Math.PI * 2) {
             ang = ang % (Math.PI * 2);
-        } else if(ang < -Math.PI * 2) {
+        } else if (ang < -Math.PI * 2) {
             ang = -(Math.abs(ang) % (Math.PI * 2));
         }
         if (ang > Math.PI) {
@@ -159,26 +161,26 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
      * @return
      */
     protected boolean isValidMove(Double2D target) {
-        return (!boundedArena || checkInsideArena(target)) &&
-                (!agentCollisions || checkAgentCollisions(target)) &&
-                (!polygonCollisions || checkPolygonCollisions(target));
+        return (!boundedArena || checkInsideArena(target))
+                && (!agentCollisions || checkAgentCollisions(target))
+                && (!polygonCollisions || checkPolygonCollisions(target));
     }
-    
+
     protected boolean checkPolygonCollisions(Double2D target) {
         // initialisation
-        if(obstacleList == null) {
+        if (obstacleList == null) {
             obstacleList = new ArrayList<>();
-            for(Object o : field.allObjects) {
-                if(o instanceof StaticPolygon) {
+            for (Object o : field.allObjects) {
+                if (o instanceof StaticPolygon) {
                     obstacleList.add((StaticPolygon) o);
                 }
             }
         }
-        
+
         // check for collisions
-        for(StaticPolygon p : obstacleList) {
+        for (StaticPolygon p : obstacleList) {
             double d = p.closestDistance(target);
-            if(d <= radius) {
+            if (d <= radius) {
                 return false;
             }
         }
@@ -194,7 +196,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         for (Object o : objects) {
             if (o != this && o instanceof EmboddiedAgent) {
                 EmboddiedAgent a = (EmboddiedAgent) o;
-                if(a.agentCollisions && a.distanceTo(target) <= radius) {
+                if (a.agentCollisions && a.distanceTo(target) <= radius) {
                     return false;
                 }
             }
@@ -220,15 +222,6 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
         this.orientation = angle;
     }
 
-    public Double2D getLocation() {
-        return pos;
-    }
-
-    public void setLocation(Double2D loc) {
-        this.pos = loc;
-        field.setObjectLocation(this, pos);
-    }
-
     public boolean getCollisionStatus() {
         return collisionStatus;
     }
@@ -236,15 +229,15 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     public double getSpeed() {
         return speed;
     }
-    
+
     public double getTurningSpeed() {
         return turningSpeed;
     }
-    
+
     public void setSpeed(double speed) {
         this.speed = speed;
     }
-    
+
     public void setTurningSpeed(double turnSpeed) {
         this.turningSpeed = turnSpeed;
     }
@@ -255,7 +248,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
      */
     public double angleTo(Double2D point) {
         Double2D agentToPoint = point.subtract(pos);
-        if((agentToPoint.x == 0 && agentToPoint.y == 0) || Double.isInfinite(agentToPoint.x) || Double.isInfinite(agentToPoint.y) || Double.isNaN(agentToPoint.x) || Double.isNaN(agentToPoint.y)) {
+        if ((agentToPoint.x == 0 && agentToPoint.y == 0) || Double.isInfinite(agentToPoint.x) || Double.isInfinite(agentToPoint.y) || Double.isNaN(agentToPoint.x) || Double.isNaN(agentToPoint.y)) {
             return 0;
         }
         agentToPoint = agentToPoint.normalize();
@@ -266,7 +259,7 @@ public abstract class EmboddiedAgent extends OrientedPortrayal2D implements Step
     public double distanceTo(EmboddiedAgent other) {
         return Math.max(0, pos.distance(other.getLocation()) - other.radius - this.radius);
     }
-    
+
     public double distanceTo(Double2D point) {
         return Math.max(0, pos.distance(point) - this.radius);
     }

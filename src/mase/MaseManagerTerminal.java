@@ -18,6 +18,7 @@ import mase.MaseManager.Job;
 import mase.MaseManager.JobRunner;
 import mase.MaseManager.StatusListener;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -95,7 +96,7 @@ public class MaseManagerTerminal implements StatusListener {
                         break;
                     case "loadjobs":
                         while(sc.hasNext()) {
-                            loadJobs(new File(sc.nextLine()));
+                            loadJobs(new File(sc.next()));
                         }
                         break;
                     case "killrunner":
@@ -120,6 +121,16 @@ public class MaseManagerTerminal implements StatusListener {
                         int id = sc.nextInt();
                         int l = sc.hasNextInt() ? sc.nextInt() : lines;
                         System.out.println(mng.getOutput(id, l));
+                        break;
+                    case "jobs":
+                        while (sc.hasNext()) {
+                            String jobid = sc.next();
+                            for(Job j : mng.waitingList) {
+                                if(j.id.equals(jobid) || (StringUtils.isAlpha(jobid) && j.id.startsWith(jobid))) {
+                                    System.out.println(j.detailedToString()+"\n-----------------");
+                                }
+                            }
+                        }
                         break;
                     case "status":
                         int ls = sc.hasNextInt() ? sc.nextInt() : lines;
@@ -228,12 +239,13 @@ public class MaseManagerTerminal implements StatusListener {
                                 + "-- killjob        [job_id]...\n"
                                 + "-- killalljobs    []\n"
                                 + "-- output         runner_id [lines]\n"
+                                + "-- jobs           [job_id]...\n"
                                 + "-- status         [lines]\n"
                                 + "-- list           [waiting|completed|failed|runners]...\n"
                                 + "-- retry          [job_id]...\n"
                                 + "-- retryfailed    []\n"
                                 + "-- priority       top|bottom [job_id]...\n"
-                                + "-- sort           batch|jobnumber|date\n"
+                                + "-- sort           batch|job|date\n"
                                 + "-- clear          [waiting|completed|failed|runners]...\n"
                                 + "-- pause          [force]\n"
                                 + "-- resume         []\n"

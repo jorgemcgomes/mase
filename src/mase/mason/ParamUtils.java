@@ -12,8 +12,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import javassist.Modifier;
 import sim.util.Double2D;
 import sim.util.Int2D;
 

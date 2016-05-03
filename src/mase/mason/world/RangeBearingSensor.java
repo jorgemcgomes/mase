@@ -33,6 +33,9 @@ public class RangeBearingSensor extends AbstractSensor {
     public void setObjects(Collection<? extends Object> objs) {
         objects = new ArrayList<>(objs.size());
         for (Object o : objs) {
+            if(o == null) {
+                System.out.println("WARNING: NULL OBJECT");
+            }
             if (o != ag) {
                 objects.add(o);
             }

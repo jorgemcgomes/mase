@@ -1,3 +1,4 @@
+#install.packages(c("ggplot2","scales","reshape","kohonen","parallel","doParallel","pbapply","data.table","plyr","doBy","pdist","RColorBrewer","formula.tools"))
 library(ggplot2)
 library(scales)
 library(reshape)
@@ -171,11 +172,13 @@ lastGen <- function(data) {
 
 #### Fitness plotting functions #####################################################################
 
-bestSoFarFitness <- function(data) {
+bestSoFarFitness <- function(data, showSE=T) {
   agg <- summaryBy(BestSoFar ~ Setup + Generation, subset(data,Subpop=="Any"), FUN=c(mean,se))
-  g <- ggplot(agg, aes(Generation,BestSoFar.mean,group=Setup)) + geom_line(aes(colour=Setup)) + ylab("Fitness") +
-    geom_ribbon(aes(ymax = BestSoFar.mean + BestSoFar.se, ymin = BestSoFar.mean - BestSoFar.se), alpha = 0.1) +
+  g <- ggplot(agg, aes(Generation,BestSoFar.mean,group=Setup)) + geom_line(aes(colour=Setup)) + ylab("Fitness") + 
     theme(legend.position="bottom")
+  if(showSE) {
+    g <- g + geom_ribbon(aes(ymax = BestSoFar.mean + BestSoFar.se, ymin = BestSoFar.mean - BestSoFar.se), alpha = 0.1)
+  }
   return(g)
 }
 

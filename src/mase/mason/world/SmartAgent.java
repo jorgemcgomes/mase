@@ -114,15 +114,37 @@ public abstract class SmartAgent extends EmboddiedAgent {
     }
 
     public String getSensorsReport() {
-        return Arrays.toString(lastRawSensors);
+        return formatSensors(lastRawSensors);
     }
 
     public String getRawSensors() {
-        return Arrays.toString(lastNormSensors);
+        return formatSensors(lastNormSensors);
+    }
+    
+    private String formatSensors(double[] values) {
+        int index = 0;
+        StringBuilder sb = new StringBuilder();
+        for(Sensor s : sensors) {
+            sb.append(s.getClass().getSimpleName()).append("{");
+            for(int i = 0 ; i < s.valueCount() ; i++) {
+                sb.append("[").append(i).append("]").append(String.format("%.2f", values[index++])).append(" ");
+            }
+            sb.setCharAt(sb.length()-1, '}');
+        }
+        return sb.toString();
     }
 
     public String getRawActions() {
-        return Arrays.toString(lastActionOutput);
+        int index = 0;
+        StringBuilder sb = new StringBuilder();
+        for(Effector e : effectors) {
+            sb.append(e.getClass().getSimpleName()).append("{");
+            for(int i = 0 ; i < e.valueCount() ; i++) {
+                sb.append("[").append(i).append("]").append(String.format("%.2f", lastActionOutput[index++])).append(" ");
+            }
+            sb.setCharAt(sb.length()-1, '}');
+        }
+        return sb.toString();
     }
 
     public List<Sensor> getSensors() {
