@@ -1,0 +1,227 @@
+package mase.app.soccer;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import mase.controllers.AgentController;
+import mase.controllers.GroupController;
+import mase.mason.MasonSimState;
+import mase.mason.world.StaticPolygon;
+import mase.mason.world.StaticPolygon.Segment;
+import sim.field.continuous.Continuous2D;
+import sim.portrayal.FieldPortrayal2D;
+import sim.util.Double2D;
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+/**
+ *
+ * @author jorge
+ */
+public class Soccer extends MasonSimState {
+
+    private static final long serialVersionUID = 1L;
+
+    protected SoccerParams par;
+    protected Continuous2D field;
+    protected List<SoccerAgent> leftTeam, rightTeam, all;
+    protected StaticPolygon fieldBoundaries;
+    protected Double2D leftGoalCenter, rightGoalCenter;
+    protected Color leftTeamColor, rightTeamColor;
+    protected Ball ball;
+    protected Referee referee;
+
+    Soccer(long seed, SoccerParams par, GroupController gc) {
+        super(gc, seed);
+        this.par = par;
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        this.field = new Continuous2D(par.discretization, par.fieldLength, par.fieldWidth);
+        double fl = par.fieldLength, fw = par.fieldWidth, hg = par.goalWidth / 2, d = par.cornerDiag;
+        Segment t1 = new Segment(new Double2D(0, fw / 2 - hg), new Double2D(0, d));
+        Segment t2 = new Segment(t1.end, new Double2D(d, 0));
+        Segment t3 = new Segment(t2.end, new Double2D(fl - d, 0));
+        Segment t4 = new Segment(t3.end, new Double2D(fl, d));
+        Segment t5 = new Segment(t4.end, new Double2D(fl, fw / 2 - hg));
+        Segment t6 = new Segment(new Double2D(fl, fw / 2 + hg), new Double2D(fl, fw - d));
+        Segment t7 = new Segment(t6.end, new Double2D(fl - d, fw));
+        Segment t8 = new Segment(t7.end, new Double2D(d, fw));
+        Segment t9 = new Segment(t8.end, new Double2D(0, fw - d));
+        Segment t10 = new Segment(t9.end, new Double2D(0, fw / 2 + hg));
+
+        leftGoalCenter = new Double2D(0, fw / 2);
+        rightGoalCenter = new Double2D(fl, fw / 2);
+
+        fieldBoundaries = new StaticPolygon(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
+        fieldBoundaries.setStroke(new BasicStroke(1));
+        fieldBoundaries.paint = Color.WHITE;
+        fieldBoundaries.filled = false;
+        field.setObjectLocation(fieldBoundaries, new Double2D(0, 0));
+
+        referee = new Referee();
+        schedule.scheduleRepeating(referee);
+
+        ball = new Ball(this);
+        ball.setLabel("");
+        ball.setColor(Color.WHITE);
+        schedule.scheduleRepeating(ball);
+
+        createAgents();
+        resetTeams(true); // left (evolved) team starts
+    }
+
+    public void createAgents() {
+        int teamSize = 0;
+        for (int t : par.formation) {
+            teamSize += t;
+        }
+        leftTeam = new ArrayList<>();
+        if (gc != null) {
+            AgentController[] acs = super.gc.getAgentControllers(teamSize);
+            for (int i = 0; i < teamSize; i++) {
+                EvolvedSoccerAgent a = new EvolvedSoccerAgent(this, acs[i], par.agentMoveSpeed, par.agentKickSpeed);
+                a.setLabel("evo"+i);
+                leftTeam.add(a);
+            }
+        } else {
+            for (int i = 0; i < teamSize; i++) {
+                ProgSoccerAgent a = new ProgSoccerAgent(this);
+                a.setLabel("prog"+i);
+                leftTeam.add(a);
+            }
+        }
+
+        rightTeam = new ArrayList<>();
+        for (int i = 0; i < teamSize; i++) {
+            ProgSoccerAgent a = new ProgSoccerAgent(this);
+            a.setLabel("prog"+i);
+            //SoccerAgent a = new SoccerAgent(this, null, 0, 0);
+            rightTeam.add(a);
+        }
+        all = new ArrayList<>();
+        all.addAll(leftTeam);
+        all.addAll(rightTeam);
+
+        leftTeamColor = Color.BLUE;
+        rightTeamColor = Color.RED;
+
+        for (SoccerAgent a : leftTeam) {
+            a.setTeamContext(leftTeam, rightTeam, leftGoalCenter, rightGoalCenter, leftTeamColor);
+            if (a instanceof EvolvedSoccerAgent) {
+                ((EvolvedSoccerAgent) a).setupSensors();
+            }
+            schedule.scheduleRepeating(a);
+        }
+        for (SoccerAgent a : rightTeam) {
+            a.setTeamContext(rightTeam, leftTeam, rightGoalCenter, leftGoalCenter, rightTeamColor);
+            schedule.scheduleRepeating(a);
+        }
+    }
+
+    public void resetTeams(boolean leftStarting) {
+        initialPositions(leftTeam, true, leftStarting);
+        initialPositions(rightTeam, false, !leftStarting);
+        ball.reset();
+        ball.setLocation(new Double2D(par.fieldLength / 2, par.fieldWidth / 2));
+    }
+
+    protected void initialPositions(List<SoccerAgent> team, boolean left, boolean starting) {
+        double xSpacing = (field.width / 2) / (par.formation.length + 1);
+        double mx = field.width / 2;
+        double side = left ? -1 : 1;
+        int agentIndex = 0;
+        double ori = left ? 0 : Math.PI;
+        for (int i = 0; i < par.formation.length; i++) {
+            double x = mx + side * xSpacing * (par.formation.length - i);
+            double ySpacing = (field.height) / (par.formation[i] + 1);
+            for (int j = 0; j < par.formation[i]; j++) {
+                double y = left ? ySpacing + ySpacing * j : field.height - ySpacing - ySpacing * j;
+                Double2D pos;
+                if (i == par.formation.length - 1 && j == par.formation[i] / 2 && starting) {
+                    pos = new Double2D(mx + side * par.agentRadius * 2, field.height / 2);
+                } else {
+                    pos = new Double2D(x + (random.nextDouble() * 2 - 1) * par.locationRandom, 
+                            y + (random.nextDouble() * 2 - 1) * par.locationRandom);
+                }
+                SoccerAgent a = team.get(agentIndex++);
+                a.setLocation(pos);
+                a.setOrientation(ori);
+                if (a.getAgentController() != null) {
+                    a.getAgentController().reset();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setupPortrayal(FieldPortrayal2D port) {
+        port.setField(field);
+    }
+}
+
+
+/*ProgSoccerAgent l1 = new ProgSoccerAgent(this);
+        ProgSoccerAgent l2 = new ProgSoccerAgent(this);
+        ProgSoccerAgent l3 = new ProgSoccerAgent(this);
+        ProgSoccerAgent l4 = new ProgSoccerAgent(this);
+        ProgSoccerAgent l5 = new ProgSoccerAgent(this);
+
+        ProgSoccerAgent r1 = new ProgSoccerAgent(this);
+        ProgSoccerAgent r2 = new ProgSoccerAgent(this);
+        ProgSoccerAgent r3 = new ProgSoccerAgent(this);
+        ProgSoccerAgent r4 = new ProgSoccerAgent(this);
+        ProgSoccerAgent r5 = new ProgSoccerAgent(this);
+
+        leftTeam = new ArrayList<>();
+        leftTeam.add(l1);
+        leftTeam.add(l2);
+        leftTeam.add(l3);
+        leftTeam.add(l4);
+        leftTeam.add(l5);
+        rightTeam = new ArrayList<>();
+        rightTeam.add(r1);
+        rightTeam.add(r2);
+        rightTeam.add(r3);
+        rightTeam.add(r4);
+        rightTeam.add(r5);
+        all = new ArrayList<>(leftTeam);
+        all.addAll(rightTeam);
+
+        l1.setTeamContext(leftTeam, rightTeam, leftGoalCenter, rightGoalCenter, Color.BLUE);
+        l1.setLocation(new Double2D(120, 76));
+        schedule.scheduleRepeating(l1);
+        l2.setTeamContext(leftTeam, rightTeam, leftGoalCenter, rightGoalCenter, Color.BLUE);
+        l2.setLocation(new Double2D(90, 36));
+        schedule.scheduleRepeating(l2);
+        l3.setTeamContext(leftTeam, rightTeam, leftGoalCenter, rightGoalCenter, Color.BLUE);
+        l3.setLocation(new Double2D(90, 116));
+        schedule.scheduleRepeating(l3);
+        l4.setTeamContext(leftTeam, rightTeam, leftGoalCenter, rightGoalCenter, Color.BLUE);
+        l4.setLocation(new Double2D(40, 56));
+        schedule.scheduleRepeating(l4);
+        l5.setTeamContext(leftTeam, rightTeam, leftGoalCenter, rightGoalCenter, Color.BLUE);
+        l5.setLocation(new Double2D(40, 96));
+        schedule.scheduleRepeating(l5);
+
+        r1.setTeamContext(rightTeam, leftTeam, rightGoalCenter, leftGoalCenter, Color.RED);
+        r1.setLocation(new Double2D(184, 36));
+        schedule.scheduleRepeating(r1);
+        r2.setTeamContext(rightTeam, leftTeam, rightGoalCenter, leftGoalCenter, Color.RED);
+        r2.setLocation(new Double2D(184, 76));
+        schedule.scheduleRepeating(r2);
+        r3.setTeamContext(rightTeam, leftTeam, rightGoalCenter, leftGoalCenter, Color.RED);
+        r3.setLocation(new Double2D(184, 116));
+        schedule.scheduleRepeating(r3);
+        r4.setTeamContext(rightTeam, leftTeam, rightGoalCenter, leftGoalCenter, Color.RED);
+        r4.setLocation(new Double2D(234, 56));
+        schedule.scheduleRepeating(r4);
+        r5.setTeamContext(rightTeam, leftTeam, rightGoalCenter, leftGoalCenter, Color.RED);
+        r5.setLocation(new Double2D(234, 96));
+        schedule.scheduleRepeating(r5);*/
