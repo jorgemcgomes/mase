@@ -6,14 +6,11 @@ exch.merge-mode =        elite
 exch.merge-proportion =  proportionate
 exch.homogeneous-start = false
 exch.split-mode =        random
-
-eval.base.max-evaluations = 100000
-quit-on-run-complete=true
+exch.behaviour-index =   2
 
 exch.foreign-mode =      elite
 exch.difference-mode =   mean
 
-pop.default-subpop.species.fitness =    mase.novelty.NoveltyFitness
 neat.shared-database =  true
 
 stat.child.20 =             mase.spec.HybridStat

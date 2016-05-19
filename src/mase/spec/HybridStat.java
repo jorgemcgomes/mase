@@ -16,7 +16,10 @@ import mase.spec.AbstractHybridExchanger.MetaPopulation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
- *
+ * Generation | Num pops | Min agents in pop | Mean agents in pop | Max agents in pop
+ * Num of foreigns | Evaluated self inds | Evaluated foreign inds | Evaluated all inds
+ * Mean pop age | Max pop age | Mean pop dispersion | Mean pop distance to others
+ * Num of splits | Merges | Remerges | Total number of splits | Merges | Remerges
  * @author jorge
  */
 public class HybridStat extends Statistics {
@@ -103,7 +106,7 @@ public class HybridStat extends Statistics {
         state.output.println(" " + totalMerges + " " + totalSplits + " " + totalRemerges, log);
 
         
-        for(MetaPopulation mp : exc.metaPops) {
+        /*for(MetaPopulation mp : exc.metaPops) {
             StringBuilder sb = new StringBuilder();
             sb.append(String.format("%3d", mp.age)).append(" - ").append(mp.toString());
             if(!mp.foreigns.isEmpty()) {
@@ -115,10 +118,10 @@ public class HybridStat extends Statistics {
             state.output.message(sb.toString());
         }
         
-        printMatrix(exc.distanceMatrix, state);
+        printMatrix(exc.distanceMatrix, state);*/
     }
 
-    private void printMatrix(double[][] m, EvolutionState state) {
+    /*private void printMatrix(double[][] m, EvolutionState state) {
         DecimalFormat df = new DecimalFormat("000.000");
         try {
             StringBuilder sb = new StringBuilder();
@@ -135,6 +138,6 @@ public class HybridStat extends Statistics {
         } catch (Exception e) {
             System.out.println("Matrix is empty!!");
         }
-    }
+    }*/
 
 }

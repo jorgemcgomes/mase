@@ -62,6 +62,7 @@ public class MultiRover extends MasonSimState {
             new Double2D(0, par.size),
             new Double2D(0, 0)
         });
+        walls.filled = false;
         field.setObjectLocation(walls, new Double2D(0, 0));
 
         placeRocks();
@@ -74,12 +75,12 @@ public class MultiRover extends MasonSimState {
         AgentController[] controllers = gc.getAgentControllers(par.numAgents);
         rovers = new ArrayList<>(par.numAgents);
         for (int i = 0; i < par.numAgents;) {
-            double x = Rover.RADIUS + random.nextDouble() * (par.size - Rover.RADIUS * 2);
-            double y = Rover.RADIUS + random.nextDouble() * (par.size - Rover.RADIUS * 2);
+            double x = par.agentRadius + random.nextDouble() * (par.size - par.agentRadius * 2);
+            double y = par.agentRadius + random.nextDouble() * (par.size - par.agentRadius * 2);
             Double2D newLoc = new Double2D(x, y);
             boolean check = true;
             for (Rover r : rovers) {
-                if (r.getLocation().distance(newLoc) < par.sensorRange + Rover.RADIUS * 2) {
+                if (r.getLocation().distance(newLoc) < par.sensorRange + par.agentRadius * 2) {
                     check = false;
                     break;
                 }
@@ -92,6 +93,7 @@ public class MultiRover extends MasonSimState {
                 rover.setLocation(newLoc);
                 rover.setOrientation(random.nextDouble() * Math.PI * 2 - Math.PI);
                 rover.setStopper(schedule.scheduleRepeating(rover));
+                rover.setLabel("R"+i);
                 rovers.add(rover);
                 i++;
             }
@@ -113,7 +115,8 @@ public class MultiRover extends MasonSimState {
             }
             RockType t = RockType.valueOf(par.rocks[count]);
             RedRock newRock = new RedRock(this, t);
-            field.setObjectLocation(newRock, new Double2D(x, y));
+            newRock.setLabel(t.name() + Arrays.toString(t.actuators));
+            newRock.setLocation(new Double2D(x, y));
             newRock.setStopper(schedule.scheduleRepeating(newRock));
             count++;
             rocks.add(newRock);

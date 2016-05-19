@@ -32,12 +32,12 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
     protected CircledPortrayal2D circledPortrayal;
     protected LabelledPortrayal2D labelPortrayal;
     protected MovablePortrayal2D movablePortrayal;
-    protected SimplePortrayal2D child;
+    protected SimplePortrayal2D woChild;
 
     public WorldObject(SimplePortrayal2D child, SimState sim, Continuous2D field, double radius) {
         super(new LabelledPortrayal2D(new MovablePortrayal2D(child), ""));
 
-        this.child = child;
+        this.woChild = child;
         this.sim = sim;
         this.field = field;
         this.radius = radius;
@@ -50,6 +50,7 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
         this.label = this.toString();
         this.labelPortrayal = (LabelledPortrayal2D) circledPortrayal.child;
         this.labelPortrayal.label = label;
+        //this.labelPortrayal.align = LabelledPortrayal2D.ALIGN_CENTER;
 
         this.movablePortrayal = (MovablePortrayal2D) labelPortrayal.child;
         movablePortrayal.setSelectsWhenMoved(true);
@@ -71,7 +72,7 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
 
     public void setColor(Color c) {
         this.circledPortrayal.paint = c;
-        this.labelPortrayal.paint = new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue());
+        this.labelPortrayal.paint = Color.BLACK;
     }
 
     public Double2D getLocation() {

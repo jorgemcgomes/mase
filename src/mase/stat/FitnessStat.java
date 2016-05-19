@@ -142,16 +142,7 @@ public class FitnessStat extends Statistics {
     @Override
     public void postBreedingStatistics(final EvolutionState state) {
         super.postBreedingStatistics(state);
-        // MODIFIED FOR EVALUATIONS LIMIT
-        int evals = 0;
-        if(state.evaluator instanceof MetaEvaluator) {
-            MetaEvaluator me = (MetaEvaluator) state.evaluator;
-            if(me.getBaseEvaluator() instanceof CoevolutionaryEvaluator) {
-                CoevolutionaryEvaluator mpc = (CoevolutionaryEvaluator) me.getBaseEvaluator();
-                evals = mpc.totalEvaluations;
-            }
-        }
-        
+        int evals = ((MetaEvaluator) state.evaluator).totalEvaluations;
         state.output.print((state.generation + 1) + " " + evals + " ", statisticslog); // 1 because we're putting the breeding info on the same line as the generation it *produces*, and the generation number is increased *after* breeding occurs, and statistics for it
     }
 

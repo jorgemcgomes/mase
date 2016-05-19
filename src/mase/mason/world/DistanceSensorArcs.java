@@ -98,15 +98,16 @@ public class DistanceSensorArcs extends AbstractSensor {
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
         for (Object n : neighbours) {
             if (objectMatch(n) && field.exists(n)) {
-                double dist = distFunction.agentToObjectDistance(ag, n);
-                if (ignoreRadius) {
-                    dist += ag.getRadius();
-                }
+                double rawDist = distFunction.centerToCenterDistance(ag,n);
+                double dist = ignoreRadius ? rawDist : distFunction.agentToObjectDistance(ag, n);
                 if (rangeNoiseAbs > 0) {
                     dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                     dist = Math.max(dist, 0);
                 }
-                if (dist <= range) {
+                if(!ignoreRadius && rawDist < distFunction.radius(n)) { // agent is inside the object
+                    Arrays.fill(lastDistances, 0);
+                    Arrays.fill(closestObjects, n);
+                } else if (dist <= range) {
                     double angle = 0;
                     angle = ag.angleTo(field.getObjectLocation(n));
                     if (orientationNoise > 0) {

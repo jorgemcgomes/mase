@@ -12,6 +12,7 @@ library(doBy)
 library(pdist)
 library(RColorBrewer)
 library(formula.tools)
+library(arules)
 
 theme_set(theme_bw())
 theme_update(plot.margin=unit(c(1,1,1,1),"mm"), legend.position="bottom")
@@ -167,7 +168,7 @@ loadFitness <- function(file, loadSubs=F) {
 
 # Convenience function to filter data to only last generation of each setup
 lastGen <- function(data) {
-  ddply(data, .(Setup), function(x) subset(x, Generation==max(x$Generation)))
+  ddply(data, .(Setup,Job), function(x) subset(x, Generation==max(x$Generation)))
 }
 
 #### Fitness plotting functions #####################################################################
@@ -182,16 +183,17 @@ bestSoFarFitness <- function(data, showSE=T) {
   return(g)
 }
 
-fitnessBoxplots <- function(data, generation=max(data$Generation), ttests=T) {
-  data <- subset(data, Generation==generation & Subpop=="Any")
+fitnessBoxplots <- function(data, generation=NULL, ttests=T) {
+  data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
   g <- ggplot(data, aes(x=Setup, y=BestSoFar,fill=Setup)) + geom_boxplot() +
     geom_point(position=position_jitterdodge(jitter.width=0.3, jitter.height=0), colour="gray") 
   if(ttests) print(fitnessTtests(data,generation=generation))
   return(g)
 }
 
-rankByFitness <- function(data, generation=max(data$Generation), ttests=T) {
-  agg <- summaryBy(BestSoFar ~ Setup, subset(data,Generation==generation & Subpop=="Any"), FUN=c(mean,se))
+rankByFitness <- function(data, generation=NULL, ttests=T) {
+  data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
+  agg <- summaryBy(BestSoFar ~ Setup, subset(data,Subpop=="Any"), FUN=c(mean,se))
   agg <- transform(agg, Setup = reorder(Setup, BestSoFar.mean))
   g <- ggplot(agg, aes(x=Setup, y=BestSoFar.mean, fill=Setup)) + 
     geom_bar(stat="identity") + geom_errorbar(aes(ymin=BestSoFar.mean-BestSoFar.se, ymax=BestSoFar.mean+BestSoFar.se),width=0.5) +
@@ -200,8 +202,9 @@ rankByFitness <- function(data, generation=max(data$Generation), ttests=T) {
   return(g)
 }
 
-fitnessTtests <- function(data, generation=max(data$Generation)) {
-  data <- subset(data, Generation==generation & Subpop=="Any", select=c("Setup","BestSoFar"))
+fitnessTtests <- function(data, generation=NULL) {
+  data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
+  data <- subset(data, Subpop=="Any", select=c("Setup","BestSoFar"))
   d <- split(data, data$Setup)
   setlist <- lapply(d, function(x){x$BestSoFar})
   return(batch.ttest(setlist))

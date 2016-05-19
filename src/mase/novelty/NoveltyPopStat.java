@@ -5,6 +5,7 @@
 package mase.novelty;
 
 import ec.EvolutionState;
+import ec.Individual;
 import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.PostEvaluator;
 import mase.evaluation.ExpandedFitness;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  *
@@ -20,11 +22,13 @@ import mase.evaluation.ExpandedFitness;
  */
 public class NoveltyPopStat extends Statistics {
 
+    public static final String P_DO_SUBPOPS = "do-subpops";
     public static final String P_STATISTICS_FILE = "file";
     private static final long serialVersionUID = 1L;
     public int log = 0;  // stdout by default
     protected ArrayList<NoveltyEvaluation> neList = null;
-
+    boolean doSubpops;
+    
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
@@ -38,6 +42,8 @@ public class NoveltyPopStat extends Statistics {
             }
         }
 
+        doSubpops = state.parameters.getBoolean(base.push(P_DO_SUBPOPS), null, false);
+        
         neList = new ArrayList<>();
         for (PostEvaluator pe : ((MetaEvaluator) state.evaluator).getPostEvaluators()) {
             if (pe instanceof NoveltyEvaluation) {
@@ -52,19 +58,19 @@ public class NoveltyPopStat extends Statistics {
 
         state.output.print(state.generation + "", log);
         for (NoveltyEvaluation ne : neList) {
+            DescriptiveStatistics ds = new DescriptiveStatistics();        
             for (int i = 0; i < state.population.subpops.length; i++) {
-                double averageNovScore = 0;
-                double maxNovScore = Double.NEGATIVE_INFINITY;
-                double minNovScore = Double.POSITIVE_INFINITY;
-                for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                    ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;
-                    double nsScore = nf.scores().get(ne.scoreName);
-                    averageNovScore += nsScore;
-                    maxNovScore = Math.max(maxNovScore, nsScore);
-                    minNovScore = Math.min(minNovScore, nsScore);
+                for (Individual individual : state.population.subpops[i].individuals) {
+                    ExpandedFitness nf = (ExpandedFitness) individual.fitness;
+                    ds.addValue(nf.scores().get(ne.scoreName));
                 }
-                averageNovScore /= state.population.subpops[i].individuals.length;
-                state.output.print(" " + ne.archives[i].size() + " " + minNovScore + " " + averageNovScore + " " + maxNovScore , log);
+                if(doSubpops) {
+                    state.output.print(" " + ne.archives[i].size() + " " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax() , log);
+                    ds.clear();
+                }
+            }
+            if(!doSubpops) {
+                state.output.print(" " + ne.archives[0].size() + " " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax() , log);
             }
         }
         state.output.println("", log);

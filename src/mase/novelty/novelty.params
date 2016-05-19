@@ -13,5 +13,6 @@ novelty.score-name =               novelty
 
 stat.child.11 =                    mase.novelty.NoveltyPopStat
 stat.child.11.file =		   $noveltypop.stat
+stat.child.11.do-subpops =         false
 
 neat.SPECIE.FITNESS.MAX =          1000

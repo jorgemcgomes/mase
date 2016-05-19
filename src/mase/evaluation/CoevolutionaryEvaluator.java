@@ -9,8 +9,6 @@ import ec.*;
 import ec.coevolve.GroupedProblemForm;
 import ec.coevolve.MultiPopCoevolutionaryEvaluator;
 import ec.util.Parameter;
-import ec.util.QuickSort;
-import ec.util.SortComparator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,13 +30,10 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     public static final String P_ELITE_MODE = "elite-score";
     public static final String V_ELITE_SCORES = "score";
     public static final String P_PARETO_ELITE = "num-pareto-front";
-    public static final String P_MAX_EVALUATIONS = "max-evaluations";
 
     private static final long serialVersionUID = 1L;
 
     protected String[] eliteScore;
-    public int totalEvaluations;
-    public int maxEvaluations;
     protected int lastChampions;
     protected int randomChampions;
     protected int currentElite;
@@ -57,8 +52,6 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        maxEvaluations = state.parameters.getIntWithDefault(base.push(P_MAX_EVALUATIONS), null, -1);
-        totalEvaluations = 0;
 
         String st = state.parameters.getString(base.push(P_ELITE_MODE), null);
         if (st.equalsIgnoreCase(V_ELITE_SCORES)) {
@@ -80,10 +73,6 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
         }
     }
 
-    @Override
-    public boolean runComplete(EvolutionState state) {
-        return maxEvaluations == -1 ? false : totalEvaluations >= maxEvaluations;
-    }
 
     @Override
     protected void beforeCoevolutionaryEvaluation(EvolutionState state, Population population, GroupedProblemForm prob) {
@@ -267,7 +256,6 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
                             tUpdates[ind] = false;
                         }
                     }
-                    totalEvaluations++;
                     prob.evaluate(state, tInds, tUpdates, false, subpops, 0);
                 }
             }

@@ -18,7 +18,6 @@ import mase.MaseManager.Job;
 import mase.MaseManager.JobRunner;
 import mase.MaseManager.StatusListener;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -87,7 +86,7 @@ public class MaseManagerTerminal implements StatusListener {
                         mng.addRunner(sc.nextLine());
                         break;
                     case "loadrunners":
-                        while(sc.hasNext()) {
+                        while (sc.hasNext()) {
                             loadRunners(new File(sc.next()));
                         }
                         break;
@@ -95,7 +94,7 @@ public class MaseManagerTerminal implements StatusListener {
                         mng.addJob(sc.nextLine());
                         break;
                     case "loadjobs":
-                        while(sc.hasNext()) {
+                        while (sc.hasNext()) {
                             loadJobs(new File(sc.next()));
                         }
                         break;
@@ -116,7 +115,7 @@ public class MaseManagerTerminal implements StatusListener {
                         for (Job j : running) {
                             mng.killJob(j.id);
                         }
-                        break;                        
+                        break;
                     case "output":
                         int id = sc.nextInt();
                         int l = sc.hasNextInt() ? sc.nextInt() : lines;
@@ -125,10 +124,9 @@ public class MaseManagerTerminal implements StatusListener {
                     case "jobs":
                         while (sc.hasNext()) {
                             String jobid = sc.next();
-                            for(Job j : mng.waitingList) {
-                                if(j.id.equals(jobid) || (StringUtils.isAlpha(jobid) && j.id.startsWith(jobid))) {
-                                    System.out.println(j.detailedToString()+"\n-----------------");
-                                }
+                            List<Job> found = mng.findJobs(jobid);
+                            for (Job j : found) {
+                                System.out.println(j.detailedToString() + "\n-----------------");
                             }
                         }
                         break;
@@ -186,9 +184,9 @@ public class MaseManagerTerminal implements StatusListener {
                                 mng.completed.clear();
                             } else if (t.equals("waiting")) {
                                 mng.waitingList.clear();
-                            } else if(t.equals("runners")) {
+                            } else if (t.equals("runners")) {
                                 List<Integer> runners = new ArrayList<>(mng.runners.keySet());
-                                for(Integer r : runners) {
+                                for (Integer r : runners) {
                                     mng.killRunner(r);
                                 }
                             } else {
@@ -209,9 +207,9 @@ public class MaseManagerTerminal implements StatusListener {
                         break;
                     case "sort":
                         String sort = sc.next();
-                        if(sort.equals("job")) {
+                        if (sort.equals("job")) {
                             mng.sortJobFirst();
-                        } else if(sort.equals("date")) {
+                        } else if (sort.equals("date")) {
                             mng.sortSubmissionDate();
                         } else {
                             error("Unknown sorting method: " + sort);
@@ -228,6 +226,9 @@ public class MaseManagerTerminal implements StatusListener {
                         break;
                     case "setlines":
                         lines = sc.nextInt();
+                        break;
+                    case "setmaxtries":
+                        mng.setMaxTries(sc.nextInt());
                         break;
                     case "help":
                         System.out.println("Available commands:\n"
@@ -250,7 +251,9 @@ public class MaseManagerTerminal implements StatusListener {
                                 + "-- pause          [force]\n"
                                 + "-- resume         []\n"
                                 + "-- exit           []\n"
-                                + "-- setlines       [lines]");
+                                + "-- setlines       [lines]"
+                                + "-- setmaxtries    [tries]"
+                        );
                         break;
                     default:
                         System.out.println("Unknown command. Try help.");
@@ -291,23 +294,3 @@ public class MaseManagerTerminal implements StatusListener {
         System.out.println("[!] " + df.format(new Date()) + " " + str);
     }
 }
-
-
-    /*public List<Integer> expand(String s) {
-        List<Integer> res = new ArrayList<>();
-        String[] commaSplit = s.trim().split(",");
-        for (String sp : commaSplit) {
-            if (sp.contains("-")) {
-                String[] rangeSplit = sp.split("-");
-                int start = Integer.parseInt(rangeSplit[0].trim());
-                int end = Integer.parseInt(rangeSplit[rangeSplit.length - 1].trim());
-                for (int i = start; i <= end; i++) {
-                    res.add(i);
-                }
-            } else {
-                int id = Integer.parseInt(sp.trim());
-                res.add(id);
-            }
-        }
-        return res;
-    }*/

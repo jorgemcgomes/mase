@@ -1,0 +1,39 @@
+eval.base.problem =                mase.app.multirover.MultiRoverSimulator
+problem.trials-merge =             best
+problem.number-evals =             3
+problem.eval.0 =                   mase.app.multirover.MultiRoverFitness
+problem.eval.0.update-freq =       0
+problem.eval.1 =                   mase.app.multirover.MultiRoverGroupEval
+problem.eval.1.update-freq =       1
+problem.eval.2 =                   mase.app.multirover.MultiRoverIndEval
+problem.eval.2.update-freq =       1
+
+fitness.fitness-index =            0
+
+problem.repetitions =              3
+problem.max-steps =                1000
+
+problem.size =                     300
+problem.discretization =           100
+problem.numAgents =                5
+problem.linearSpeed =              1
+problem.turnSpeed =                0.4
+problem.sensorRange =              50
+problem.rocks =                    A,A,A,A,A,A,A,A,A,A
+problem.rockRadius =               6
+problem.agentRadius =              2
+problem.collectionTime =           20
+problem.numActuators =             1
+problem.minActivationTime =        25
+
+#vector.species.genome-size =       125
+#neural.input =                     10
+#neural.hidden =                    7
+#neural.output =                    4
+#neural.structure =                 jordan
+#neural.tanh =                      false
+
+# 2 (obstacle whiskers) + 4 (rock dist cones) + 4 (agent dist cones) + N (closest neighbor's actuator) + R (closest rock's type)
+# 2 + N (actuator type)
+neat.INPUT.NODES =                 12
+neat.OUTPUT.NODES =                3

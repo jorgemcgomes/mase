@@ -77,7 +77,7 @@ public class GUIState2D extends GUIState {
         display = new Display2D(w, h, this);
         display.setClipping(false);
         displayFrame = display.createFrame();
-        displayFrame.setTitle("Predator Prey");
+        displayFrame.setTitle(title);
         c.registerFrame(displayFrame);
         //displayFrame.setSize(w + 150, h + 200);
         displayFrame.setVisible(true);

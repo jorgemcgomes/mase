@@ -34,6 +34,7 @@ public class MaseManager {
     private volatile int jobId = 0;
     private volatile int runnerId = 0;
     private volatile boolean run = true;
+    private int maxTries = 3;
     private StatusListener listener;
 
     public void startExecution() {
@@ -62,6 +63,7 @@ public class MaseManager {
                         final JobRunner nextRunner = n;
                         final Job nextJob = waitingList.remove(0);
                         running.put(nextRunner, nextJob);
+                        nextJob.tries++;
                         Thread t = new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -79,6 +81,9 @@ public class MaseManager {
                                 if (success) {
                                     completed.add(nextJob);
                                     listener.message("Job completed: " + nextJob + " @ " + nextRunner);
+                                } else if (nextJob.tries < maxTries) {
+                                    listener.message("Job failed: " + nextJob + " @ " + nextRunner + " -- Retrying later (" + nextJob.tries + "/" + maxTries + ")");
+                                    waitingList.add(nextJob);
                                 } else {
                                     failed.add(nextJob);
                                     listener.error("Job failed: " + nextJob + " @ " + nextRunner);
@@ -111,6 +116,10 @@ public class MaseManager {
         } else if (!running.isEmpty()) {
             listener.message("Not cancelling jobs, " + running.size() + " jobs still running");
         }
+    }
+
+    public void setMaxTries(int n) {
+        this.maxTries = n;
     }
 
     public void resume() {
@@ -174,53 +183,34 @@ public class MaseManager {
     }
 
     public void retryJob(String id) {
-        int found = 0;
-        for (Job j : waitingList) {
-            if (j.id.equals(id)) {
-                listener.error("Job already in waiting list: " + j);
-                return;
-            }
+        for (Job j : findJobs(waitingList, id)) {
+            listener.error("Job already in waiting list: " + j);
         }
-        Iterator<Job> iter = failed.iterator();
-        while (iter.hasNext()) {
-            Job j = iter.next();
-            if (j.id.equals(id) || (StringUtils.isAlpha(id) && j.id.startsWith(id))) {
-                waitingList.add(j);
-                iter.remove();
-                found++;
-            }
+        List<Job> retry = findJobs(failed, id);
+        retry.addAll(findJobs(completed, id));
+        for(Job j : retry) {
+            j.tries = 0;
         }
-
-        iter = completed.iterator();
-        while (iter.hasNext()) {
-            Job j = iter.next();
-            if (j.id.equals(id) || (StringUtils.isAlpha(id) && j.id.startsWith(id))) {
-                waitingList.add(j);
-                iter.remove();
-                found++;
-            }
-        }
-
-        if (found == 0) {
-            listener.error("Job not found: " + id);
-        } else {
-            listener.message("Jobs added to waiting list: " + found);
-        }
+        failed.removeAll(retry);
+        completed.removeAll(retry);
+        waitingList.addAll(retry);
+        listener.message("Jobs added to waiting list: " + retry.size());
     }
 
     public void retryFailed() {
         for (Job j : failed) {
+            j.tries = 0;
             waitingList.add(j);
         }
-        listener.message("Added " + failed.size() + " jobs to waiting list");
         failed.clear();
+        listener.message("Added " + failed.size() + " jobs to waiting list");
     }
-    
+
     private String optionValue(String args, String option) {
         String v = StringUtils.substringBetween(args, option, " ");
-        if(v == null) {
+        if (v == null) {
             v = StringUtils.substringAfter(args, option).trim();
-            if(v.isEmpty()) {
+            if (v.isEmpty()) {
                 v = null;
             }
         }
@@ -229,21 +219,21 @@ public class MaseManager {
 
     public void addJob(String args) {
         String out = optionValue(args, "-out ");
-        if(out == null) {
+        if (out == null) {
             listener.error(args + "\nNo -out directory speciefied");
             return;
         }
         out = StringUtils.remove(out, "~/");
         out = StringUtils.removePattern(out, "/home/\\w+/"); // Strip the absolute path
-        
+
         String jobsStr = optionValue(args, "-p jobs=");
-        if(jobsStr == null) {
+        if (jobsStr == null) {
             listener.error(args + "\nNo jobs specified");
         }
         int jobs = Integer.parseInt(jobsStr);
         int currentJob = 0;
         String curJobStr = optionValue(args, "-p current-job=");
-        if(curJobStr != null) {
+        if (curJobStr != null) {
             currentJob = Integer.parseInt(curJobStr);
         }
 
@@ -275,7 +265,7 @@ public class MaseManager {
             for (List<String> p : permutations) {
                 String newClean = clean;
                 String newOut = StringUtils.removeEnd(out, "/");
-                for(int j = 0 ; j < options.length ; j++) {
+                for (int j = 0; j < options.length; j++) {
                     String value = p.get(j);
                     newClean = newClean.replaceFirst("\\{.+?\\}", value);
                     newOut = newOut + "_" + (useFull.get(j) ? value : optionsList.get(j).indexOf(value));
@@ -351,56 +341,32 @@ public class MaseManager {
     }
 
     public void killJob(String id) {
-        int found = 0;
-        Iterator<Job> iter = waitingList.iterator();
-        while (iter.hasNext()) {
-            Job j = iter.next();
-            if (j.id.equals(id) || (StringUtils.isAlpha(id) && j.id.startsWith(id))) {
-                iter.remove();
-                found++;
-            }
-        }
+        List<Job> waitingKill = findJobs(waitingList, id);
+        waitingList.removeAll(waitingKill);
+        int found = waitingKill.size();
 
         Map<JobRunner, Job> runningCopy = new HashMap<>(running); // to avoid concurrent modifications in the iterator
         for (Entry<JobRunner, Job> e : runningCopy.entrySet()) {
-            Job j = e.getValue();
-            if (j.id.equals(id) || (StringUtils.isAlpha(id) && j.id.startsWith(id))) {
+            if (jobMatch(e.getValue(), id)) {
+                e.getValue().tries = 9999; // avoid being added again
                 e.getKey().interrupt();
                 found++;
             }
         }
-        if (found == 0) {
-            listener.error("Job not found: " + id);
-        } else {
-            listener.message("Jobs killed: " + found);
-        }
+        listener.message("Jobs killed: " + found);
     }
 
     public void topPriority(String id) {
-        List<Job> up = new ArrayList<>();
-        Iterator<Job> iter = waitingList.iterator();
-        while (iter.hasNext()) {
-            Job j = iter.next();
-            if (j.id.equals(id) || (StringUtils.isAlpha(id) && j.id.startsWith(id))) {
-                iter.remove();
-                up.add(j);
-            }
-        }
+        List<Job> up = findJobs(waitingList, id);
+        waitingList.removeAll(up);
         waitingList.addAll(0, up);
         listener.message("Jobs moved to top priority: " + up.size());
     }
 
     public void lowestPriority(String id) {
-        List<Job> down = new ArrayList<>();
-        Iterator<Job> iter = waitingList.iterator();
-        while (iter.hasNext()) {
-            Job j = iter.next();
-            if (j.id.equals(id) || (StringUtils.isAlpha(id) && j.id.startsWith(id))) {
-                iter.remove();
-                down.add(j);
-            }
-        }
-        waitingList.addAll(down);
+        List<Job> down = findJobs(waitingList, id);
+        waitingList.removeAll(down);
+        waitingList.addAll(0, down);
         listener.message("Jobs moved to lowest priority: " + down.size());
     }
 
@@ -434,7 +400,30 @@ public class MaseManager {
             }
         });
     }
-    
+
+    public List<Job> findJobs(Collection<Job> col, String jobId) {
+        LinkedList<Job> res = new LinkedList<>();
+        for (Job j : col) {
+            if (jobMatch(j, jobId)) {
+                res.add(j);
+            }
+        }
+        return res;
+    }
+
+    public List<Job> findJobs(String jobId) {
+        LinkedList<Job> res = new LinkedList<>();
+        res.addAll(findJobs(waitingList, jobId));
+        res.addAll(findJobs(failed, jobId));
+        res.addAll(findJobs(completed, jobId));
+        res.addAll(findJobs(running.values(), jobId));
+        return res;
+    }
+
+    private boolean jobMatch(Job j, String jobId) {
+        return j.id.equals(jobId) || (StringUtils.isAlpha(jobId) && j.id.startsWith(jobId));
+    }
+
     public interface StatusListener {
 
         public void message(String str);
@@ -452,14 +441,15 @@ public class MaseManager {
         Date submitted;
         Date started;
         Date completed;
+        int tries = 0;
 
         @Override
         public String toString() {
             return id + ":" + outfolder + "(" + jobNumber + ")";
         }
-        
+
         public String detailedToString() {
-            return toString() + "\n" + params;
+            return toString() + "\nSubmitted: " + submitted + " Started: " + started + " Completed: " + completed + " Tries: " + tries + "\n" + params;
         }
     }
 
@@ -559,6 +549,11 @@ public class MaseManager {
 
         @Override
         public boolean runJob(Job job) throws Exception {
+            if (!checkConnection()) {
+                runners.remove(id);
+                return false;
+            }
+
             String tempOut = "masetemp/" + RandomStringUtils.randomAlphabetic(4).toLowerCase();
             process = Runtime.getRuntime().exec("ssh -t -t " + ip + " java -cp build/classes:lib/* mase.MaseEvolve -out " + tempOut + " " + job.params);
             in = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -568,10 +563,10 @@ public class MaseManager {
             boolean copySuccess = false;
             String localDestiny = absolute(job.outfolder);
             File localDestinyFolder = new File(localDestiny);
-            if(!localDestinyFolder.exists()) {
+            if (!localDestinyFolder.exists()) {
                 localDestinyFolder.mkdirs();
             }
-            
+
             if (jobSuccess) {
                 copySuccess = Runtime.getRuntime().exec("scp -q -r " + ip + ":" + tempOut + "/* " + localDestiny).waitFor() == 0;
             }
@@ -585,6 +580,15 @@ public class MaseManager {
             }
             return jobSuccess && copySuccess;
         }
+
+        private boolean checkConnection() {
+            try {
+                int status = Runtime.getRuntime().exec("ssh " + ip + " ls").waitFor();
+                return status == 0;
+            } catch (Exception ex) {
+                return false;
+            }
+        }
     }
 
     private static String absolute(String path) {
@@ -592,7 +596,7 @@ public class MaseManager {
         if (!path.startsWith(home)) {
             path = home + "/" + path + "/";
         }
-        if(path.endsWith("/")) {
+        if (path.endsWith("/")) {
             return path;
         } else {
             return path + "/";

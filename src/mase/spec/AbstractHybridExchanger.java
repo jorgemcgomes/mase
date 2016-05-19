@@ -12,6 +12,7 @@ import ec.Population;
 import ec.Subpopulation;
 import mase.evaluation.CoevolutionaryEvaluator;
 import ec.util.Parameter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,7 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.BehaviourResult;
-import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.SubpopEvaluationResult;
 
@@ -30,8 +30,10 @@ import mase.evaluation.SubpopEvaluationResult;
 public abstract class AbstractHybridExchanger extends Exchanger {
 
     public static final String P_HOMOGENEOUS_START = "homogeneous-start";
+    public static final String P_BEHAVIOUR_INDEX = "behaviour-index";
     private static final long serialVersionUID = 1L;
     int popSize, nAgents;
+    int behaviourIndex;
     boolean homogeneousStart;
     List<MetaPopulation> metaPops;
     int[] allocations;
@@ -43,6 +45,7 @@ public abstract class AbstractHybridExchanger extends Exchanger {
             allocations[i] = i;
         }
         nAgents = allocations.length;
+        behaviourIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), null);
         homogeneousStart = state.parameters.getBoolean(base.push(P_HOMOGENEOUS_START), null, false);
     }
 
@@ -54,7 +57,7 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         // initialization -- first time in each evolutionary run
         if (metaPops == null) {
             popSize = state.population.subpops[0].individuals.length;
-            metaPops = new ArrayList<MetaPopulation>();
+            metaPops = new ArrayList<>();
             initializationProcess(state);
         }
 
@@ -168,7 +171,9 @@ public abstract class AbstractHybridExchanger extends Exchanger {
 
     protected abstract void splitProcess(EvolutionState state);
 
-    protected static class MetaPopulation {
+    protected static class MetaPopulation implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         List<Integer> agents;
         Subpopulation pop;
@@ -177,9 +182,9 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         List<Foreign> foreigns;
 
         MetaPopulation() {
-            this.agents = new ArrayList<Integer>();
+            this.agents = new ArrayList<>();
             this.age = 0;
-            this.foreigns = new LinkedList<Foreign>();
+            this.foreigns = new LinkedList<>();
         }
 
         @Override
@@ -236,13 +241,8 @@ public abstract class AbstractHybridExchanger extends Exchanger {
 
     protected BehaviourResult getAgentBR(Individual ind, int agent) {
         ExpandedFitness nf = (ExpandedFitness) ind.fitness;
-        for (EvaluationResult er : nf.getEvaluationResults()) {
-            if (er instanceof SubpopEvaluationResult) {
-                SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
-                return (BehaviourResult) ser.getSubpopEvaluation(agent);
-            }
-        }
-        return null;
+        SubpopEvaluationResult ser = (SubpopEvaluationResult) nf.getEvaluationResults()[behaviourIndex];
+        return (BehaviourResult) ser.getSubpopEvaluation(agent);
     }
 
     public int[] getAllocations() {
@@ -263,7 +263,7 @@ public abstract class AbstractHybridExchanger extends Exchanger {
 /*List<Individual> sorted = new LinkedList<Individual>();
  sorted.addAll(Arrays.asList(mp.inds));
  for(Foreign f : mp.foreigns)*/
-/*List<Pair<Individual, MetaPopulation>> sorted = new LinkedList<Pair<Individual, MetaPopulation>>();
+ /*List<Pair<Individual, MetaPopulation>> sorted = new LinkedList<Pair<Individual, MetaPopulation>>();
  for (Individual ind : mp.inds) {
  sorted.add(Pair.of(ind, mp));
  }

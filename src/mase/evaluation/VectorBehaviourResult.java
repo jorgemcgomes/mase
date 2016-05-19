@@ -62,10 +62,9 @@ public class VectorBehaviourResult implements BehaviourResult {
     @Override
     public String toString() {
         String res = "";
-        for (int i = 0; i < behaviour.length - 1; i++) {
-            res += behaviour[i] + " ";
+        for (int i = 0; i < behaviour.length; i++) {
+            res += String.format("%.3f ", behaviour[i]);
         }
-        res += behaviour[behaviour.length - 1];
         return res;
     }
 

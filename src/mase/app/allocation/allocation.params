@@ -1,0 +1,74 @@
+# homogeneous
+#./evolve.sh -out ~/exps/alltest/hom -p parent=build/classes/mase/app/allocation/allocation.params -p parent=build/classes/mase/base.params -p generations=1000 -force -p ec.subpop.size=1000
+# CCEA
+#./evolve.sh -out ~/exps/alltest/ccea -p parent=build/classes/mase/app/allocation/allocation.params -p parent=build/classes/mase/cooperative.params -p parent=build/classes/mase/base.params -p generations=1000 -force -p ec.subpop.size=100 -p pop.subpops=10
+# team encoding
+#./evolve.sh -out ~/exps/alltest/team -p parent=build/classes/mase/app/allocation/allocation.params -p parent=build/classes/mase/base.params -p generations=1000 -force -p ec.subpop.size=1000 -p vector.species.ind=mase.app.allocation.MultiIndividual -p vector.double-vect-ind.num-agents=10 -p vector.species.genome-size=200
+
+
+eval.base.problem =                mase.app.allocation.AllocationProblem
+problem.number-evals =             0
+problem.trials-merge =             best
+problem.seed =                     0
+fitness.fitness-index =            0
+
+
+eval.max-evaluations = 1000000
+generations = 10000
+
+#problem.dimensions = 10
+#vector.species.genome-size = 10
+problem.dimensions = 5
+vector.species.genome-size = 5
+problem.power = 3
+
+problem.numAgents = 10
+
+problem.types = 1,1,1,1,1,1,1,1,1,1
+#problem.types = 2,2,2,2,2
+#problem.types = 2,2,3,3
+#problem.types = 3,3,4
+#problem.types = 5,5
+#problem.types = 10
+
+problem.minSeparation = -1
+problem.clusterSize = 0.25
+problem.numClusters = 0
+
+pop.subpops =                           1
+pop.subpop.0 =                          ec.Subpopulation
+pop.default-subpop = 			0
+ec.subpop.duplicate-retries =           10
+ec.subpop.size = 			100
+
+# Individual representation
+ec.subpop.species = 			ec.vector.FloatVectorSpecies
+vector.species.min-gene =               0
+vector.species.max-gene =               1
+vector.species.ind =                    mase.app.allocation.AllocationIndividual
+
+# Elitism configuration (pre-breeding)
+breed.elite.0 =                         5
+breed.reevaluate-elites.0 =             true
+
+# Breeding
+vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline
+vector.mutate.source.0 =                ec.select.TournamentSelection
+vector.species.mutation-type =          gauss
+vector.species.mutation-stdev =         0.25
+#vector.species.mutation-prob =          0.2
+vector.species.mutation-prob =          0.3
+vector.species.mutation-bounded =       TRUE
+select.tournament.size =                2
+
+stat.child.0.do-subpops = false
+stat.child.1.do-subpops = false
+
+# No post-evaluation needed
+stat.child.8 = ec.Statistics
+
+# No behaviors
+stat.child.3 = ec.Statistics
+
+# No scores
+stat.child.9 = ec.Statistics

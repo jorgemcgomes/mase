@@ -23,6 +23,7 @@ public class MRParams implements Serializable, Cloneable {
     protected double turnSpeed;
     protected double sensorRange;
     protected double rockRadius;
+    protected double agentRadius;
     protected int minActivationTime;
     protected int collectionTime;
     protected int numActuators;

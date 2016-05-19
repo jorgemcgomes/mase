@@ -2,7 +2,7 @@
 evalthreads =   			auto
 breedthreads = 				auto
 generations =				500
-quit-on-run-complete =			false
+quit-on-run-complete =			true
 
 # ECJ freaks out when seed parameters are not defined and evalthreads and breedthreads != auto
 seed.0=time
@@ -25,6 +25,7 @@ pop = 					ec.Population
 # Evaluation config
 eval =                                  mase.evaluation.MetaEvaluator
 eval.base =                             ec.simple.SimpleEvaluator
+eval.max-evaluations =                  -1
 vector.species.fitness =                mase.evaluation.ExpandedFitness
 
 # Checkpointing

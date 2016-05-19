@@ -9,6 +9,8 @@ package mase.app.multirover;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import mase.app.multirover.RedRock.RockType;
 import mase.controllers.GroupController;
 import mase.mason.GUIState2D;
@@ -52,7 +54,9 @@ public class MultiRoverSimulator extends MasonSimulationProblem {
 
     @Override
     public GUIState createSimStateWithUI(GroupController cs, long seed) {
-        return new GUIState2D(createSimState(cs, seed), "Multi-rover", 500, 500, Color.WHITE);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int size = (int) screenSize.getHeight() - 200;
+        return new GUIState2D(createSimState(cs, seed), "Multi-rover", size, size, Color.WHITE);
     }
     
 }

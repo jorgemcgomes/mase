@@ -110,7 +110,7 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
         for (int i = 0; i < metaPops.size(); i++) {
             MetaPopulation mp = metaPops.get(i);
             Individual[] inds = getElitePortion(mp.inds, (int) Math.ceil(elitePortion * popSize));
-            mpBehavs[i] = new ArrayList<BehaviourResult>(mp.agents.size() * inds.length);
+            mpBehavs[i] = new ArrayList<>(mp.agents.size() * inds.length);
             for (Individual ind : inds) {
                 for (Integer a : mp.agents) {
                     mpBehavs[i].add(getAgentBR(ind, a));
@@ -150,10 +150,10 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
         // Create new MetaPop
         MetaPopulation mpNew = new MetaPopulation();
         if (mp1.age > mp2.age) {
-            mpNew.agents = new ArrayList<Integer>(mp1.agents);
+            mpNew.agents = new ArrayList<>(mp1.agents);
             mpNew.agents.addAll(mp2.agents);
         } else {
-            mpNew.agents = new ArrayList<Integer>(mp2.agents);
+            mpNew.agents = new ArrayList<>(mp2.agents);
             mpNew.agents.addAll(mp1.agents);
         }
 
@@ -219,7 +219,7 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
     }
 
     protected MetaPopulation fork(MetaPopulation parent, EvolutionState state) {
-        List<Integer> forkAgents = new ArrayList<Integer>();
+        List<Integer> forkAgents = new ArrayList<>();
 
         if (splitMode == SplitMode.one || parent.agents.size() <= 3) {
             forkAgents.add(parent.agents.get(0));
@@ -297,7 +297,7 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
             System.arraycopy(sorted, 0, picked, 0, num);
         } else if (mode == PickMode.probabilistic) {
             double total = 0;
-            LinkedList<Individual> poolList = new LinkedList<Individual>();
+            LinkedList<Individual> poolList = new LinkedList<>();
             for (Individual ind : pool) {
                 poolList.add(ind);
                 total += ((SimpleFitness) ind.fitness).fitness();
@@ -319,7 +319,7 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
                 }
             }
         } else if (mode == PickMode.random) {
-            LinkedList<Individual> poolList = new LinkedList<Individual>(Arrays.asList(pool));
+            LinkedList<Individual> poolList = new LinkedList<>(Arrays.asList(pool));
             int index = 0;
             while (index < num) {
                 int rand = state.random[0].nextInt(poolList.size());

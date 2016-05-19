@@ -6,3 +6,10 @@ soc3 <- loadData("soccer3/*","postfitness.stat",fun=loadFitness)
 bestSoFarFitness(soc3)
 fitnessBoxplots(soc3)
 rankByFitness(soc3)
+
+soc3 <- loadData(c("soccer3/homo*","soccer3/ccea*"), "postfitness.stat", fun=loadFitness)
+soc5 <- loadData(c("soccer5/homo*","soccer5/ccea*"), "postfitness.stat", fun=loadFitness)
+
+bestSoFarFitness(soc5)
+fitnessBoxplots(soc5)
+rankByFitness(soc5)

@@ -31,12 +31,30 @@ public class GenericDistanceFunction extends DistanceFunction {
             return Double.NaN;
         }
     }
+    
+    public double radius(Object o) {
+        if(o instanceof WorldObject) {
+            return ((WorldObject) o).getRadius();
+        } else if(o instanceof OvalPortrayal2D) {
+            return ((OvalPortrayal2D) o).scale / 2;
+        }
+        return 0;
+    }
+    
+    public double centerToCenterDistance(Object e1, Object e2) {
+        Double2D d1 = e1 instanceof Double2D ? (Double2D) e1 : e1 instanceof WorldObject ? ((WorldObject) e1).getLocation() : field.getObjectLocation(e1);
+        Double2D d2 = e2 instanceof Double2D ? (Double2D) e2 : e2 instanceof WorldObject ? ((WorldObject) e2).getLocation() : field.getObjectLocation(e2);
+        return d1.distance(d2);
+    }
 
     public double agentToObjectDistance(EmboddiedAgent a1, Object e2) {
         double res = Double.NaN;
         if (e2 instanceof EmboddiedAgent) {
             EmboddiedAgent a2 = (EmboddiedAgent) e2;
             res = a1.distanceTo(a2);
+        } else if (e2 instanceof WorldObject) {
+            WorldObject wo = (WorldObject) e2;
+            res = a1.distanceTo(field.getObjectLocation(wo)) - wo.getRadius();
         } else if (e2 instanceof Double2D) {
             res = a1.distanceTo((Double2D) e2);
         } else if (e2 instanceof SimplePortrayal2D) {

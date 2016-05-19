@@ -48,7 +48,7 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
         super(new OrientedPortrayal2D(new OvalPortrayal2D()), sim, field, radius);
 
-        this.orientedPortrayal = (OrientedPortrayal2D) this.child;
+        this.orientedPortrayal = (OrientedPortrayal2D) this.woChild;
         this.orientedPortrayal.offset = 0;
         this.orientedPortrayal.scale = radius;
 
@@ -66,7 +66,6 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
         this.polygonCollisions = false;
         this.collisionRebound = true;
         this.isAlive = true;
-        this.setOrientation(0);
     }
 
     public boolean isAlive() {

@@ -98,8 +98,7 @@ public class PersistentSolution implements Serializable, Comparable<PersistentSo
         str += controller.toString() + "\n";
         int i = 0;
         for(EvaluationResult er : evalResults) {
-            str += "Evaluation " + (i++) + "\n";
-            str += er.toString();
+            str += "Evaluation " + (i++) + "\n" + er.toString()+"\n";
         }
         str += "\nFitness score: " + fitness + "\n";
         if(userData != null) {
