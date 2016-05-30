@@ -52,7 +52,7 @@ public class MaseManagerTerminal implements StatusListener {
 
     private final DateFormat df = new SimpleDateFormat("HH-mm-ss");
     private final MaseManager mng;
-    private int lines = 5;
+    private int lines = 1;
 
     public MaseManagerTerminal(MaseManager mng) {
         this.mng = mng;
@@ -103,12 +103,12 @@ public class MaseManagerTerminal implements StatusListener {
                             mng.killRunner(sc.nextInt());
                         }
                         break;
-                    case "killjob":
+                    case "kill":
                         while (sc.hasNext()) {
                             mng.killJob(sc.next());
                         }
                         break;
-                    case "killalljobs":
+                    case "killall":
                         mng.failed.addAll(mng.waitingList);
                         mng.waitingList.clear();
                         List<Job> running = new ArrayList<>(mng.running.values());
@@ -218,17 +218,23 @@ public class MaseManagerTerminal implements StatusListener {
                     case "pause":
                         mng.pause(sc.hasNext() && sc.next().equals("force"));
                         break;
-                    case "resume":
+                    case "start":
                         mng.resume();
                         break;
                     case "exit":
                         System.exit(0);
                         break;
-                    case "setlines":
-                        lines = sc.nextInt();
-                        break;
-                    case "setmaxtries":
-                        mng.setMaxTries(sc.nextInt());
+                    case "set":
+                        String par = sc.next();
+                        switch(par) {
+                            case "lines":
+                                lines = sc.nextInt();
+                                break;
+                            case "maxtries":
+                                mng.setMaxTries(sc.nextInt());
+                                break;
+                        }
+                        
                         break;
                     case "help":
                         System.out.println("Available commands:\n"
@@ -237,22 +243,21 @@ public class MaseManagerTerminal implements StatusListener {
                                 + "-- addjobs        job_params\n"
                                 + "-- loadjobs       [file]...\n"
                                 + "-- killrunner     [runner_id]...\n"
-                                + "-- killjob        [job_id]...\n"
-                                + "-- killalljobs    []\n"
+                                + "-- kill           [job_id]...\n"
+                                + "-- killall        \n"
                                 + "-- output         runner_id [lines]\n"
                                 + "-- jobs           [job_id]...\n"
                                 + "-- status         [lines]\n"
                                 + "-- list           [waiting|completed|failed|runners]...\n"
                                 + "-- retry          [job_id]...\n"
-                                + "-- retryfailed    []\n"
+                                + "-- retryfailed    \n"
                                 + "-- priority       top|bottom [job_id]...\n"
                                 + "-- sort           batch|job|date\n"
                                 + "-- clear          [waiting|completed|failed|runners]...\n"
                                 + "-- pause          [force]\n"
-                                + "-- resume         []\n"
-                                + "-- exit           []\n"
-                                + "-- setlines       [lines]"
-                                + "-- setmaxtries    [tries]"
+                                + "-- start          \n"
+                                + "-- exit           \n"
+                                + "-- set            lines|tries value"
                         );
                         break;
                     default:

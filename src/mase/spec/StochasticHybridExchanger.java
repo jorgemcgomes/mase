@@ -7,30 +7,42 @@ package mase.spec;
 
 import ec.EvolutionState;
 import ec.Individual;
-import ec.Population;
 import ec.Subpopulation;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import mase.evaluation.BehaviourResult;
+import net.jafama.FastMath;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.linear.BlockRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 
 /**
  *
  * @author jorge
  */
-public class BasicHybridExchanger extends AbstractHybridExchanger {
+public class StochasticHybridExchanger extends AbstractHybridExchanger {
 
+    // algorithm parameter values
     public static final String P_MERGE_THRESHOLD = "merge-threshold";
+    public static final String P_MAX_LOCKDOWN = "max-lockdown";
+
+    // algorithm implementation modes
+    public static final String P_ELITE_PORTION = "elite-portion";
     public static final String P_MERGE_MODE = "merge-mode";
     public static final String P_MERGE_PROPORTION = "merge-proportion";
-    public static final String P_STABILITY_TIME = "stability-time";
-    public static final String P_ELITE_PORTION = "elite-portion";
     public static final String P_SPLIT_MODE = "split-mode";
+    public static final String P_WEIGHTED_SILHOUETTE = "weighted-silhouette";
+    public static final String P_THREADED_CALCULATION = "threaded-calculation";
+    
     private static final long serialVersionUID = 1L;
 
     public enum PickMode {
@@ -51,77 +63,207 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
     }
 
     double mergeThreshold;
+    int maxLockdown;
+
+    double elitePortion;
+    boolean weightedSilhouette;
     PickMode mergeMode;
     MergeProportion mergeProportion;
     SplitMode splitMode;
-    int stabilityTime;
-    double elitePortion;
-    double[][] distanceMatrix;
-    int merges, splits, remerges;
 
+    double[][] distanceMatrix;
+    ExecutorService executor;
+    
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         mergeThreshold = state.parameters.getDouble(base.push(P_MERGE_THRESHOLD), null);
-        stabilityTime = state.parameters.getInt(base.push(P_STABILITY_TIME), null);
+        maxLockdown = state.parameters.getInt(base.push(P_MAX_LOCKDOWN), null);
         elitePortion = state.parameters.getDouble(base.push(P_ELITE_PORTION), null);
         mergeMode = PickMode.valueOf(state.parameters.getString(base.push(P_MERGE_MODE), null));
         mergeProportion = MergeProportion.valueOf(state.parameters.getString(base.push(P_MERGE_PROPORTION), null));
         splitMode = SplitMode.valueOf(state.parameters.getString(base.push(P_SPLIT_MODE), null));
-    }
-
-    @Override
-    protected void importForeignPreBreed(EvolutionState state) {
-    }
-
-    @Override
-    protected void importForeignPostBreed(EvolutionState state) {
-    }
-
-    @Override
-    public Population preBreedingExchangePopulation(EvolutionState state) {
-        merges = 0;
-        splits = 0;
-        remerges = 0;
-        return super.preBreedingExchangePopulation(state);
+        weightedSilhouette = state.parameters.getBoolean(base.push(P_WEIGHTED_SILHOUETTE), null, false);
+        boolean threadedCalculation = state.parameters.getBoolean(base.push(P_THREADED_CALCULATION), null, false);
+        if(threadedCalculation) {
+            executor = Executors.newFixedThreadPool(state.evalthreads);            
+        }
     }
 
     /* Similar to bottom-up (agglomerative) hierarchical clustering */
     @Override
-    protected void mergeProcess(EvolutionState state) {
+    protected int mergeProcess(EvolutionState state) {
         distanceMatrix = computeMetapopDistances(state);
 
         Pair<MetaPopulation, MetaPopulation> nextMerge = findNextMerge(distanceMatrix, state);
 
         // Merge if they are similar
         if (nextMerge != null) {
-            state.output.message("*************************** Merging " + nextMerge.getLeft() + " with " + nextMerge.getRight() + " ***************************");
-            merges++;
+            state.output.message("*** Merging " + nextMerge.getLeft() + " with " + nextMerge.getRight() + " ***");
             MetaPopulation mpNew = mergePopulations(nextMerge.getLeft(), nextMerge.getRight(), state);
+            mpNew.lockDown = calculateLockDown(mpNew, state);
             metaPops.remove(nextMerge.getLeft());
             metaPops.remove(nextMerge.getRight());
             metaPops.add(mpNew);
+            return 1;
+        }
+        return 0;
+    }
+
+    @Override
+    protected void initializationProcess(EvolutionState state) {
+        super.initializationProcess(state);
+        for (MetaPopulation mp : metaPops) {
+            mp.lockDown = calculateLockDown(mp, state);
         }
     }
 
     protected double[][] computeMetapopDistances(EvolutionState state) {
         // Retrieve agent behaviours, aggregated by MetaPopulation
-        List<BehaviourResult>[] mpBehavs = new List[metaPops.size()];
+        List<BehaviourResult> behavs = new ArrayList<>();
+        List<Integer>[] alloc = new List[metaPops.size()];
+        List<Double> weights = new ArrayList<>();
+        int index = 0;
         for (int i = 0; i < metaPops.size(); i++) {
             MetaPopulation mp = metaPops.get(i);
+            if (mp.age < mp.lockDown) {
+                continue;
+            }
+            alloc[i] = new ArrayList<>();
             Individual[] inds = getElitePortion(mp.inds, (int) Math.ceil(elitePortion * popSize));
-            mpBehavs[i] = new ArrayList<>(mp.agents.size() * inds.length);
             for (Individual ind : inds) {
                 for (Integer a : mp.agents) {
-                    mpBehavs[i].add(getAgentBR(ind, a));
+                    behavs.add(getAgentBR(ind, a));
+                    weights.add(weightedSilhouette ? ind.fitness.fitness() : 1d);
+                    alloc[i].add(index++);
+                }
+            }
+            // normalise weights
+            if (weightedSilhouette) {
+                double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
+                for (int j : alloc[i]) {
+                    double f = weights.get(j);
+                    min = Math.min(min, f);
+                    max = Math.max(max, f);
+                }
+                for (int j : alloc[i]) {
+                    if (Math.abs(max - min) < 0.0001) {
+                        weights.set(j, 1d);
+                    } else {
+                        weights.set(j, FastMath.pow3((weights.get(j) - min) / (max - min)));
+                    }
                 }
             }
         }
 
-        // Compute distance matrix
-        double[][] dm = distanceMatrix(mpBehavs, state);
-        dm = normalisedDistanceMatrix(dm, state);
-        return dm;
+        RealMatrix behavDist = null;
+        if(!behavs.isEmpty()) {
+            if(executor != null) {
+                behavDist = computeDistanceMatrixParallel(behavs);
+            } else {
+                behavDist = computeDistanceMatrix(behavs);
+            }
+        }
+
+        double[][] mpDist = new double[metaPops.size()][metaPops.size()];
+        for (int i = 0; i < metaPops.size(); i++) {
+            for (int j = 0; j < metaPops.size(); j++) {
+                MetaPopulation mpi = metaPops.get(i);
+                MetaPopulation mpj = metaPops.get(j);
+                if (i == j) {
+                    mpDist[i][j] = Double.NaN;
+                } else if (mpi.age < mpi.lockDown || mpj.age < mpj.lockDown) {
+                    mpDist[i][j] = Double.POSITIVE_INFINITY;
+                } else if (i < j) {
+                    double wi = silhouetteWidth(alloc[i], alloc[j], behavDist, weights, state);
+                    double wj = silhouetteWidth(alloc[j], alloc[i], behavDist, weights, state);
+                    mpDist[i][j] = (wi + wj) / 2;
+                } else {
+                    mpDist[i][j] = mpDist[j][i];
+                }
+            }
+        }
+        return mpDist;
+    }
+
+    private double silhouetteWidth(List<Integer> own, List<Integer> others, RealMatrix distMatrix, List<Double> weights, EvolutionState state) {
+        double totalWidth = 0;
+        double count = 0;
+        for (int i : own) {
+            double ai = 0;
+            for (int j : own) {
+                if (i != j) {
+                    ai += distMatrix.getEntry(i, j);
+                }
+            }
+            ai /= (own.size() - 1);
+
+            double bi = 0;
+            for (int j : others) {
+                bi += distMatrix.getEntry(i, j);
+            }
+            bi /= others.size();
+
+            double si = (bi - ai) / Math.max(ai, bi);
+            double f = weights.get(i);
+            totalWidth += (si * f);
+            count += f;
+        }
+
+        return totalWidth / count;
+    }
+
+    private RealMatrix computeDistanceMatrix(List<BehaviourResult> brs) {
+        RealMatrix mat = new BlockRealMatrix(brs.size(), brs.size());
+        for (int i = 0; i < brs.size(); i++) {
+            for (int j = i + 1; j < brs.size(); j++) {
+                double d = brs.get(i).distanceTo(brs.get(j));
+                mat.setEntry(i, j, d);
+                mat.setEntry(j, i, d);
+            }
+        }
+        return mat;
+    }
+    
+    private RealMatrix computeDistanceMatrixParallel(List<BehaviourResult> brs) {
+        RealMatrix mat = new BlockRealMatrix(brs.size(), brs.size());
+        Collection<Callable<Object>> div = new ArrayList<>();
+        for (int i = 0; i < brs.size(); i++) {
+            div.add(new DistanceMatrixCalculator(mat, brs, i, i));
+        }
+        try {
+            executor.invokeAll(div);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        return mat;
+    }
+
+    private static class DistanceMatrixCalculator implements Callable<Object> {
+
+        private final RealMatrix matrix;
+        private final List<BehaviourResult> brs;
+        private final int fromRow, toRow;
+
+        DistanceMatrixCalculator(RealMatrix matrix, List<BehaviourResult> brs, int fromRow, int toRow) {
+            this.matrix = matrix;
+            this.brs = brs;
+            this.fromRow = fromRow;
+            this.toRow = toRow;
+        }
+
+        @Override
+        public Object call() {
+            for (int i = fromRow; i <= toRow; i++) {
+                for (int j = i + 1; j < brs.size(); j++) {
+                    double d = brs.get(i).distanceTo(brs.get(j));
+                    matrix.setEntry(i, j, d);
+                    matrix.setEntry(j, i, d);
+                }
+            }
+            return null;
+        }
+
     }
 
     protected Pair<MetaPopulation, MetaPopulation> findNextMerge(double[][] distanceMatrix, EvolutionState state) {
@@ -130,7 +272,7 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
         for (int i = 0; i < metaPops.size(); i++) {
             for (int j = i + 1; j < metaPops.size(); j++) {
                 double d = distanceMatrix[i][j];
-                if (metaPops.get(i).age >= stabilityTime && metaPops.get(j).age >= stabilityTime && (closeI == null || d < closest)) {
+                if (metaPops.get(i).age >= metaPops.get(i).lockDown && metaPops.get(j).age >= metaPops.get(j).lockDown && (closeI == null || d < closest)) {
                     closeI = metaPops.get(i);
                     closeJ = metaPops.get(j);
                     closest = d;
@@ -138,7 +280,7 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
             }
         }
         if (closeI != null) {
-            state.output.message("Closest: " + closeI + " " + closeJ + " -- " + closest);
+            state.output.message("*** Closest: " + closeI + " " + closeJ + " -- " + closest + " ***");
         }
         if (closeI != null && closest <= mergeThreshold) {
             return Pair.of(closeI, closeJ);
@@ -186,7 +328,7 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
     }
 
     @Override
-    protected void splitProcess(EvolutionState state) {
+    protected int splitProcess(EvolutionState state) {
         // Find new splits
         MetaPopulation parent = findNextSplit(state);
 
@@ -194,25 +336,22 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
         if (parent != null) {
             MetaPopulation child = fork(parent, state);
             metaPops.add(child);
-            state.output.message("*************************** Spliting " + child + " from " + parent + " ***************************");
-
+            parent.lockDown = calculateLockDown(parent, state);
+            child.lockDown = parent.lockDown; // same lockdown to give them a chance to remerge before any further splits
+            state.output.message("*** Spliting " + child + " from " + parent + " ***");
+            return 1;
         }
+        return 0;
     }
 
     protected MetaPopulation findNextSplit(EvolutionState state) {
         MetaPopulation chosen = null;
-        double highestPressure = 0;
         for (MetaPopulation mp : metaPops) {
-            if (mp.agents.size() > 1) {
-                //double pressure = (mp.agents.size() / (double) nAgents) * mp.age;
-                double pressure = mp.age / 2.0 + (mp.age / 2.0) * ((mp.agents.size() - 2.0) / (nAgents - 2.0));
-                if (pressure > highestPressure) {
-                    chosen = mp;
-                    highestPressure = pressure;
-                }
+            if (mp.agents.size() > 1 && mp.age >= mp.lockDown && (chosen == null || mp.age > chosen.age)) {
+                chosen = mp;
             }
         }
-        if (chosen != null && highestPressure > stabilityTime) {
+        if (chosen != null) {
             return chosen;
         }
         return null;
@@ -235,7 +374,6 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
             }
         }
 
-        splits++;
         parent.age = 0;
         parent.agents.removeAll(forkAgents);
 
@@ -249,43 +387,8 @@ public class BasicHybridExchanger extends AbstractHybridExchanger {
         return child;
     }
 
-    protected double[][] distanceMatrix(List<BehaviourResult>[] behavs, EvolutionState state) {
-        double[][] dm = new double[behavs.length][behavs.length];
-        for (int i = 0; i < behavs.length; i++) {
-            for (int j = 0; j < behavs.length; j++) {
-                if (j >= i) {
-                    dm[i][j] = pairwiseDistance(behavs[i], behavs[j], state);
-                } else {
-                    dm[i][j] = dm[j][i];
-                }
-            }
-        }
-        return dm;
-    }
-
-    protected double[][] normalisedDistanceMatrix(double[][] dm, EvolutionState state) {
-        double[][] ndm = new double[dm.length][dm.length];
-        for (int i = 0; i < dm.length; i++) {
-            for (int j = 0; j < dm.length; j++) {
-                ndm[i][j] = dm[i][j] / ((dm[i][i] + dm[j][j]) / 2);
-            }
-        }
-        return ndm;
-    }
-
-    protected double pairwiseDistance(List<BehaviourResult> brs1, List<BehaviourResult> brs2, EvolutionState state) {
-        // all to all
-        int count = 0;
-        double total = 0;
-        for (BehaviourResult brs11 : brs1) {
-            for (BehaviourResult brs21 : brs2) {
-                if (brs11 != brs21) {
-                    total += brs11.distanceTo(brs21);
-                    count++;
-                }
-            }
-        }
-        return total / count;
+    protected int calculateLockDown(MetaPopulation pop, EvolutionState state) {
+        return state.random[0].nextInt(maxLockdown);
     }
 
     protected Individual[] pickIndividuals(Individual[] pool, int num, PickMode mode, EvolutionState state) {

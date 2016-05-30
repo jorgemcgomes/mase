@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.BehaviourResult;
@@ -37,6 +36,7 @@ public abstract class AbstractHybridExchanger extends Exchanger {
     boolean homogeneousStart;
     List<MetaPopulation> metaPops;
     int[] allocations;
+    int merges, splits;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -64,16 +64,18 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         // the evaluation has passed - update ages
         for (MetaPopulation mp : metaPops) {
             mp.age++;
-            for (Foreign f : mp.foreigns) {
-                f.age++;
-            }
         }
+        merges = 0;
+        splits = 0;
 
-        splitProcess(state);
-        mergeProcess(state);
+        // Only allows one operation per generation
+        // reason: its important to evaluate before making any more changes
+        merges = mergeProcess(state);
+        if(merges == 0) {
+            splits = splitProcess(state);            
+        }
         updateRepresentatives(state);
 
-        importForeignPreBreed(state);
         // create new population with individuals from metapops, without foreigns
         Population newPop = (Population) state.population.emptyClone();
         newPop.subpops = new Subpopulation[metaPops.size()];
@@ -96,17 +98,6 @@ public abstract class AbstractHybridExchanger extends Exchanger {
             mp.inds = state.population.subpops[i].individuals;
         }
 
-        importForeignPostBreed(state);
-
-        // Add foreign individuals to the subpopulations for evaluation        
-        for (MetaPopulation mp : metaPops) {
-            for (Foreign f : mp.foreigns) {
-                Individual[] newInds = Arrays.copyOf(mp.pop.individuals, mp.pop.individuals.length + f.inds.length);
-                System.arraycopy(f.inds, 0, newInds, mp.pop.individuals.length, f.inds.length);
-                mp.pop.individuals = newInds;
-            }
-        }
-
         // Update allocations
         for (int i = 0; i < metaPops.size(); i++) {
             for (Integer ag : metaPops.get(i).agents) {
@@ -117,25 +108,12 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         return state.population;
     }
 
-    protected abstract void importForeignPreBreed(EvolutionState state);
-
-    protected abstract void importForeignPostBreed(EvolutionState state);
-
     protected void updateRepresentatives(EvolutionState state) {
         CoevolutionaryEvaluator base = (CoevolutionaryEvaluator) ((MetaEvaluator) state.evaluator).getBaseEvaluator();
         Individual[][] newElites = new Individual[metaPops.size()][base.getEliteIndividuals()[0].length];
         for (int i = 0; i < metaPops.size(); i++) {
             MetaPopulation mp = metaPops.get(i);
-
-            // Make a pool with all individuals (self + all foreigns)
-            Individual[] allInds = Arrays.copyOf(mp.inds, mp.inds.length);
-            for (Foreign f : mp.foreigns) {
-                if (f.inds != null) {
-                    allInds = Arrays.copyOf(allInds, allInds.length + f.inds.length);
-                    System.arraycopy(f.inds, 0, allInds, allInds.length - f.inds.length, f.inds.length);
-                }
-            }
-            allInds = sortedCopy(allInds);
+            Individual[] allInds = sortedCopy(mp.inds);
             for (int j = 0; j < newElites[i].length; j++) {
                 newElites[i][j] = (Individual) allInds[j].clone();
             }
@@ -166,10 +144,9 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         }
     }
 
-    /* Similar to bottom-up (agglomerative) hierarchical clustering */
-    protected abstract void mergeProcess(EvolutionState state);
+    protected abstract int mergeProcess(EvolutionState state);
 
-    protected abstract void splitProcess(EvolutionState state);
+    protected abstract int splitProcess(EvolutionState state);
 
     protected static class MetaPopulation implements Serializable {
 
@@ -179,12 +156,11 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         Subpopulation pop;
         Individual[] inds;
         int age;
-        List<Foreign> foreigns;
+        int lockDown;
 
         MetaPopulation() {
             this.agents = new ArrayList<>();
             this.age = 0;
-            this.foreigns = new LinkedList<>();
         }
 
         @Override
@@ -198,20 +174,6 @@ public abstract class AbstractHybridExchanger extends Exchanger {
             }
             return s + "]";
         }
-    }
-
-    protected static class Foreign {
-
-        MetaPopulation origin;
-        Individual[] inds;
-        int age;
-
-        Foreign(MetaPopulation origin) {
-            this.origin = origin;
-            this.age = 0;
-            this.inds = null;
-        }
-
     }
 
     /*
@@ -259,40 +221,3 @@ public abstract class AbstractHybridExchanger extends Exchanger {
     }
 
 }
-
-/*List<Individual> sorted = new LinkedList<Individual>();
- sorted.addAll(Arrays.asList(mp.inds));
- for(Foreign f : mp.foreigns)*/
- /*List<Pair<Individual, MetaPopulation>> sorted = new LinkedList<Pair<Individual, MetaPopulation>>();
- for (Individual ind : mp.inds) {
- sorted.add(Pair.of(ind, mp));
- }
- for (Foreign f : mp.foreigns) {
- if(f.inds != null) {
- for (Individual ind : f.inds) {
- sorted.add(Pair.of(ind, f.origin));
- }
- }
- }
-
- // Sort the individuals from the pool
- final FitnessComparator fc = new FitnessComparator();
- Collections.sort(sorted, new Comparator<Pair<Individual, MetaPopulation>>() {
- @Override
- public int compare(Pair<Individual, MetaPopulation> o1, Pair<Individual, MetaPopulation> o2) {
- return fc.compare(o1.getLeft(), o2.getLeft());
- }
- });
-
- // Select the top individuals as the representatives
-            
- int foreign = 0;
- for (int j = 0; j < newElites[i].length; j++) {
- Pair<Individual, MetaPopulation> next = sorted.get(j);
- newElites[i][j] = (Individual) next.getLeft().clone();
- if (next.getRight() != mp) {
- foreign++;
- }
- }
- System.out.println("Elite " + i + ": " + newElites[i][0].fitness.fitness()
- + (foreign == 1 ? "(foreign)" : ""));*/

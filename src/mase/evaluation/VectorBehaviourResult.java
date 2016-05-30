@@ -84,9 +84,9 @@ public class VectorBehaviourResult implements BehaviourResult {
             case EUCLIDEAN:
                 double d = 0;
                 for (int i = 0; i < v1.length; i++) {
-                    d += FastMath.pow(v1[i] - v2[i], 2);
+                    d += FastMath.pow2(v1[i] - v2[i]);
                 }
-                return FastMath.sqrt(d);
+                return FastMath.sqrtQuick(d);
         }
     }
 

@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MaseManager {
 
-    public static final String ALLOWED_NAMES_PATTERN = "[^\\\\/:\\*\\?\"<>\\|\\s_]{1,7}";
+    public static final String ALLOWED_NAMES_PATTERN = "[^\\\\/:\\*\\?\"<>\\|\\s_]{1,15}";
     protected List<Job> waitingList = Collections.synchronizedList(new ArrayList<Job>());
     protected List<Job> completed = Collections.synchronizedList(new ArrayList<Job>());
     protected List<Job> failed = Collections.synchronizedList(new ArrayList<Job>());
@@ -33,7 +33,7 @@ public class MaseManager {
     protected ConcurrentHashMap<JobRunner, Job> running = new ConcurrentHashMap<>();
     private volatile int jobId = 0;
     private volatile int runnerId = 0;
-    private volatile boolean run = true;
+    private volatile boolean run = false;
     private int maxTries = 3;
     private StatusListener listener;
 
@@ -93,8 +93,8 @@ public class MaseManager {
                         t.start();
                     }
                 }
-                for (JobRunner r : running.keySet()) {
-                    r.updateOutput();
+                for (Entry<JobRunner,Job> e : running.entrySet()) {
+                    e.getKey().updateOutput();
                 }
                 try {
                     Thread.sleep(1000);

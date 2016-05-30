@@ -31,14 +31,15 @@ import org.apache.commons.math3.ml.distance.EuclideanDistance;
 public class AllocationProblem extends SimulationProblem {
 
     private static final long serialVersionUID = 1L;
-    public static int RANDOM = 0, CLUSTERED = 1;
 
     @Param()
     int numAgents;
     @Param()
     int dimensions;
     @Param()
-    int[] types;
+    int[] types = null;
+    @Param()
+    int numTypes;
     @Param()
     double power;
     @Param()
@@ -56,6 +57,23 @@ public class AllocationProblem extends SimulationProblem {
         super.setup(state, base);
         ParamUtils.autoSetParameters(this, state.parameters, base, defaultBase(), false);
 
+        // calculate types, if not given
+        if(types == null) {
+            int div = numAgents / numTypes;
+            int rem = numAgents % numTypes;
+            types = new int[numTypes];
+            for(int i = 0 ; i < numTypes ; i++) {
+                types[i] = div;
+                if(rem > 0) {
+                    types[i]++;
+                    rem--;
+                }
+            }
+        } else {
+            state.output.warning("Overriding numTypes with the given types");
+        }
+        
+        // validate simulation parameters
         int checkSum = 0;
         for (int t : types) {
             checkSum += t;
@@ -70,7 +88,8 @@ public class AllocationProblem extends SimulationProblem {
             minSeparation = FastMath.sqrt(dimensions) / 3;
             state.output.warning("Using default min separation sqrt(dimensions)/3: " + minSeparation);
         }
-
+        
+        // randomly create target points
         Random rand = new Random((int) state.job[0]);
         typesLoc = new double[types.length][];
         if (numClusters == 0) {

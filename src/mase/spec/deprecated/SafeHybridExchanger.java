@@ -36,7 +36,7 @@ public class SafeHybridExchanger extends BasicHybridExchanger {
         super.setup(state, base);
         this.foreignMode = PickMode.valueOf(state.parameters.getString(base.push(P_FOREIGN_MODE), null));
         this.differenceMode = DifferenceMode.valueOf(state.parameters.getString(base.push(P_DIFFERENCE_MODE), null));
-        newChilds = new HashSet<MetaPopulation>();
+        newChilds = new HashSet<>();
     }
 
     @Override

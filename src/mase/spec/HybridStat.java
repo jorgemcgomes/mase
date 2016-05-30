@@ -11,15 +11,14 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import mase.spec.AbstractHybridExchanger.Foreign;
+import mase.evaluation.MetaEvaluator;
 import mase.spec.AbstractHybridExchanger.MetaPopulation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
- * Generation | Num pops | Min agents in pop | Mean agents in pop | Max agents in pop
- * Num of foreigns | Evaluated self inds | Evaluated foreign inds | Evaluated all inds
- * Mean pop age | Max pop age | Mean pop dispersion | Mean pop distance to others
- * Num of splits | Merges | Remerges | Total number of splits | Merges | Remerges
+ * Generation | Evaluations | Min|Mean|Max agents in pop | 
+ * Mean|Max pop age | Number of Merges|Splits in generation | Total number of Merges|Splits
+ * [Min|Mean|Max population distance]
  * @author jorge
  */
 public class HybridStat extends Statistics {
@@ -27,9 +26,7 @@ public class HybridStat extends Statistics {
     public static final String P_STATISTICS_FILE = "file";
     private static final long serialVersionUID = 1L;
     public int log = 0;  // stdout by default
-    private int selfIndividuals = 0;
-    private int foreignIndividuals = 0;
-    private int totalMerges = 0, totalSplits = 0, totalRemerges = 0;
+    private int totalMerges = 0, totalSplits = 0;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -47,65 +44,50 @@ public class HybridStat extends Statistics {
     @Override
     public void postPreBreedingExchangeStatistics(EvolutionState state) {
         super.postPreBreedingExchangeStatistics(state);
-        BasicHybridExchanger exc = (BasicHybridExchanger) state.exchanger;
-        state.output.print(state.generation + " " + exc.metaPops.size(), log);
+        AbstractHybridExchanger exc = (AbstractHybridExchanger) state.exchanger;
+        MetaEvaluator me = (MetaEvaluator) state.evaluator;
+        // generation, evaluations, and number of metapops
+        state.output.print(state.generation + " " + me.totalEvaluations + " " + exc.metaPops.size(), log);
 
-        int foreigns = 0, foreignInds = 0, metapopInds = 0;
         DescriptiveStatistics ds = new DescriptiveStatistics();
         for (MetaPopulation mp : exc.metaPops) {
             ds.addValue(mp.agents.size());
-            foreigns += mp.foreigns.size();
-            for (Foreign f : mp.foreigns) {
-                foreignInds += f.inds.length;
-            }
-            metapopInds += mp.inds.length;
         }
-        // metapop size (min, mean, max) and foreign pops
-        state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax() + " " + foreigns, log);
+        // metapop size (min, mean, max)
+        state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);
 
-        // total number of self-individuals, foreign individuals, and total
-        selfIndividuals += metapopInds;
-        foreignIndividuals += foreignInds;
-        state.output.print(" " + selfIndividuals + " " + foreignIndividuals + " " + (selfIndividuals + foreignIndividuals), log);
-
-        // metapop age
-        ds = new DescriptiveStatistics();
+        // metapop mean and max age
+        ds.clear();
         for(MetaPopulation mp : exc.metaPops) {
             ds.addValue(mp.age);
         }
         state.output.print(" " + ds.getMean() + " " + ds.getMax(), log);
         
-        // metapop dispersion (min, mean, max)
-        ds.clear();
-        for (int i = 0; i < exc.distanceMatrix.length; i++) {
-            ds.addValue(exc.distanceMatrix[i][i]);
-        }
-        state.output.print(/*" " + ds.getMin() + */" " + ds.getMean()/* + " " + ds.getMax()*/, log);
-
-        // metapop difference to others
-        ds.clear();
-        for (int i = 0; i < exc.distanceMatrix.length; i++) {
-            for (int j = i + 1; j < exc.distanceMatrix.length; j++) {
-                if (!Double.isInfinite(exc.distanceMatrix[i][j])) {
-                    ds.addValue(exc.distanceMatrix[i][j]);
-                }
-            }
-        }
-        if (ds.getN() == 0) {
-            ds.addValue(0);
-        }
-        state.output.print(/*" " + ds.getMin() + */" " + ds.getMean()/* + " " + ds.getMax()*/, log);
-
-        // number of splits, merges and remerges in this generation
-        state.output.print(" " + exc.merges + " " + exc.splits + " " + exc.remerges, log);
-
-        // total number of splits, merges, remerges
+        // number of splits and merges in this generation + total number of splits and merges
         totalMerges += exc.merges;
         totalSplits += exc.splits;
-        totalRemerges += exc.remerges;
-        state.output.println(" " + totalMerges + " " + totalSplits + " " + totalRemerges, log);
+        state.output.print(" " + exc.merges + " " + exc.splits + " " + totalMerges + " " + totalSplits, log);
 
+        if(exc instanceof StochasticHybridExchanger) {
+            StochasticHybridExchanger she = (StochasticHybridExchanger) exc;
+            // metapop difference to others
+            ds.clear();
+            for (int i = 0; i < she.distanceMatrix.length; i++) {
+                for (int j = i + 1; j < she.distanceMatrix.length; j++) {
+                    if (!Double.isInfinite(she.distanceMatrix[i][j]) && !Double.isNaN(she.distanceMatrix[i][j])) {
+                        ds.addValue(she.distanceMatrix[i][j]);
+                    }
+                }
+            }
+            if (ds.getN() == 0) {
+                ds.addValue(0);
+            }
+            state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);
+            //printMatrix(she.distanceMatrix, state);
+        }
         
+        state.output.println("", log);
+
         /*for(MetaPopulation mp : exc.metaPops) {
             StringBuilder sb = new StringBuilder();
             sb.append(String.format("%3d", mp.age)).append(" - ").append(mp.toString());
@@ -116,12 +98,14 @@ public class HybridStat extends Statistics {
                 sb.append(" ").append(f.origin).append("(").append(f.age).append(")");
             }
             state.output.message(sb.toString());
-        }
+        }*/
         
-        printMatrix(exc.distanceMatrix, state);*/
+        /*for(MetaPopulation mp : exc.metaPops) {
+            state.output.message(mp.age + "/" + mp.lockDown);
+        }*/
     }
 
-    /*private void printMatrix(double[][] m, EvolutionState state) {
+    private void printMatrix(double[][] m, EvolutionState state) {
         DecimalFormat df = new DecimalFormat("000.000");
         try {
             StringBuilder sb = new StringBuilder();
@@ -130,14 +114,14 @@ public class HybridStat extends Statistics {
             for (int i = 0; i < rows; i++) {
                 sb.append("| ");
                 for (int j = 0; j < columns; j++) {
-                    sb.append(Double.isInfinite(m[i][j]) ? "   \u221E   " : df.format(m[i][j])).append(" ");
+                    sb.append(Double.isInfinite(m[i][j]) ? "   \u221E   " : Double.isNaN(m[i][j]) ? "  NaN  " : df.format(m[i][j])).append(" ");
                 }
                 sb.append("|\n");
             }
             state.output.message(sb.toString());
         } catch (Exception e) {
-            System.out.println("Matrix is empty!!");
+            state.output.message("Matrix is empty!!");
         }
-    }*/
+    }
 
 }

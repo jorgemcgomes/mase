@@ -63,6 +63,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
     valid <- sapply(folders, function(x){length(list.files(x,pattern=jobprefix))>0})
     folders <- folders[valid]
   }
+  cat("Found",length(folders),"folders\n")
   
   if(is.null(names)) names <- folders
   if(auto.ids) {
@@ -83,6 +84,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
     folderIds <- sapply(ids, function(x){rep_len(x,length(folders))[i]})
     allfiles <- c(allfiles, lapply(files, c, folderIds))
   }
+  cat("Going to load",length(allfiles),"files\n")
 
   aux <- function(file, ...) {
     f <- do.call(fun, args=c(file[1],list(...)))
@@ -95,8 +97,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
   }
   
   if(parallel) {
-    clusterExport(cl, list(fun))
-    clusterEvalQ(cl, library(data.table))
+    clusterExport(cl, list("loadFile","loadWideFile","loadBehaviours","loadFitness"))
   }
   result <- ldply(allfiles, aux, ..., .progress="text", .parallel = parallel)
   setDT(result)
@@ -106,10 +107,13 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
 }
 
 # loads any file given the column names
-loadFile <- function(file, separator=" ",colnames=NULL) {
+loadFile <- function(file, separator=" ",colnames=NULL, exclude.na=T) {
   frame <- fread(file, header=F, sep=separator, stringsAsFactors=F)
   if(!is.null(colnames)) {
     setnames(frame,colnames)
+    if(exclude.na) {
+      set(frame, j=which(is.na(colnames)), value=NULL)
+    }
   }
   return(frame)
 }
@@ -168,7 +172,9 @@ loadFitness <- function(file, loadSubs=F) {
 
 # Convenience function to filter data to only last generation of each setup
 lastGen <- function(data) {
-  ddply(data, .(Setup,Job), function(x) subset(x, Generation==max(x$Generation)))
+  d <- ddply(data, .(Setup,Job), function(x) subset(x, Generation==max(x$Generation)))
+  setDT(d)
+  return(d)
 }
 
 #### Fitness plotting functions #####################################################################
@@ -197,7 +203,7 @@ rankByFitness <- function(data, generation=NULL, ttests=T) {
   agg <- transform(agg, Setup = reorder(Setup, BestSoFar.mean))
   g <- ggplot(agg, aes(x=Setup, y=BestSoFar.mean, fill=Setup)) + 
     geom_bar(stat="identity") + geom_errorbar(aes(ymin=BestSoFar.mean-BestSoFar.se, ymax=BestSoFar.mean+BestSoFar.se),width=0.5) +
-    theme(legend.position="none")
+    theme(legend.position="none", axis.text.x = element_text(angle = 45, hjust = 1))
   if(ttests) print(fitnessTtests(data,generation=generation))
   return(g)
 }

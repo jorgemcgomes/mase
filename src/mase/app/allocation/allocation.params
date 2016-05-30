@@ -16,21 +16,12 @@ fitness.fitness-index =            0
 eval.max-evaluations = 1000000
 generations = 10000
 
-#problem.dimensions = 10
-#vector.species.genome-size = 10
-problem.dimensions = 5
-vector.species.genome-size = 5
+problem.dimensions = 10
+vector.species.genome-size = 10
 problem.power = 3
 
 problem.numAgents = 10
-
-problem.types = 1,1,1,1,1,1,1,1,1,1
-#problem.types = 2,2,2,2,2
-#problem.types = 2,2,3,3
-#problem.types = 3,3,4
-#problem.types = 5,5
-#problem.types = 10
-
+problem.numTypes = 10
 problem.minSeparation = -1
 problem.clusterSize = 0.25
 problem.numClusters = 0
@@ -56,8 +47,7 @@ vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline
 vector.mutate.source.0 =                ec.select.TournamentSelection
 vector.species.mutation-type =          gauss
 vector.species.mutation-stdev =         0.25
-#vector.species.mutation-prob =          0.2
-vector.species.mutation-prob =          0.3
+vector.species.mutation-prob =          0.2
 vector.species.mutation-bounded =       TRUE
 select.tournament.size =                2
 
@@ -66,6 +56,9 @@ stat.child.1.do-subpops = false
 
 # No post-evaluation needed
 stat.child.8 = ec.Statistics
+
+# No best-of-gen needed
+stat.child.4 = ec.Statistics
 
 # No behaviors
 stat.child.3 = ec.Statistics

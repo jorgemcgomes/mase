@@ -13,6 +13,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import mase.evaluation.ExpandedFitness;
+import mase.evaluation.MetaEvaluator;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -97,8 +98,10 @@ public class ConsoleStat extends Statistics {
         }
         FitnessStat stat = (FitnessStat) state.statistics.children[1];
         String ip = RunStatistics.getComputerName();
-        state.output.message("Exp:" + stat.statisticsFile.getParent() + " Job: " + state.job[0] + " IP: " + ip);
-        state.output.message("Best gen: " + nf.format(maxGen) + " | "
+        state.output.message("Exp: " + stat.statisticsFile.getParent() + " Job: " + state.job[0] + " IP: " + ip);
+        MetaEvaluator me = (MetaEvaluator) state.evaluator;
+        String status = me.maxEvaluations > 0 ? "Evals: " + me.totalEvaluations/1000 + "/" + me.maxEvaluations/1000+"k" : "Gens: " + state.generation + "/" + state.numGenerations;        
+        state.output.message(status + " | Best gen: " + nf.format(maxGen) + " | "
                 + "Best so far: " + nf.format(bestFitness));
     }
 

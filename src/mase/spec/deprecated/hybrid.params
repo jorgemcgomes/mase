@@ -1,15 +1,15 @@
-exch =                   mase.spec.StochasticHybridExchanger
-exch.merge-threshold =   0.1
-exch.max-lockdown =      20
-exch.elite-portion =     1
-exch.weighted-silhouette = true
+exch =                   mase.spec.BasicHybridExchanger
+exch.merge-threshold =   1.25
+exch.stability-time =    10
+exch.elite-portion =     0.2
 exch.merge-mode =        elite
 exch.merge-proportion =  proportionate
 exch.homogeneous-start = false
 exch.split-mode =        random
 exch.behaviour-index =   2
-exch.threaded-calculation = true
 
+exch.foreign-mode =      elite
+exch.difference-mode =   mean
 
 neat.shared-database =  true
 
