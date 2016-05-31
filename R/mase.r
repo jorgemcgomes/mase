@@ -427,6 +427,7 @@ metaAnalysis <- function(frame, formula, split=NULL, ...) {
   }
 }
 
+# ex: frameAnalysis(lastGen(data), BestSoFar~Setup)
 frameAnalysis <- function(frame, formula, summary=T, ttests=T, data=F, ...) {
   res <- list()
   if(summary) {

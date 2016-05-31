@@ -1,8 +1,8 @@
 exch =                   mase.spec.StochasticHybridExchanger
-exch.merge-threshold =   0.1
+exch.merge-threshold =   0.15
 exch.max-lockdown =      20
-exch.elite-portion =     1
-exch.weighted-silhouette = true
+exch.elite-portion =     0.2
+exch.weighted-silhouette = false
 exch.merge-mode =        elite
 exch.merge-proportion =  proportionate
 exch.homogeneous-start = false

@@ -53,6 +53,7 @@ public class MaseManagerTerminal implements StatusListener {
     private final DateFormat df = new SimpleDateFormat("HH-mm-ss");
     private final MaseManager mng;
     private int lines = 1;
+    private boolean mute = false;
 
     public MaseManagerTerminal(MaseManager mng) {
         this.mng = mng;
@@ -236,6 +237,12 @@ public class MaseManagerTerminal implements StatusListener {
                         }
                         
                         break;
+                    case "mute":
+                        this.mute = true;
+                        break;
+                    case "unmute":
+                        this.mute = false;
+                        break;
                     case "help":
                         System.out.println("Available commands:\n"
                                 + "-- addrunner      runner_type [config]\n"
@@ -256,6 +263,7 @@ public class MaseManagerTerminal implements StatusListener {
                                 + "-- clear          [waiting|completed|failed|runners]...\n"
                                 + "-- pause          [force]\n"
                                 + "-- start          \n"
+                                + "-- mute|unmute    \n"
                                 + "-- exit           \n"
                                 + "-- set            lines|tries value"
                         );
@@ -291,7 +299,9 @@ public class MaseManagerTerminal implements StatusListener {
 
     @Override
     public void message(String str) {
-        System.out.println("[+] " + df.format(new Date()) + " " + str);
+        if(!mute) {
+            System.out.println("[+] " + df.format(new Date()) + " " + str);
+        }
     }
 
     @Override

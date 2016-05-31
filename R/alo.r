@@ -247,18 +247,81 @@ ggplot(sum, aes(x=ID3, y=NumPops, fill=ID4)) + geom_boxplot() + facet_grid(ID5 ~
   theme(legend.position="none", axis.text.x = element_text(angle = 45, hjust = 1))
 
 
-setwd("~/labmag/exps/alo_parameters5/")
-fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_",jobs=0:10,parallel=F)
+
+### MERGE DISTANCE AND THRESHOLD ###############################
+
+setwd("~/exps/alo_parameters5/")
+fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_",parallel=F)
 fitness[, ID2 := factor(ID2,levels=c("0.10","0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.1","T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
 fitness[, ID4 := factor(ID4,levels=c("0","1","2"),labels=c("Weighted","Elite20","Flat"))]
 
 ggplot(lastGen(fitness), aes(x=ID3, y=BestSoFar, fill=ID4)) + geom_boxplot() + facet_wrap(~ ID2)
 
 l <- ddply(fitness,.(Setup,Job), fitnessLevelAchieved, 0.98, .progress="text")
-ggplot(l, aes(x=ID3, y=Evaluations, fill=ID4)) + geom_boxplot() + facet_wrap(~ ID2)
+ggplot(l, aes(x=ID3, y=Evaluations, fill=ID4)) + geom_boxplot() + facet_wrap(~ ID2, scales="free_y")
 
-hybrid <- loadData("*","hybrid.stat",auto.ids.sep="_",jobs=0:10,fun=loadFile, colnames=c("Generation","Evaluations","NumPops",NA,NA,NA,NA,NA,"Merges","Splits","TotalMerges","TotalSplits",NA,NA,NA), parallel=F)
+hybrid <- loadData("*","hybrid.stat",auto.ids.sep="_",fun=loadFile, colnames=c("Generation","Evaluations","NumPops",NA,NA,NA,"MeanAge","MaxAge","Merges","Splits","TotalMerges","TotalSplits",NA,"MeanDist",NA), parallel=F)
 hybrid[, ID2 := factor(ID2,levels=c("0.10","0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.1","T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
 hybrid[, ID4 := factor(ID4,levels=c("0","1","2"),labels=c("Weighted","Elite20","Flat"))]
 sum <- summaryBy(NumPops ~ Setup + Job, id=~ID2+ID3+ID4, hybrid, FUN=mean, keep.names=T)
 ggplot(sum, aes(x=ID3, y=NumPops, fill=ID4)) + geom_boxplot() + facet_wrap(~ ID2)
+
+
+hybfit <- merge(fitness, hybrid, by=c("ID1","ID2","ID3","ID4","Setup","Job","Generation"))
+hybfit <- hybfit[, .(ID2,ID3,ID4,Job,Generation,BestGen,Merges,Splits)]
+
+decays <- ddply(hybfit, .(ID2,ID3,ID4,Job), fitnessDecay, 1, .progress="text")
+setDT(decays)
+decays.melt <- melt(na.omit(decays))
+decays.sum <- summaryBy(value~ID2+ID3+ID4+variable, decays.melt, FUN=c(mean,se))
+
+ggplot(subset(decays.sum,variable=="Split1"), aes(ID3, value.mean, fill=ID4)) + geom_bar(position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=value.mean-value.se, ymax=value.mean+value.se), width=.2, position=position_dodge(.9)) +
+  facet_wrap(~ ID2, scales="free_y") + xlab("Merge threshold") + ylab("Fitness difference after the operation")
+
+
+
+### MAX LOCKDOWN PARAMETER #####################################
+
+setwd("~/exps/alo_parameters6/")
+fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_",parallel=F)
+fitness[, ID2 := factor(ID2,levels=c("0.10","0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.1","T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+fitness[, ID3 := factor(ID3,levels=c("1","5","10","20","35","50"))]
+fitness[, ID4 := factor(ID4,levels=c("0","1","2"),labels=c("5D","10D","15D"))]
+
+ggplot(lastGen(fitness), aes(x=ID3, y=BestSoFar, fill=ID4)) + geom_boxplot() + facet_wrap(~ ID2)
+
+l <- ddply(fitness,.(Setup,Job), fitnessLevelAchieved, 0.98, .progress="text")
+sum <- summaryBy(Evaluations ~ Setup, id=~ID2+ID3+ID4, l, FUN=c(mean,se))
+pd <- position_dodge(0)
+ggplot(sum, aes(x=ID3, y=Evaluations.mean, colour=ID4, group=ID4)) +
+  geom_errorbar(aes(ymin=Evaluations.mean-Evaluations.se, ymax=Evaluations.mean+Evaluations.se), width=.5, position=pd) +
+  geom_line(position=pd) + geom_point(position=pd) + facet_wrap(~ ID2, scales="free_y") + xlab("Max lockdown")
+
+hybrid <- loadData("*","hybrid.stat",auto.ids.sep="_",fun=loadFile, colnames=c("Generation","Evaluations","NumPops",NA,NA,NA,"MeanAge","MaxAge","Merges","Splits","TotalMerges","TotalSplits",NA,"MeanDist",NA), parallel=F)
+hybrid[, ID2 := factor(ID2,levels=c("0.10","0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.1","T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+hybrid[, ID3 := factor(ID3,levels=c("1","5","10","20","35","50"))]
+hybrid[, ID4 := factor(ID4,levels=c("0","1","2"),labels=c("5D","10D","15D"))]
+
+sum <- summaryBy(NumPops ~ Setup + Job, id=~ID2+ID3+ID4, hybrid, FUN=mean, keep.names=T)
+sum <- summaryBy(NumPops ~ Setup, id=~ID2+ID3+ID4, sum, FUN=c(mean,se))
+pd <- position_dodge(0)
+ggplot(sum, aes(x=ID3, y=NumPops.mean, colour=ID4, group=ID4)) +
+  geom_errorbar(aes(ymin=NumPops.mean-NumPops.se, ymax=NumPops.mean+NumPops.se), width=.5, position=pd) +
+  geom_line(position=pd) + geom_point(position=pd) + facet_wrap(~ ID2) + xlab("Max lockdown")
+
+
+
+
+### CHANGE CHECK ##################
+
+fitness <- loadData("~/exps/aloparameters5/*_0.2_1","fitness.stat",fun=loadFitness,auto.ids.sep="_",parallel=F)
+fitness <- loadData("~/exps/aloparameters7/*_0.2_0","fitness.stat",fun=loadFitness,auto.ids.sep="_",parallel=F)
+
+fitness[, ID2 := factor(ID2,levels=c("0.10","0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.1","T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+ggplot(lastGen(fitness), aes(x=ID2, y=BestSoFar)) + geom_boxplot()
+l <- ddply(fitness,.(Setup,Job), fitnessLevelAchieved, 0.98, .progress="text")
+ggplot(l, aes(x=ID2, y=Evaluations/1000)) + geom_boxplot() + ylim(0,1000)
+
+
+

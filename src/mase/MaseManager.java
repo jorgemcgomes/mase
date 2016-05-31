@@ -10,11 +10,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -93,7 +95,7 @@ public class MaseManager {
                         t.start();
                     }
                 }
-                for (Entry<JobRunner,Job> e : running.entrySet()) {
+                for (Entry<JobRunner, Job> e : running.entrySet()) {
                     e.getKey().updateOutput();
                 }
                 try {
@@ -141,17 +143,8 @@ public class MaseManager {
             runners.put(lr.id, lr);
         } else if (split[0].equalsIgnoreCase("ssh")) {
             final String ip = split[1];
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        SSHRunner sr = new SSHRunner(ip, runnerId++);
-                        runners.put(sr.id, sr);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }).start();
+            SSHRunner sr = new SSHRunner(ip, runnerId++);
+            runners.put(sr.id, sr);
         } else if (split[0].equalsIgnoreCase("conillon")) {
             ConillonRunner cr = new ConillonRunner(runnerId++);
             runners.put(cr.id, cr);
@@ -176,8 +169,12 @@ public class MaseManager {
             if (running.containsKey(r)) {
                 // Kill this runner, and add the running job back to the waiting list
                 Job cancelled = running.get(r);
-                r.interrupt();
                 waitingList.add(0, cancelled);
+            }
+            r.interrupt();
+            if (r instanceof SSHRunner) {
+                SSHRunner ssh = (SSHRunner) r;
+                SSH_INITTED.remove(ssh.ip);
             }
         }
     }
@@ -188,7 +185,7 @@ public class MaseManager {
         }
         List<Job> retry = findJobs(failed, id);
         retry.addAll(findJobs(completed, id));
-        for(Job j : retry) {
+        for (Job j : retry) {
             j.tries = 0;
         }
         failed.removeAll(retry);
@@ -494,7 +491,9 @@ public class MaseManager {
         }
 
         protected void interrupt() {
-            process.destroy();
+            if (process != null) {
+                process.destroy();
+            }
         }
 
         @Override
@@ -530,6 +529,8 @@ public class MaseManager {
         }
     }
 
+    private static final Set<String> SSH_INITTED = Collections.synchronizedSet(new HashSet<String>());
+
     public class SSHRunner extends JobRunner {
 
         private final String ip;
@@ -537,20 +538,25 @@ public class MaseManager {
         public SSHRunner(String ip, int id) throws Exception {
             super("ssh" + ip, id);
             this.ip = ip;
-            listener.message("Initializing @ " + toString());
-            if (Runtime.getRuntime().exec("ssh " + ip + " rm -rf build lib").waitFor() != 0
-                    || Runtime.getRuntime().exec("ssh " + ip + " mkdir -p build masetemp").waitFor() != 0
-                    || Runtime.getRuntime().exec("scp -r -q build/classes " + ip + ":build/classes").waitFor() != 0
-                    || Runtime.getRuntime().exec("scp -r -q dist/lib " + ip + ":lib").waitFor() != 0) {
-                throw new Exception("Initialization problems @ " + toString());
+            if (SSH_INITTED.contains(ip)) {
+                listener.message("Initialized without copy @ " + toString());
+            } else {
+                listener.message("Initializing @ " + toString());
+                if (Runtime.getRuntime().exec("ssh " + ip + " rm -rf build lib").waitFor() != 0
+                        || Runtime.getRuntime().exec("ssh " + ip + " mkdir -p build masetemp").waitFor() != 0
+                        || Runtime.getRuntime().exec("scp -r -q build/classes " + ip + ":build/classes").waitFor() != 0
+                        || Runtime.getRuntime().exec("scp -r -q dist/lib " + ip + ":lib").waitFor() != 0) {
+                    throw new Exception("Initialization problems @ " + toString());
+                }
+                listener.message("Initialized @ " + toString());
+                SSH_INITTED.add(ip);
             }
-            listener.message("Initialized @ " + toString());
         }
 
         @Override
         public boolean runJob(Job job) throws Exception {
             if (!checkConnection()) {
-                runners.remove(id);
+                killRunner(id);
                 return false;
             }
 

@@ -16,7 +16,7 @@ import mase.spec.AbstractHybridExchanger.MetaPopulation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
- * Generation | Evaluations | Min|Mean|Max agents in pop | 
+ * Generation | Evaluations | Number of pops | Min|Mean|Max agents in pop | 
  * Mean|Max pop age | Number of Merges|Splits in generation | Total number of Merges|Splits
  * [Min|Mean|Max population distance]
  * @author jorge

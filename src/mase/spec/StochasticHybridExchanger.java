@@ -130,7 +130,7 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
                 continue;
             }
             alloc[i] = new ArrayList<>();
-            Individual[] inds = getElitePortion(mp.inds, (int) Math.ceil(elitePortion * popSize));
+            Individual[] inds = getElitePortion(mp.pop.individuals, (int) Math.ceil(elitePortion * popSize));
             for (Individual ind : inds) {
                 for (Integer a : mp.agents) {
                     behavs.add(getAgentBR(ind, a));
@@ -304,7 +304,7 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         } else {
             mpNew.pop = (Subpopulation) mp2.pop.emptyClone();
         }
-        mpNew.inds = new Individual[mp1.inds.length];
+        mpNew.pop.individuals = new Individual[mp1.pop.individuals.length];
         mergeIndividuals(mpNew, mp1, mp2, state);
         return mpNew;
     }
@@ -313,18 +313,18 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         // The number of individuals to pick from each pop
         int from1 = 0;
         if (mergeProportion == MergeProportion.equal) {
-            from1 = mpNew.inds.length / 2;
+            from1 = mpNew.pop.individuals.length / 2;
         } else if (mergeProportion == MergeProportion.largest) {
-            from1 = mp1.agents.size() >= mp2.agents.size() ? mpNew.inds.length : 0;
+            from1 = mp1.agents.size() >= mp2.agents.size() ? mpNew.pop.individuals.length : 0;
         } else if (mergeProportion == MergeProportion.proportionate) {
-            from1 = Math.round((float) mp1.agents.size() / (mp1.agents.size() + mp2.agents.size()) * mpNew.inds.length);
+            from1 = Math.round((float) mp1.agents.size() / (mp1.agents.size() + mp2.agents.size()) * mpNew.pop.individuals.length);
         }
-        int from2 = mpNew.inds.length - from1;
+        int from2 = mpNew.pop.individuals.length - from1;
 
-        Individual[] picked1 = pickIndividuals(mp1.inds, from1, mergeMode, state);
-        Individual[] picked2 = pickIndividuals(mp2.inds, from2, mergeMode, state);
-        System.arraycopy(picked1, 0, mpNew.inds, 0, picked1.length);
-        System.arraycopy(picked2, 0, mpNew.inds, picked1.length, picked2.length);
+        Individual[] picked1 = pickIndividuals(mp1.pop.individuals, from1, mergeMode, state);
+        Individual[] picked2 = pickIndividuals(mp2.pop.individuals, from2, mergeMode, state);
+        System.arraycopy(picked1, 0, mpNew.pop.individuals, 0, picked1.length);
+        System.arraycopy(picked2, 0, mpNew.pop.individuals, picked1.length, picked2.length);
     }
 
     @Override
@@ -380,9 +380,9 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         MetaPopulation child = new MetaPopulation();
         child.agents.addAll(forkAgents);
         child.pop = (Subpopulation) parent.pop.emptyClone();
-        child.inds = new Individual[parent.inds.length];
-        for (int k = 0; k < parent.inds.length; k++) {
-            child.inds[k] = (Individual) parent.inds[k].clone();
+        child.pop.individuals = new Individual[parent.pop.individuals.length];
+        for (int k = 0; k < parent.pop.individuals.length; k++) {
+            child.pop.individuals[k] = (Individual) parent.pop.individuals[k].clone();
         }
         return child;
     }
