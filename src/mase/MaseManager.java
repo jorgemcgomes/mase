@@ -542,6 +542,10 @@ public class MaseManager {
                 listener.message("Initialized without copy @ " + toString());
             } else {
                 listener.message("Initializing @ " + toString());
+                boolean conn = checkConnection();
+                if(!conn) {
+                    throw new Exception("Unnable to establish connection @ " + toString());
+                }
                 if (Runtime.getRuntime().exec("ssh " + ip + " rm -rf build lib").waitFor() != 0
                         || Runtime.getRuntime().exec("ssh " + ip + " mkdir -p build masetemp").waitFor() != 0
                         || Runtime.getRuntime().exec("scp -r -q build/classes " + ip + ":build/classes").waitFor() != 0

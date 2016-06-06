@@ -1,0 +1,10 @@
+exch =                      mase.spec.RandomExchanger
+exch.foreign-proportion =   0.25
+exch.distance-elite =       0.20
+exch.behaviour-index =      2
+exch.distance-calculator =  mase.spec.SilhouetteDistanceCalculator
+exch.distance.threaded =    true
+
+neat.shared-database =      true
+
+stat.child.1.do-subpops =   false

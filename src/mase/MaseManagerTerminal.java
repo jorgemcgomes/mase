@@ -227,7 +227,7 @@ public class MaseManagerTerminal implements StatusListener {
                         break;
                     case "set":
                         String par = sc.next();
-                        switch(par) {
+                        switch (par) {
                             case "lines":
                                 lines = sc.nextInt();
                                 break;
@@ -235,7 +235,7 @@ public class MaseManagerTerminal implements StatusListener {
                                 mng.setMaxTries(sc.nextInt());
                                 break;
                         }
-                        
+
                         break;
                     case "mute":
                         this.mute = true;
@@ -282,7 +282,12 @@ public class MaseManagerTerminal implements StatusListener {
         String[] fileLines = content.split(System.getProperty("line.separator"));
         for (String l : fileLines) {
             if (!l.trim().isEmpty() && !l.startsWith("#")) {
-                mng.addJob(l);
+                try {
+                    mng.addJob(l);
+                } catch (Exception ex) {
+                    error(ex.getMessage());
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -292,14 +297,19 @@ public class MaseManagerTerminal implements StatusListener {
         String[] fileLines = content.split(System.getProperty("line.separator"));
         for (String l : fileLines) {
             if (!l.trim().isEmpty() && !l.startsWith("#")) {
-                mng.addRunner(l);
+                try {
+                    mng.addRunner(l);
+                } catch (Exception ex) {
+                    error(ex.getMessage());
+                    ex.printStackTrace();
+                }
             }
         }
     }
 
     @Override
     public void message(String str) {
-        if(!mute) {
+        if (!mute) {
             System.out.println("[+] " + df.format(new Date()) + " " + str);
         }
     }

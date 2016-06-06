@@ -49,14 +49,18 @@ metaLoadData <- function(folders, filenames=NULL, filename.ids=filenames, ids=li
 # folders: a vector of folders to be searched
 # filename: the filename pattern of the files to be loaded
 # names: vector with the setup names to be given for each of the folders. uses folder name if NULL
-# ids: list of vectors with additional ids to be given to each folder. Use "auto" for determining ids based on the filepath
+# ids: list of vectors with additional ids to be given to each folder. 
+# auto.ids: determine ids based on the filepath
+# auto.ids.names: column names for automatically determined ids (ID1,ID2,... if NULL)
 # jobs: vector with job numbers to be loaded
 # jobprefix: prefix used for jobs
 # recursive: search folders recursively
 # parallel: use multiple cores for data loading (no progress bar)
-# fun: function to be called to load one file
-# ...: parameters to fun
-loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto.ids.names=NULL, auto.ids.sep="/", jobs=NULL, jobprefix="job", recursive=F, parallel=F, fun="loadFile", ...) {
+# fun: function to be called to load one file. Must receive a file name and return a data.table
+# ...: other parameters to pass to fun
+# filter: function to apply to each loaded file (loaded by fun). Must receive a data.table and return a data.table
+# filter.par: other parameters to pass to filter.fun
+loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto.ids.names=NULL, auto.ids.sep="/", jobs=NULL, jobprefix="job", recursive=F, parallel=F, fun=loadFile, ..., filter=NULL, filter.par=list()) {
   folders <- Sys.glob(folders) # expand
   if(recursive) {
     folders <- as.vector(sapply(folders,list.dirs))
@@ -86,23 +90,31 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
   }
   cat("Going to load",length(allfiles),"files\n")
 
+  # file is a vector where the first position is the filepath and the other elements are the IDs for this file
   aux <- function(file, ...) {
-    f <- do.call(fun, args=c(file[1],list(...)))
-    job <- as.numeric(gsub("[^0-9]","",basename(file[1])))
-    f$Job <- rep(job,nrow(f))
+    f <- try(do.call(fun, args=c(file[1],list(...))))
+    if (class(file) == "try-error") {
+      cat("Fatal error:",file[1],"\n")
+      return(NULL)
+    }
+    if(!is.null(filter)) {
+      f <- do.call(filter, args=c(list(f),filter.par))
+    }
+    f[,Job := as.numeric(gsub("[^0-9]","",basename(file[1])))]
     for(id in names(file[-1])) {
-      f[[id]] <- file[id]
+      f[,(id) := file[id]]
     }
     return(f)
   }
-  
+
   if(parallel) {
-    clusterExport(cl, list("loadFile","loadWideFile","loadBehaviours","loadFitness"))
+    clusterExport(cl, list("fun","filter"), envir=environment(NULL))
   }
-  result <- ldply(allfiles, aux, ..., .progress="text", .parallel = parallel)
-  setDT(result)
-  for(id in names(ids)) set(result, j=id, value=factor(result[[id]],levels=unique(result[[id]])))
-  set(result,j="Job", value=as.factor(result$Job))
+  result <- llply(allfiles, aux, ..., .progress="text", .parallel=parallel)
+  result <- rbindlist(result)
+
+  cols <- c("Job",names(ids))
+  result[,(cols) := lapply(.SD, function(x){factor(x,levels=unique(x))}), .SDcols=cols]
   return(result)
 }
 
@@ -172,9 +184,7 @@ loadFitness <- function(file, loadSubs=F) {
 
 # Convenience function to filter data to only last generation of each setup
 lastGen <- function(data) {
-  d <- ddply(data, .(Setup,Job), function(x) subset(x, Generation==max(x$Generation)))
-  setDT(d)
-  return(d)
+  return(data[, .SD[.N],by=.(Setup,Job)])
 }
 
 #### Fitness plotting functions #####################################################################

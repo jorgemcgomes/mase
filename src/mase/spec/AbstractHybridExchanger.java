@@ -28,25 +28,41 @@ import mase.evaluation.SubpopEvaluationResult;
  */
 public abstract class AbstractHybridExchanger extends Exchanger {
 
-    public static final String P_HOMOGENEOUS_START = "homogeneous-start";
+    // list of allocations, separated by comma (ex: 0,0,1,1,2,2) OR V_HOMOGENEOUS OR V_HETEROGENEOUS
+    public static final String P_INITIAL_ALLOCATION = "initial-allocation";
+    public static final String V_HOMOGENEOUS = "homogeneous";
+    public static final String V_HETEROGENEOUS = "heterogeneous";
     public static final String P_BEHAVIOUR_INDEX = "behaviour-index";
     private static final long serialVersionUID = 1L;
     int popSize, nAgents;
     int behaviourIndex;
-    boolean homogeneousStart;
     List<MetaPopulation> metaPops;
+    // array with the length == number of agents, where each position indicates the agent-subpop allocation
     int[] allocations;
     int merges, splits;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
-        allocations = new int[state.parameters.getInt(new Parameter("pop.subpops"), null)]; // TODO: bad fix
-        for (int i = 0; i < allocations.length; i++) {
-            allocations[i] = i;
-        }
-        nAgents = allocations.length;
+        nAgents = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: bad dependency
+        allocations = new int[nAgents]; 
         behaviourIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), null);
-        homogeneousStart = state.parameters.getBoolean(base.push(P_HOMOGENEOUS_START), null, false);
+        String initial = state.parameters.getString(base.push(P_INITIAL_ALLOCATION), null);
+        
+        if(initial.equalsIgnoreCase(V_HOMOGENEOUS)) {
+            Arrays.fill(allocations, 0);
+        } else if(initial.equalsIgnoreCase(V_HETEROGENEOUS)) {
+            for (int i = 0; i < allocations.length; i++) {
+                allocations[i] = i;
+            }
+        } else {
+            String[] split = initial.split("[\\s\\,\\-]+");
+            if(split.length != nAgents) {
+                state.output.fatal("Initial allocation (" + split.length + ") does not match the number of agents (" + nAgents + ").", base.push(P_INITIAL_ALLOCATION));
+            }
+            for(int i = 0 ; i < allocations.length ; i++) {
+                allocations[i] = Integer.parseInt(split[i].trim());
+            }
+        }
     }
 
     /*
@@ -57,7 +73,6 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         // initialization -- first time in each evolutionary run
         if (metaPops == null) {
             popSize = state.population.subpops[0].individuals.length;
-            metaPops = new ArrayList<>();
             initializationProcess(state);
         }
 
@@ -137,19 +152,17 @@ public abstract class AbstractHybridExchanger extends Exchanger {
      Initialization, merging and spliting algorithms
      */
     protected void initializationProcess(EvolutionState state) {
-        if (homogeneousStart) {
-            MetaPopulation homo = new MetaPopulation();
-            for (int i = 0; i < state.population.subpops.length; i++) {
-                homo.agents.add(i);
+        metaPops = new ArrayList<>();
+        for(int i = 0 ; i < nAgents ; i++) {
+            MetaPopulation mp = new MetaPopulation();
+            for(int j = 0 ; j < allocations.length ; j++) {
+                if(allocations[j] == i) {
+                    mp.agents.add(j);
+                }
             }
-            homo.pop = state.population.subpops[0];
-            metaPops.add(homo);
-        } else {
-            for (int i = 0; i < state.population.subpops.length; i++) {
-                MetaPopulation pi = new MetaPopulation();
-                pi.agents.add(i);
-                pi.pop = state.population.subpops[i];
-                metaPops.add(pi);
+            if(!mp.agents.isEmpty()) {
+                mp.pop = state.population.subpops[i];
+                metaPops.add(mp);
             }
         }
     }
@@ -185,37 +198,6 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         }
     }
 
-    /*
-     Uses final scores
-     Sorts from the highest fitness to the lowest fitness
-     */
-    protected class FitnessComparator implements Comparator<Individual> {
-
-        @Override
-        public int compare(Individual o1, Individual o2) {
-            return Double.compare(o2.fitness.fitness(), o1.fitness.fitness());
-        }
-    }
-
-    protected Individual[] sortedCopy(Individual[] inds) {
-        inds = Arrays.copyOf(inds, inds.length);
-        Arrays.sort(inds, new FitnessComparator());
-        return inds;
-    }
-
-    protected Individual[] getElitePortion(Individual[] inds, int num) {
-        inds = sortedCopy(inds);
-        Individual[] elite = new Individual[num];
-        System.arraycopy(inds, 0, elite, 0, num);
-        return elite;
-    }
-
-    protected BehaviourResult getAgentBR(Individual ind, int agent) {
-        ExpandedFitness nf = (ExpandedFitness) ind.fitness;
-        SubpopEvaluationResult ser = (SubpopEvaluationResult) nf.getEvaluationResults()[behaviourIndex];
-        return (BehaviourResult) ser.getSubpopEvaluation(agent);
-    }
-
     public int[] getAllocations() {
         return allocations;
     }
@@ -229,4 +211,41 @@ public abstract class AbstractHybridExchanger extends Exchanger {
         return null;
     }
 
+    
+    /**
+     * UTIL METHODS
+     */
+    
+    /*
+     Uses final scores
+     Sorts from the highest fitness to the lowest fitness
+     */
+    protected static class FitnessComparator implements Comparator<Individual> {
+
+        @Override
+        public int compare(Individual o1, Individual o2) {
+            return Double.compare(o2.fitness.fitness(), o1.fitness.fitness());
+        }
+    }
+
+    protected static Individual[] sortedCopy(Individual[] inds) {
+        inds = Arrays.copyOf(inds, inds.length);
+        Arrays.sort(inds, new FitnessComparator());
+        return inds;
+    }
+
+    protected static Individual[] getElitePortion(Individual[] inds, int num) {
+        inds = sortedCopy(inds);
+        Individual[] elite = new Individual[num];
+        System.arraycopy(inds, 0, elite, 0, num);
+        return elite;
+    }
+
+    protected static BehaviourResult getAgentBR(Individual ind, int agent, int index) {
+        ExpandedFitness nf = (ExpandedFitness) ind.fitness;
+        SubpopEvaluationResult ser = (SubpopEvaluationResult) nf.getEvaluationResults()[index];
+        return (BehaviourResult) ser.getSubpopEvaluation(agent);
+    }
+    
+    
 }

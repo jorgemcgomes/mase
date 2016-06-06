@@ -35,8 +35,6 @@ public class AllocationProblem extends SimulationProblem {
     @Param()
     int numAgents;
     @Param()
-    int dimensions;
-    @Param()
     int[] types = null;
     @Param()
     int numTypes;
@@ -47,15 +45,18 @@ public class AllocationProblem extends SimulationProblem {
     @Param()
     int numClusters;
     @Param()
-    double minSeparation = -1; // sqrt(dimensions)/3 if -1
+    double minSeparation = 0; // sqrt(dimensions)/3 if -1
 
     private final EuclideanDistance dist = new EuclideanDistance();
     double[][] typesLoc;
+    int dimensions = -1;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         ParamUtils.autoSetParameters(this, state.parameters, base, defaultBase(), false);
+        
+        dimensions = state.parameters.getInt(new Parameter("vector.species.genome-size"), null);
 
         // calculate types, if not given
         if(types == null) {

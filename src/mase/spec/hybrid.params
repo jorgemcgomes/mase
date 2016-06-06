@@ -1,17 +1,20 @@
-exch =                   mase.spec.StochasticHybridExchanger
-exch.merge-threshold =   0.15
-exch.max-lockdown =      20
-exch.elite-portion =     0.2
-exch.weighted-silhouette = false
-exch.merge-mode =        elite
-exch.merge-proportion =  proportionate
-exch.homogeneous-start = false
-exch.split-mode =        random
-exch.behaviour-index =   2
-exch.threaded-calculation = true
+exch =                      mase.spec.StochasticHybridExchanger
+exch.merge-threshold =      0.15
+exch.max-lockdown =         20
+exch.distance-elite =       0.2
+
+exch.merge-selection =      truncate
+exch.merge-agents =         proportionate
+exch.split-agents =         random
+
+exch.distance-calculator =  mase.spec.SilhouetteDistanceCalculator
+exch.distance.threaded =    true
+
+exch.initial-allocation =   heterogeneous
+exch.behaviour-index =      2
 
 
-neat.shared-database =  true
+neat.shared-database =      true
 
 stat.child.20 =             mase.spec.HybridStat
 stat.child.20.file =        $hybrid.stat

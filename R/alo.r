@@ -1,5 +1,9 @@
-setwd("~/labmag/exps/alo_parameters/")
-f <- loadData("*/**","fitness.stat",fun=loadFitness)
+setwd("~/exps/aloparameters/")
+fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_")
+ggplot(lastGen(fitness), aes(x=ID3, y=BestSoFar, fill=ID4)) + geom_boxplot() + facet_wrap(~ ID2)
+
+
+
 
 f2 <- f
 f2$Evaluations <- discretize(f2$Evaluations, categories=50, ordered=T)
@@ -198,7 +202,7 @@ ggplot(l, aes(x=ID6, y=Evaluations)) + geom_boxplot() + facet_grid(ID7 ~ ID2) + 
   theme(legend.position="none", axis.text.x = element_text(angle = 45, hjust = 1))
 
 
-setwd("~/exps/alo_parameters3/")
+setwd("~/exps/aloparameters3/")
 fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_",parallel=F)
 fitness[, ID2 := factor(ID2,levels=c("0.10","0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.1","T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
 fitness[, ID3 := factor(ID3,labels=c("5/1.7","10/3.3","20/6.7","30/10"))]
@@ -316,6 +320,8 @@ ggplot(sum, aes(x=ID3, y=NumPops.mean, colour=ID4, group=ID4)) +
 ### CHANGE CHECK ##################
 
 fitness <- loadData("~/exps/aloparameters5/*_0.2_1","fitness.stat",fun=loadFitness,auto.ids.sep="_",parallel=F)
+
+
 fitness <- loadData("~/exps/aloparameters7/*_0.2_0","fitness.stat",fun=loadFitness,auto.ids.sep="_",parallel=F)
 
 fitness[, ID2 := factor(ID2,levels=c("0.10","0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.1","T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
@@ -325,3 +331,90 @@ ggplot(l, aes(x=ID2, y=Evaluations/1000)) + geom_boxplot() + ylim(0,1000)
 
 
 
+### FINAL PARAMS #################
+
+fitnessLevelAchieved <- function(data, threshold) {
+  w <- which(data$BestSoFar > threshold)
+  if(length(w) > threshold) {
+    return(data[min(w)])
+  } else {
+    return(tail(data,1))
+  }
+}
+
+setwd("~/exps/aloparamsfinal/")
+fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_", parallel=T, filter=tail,filter.par=list(n=1))
+fitness[, ID2 := factor(ID2,levels=c("0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+fitness[, ID3 := factor(ID3,levels=c("5","10","20","30"))]
+fitness[, ID5 := factor(ID5,levels=c("1","5","10","20","35","50"))]
+
+sum <- fitness[, .(BestMean=mean(BestSoFar)), by=.(ID2,ID3,ID4,ID5)]
+ggplot(sum, aes(ID4,ID5)) + geom_tile(aes(fill = BestMean), colour="white") + 
+  scale_fill_distiller(type="seq", palette="Reds", direction=1, na.value="white") +
+  facet_grid(ID3 ~ ID2) + xlab("Merge threshold") + ylab("Max lockdown") 
+
+ggplot(fitness, aes(ID4,BestSoFar)) + geom_boxplot(aes(fill = ID5)) + facet_grid(ID3 ~ ID2) 
+
+ggplot(fitness[ID4=="0.15"], aes(ID5,BestSoFar)) + geom_boxplot(aes(fill = ID3)) + facet_wrap(~ ID2) 
+
+
+agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(ID4,ID5)]
+agg[, Setup := reorder(paste(ID4,ID5),Mean)]
+
+agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(ID4)]
+agg[, Setup := reorder(ID4,Mean)]
+
+agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(ID5)]
+agg[, Setup := reorder(ID5,Mean)]
+
+ggplot(agg, aes(x=Setup, y=Mean)) + geom_bar(stat="identity") + 
+  geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE),width=0.5) +
+  theme(legend.position="none", axis.text.x = element_text(angle = 45, hjust = 1))
+
+evals <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_", parallel=T, filter=fitnessLevelAchieved,filter.par=list(0.9))
+evals[, ID2 := factor(ID2,levels=c("0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+evals[, ID3 := factor(ID3,levels=c("5","10","20","30"))]
+evals[, ID5 := factor(ID5,levels=c("1","5","10","20","35","50"))]
+
+sum <- evals[, .(EvalMean=mean(Evaluations)), by=.(ID2,ID3,ID4,ID5)]
+ggplot(sum, aes(ID4,ID5)) + geom_tile(aes(fill = EvalMean), colour="white") + 
+  scale_fill_distiller(type="seq", palette="Reds", direction=1, na.value="white") +
+  facet_grid(ID3 ~ ID2) + xlab("Merge threshold") + ylab("Max lockdown") 
+
+ggplot(evals, aes(ID4,Evaluations)) + geom_bar(aes(fill = ID5), stat="identity",position="dodge") + facet_grid(ID3 ~ ID2) 
+
+
+hyb.cols <- c("Generation","Evaluations","NumPops",NA,NA,NA,"MeanAge","MaxAge","Merges","Splits","TotalMerges","TotalSplits",NA,"MeanDist",NA)
+hybrid <- loadData("*","hybrid.stat",auto.ids.sep="_",fun=loadFile, colnames=hyb.cols, filter=function(df) {df[, .(NumPops = mean(NumPops))]}, parallel=T)
+hybrid[, ID2 := factor(ID2,levels=c("0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+hybrid[, ID3 := factor(ID3,levels=c("5","10","20","30"))]
+hybrid[, ID5 := factor(ID5,levels=c("1","5","10","20","35","50"))]
+
+sum <- hybrid[, .(NumPopsMean=mean(NumPops)), by=.(ID2,ID3,ID4,ID5)]
+ggplot(sum, aes(ID4,ID5)) + geom_tile(aes(fill = NumPopsMean), colour="white") + 
+  scale_fill_distiller(type="seq", palette="Reds", direction=1, na.value="white") +
+  facet_grid(ID3 ~ ID2) + xlab("Merge threshold") + ylab("Max lockdown") 
+
+
+setwd("~/exps/aloparamsfinalelite/")
+fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_", parallel=F, filter=tail,filter.par=list(n=1))
+fitness[, ID2 := factor(ID2,levels=c("0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+
+sum <- fitness[, .(BestMean=mean(BestSoFar)), by=.(ID2,ID4,ID6)]
+ggplot(sum, aes(ID4,ID6)) + geom_tile(aes(fill = BestMean), colour="white") + 
+  scale_fill_distiller(type="seq", palette="Reds", direction=1, na.value="white") +
+  facet_wrap(~ ID2)
+
+hybrid <- loadData("*","hybrid.stat",auto.ids.sep="_",fun=loadFile, colnames=hyb.cols, filter=function(df) {df[, .(NumPops = mean(NumPops))]}, parallel=T)
+hybrid[, ID2 := factor(ID2,levels=c("0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+sum <- hybrid[, .(NumPopsMean=mean(NumPops)), by=.(ID2,ID4,ID6)]
+ggplot(sum, aes(ID4,ID6)) + geom_tile(aes(fill = NumPopsMean), colour="white") + 
+  scale_fill_distiller(type="seq", palette="Reds", direction=1, na.value="white") +
+  facet_wrap(~ ID2) + xlab("Merge threshold") + ylab("Max lockdown") 
+
+evals <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_", parallel=T, filter=fitnessLevelAchieved,filter.par=list(0.95))
+evals[, ID2 := factor(ID2,levels=c("0.25","0.50","0.75","10","5","3","1"),labels=c("T10S0.25","T10S0.50","T10S0.75","T10S1","T5S1","T3S1","T1S1"))]
+sum <- evals[, .(EvalMean=mean(Evaluations)), by=.(ID2,ID4,ID6)]
+ggplot(sum, aes(ID4,ID6)) + geom_tile(aes(fill = EvalMean), colour="white") + 
+  scale_fill_distiller(type="seq", palette="Reds", direction=1, na.value="white") +
+  facet_wrap(~ ID2) + xlab("Merge threshold") + ylab("Max lockdown") 

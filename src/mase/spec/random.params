@@ -1,0 +1,6 @@
+exch =                      mase.spec.RandomExchanger
+exch.foreign-proportion =   0.25
+
+neat.shared-database =      true
+
+stat.child.1.do-subpops =   false
