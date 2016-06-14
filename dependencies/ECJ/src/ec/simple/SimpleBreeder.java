@@ -395,7 +395,7 @@ public class SimpleBreeder extends Breeder
             if (!shouldBreedSubpop(state, subpop, threadnum))  
                 {
                 // instead of breeding, we should just copy forward this subpopulation.  We'll copy the part we're assigned
-                for(int ind=from[subpop] ; ind < numinds[subpop] - from[subpop]; ind++)
+                for(int ind=from[subpop] ; ind < numinds[subpop] + from[subpop]; ind++)
                     // newpop.subpops[subpop].individuals[ind] = (Individual)(state.population.subpops[subpop].individuals[ind].clone());
                     // this could get dangerous
                     newpop.subpops[subpop].individuals[ind] = state.population.subpops[subpop].individuals[ind];
