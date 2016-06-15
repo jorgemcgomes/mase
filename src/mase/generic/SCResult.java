@@ -12,107 +12,145 @@ import java.util.Map.Entry;
 import java.util.Set;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.BehaviourResult;
-import mase.evaluation.VectorBehaviourResult;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
  * @author jorge
  */
-public class SCResult extends VectorBehaviourResult {
+public class SCResult implements BehaviourResult {
 
     private static final long serialVersionUID = 1;
-    protected Map<Integer, Double> counts;
-    protected Map<Integer, byte[]> states;
-    protected int removedByFilter;
-    protected double[] rawClusteredCount;
+    protected Map<Integer, Integer> counts;
+    protected int originalSize;
 
-    public SCResult(Map<Integer, Double> counts, Map<Integer, byte[]> states, int dist) {
+    public SCResult(Map<Integer, Integer> counts) {
         this.counts = counts;
-        this.states = states;
-        this.removedByFilter = 0;
-        this.dist = dist;
-        this.behaviour = null;
+        this.originalSize = counts.size();
     }
 
     @Override
     public Object value() {
-        if (behaviour != null) {
-            return super.value();
-        } else {
-            return Pair.of(counts, states);
-        }
+        return counts;
     }
 
     @Override
     public SCResult mergeEvaluations(EvaluationResult[] results) {
-        Map<Integer, Double> mergedCounts = new HashMap<>();
-        Map<Integer, byte[]> mergedStates = new HashMap<>();
-        for (EvaluationResult er : results) {
-            SCPostEvaluator.mergeCountMap(mergedCounts, ((SCResult) er).getCounts());
-            mergedStates.putAll(((SCResult) er).getStates());
+        SCResult first = (SCResult) results[0];
+        int totalOriginalSize = first.originalSize;
+        Map<Integer, Integer> mergedCounts = (Map<Integer, Integer>) ((HashMap) first.counts).clone();
+        for (int i = 1 ; i < results.length ; i++) {
+            SCResult r = (SCResult) results[i];
+            totalOriginalSize += r.originalSize;
+            mergeCountMap(mergedCounts, r.counts);
         }
-        return new SCResult(mergedCounts, mergedStates, dist);
+        SCResult newRes = new SCResult(mergedCounts);
+        newRes.originalSize = totalOriginalSize;
+        return newRes;
     }
 
     @Override
     public double distanceTo(BehaviourResult br) {
-        if (behaviour == null) {
-            SCResult other = (SCResult) br;
-            // make the counts vectors -- aligned by the same states
-            Set<Integer> shared = new HashSet<>(this.counts.keySet());
-            shared.retainAll(other.counts.keySet());
-            int size = this.counts.size() + other.counts.size() - shared.size();
-            double[] v1 = new double[size];
-            double[] v2 = new double[size];
-            int index = 0;
-            // shared elements
-            for (Integer h : shared) {
-                v1[index] = this.counts.get(h);
-                v2[index] = other.counts.get(h);
-                index++;
-            }
-            // only elements from this
-            for (Integer h : this.counts.keySet()) {
-                if (!shared.contains(h)) {
-                    v1[index] = this.counts.get(h);
-                }
-            }
-            // only elements from other
-            for (Integer h : other.counts.keySet()) {
-                if (!shared.contains(h)) {
-                    v2[index] = other.counts.get(h);
-                }
-            }
-            return super.vectorDistance(v1, v2);
-        } else {
-            return super.distanceTo(br);
+        SCResult other = (SCResult) br;
+        int diffs = 0;
+        int total = 0;
+        
+        // set intersection -- shared states
+        Set<Integer> shared = new HashSet<>(this.counts.keySet());
+        shared.retainAll(other.counts.keySet());
+               
+        // shared elements
+        for (Integer h : shared) {
+            int c1 = this.counts.get(h);
+            int c2 = other.counts.get(h);
+            diffs += Math.abs(c1 - c2);
+            total += c1 + c2;
         }
-    }
+        // The GECCO paper probably had a bug in the next code, as it was not
+        // incrementing the index. This means that only the shared elements
+        // where being effectively used for the comparison
 
+        // only elements from this
+        for (Integer h : this.counts.keySet()) {
+            if (!shared.contains(h)) {
+                int c = this.counts.get(h);
+                diffs += c;
+                total += c;
+            }
+        }
+        // only elements from other
+        for (Integer h : other.counts.keySet()) {
+            if (!shared.contains(h)) {
+                int c = other.counts.get(h);
+                diffs += c;
+                total += c;
+            }
+        }
+        return (double) diffs / total;
+    }
 
 
     @Override
     public String toString() {
-        //return "SC";
-        StringBuilder sb = new StringBuilder();
-        for (Iterator<Entry<Integer, Double>> iter = counts.entrySet().iterator(); iter.hasNext();) {
-            Entry<Integer, Double> e = iter.next();
-            sb.append(e.getKey());
-            sb.append(">");
-            sb.append(e.getValue());
-            if (iter.hasNext()) {
-                sb.append(";");
+        return counts.size() + " " + (originalSize - counts.size());
+        /*
+        // the states and counts pairs, sorted by counts
+        List<Entry<Integer,Integer>> list = new ArrayList<>(counts.entrySet());
+        Collections.sort(list, new Comparator<Entry<Integer,Integer>>() {
+            @Override
+            public int compare(Entry<Integer, Integer> o1, Entry<Integer, Integer> o2) {
+                return Integer.compare(o2.getValue(), o1.getValue());
             }
+        });
+        StringBuilder sb = new StringBuilder();
+        for (Entry<Integer, Integer> e : list) {
+            sb.append(e.getKey()).append(">").append(e.getValue()).append(";");
         }
-        return new String(sb);
+        return new String(sb);*/
     }
 
-    public Map<Integer, Double> getCounts() {
+    public Map<Integer, Integer> getCounts() {
         return counts;
     }
 
-    public Map<Integer, byte[]> getStates() {
-        return states;
+    protected void filter(double percentageThreshold) {
+        int totalCount = 0;
+        for (Integer c : getCounts().values()) {
+            totalCount += c;
+        }
+        int threshold = (int) Math.round(totalCount * percentageThreshold);
+        filter(threshold);
+    }
+    
+    protected void filter(int countThreshold) {
+        // fail-safe in case all are to be removed
+        // retain only the element with highest count
+        Entry<Integer,Integer> highestCount = null;
+        for(Entry<Integer,Integer> e : counts.entrySet()) {
+            if(highestCount == null || e.getValue() > highestCount.getValue()) {
+                highestCount = e;
+            }
+        }
+        
+        for(Iterator<Map.Entry<Integer, Integer>> it = counts.entrySet().iterator(); it.hasNext(); ) {
+            Entry<Integer, Integer> next = it.next();
+            if(next.getValue() < countThreshold) {
+                it.remove();
+            }
+        }
+        
+        if(counts.isEmpty()) {
+            counts.put(highestCount.getKey(), highestCount.getValue());
+        }     
+    }
+
+    
+    protected static void mergeCountMap(Map<Integer, Integer> map, Map<Integer, Integer> other) {
+        for (Map.Entry<Integer, Integer> e : other.entrySet()) {
+            if (!map.containsKey(e.getKey())) {
+                map.put(e.getKey(), e.getValue());
+            } else {
+                map.put(e.getKey(), map.get(e.getKey()) + e.getValue());
+            }
+        }
     }
 }

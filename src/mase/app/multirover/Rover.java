@@ -8,7 +8,6 @@ package mase.app.multirover;
 import java.awt.Color;
 import mase.app.multirover.RedRock.RockType;
 import mase.controllers.AgentController;
-import mase.mason.world.AbstractEffector;
 import mase.mason.world.AbstractSensor;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;

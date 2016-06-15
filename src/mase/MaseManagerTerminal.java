@@ -52,7 +52,7 @@ public class MaseManagerTerminal implements StatusListener {
 
     private final DateFormat df = new SimpleDateFormat("HH-mm-ss");
     private final MaseManager mng;
-    private int lines = 1;
+    private int lines = 3;
     private boolean mute = false;
 
     public MaseManagerTerminal(MaseManager mng) {
@@ -143,15 +143,18 @@ public class MaseManagerTerminal implements StatusListener {
                         while (sc.hasNext()) {
                             String t = sc.next();
                             if (t.equals("failed")) {
-                                for (Job j : mng.failed) {
-                                    System.out.println(df.format(j.completed) + " " + j);
+                                for(int i = mng.failed.size() - 1 ; i >= 0 ; i--) {
+                                    Job j = mng.failed.get(i);
+                                    System.out.println(df.format(j.submitted) + " " + j);
                                 }
                             } else if (t.equals("completed")) {
-                                for (Job j : mng.completed) {
-                                    System.out.println(df.format(j.completed) + " " + j);
+                                for(int i = mng.completed.size() - 1 ; i >= 0 ; i--) {
+                                    Job j = mng.completed.get(i);
+                                    System.out.println(df.format(j.submitted) + " " + j);
                                 }
                             } else if (t.equals("waiting")) {
-                                for (Job j : mng.waitingList) {
+                                for(int i = mng.waitingList.size() - 1 ; i >= 0 ; i--) {
+                                    Job j = mng.waitingList.get(i);
                                     System.out.println(df.format(j.submitted) + " " + j);
                                 }
                             } else if (t.equals("runners")) {

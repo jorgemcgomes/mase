@@ -5,6 +5,7 @@
 package mase.evaluation;
 
 import java.util.Arrays;
+import java.util.Locale;
 import net.jafama.FastMath;
 
 /**
@@ -16,7 +17,7 @@ public class VectorBehaviourResult implements BehaviourResult {
     private static final long serialVersionUID = 1;
     protected double[] behaviour;
     protected int dist;
-    public static final int COSINE = 0, BRAY_CURTIS = 1, EUCLIDEAN = 2;
+    public static final int COSINE = 0, BRAY_CURTIS = 1, EUCLIDEAN = 2, MANHATTAN = 3;
 
 
     public VectorBehaviourResult(double... bs) {
@@ -61,9 +62,9 @@ public class VectorBehaviourResult implements BehaviourResult {
 
     @Override
     public String toString() {
-        String res = "";
-        for (int i = 0; i < behaviour.length; i++) {
-            res += String.format("%.3f ", behaviour[i]);
+        String res = String.format(Locale.ENGLISH, "%.5f", behaviour[0]);
+        for (int i = 1; i < behaviour.length; i++) {
+            res += String.format(Locale.ENGLISH, " %.5f", behaviour[i]);
         }
         return res;
     }
@@ -80,6 +81,12 @@ public class VectorBehaviourResult implements BehaviourResult {
                 return diffs / total;
             case COSINE:
                 return cosineSimilarity(v1, v2);
+            case MANHATTAN:
+                double diff = 0;
+                for(int i = 0 ; i < v1.length ; i++) {
+                    diff += Math.abs(v1[i] - v2[i]);
+                }
+                return diff;
             default:
             case EUCLIDEAN:
                 double d = 0;

@@ -5,6 +5,7 @@
  */
 package mase.app.allocation;
 
+import java.util.Arrays;
 import mase.controllers.AgentController;
 
 /**
@@ -14,14 +15,14 @@ import mase.controllers.AgentController;
 public class AllocationAgent implements AgentController {
 
     private static final long serialVersionUID = 1L;
-    private final double[] type;
+    private final double[] location;
     
-    AllocationAgent(double[] type) {
-        this.type = type;
+    AllocationAgent(double[] location) {
+        this.location = location;
     }
 
-    public double[] getType() {
-        return type;
+    public double[] getLocation() {
+        return location;
     }
     
     @Override
@@ -36,7 +37,14 @@ public class AllocationAgent implements AgentController {
 
     @Override
     public AgentController clone() {
-        return new AllocationAgent(type);
+        return new AllocationAgent(location);
     }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(location);
+    }
+    
+    
     
 }

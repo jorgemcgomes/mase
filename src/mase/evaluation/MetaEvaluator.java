@@ -48,11 +48,11 @@ public class MetaEvaluator extends Evaluator {
     @Override
     public void evaluatePopulation(EvolutionState state) {
         baseEvaluator.evaluatePopulation(state);
-        for (PostEvaluator postEval : postEvaluators) {
-            postEval.processPopulation(state);
-        }
         for(Subpopulation sub : state.population.subpops) {
             totalEvaluations += sub.individuals.length;
+        }
+        for (PostEvaluator postEval : postEvaluators) {
+            postEval.processPopulation(state);
         }
         // necessary hack to load the elites in the CoevolutionaryEvaluator
         if (baseEvaluator instanceof CoevolutionaryEvaluator) {            

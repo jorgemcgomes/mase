@@ -18,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.PostEvaluator;
-import static mase.generic.SCPostEvaluator.mergeCountMap;
 import mase.novelty.NoveltyEvaluation;
 import mase.novelty.NoveltyEvaluation.ArchiveEntry;
 import net.jafama.FastMath;
@@ -69,7 +68,7 @@ public class ClusterSCPostEvaluator extends SCPostEvaluator {
         // Integrate the information from the evaluations of this generation
         for (SCResult scr : super.currentPop) {
             genKeys.addAll(scr.getCounts().keySet());
-            mergeCountMap(buffer, scr.getCounts());
+            SCResult.mergeCountMap(buffer, scr.getCounts());
         }
 
         // Initialize

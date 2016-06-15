@@ -1,3 +1,5 @@
+parent.0 = ../cooperative.params
+
 exch =                      mase.spec.RandomExchanger
 exch.foreign-proportion =   0.25
 

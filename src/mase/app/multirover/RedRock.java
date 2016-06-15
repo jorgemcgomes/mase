@@ -33,8 +33,10 @@ public class RedRock extends WorldObject implements Steppable {
         AA(Color.RED, new int[]{0, 0}),
         BB(Color.BLUE, new int[]{1, 1}),
         AB(Color.CYAN, new int[]{0, 1}),
+        ABC(Color.BLACK, new int[]{0, 1, 2}),
         Z(Color.GRAY, new int[]{Rover.NO_ACTIVATION}),
-        ZZ(Color.GRAY, new int[]{Rover.NO_ACTIVATION, Rover.NO_ACTIVATION});
+        ZZ(Color.GRAY, new int[]{Rover.NO_ACTIVATION, Rover.NO_ACTIVATION}),
+        ZZZ(Color.GRAY, new int[]{Rover.NO_ACTIVATION, Rover.NO_ACTIVATION, Rover.NO_ACTIVATION});
 
         public final Color color;
         public final int[] actuators;

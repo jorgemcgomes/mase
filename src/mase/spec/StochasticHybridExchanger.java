@@ -79,6 +79,23 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         distCalculator.setup(state, base.push(DistanceCalculator.P_BASE));
     }
 
+    @Override
+    protected void initializationProcess(EvolutionState state) {
+        super.initializationProcess(state);
+        for (MetaPopulation mp : metaPops) {
+            mp.lockDown = calculateLockDown(mp, state);
+        }
+    }    
+    
+    protected int calculateLockDown(MetaPopulation pop, EvolutionState state) {
+        return state.random[0].nextInt(maxLockdown);
+    }
+    
+    
+    /*****************
+     * MERGE PROCESS
+     *****************/    
+    
     /* Similar to bottom-up (agglomerative) hierarchical clustering */
     @Override
     protected int mergeProcess(EvolutionState state) {
@@ -98,36 +115,7 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         }
         return 0;
     }
-
-    @Override
-    protected void initializationProcess(EvolutionState state) {
-        super.initializationProcess(state);
-        for (MetaPopulation mp : metaPops) {
-            mp.lockDown = calculateLockDown(mp, state);
-        }
-    }
-
-    protected double[][] computeMetapopDistances(EvolutionState state) {
-        // Retrieve agent behaviours, aggregated by MetaPopulation
-        List<BehaviourResult>[] behavs = new List[metaPops.size()];
-        for (int i = 0; i < metaPops.size(); i++) {
-            MetaPopulation mp = metaPops.get(i);
-            if (mp.age < mp.lockDown) {
-                behavs[i] = Collections.EMPTY_LIST;
-            } else {
-                behavs[i] = new ArrayList<>();
-                Individual[] elite = getElitePortion(mp.pop.individuals, (int) Math.ceil(distanceElite * popSize));
-                for (Individual ind : elite) {
-                    for (Integer a : mp.agents) {
-                        behavs[i].add(getAgentBR(ind, a, behaviourIndex));
-                    }
-                }                
-            }
-        }
-        return distCalculator.computeDistances(behavs, state);
-    }
-
-
+    
     protected Pair<MetaPopulation, MetaPopulation> findNextMerge(double[][] distanceMatrix, EvolutionState state) {
         MetaPopulation closeI = null, closeJ = null;
         double closest = 0;
@@ -167,11 +155,11 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
             mpNew.pop = (Subpopulation) mp2.pop.emptyClone();
         }
         mpNew.pop.individuals = new Individual[mp1.pop.individuals.length];
-        mergeIndividuals(mpNew, mp1, mp2, state);
+        fillNewPopulation(mpNew, mp1, mp2, state);
         return mpNew;
-    }
+    }    
 
-    protected void mergeIndividuals(MetaPopulation mpNew, MetaPopulation mp1, MetaPopulation mp2, EvolutionState state) {
+    protected void fillNewPopulation(MetaPopulation mpNew, MetaPopulation mp1, MetaPopulation mp2, EvolutionState state) {
         // The number of individuals to pick from each pop
         int from1 = 0;
         if (mergeProportion == MergeAgentsProportion.equal) {
@@ -183,12 +171,79 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         }
         int from2 = mpNew.pop.individuals.length - from1;
 
-        Individual[] picked1 = pickIndividuals(mp1.pop.individuals, from1, mergeSelection, state);
-        Individual[] picked2 = pickIndividuals(mp2.pop.individuals, from2, mergeSelection, state);
+        Individual[] picked1 = selectIndividuals(mp1.pop.individuals, from1, mergeSelection, state);
+        Individual[] picked2 = selectIndividuals(mp2.pop.individuals, from2, mergeSelection, state);
         System.arraycopy(picked1, 0, mpNew.pop.individuals, 0, picked1.length);
         System.arraycopy(picked2, 0, mpNew.pop.individuals, picked1.length, picked2.length);
+    }    
+    
+    protected Individual[] selectIndividuals(Individual[] pool, int num, MergeSelection mode, EvolutionState state) {
+        Individual[] picked = new Individual[num];
+        if (mode == MergeSelection.truncate) {
+            Individual[] sorted = sortedCopy(pool);
+            System.arraycopy(sorted, 0, picked, 0, num);
+        } else if (mode == MergeSelection.fitnessproportionate) {
+            double total = 0;
+            LinkedList<Individual> poolList = new LinkedList<>();
+            for (Individual ind : pool) {
+                poolList.add(ind);
+                total += ((SimpleFitness) ind.fitness).fitness();
+            }
+            int index = 0;
+            while (index < num) {
+                double accum = 0;
+                double rand = state.random[0].nextDouble() * total;
+                Iterator<Individual> iter = poolList.iterator();
+                while (iter.hasNext()) {
+                    Individual ind = iter.next();
+                    accum += ((SimpleFitness) ind.fitness).fitness();
+                    if (accum >= rand) {
+                        picked[index++] = ind;
+                        iter.remove();
+                        total -= ((SimpleFitness) ind.fitness).fitness();
+                        break;
+                    }
+                }
+            }
+        } else if (mode == MergeSelection.random) {
+            LinkedList<Individual> poolList = new LinkedList<>(Arrays.asList(pool));
+            int index = 0;
+            while (index < num) {
+                int rand = state.random[0].nextInt(poolList.size());
+                picked[index++] = poolList.get(rand);
+                poolList.remove(rand);
+            }
+        } else {
+            state.output.fatal("Unknown picking mode: " + mode);
+        }
+        return picked;
+    }
+    
+    protected double[][] computeMetapopDistances(EvolutionState state) {
+        // Retrieve agent behaviours, aggregated by MetaPopulation
+        List<BehaviourResult>[] behavs = new List[metaPops.size()];
+        for (int i = 0; i < metaPops.size(); i++) {
+            MetaPopulation mp = metaPops.get(i);
+            if (mp.age < mp.lockDown) {
+                behavs[i] = Collections.EMPTY_LIST;
+            } else {
+                behavs[i] = new ArrayList<>();
+                Individual[] elite = getElitePortion(mp.pop.individuals, (int) Math.ceil(distanceElite * popSize));
+                for (Individual ind : elite) {
+                    for (Integer a : mp.agents) {
+                        behavs[i].add(getAgentBR(ind, a, behaviourIndex));
+                    }
+                }                
+            }
+        }
+        return distCalculator.computeDistances(behavs, state);
     }
 
+
+    /*****************
+     * SPLIT PROCESS
+     *****************/
+    
     @Override
     protected int splitProcess(EvolutionState state) {
         // Find new splits
@@ -247,51 +302,5 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
             child.pop.individuals[k] = (Individual) parent.pop.individuals[k].clone();
         }
         return child;
-    }
-
-    protected int calculateLockDown(MetaPopulation pop, EvolutionState state) {
-        return state.random[0].nextInt(maxLockdown);
-    }
-
-    protected Individual[] pickIndividuals(Individual[] pool, int num, MergeSelection mode, EvolutionState state) {
-        Individual[] picked = new Individual[num];
-        if (mode == MergeSelection.truncate) {
-            Individual[] sorted = sortedCopy(pool);
-            System.arraycopy(sorted, 0, picked, 0, num);
-        } else if (mode == MergeSelection.fitnessproportionate) {
-            double total = 0;
-            LinkedList<Individual> poolList = new LinkedList<>();
-            for (Individual ind : pool) {
-                poolList.add(ind);
-                total += ((SimpleFitness) ind.fitness).fitness();
-            }
-            int index = 0;
-            while (index < num) {
-                double accum = 0;
-                double rand = state.random[0].nextDouble() * total;
-                Iterator<Individual> iter = poolList.iterator();
-                while (iter.hasNext()) {
-                    Individual ind = iter.next();
-                    accum += ((SimpleFitness) ind.fitness).fitness();
-                    if (accum >= rand) {
-                        picked[index++] = ind;
-                        iter.remove();
-                        total -= ((SimpleFitness) ind.fitness).fitness();
-                        break;
-                    }
-                }
-            }
-        } else if (mode == MergeSelection.random) {
-            LinkedList<Individual> poolList = new LinkedList<>(Arrays.asList(pool));
-            int index = 0;
-            while (index < num) {
-                int rand = state.random[0].nextInt(poolList.size());
-                picked[index++] = poolList.get(rand);
-                poolList.remove(rand);
-            }
-        } else {
-            state.output.fatal("Unknown picking mode: " + mode);
-        }
-        return picked;
     }
 }

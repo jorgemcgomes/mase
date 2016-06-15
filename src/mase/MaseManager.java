@@ -84,8 +84,10 @@ public class MaseManager {
                                     completed.add(nextJob);
                                     listener.message("Job completed: " + nextJob + " @ " + nextRunner);
                                 } else if (nextJob.tries < maxTries) {
-                                    listener.message("Job failed: " + nextJob + " @ " + nextRunner + " -- Retrying later (" + nextJob.tries + "/" + maxTries + ")");
-                                    waitingList.add(nextJob);
+                                    if(!existsSimilar(nextJob)) {
+                                        listener.message("Job failed: " + nextJob + " @ " + nextRunner + " -- Retrying later (" + nextJob.tries + "/" + maxTries + ")");
+                                        waitingList.add(nextJob);
+                                    }
                                 } else {
                                     failed.add(nextJob);
                                     listener.error("Job failed: " + nextJob + " @ " + nextRunner);
@@ -276,7 +278,7 @@ public class MaseManager {
     private void addJob(String out, int currentJob, int jobs, String cleanParams, boolean checkRepetitions) {
         String strId = strId(jobId);
         for (int j = currentJob; j < jobs; j++) {
-            File check = new File(absolute(out), "job." + j + ".postfitness.stat");
+            File check = new File(absolute(out), "job." + j + ".run.params");
             if (check.exists() && checkRepetitions) {
                 listener.message("Job already completed, not adding: " + out + " (" + j + ")");
             } else {
@@ -322,6 +324,11 @@ public class MaseManager {
             if (j.params.equals(check.params)) {
                 listener.error("Job already exists in waiting list: " + j);
                 return true;
+            }
+        }
+        for(Job j : completed) {
+            if(j.params.equals(check.params)) {
+                listener.error("Job is already in the completed list");
             }
         }
         for (Entry<JobRunner, Job> e : running.entrySet()) {

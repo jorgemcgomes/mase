@@ -418,3 +418,42 @@ sum <- evals[, .(EvalMean=mean(Evaluations)), by=.(ID2,ID4,ID6)]
 ggplot(sum, aes(ID4,ID6)) + geom_tile(aes(fill = EvalMean), colour="white") + 
   scale_fill_distiller(type="seq", palette="Reds", direction=1, na.value="white") +
   facet_wrap(~ ID2) + xlab("Merge threshold") + ylab("Max lockdown") 
+
+
+
+setwd("~/exps/allocation")
+
+fitness <- loadData(c("random/*","biased/*","conditional/*"),"fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", parallel=F, filter=tail,filter.par=list(n=1))
+ggplot(fitness[, .(BestMean=mean(BestSoFar)), by=.(ID1,ID3,ID4,ID5)], aes(ID5,BestMean)) + geom_line(aes(colour=ID1,group=ID1)) + facet_grid(ID4 ~ ID3)
+
+fitness <- loadData(c("ccea/*","cceahyb/*","random/*_0.25","biased/*_0.25","conditional/*_0.25","hybrid/clusters_*_0.15_20"),"fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", parallel=F, filter=bestSoFarEvaluations)
+
+ggplot(lastGen(fitness)[, .(BestMean=mean(BestSoFar)), by=.(ID1,ID3,ID4)], aes(ID1,BestMean)) + geom_boxplot() + facet_grid(ID3 ~ ID4)
+
+agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,ID1,ID3,ID4,Evaluations)]
+ggplot(agg, aes(Evaluations,Mean,group=ID1)) + geom_line(aes(colour=ID1)) + facet_grid(ID3 ~ ID4, labeller=label_both)
+
+
+setwd("~/exps/allocation2")
+fitness <- loadData("**/*","fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", parallel=F, filter=bestSoFarEvaluations, filter.par=list(step=1000))
+ggplot(lastGen(fitness)[, .(BestMean=mean(BestSoFar)), by=.(ID1,ID3,ID4)], aes(ID1,BestMean)) + geom_boxplot() + facet_grid(ID3 ~ ID4)
+agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,ID1,ID3,ID4,Evaluations)]
+ggplot(agg, aes(Evaluations,Mean,group=ID1)) + geom_line(aes(colour=ID1)) + facet_grid(ID3 ~ ID4, labeller=label_both, scales="free") +
+  scale_y_continuous(trans="log10")
+
+hybrid <- loadData("hybrid/*/*","hybrid.stat",auto.ids.sep="[_/]",fun=loadFile, colnames=hyb.cols, parallel=F)
+
+
+setwd("~/labmag/exps/herding/")
+fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_", parallel=F, filter=bestSoFarEvaluations, filter.par=list(step=1000))
+agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(ID1,ID2,Evaluations)]
+ggplot(agg, aes(Evaluations,Mean,group=ID1)) + geom_line(aes(colour=ID1)) + facet_wrap(~ ID2, scales="free", ncol=2)
+
+ggplot(lastGen(fitness), aes(ID1,BestSoFar)) + geom_boxplot() + facet_wrap(~ ID2, scales="free",ncol=2)
+
+hybrid <- loadData("hyb*","hybrid.stat",auto.ids.sep="_",fun=loadFile, colnames=hyb.cols, parallel=F)
+ggplot(hybrid[, .(MeanPops=mean(NumPops)), by=.(ID1,ID2)], aes(ID1,MeanPops)) + geom_bar(stat="identity") + facet_wrap(~ ID2, scales="free")
+ggplot(hybrid[, .(MeanDist=mean(MeanDist)), by=.(ID1,ID2)], aes(ID1,MeanDist)) + geom_bar(stat="identity") + facet_wrap(~ ID2, scales="free")
+ggplot(lastGen(hybrid)[, .(MeanTotalMerges=mean(TotalMerges)), by=.(ID1,ID2)], aes(ID1,MeanTotalMerges)) + geom_bar(stat="identity") + facet_wrap(~ ID2, scales="free")
+ggplot(lastGen(hybrid)[, .(MeanTotalSplits=mean(TotalSplits)), by=.(ID1,ID2)], aes(ID1,MeanTotalSplits)) + geom_bar(stat="identity") + facet_wrap(~ ID2, scales="free")
+

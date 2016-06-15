@@ -1,0 +1,7 @@
+parent.0 = ../cooperative.params
+
+exch =                      mase.spec.AbstractHybridExchanger
+exch.initial-allocation =   heterogeneous
+exch.behaviour-index =      1
+
+stat.child.1.do-subpops =   false

@@ -17,9 +17,9 @@ import sim.engine.SimState;
  */
 public abstract class MasonEvaluation implements EvaluationFunction {
 
-    public static final String P_COMBINATION = "combination";
     public static final String P_DEFAULT = "mason-eval";
     public static final String P_FREQUENCY = "update-freq";
+    private static final long serialVersionUID = 1L;
     protected SimState sim;
     protected int currentEvaluationStep;
     protected int maxEvaluationSteps;

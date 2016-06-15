@@ -1,5 +1,7 @@
+parent.0 = ../cooperative.params
+
 exch =                      mase.spec.StochasticHybridExchanger
-exch.merge-threshold =      0.15
+exch.merge-threshold =      0.25
 exch.max-lockdown =         20
 exch.distance-elite =       0.2
 
@@ -11,12 +13,13 @@ exch.distance-calculator =  mase.spec.SilhouetteDistanceCalculator
 exch.distance.threaded =    true
 
 exch.initial-allocation =   heterogeneous
-exch.behaviour-index =      2
+exch.behaviour-index =      1
 
+breed =                     mase.spec.SkipNewBreeder
 
 neat.shared-database =      true
 
-stat.child.20 =             mase.spec.HybridStat
-stat.child.20.file =        $hybrid.stat
+stat.child.15 =             mase.spec.HybridStat
+stat.child.15.file =        $hybrid.stat
 
 stat.child.1.do-subpops =   false

@@ -12,14 +12,11 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
-import mase.evaluation.MetaEvaluator;
-import mase.evaluation.PostEvaluator;
+import mase.evaluation.SubpopEvaluationResult;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -28,93 +25,72 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class SCStat extends Statistics {
 
-    public static final String P_LOG_FILE = "log-file";
-    public static final String P_STATES_FILE = "states-file";
-    public static final String P_SAVE_STATES = "save-states";
+    public static final String P_LOG_FILE = "file";
     private static final long serialVersionUID = 1L;
-    private int genLog, statesLog;
-    private boolean saveStates;
-    private SCPostEvaluator sc;
-    protected Map<Integer, Double> globalCount;
+    private int genLog;
+    protected Map<Integer, Integer> globalCount;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         System.out.println("");
         super.setup(state, base);
-        Parameter df = new Parameter(SCPostEvaluator.P_STATECOUNT_BASE);
-        saveStates = state.parameters.getBoolean(base.push(P_SAVE_STATES), df.push(P_SAVE_STATES), false);
         try {
-            File logFile = state.parameters.getFile(base.push(P_LOG_FILE), df.push(P_LOG_FILE));
+            File logFile = state.parameters.getFile(base.push(P_LOG_FILE), null);
             genLog = state.output.addLog(logFile, true, false);
-            if (saveStates) {
-                File statesFile = state.parameters.getFile(base.push(P_STATES_FILE), df.push(P_STATES_FILE));
-                statesLog = state.output.addLog(statesFile, true, false);
-
-            }
         } catch (IOException i) {
             state.output.fatal("An IOException occurred while trying to create the state count logs.");
         }
-        PostEvaluator[] postEvals = ((MetaEvaluator) state.evaluator).getPostEvaluators();
-        for (PostEvaluator pe : postEvals) {
-            if (pe instanceof SCPostEvaluator) {
-                sc = (SCPostEvaluator) pe;
-                break;
-            }
-        }
-        if (sc == null) {
-            state.output.fatal("No StateCountPostEvaluator to log.");
-        }
-
-        this.globalCount = new HashMap<>(1000);
+        this.globalCount = new HashMap<>(100000);
     }
 
+    /**
+     * Generation | Total unique states | Unique states this gen | total count this gen |
+     * mean filtered (absolute) | min/mean/max filtered (relative) | min/mean/max unique states in eval
+     * @param state 
+     */
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        DescriptiveStatistics filteredStatesDS = new DescriptiveStatistics();
-        DescriptiveStatistics visitedStatesDS = new DescriptiveStatistics();
-        DescriptiveStatistics stateCountsDS = new DescriptiveStatistics();
+        Map<Integer, Integer> genCount = new HashMap<>(1000);
+        DescriptiveStatistics filteredAbs = new DescriptiveStatistics();
+        DescriptiveStatistics filteredRel = new DescriptiveStatistics();
+        DescriptiveStatistics sizeStat = new DescriptiveStatistics();
+        
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
                     if (er instanceof SCResult) {
-                        SCResult r = (SCResult) er;
-                        filteredStatesDS.addValue(r.removedByFilter / (double) (r.removedByFilter + r.counts.size()));
-                        visitedStatesDS.addValue(r.counts.size());
-                        for (Double f : r.counts.values()) {
-                            stateCountsDS.addValue(f);
+                        SCResult scr = (SCResult) er;
+                        SCResult.mergeCountMap(genCount, scr.getCounts());
+                        filteredAbs.addValue(scr.originalSize - scr.getCounts().size());
+                        filteredRel.addValue(1 - (double) scr.getCounts().size() / scr.originalSize);
+                        sizeStat.addValue(scr.getCounts().size());
+                    } else if (er instanceof SubpopEvaluationResult) {
+                        SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
+                        ArrayList<EvaluationResult> all = ser.getAllEvaluations();
+                        for (EvaluationResult subEr : all) {
+                            if (subEr instanceof SCResult) {
+                                SCResult scr = (SCResult) subEr;
+                                SCResult.mergeCountMap(genCount, scr.getCounts());
+                                filteredAbs.addValue(scr.originalSize - scr.getCounts().size());
+                                filteredRel.addValue(1 - (double) scr.getCounts().size() / scr.originalSize);
+                                sizeStat.addValue(scr.getCounts().size());
+                            }
                         }
-                        SCPostEvaluator.mergeCountMap(globalCount, r.getCounts());
                     }
                 }
             }
         }
-        state.output.println(state.generation + " " + globalCount.size() + " "
-                + visitedStatesDS.getMin() + " " + visitedStatesDS.getMean() + " " + visitedStatesDS.getMax() + " "
-                + filteredStatesDS.getMin() + " " + filteredStatesDS.getMean() + " " + filteredStatesDS.getMax() + " "
-                + stateCountsDS.getMin() + " " + stateCountsDS.getMean() + " " + stateCountsDS.getMax() + " " + stateCountsDS.getSkewness(), genLog);
-    }
-
-    @Override
-    public void finalStatistics(EvolutionState state, int result) {
-        super.finalStatistics(state, result);
-        if (saveStates) {
-            // Sort by frequency
-            ArrayList<Integer> hashes = new ArrayList<Integer>(globalCount.keySet());
-            Collections.sort(hashes, new Comparator<Integer>() {
-                @Override
-                public int compare(Integer h1, Integer h2) {
-                    return Double.compare(globalCount.get(h2), globalCount.get(h1));
-                }
-            });
-            // Print visited states
-            for (Integer h : hashes) {
-                state.output.print(h + " " + globalCount.get(h), statesLog);
-                for (byte b : sc.getGlobalKey().get(h)) {
-                    state.output.print(" " + b, statesLog);
-                }
-                state.output.print("\n", statesLog);
-            }
+        int totalCount = 0;
+        for(Integer i : genCount.values()) {
+            totalCount += i;
         }
+        SCResult.mergeCountMap(globalCount, genCount);
+        state.output.println(state.generation + " " + globalCount.size() + " "
+                + genCount.size() + " " + totalCount + " " + filteredAbs.getMean() + " " + filteredRel.getMin() + " "
+                + filteredRel.getMean() + " " + filteredRel.getMax() + " " + sizeStat.getMin() + " "
+                + sizeStat.getMean() + " " + sizeStat.getMax(), genLog);        
     }
+    
+    
 }

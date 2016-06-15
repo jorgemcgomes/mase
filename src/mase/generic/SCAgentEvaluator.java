@@ -6,9 +6,13 @@ package mase.generic;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import mase.evaluation.VectorBehaviourResult;
+import mase.evaluation.EvaluationResult;
+import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.world.SmartAgent;
 
@@ -16,76 +20,73 @@ import mase.mason.world.SmartAgent;
  *
  * @author jorge
  */
-public class SCEvaluator extends MasonEvaluation {
+public class SCAgentEvaluator extends MasonEvaluation {
 
-    public static final String V_COSINE = "cosine", V_BRAY_CURTIS = "bray_curtis", V_EUCLIDEAN = "euclidean";
     public static final String P_DISCRETIZATION = "discretisation";
-    public static final String P_DISTANCE = "distance";
+    public static final String P_FILTER = "filter";
     private static final long serialVersionUID = 1L;
     private int bins;
-    private int distance;
-    private HashMap<Integer, byte[]> key;
-    private HashMap<Integer, Double> count;
-    private SCResult res;
+    private double filter;
+    
+    private List<HashMap<Integer, Integer>> counts;
+    private SubpopEvaluationResult res;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        Parameter df = defaultBase();
-        this.bins = state.parameters.getInt(base.push(P_DISCRETIZATION), df.push(P_DISCRETIZATION));
-        String dist = state.parameters.getString(base.push(P_DISTANCE), df.push(P_DISTANCE));
-        switch(dist) {
-            case V_EUCLIDEAN:
-                distance = VectorBehaviourResult.EUCLIDEAN;
-                break;
-            case V_BRAY_CURTIS:
-                distance = VectorBehaviourResult.BRAY_CURTIS;
-                break;
-            case V_COSINE:
-                distance = VectorBehaviourResult.COSINE;
-                break;
-            default:
-                state.output.fatal("Unknown distance measure.", base.push(P_DISTANCE));
-        }
+        this.bins = state.parameters.getInt(base.push(P_DISCRETIZATION), null);
+        this.filter = state.parameters.getDouble(base.push(P_FILTER), null);
     }
 
     @Override
-    public Parameter defaultBase() {
-        return new Parameter(SCPostEvaluator.P_STATECOUNT_BASE);
-    }
-
-    @Override
-    public SCResult getResult() {
+    public SubpopEvaluationResult getResult() {
         return res;
     }
 
     @Override
     protected void preSimulation() {
-        this.key = new HashMap<>(100);
-        this.count = new HashMap<>(100);
+        this.counts = null;
     }
 
     @Override
     protected void evaluate() {
         SmartAgentProvider td = (SmartAgentProvider) sim;
         List<? extends SmartAgent> agents = td.getSmartAgents();
-        for (SmartAgent a : agents) {
-            double[] lastSensors = a.lastInputs();
-            double[] lastAction = a.lastOutputs();
+        
+        // init
+        if(counts == null) {
+            counts = new ArrayList<>(agents.size());
+            for(int i = 0 ; i < agents.size() ; i++) {
+                counts.add(new HashMap<Integer,Integer>(1000, 0.5f));
+            }
+        }
+        
+        for(int i = 0 ; i < agents.size() ; i++) {
+            SmartAgent a = agents.get(i);
+            double[] lastSensors = a.lastNormalisedInputs();
+            double[] lastAction = a.lastNormalisedOutputs();
             byte[] d = discretise(lastSensors, lastAction);
             int h = hashVector(d);
-            Double c = count.get(h);
+            HashMap<Integer,Integer> map = counts.get(i);
+            Integer c = map.get(h);
             if (c == null) {
-                key.put(h, d);
-                c = 0d;
+                c = 0;
             }
-            count.put(h, c + 1);
+            map.put(h, c + 1);            
         }
     }
 
     @Override
     protected void postSimulation() {
-        res = new SCResult(count, key, distance);
+        Collection<EvaluationResult> scs = new ArrayList<>(counts.size());
+        for(HashMap<Integer, Integer> m : counts) {
+            SCResult scr = new SCResult(m);
+            if(filter > 0) {
+                scr.filter(filter);
+            }
+            scs.add(scr);
+        }
+        res = new SubpopEvaluationResult(scs);
     }
 
     protected byte[] discretise(double[] sensors, double[] actions) {

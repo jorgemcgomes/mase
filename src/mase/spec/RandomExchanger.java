@@ -11,6 +11,7 @@ import ec.Individual;
 import ec.Population;
 import ec.Subpopulation;
 import ec.util.Parameter;
+import java.util.Arrays;
 
 /**
  * After breeding, randomly remove the foreign-proportion, and import individuals from other subpops
@@ -35,18 +36,23 @@ public class RandomExchanger extends Exchanger {
 
     @Override
     public Population postBreedingExchangePopulation(EvolutionState state) {
-        for(Subpopulation sub : state.population.subpops) {
-            int replace = (int) Math.round(sub.individuals.length * foreignProportion);
+        Individual[][] old = new Individual[state.population.subpops.length][];
+        for(int i = 0 ; i < state.population.subpops.length ; i++) {
+            old[i] = Arrays.copyOf(state.population.subpops[i].individuals, state.population.subpops[i].individuals.length);
+        }
+        
+        for(int s = 0 ; s < old.length ; s++) {
+            int replace = (int) Math.round(old[s].length * foreignProportion);
             for(int i = 0 ; i < replace ; i++) {
                 // pick population
-                Subpopulation pickSub = null;
-                while(pickSub == null || pickSub == sub) {
-                    pickSub = state.population.subpops[state.random[0].nextInt(state.population.subpops.length)];
+                int pickIndex = -1;
+                while(pickIndex == -1 || pickIndex == s) {
+                    pickIndex = state.random[0].nextInt(old.length);
                 }
                 // pick individual
-                Individual ind = pickSub.individuals[state.random[0].nextInt(pickSub.individuals.length)];
-                // replace
-                sub.individuals[sub.individuals.length - replace - 1] = (Individual) ind.clone();
+                Individual ind = old[pickIndex][state.random[0].nextInt(old[pickIndex].length)];
+                // replace from the beginning -- the elites are copied to the end!
+                state.population.subpops[s].individuals[i] = (Individual) ind.clone();
             }
         }
         return state.population;

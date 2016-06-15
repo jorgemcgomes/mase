@@ -11,11 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.SmartAgentProvider;
 import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
 import mase.mason.world.GenericDistanceFunction;
+import mase.mason.world.SmartAgent;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.StaticPolygon.Segment;
 import sim.field.continuous.Continuous2D;
@@ -27,7 +29,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Herding extends MasonSimState implements TaskDescriptionProvider {
+public class Herding extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
     private static final long serialVersionUID = 1L;
 
@@ -164,6 +166,11 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider {
     @Override
     public TaskDescription getTaskDescription() {
         return td;
+    }
+
+    @Override
+    public List<? extends SmartAgent> getSmartAgents() {
+        return shepherds;
     }
 
 }

@@ -7,7 +7,6 @@ package mase.app.herding;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
@@ -18,7 +17,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class HerdingFitnessFoxes extends MasonEvaluation {
+public class HerdingFitnessBootstrap extends MasonEvaluation {
 
     private static final long serialVersionUID = 1L;
 
@@ -68,7 +67,7 @@ public class HerdingFitnessFoxes extends MasonEvaluation {
             closest += d / herd.field.width;
         }
         fitness += (1 - closest / closestShepherd.length);
-        res = new FitnessResult( fitness, FitnessResult.HARMONIC);
+        res = new FitnessResult( fitness, FitnessResult.ARITHMETIC);
     }
 
     @Override

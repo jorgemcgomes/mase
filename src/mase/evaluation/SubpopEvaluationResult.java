@@ -15,16 +15,14 @@ import java.util.Collection;
 public class SubpopEvaluationResult implements EvaluationResult {
 
     private static final long serialVersionUID = 1;
-    private ArrayList<EvaluationResult> evals;
+    private final ArrayList<EvaluationResult> evals;
 
     public SubpopEvaluationResult(EvaluationResult... evals) {
-        this.evals = new ArrayList<>();
-        this.evals.addAll(Arrays.asList(evals));
+        this.evals = new ArrayList<>(Arrays.asList(evals));
     }
 
     public SubpopEvaluationResult(Collection<EvaluationResult> evals) {
-        this.evals = new ArrayList<>();
-        this.evals.addAll(evals);
+        this.evals = new ArrayList<>(evals);
     }
 
     public EvaluationResult getSubpopEvaluation(int index) {

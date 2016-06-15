@@ -21,24 +21,24 @@ import mase.evaluation.VectorBehaviourResult;
 import mase.mason.ParamUtils;
 import mase.mason.ParamUtils.Param;
 import net.jafama.FastMath;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.ml.distance.EuclideanDistance;
 
 /**
  *
  * @author jorge
  */
-public class AllocationProblem extends SimulationProblem {
+public class AllocationProblem2 extends SimulationProblem {
 
     private static final long serialVersionUID = 1L;
 
     @Param()
     int numAgents;
     @Param()
-    int[] types = null;
+    int[] uniqueTypes = null;
     @Param()
-    int numTypes;
-    @Param()
-    double power;
+    int numUniqueTypes;
     @Param()
     double clusterSize; // max 1
     @Param()
@@ -46,36 +46,36 @@ public class AllocationProblem extends SimulationProblem {
     @Param()
     double minSeparation = 0; // sqrt(dimensions)/3 if -1
 
-    private final EuclideanDistance dist = new EuclideanDistance();
-    double[][] typesLoc;
+    private static final EuclideanDistance DIST = new EuclideanDistance();
+    double[][] types;
     int dimensions = -1;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         ParamUtils.autoSetParameters(this, state.parameters, base, defaultBase(), false);
-        
+
         dimensions = state.parameters.getInt(new Parameter("vector.species.genome-size"), null);
 
         // calculate types, if not given
-        if(types == null) {
-            int div = numAgents / numTypes;
-            int rem = numAgents % numTypes;
-            types = new int[numTypes];
-            for(int i = 0 ; i < numTypes ; i++) {
-                types[i] = div;
-                if(rem > 0) {
-                    types[i]++;
+        if (uniqueTypes == null) {
+            int div = numAgents / numUniqueTypes;
+            int rem = numAgents % numUniqueTypes;
+            uniqueTypes = new int[numUniqueTypes];
+            for (int i = 0; i < numUniqueTypes; i++) {
+                uniqueTypes[i] = div;
+                if (rem > 0) {
+                    uniqueTypes[i]++;
                     rem--;
                 }
             }
         } else {
             state.output.warning("Overriding numTypes with the given types");
         }
-        
+
         // validate simulation parameters
         int checkSum = 0;
-        for (int t : types) {
+        for (int t : uniqueTypes) {
             checkSum += t;
         }
         if (checkSum != numAgents) {
@@ -88,22 +88,22 @@ public class AllocationProblem extends SimulationProblem {
             minSeparation = FastMath.sqrt(dimensions) / 3;
             state.output.warning("Using default min separation sqrt(dimensions)/3: " + minSeparation);
         }
-        
+
         // randomly create target points
         Random rand = new Random((int) state.job[0]);
-        typesLoc = new double[types.length][];
+        double[][] unique = new double[uniqueTypes.length][];
         if (numClusters == 0) {
             double[] min = new double[dimensions], max = new double[dimensions];
             Arrays.fill(min, 0);
             Arrays.fill(max, 1);
-            typesLoc = generateDispersedPoints(rand, types.length, minSeparation, min, max);
+            unique = generateDispersedPoints(rand, uniqueTypes.length, minSeparation, min, max);
         } else {
             double[] min = new double[dimensions], max = new double[dimensions];
             Arrays.fill(min, clusterSize / 2);
             Arrays.fill(max, 1 - clusterSize / 2);
             double[][] centers = generateDispersedPoints(rand, numClusters, minSeparation, min, max);
-            int perCluster = types.length / numClusters;
-            int remaining = types.length % numClusters;
+            int perCluster = uniqueTypes.length / numClusters;
+            int remaining = uniqueTypes.length % numClusters;
             for (int i = 0; i < centers.length; i++) {
                 for (int j = 0; j < dimensions; j++) {
                     min[j] = centers[i][j] - clusterSize / 2;
@@ -115,23 +115,31 @@ public class AllocationProblem extends SimulationProblem {
                     remaining--;
                 }
                 double[][] generated = generateDispersedPoints(rand, size, 0, min, max);
-                System.arraycopy(generated, 0, typesLoc, i * perCluster, generated.length);
+                System.arraycopy(generated, 0, unique, i * perCluster, generated.length);
+            }
+        }
+
+        types = new double[numAgents][];
+        int index = 0;
+        for (int i = 0; i < unique.length; i++) {
+            for (int j = 0; j < uniqueTypes[i]; j++) {
+                types[index++] = unique[i];
             }
         }
 
         // debug: print types
-        for (int i = 0; i < typesLoc.length; i++) {
-            System.out.println(i + ": " + Arrays.toString(typesLoc[i]));
+        for (int i = 0; i < types.length; i++) {
+            System.out.println(i + ": " + Arrays.toString(types[i]));
         }
         System.out.print("  ");
-        for (int i = 0; i < typesLoc.length; i++) {
+        for (int i = 0; i < types.length; i++) {
             System.out.printf("%6d", i);
         }
         System.out.println();
-        for (int i = 0; i < typesLoc.length; i++) {
+        for (int i = 0; i < types.length; i++) {
             System.out.printf("%2d", i);
-            for (int j = 0; j < typesLoc.length; j++) {
-                System.out.printf(" %.3f", dist.compute(typesLoc[i], typesLoc[j]));
+            for (int j = 0; j < types.length; j++) {
+                System.out.printf(" %.3f", DIST.compute(types[i], types[j]));
             }
             System.out.println();
         }
@@ -150,7 +158,7 @@ public class AllocationProblem extends SimulationProblem {
             boolean ok = true;
             if (distThreshold > 0) {
                 for (int i = 0; i < filled; i++) {
-                    if (dist.compute(points[i], candidate) < distThreshold) {
+                    if (DIST.compute(points[i], candidate) < distThreshold) {
                         ok = false;
                         break;
                     }
@@ -168,61 +176,105 @@ public class AllocationProblem extends SimulationProblem {
     @Override
     public EvaluationResult[] evaluateSolution(GroupController gc, long seed) {
         AgentController[] acs = gc.getAgentControllers(numAgents);
-
-        double[][] distanceMatrix = new double[numAgents][typesLoc.length];
-        double[][] distanceMatrixT = new double[typesLoc.length][numAgents];
+        RealMatrix distanceMatrix = new Array2DRowRealMatrix(numAgents, types.length);
         for (int i = 0; i < numAgents; i++) {
             AllocationAgent aa = (AllocationAgent) acs[i];
-            for (int j = 0; j < typesLoc.length; j++) {
-                distanceMatrix[i][j] = dist.compute(aa.getLocation(), typesLoc[j]);
-                distanceMatrixT[j][i] = distanceMatrix[i][j];
+            for (int j = 0; j < types.length; j++) {
+                distanceMatrix.setEntry(i, j, DIST.compute(aa.getLocation(), types[j]));
             }
         }
-
-        double payoff = 0;
-        for (int i = 0; i < typesLoc.length; i++) {
-            double[] dists = Arrays.copyOf(distanceMatrixT[i], distanceMatrixT[i].length);
-            Arrays.sort(dists);
-            for (int k = 0; k < types[i] && k < dists.length; k++) {
-                payoff += distancePayoff(dists[k]);
-            }
-        }
-        payoff /= numAgents;
 
         // fitness
-        FitnessResult fr = new FitnessResult(payoff);
+        FitnessResult fr = new FitnessResult(score(distanceMatrix));
 
         // individual characterisation -- distance to each type
         List<EvaluationResult> vbrs = new ArrayList<>();
-        for (double[] dists : distanceMatrix) {
+        for (double[] dists : distanceMatrix.getData()) {
             vbrs.add(new VectorBehaviourResult(dists));
         }
         SubpopEvaluationResult ser = new SubpopEvaluationResult(vbrs);
 
-        // group characterisation -- number of agents closer to each type
-        int[] closestType = new int[numAgents];
-        for (int i = 0; i < numAgents; i++) {
-            double minDist = Double.POSITIVE_INFINITY;
-            for (int t = 0; t < typesLoc.length; t++) {
-                if (distanceMatrix[i][t] < minDist) {
-                    minDist = distanceMatrix[i][t];
-                    closestType[i] = t;
-                }
+        return new EvaluationResult[]{fr, ser};
+    }
+
+    private static RealMatrix distanceMatrix(double[][] a, double[][] b) {
+        RealMatrix m = new Array2DRowRealMatrix(a.length, b.length);
+        for (int i = 0; i < a.length; i++) {
+            for (int j = 0; j < b.length; j++) {
+                m.setEntry(i, j, DIST.compute(a[i], b[j]));
             }
         }
-        double[] bc = new double[typesLoc.length];
-        for (int a = 0; a < numAgents; a++) {
-            bc[closestType[a]] += 1d / numAgents;
+        return m;
+    }
+
+    // Hausdorff distance
+    // http://cgm.cs.mcgill.ca/~godfried/teaching/cg-projects/98/normand/main.html
+    private static double H(RealMatrix distMatrix) {
+        double h1 = h(distMatrix);
+        RealMatrix tr = distMatrix.transpose();
+        double h2 = h(tr);
+        double H = Math.max(h1, h2);
+        return H;
+    }
+
+    private static double h(RealMatrix distMatrix) {
+        double h = 0;
+        for (int ai = 0; ai < distMatrix.getRowDimension(); ai++) {
+            double shortest = Double.POSITIVE_INFINITY;
+            for (int bj = 0; bj < distMatrix.getColumnDimension(); bj++) {
+                double dij = distMatrix.getEntry(ai, bj);
+                if (dij < shortest) {
+                    shortest = dij;
+                }
+            }
+            if (shortest > h) {
+                h = shortest;
+            }
         }
-        VectorBehaviourResult gr = new VectorBehaviourResult(bc);
-        // alternative group char: min distance between an agent and that type
-
-        return new EvaluationResult[]{fr, gr, ser};
+        return h;
     }
-
-    private double distancePayoff(double dist) {
-        double normDist = dist / FastMath.sqrt(dimensions);
-        return FastMath.pow(1 - normDist, power);
+    
+    private double score(RealMatrix distMatrix) {
+        double d = distClosest(distMatrix);
+        return 1 - d / Math.sqrt(dimensions);
     }
+    
+    // MAX value = sqrt(dimensions), assuming [0,1] range
+    private static double distClosest(RealMatrix distMatrix) {
+        double d1 = distClosestAux(distMatrix);
+        RealMatrix tr = distMatrix.transpose();
+        double d2 = distClosestAux(tr);
+        double d = Math.max(d1, d2);
+        return d;        
+    }
+    
+    private static double distClosestAux(RealMatrix distMatrix) {
+        double mean = 0;
+        for(int i = 0 ; i < distMatrix.getRowDimension() ; i++) {
+            double closest = Double.POSITIVE_INFINITY;
+            for(int j = 0 ; j < distMatrix.getColumnDimension() ; j++) {
+                closest = Math.min(closest, distMatrix.getEntry(i, j));
+            }
+            mean += closest;
+        }
+        return mean / distMatrix.getRowDimension();
+    }
+    
+    
+    /*public static void main(String[] args) {
+        double[][] test1 = new double[][]{
+            new double[]{1,1},
+            new double[]{1,1},
+            new double[]{1,1}    
+        };
+        double[][] test2 = new double[][]{
+            new double[]{1,1},
+            new double[]{1,1},
+            new double[]{1,1}    
+        };    
+        RealMatrix m = distanceMatrix(test1,test2);
+        //System.out.println(H(m));
+        System.out.println(distClosest(m));
+    }*/
 
 }

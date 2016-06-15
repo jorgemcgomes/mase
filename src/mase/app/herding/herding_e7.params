@@ -1,0 +1,15 @@
+parent.0=herding_e5.params
+
+problem.numSheeps = 1
+
+problem.numFoxes = 2
+problem.smartFox = true
+
+problem.numShepherds = 7
+
+eval.max-evaluations = 300000
+generations = 3000
+
+pop.subpops =           7
+neat.INPUT.NODES =      12
+neat.OUTPUT.NODES =     2 

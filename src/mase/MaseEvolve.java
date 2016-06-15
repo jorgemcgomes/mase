@@ -98,9 +98,8 @@ public class MaseEvolve {
     }
 
     public static Map<String, String> readParams(String[] args) throws Exception {
-        // Read command line parameters to a map
+        // Reads command line parameters to a map
         // Checks the parent order
-        File tempFile = File.createTempFile("masetemp", ".params", new File("."));
         Map<String, String> argsPars = new LinkedHashMap<>();
         int parentOrder = 0;
         for (int i = 0; i < args.length; i++) {
@@ -129,6 +128,7 @@ public class MaseEvolve {
         }
 
         // Write command line parameters to a temp file -- the root file
+        File tempFile = File.createTempFile("masetemp", ".params", new File("."));        
         BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
         for (Entry<String, String> e : argsPars.entrySet()) {
             bw.write(e.getKey() + " = " + e.getValue());

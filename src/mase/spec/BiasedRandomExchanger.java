@@ -11,6 +11,7 @@ import ec.Population;
 import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.BehaviourResult;
 import static mase.spec.AbstractHybridExchanger.P_BEHAVIOUR_INDEX;
@@ -55,10 +56,14 @@ public class BiasedRandomExchanger extends RandomExchanger {
     @Override
     public Population postBreedingExchangePopulation(EvolutionState state) {
         double[][] dists = computeDistances(state);
+        Individual[][] old = new Individual[state.population.subpops.length][];
+        for(int i = 0 ; i < state.population.subpops.length ; i++) {
+            old[i] = Arrays.copyOf(state.population.subpops[i].individuals, state.population.subpops[i].individuals.length);
+        }
         
         for (int i = 0 ; i < state.population.subpops.length ; i++) {
             Subpopulation sub = state.population.subpops[i];
-            int replace = (int) Math.round(sub.individuals.length * foreignProportion);
+            int replace = (int) (sub.individuals.length * foreignProportion);
             double[] probs = dists[i];
             double total = 0;
             for(int j = 0 ; j < probs.length ; j++) {
@@ -68,20 +73,20 @@ public class BiasedRandomExchanger extends RandomExchanger {
             
             for (int j = 0; j < replace; j++) {
                 // pick population
-                Subpopulation pickSub = null;
+                int pickIndex = -1;
                 double rand = state.random[0].nextDouble() * total;
                 for(int k = 0 ; k < probs.length ; k++) {
                      rand -= probs[k];
                      if(rand <= 0d) {
-                         pickSub = state.population.subpops[k];
+                         pickIndex = k;
                          break;
                      }
                 }
 
                 // pick individual
-                Individual ind = pickSub.individuals[state.random[0].nextInt(pickSub.individuals.length)];
-                // replace
-                sub.individuals[sub.individuals.length - replace - 1] = (Individual) ind.clone();
+                Individual ind = old[pickIndex][state.random[0].nextInt(old[pickIndex].length)];
+                // replace from the beginning -- the elites are copied to the end!
+                sub.individuals[j] = (Individual) ind.clone();
             }
         }
         return state.population;

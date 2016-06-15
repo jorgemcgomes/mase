@@ -114,7 +114,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
   result <- rbindlist(result)
 
   cols <- c("Job",names(ids))
-  result[,(cols) := lapply(.SD, function(x){factor(x,levels=unique(x))}), .SDcols=cols]
+  result[,(cols) := lapply(.SD, factorReorder), .SDcols=cols]
   return(result)
 }
 
@@ -182,6 +182,27 @@ loadFitness <- function(file, loadSubs=F) {
   return(df)
 }
 
+factorDT <- function(dt, unique.limit=50) {
+  cols <- c()
+  for(col in colnames(dt)) {
+    if(length(unique(dt[[col]])) <= unique.limit) cols <- c(cols,col)
+  }
+  copy <- copy(dt)
+  if(length(cols) > 0) copy[,(cols) := lapply(.SD, factorReorder), .SDcols=cols]
+  return(copy)
+}
+
+factorReorder <- function(col) {
+  num <- if(is.factor(col)) as.character(col) else col
+  num[is.na(num)] <- Inf
+  num <- as.numeric(num)
+  if(sum(is.na(num)) > 0) {
+    return(factor(col,levels=unique(col)))
+  } else {
+    return(reorder(col, num))
+  }
+}
+
 # Convenience function to filter data to only last generation of each setup
 lastGen <- function(data) {
   return(data[, .SD[.N],by=.(Setup,Job)])
@@ -198,6 +219,12 @@ bestSoFarFitness <- function(data, showSE=T) {
   }
   return(g)
 }
+
+bestSoFarEvaluations <- function(dt, step=10000) {
+  dt[, Evaluations := floor(Evaluations / step) * step]
+  return(dt[, .(BestSoFar=max(BestSoFar)), by=.(Evaluations)])
+}
+
 
 fitnessBoxplots <- function(data, generation=NULL, ttests=T) {
   data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)

@@ -31,8 +31,8 @@ vector.species.fitness =                mase.evaluation.ExpandedFitness
 # Checkpointing
 checkpoint =                            false
 checkpoint-prefix =                     checkpoint
-checkpoint-directory =                  $
 checkpoint-modulo =                     25
+#checkpoint-directory =                  $
 
 # Statistics
 stat =                                  mase.stat.ConsoleStat

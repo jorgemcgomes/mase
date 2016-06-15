@@ -97,11 +97,11 @@ public abstract class SmartAgent extends EmboddiedAgent {
         return ac;
     }    
     
-    public double[] lastOutputs() {
+    public double[] lastNormalisedOutputs() {
         return lastActionOutput;
     }
 
-    public double[] lastInputs() {
+    public double[] lastNormalisedInputs() {
         return lastNormSensors;
     }
     
@@ -110,14 +110,14 @@ public abstract class SmartAgent extends EmboddiedAgent {
     }
 
     public String getActionReport() {
-        return getRawActions();
+        return getRawActionsReport();
     }
 
     public String getSensorsReport() {
         return formatSensors(lastRawSensors);
     }
 
-    public String getRawSensors() {
+    public String getRawSensorsReport() {
         return formatSensors(lastNormSensors);
     }
     
@@ -134,7 +134,7 @@ public abstract class SmartAgent extends EmboddiedAgent {
         return sb.toString();
     }
 
-    public String getRawActions() {
+    public String getRawActionsReport() {
         int index = 0;
         StringBuilder sb = new StringBuilder();
         for(Effector e : effectors) {

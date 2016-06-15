@@ -10,10 +10,8 @@ import ec.Subpopulation;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.PostEvaluator;
@@ -41,13 +39,13 @@ public class SCPostEvaluator implements PostEvaluator {
         this.filter = state.parameters.getDouble(base.push(P_FILTER), df.push(P_FILTER));
         this.doFilter = state.parameters.getBoolean(base.push(P_DO_FILTER), df.push(P_DO_FILTER), false);
         this.doTfIdf = state.parameters.getBoolean(base.push(P_DO_TFIDF), df.push(P_DO_TFIDF), false);
-        this.globalKey = new HashMap<Integer, byte[]>(10000);
+        this.globalKey = new HashMap<>(10000);
     }
 
     @Override
     public void processPopulation(EvolutionState state) {
         // Auxiliary data structure
-        currentPop = new ArrayList<SCResult>(state.population.subpops.length
+        currentPop = new ArrayList<>(state.population.subpops.length
                 * state.population.subpops[0].individuals.length);
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
@@ -63,49 +61,9 @@ public class SCPostEvaluator implements PostEvaluator {
         }
 
         // Filter
-        for (SCResult scr : currentPop) {
-            if (doFilter) {
-                filter(scr);
-            }
-        }
-    }
-
-    protected void filter(SCResult res) {
-        // remove the entries with very low frequency count
-        int numStates = res.getCounts().size();
-        double total = 0;
-        for (Double f : res.getCounts().values()) {
-            total += f;
-        }
-        double threshold = total * filter;
-
-        List<Integer> toRemove = new LinkedList<Integer>();
-        Entry<Integer, Double> highestCount = null;
-        for (Entry<Integer, Double> e : res.getCounts().entrySet()) {
-            if (e.getValue() < threshold) {
-                toRemove.add(e.getKey());
-            }
-            if (highestCount == null || e.getValue() > highestCount.getValue()) {
-                highestCount = e;
-            }
-        }
-        
-        if (toRemove.size() < res.getCounts().size()) {
-            res.getCounts().keySet().removeAll(toRemove);
-        } else { // retain only the element with highest count
-            res.getCounts().clear();
-            res.getCounts().put(highestCount.getKey(), highestCount.getValue());
-        }
-
-        res.removedByFilter = numStates - res.getCounts().size();
-    }
-
-    protected static void mergeCountMap(Map<Integer, Double> map, Map<Integer, Double> other) {
-        for (Map.Entry<Integer, Double> e : other.entrySet()) {
-            if (!map.containsKey(e.getKey())) {
-                map.put(e.getKey(), e.getValue());
-            } else {
-                map.put(e.getKey(), map.get(e.getKey()) + e.getValue());
+        if (doFilter) {
+            for (SCResult scr : currentPop) {
+                scr.filter(filter);
             }
         }
     }
