@@ -438,10 +438,9 @@ setwd("~/exps/allocation2")
 fitness <- loadData("**/*","fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", parallel=F, filter=bestSoFarEvaluations, filter.par=list(step=1000))
 ggplot(lastGen(fitness)[, .(BestMean=mean(BestSoFar)), by=.(ID1,ID3,ID4)], aes(ID1,BestMean)) + geom_boxplot() + facet_grid(ID3 ~ ID4)
 agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,ID1,ID3,ID4,Evaluations)]
-ggplot(agg, aes(Evaluations,Mean,group=ID1)) + geom_line(aes(colour=ID1)) + facet_grid(ID3 ~ ID4, labeller=label_both, scales="free") +
-  scale_y_continuous(trans="log10")
+ggplot(agg, aes(Evaluations,Mean,group=ID1)) + geom_line(aes(colour=ID1)) + facet_grid(ID3 ~ ID4, labeller=label_both, scales="free")
 
-hybrid <- loadData("hybrid/*/*","hybrid.stat",auto.ids.sep="[_/]",fun=loadFile, colnames=hyb.cols, parallel=F)
+hybrid <- loadData("hybrid/*","hybrid.stat",auto.ids.sep="[_/]",fun=loadFile, colnames=hyb.cols, parallel=F)
 
 
 setwd("~/labmag/exps/herding/")

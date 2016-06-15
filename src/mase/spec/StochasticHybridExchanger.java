@@ -64,7 +64,7 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
     SplitAgentsProportion splitProportion;
 
     DistanceCalculator distCalculator;
-    double[][] distanceMatrix;
+    double[][] distanceMatrix = new double[0][0];
     
     @Override
     public void setup(EvolutionState state, Parameter base) {
