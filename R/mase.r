@@ -60,7 +60,7 @@ metaLoadData <- function(folders, filenames=NULL, filename.ids=filenames, ids=li
 # ...: other parameters to pass to fun
 # filter: function to apply to each loaded file (loaded by fun). Must receive a data.table and return a data.table
 # filter.par: other parameters to pass to filter.fun
-loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto.ids.names=NULL, auto.ids.sep="/", jobs=NULL, jobprefix="job", recursive=F, parallel=F, fun=loadFile, ..., filter=NULL, filter.par=list()) {
+loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto.ids.names=NULL, auto.ids.sep="[_/]", jobs=NULL, jobprefix="job", recursive=F, parallel=F, fun=loadFile, ..., filter=NULL, filter.par=list()) {
   folders <- Sys.glob(folders) # expand
   if(recursive) {
     folders <- as.vector(sapply(folders,list.dirs))
@@ -223,6 +223,17 @@ bestSoFarFitness <- function(data, showSE=T) {
 bestSoFarEvaluations <- function(dt, step=10000) {
   dt[, Evaluations := floor(Evaluations / step) * step]
   return(dt[, .(BestSoFar=max(BestSoFar)), by=.(Evaluations)])
+}
+
+fitnessLevels <- function(data, thresholds) {
+  aux <- function(t) {
+    w <- which(data[,BestSoFar] > t)
+    return(if(length(w) > 0) data$Evaluations[min(w)] else Inf)
+  }
+  evals <- sapply(thresholds, aux)
+  res <- data.table(Threshold=thresholds,Evaluations=evals)
+  res <- res[!is.infinite(Evaluations)]
+  return(res)
 }
 
 

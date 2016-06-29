@@ -21,6 +21,7 @@ import mase.evaluation.MetaEvaluator;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.SubpopEvaluationResult;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -28,7 +29,7 @@ import mase.evaluation.SubpopEvaluationResult;
  */
 public class AbstractHybridExchanger extends Exchanger {
 
-    // list of allocations, separated by comma (ex: 0,0,1,1,2,2) OR V_HOMOGENEOUS OR V_HETEROGENEOUS
+    // list of allocations, separated by comma (ex: 0,0,1,1,2,2) OR V_HOMOGENEOUS OR V_HETEROGENEOUS OR a single number with the number of pops (agents are equally divided among all pops)
     public static final String P_INITIAL_ALLOCATION = "initial-allocation";
     public static final String V_HOMOGENEOUS = "homogeneous";
     public static final String V_HETEROGENEOUS = "heterogeneous";
@@ -46,14 +47,16 @@ public class AbstractHybridExchanger extends Exchanger {
         nAgents = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: bad dependency
         allocations = new int[nAgents];
         behaviourIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), null);
+                
         String initial = state.parameters.getString(base.push(P_INITIAL_ALLOCATION), null);
 
         if (initial.equalsIgnoreCase(V_HOMOGENEOUS)) {
-            Arrays.fill(allocations, 0);
+            setInitialAllocation(1);
         } else if (initial.equalsIgnoreCase(V_HETEROGENEOUS)) {
-            for (int i = 0; i < allocations.length; i++) {
-                allocations[i] = i;
-            }
+            setInitialAllocation(nAgents);
+        } else if (StringUtils.isNumeric(initial)) {
+            int pops = Integer.parseInt(initial);
+            setInitialAllocation(pops);
         } else {
             String[] split = initial.split("[\\s\\,\\-]+");
             if (split.length != nAgents) {
@@ -61,6 +64,23 @@ public class AbstractHybridExchanger extends Exchanger {
             }
             for (int i = 0; i < allocations.length; i++) {
                 allocations[i] = Integer.parseInt(split[i].trim());
+            }
+        }
+    }
+
+    public void setInitialAllocation(int pops) {
+        allocations = new int[nAgents];
+        int div = nAgents / pops;
+        int rem = nAgents % pops;
+
+        int index = 0;
+        for (int i = 0; i < pops; i++) {
+            for (int j = 0; j < div; j++) {
+                allocations[index++] = i;
+            }
+            if (rem > 0) {
+                allocations[index++] = i;
+                rem--;
             }
         }
     }
@@ -94,8 +114,8 @@ public class AbstractHybridExchanger extends Exchanger {
             for (Integer ag : metaPops.get(i).agents) {
                 allocations[ag] = i;
             }
-        }        
-        
+        }
+
         // create new population with individuals from metapops
         Population newPop = (Population) state.population.emptyClone();
         newPop.subpops = new Subpopulation[metaPops.size()];
@@ -115,7 +135,7 @@ public class AbstractHybridExchanger extends Exchanger {
             metaPops.get(i).pop = state.population.subpops[i];
             // Mark all individuals for re-evaluation
             // Needed since the non-bred pops are copied from previous gens
-            for(int j = 0 ; j < state.population.subpops[i].individuals.length ; j++) {
+            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 state.population.subpops[i].individuals[j].evaluated = false;
             }
         }

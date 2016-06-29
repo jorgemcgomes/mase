@@ -1,0 +1,14 @@
+parent.0 = allocation.params
+
+# Breeding
+vector.species.pipe =                   ec.breed.MultiBreedingPipeline
+breed.multibreed.num-sources =          2
+
+breed.multibreed.source.0 =             ec.vector.breed.VectorMutationPipeline
+vector.mutate.prob =                    0.5
+
+breed.multibreed.source.1 =             ec.vector.breed.VectorCrossoverPipeline
+vector.xover.prob =                     0.5
+vector.xover.source.0 =                 ec.select.TournamentSelection
+vector.xover.source.1 =                 same
+vector.species.crossover-type =         one

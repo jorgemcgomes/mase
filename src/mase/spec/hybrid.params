@@ -1,7 +1,7 @@
 parent.0 = ../cooperative.params
 
 exch =                      mase.spec.StochasticHybridExchanger
-exch.merge-threshold =      0.25
+exch.merge-threshold =      0.2
 exch.max-lockdown =         20
 exch.distance-elite =       0.2
 

@@ -439,9 +439,45 @@ fitness <- loadData("**/*","fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", p
 ggplot(lastGen(fitness)[, .(BestMean=mean(BestSoFar)), by=.(ID1,ID3,ID4)], aes(ID1,BestMean)) + geom_boxplot() + facet_grid(ID3 ~ ID4)
 agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,ID1,ID3,ID4,Evaluations)]
 ggplot(agg, aes(Evaluations,Mean,group=ID1)) + geom_line(aes(colour=ID1)) + facet_grid(ID3 ~ ID4, labeller=label_both, scales="free")
+ggplot(agg, aes(Evaluations,Mean,group=ID3)) + geom_line(aes(colour=ID3)) + facet_grid(ID4 ~ ID1, labeller=label_both, scales="free")
 
 hybrid <- loadData("hybrid/*","hybrid.stat",auto.ids.sep="[_/]",fun=loadFile, colnames=hyb.cols, parallel=F)
+ggplot(hybrid[, .(MeanPops=mean(NumPops)), by=.(ID3,ID4)], aes(ID3,MeanPops)) + geom_bar(stat="identity") + facet_wrap(~ ID4, scales="free")
 
+
+fitness <- loadData("comparison/**/*","fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", parallel=F, filter=bestSoFarEvaluations, filter.par=list(step=1000))
+levels <- fitness[, fitnessLevels(.SD,seq(0.95,1,0.01)), by=.(ID2,ID4,ID5,Job)]
+levels[which(is.infinite(Evaluations)), Evaluations := NA]
+
+agg <- levels[, .(Mean=mean(Evaluations,na.rm=T)), by=.(ID2,ID4,ID5,Threshold)]
+ggplot(agg, aes(Threshold,Mean)) + geom_bar(aes(fill=ID2),stat="identity",position="dodge") + facet_grid(ID4 ~ ID5, scales="free_y")
+
+
+
+fitness <- loadData("pops/**/*","fitness.stat",jobs=0:22,fun=loadFitness,auto.ids.sep="[_/]", parallel=F, filter=bestSoFarEvaluations, filter.par=list(step=10000))
+agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,ID2,ID4,ID5,Evaluations)]
+ggplot(agg, aes(Evaluations,Mean,group=ID2)) + geom_line(aes(colour=ID2)) + facet_wrap(~ ID5 + ID4, labeller=label_both, scales="free_x")
+
+fitness <- loadData("init/**/*","fitness.stat",jobs=0:22,fun=loadFitness,auto.ids.sep="[_/]", parallel=F, filter=bestSoFarEvaluations, filter.par=list(step=10000))
+agg <- fitness[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,ID4,ID5,Evaluations)]
+ggplot(agg, aes(Evaluations,Mean,group=ID5)) + geom_line(aes(colour=ID5)) + facet_wrap(~ ID4, labeller=label_both)
+
+
+
+fitnessLevels <- function(data, thresholds) {
+  aux <- function(t) {
+    w <- which(data[,BestSoFar] > t)
+    return(if(length(w) > 0) data$Evaluations[min(w)] else Inf)
+  }
+  evals <- sapply(thresholds, aux)
+  return(data.table(Threshold=thresholds,Evaluations=evals))
+}
+
+levels <- fitness[, fitnessLevels(.SD,seq(0.95,1,0.01)), by=.(ID2,ID4,ID5,Job)]
+levels[which(is.infinite(Evaluations)), Evaluations := NA]
+
+agg <- levels[, .(Mean=mean(Evaluations,na.rm=T)), by=.(ID2,ID4,ID5,Threshold)]
+ggplot(agg, aes(Threshold,Mean)) + geom_bar(aes(fill=ID2),stat="identity",position="dodge") + facet_grid(ID4 ~ ID5, scales="free_y")
 
 setwd("~/labmag/exps/herding/")
 fitness <- loadData("*","fitness.stat",fun=loadFitness,auto.ids.sep="_", parallel=F, filter=bestSoFarEvaluations, filter.par=list(step=1000))
@@ -455,4 +491,99 @@ ggplot(hybrid[, .(MeanPops=mean(NumPops)), by=.(ID1,ID2)], aes(ID1,MeanPops)) + 
 ggplot(hybrid[, .(MeanDist=mean(MeanDist)), by=.(ID1,ID2)], aes(ID1,MeanDist)) + geom_bar(stat="identity") + facet_wrap(~ ID2, scales="free")
 ggplot(lastGen(hybrid)[, .(MeanTotalMerges=mean(TotalMerges)), by=.(ID1,ID2)], aes(ID1,MeanTotalMerges)) + geom_bar(stat="identity") + facet_wrap(~ ID2, scales="free")
 ggplot(lastGen(hybrid)[, .(MeanTotalSplits=mean(TotalSplits)), by=.(ID1,ID2)], aes(ID1,MeanTotalSplits)) + geom_bar(stat="identity") + facet_wrap(~ ID2, scales="free")
+
+
+
+# DRAFT
+
+setwd("~/exps/allocation2")
+hyb.cols <- c("Generation","Evaluations","NumPops",NA,NA,NA,"MeanAge","MaxAge","Merges","Splits","TotalMerges","TotalSplits",NA,"MeanDist",NA)
+
+
+fitness <- loadData("comparison/hybrid/*","fitness.stat",jobs=0:22,fun=loadFitness,auto.ids.sep="[_/]", parallel=F, auto.ids.names=c("Experiment","Method","Task","UniqueTargets","Dimensions"),  filter=bestSoFarEvaluations, filter.par=list(step=1000))
+ggplot(lastGen(fitness)[, .(BestMean=mean(BestSoFar)), by=.(UniqueTargets,Dimensions)], aes(Dimensions,BestMean)) + geom_bar(aes(fill=UniqueTargets), stat="identity",position="dodge")
+
+hybrid <- loadData("comparison/hybrid/*","hybrid.stat",jobs=0:22,auto.ids.sep="[_/]", auto.ids.names=c("Experiment","Method","Task","UniqueTargets","Dimensions"),fun=loadFile, colnames=hyb.cols, parallel=F)
+ggplot(hybrid[Evaluations>=900000, .(MeanPops=mean(NumPops)), by=.(UniqueTargets,Dimensions)], aes(Dimensions,MeanPops)) + geom_bar(aes(fill=UniqueTargets), stat="identity",position="dodge") + ggtitle("Mean number of populations in the final generations")
+
+hybrid[, Evaluations := floor(Evaluations / 1000) * 1000]
+ggplot(hybrid[, .(NumPops=mean(NumPops)), by=.(Evaluations,UniqueTargets,Dimensions)], aes(Evaluations,NumPops)) + geom_line(aes(colour=UniqueTargets,group=UniqueTargets)) + facet_wrap(~ Dimensions, labeller=label_both) + ylim(1,10) + ylab("Mean number of populations")
+
+
+fitness <- loadData("pops/hybrid/*","fitness.stat",jobs=0:22,fun=loadFitness,auto.ids.sep="[_/]", parallel=F, auto.ids.names=c("Experiment","Method","Task","Agents","UniqueTargets"),  filter=bestSoFarEvaluations, filter.par=list(step=5000))
+ggplot(lastGen(fitness)[, .(BestMean=mean(BestSoFar)), by=.(Agents,UniqueTargets)], aes(Agents,BestMean)) + geom_bar(aes(fill=UniqueTargets), stat="identity",position="dodge")
+
+hybrid <- loadData("pops/hybrid/*","hybrid.stat",jobs=0:22,auto.ids.sep="[_/]", auto.ids.names=c("Experiment","Method","Task","Agents","UniqueTargets"),fun=loadFile, colnames=hyb.cols, parallel=F)
+hybrid[, Evaluations := floor(Evaluations / 5000) * 5000]
+ggplot(hybrid[, .(NumPops=mean(NumPops)), by=.(Evaluations,UniqueTargets,Agents)], aes(Evaluations,NumPops)) + geom_line(aes(colour=UniqueTargets,group=UniqueTargets)) + facet_wrap(~ Agents, labeller=label_both, scales="free") + ylab("Mean number of populations")
+
+
+fitness <- loadData("init/hybrid/*","fitness.stat",jobs=0:22,fun=loadFitness,auto.ids.sep="[_/]", parallel=F, auto.ids.names=c("Experiment","Method","Task","UniqueTargets","InitialPopulations"), filter=bestSoFarEvaluations, filter.par=list(step=1000))
+ggplot(lastGen(fitness)[, .(BestMean=mean(BestSoFar)), by=.(InitialPopulations,UniqueTargets)], aes(UniqueTargets,BestMean)) + geom_bar(aes(fill=InitialPopulations), stat="identity",position="dodge")
+
+hybrid <- loadData("init/hybrid/*","hybrid.stat",jobs=0:22,auto.ids.sep="[_/]", auto.ids.names=c("Experiment","Method","Task","UniqueTargets","InitialPopulations"),fun=loadFile, colnames=hyb.cols, parallel=F)
+hybrid[, Evaluations := floor(Evaluations / 1000) * 1000]
+hybrid[, InitialPopulations := factor(InitialPopulations, labels=c("1","3","5","10"))]
+ggplot(hybrid[, .(NumPops=mean(NumPops)), by=.(Evaluations,UniqueTargets,InitialPopulations)], aes(Evaluations,NumPops)) + geom_line(aes(colour=InitialPopulations,group=InitialPopulations)) + facet_wrap(~ UniqueTargets, labeller=label_both, scales="free") + ylab("Mean number of populations")
+
+fitness <- loadData("comparison/**/*","fitness.stat",jobs=0:22,fun=loadFitness,auto.ids.sep="[_/]", parallel=F, auto.ids.names=c("Experiment","Method","Task","UniqueTargets","Dimensions"), filter=bestSoFarEvaluations, filter.par=list(step=1000))
+
+fit <- fitness[Dimensions=="20"]
+ggplot(fit[,.(Mean=mean(BestSoFar)), by=.(Evaluations,Method,UniqueTargets)], aes(Evaluations,Mean)) + geom_line(aes(colour=Method,group=Method)) + facet_wrap(~ UniqueTargets, labeller=label_both)
+
+levels <- fitness[, fitnessLevels(.SD,seq(0.9,0.99,0.01)), by=.(Job,Method,UniqueTargets,Dimensions)]
+levels[which(is.infinite(Evaluations)), Evaluations := NA]
+agg <- levels[, if(length(Evaluations) > 10) mean(Evaluations,na.rm=T) else NA, by=.(Method,UniqueTargets,Dimensions,Threshold)]
+ggplot(agg, aes(UniqueTargets,V1)) + geom_bar(aes(fill=Method), stat="identity",position="dodge") + facet_grid(Dimensions ~ Threshold, labeller=label_both)
+
+filt <- agg[(Threshold==0.99 & Dimensions=="5")|(Threshold==0.99 & Dimensions=="10")|(Threshold==0.98 & Dimensions=="20")|(Threshold==0.96 & Dimensions=="30")|(Threshold==0.93 & Dimensions=="50")]
+
+ggplot(filt, aes(UniqueTargets,V1)) + geom_bar(aes(fill=Method), stat="identity",position="dodge") + 
+  facet_wrap(~ Dimensions + Threshold, labeller=label_both) + ylab("Evaluations until fitness levels achieved (less is better)")
+ggplot(lastGen(fitness)[,.(Mean=mean(BestSoFar)), by=.(Method,Dimensions,UniqueTargets)], aes(UniqueTargets,Mean)) + geom_bar(aes(fill=Method), stat="identity",position="dodge") + facet_wrap(~ Dimensions, labeller=label_both) + scale_y_continuous(limits=c(0.75,1),oob = rescale_none) + ylab("Mean of highest fitness achieved in each run")
+
+ggplot(filt, aes(UniqueTargets,V1,colour=Method,group=Method)) + geom_line() + geom_point() + 
+  facet_wrap(~ Dimensions + Threshold, labeller=label_both) + ylab("Evaluations until fitness levels achieved (less is better)")
+ggplot(lastGen(fitness)[,.(Mean=mean(BestSoFar)), by=.(Method,Dimensions,UniqueTargets)], aes(UniqueTargets,Mean,colour=Method,group=Method)) + geom_line() + geom_point() + facet_wrap(~ Dimensions, labeller=label_both) + ylab("Mean of highest fitness achieved in each run (higher is better)")
+
+
+setwd("/media/jorge/Orico/allocation2")
+split <- loadData("split/*_20_*","fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", parallel=F, auto.ids.names=c("Experiment","Task","UniqueTargets","Dimensions","MaxLockdown"), filter=bestSoFarEvaluations, filter.par=list(step=1000))
+
+ggplot(split[,.(Mean=mean(BestSoFar)), by=.(Evaluations,UniqueTargets,Dimensions,MaxLockdown)], aes(Evaluations,Mean)) + geom_line(aes(colour=MaxLockdown,group=MaxLockdown)) + facet_wrap(~ UniqueTargets, labeller=label_both)
+ggplot(lastGen(split)[, .(BestMean=mean(BestSoFar)), by=.(UniqueTargets,Dimensions,MaxLockdown)], aes(MaxLockdown,BestMean)) + geom_line(aes(colour=Dimensions,group=Dimensions)) + facet_wrap(~ UniqueTargets)
+
+hybsplit <- loadData("split/*_20_*","hybrid.stat",auto.ids.sep="[_/]", auto.ids.names=c("Experiment","Task","UniqueTargets","Dimensions","MaxLockdown"), fun=loadFile, colnames=hyb.cols, parallel=F)
+hybsplit[, Evaluations := floor(Evaluations / 1000) * 1000]
+ggplot(hybsplit[, .(NumPops=mean(NumPops)), by=.(Evaluations,UniqueTargets,Dimensions,MaxLockdown)], aes(Evaluations,NumPops)) + geom_line(aes(colour=MaxLockdown,group=MaxLockdown)) + facet_grid(UniqueTargets ~ Dimensions, labeller=label_both) + ylab("Mean number of populations")
+
+merge <- loadData("merge/*_20_*","fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", parallel=F, auto.ids.names=c("Experiment","Task","UniqueTargets","Dispersion","Dimensions","MergeThreshold"), filter=bestSoFarEvaluations, filter.par=list(step=10000))
+
+levels <- merge[, fitnessLevels(.SD,seq(0.9,0.99,0.01)), by=.(Job,UniqueTargets,Dispersion,MergeThreshold)]
+agg <- levels[, if(length(Evaluations) > 10) mean(Evaluations,na.rm=T) else NA, by=.(UniqueTargets,Dispersion,MergeThreshold,Threshold)]
+ggplot(agg, aes(Threshold,V1)) + geom_bar(aes(fill=MergeThreshold), position="dodge",stat="identity") + facet_wrap(~ Dispersion + UniqueTargets, labeller=label_both)
+
+
+ggplot(merge[,.(Mean=mean(BestSoFar)), by=.(Evaluations,UniqueTargets,Dispersion,MergeThreshold)], aes(Evaluations,Mean)) + geom_line(aes(colour=MergeThreshold,group=MergeThreshold)) + facet_wrap(~ Dispersion + UniqueTargets, labeller=label_both)
+
+hybmerge <- loadData("merge/*_20_*","hybrid.stat",auto.ids.sep="[_/]", auto.ids.names=c("Experiment","Task","UniqueTargets","Dispersion","Dimensions","MergeThreshold"), fun=loadFile, colnames=hyb.cols, parallel=F)
+hybmerge[, Evaluations := floor(Evaluations / 1000) * 1000]
+ggplot(hybmerge[, .(NumPops=mean(NumPops)), by=.(Evaluations,UniqueTargets,Dispersion,MergeThreshold)], aes(Evaluations,NumPops)) + geom_line(aes(colour=MergeThreshold,group=MergeThreshold)) + facet_wrap(~ Dispersion + UniqueTargets, labeller=label_both) + ylab("Mean number of populations")
+
+setwd("/media/jorge/Orico/allocationx")
+fitness <- loadData("comparison/**/*","fitness.stat",fun=loadFitness,auto.ids.sep="[_/]", parallel=F, auto.ids.names=c("Experiment","Method","Task","UniqueTargets","Dimensions"), filter=bestSoFarEvaluations, filter.par=list(step=1000))
+
+levels <- fitness[, fitnessLevels(.SD,seq(0.9,0.99,0.01)), by=.(Job,Method,UniqueTargets,Dimensions)]
+agg <- levels[, if(length(Evaluations) > 10) mean(Evaluations,na.rm=T) else NA, by=.(Method,UniqueTargets,Dimensions,Threshold)]
+ggplot(agg, aes(UniqueTargets,V1)) + geom_bar(aes(fill=Method), stat="identity",position="dodge") + facet_grid(Dimensions ~ Threshold, labeller=label_both)
+
+filt <- agg[(Threshold==0.99 & Dimensions=="5")|(Threshold==0.99 & Dimensions=="10")|(Threshold==0.99 & Dimensions=="20")|(Threshold==0.99 & Dimensions=="30")|(Threshold==0.98 & Dimensions=="50")]
+
+ggplot(filt, aes(UniqueTargets,V1)) + geom_bar(aes(fill=Method), stat="identity",position="dodge") + 
+  facet_wrap(~ Dimensions + Threshold, labeller=label_both) + ylab("Evaluations until fitness levels achieved (less is better)")
+ggplot(lastGen(fitness)[,.(Mean=mean(BestSoFar)), by=.(Method,Dimensions,UniqueTargets)], aes(UniqueTargets,Mean)) + geom_bar(aes(fill=Method), stat="identity",position="dodge") + facet_wrap(~ Dimensions, labeller=label_both) + scale_y_continuous(limits=c(0.75,1),oob = rescale_none) + ylab("Mean of highest fitness achieved in each run")
+
+ggplot(filt, aes(UniqueTargets,V1,colour=Method,group=Method)) + geom_line() + geom_point() + 
+  facet_wrap(~ Dimensions + Threshold, labeller=label_both) + ylab("Evaluations until fitness levels achieved (less is better)")
+ggplot(lastGen(fitness)[,.(Mean=mean(BestSoFar)), by=.(Method,Dimensions,UniqueTargets)], aes(UniqueTargets,Mean,colour=Method,group=Method)) + geom_line() + geom_point() + facet_wrap(~ Dimensions, labeller=label_both) + ylab("Mean of highest fitness achieved in each run (higher is better)")
 

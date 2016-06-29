@@ -37,9 +37,8 @@ public class ProblemInstanceStat extends Statistics {
         super.postInitializationStatistics(state);
         AllocationProblem prob = (AllocationProblem) state.evaluator.p_problem;
         for(int i = 0 ; i < prob.types.length ; i++) {
-            state.output.print(prob.types[i] + "", log);
-            for(int j = 0 ; j < prob.typesLoc[i].length ; j++) {
-                state.output.print(" " + prob.typesLoc[i][j], log);
+            for(int j = 0 ; j < prob.types[i].length ; j++) {
+                state.output.print(prob.types[i][j] + " ", log);
             }
             state.output.println("",log);
         }

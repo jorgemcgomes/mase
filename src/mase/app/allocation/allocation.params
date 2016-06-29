@@ -1,30 +1,21 @@
-# homogeneous
-#./evolve.sh -out ~/exps/alltest/hom -p parent=build/classes/mase/app/allocation/allocation.params -p parent=build/classes/mase/base.params -p generations=1000 -force -p ec.subpop.size=1000
-# CCEA
-#./evolve.sh -out ~/exps/alltest/ccea -p parent=build/classes/mase/app/allocation/allocation.params -p parent=build/classes/mase/cooperative.params -p parent=build/classes/mase/base.params -p generations=1000 -force -p ec.subpop.size=100 -p pop.subpops=10
-# team encoding
-#./evolve.sh -out ~/exps/alltest/team -p parent=build/classes/mase/app/allocation/allocation.params -p parent=build/classes/mase/base.params -p generations=1000 -force -p ec.subpop.size=1000 -p vector.species.ind=mase.app.allocation.MultiIndividual -p vector.double-vect-ind.num-agents=10 -p vector.species.genome-size=200
-
-
 eval.base.problem =                mase.app.allocation.AllocationProblem
 problem.number-evals =             0
 problem.trials-merge =             best
 problem.seed =                     0
 fitness.fitness-index =            0
 
+exch.behaviour-index =      1
 
-eval.max-evaluations = 1000000
-generations = 10000
-
-problem.power = 3
+eval.max-evaluations = 1500000
+generations = 1000000
 
 problem.numAgents = 10
-problem.numTypes = 10
+problem.numUniqueTypes = 10
 problem.minSeparation = 0
 problem.numClusters = 0
-problem.clusterSize = 0.25
+problem.clusterSize = 1
 
-pop.subpops =                           1
+pop.subpops =                           10
 pop.subpop.0 =                          ec.Subpopulation
 pop.default-subpop = 			0
 ec.subpop.duplicate-retries =           10
