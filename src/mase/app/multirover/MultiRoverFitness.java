@@ -18,7 +18,7 @@ public class MultiRoverFitness extends MasonEvaluation {
 
     private static final long serialVersionUID = 1L;
 
-    private FitnessResult fitnessResult;
+    protected FitnessResult fitnessResult;
     
     @Override
     public EvaluationResult getResult() {
@@ -33,7 +33,7 @@ public class MultiRoverFitness extends MasonEvaluation {
         for(int c : mr.scores) {
             count += c;
         }
-        fitnessResult = new FitnessResult(count, FitnessResult.ARITHMETIC);
+        fitnessResult = new FitnessResult(count, FitnessResult.HARMONIC);
     }
     
     

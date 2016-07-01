@@ -14,26 +14,30 @@ public class FitnessResult implements EvaluationResult {
     public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3, MIN_PLUS = 4;
     public static final double FLOAT_THRESHOLD = 0.0001f;
     protected double value;
-    protected int combination;
+    protected int average;
 
     public FitnessResult(double value) {
         this(value, HARMONIC);
     }
 
-    public FitnessResult(double value, int combination) {
+    public FitnessResult(double value, int average) {
         this.value = value;
-        this.combination = combination;
+        this.average = average;
     }
 
     @Override
     public Double value() {
         return value;
     }
+    
+    public int getAverageType() {
+        return average;
+    }
 
     @Override
     public FitnessResult mergeEvaluations(EvaluationResult[] results) {
         double score = 0;
-        switch (combination) {
+        switch (average) {
             case MAX:
                 score = Double.NEGATIVE_INFINITY;
                 for (EvaluationResult f : results) {
@@ -73,7 +77,7 @@ public class FitnessResult implements EvaluationResult {
                 score = 0.01f * (mean / results.length) + 0.99f * min;
                 break;
         }
-        FitnessResult fit = new FitnessResult(score, combination);
+        FitnessResult fit = new FitnessResult(score, average);
         return fit;
     }
 

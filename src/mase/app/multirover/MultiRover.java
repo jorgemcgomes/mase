@@ -7,11 +7,8 @@ package mase.app.multirover;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import mase.app.multirover.RedRock.RockType;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.MasonSimState;
@@ -34,8 +31,7 @@ public class MultiRover extends MasonSimState {
     protected final MRParams originalPar;
     protected int[] scores;
     protected List<Rover> rovers;
-    protected List<RedRock> rocks;
-    protected Set<RockType> types;
+    protected List<Rock> rocks;
 
     public MultiRover(long seed, MRParams par, GroupController gc) {
         super(gc, seed);
@@ -52,7 +48,7 @@ public class MultiRover extends MasonSimState {
         par.sensorRange += par.sensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
         
         this.field = new Continuous2D(par.discretization, par.size, par.size);
-        this.scores = new int[RedRock.RockType.values().length];
+        this.scores = new int[par.usedTypes.size()];
         Arrays.fill(scores, 0);
 
         StaticPolygon walls = new StaticPolygon(new Double2D[]{
@@ -104,23 +100,21 @@ public class MultiRover extends MasonSimState {
     protected void placeRocks() {
         
         this.rocks = new LinkedList<>();
-        this.types = new HashSet<>();
         int count = 0;
-        while (count < par.rocks.length) {
-            double x = par.rockRadius + random.nextDouble() * (par.size - par.rockRadius * 2);
-            double y = par.rockRadius + random.nextDouble() * (par.size - par.rockRadius * 2);
-            Bag close = field.getNeighborsExactlyWithinDistance(new Double2D(x, y), par.rockRadius * 4);
+        while (count < par.rockDistribution.length) {
+            RockType type = par.rockDistribution[count];
+            double x = type.radius + random.nextDouble() * (par.size - type.radius * 2);
+            double y = type.radius + random.nextDouble() * (par.size - type.radius * 2);
+            Bag close = field.getNeighborsExactlyWithinDistance(new Double2D(x, y), type.radius * 4);
             if (!close.isEmpty()) {
                 continue;
             }
-            RockType t = RockType.valueOf(par.rocks[count]);
-            RedRock newRock = new RedRock(this, t);
-            newRock.setLabel(t.name() + Arrays.toString(t.actuators));
+            Rock newRock = new Rock(this, type);
+            newRock.setLabel(Arrays.toString(type.actuators));
             newRock.setLocation(new Double2D(x, y));
             newRock.setStopper(schedule.scheduleRepeating(newRock));
             count++;
             rocks.add(newRock);
-            types.add(t);
         }
 
     }

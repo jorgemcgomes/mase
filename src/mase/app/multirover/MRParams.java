@@ -6,7 +6,13 @@
 
 package mase.app.multirover;
 
+import java.awt.Color;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import mase.mason.ParamUtils.IgnoreParam;
+import mase.mason.ParamUtils.MultiParam;
 
 /**
  *
@@ -22,18 +28,32 @@ public class MRParams implements Serializable, Cloneable {
     protected double linearSpeed;
     protected double turnSpeed;
     protected double sensorRange;
-    protected double rockRadius;
     protected double agentRadius;
-    protected int minActivationTime;
-    protected int collectionTime;
-    protected int numActuators;
     protected String[] rocks;
+    protected int numRockTypes;
     
+    @MultiParam(base="type")
+    protected double[] radius;
+    @MultiParam(base="type")
+    protected int[] time;
+    @MultiParam(base="type")
+    protected Color[] color;
+    @MultiParam(base="type")
+    protected int[][] actuators;
+    
+    @IgnoreParam
+    protected int numActuators;
+    @IgnoreParam
+    protected RockType[] rockDistribution;
+    @IgnoreParam
+    protected Collection<RockType> usedTypes;
+            
     protected double actuatorNoise = 0; // percentage
     protected double sensorRangeNoise = 0; // percentage
     protected double sensorAngleNoise = 0; // radians
     protected double sensorOffset = 0; // percentage
     protected double actuatorOffset = 0; // percentage
+    
     
     @Override
     public MRParams clone() {

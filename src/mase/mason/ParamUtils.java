@@ -7,6 +7,7 @@ package mase.mason;
 
 import ec.util.Parameter;
 import ec.util.ParameterDatabase;
+import java.awt.Color;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,7 +26,7 @@ public class ParamUtils {
 
     public static final String SEPARATOR_2D = "[:\\-]+";
     public static final String SEPARATOR_ARRAY = "[,;]+";
-    public static final int MAX_NUM_ROBOTS = 20;
+    public static final int MAX_COUNT = 20;
 
     /**
      * Use this annotation in the parameters that need to be automatically
@@ -47,13 +48,13 @@ public class ParamUtils {
      * different robots
      */
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface RobotParam {
+    public @interface MultiParam {
 
-        String name() default "";
+        String name() default ""; // uses the attribute name
 
         String base() default "robot";
 
-        int numRobots() default 0;
+        int count() default 0; // uses up to the MAX_COUNT
     }
 
     /**
@@ -79,28 +80,41 @@ public class ParamUtils {
         Field[] fields = params.getClass().getDeclaredFields();
         for (Field field : fields) {
             try {
+                // Check for attribute visibility and skip if its private
                 if (Modifier.isPrivate(field.getModifiers())) {
                     System.out.println("- " + field.getName() + ": IGNORED (PRIVATE)");
                     continue;
                 }
                 field.setAccessible(true);
+                
+                // Ignore attribute it is static
                 if (Modifier.isStatic(field.getModifiers())) {
                     System.out.println("- " + field.getName() + ": IGNORED (STATIC). Using default: " + field.get(params));
                     continue;
                 }
+                
+                // Ignore attribute if it has the @IgnoreParam annotation
                 if (field.isAnnotationPresent(IgnoreParam.class)) {
                     System.out.println("- " + field.getName() + ": IGNORED (ANNOTATION). Using default: " + field.get(params));
                     continue;
                 }
-                if (field.isAnnotationPresent(RobotParam.class)) {
-                    RobotParam annotation = field.getAnnotation(RobotParam.class);
+                
+                // It is a composite param, having the @MultiParam annotation
+                if (field.isAnnotationPresent(MultiParam.class)) {
+                    MultiParam annotation = field.getAnnotation(MultiParam.class);
                     Class<?> type = field.getType();
                     if (type.isArray()) {
                         String name = annotation.name().equals("") ? field.getName() : annotation.name();
                         Parameter defaultRobot = base.push(annotation.base()).push(name);
-                        Object array = Array.newInstance(type.getComponentType(), MAX_NUM_ROBOTS);
-                        for (int i = 0; i < (annotation.numRobots() != 0 ? annotation.numRobots() : MAX_NUM_ROBOTS); i++) {
+                        if(!db.exists(defaultRobot, null)) {
+                            defaultRobot = defaultBase.push(annotation.base()).push(name);
+                        }
+                        Object array = Array.newInstance(type.getComponentType(), MAX_COUNT);
+                        for (int i = 0; i < (annotation.count() != 0 ? annotation.count() : MAX_COUNT); i++) {
                             Parameter paramRobot = base.push(annotation.base()).push(i + "").push(name);
+                            if(!db.exists(paramRobot, null)) {
+                                paramRobot = defaultBase.push(annotation.base()).push(i + "").push(name);
+                            }
                             if (db.exists(paramRobot, defaultRobot)) {
                                 Object value = getValue(type.getComponentType(), db, paramRobot, defaultRobot);
                                 Array.set(array, i, value);
@@ -111,7 +125,7 @@ public class ParamUtils {
                     } else {
                         System.out.println("X " + field.getName() + ": Field is not an array");
                     }
-                } else if (field.isAnnotationPresent(Param.class) || useAll) {
+                } else if (field.isAnnotationPresent(Param.class) || useAll) { // It is a simple attribute
                     Param annotation = field.getAnnotation(Param.class);
                     String name = (annotation == null || annotation.name().equals("")) ? field.getName() : annotation.name();
                     if (db.exists(base.push(name), defaultBase.push(name))) {
@@ -185,9 +199,28 @@ public class ParamUtils {
                 throw new Exception("Unexpected split when parsing Int2D: " + stringVal);
             }
             return new Double2D(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+        } else if (type.equals(Color.class)) {
+            return parseColor(stringVal);
         } else {
             throw new Exception("Unknown type: " + type.getName());
         }
     }
 
+     public static Color parseColor(String str) {
+        String[] split = str.split("-|\\.|,|;");
+        if (split.length == 1) {
+            try {
+                Field field = Color.class.getField(split[0]);
+                return (Color) field.get(null);
+            } catch (Exception ex) {
+                return Color.decode(split[0]);
+            }
+        } else if (split.length == 3) {
+            return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        } else if (split.length == 4) {
+            return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+        }
+        return null;
+    }
+    
 }

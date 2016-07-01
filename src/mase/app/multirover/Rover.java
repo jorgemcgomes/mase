@@ -6,7 +6,6 @@
 package mase.app.multirover;
 
 import java.awt.Color;
-import mase.app.multirover.RedRock.RockType;
 import mase.controllers.AgentController;
 import mase.mason.world.AbstractSensor;
 import mase.mason.world.DashMovementEffector;
@@ -29,8 +28,6 @@ public class Rover extends SmartAgent {
     public static final double ACTIVATION_THRESHOLD = 0.5;
 
     protected int actuatorType = NO_ACTIVATION;
-    protected long lastActivation = -10000;
-    protected int numActivations = 0;
     protected int captured = 0;
 
     public Rover(MultiRover sim, Continuous2D field, AgentController ac) {
@@ -46,11 +43,11 @@ public class Rover extends SmartAgent {
         dw.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
         super.addSensor(dw);
 
-        // redrock sensor
+        // rock sensor
         DistanceSensorArcs ds = new DistanceSensorArcs();
         ds.setArcs(4);
         ds.setRange(sim.par.sensorRange);
-        ds.setObjectTypes(RedRock.class);
+        ds.setObjectTypes(Rock.class);
         ds.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
         super.addSensor(ds);
 
@@ -67,9 +64,9 @@ public class Rover extends SmartAgent {
             NeighbourTypeSensor ts = new NeighbourTypeSensor(dsr, i);
             super.addSensor(ts);
         }
-        
+
         // rock type sensor
-        for(RockType t : sim.types) {
+        for (RockType t : sim.par.usedTypes) {
             RockTypeSensor rts = new RockTypeSensor(ds, t);
             super.addSensor(rts);
         }
@@ -82,17 +79,17 @@ public class Rover extends SmartAgent {
         super.addEffector(dm);
 
     }
-    
+
     private static class RockTypeSensor extends AbstractSensor {
 
         private final DistanceSensorArcs rockSensor;
         private final RockType type;
-        
+
         RockTypeSensor(DistanceSensorArcs rockSensor, RockType type) {
             this.rockSensor = rockSensor;
             this.type = type;
         }
-        
+
         @Override
         public int valueCount() {
             return 1;
@@ -103,11 +100,11 @@ public class Rover extends SmartAgent {
             Object[] rocks = rockSensor.getClosestObjects();
             double[] dists = rockSensor.getLastDistances();
             double minDist = Double.POSITIVE_INFINITY;
-            RedRock closestRock = null;
+            Rock closestRock = null;
             for (int i = 0; i < rocks.length; i++) {
-                if(rocks[i] != null && dists[i] < minDist) {
+                if (rocks[i] != null && dists[i] < minDist) {
                     minDist = dists[i];
-                    closestRock = (RedRock) rocks[i];
+                    closestRock = (Rock) rocks[i];
                 }
             }
             if (closestRock != null && closestRock.getType() == type) {
@@ -121,7 +118,7 @@ public class Rover extends SmartAgent {
         public double[] normaliseValues(double[] vals) {
             return vals;
         }
-        
+
     }
 
     private static class NeighbourTypeSensor extends AbstractSensor {
@@ -163,37 +160,28 @@ public class Rover extends SmartAgent {
             return vals;
         }
     }
-    
+
     public int getActuatorType() {
         return actuatorType;
     }
-  
+
     @Override
     public void action(double[] output) {
         MRParams par = ((MultiRover) sim).par;
-        if (sim.schedule.getSteps() - lastActivation < par.minActivationTime) {
-            // locked in the actuator -- do not move and do not change actuator
+        actuatorType = NO_ACTIVATION;
+        double highestActivation = 0;
+        for (int i = 0; i < par.numActuators; i++) {
+            if (output[2 + i] > ACTIVATION_THRESHOLD && output[2 + i] > highestActivation) {
+                highestActivation = output[2 + i];
+                actuatorType = i;
+            }
+        }
+        // Only move if there is no actuator active
+        if (actuatorType == NO_ACTIVATION) {
+            this.setColor(NOACTUATOR_COLOUR);
+            super.action(output);
         } else {
-            int newActuator = NO_ACTIVATION;
-            double highestActivation = 0;
-            for (int i = 0; i < par.numActuators; i++) {
-                if (output[2 + i] > ACTIVATION_THRESHOLD && output[2 + i] > highestActivation) {
-                    highestActivation = output[2 + i];
-                    newActuator = i;
-                }
-            }
-            if(newActuator != actuatorType && newActuator != NO_ACTIVATION) {
-                lastActivation = sim.schedule.getSteps();
-                numActivations++;
-                this.setColor(ACTUATING_COLOUR);
-            }
-            actuatorType = newActuator;
-
-            // Only move if there is no actuator active
-            if(actuatorType == NO_ACTIVATION) {
-                this.setColor(NOACTUATOR_COLOUR);
-                super.action(output);
-            }
+            this.setColor(ACTUATING_COLOUR);
         }
     }
 }

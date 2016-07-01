@@ -48,7 +48,7 @@ public class ScoresStat extends Statistics {
                 }
                 state.output.print(" " + nf.fitness() + "\n", log);
             }
-            state.output.println("", log); // flush
         }
+        state.output.getLog(log).writer.flush(); // flush        
     }
 }

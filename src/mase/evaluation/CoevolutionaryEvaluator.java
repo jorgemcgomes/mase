@@ -355,6 +355,8 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
 
         // Fill remaining with the elite of the current pop
         int toFill = numElite - index;
+        // the number of individuals left to fill is less than or equal to the number of elite scores
+        // no need to do any sorting, since it is going to be the single best
         if (toFill <= eliteScore.length) {
             for (int i = 0; i < toFill && index < numElite; i++) {
                 Individual best = subpop.individuals[0];
@@ -365,6 +367,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
                 }
                 eliteIndividuals[whichSubpop][index++] = (Individual) best.clone();
             }
+        // more than one individual per score are need, therefore we sort them and fill with the top
         } else {
             // Sort the individuals according to the multiple objectives
             List<Individual>[] sorted = new List[eliteScore.length];

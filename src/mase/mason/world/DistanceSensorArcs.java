@@ -87,7 +87,7 @@ public class DistanceSensorArcs extends AbstractSensor {
 
     @Override
     public double[] readValues() {
-        Bag neighbours = Double.isInfinite(range) ? field.allObjects
+        Bag neighbours = Double.isInfinite(range) || field.allObjects.size() < 30 ? field.allObjects
                 : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
         lastDistances = new double[valueCount()];
         Arrays.fill(lastDistances, Double.POSITIVE_INFINITY);
@@ -97,29 +97,30 @@ public class DistanceSensorArcs extends AbstractSensor {
         }
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
         for (Object n : neighbours) {
-            if (objectMatch(n) && field.exists(n)) {
-                double rawDist = distFunction.centerToCenterDistance(ag,n);
-                double dist = ignoreRadius ? rawDist : distFunction.agentToObjectDistance(ag, n);
-                if (rangeNoiseAbs > 0) {
-                    dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                    dist = Math.max(dist, 0);
-                }
-                if(!ignoreRadius && rawDist < distFunction.radius(n)) { // agent is inside the object
+            if (objectMatch(n)) {
+                double rawDist = distFunction.centerToCenterDistance(ag, n);
+                if (!ignoreRadius && rawDist < distFunction.radius(n)) { // agent is inside the object
                     Arrays.fill(lastDistances, 0);
                     Arrays.fill(closestObjects, n);
-                } else if (dist <= range) {
-                    double angle = 0;
-                    angle = ag.angleTo(field.getObjectLocation(n));
-                    if (orientationNoise > 0) {
-                        angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                        angle = EmboddiedAgent.normalizeAngle(angle);
+                } else {
+                    double dist = ignoreRadius ? rawDist : distFunction.agentToObjectDistance(ag, n);
+                    if (rangeNoiseAbs > 0) {
+                        dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                        dist = Math.max(dist, 0);
                     }
-                    for (int a = 0; a < arcStart.length; a++) {
-                        if ((angle >= arcStart[a] && angle <= arcEnd[a])
-                                || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a]))) {
-                            if (dist < lastDistances[a]) {
-                                lastDistances[a] = dist;
-                                closestObjects[a] = n;
+                    if (dist <= range) {
+                        double angle = ag.angleTo(field.getObjectLocation(n));
+                        if (orientationNoise > 0) {
+                            angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                            angle = EmboddiedAgent.normalizeAngle(angle);
+                        }
+                        for (int a = 0; a < arcStart.length; a++) {
+                            if ((angle >= arcStart[a] && angle <= arcEnd[a])
+                                    || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a]))) {
+                                if (dist < lastDistances[a]) {
+                                    lastDistances[a] = dist;
+                                    closestObjects[a] = n;
+                                }
                             }
                         }
                     }

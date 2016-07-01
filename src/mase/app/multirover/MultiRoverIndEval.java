@@ -81,7 +81,7 @@ public class MultiRoverIndEval extends MasonEvaluation {
             //dispersion += r.distanceTo(new Double2D(cm));
 
             double closest = Double.POSITIVE_INFINITY;
-            for (RedRock rock : mr.rocks) {
+            for (Rock rock : mr.rocks) {
                 Double2D p = mr.field.getObjectLocation(rock);
                 closest = Math.min(closest, r.distanceTo(p));
             }

@@ -84,6 +84,10 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         if (repetitions < 1) {
             state.output.fatal("Parameter invalid value. Must be > 0.", base.push(P_REPETITIONS));
         }
+        
+        if(repetitions > 1 && sameSeed) {
+            state.output.fatal("Using multiple repetitions, but the random seed is fixed.");
+        }
     }
 
     @Override

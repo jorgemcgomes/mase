@@ -11,11 +11,15 @@ import ec.util.Parameter;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import mase.app.multirover.RedRock.RockType;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import mase.controllers.GroupController;
 import mase.mason.GUIState2D;
 import mase.mason.MasonSimulationProblem;
 import mase.mason.ParamUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import sim.display.GUIState;
 
 /**
@@ -33,18 +37,48 @@ public class MultiRoverSimulator extends MasonSimulationProblem {
         par = new MRParams();
         ParamUtils.autoSetParameters(par, state.parameters, base, super.defaultBase(), true);
         
-        // Validate rock types
+        // Parse rock types
+        RockType[] allTypes = new RockType[par.numRockTypes];
+        for(int i = 0 ; i < par.numRockTypes ; i++) {
+            RockType t = new RockType(par.color[i], i, par.actuators[i], par.time[i], par.radius[i]);
+            allTypes[i] = t;
+        }
+        
+        // Parse rock distribution
+        List<RockType> dist = new ArrayList<>();
         for(String rStr : par.rocks) {
-            RockType r = RockType.valueOf(rStr);
-            if(r.actuators.length > par.numAgents) {
-                state.output.fatal("Invalid rock type: " + r.name() + ". More agents required than available.");
-            }
-            for(int a : r.actuators) {
-                if(a != Rover.NO_ACTIVATION && a > par.numActuators - 1) {
-                    state.output.fatal("Invalid rock type: " + r.name() + ". The required actuator does not exist.");
+            if(rStr.contains("*")) {
+                String[] split = rStr.split("\\*");
+                int num = Integer.parseInt(split[0].trim());
+                int idx = Integer.parseInt(split[1].trim());
+                for(int i = 0 ; i < num ; i++) {
+                    dist.add(allTypes[idx]);
                 }
+            } else {
+                int idx = Integer.parseInt(rStr);
+                dist.add(allTypes[idx]);
             }
         }
+        par.rockDistribution = dist.toArray(new RockType[dist.size()]);
+        state.output.message("Using a total of " + dist.size() + " rocks");
+        
+        // Find the rocktypes that are actually used
+        par.usedTypes = new LinkedList<>();
+        for(RockType t : allTypes) {
+            if(ArrayUtils.contains(par.rockDistribution, t)) {
+                par.usedTypes.add(t);
+            }
+        }
+        state.output.message("There is a total of " + par.usedTypes.size() + " unique types");
+                
+        // Determine the number of acuatorts for the used rock types
+        par.numActuators = 0;
+        for(RockType r : par.usedTypes) {
+            for(int a : r.actuators) {
+                par.numActuators = Math.max(0, a + 1);
+            }
+        }
+        state.output.message("Auto determined number of rock actuators: " + par.numActuators);        
     }
 
     @Override

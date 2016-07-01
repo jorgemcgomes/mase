@@ -72,7 +72,6 @@ public abstract class SmartAgent extends EmboddiedAgent {
         for(Sensor s : sensors) {
             double[] raw = s.readValues();
             double[] norm = s.normaliseValues(raw);
-            s.normaliseValues(raw);
             System.arraycopy(raw, 0, lastRawSensors, index, raw.length);
             System.arraycopy(norm, 0, lastNormSensors, index, norm.length);
             index += raw.length;
