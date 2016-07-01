@@ -80,7 +80,7 @@ public class Rock extends WorldObject implements Steppable {
             if (requiredAct.isEmpty()) {
                 stop.stop();
                 mr.field.remove(this);
-                mr.scores[type.index]++;
+                mr.scores.put(type, mr.scores.get(type) + 1);
                 mr.rocks.remove(this);
                 for(Rover r : ableRover) { // for behaviour measures
                     r.captured++;

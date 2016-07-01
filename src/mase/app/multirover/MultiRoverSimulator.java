@@ -40,7 +40,7 @@ public class MultiRoverSimulator extends MasonSimulationProblem {
         // Parse rock types
         RockType[] allTypes = new RockType[par.numRockTypes];
         for(int i = 0 ; i < par.numRockTypes ; i++) {
-            RockType t = new RockType(par.color[i], i, par.actuators[i], par.time[i], par.radius[i]);
+            RockType t = new RockType(par.color[i], par.actuators[i], par.time[i], par.radius[i]);
             allTypes[i] = t;
         }
         

@@ -30,7 +30,7 @@ public class MultiRoverFitness extends MasonEvaluation {
         super.postSimulation();
         MultiRover mr = (MultiRover) sim;
         int count = 0;
-        for(int c : mr.scores) {
+        for(int c : mr.scores.values()) {
             count += c;
         }
         fitnessResult = new FitnessResult(count, FitnessResult.HARMONIC);

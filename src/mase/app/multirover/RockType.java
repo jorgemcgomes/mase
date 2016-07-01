@@ -20,14 +20,12 @@ public class RockType implements Serializable {
     protected final int[] actuators;
     protected final int collectionTime;
     protected final double radius;
-    protected final int index;
 
-    public RockType(Color color, int index, int[] actuators, int collectionTime, double radius) {
+    public RockType(Color color, int[] actuators, int collectionTime, double radius) {
         this.color = color;
         this.actuators = actuators;
         this.collectionTime = collectionTime;
         this.radius = radius;
-        this.index = index;
     }
 
 }

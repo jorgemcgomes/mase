@@ -7,8 +7,11 @@ package mase.app.multirover;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.MasonSimState;
@@ -29,7 +32,7 @@ public class MultiRover extends MasonSimState {
     protected Continuous2D field;
     protected MRParams par;
     protected final MRParams originalPar;
-    protected int[] scores;
+    protected Map<RockType,Integer> scores;
     protected List<Rover> rovers;
     protected List<Rock> rocks;
 
@@ -48,8 +51,10 @@ public class MultiRover extends MasonSimState {
         par.sensorRange += par.sensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
         
         this.field = new Continuous2D(par.discretization, par.size, par.size);
-        this.scores = new int[par.usedTypes.size()];
-        Arrays.fill(scores, 0);
+        this.scores = new LinkedHashMap<>();
+        for(RockType t : par.usedTypes) {
+            scores.put(t, 0);
+        }
 
         StaticPolygon walls = new StaticPolygon(new Double2D[]{
             new Double2D(0, 0),

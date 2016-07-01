@@ -1,7 +1,7 @@
 eval.base.problem =                mase.app.multirover.MultiRoverSimulator
 problem.trials-merge =             best
 problem.number-evals =             1
-problem.eval.0 =                   mase.app.multirover.MultiRoverFitnessBootstrap
+problem.eval.0 =                   mase.app.multirover.MultiRoverFitness
 problem.eval.0.update-freq =       1
 #problem.eval.1 =                   mase.app.multirover.MultiRoverIndEval
 #problem.eval.1.update-freq =       1
@@ -30,7 +30,7 @@ problem.type.time =                25
 problem.type.color =               blue
 
 # rock types
-problem.numRockTypes =       10
+problem.numRockTypes =       12
 
 problem.type.0.actuators =   0
 problem.type.1.actuators =   1  
@@ -42,11 +42,14 @@ problem.type.6.actuators =   0,1,2
 problem.type.7.actuators =   -1  
 problem.type.8.actuators =   -1,-1  
 problem.type.9.actuators =   -1,-1,-1  
+problem.type.10.actuators =  3
+problem.type.11.actuators =  4
 
-problem.rocks = 15*0
-neat.INPUT.NODES =                 12
-neat.OUTPUT.NODES =                3
-  
+-p problem.rocks=15*0 -p neat.INPUT.NODES=12 -p neat.OUTPUT.NODES=3
+#-p problem.rocks=8*0,7*1 -p neat.INPUT.NODES=14 -p neat.OUTPUT.NODES=4
+#-p problem.rocks=5*0,5*1,5*2 -p neat.INPUT.NODES=16 -p neat.OUTPUT.NODES=5
+#-p problem.rocks=3*0,4*1,4*2,4*10 -p neat.INPUT.NODES=18 -p neat.OUTPUT.NODES=6
+#-p problem.rocks=3*0,3*1,3*2,3*10,3*11 -p neat.INPUT.NODES=20 -p neat.OUTPUT.NODES=7  
 
 #-p problem.rocks=A,A,A,A,A,A,A,A,A,A,A,A,A,A,A -p problem.numActuators=1 -p neat.INPUT.NODES=12 -p neat.OUTPUT.NODES=3
 #problem.rocks =                    A,A,A,A,A,A,A,A,A,A,A,A,A,A,A
