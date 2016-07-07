@@ -112,8 +112,12 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
         int count = 0;
         while (count < par.rockDistribution.length) {
             RockType type = par.rockDistribution[count];
-            double x = random.nextDouble() * par.size;
-            double y = random.nextDouble() * par.size;
+            double x = type.radius + random.nextDouble() * (par.size - type.radius * 2);
+            double y = type.radius + random.nextDouble() * (par.size - type.radius * 2);
+            Bag close = field.getNeighborsExactlyWithinDistance(new Double2D(x, y), type.radius * 4);
+            if (!close.isEmpty()) {
+                continue;
+            }
             Rock newRock = new Rock(this, type);
             newRock.setLabel(Arrays.toString(type.actuators));
             newRock.setLocation(new Double2D(x, y));

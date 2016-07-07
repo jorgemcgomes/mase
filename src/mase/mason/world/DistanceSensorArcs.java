@@ -5,6 +5,7 @@
  */
 package mase.mason.world;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -152,7 +153,7 @@ public class DistanceSensorArcs extends AbstractSensor {
 
     protected Collection<? extends Object> getCandidates() {
         if (objects != null) {
-            return objects;
+            return new ArrayList<>(objects);
         } else {
             Collection<Object> objs = new LinkedList<>();
             Bag neighbours = Double.isInfinite(range) || field.allObjects.size() < 30 ? field.allObjects
