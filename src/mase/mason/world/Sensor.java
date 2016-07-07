@@ -6,17 +6,12 @@
 
 package mase.mason.world;
 
-import sim.engine.SimState;
-import sim.field.continuous.Continuous2D;
-
 /**
  *
  * @author jorge
  */
 public interface Sensor extends Cloneable {
-    
-    public void setAgent(SimState state, Continuous2D field, EmboddiedAgent ag);
-    
+        
     public int valueCount();
         
     public double[] readValues();

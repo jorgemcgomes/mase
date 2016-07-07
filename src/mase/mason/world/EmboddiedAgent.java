@@ -251,7 +251,7 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
             return 0;
         }
         agentToPoint = agentToPoint.normalize();
-        Double2D agentDir = new Double2D(FastMath.cos(orientation), FastMath.sin(orientation));
+        Double2D agentDir = new Double2D(FastMath.cosQuick(orientation), FastMath.sinQuick(orientation));
         return FastMath.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
     }
 

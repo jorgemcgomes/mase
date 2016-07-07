@@ -36,7 +36,7 @@ public class FlyingRobot extends SmartAgent {
         this.enablePolygonCollisions(false);
         this.enableCollisionRebound(false);
 
-        effector = new FlyingEffector();
+        effector = new FlyingEffector(sim, field, this);
         super.addEffector(effector);
         effector.enableAltitude(sim.par.flyingVerticalMovement);
         effector.setHeight(sim.par.flyingStartHeight);
@@ -47,7 +47,7 @@ public class FlyingRobot extends SmartAgent {
         
         double vRange = sim.par.flyingStartHeight * FastMath.tan(sim.par.flyingVisionAngle / 2);
 
-        itemArcs = new DistanceSensorArcs();
+        itemArcs = new DistanceSensorArcs(sim, field, this);
         super.addSensor(itemArcs);
         itemArcs.ignoreRadius(true);
         itemArcs.setRange(vRange);
@@ -56,7 +56,7 @@ public class FlyingRobot extends SmartAgent {
         itemArcs.setObjectTypes(Item.class);
         itemArcs.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         
-        botArcs = new DistanceSensorArcs();
+        botArcs = new DistanceSensorArcs(sim, field, this);
         super.addSensor(botArcs);
         botArcs.ignoreRadius(true);
         botArcs.setRange(vRange);
@@ -66,14 +66,14 @@ public class FlyingRobot extends SmartAgent {
         botArcs.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         
         if(sim.par.flyingVerticalMovement) {
-            HeightSensor hs = new HeightSensor();
+            HeightSensor hs = new HeightSensor(sim, field, this);
             hs.setFlyingEffector(effector);
             hs.setNoise(sim.par.sensorRangeNoise);
             super.addSensor(hs);
             effector.updateHeight();
         }
         
-        centre = new RangeBearingSensor();
+        centre = new RangeBearingSensor(sim, field, this);
         centre.setObjects(Collections.singletonList(new Double2D(sim.par.arenaSize.x / 2, sim.par.arenaSize.y / 2)));
         centre.setRange(Double.POSITIVE_INFINITY);
         centre.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);

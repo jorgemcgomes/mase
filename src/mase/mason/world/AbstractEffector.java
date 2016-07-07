@@ -14,15 +14,26 @@ import sim.field.continuous.Continuous2D;
  */
 public abstract class AbstractEffector implements Effector {
 
-    protected SimState state;
-    protected Continuous2D field;
-    protected EmboddiedAgent ag;
+    protected final SimState state;
+    protected final Continuous2D field;
+    protected final EmboddiedAgent ag;
 
-    @Override
-    public void setAgent(SimState state, Continuous2D field, EmboddiedAgent ag) {
+    public AbstractEffector(SimState state, Continuous2D field, EmboddiedAgent ag) {
         this.state = state;
         this.field = field;
         this.ag = ag;
     }
+    
+    public SimState getSimState() {
+        return state;
+    }
+    
+    public Continuous2D getField() {
+        return field;
+    }
+    
+    public EmboddiedAgent getAgent() {
+        return ag;
+    }    
 
 }

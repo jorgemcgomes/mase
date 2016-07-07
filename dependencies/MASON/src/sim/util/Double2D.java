@@ -173,7 +173,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - x;
         final double dy = (double)this.y - y;
-        return FastMath.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrtQuick(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point.   */
@@ -181,7 +181,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return FastMath.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrtQuick(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point.    */
@@ -189,7 +189,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return FastMath.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrtQuick(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point.    */
@@ -197,7 +197,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return FastMath.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrtQuick(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point.    */
@@ -205,7 +205,7 @@ public final class Double2D implements java.io.Serializable
         {
         final double dx = (double)this.x - p.getX();
         final double dy = (double)this.y - p.getY();
-        return FastMath.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrtQuick(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this Double2D TO the specified point */
@@ -406,8 +406,8 @@ public final class Double2D implements java.io.Serializable
         return new Double2D(cosTheta * this.x + -sinTheta * this.y, sinTheta * this.x + cosTheta * this.y);
         */
 
-        final double sinTheta = FastMath.sin(theta);
-        final double cosTheta = FastMath.cos(theta);
+        final double sinTheta = FastMath.sinQuick(theta);
+        final double cosTheta = FastMath.cosQuick(theta);
         final double x = this.x;
         final double y = this.y;
         return new Double2D(cosTheta * x + -sinTheta * y, sinTheta * x + cosTheta * y);

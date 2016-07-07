@@ -6,6 +6,10 @@
 package mase.mason.world;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import sim.engine.SimState;
+import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
 
 /**
@@ -18,6 +22,7 @@ public class DistanceSensorArcs extends AbstractSensor {
     private double[] arcEnd;
     private double range = Double.POSITIVE_INFINITY;
     private Class[] types = new Class[]{Object.class};
+    private Collection<? extends Object> objects;
     private boolean binary = false;
     private Object[] closestObjects;
     private double[] lastDistances;
@@ -27,6 +32,10 @@ public class DistanceSensorArcs extends AbstractSensor {
     private double orientationNoise = 0;
     private double rangeNoise = 0;
     private int noiseType;
+
+    public DistanceSensorArcs(SimState state, Continuous2D field, EmboddiedAgent ag) {
+        super(state, field, ag);
+    }
 
     public void setArcs(double[] arcStart, double[] arcEnd) {
         if (arcStart.length != arcEnd.length) {
@@ -72,6 +81,16 @@ public class DistanceSensorArcs extends AbstractSensor {
         this.types = types;
     }
 
+    /**
+     * Setting this makes the sensor ignore the object types, and use these
+     * objects instead. Set null to ignore
+     *
+     * @param obj
+     */
+    public void setObjects(Collection<? extends Object> obj) {
+        this.objects = obj;
+    }
+
     public void setBinary(boolean binary) {
         this.binary = binary;
     }
@@ -87,8 +106,7 @@ public class DistanceSensorArcs extends AbstractSensor {
 
     @Override
     public double[] readValues() {
-        Bag neighbours = Double.isInfinite(range) || field.allObjects.size() < 30 ? field.allObjects
-                : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
+
         lastDistances = new double[valueCount()];
         Arrays.fill(lastDistances, Double.POSITIVE_INFINITY);
         Arrays.fill(closestObjects, null);
@@ -96,31 +114,33 @@ public class DistanceSensorArcs extends AbstractSensor {
             return lastDistances;
         }
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
-        for (Object n : neighbours) {
-            if (objectMatch(n)) {
-                double rawDist = distFunction.centerToCenterDistance(ag, n);
-                if (!ignoreRadius && rawDist < distFunction.radius(n)) { // agent is inside the object
-                    Arrays.fill(lastDistances, 0);
-                    Arrays.fill(closestObjects, n);
-                } else {
-                    double dist = ignoreRadius ? rawDist : distFunction.agentToObjectDistance(ag, n);
-                    if (rangeNoiseAbs > 0) {
-                        dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                        dist = Math.max(dist, 0);
+
+        Collection<? extends Object> candidates = getCandidates();
+        for (Object n : candidates) {
+            if(n == ag) { // do not sense itself
+                continue;
+            }
+            if (!ignoreRadius && distFunction.agentIsInside(ag, n)) { // agent is inside the object
+                Arrays.fill(lastDistances, 0);
+                Arrays.fill(closestObjects, n);
+            } else {
+                double dist = ignoreRadius ? distFunction.centerToCenterDistance(ag, n) : distFunction.agentToObjectDistance(ag, n);
+                if (rangeNoiseAbs > 0) {
+                    dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                    dist = Math.max(dist, 0);
+                }
+                if (dist <= range) {
+                    double angle = ag.angleTo(field.getObjectLocation(n));
+                    if (orientationNoise > 0) {
+                        angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                        angle = EmboddiedAgent.normalizeAngle(angle);
                     }
-                    if (dist <= range) {
-                        double angle = ag.angleTo(field.getObjectLocation(n));
-                        if (orientationNoise > 0) {
-                            angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                            angle = EmboddiedAgent.normalizeAngle(angle);
-                        }
-                        for (int a = 0; a < arcStart.length; a++) {
-                            if ((angle >= arcStart[a] && angle <= arcEnd[a])
-                                    || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a]))) {
-                                if (dist < lastDistances[a]) {
-                                    lastDistances[a] = dist;
-                                    closestObjects[a] = n;
-                                }
+                    for (int a = 0; a < arcStart.length; a++) {
+                        if ((angle >= arcStart[a] && angle <= arcEnd[a])
+                                || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a]))) {
+                            if (dist < lastDistances[a]) {
+                                lastDistances[a] = dist;
+                                closestObjects[a] = n;
                             }
                         }
                     }
@@ -130,24 +150,33 @@ public class DistanceSensorArcs extends AbstractSensor {
         return lastDistances;
     }
 
+    protected Collection<? extends Object> getCandidates() {
+        if (objects != null) {
+            return objects;
+        } else {
+            Collection<Object> objs = new LinkedList<>();
+            Bag neighbours = Double.isInfinite(range) || field.allObjects.size() < 30 ? field.allObjects
+                    : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
+            for (Object n : neighbours) {
+                if (n != ag) {
+                    for (Class type : types) {
+                        if (type.isInstance(n)) {
+                            objs.add(n);
+                            break;
+                        }
+                    }
+                }
+            }
+            return objs;
+        }
+    }
+
     public Object[] getClosestObjects() {
         return closestObjects;
     }
 
     public double[] getLastDistances() {
         return lastDistances;
-    }
-
-    protected boolean objectMatch(Object o) {
-        if (o == ag) {
-            return false;
-        }
-        for (Class type : types) {
-            if (type.isInstance(o)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

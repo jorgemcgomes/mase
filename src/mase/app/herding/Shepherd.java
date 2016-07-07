@@ -28,40 +28,40 @@ public class Shepherd extends SmartAgent {
         this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
         
-        DistanceSensorArcs ds = new DistanceSensorArcs();
+        DistanceSensorArcs ds = new DistanceSensorArcs(sim, field, this);
         ds.setArcs(4);
         ds.setRange(sim.par.shepherdSensorRange);
         ds.setObjectTypes(Shepherd.class);
         ds.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         super.addSensor(ds);
         
-        RangeBearingSensor rbSheep = new RangeBearingSensor();
+        RangeBearingSensor rbSheep = new RangeBearingSensor(sim, field, this);
         rbSheep.setObjects(sim.sheeps);
         rbSheep.setSort(false);
         rbSheep.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         super.addSensor(rbSheep);
         
-        RangeBearingSensor rbGate = new RangeBearingSensor();
+        RangeBearingSensor rbGate = new RangeBearingSensor(sim, field, this);
         rbGate.setObjects(Collections.singletonList(new Double2D(sim.par.arenaSize, sim.par.arenaSize / 2)));
         rbGate.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         super.addSensor(rbGate);
         
         if (sim.par.shepherdArcSensor) {
-            ds = new DistanceSensorArcs();
+            ds = new DistanceSensorArcs(sim, field, this);
             ds.setArcs(4);
             ds.setRange(sim.par.shepherdSensorRange);
             ds.setObjectTypes(Fox.class);
             ds.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
             super.addSensor(ds);
         } else {
-            RangeBearingSensor rbFoxes = new RangeBearingSensor();
+            RangeBearingSensor rbFoxes = new RangeBearingSensor(sim, field, this);
             rbFoxes.setObjects(sim.foxes);
             rbFoxes.setSort(false);
             rbFoxes.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
             super.addSensor(rbFoxes);
         }
         
-        DashMovementEffector dm = new DashMovementEffector();
+        DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         dm.setSpeeds(sim.par.shepherdLinearSpeed, sim.par.shepherdTurnSpeed);
         dm.setNoise(sim.par.actuatorNoise, sim.par.actuatorNoise);
         super.addEffector(dm);

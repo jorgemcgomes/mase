@@ -30,6 +30,10 @@ public class RangeBearingSensor extends AbstractSensor {
     private double rangeNoise = 0;
     private int noiseType;
 
+    public RangeBearingSensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
+        super(state, field, ag);
+    }
+
     public void setObjects(Collection<? extends Object> objs) {
         objects = new ArrayList<>(objs.size());
         for (Object o : objs) {
@@ -133,11 +137,4 @@ public class RangeBearingSensor extends AbstractSensor {
         }
         return norm;
     }
-
-    @Override
-    public void setAgent(SimState state, Continuous2D field, EmboddiedAgent ag) {
-        super.setAgent(state, field, ag);
-        this.setObjects(objects); // quick fix so that the own agent can be excluded from the object list
-    }
-
 }

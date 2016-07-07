@@ -10,7 +10,10 @@ import mase.mason.world.AbstractEffector;
 import mase.mason.world.AbstractSensor;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
+import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.RangeBearingSensor;
+import sim.engine.SimState;
+import sim.field.continuous.Continuous2D;
 
 /**
  *
@@ -27,52 +30,57 @@ public class EvolvedSoccerAgent extends SoccerAgent {
     protected void setupSensors() {
         Soccer soc = (Soccer) super.sim;
 
-        DashMovementEffector eff = new DashMovementEffector();
+        DashMovementEffector eff = new DashMovementEffector(sim, field, this);
         eff.allowBackwardMove(false);
         eff.setSpeeds(moveSpeed, Math.PI);
         super.addEffector(eff);
-        KickEffector k = new KickEffector(kickSpeed, Math.PI);
+        KickEffector k = new KickEffector(sim, field, this);
+        k.setKickCapabilities(kickSpeed, Math.PI);
         super.addEffector(k);
 
-        SoccerAgentDistanceSensor own = new SoccerAgentDistanceSensor(true);
-        own.setObjectTypes(SoccerAgent.class);
+        DistanceSensorArcs own = new DistanceSensorArcs(sim, field, this);
+        own.setObjects(ownTeam);
         own.setArcs(soc.par.sensorArcs);
         own.setRange(Double.POSITIVE_INFINITY);
         super.addSensor(own);
 
-        SoccerAgentDistanceSensor opp = new SoccerAgentDistanceSensor(false);
-        opp.setObjectTypes(SoccerAgent.class);
+        DistanceSensorArcs opp = new DistanceSensorArcs(sim, field, this);
+        opp.setObjects(oppTeam);
         opp.setArcs(soc.par.sensorArcs);
         opp.setRange(Double.POSITIVE_INFINITY);
         super.addSensor(opp);
 
-        RangeBearingSensor rbs = new RangeBearingSensor();
+        RangeBearingSensor rbs = new RangeBearingSensor(sim, field, this);
         rbs.setObjects(Arrays.asList(soc.ball));
         super.addSensor(rbs);
 
         if (soc.par.goalSensors) {
-            RangeBearingSensor rbsGoal = new RangeBearingSensor();
+            RangeBearingSensor rbsGoal = new RangeBearingSensor(sim, field, this);
             rbsGoal.setObjects(Arrays.asList(ownGoal, oppGoal));
             super.addSensor(rbsGoal);
         }
 
         if (soc.par.possessionSensor) {
-            PossessionSensor ps = new PossessionSensor();
+            PossessionSensor ps = new PossessionSensor(sim, field, this);
             super.addSensor(ps);
         }
 
         if (soc.par.locationSensor) {
-            LocationSensor ls = new LocationSensor();
+            LocationSensor ls = new LocationSensor(sim, field, this);
             super.addSensor(ls);
         }
     }
-    
+
     static class KickEffector extends AbstractEffector {
 
         double kickSpeed;
         double kickAngle;
 
-        KickEffector(double kickSpeed, double kickAngle) {
+        public KickEffector(SimState state, Continuous2D field, EmboddiedAgent ag) {
+            super(state, field, ag);
+        }
+
+        public void setKickCapabilities(double kickSpeed, double kickAngle) {
             this.kickSpeed = kickSpeed;
             this.kickAngle = kickAngle;
         }
@@ -91,6 +99,10 @@ public class EvolvedSoccerAgent extends SoccerAgent {
     }
 
     static class LocationSensor extends AbstractSensor {
+
+        public LocationSensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
+            super(state, field, ag);
+        }
 
         @Override
         public int valueCount() {
@@ -116,6 +128,10 @@ public class EvolvedSoccerAgent extends SoccerAgent {
 
     static class PossessionSensor extends AbstractSensor {
 
+        public PossessionSensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
+            super(state, field, ag);
+        }
+
         @Override
         public int valueCount() {
             return 1;
@@ -135,22 +151,4 @@ public class EvolvedSoccerAgent extends SoccerAgent {
 
     }
 
-    static class SoccerAgentDistanceSensor extends DistanceSensorArcs {
-
-        private boolean ownTeam = true;
-
-        public SoccerAgentDistanceSensor(boolean ownTeam) {
-            this.ownTeam = ownTeam;
-        }
-
-        @Override
-        protected boolean objectMatch(Object o) {
-            boolean match = super.objectMatch(o);
-            if (!match) {
-                return false;
-            }
-            boolean same = ((SoccerAgent) o).teamColor == ((SoccerAgent) ag).teamColor;
-            return (same && ownTeam) || (!same && !ownTeam);
-        }
-    }    
 }

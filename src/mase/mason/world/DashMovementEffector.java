@@ -5,6 +5,9 @@
  */
 package mase.mason.world;
 
+import sim.engine.SimState;
+import sim.field.continuous.Continuous2D;
+
 /**
  *
  * @author jorge
@@ -16,6 +19,10 @@ public class DashMovementEffector extends AbstractEffector {
     private boolean backward = false;
     private double turnNoise = 0;
     private double linearNoise = 0;
+
+    public DashMovementEffector(SimState state, Continuous2D field, EmboddiedAgent ag) {
+        super(state, field, ag);
+    }
 
     public void setSpeeds(double linear, double turn) {
         this.linearSpeed = linear;

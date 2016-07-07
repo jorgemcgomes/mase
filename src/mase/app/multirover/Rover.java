@@ -6,8 +6,8 @@
 package mase.app.multirover;
 
 import java.awt.Color;
+import java.util.Collections;
 import mase.controllers.AgentController;
-import mase.mason.world.AbstractSensor;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.DistanceSensorRays;
@@ -35,44 +35,10 @@ public class Rover extends SmartAgent {
         this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
 
-        // Obstacle sensor
-        DistanceSensorRays dw = new DistanceSensorRays();
-        dw.setAgent(sim, field, this);
-        dw.setRays(10.0, -Math.PI / 6, Math.PI / 6);
-        dw.setBinary(true);
-        dw.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
-        super.addSensor(dw);
-
-        // rock sensor
-        DistanceSensorArcs ds = new DistanceSensorArcs();
-        ds.setArcs(4);
-        ds.setRange(sim.par.sensorRange);
-        ds.setObjectTypes(Rock.class);
-        ds.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
-        super.addSensor(ds);
-
-        // closest rovers distance
-        DistanceSensorArcs dsr = new DistanceSensorArcs();
-        dsr.setArcs(4);
-        dsr.setRange(sim.par.sensorRange);
-        dsr.setObjectTypes(Rover.class);
-        dsr.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
-        super.addSensor(dsr);
-
-        // closest rovers type
-        for (int i = 0; i < sim.par.numActuators; i++) {
-            NeighbourTypeSensor ts = new NeighbourTypeSensor(dsr, i);
-            super.addSensor(ts);
-        }
-
-        // rock type sensor
-        for (RockType t : sim.par.usedTypes) {
-            RockTypeSensor rts = new RockTypeSensor(ds, t);
-            super.addSensor(rts);
-        }
-
+        super.circledPortrayal.scale = sim.par.rockSensorRange * 2;
+        
         // movement effector
-        DashMovementEffector dm = new DashMovementEffector();
+        DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
         dm.allowBackwardMove(false);
         dm.setNoise(sim.par.actuatorNoise, sim.par.actuatorNoise);
@@ -80,85 +46,46 @@ public class Rover extends SmartAgent {
 
     }
 
-    private static class RockTypeSensor extends AbstractSensor {
+    protected void setupSensors() {
+        MultiRover mr = (MultiRover) sim;
+        MRParams par = mr.par;
+        
+        // Obstacle sensor
+        DistanceSensorRays dw = new DistanceSensorRays(sim, field, this);
+        dw.setRays(5, -Math.PI / 6, Math.PI / 6);
+        dw.setObjects(Collections.singleton(mr.walls));
+        dw.setBinary(true);
+        dw.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
+        super.addSensor(dw);
 
-        private final DistanceSensorArcs rockSensor;
-        private final RockType type;
+        // rock sensor
+        DistanceSensorArcs ds = new DistanceSensorArcs(sim, field, this);
+        ds.setArcs(4);
+        ds.setRange(par.rockSensorRange);
+        ds.setObjectTypes(Rock.class);
+        ds.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
+        ds.ignoreRadius(true);
+        super.addSensor(ds);
 
-        RockTypeSensor(DistanceSensorArcs rockSensor, RockType type) {
-            this.rockSensor = rockSensor;
-            this.type = type;
+        // closest rovers distance
+        DistanceSensorArcs dsr = new DistanceSensorArcs(sim, field, this);
+        dsr.setArcs(4);
+        dsr.setRange(par.roverSensorRange);
+        dsr.setObjects(mr.rovers);
+        dsr.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
+        super.addSensor(dsr);
+
+        // closest rovers type
+        for (int i = 0; i < par.numActuators; i++) {
+            NeighbourTypeSensor ts = new NeighbourTypeSensor(dsr, i);
+            super.addSensor(ts);
         }
 
-        @Override
-        public int valueCount() {
-            return 1;
-        }
-
-        @Override
-        public double[] readValues() {
-            Object[] rocks = rockSensor.getClosestObjects();
-            double[] dists = rockSensor.getLastDistances();
-            double minDist = Double.POSITIVE_INFINITY;
-            Rock closestRock = null;
-            for (int i = 0; i < rocks.length; i++) {
-                if (rocks[i] != null && dists[i] < minDist) {
-                    minDist = dists[i];
-                    closestRock = (Rock) rocks[i];
-                }
-            }
-            if (closestRock != null && closestRock.getType() == type) {
-                return new double[]{1};
-            } else {
-                return new double[]{-1};
-            }
-        }
-
-        @Override
-        public double[] normaliseValues(double[] vals) {
-            return vals;
-        }
-
-    }
-
-    private static class NeighbourTypeSensor extends AbstractSensor {
-
-        private final DistanceSensorArcs roverSensor;
-        private final int type;
-
-        NeighbourTypeSensor(DistanceSensorArcs roverSensor, int type) {
-            this.roverSensor = roverSensor;
-            this.type = type;
-        }
-
-        @Override
-        public int valueCount() {
-            return 1;
-        }
-
-        @Override
-        public double[] readValues() {
-            Object[] rovers = roverSensor.getClosestObjects();
-            double[] dists = roverSensor.getLastDistances();
-            double closestDist = Double.POSITIVE_INFINITY;
-            Rover closestRover = null;
-            for (int i = 0; i < rovers.length; i++) {
-                if (rovers[i] != null && dists[i] < closestDist) {
-                    closestDist = dists[i];
-                    closestRover = (Rover) rovers[i];
-                }
-            }
-            if (closestRover != null && closestRover.getActuatorType() == type) {
-                return new double[]{1};
-            } else {
-                return new double[]{-1};
-            }
-        }
-
-        @Override
-        public double[] normaliseValues(double[] vals) {
-            return vals;
-        }
+        // rock type sensor
+        /*for (RockType t : par.usedTypes) {
+            RockTypeSensor rts = new RockTypeSensor(ds, t);
+            super.addSensor(rts);
+        }*/
     }
 
     public int getActuatorType() {

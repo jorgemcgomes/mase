@@ -14,36 +14,42 @@ pop.subpops =                      5
 neat.size =                        100
 
 problem.seed =                     random
-problem.repetitions =              5
+problem.repetitions =              3
 problem.max-steps =                1000
-problem.discretization =           100
+problem.discretization =           25
 problem.linearSpeed =              1
 problem.turnSpeed =                0.393
-problem.sensorRange =              50
-problem.agentRadius =              2
+problem.roverSensorRange =         10
+problem.rockSensorRange =          5
+problem.agentRadius =              1
 problem.numAgents =                5
-problem.size =                     300
+problem.size =                     200
 
 # rock type default values
-problem.type.radius =              6
-problem.type.time =                25
-problem.type.color =               blue
+problem.type.radius =              5
+problem.type.time =                1
 
 # rock types
-problem.numRockTypes =       12
+problem.numRockTypes =       4
 
-problem.type.0.actuators =   0
-problem.type.1.actuators =   1  
-problem.type.2.actuators =   2  
-problem.type.3.actuators =   0,0  
-problem.type.4.actuators =   1,1  
-problem.type.5.actuators =   0,1  
-problem.type.6.actuators =   0,1,2
-problem.type.7.actuators =   -1  
-problem.type.8.actuators =   -1,-1  
-problem.type.9.actuators =   -1,-1,-1  
-problem.type.10.actuators =  3
-problem.type.11.actuators =  4
+problem.type.0.actuators =   0,0
+problem.type.0.color =       blue
+problem.type.1.actuators =   0,1
+problem.type.1.color =       pink
+problem.type.2.actuators =   1,2
+problem.type.2.color =       magenta
+problem.type.3.actuators =   2,2
+problem.type.3.color =       red
+
+problem.rocks = 25*0,25*1,25*2,25*3
+neat.INPUT.NODES=13
+neat.OUTPUT.NODES=5
+
+-p problem.rocks = 50*0 -p neat.INPUT.NODES=11 -p neat.OUTPUT.NODES=3
+-p problem.rocks = 50*1 -p neat.INPUT.NODES=12 -p neat.OUTPUT.NODES=4
+-p problem.rocks = 12*0,12*1,13*2,13*3 -p neat.INPUT.NODES=13 -p neat.OUTPUT.NODES=5
+
+
 
 #-p problem.rocks=15*0 -p neat.INPUT.NODES=12 -p neat.OUTPUT.NODES=3
 #-p problem.rocks=8*0,7*1 -p neat.INPUT.NODES=14 -p neat.OUTPUT.NODES=4

@@ -41,6 +41,11 @@ public class GenericDistanceFunction extends DistanceFunction {
         return 0;
     }
     
+    public boolean agentIsInside(EmboddiedAgent e1, Object e2) {
+        double rawDist = centerToCenterDistance(e1, e2);
+        return rawDist < radius(e2);
+    }
+    
     public double centerToCenterDistance(Object e1, Object e2) {
         Double2D d1 = e1 instanceof Double2D ? (Double2D) e1 : e1 instanceof WorldObject ? ((WorldObject) e1).getLocation() : field.getObjectLocation(e1);
         Double2D d2 = e2 instanceof Double2D ? (Double2D) e2 : e2 instanceof WorldObject ? ((WorldObject) e2).getLocation() : field.getObjectLocation(e2);

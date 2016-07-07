@@ -5,6 +5,8 @@
  */
 package mase.mason.world;
 
+import sim.engine.SimState;
+import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
 
 /**
@@ -16,6 +18,10 @@ public class CountSensor extends AbstractSensor {
     private double range = Double.POSITIVE_INFINITY;
     private Class[] types = new Class[]{Object.class};
     private int max = 1;
+
+    public CountSensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
+        super(state, field, ag);
+    }
 
     public void setMax(int max) {
         this.max = max;

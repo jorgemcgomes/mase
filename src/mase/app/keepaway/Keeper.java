@@ -31,19 +31,19 @@ public class Keeper extends SmartAgent {
         this.passSpeed = passSpeed;
         this.moveSpeed = moveSpeed;
 
-        DashMovementEffector dm = new DashMovementEffector();
+        DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         dm.setSpeeds(moveSpeed, Math.PI / 4);
         super.addEffector(dm);
     }
 
     protected void setupSensors() {
         Keepaway kw = (Keepaway) sim;
-        RangeBearingSensor keepersRBS = new RangeBearingSensor();
+        RangeBearingSensor keepersRBS = new RangeBearingSensor(sim, field, this);
         keepersRBS.setObjects(kw.keepers);
         keepersRBS.setSort(kw.par.sortKeepers);
         super.addSensor(keepersRBS);
 
-        RangeBearingSensor otherRBS = new RangeBearingSensor();
+        RangeBearingSensor otherRBS = new RangeBearingSensor(sim, field, this);
         ArrayList<Object> list = new ArrayList<Object>(kw.takers);
         list.add(kw.ball);
         otherRBS.setObjects(list);

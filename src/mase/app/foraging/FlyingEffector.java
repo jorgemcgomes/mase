@@ -12,6 +12,8 @@ import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.Sensor;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
+import sim.engine.SimState;
+import sim.field.continuous.Continuous2D;
 import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Double2D;
 
@@ -40,6 +42,10 @@ public class FlyingEffector extends AbstractEffector {
     private boolean enableAltitude;
     
     private double noise = 0;
+
+    public FlyingEffector(SimState state, Continuous2D field, EmboddiedAgent ag) {
+        super(state, field, ag);
+    }
 
 
     public void setAccelerationLimits(double linear, double turn) {

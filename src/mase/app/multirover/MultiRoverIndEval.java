@@ -6,14 +6,17 @@
 
 package mase.app.multirover;
 
+import java.util.Arrays;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import sim.util.Double2D;
 
 /**
- *
+ * Total number of captured rocks; Mean distance to the nearest rock of each type; Amount of time each actuator was active
  * @author jorge
  */
 public class MultiRoverIndEval extends MasonEvaluation {
@@ -21,12 +24,8 @@ public class MultiRoverIndEval extends MasonEvaluation {
     private static final long serialVersionUID = 1L;
     
     private SubpopEvaluationResult br;
-    private double dispersion;
-    private double[] proximity;
-    private Double2D[] lastPosition;
-    private double[] movement;
-    private int[] type1Active;
-    private int[] type2Active;
+    private DescriptiveStatistics[][] nearestOfType;
+    private int[][] actuatorTime;
 
     @Override
     public EvaluationResult getResult() {
@@ -37,17 +36,14 @@ public class MultiRoverIndEval extends MasonEvaluation {
     protected void preSimulation() {
         super.preSimulation();
         MultiRover mr = (MultiRover) sim;
-
-        dispersion = 0;
-        proximity = new double[mr.rovers.size()];
-        movement = new double[mr.rovers.size()];
-        lastPosition = new Double2D[mr.rovers.size()];
-        type1Active = new int[mr.rovers.size()];
-        type2Active = new int[mr.rovers.size()];
         
-        int i = 0;
-        for(Rover r : mr.rovers) {
-            lastPosition[i++] = r.getLocation();
+        nearestOfType = new DescriptiveStatistics[mr.rovers.size()][mr.par.usedTypes.size()];
+        actuatorTime = new int[mr.rovers.size()][mr.par.numActuators];        
+        for(int r = 0 ; r < mr.rovers.size(); r++) {
+            for(int i = 0 ; i < nearestOfType[r].length ; i++){
+                nearestOfType[r][i] = new DescriptiveStatistics();
+            }
+            Arrays.fill(actuatorTime[r], 0);
         }
     }
 
@@ -57,11 +53,16 @@ public class MultiRoverIndEval extends MasonEvaluation {
         VectorBehaviourResult[] res = new VectorBehaviourResult[mr.rovers.size()];
         
         for(int i = 0 ; i < mr.rovers.size() ; i++) {
-            res[i] = new VectorBehaviourResult( (movement[i] / currentEvaluationStep / mr.par.linearSpeed),
-                     (proximity[i] / currentEvaluationStep / (mr.par.size / 4)),
-                    (double) type1Active[i] / currentEvaluationStep,
-                    (double) type2Active[i] / currentEvaluationStep
-            );
+            Rover r = mr.rovers.get(i);
+            double[] vals = new double[1];
+            vals[0] = r.captured / (double) mr.par.rockDistribution.length;
+            for (DescriptiveStatistics ds : nearestOfType[i]) {
+                vals = ArrayUtils.add(vals, ds.getMean() / mr.field.width);
+            }
+            for(int time : actuatorTime[i]) {
+                vals = ArrayUtils.add(vals, (double) time / currentEvaluationStep);
+            }
+            res[i] = new VectorBehaviourResult(vals);
         }
         this.br = new SubpopEvaluationResult(res);
     }
@@ -69,34 +70,30 @@ public class MultiRoverIndEval extends MasonEvaluation {
     @Override
     protected void evaluate() {
         MultiRover mr = (MultiRover) sim;
-        /*MutableDouble2D cm = new MutableDouble2D();
-        for (Rover r : mr.rovers) {
-            cm.addIn(r.getLocation());
-        }
-
-        cm.multiplyIn(1.0 / mr.rovers.size());*/
-        
-        int i = 0;
-        for (Rover r : mr.rovers) {
-            //dispersion += r.distanceTo(new Double2D(cm));
-
-            double closest = Double.POSITIVE_INFINITY;
-            for (Rock rock : mr.rocks) {
-                Double2D p = mr.field.getObjectLocation(rock);
-                closest = Math.min(closest, r.distanceTo(p));
-            }
-
-            if (!Double.isInfinite(closest)) {
-                proximity[i] += closest;
+        for (int i = 0 ; i < mr.rovers.size() ; i++) {
+            Rover r = mr.rovers.get(i);
+            // Distance to closest rock of each type
+            int index = 0;
+            for(RockType type : mr.par.usedTypes) {
+                double closest = Double.POSITIVE_INFINITY;
+                for (Rock rock : mr.rocks) {
+                    if(rock.getType() == type) {
+                        Double2D p = mr.field.getObjectLocation(rock);
+                        closest = Math.min(closest, r.distanceTo(p));
+                    }
+                }
+                if(!Double.isInfinite(closest)) {
+                    nearestOfType[i][index].addValue(closest);
+                }
+                index++;
             }
             
-            movement[i] += r.getLocation().distance(lastPosition[i]);
-            lastPosition[i] = r.getLocation();
-            
-            type1Active[i] += r.getActuatorType() == 0 ? 1 : 0;
-            type2Active[i] += r.getActuatorType() == 1 ? 1 : 0;
-            
-            i++;
+            // Amount of time each actuator was active
+            for(int a = 0 ; a < actuatorTime.length ; a++) {
+                if(r.getActuatorType() == a) {
+                    actuatorTime[i][a]++;
+                }
+            }
         }
     }
 }

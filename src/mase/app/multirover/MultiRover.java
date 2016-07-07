@@ -7,14 +7,15 @@ package mase.app.multirover;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.SmartAgentProvider;
 import mase.mason.MasonSimState;
+import mase.mason.world.SmartAgent;
 import mase.mason.world.StaticPolygon;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -25,16 +26,17 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class MultiRover extends MasonSimState {
+public class MultiRover extends MasonSimState implements SmartAgentProvider {
 
     private static final long serialVersionUID = 1L;
 
     protected Continuous2D field;
     protected MRParams par;
-    protected final MRParams originalPar;
+    private final MRParams originalPar;
     protected Map<RockType,Integer> scores;
     protected List<Rover> rovers;
     protected List<Rock> rocks;
+    protected StaticPolygon walls;
 
     public MultiRover(long seed, MRParams par, GroupController gc) {
         super(gc, seed);
@@ -48,7 +50,8 @@ public class MultiRover extends MasonSimState {
         par = originalPar.clone();
         par.linearSpeed += par.linearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
         par.turnSpeed += par.turnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
-        par.sensorRange += par.sensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
+        par.roverSensorRange += par.roverSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
+        par.rockSensorRange += par.rockSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
         
         this.field = new Continuous2D(par.discretization, par.size, par.size);
         this.scores = new LinkedHashMap<>();
@@ -56,7 +59,7 @@ public class MultiRover extends MasonSimState {
             scores.put(t, 0);
         }
 
-        StaticPolygon walls = new StaticPolygon(new Double2D[]{
+        walls = new StaticPolygon(new Double2D[]{
             new Double2D(0, 0),
             new Double2D(par.size, 0),
             new Double2D(par.size, par.size),
@@ -68,7 +71,9 @@ public class MultiRover extends MasonSimState {
 
         placeRocks();
         placeRovers();
-
+        for(Rover r : rovers) {
+            r.setupSensors();
+        }
     }
 
     protected void placeRovers() {
@@ -81,7 +86,7 @@ public class MultiRover extends MasonSimState {
             Double2D newLoc = new Double2D(x, y);
             boolean check = true;
             for (Rover r : rovers) {
-                if (r.getLocation().distance(newLoc) < par.sensorRange + par.agentRadius * 2) {
+                if (r.getLocation().distance(newLoc) <= par.agentRadius * 2) {
                     check = false;
                     break;
                 }
@@ -103,17 +108,12 @@ public class MultiRover extends MasonSimState {
     }
 
     protected void placeRocks() {
-        
         this.rocks = new LinkedList<>();
         int count = 0;
         while (count < par.rockDistribution.length) {
             RockType type = par.rockDistribution[count];
-            double x = type.radius + random.nextDouble() * (par.size - type.radius * 2);
-            double y = type.radius + random.nextDouble() * (par.size - type.radius * 2);
-            Bag close = field.getNeighborsExactlyWithinDistance(new Double2D(x, y), type.radius * 4);
-            if (!close.isEmpty()) {
-                continue;
-            }
+            double x = random.nextDouble() * par.size;
+            double y = random.nextDouble() * par.size;
             Rock newRock = new Rock(this, type);
             newRock.setLabel(Arrays.toString(type.actuators));
             newRock.setLocation(new Double2D(x, y));
@@ -127,6 +127,11 @@ public class MultiRover extends MasonSimState {
     @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
+    }
+
+    @Override
+    public List<? extends SmartAgent> getSmartAgents() {
+        return rovers;
     }
 
 }

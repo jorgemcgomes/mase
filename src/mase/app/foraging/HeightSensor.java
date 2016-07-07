@@ -6,6 +6,9 @@
 package mase.app.foraging;
 
 import mase.mason.world.AbstractSensor;
+import mase.mason.world.EmboddiedAgent;
+import sim.engine.SimState;
+import sim.field.continuous.Continuous2D;
 
 /**
  *
@@ -15,6 +18,10 @@ public class HeightSensor extends AbstractSensor {
 
     private FlyingEffector fe;
     private double noise = 0;
+
+    public HeightSensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
+        super(state, field, ag);
+    }
 
     @Override
     public int valueCount() {

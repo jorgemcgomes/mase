@@ -5,7 +5,11 @@
  */
 package mase.mason.world;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import sim.engine.SimState;
+import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 
 /**
@@ -22,7 +26,12 @@ public class DistanceSensorRays extends AbstractSensor {
     private double orientationNoise = 0;
     private int noiseType;
     private double[] angles;
-    
+    private Collection<StaticPolygon> polygons;
+
+    public DistanceSensorRays(SimState state, Continuous2D field, EmboddiedAgent ag) {
+        super(state, field, ag);
+    }
+
     public void setRays(double range, int numRays, boolean frontAligned) {
         double increment = Math.PI * 2 / numRays;
         double start = frontAligned ? 0 : -increment / 2;
@@ -33,13 +42,20 @@ public class DistanceSensorRays extends AbstractSensor {
         this.setRays(range, angles);
     }
 
+    /*
+    If not set, or set to null, it will search for existing polygons every timestep
+     */
+    public void setObjects(Collection<StaticPolygon> polygons) {
+        this.polygons = polygons;
+    }
+
     public void setRays(double range, double... angles) {
         this.range = range;
         this.angles = angles;
-        if(Double.isInfinite(range)) {
+        if (Double.isInfinite(range)) {
             range = fieldDiagonal;
         }
-        
+
         rayStarts = new Double2D[angles.length];
         rayEnds = new Double2D[angles.length];
 
@@ -66,7 +82,7 @@ public class DistanceSensorRays extends AbstractSensor {
         this.orientationNoise = orientationNoise;
         this.noiseType = type;
     }
-    
+
     @Override
     public int valueCount() {
         return rayStarts.length;
@@ -85,7 +101,7 @@ public class DistanceSensorRays extends AbstractSensor {
         for (int i = 0; i < rayStarts.length; i++) {
             Double2D rs = rayStarts[i].rotate(ag.orientation2D()).add(ag.getLocation());
             Double2D re;
-            if(rangeNoise > 0) {
+            if (rangeNoise > 0) {
                 double newRange = range + rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 newRange = Math.max(0, newRange);
                 double newOrientation = angles[i] + orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
@@ -93,18 +109,29 @@ public class DistanceSensorRays extends AbstractSensor {
             } else {
                 re = rayEnds[i].rotate(ag.orientation2D()).add(ag.getLocation());
             }
-            
-            for (Object o : field.allObjects) {
-                if (o instanceof StaticPolygon) {
-                    StaticPolygon pe = (StaticPolygon) o;
-                    double dist = pe.closestDistance(rs, re);
-                    if (!Double.isInfinite(dist)) {
-                        vals[i] = binary ? 1 : Math.min(vals[i], dist);
-                    }
+
+            for (StaticPolygon p : getCandidates()) {
+                double dist = p.closestDistance(rs, re);
+                if (!Double.isInfinite(dist)) {
+                    vals[i] = binary ? 1 : Math.min(vals[i], dist);
                 }
             }
         }
         return vals;
+    }
+
+    protected Collection<StaticPolygon> getCandidates() {
+        if (polygons != null) {
+            return polygons;
+        } else {
+            Collection<StaticPolygon> p = new ArrayList<>();
+            for (Object o : field.allObjects) {
+                if (o instanceof StaticPolygon) {
+                    p.add((StaticPolygon) o);
+                }
+            }
+            return p;
+        }
     }
 
     @Override
@@ -112,7 +139,7 @@ public class DistanceSensorRays extends AbstractSensor {
         double[] norm = new double[vals.length];
         double max = Double.isInfinite(range) ? fieldDiagonal : range;
         for (int i = 0; i < vals.length; i++) {
-            if(binary) {
+            if (binary) {
                 norm[i] = vals[i] == 1 ? 1 : -1;
             } else {
                 norm[i] = Double.isInfinite(vals[i]) ? 1 : (vals[i] / max) * 2 - 1;

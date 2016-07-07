@@ -28,20 +28,20 @@ public class MazeAgent extends SmartAgent {
         this.enablePolygonCollisions(true);
         this.enableCollisionRebound(false);
         
-        DistanceSensorArcs arcSensor = new DistanceSensorArcs();
+        DistanceSensorArcs arcSensor = new DistanceSensorArcs(sim, field, this);
         super.addSensor(arcSensor);
         arcSensor.setRange(Double.POSITIVE_INFINITY);
         arcSensor.setArcs(4);
         arcSensor.setBinary(true);
         arcSensor.setObjectTypes(MazeTask.Target.class);
         
-        DistanceSensorRays raySensor = new DistanceSensorRays();
+        DistanceSensorRays raySensor = new DistanceSensorRays(sim, field, this);
         super.addSensor(raySensor);
         raySensor.setBinary(false);
         raySensor.setRays(sim.par.sensorRange, -Math.PI/2, -Math.PI / 4, 0, Math.PI / 4, Math.PI / 2, Math.PI);
         
 
-        DashMovementEffector dm = new DashMovementEffector();
+        DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         super.addEffector(dm);
         dm.allowBackwardMove(true);
         dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);

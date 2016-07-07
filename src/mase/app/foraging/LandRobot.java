@@ -36,13 +36,13 @@ public class LandRobot extends SmartAgent {
         //this.setOrientationShowing(false);
 
         // movement effector
-        dm = new DashMovementEffector();
+        dm = new DashMovementEffector(sim, field, this);
         super.addEffector(dm);
         dm.allowBackwardMove(false);
         dm.setSpeeds(sim.par.landLinearSpeed, sim.par.landTurnSpeed);
         dm.setNoise(sim.par.actuatorNoise, sim.par.actuatorNoise);
 
-        itemArcs = new DistanceSensorArcs();
+        itemArcs = new DistanceSensorArcs(sim, field, this);
         super.addSensor(itemArcs);
         itemArcs.setRange(sim.par.landSensingRange);
         itemArcs.setArcs(sim.par.landArcs);
@@ -50,7 +50,7 @@ public class LandRobot extends SmartAgent {
         itemArcs.setObjectTypes(Item.class);
         itemArcs.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
 
-        botArcs = new DistanceSensorArcs();
+        botArcs = new DistanceSensorArcs(sim, field, this);
         super.addSensor(botArcs);
         botArcs.ignoreRadius(true);
         double vRange = sim.par.flyingStartHeight * FastMath.tan(sim.par.flyingVisionAngle / 2);

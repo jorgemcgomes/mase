@@ -35,12 +35,10 @@ public abstract class SmartAgent extends EmboddiedAgent {
     }
     
     public void addSensor(Sensor s) {
-        s.setAgent(sim, field, this);
         sensors.add(s);
     }
     
     public void addEffector(Effector e) {
-        e.setAgent(sim, field, this);
         effectors.add(e);
     }
 
