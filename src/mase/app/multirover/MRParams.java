@@ -30,6 +30,7 @@ public class MRParams implements Serializable, Cloneable {
     protected double agentRadius;
     protected String[] rocks;
     protected int numRockTypes;
+    protected int minActivationTime;
     
     @MultiParam(base="type")
     protected Double[] radius;

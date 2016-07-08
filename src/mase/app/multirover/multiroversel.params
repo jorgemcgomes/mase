@@ -1,13 +1,12 @@
 eval.base.problem =                mase.app.multirover.MultiRoverSimulator
 problem.trials-merge =             best
-problem.number-evals =             1
+problem.number-evals =             2
 problem.eval.0 =                   mase.app.multirover.MultiRoverFitness
 problem.eval.0.update-freq =       1
-#problem.eval.1 =                   mase.app.multirover.MultiRoverIndEval
-#problem.eval.1.update-freq =       1
+problem.eval.1 =                   mase.app.multirover.MultiRoverIndEval
+problem.eval.1.update-freq =       1
 
 fitness.fitness-index =            0
-exch.behaviour-index =             1
 
 generations =                      500
 pop.subpops =                      5
@@ -16,14 +15,16 @@ neat.size =                        100
 problem.seed =                     random
 problem.repetitions =              5
 problem.max-steps =                500
-problem.discretization =           100
+problem.discretization =           20
 problem.linearSpeed =              1
 problem.turnSpeed =                0.393
-problem.roverSensorRange =         20
-problem.rockSensorRange =          20
+problem.roverSensorRange =         25
+# the agent radius is added to the rocksensorrange, as the sensor is center-to-center
+problem.rockSensorRange =          27
 problem.agentRadius =              2
 problem.numAgents =                5
 problem.size =                     150
+problem.minActivationTime =        50
 
 # rock type default values
 problem.type.radius =              5
@@ -31,26 +32,37 @@ problem.type.time =                1
 problem.type.color =               red
 
 # rock types
-problem.numRockTypes =       15
+problem.numRockTypes =       13
 
 problem.type.0.actuators =   0
+problem.type.0.color =       blue
 problem.type.1.actuators =   1  
+problem.type.1.color =       red
 problem.type.2.actuators =   2  
+problem.type.2.color =       green
 problem.type.3.actuators =   3
+problem.type.3.color =       orange
 problem.type.4.actuators =   4
+problem.type.4.color =       pink
 problem.type.5.actuators =   0,0  
+problem.type.5.color =       blue
 problem.type.6.actuators =   1,1  
-problem.type.7.actautors =   2,2
+problem.type.6.color =       red
+problem.type.7.actuators =   2,2
+problem.type.7.color =       green
 problem.type.8.actuators =   3,3  
-problem.type.9.actautors =   4,4
-problem.type.10.actuators =   0,1  
-problem.type.11.actuators =   0,1,2
-problem.type.12.actuators =   -1  
-problem.type.13.actuators =   -1,-1  
-problem.type.14.actuators =   -1,-1,-1  
+problem.type.8.color =       orange 
+problem.type.9.actuators =   4,4
+problem.type.9.color =       pink
+problem.type.10.actuators =  0,1  
+problem.type.10.color =      magenta
+problem.type.11.actuators =  1,2  
+problem.type.11.color =      yellow
+problem.type.12.actuators =  0,2  
+problem.type.12.color =      cyan
 
 problem.rocks = 10*0,10*1
-# 10 + numActautors
+# 10 + numActuators
 neat.INPUT.NODES=12
 # 2 + numActuators
 neat.OUTPUT.NODES=4

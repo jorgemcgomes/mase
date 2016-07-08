@@ -156,7 +156,7 @@ public class DistanceSensorArcs extends AbstractSensor {
             return new ArrayList<>(objects);
         } else {
             Collection<Object> objs = new LinkedList<>();
-            Bag neighbours = Double.isInfinite(range) || field.allObjects.size() < 30 ? field.allObjects
+            Bag neighbours = Double.isInfinite(range) || field.allObjects.size() < 20 ? field.allObjects
                     : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
             for (Object n : neighbours) {
                 if (n != ag) {

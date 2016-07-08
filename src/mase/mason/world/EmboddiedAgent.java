@@ -191,7 +191,7 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
     }
 
     protected boolean checkAgentCollisions(Double2D target) {
-        Bag objects = field.allObjects.size() < 30 ? field.allObjects : field.getNeighborsWithinDistance(target, radius, false, true);
+        Bag objects = field.allObjects.size() < 20 ? field.allObjects : field.getNeighborsWithinDistance(target, radius, false, true);
         for (Object o : objects) {
             if (o != this && o instanceof EmboddiedAgent) {
                 EmboddiedAgent a = (EmboddiedAgent) o;

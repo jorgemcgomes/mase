@@ -46,7 +46,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     @Override
     public void start() {
         super.start();
-        
+                
         par = originalPar.clone();
         par.linearSpeed += par.linearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
         par.turnSpeed += par.turnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
@@ -94,7 +94,6 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
 
             if (check) {
                 AgentController controller = controllers[i].clone();
-                controller.reset();
                 Rover rover = new Rover(this, field, controller);
                 rover.setLocation(newLoc);
                 rover.setOrientation(random.nextDouble() * Math.PI * 2 - Math.PI);

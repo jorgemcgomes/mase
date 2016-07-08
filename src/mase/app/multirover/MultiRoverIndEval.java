@@ -6,17 +6,17 @@
 
 package mase.app.multirover;
 
-import java.util.Arrays;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import sim.util.Double2D;
 
 /**
- * Total number of captured rocks; Mean distance to the nearest rock of each type; Amount of time each actuator was active
+ * Total number of captured rocks
+ * Mean distance to the nearest rock of each type
+ * Amount of time each actuator was active
  * @author jorge
  */
 public class MultiRoverIndEval extends MasonEvaluation {
@@ -24,7 +24,8 @@ public class MultiRoverIndEval extends MasonEvaluation {
     private static final long serialVersionUID = 1L;
     
     private SubpopEvaluationResult br;
-    private DescriptiveStatistics[][] nearestOfType;
+    private double[][] nearestOfTypeDist;
+    private int[][] nearestOfTypeCount;
     private int[][] actuatorTime;
 
     @Override
@@ -37,14 +38,9 @@ public class MultiRoverIndEval extends MasonEvaluation {
         super.preSimulation();
         MultiRover mr = (MultiRover) sim;
         
-        nearestOfType = new DescriptiveStatistics[mr.rovers.size()][mr.par.usedTypes.size()];
+        nearestOfTypeDist = new double[mr.rovers.size()][mr.par.usedTypes.size()];
+        nearestOfTypeCount = new int[mr.rovers.size()][mr.par.usedTypes.size()];
         actuatorTime = new int[mr.rovers.size()][mr.par.numActuators];        
-        for(int r = 0 ; r < mr.rovers.size(); r++) {
-            for(int i = 0 ; i < nearestOfType[r].length ; i++){
-                nearestOfType[r][i] = new DescriptiveStatistics();
-            }
-            Arrays.fill(actuatorTime[r], 0);
-        }
     }
 
     @Override
@@ -56,8 +52,8 @@ public class MultiRoverIndEval extends MasonEvaluation {
             Rover r = mr.rovers.get(i);
             double[] vals = new double[1];
             vals[0] = r.captured / (double) mr.par.rockDistribution.length;
-            for (DescriptiveStatistics ds : nearestOfType[i]) {
-                vals = ArrayUtils.add(vals, ds.getMean() / mr.field.width);
+            for(int j = 0 ; j < nearestOfTypeDist[i].length ; j++) {
+                vals = ArrayUtils.add(vals, nearestOfTypeDist[i][j] / nearestOfTypeCount[i][j] / mr.field.width);
             }
             for(int time : actuatorTime[i]) {
                 vals = ArrayUtils.add(vals, (double) time / currentEvaluationStep);
@@ -83,7 +79,8 @@ public class MultiRoverIndEval extends MasonEvaluation {
                     }
                 }
                 if(!Double.isInfinite(closest)) {
-                    nearestOfType[i][index].addValue(closest);
+                    nearestOfTypeDist[i][index] += closest;
+                    nearestOfTypeCount[i][index]++;
                 }
                 index++;
             }
