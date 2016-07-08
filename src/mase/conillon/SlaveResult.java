@@ -19,11 +19,10 @@ public class SlaveResult extends Result {
     private static final long serialVersionUID = 1L;
     
     private ArrayList<EvaluationResult> results;
-    private int id;
     
     public SlaveResult(ArrayList<EvaluationResult> results, int id) {
+        super(id);
         this.results = results;
-        this.id = id;
     }
     
     public ArrayList<EvaluationResult> getEvaluationResults() {
@@ -46,10 +45,5 @@ public class SlaveResult extends Result {
             }
         }
         return resList;
-    }
-    
-    public int getID() {
-        return id;
-    }
-    
+    }    
 }

@@ -13,7 +13,7 @@ exch.distance-calculator =  mase.spec.SilhouetteDistanceCalculator
 exch.distance.threaded =    true
 
 exch.initial-allocation =   heterogeneous
-exch.behaviour-index =      1
+#exch.behaviour-index =      1
 
 breed =                     mase.spec.SkipNewBreeder
 

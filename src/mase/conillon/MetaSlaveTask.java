@@ -20,7 +20,8 @@ public class MetaSlaveTask extends Task {
     ArrayList<SlaveTask> tasks;
     MetaSlaveResult res;
     
-    public MetaSlaveTask(ArrayList<SlaveTask> tasks) {
+    public MetaSlaveTask(ArrayList<SlaveTask> tasks, int id) {
+        super(id);
         this.tasks = tasks;
     }
 
@@ -36,7 +37,7 @@ public class MetaSlaveTask extends Task {
             t.run();
             list.add(t.getResult());
         }
-        this.res = new MetaSlaveResult(list);
+        this.res = new MetaSlaveResult(list, getId());
     }
     
 }

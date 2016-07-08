@@ -171,7 +171,7 @@ public class ConillonMasterProblem extends MasterProblem {
                     prob.client = this.client;
                 }
                 // try to execute tasks
-                state.output.message("*** SENDING TASKS FOR CLIENT " + client.getMyID() + " ***");
+                state.output.message("*** SENDING " + tasks.size() + " TASKS FOR CLIENT " + client.getMyID() + " ***");
                 ArrayList<SlaveResult> resList = runWithTimeout(
                         new EvaluationExecutor(this.client, tasks, jobSize),
                         currentTimeout, TimeUnit.SECONDS);
@@ -187,7 +187,7 @@ public class ConillonMasterProblem extends MasterProblem {
         }
     }
 
-    private static class EvaluationExecutor implements Callable<ArrayList<SlaveResult>> {
+    private class EvaluationExecutor implements Callable<ArrayList<SlaveResult>> {
 
         private final Client client;
         private final ArrayList<SlaveTask> tasks;
@@ -217,11 +217,12 @@ public class ConillonMasterProblem extends MasterProblem {
                 numberOfTasks = tasks.size();
                 tasks.clear();
             } else {
+                int index = 0;
                 ArrayList<SlaveTask> batch = new ArrayList<>();
                 Iterator<SlaveTask> iter = tasks.iterator();
                 while (iter.hasNext()) {
                     if (batch.size() == jobSize) {
-                        MetaSlaveTask meta = new MetaSlaveTask(batch);
+                        MetaSlaveTask meta = new MetaSlaveTask(batch, nextID());
                         client.commit(meta);
                         numberOfTasks++;
                         batch = new ArrayList<>();
@@ -231,7 +232,7 @@ public class ConillonMasterProblem extends MasterProblem {
                     }
                 }
                 if (!batch.isEmpty()) {
-                    MetaSlaveTask meta = new MetaSlaveTask(batch);
+                    MetaSlaveTask meta = new MetaSlaveTask(batch, nextID());
                     client.commit(meta);
                     numberOfTasks++;
                     tasks.clear();
@@ -254,12 +255,11 @@ public class ConillonMasterProblem extends MasterProblem {
             }
             return resList;
         }
-
     }
 
     private void parseResults(ArrayList<SlaveResult> resList, EvolutionState state, int threadnum) {
         for (SlaveResult r : resList) {
-            Evaluation j = jobs.get(r.getID());
+            Evaluation j = jobs.get(r.getTaskId());
             ArrayList<EvaluationResult> evalList = r.getEvaluationResults();
             EvaluationResult[] eval = new EvaluationResult[evalList.size()];
             evalList.toArray(eval);

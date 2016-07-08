@@ -48,16 +48,17 @@ public class SlaveTask extends Task {
         The results from SER are added to the list in between nulls
         */
         for(EvaluationResult er : evalResults) {
-            if(er instanceof SubpopEvaluationResult) {
+            /*if(er instanceof SubpopEvaluationResult) {
                 resList.add(null);
                 SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
                 resList.addAll(ser.getAllEvaluations());
                 resList.add(null);
-            } else {
+            } else {*/
                 resList.add(er);
-            }
+            //}
         }
-        res = new SlaveResult(resList, id);
+        
+        res = new SlaveResult(resList, getId());
         
     }
 

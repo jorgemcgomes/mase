@@ -18,7 +18,8 @@ public class MetaSlaveResult extends Result {
     
     ArrayList<SlaveResult> results;
     
-    public MetaSlaveResult(ArrayList<SlaveResult> results) {
+    public MetaSlaveResult(ArrayList<SlaveResult> results, int id) {
+        super(id);
         this.results = results;
     }
     
