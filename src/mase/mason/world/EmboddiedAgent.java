@@ -18,6 +18,7 @@ import sim.portrayal.simple.OrientedPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Bag;
 import sim.util.Double2D;
+import sim.util.MutableDouble2D;
 
 /**
  *
@@ -246,13 +247,22 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
      * @return From -PI to PI.
      */
     public double angleTo(Double2D point) {
-        Double2D agentToPoint = point.subtract(pos);
-        if ((agentToPoint.x == 0 && agentToPoint.y == 0) || Double.isInfinite(agentToPoint.x) || Double.isInfinite(agentToPoint.y) || Double.isNaN(agentToPoint.x) || Double.isNaN(agentToPoint.y)) {
+        // hardcoded for speed
+        double agToPointX = point.x - pos.x;
+        double agToPointY = point.y - pos.y;
+                
+        if (agToPointX == 0 && agToPointY == 0) {
             return 0;
         }
-        agentToPoint = agentToPoint.normalize();
-        Double2D agentDir = new Double2D(FastMath.cosQuick(orientation), FastMath.sinQuick(orientation));
-        return FastMath.atan2(agentDir.x * agentToPoint.y - agentDir.y * agentToPoint.x, agentDir.x * agentToPoint.x + agentDir.y * agentToPoint.y);
+        
+        // Normalize
+        double l = FastMath.sqrtQuick(agToPointX * agToPointX  + agToPointY * agToPointY);
+        agToPointX = agToPointX / l;
+        agToPointY = agToPointY / l;
+        
+        double agentDirX = FastMath.cosQuick(orientation);
+        double agentDirY =  FastMath.sinQuick(orientation);
+        return FastMath.atan2(agentDirX * agToPointY - agentDirY * agToPointX, agentDirX * agToPointX + agentDirY * agToPointY);
     }
 
     public double distanceTo(EmboddiedAgent other) {

@@ -31,9 +31,10 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     protected Continuous2D field;
     protected MRParams par;
     private final MRParams originalPar;
-    protected int[] scores;
-    protected List<Rover> rovers;
-    protected List<Rock> rocks;
+    protected int[] scores; // number of rocks of each type captured 
+    protected List<Rover> rovers; // existing rovers
+    protected List<Rock> rocks; // existing rocks
+    protected List<Rock>[] matchingRocks; // rocks that match each actuator (index is actuator)
     protected StaticPolygon walls;
 
     public MultiRover(long seed, MRParams par, GroupController gc) {
@@ -104,6 +105,10 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     }
 
     protected void placeRocks() {
+        this.matchingRocks = new List[par.numActuators];
+        for(int i = 0 ; i < matchingRocks.length ; i++) {
+            matchingRocks[i] = new LinkedList<>();
+        }
         this.rocks = new LinkedList<>();
         int count = 0;
         while (count < par.rockDistribution.size()) {
@@ -120,8 +125,10 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
             newRock.setStopper(schedule.scheduleRepeating(newRock));
             count++;
             rocks.add(newRock);
+            for(int a : type.actuators) {
+                matchingRocks[a].add(newRock);
+            }
         }
-
     }
 
     @Override

@@ -62,7 +62,7 @@ public class Rover extends SmartAgent {
         super.addSensor(dw);
 
         // rock sensor
-        SelectiveRockSensor rockSensor = new SelectiveRockSensor(sim, field, this);
+        SelectiveRockSensor rockSensor = new SelectiveRockSensor(mr, field, this);
         rockSensor.setArcs(6);
         rockSensor.setRange(par.rockSensorRange);
         rockSensor.setObjectTypes(Rock.class);

@@ -83,6 +83,9 @@ public class Rock extends WorldObject implements Steppable {
                 mr.field.remove(this);
                 mr.scores[typeIndex]++;
                 mr.rocks.remove(this);
+                for(int a : type.actuators) {
+                    mr.matchingRocks[a].remove(this);
+                }
                 for(Rover r : ableRover) { // for behaviour measures
                     r.captured[typeIndex]++;
                 }

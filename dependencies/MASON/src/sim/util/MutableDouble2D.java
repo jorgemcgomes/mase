@@ -6,6 +6,8 @@
 
 package sim.util;
 
+import net.jafama.FastMath;
+
 /** 
     MutableDouble2D is more or less the same class as java.awt.geom.Point2D.Double, except that it is hash-equivalent to Double2D.  
         
@@ -191,7 +193,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
         {
         final double dx = (double)this.x - x;
         final double dy = (double)this.y - y;
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this MutableDouble2D TO the specified point.   */
@@ -199,7 +201,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this MutableDouble2D TO the specified point.   */
@@ -207,7 +209,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this MutableDouble2D TO the specified point.    */
@@ -215,7 +217,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this MutableDouble2D TO the specified point.    */
@@ -223,7 +225,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
         {
         final double dx = (double)this.x - p.x;
         final double dy = (double)this.y - p.y;
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this MutableDouble2D TO the specified point.    */
@@ -231,7 +233,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
         {
         final double dx = (double)this.x - p.getX();
         final double dy = (double)this.y - p.getY();
-        return Math.sqrt(dx*dx+dy*dy);
+        return FastMath.sqrt(dx*dx+dy*dy);
         }
 
     /** Returns the distance FROM this MutableDouble2D TO the specified point */
@@ -285,48 +287,48 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
     /** Returns the manhtattan distance FROM this MuableDouble2D TO the specified point */
     public double manhattanDistance(final double x, final double y)
         {
-        final double dx = Math.abs((double)this.x - x);
-        final double dy = Math.abs((double)this.y - y);
+        final double dx = FastMath.abs((double)this.x - x);
+        final double dy = FastMath.abs((double)this.y - y);
         return dx + dy;
         }
 
     /** Returns the manhtattan distance FROM this MuableDouble2D TO the specified point */
     public double manhattanDistance(final Double2D p)
         {
-        final double dx = Math.abs((double)this.x - p.x);
-        final double dy = Math.abs((double)this.y - p.y);
+        final double dx = FastMath.abs((double)this.x - p.x);
+        final double dy = FastMath.abs((double)this.y - p.y);
         return dx + dy;
         }
 
     /** Returns the manhtattan distance FROM this MuableDouble2D TO the specified point */
     public double manhattanDistance(final Int2D p)
         {
-        final double dx = Math.abs((double)this.x - p.x);
-        final double dy = Math.abs((double)this.y - p.y);
+        final double dx = FastMath.abs((double)this.x - p.x);
+        final double dy = FastMath.abs((double)this.y - p.y);
         return dx + dy;
         }
 
     /** Returns the manhtattan distance FROM this MuableDouble2D TO the specified point */
     public double manhattanDistance(final MutableDouble2D p)
         {
-        final double dx = Math.abs((double)this.x - p.x);
-        final double dy = Math.abs((double)this.y - p.y);
+        final double dx = FastMath.abs((double)this.x - p.x);
+        final double dy = FastMath.abs((double)this.y - p.y);
         return dx + dy;
         }
 
     /** Returns the manhtattan distance FROM this MuableDouble2D TO the specified point */
     public double manhattanDistance(final MutableInt2D p)
         {
-        final double dx = Math.abs((double)this.x - p.x);
-        final double dy = Math.abs((double)this.y - p.y);
+        final double dx = FastMath.abs((double)this.x - p.x);
+        final double dy = FastMath.abs((double)this.y - p.y);
         return dx + dy;
         }
 
     /** Returns the manhtattan distance FROM this MuableDouble2D TO the specified point */
     public double manhattanDistance(final java.awt.geom.Point2D p)
         {
-        final double dx = Math.abs((double)this.x - p.getX());
-        final double dy = Math.abs((double)this.y - p.getY());
+        final double dx = FastMath.abs((double)this.x - p.getX());
+        final double dy = FastMath.abs((double)this.y - p.getY());
         return dx + dy;
         }
 
@@ -428,7 +430,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
     /** Returns the length of the vector. */
     public final double length()
         {
-        return Math.sqrt(x * x + y * y);
+        return FastMath.sqrt(x * x + y * y);
         }
         
     /** Returns the square of the length of the MutableDouble2D. */
@@ -440,7 +442,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
     /** Returns the length of the vector between -Pi and Pi. */
     public final double angle()
         {
-        return Math.atan2(y,x);
+        return FastMath.atan2(y,x);
         }
         
     /** Extends my length so that it is multiplied by val, and returns me. */
@@ -471,9 +473,9 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
     static final double infinity = 1.0 / 0.0;
     public final MutableDouble2D normalize()
         {
-        final double invertedlen = 1.0 / Math.sqrt(x * x + y * y);
+        final double invertedlen = 1.0 / FastMath.sqrt(x * x + y * y);
         if (invertedlen == infinity || invertedlen == -infinity || invertedlen == 0 || invertedlen != invertedlen /* nan */)
-            throw new ArithmeticException("" + this + " length is " + Math.sqrt(x * x + y * y) + ", cannot normalize");
+            throw new ArithmeticException("" + this + " length is " + FastMath.sqrt(x * x + y * y) + ", cannot normalize");
         x = x * invertedlen;
         y = y * invertedlen;
         return this;
@@ -492,7 +494,7 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
         if (val == 0) x = y = 0;
         else
             {
-            final double len = Math.sqrt(x * x + y * y);
+            final double len = FastMath.sqrt(x * x + y * y);
             if (len != len || len == infinity || len == -infinity || len == 0)
                 throw new ArithmeticException("" + this + " length is "+ len + " cannot change its length");
             final double invertedlen = val / len;
@@ -508,8 +510,8 @@ public final class MutableDouble2D implements java.io.Serializable, Cloneable
         // Do the equivalent of multiplying by a 2D rotation
         // matrix without the overhead of converting the Double2D into
         // a matrix
-        final double sinTheta = Math.sin(theta);
-        final double cosTheta = Math.cos(theta);
+        final double sinTheta = FastMath.sin(theta);
+        final double cosTheta = FastMath.cos(theta);
         final double x = this.x;
         final double y = this.y;
         this.x = cosTheta * x + -sinTheta * y;
