@@ -16,7 +16,6 @@ import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -59,7 +58,7 @@ public class Aggregation extends MasonSimState implements TaskDescriptionProvide
         placeAgents();
         field.setObjectLocation(walls, new Double2D(0,0));
         
-        this.td = new TaskDescription(new GenericDistanceFunction(field), 
+        this.td = new TaskDescription(
                 new EntityGroup(agents, agents.size(), agents.size(), false),
                 new EntityGroup(Collections.singletonList(walls), 1, 1, true)
         );

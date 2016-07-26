@@ -14,7 +14,6 @@ import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -46,7 +45,6 @@ public class ResourceSharing extends MasonSimState implements TaskDescriptionPro
         placeResource();
         placeAgents();
         td = new TaskDescription(
-                new GenericDistanceFunction(field),
                 new EntityGroup(agents, 0, agents.size(), false),
                 new EntityGroup(Collections.singletonList(resource), 1, 1, true));
     }

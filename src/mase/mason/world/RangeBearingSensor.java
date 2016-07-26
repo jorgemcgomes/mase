@@ -80,7 +80,7 @@ public class RangeBearingSensor extends AbstractSensor {
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
         List<Pair<Double, Double>> readings = new ArrayList<>(objects.size());
         for (Object o : objects) {
-            double dist = distFunction.agentToObjectDistance(ag, o);
+            double dist = ag.distanceTo(o);
             if(rangeNoiseAbs > 0) {
                 dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 dist = Math.max(dist, 0);

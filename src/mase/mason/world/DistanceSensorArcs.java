@@ -115,17 +115,18 @@ public class DistanceSensorArcs extends AbstractSensor {
             return lastDistances;
         }
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
-
+        
+        
         Collection<? extends Object> candidates = getCandidates();
         for (Object n : candidates) {
             if(n == ag) { // do not sense itself
                 continue;
             }
-            if (!ignoreRadius && distFunction.agentIsInside(ag, n)) { // agent is inside the object
+            if (!ignoreRadius && ag.isInside(n)) { // agent is inside the object
                 Arrays.fill(lastDistances, 0);
                 Arrays.fill(closestObjects, n);
             } else {
-                double dist = ignoreRadius ? distFunction.centerToCenterDistance(ag, n) : distFunction.agentToObjectDistance(ag, n);
+                double dist = ignoreRadius ? ag.centerDistanceTo(n) : ag.distanceTo(n);
                 if (rangeNoiseAbs > 0) {
                     dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                     dist = Math.max(dist, 0);

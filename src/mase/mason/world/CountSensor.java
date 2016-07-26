@@ -47,7 +47,7 @@ public class CountSensor extends AbstractSensor {
                 : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
         for (Object n : neighbours) {
             if (objectMatch(n)) {
-                double dist = distFunction.distance(ag, n);
+                double dist = ag.distanceTo(n);
                 if (dist <= range) {
                     count++;
                 }

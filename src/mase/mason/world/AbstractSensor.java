@@ -19,13 +19,11 @@ public abstract class AbstractSensor implements Sensor {
     protected final Continuous2D field;
     protected final EmboddiedAgent ag;
     protected final double fieldDiagonal;
-    protected final GenericDistanceFunction distFunction;
     
     public AbstractSensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
         this.state = state;
         this.field = field;
         this.ag = ag;
-        this.distFunction = new GenericDistanceFunction(field);
         this.fieldDiagonal = FastMath.sqrtQuick(FastMath.pow2(field.height) + FastMath.pow2(field.width));        
     }
     

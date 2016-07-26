@@ -135,18 +135,18 @@ public class SystematicEvaluator extends MasonEvaluation {
                 }
 
                 // Physical dispersion -- mean distance of each entity to the other entities
-                if (physicalRelations && td.distanceFunction() != null && eg.getMaxSize() > 1 && !eg.isStatic()) {
-                    double dist = td.distanceFunction().distance(eg, eg);
-                    features.get(index++).add(dist);
+                if (physicalRelations && eg.getMaxSize() > 1 && !eg.isStatic()) {
+                    //double dist = td.distanceFunction().distance(eg, eg); 
+                    //features.get(index++).add(dist);
                 }
             }
 
             // Relations with other entities -- physical distances
-            if (physicalRelations && td.distanceFunction() != null) {
+            if (physicalRelations) {
                 for (int go = gi + 1; go < td.groups().length; go++) {
                     EntityGroup otherG = td.groups()[go];
                     if ((!eg.isStatic() || !otherG.isStatic()) && (evaluateGroup[gi] || evaluateGroup[go])) {
-                        features.get(index++).add(td.distanceFunction().distance(eg, otherG));
+                        //features.get(index++).add(td.distanceFunction().distance(eg, otherG));
                     }
                 }
             }
@@ -156,6 +156,15 @@ public class SystematicEvaluator extends MasonEvaluation {
         } else if (size != index) {
             System.out.println("Incoherent size! Expected: " + size + " Got: " + index);
         }
+    }
+    
+    private double computeDistance(Entity e1, Entity e2) {
+        return 0;
+    }
+    
+    
+    private double computeDistance(EntityGroup eg1, EntityGroup eg2) {
+        return 0;
     }
 
     @Override

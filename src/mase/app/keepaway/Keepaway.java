@@ -15,7 +15,6 @@ import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
 import mase.mason.world.EmboddiedAgent;
-import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.SmartAgent;
 import net.jafama.FastMath;
 import sim.field.continuous.Continuous2D;
@@ -60,7 +59,7 @@ public class Keepaway extends MasonSimState implements TaskDescriptionProvider, 
             k.setupSensors();
         }
         
-        this.td = new TaskDescription(new GenericDistanceFunction(field),
+        this.td = new TaskDescription(
                 new EntityGroup(keepers, keepers.size(), keepers.size(), false),
                 new EntityGroup(takers, takers.size(), takers.size(), false),
                 new EntityGroup(Collections.singletonList(ball), 1, 1, false)

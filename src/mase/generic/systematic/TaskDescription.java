@@ -13,18 +13,12 @@ package mase.generic.systematic;
 public class TaskDescription {
     
     private final EntityGroup[] groups;
-    private final DistanceFunction df;
         
-    public TaskDescription(DistanceFunction df, EntityGroup ... groups) {
+    public TaskDescription(EntityGroup ... groups) {
         this.groups = groups;
-        this.df = df;
     }
     
     public EntityGroup[] groups() {
         return groups;
-    }
-    
-    public DistanceFunction distanceFunction() {
-        return df;
     }
 }

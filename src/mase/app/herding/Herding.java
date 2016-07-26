@@ -16,7 +16,6 @@ import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.StaticPolygon.Segment;
@@ -81,7 +80,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider, S
         field.setObjectLocation(openSide, new Double2D(0, 0));
         field.setObjectLocation(curral, new Double2D(0, 0));
 
-        this.td = new TaskDescription(new GenericDistanceFunction(field),
+        this.td = new TaskDescription(
                 new EntityGroup(shepherds, shepherds.size(), shepherds.size(), false),
                 new EntityGroup(activeSheeps, 0, sheeps.size(), false),
                 new EntityGroup(foxes, foxes.size(), foxes.size(), false),

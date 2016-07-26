@@ -264,12 +264,4 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
         double agentDirY =  FastMath.sinQuick(orientation);
         return FastMath.atan2(agentDirX * agToPointY - agentDirY * agToPointX, agentDirX * agToPointX + agentDirY * agToPointY);
     }
-
-    public double distanceTo(EmboddiedAgent other) {
-        return Math.max(0, pos.distance(other.getLocation()) - other.radius - this.radius);
-    }
-
-    public double distanceTo(Double2D point) {
-        return Math.max(0, pos.distance(point) - this.radius);
-    }
 }

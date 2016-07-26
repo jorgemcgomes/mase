@@ -100,4 +100,54 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
         field.setObjectLocation(this, pos);
     }
 
+    public double distanceTo(WorldObject other) {
+        return Math.max(0, pos.distance(other.getLocation()) - other.radius - this.radius);
+    }
+
+    public double distanceTo(Double2D point) {
+        return Math.max(0, pos.distance(point) - this.radius);
+    }
+    
+    public double distanceTo(StaticPolygon poly) {
+        return Math.max(0, poly.closestDistance(pos) - this.radius);
+    }
+    
+    public double distanceTo(Object obj) {
+         if(obj instanceof WorldObject) {
+            return distanceTo((WorldObject) obj);
+        } else if(obj instanceof Double2D) {
+            return distanceTo((Double2D) obj);
+        } else if(obj instanceof StaticPolygon) {
+            return distanceTo((StaticPolygon) obj);
+        } else {
+            Double2D p = field.getObjectLocation(obj);
+            if(p == null) {
+                return Double.NaN;
+            }
+            return Math.max(0, p.distance(pos) - this.radius);
+        }
+    }
+
+    public double centerDistanceTo(Object obj) {
+        Double2D center;
+        if(obj instanceof WorldObject) {
+            center = ((WorldObject) obj).getLocation();
+        } else if(obj instanceof Double2D) {
+            center = (Double2D) obj;
+        } else {
+            center = field.getObjectLocation(obj);
+        }        
+        return center == null ? Double.NaN : pos.distance(center);
+    }    
+
+    public boolean isInside(Object obj) {
+        if(obj instanceof WorldObject) {
+            double dist = centerDistanceTo(obj);
+            return dist < ((WorldObject) obj).getRadius();
+        } else if(obj instanceof StaticPolygon) {
+            return false; // TODO: needs to be implemented, but the current static polygons can be open, which makes this currently impossible
+        } else {
+            return false;
+        }          
+    }    
 }

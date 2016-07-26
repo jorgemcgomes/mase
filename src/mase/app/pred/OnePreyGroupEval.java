@@ -9,6 +9,7 @@ import mase.evaluation.VectorBehaviourResult;
 import mase.generic.systematic.TaskDescription;
 import mase.mason.MasonEvaluation;
 import net.jafama.FastMath;
+import sim.util.MutableDouble2D;
 
 /**
  *
@@ -32,9 +33,16 @@ public class OnePreyGroupEval extends MasonEvaluation {
 
     @Override
     public void evaluate() {
-        super.evaluate();        
-        TaskDescription td = ((PredatorPrey) sim).getTaskDescription();
-        predatorDispersion += td.distanceFunction().distance(td.groups()[0], td.groups()[0]);
+        super.evaluate();     
+        PredatorPrey pp = (PredatorPrey) sim;
+        MutableDouble2D center = new MutableDouble2D(0,0);
+        for(Predator p : pp.predators) {
+            center.addIn(p.getLocation());
+        }
+        center.multiplyIn(1.0 / pp.predators.size());
+        for(Predator p : pp.predators) {
+            predatorDispersion += center.distance(p.getLocation());
+        }
     }
 
     @Override
@@ -42,7 +50,6 @@ public class OnePreyGroupEval extends MasonEvaluation {
         super.postSimulation();
         
         PredatorPrey simState = (PredatorPrey) sim;
-        TaskDescription td = simState.getTaskDescription();
         diagonal =  FastMath.sqrtQuick(FastMath.pow2(simState.field.width) * 2);
         
         predatorDispersion = Math.min(1, predatorDispersion / currentEvaluationStep / (diagonal / 2) / simState.predators.size());

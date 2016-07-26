@@ -16,7 +16,6 @@ import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -64,7 +63,7 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
         placePreys();
         placePredators();
 
-        this.td = new TaskDescription(new GenericDistanceFunction(field),
+        this.td = new TaskDescription(
                 new EntityGroup(predators, par.nPredators, par.nPredators, false),
                 new EntityGroup(activePreys, 0, par.nPreys, false),
                 new EntityGroup(Collections.singletonList(boundaries), 1, 1, true));

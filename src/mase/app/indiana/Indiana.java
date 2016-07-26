@@ -17,7 +17,6 @@ import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
 import mase.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GenericDistanceFunction;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
@@ -94,7 +93,6 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
         placeAgents();
 
         this.td = new TaskDescription(
-                new GenericDistanceFunction(field),
                 new EntityGroup(activeAgents, 0, agents.size(), false),
                 new EntityGroup(Collections.singletonList(gate), 1, 1, true),
                 new EntityGroup(Collections.singletonList(walls), 1, 1, true));
