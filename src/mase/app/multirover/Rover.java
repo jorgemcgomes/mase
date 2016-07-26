@@ -28,8 +28,10 @@ public class Rover extends SmartAgent {
         this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
 
-        if (!Double.isInfinite(sim.par.rockSensorRange)) {
-            super.circledPortrayal.scale = (sim.par.agentRadius + sim.par.rockSensorRange) * 2;
+        if (Double.isInfinite(sim.par.rockSensorRange)) {
+            super.circledPortrayal.scale = sim.par.roverSensorRange * 2;
+        } else {
+            super.circledPortrayal.scale = sim.par.rockSensorRange * 2;
         }
 
         DashMovementEffector dm = new DashMovementEffector(sim, field, this);
@@ -76,6 +78,7 @@ public class Rover extends SmartAgent {
         dsr.setRange(par.roverSensorRange);
         dsr.setObjects(mr.rovers);
         dsr.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
+        dsr.ignoreRadius(true); // not relevant
         super.addSensor(dsr);
 
         // closest rovers type

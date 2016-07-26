@@ -8,10 +8,16 @@ package mase.mason.world;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
+import sim.util.Double2D;
 
 /**
  *
@@ -105,9 +111,24 @@ public class DistanceSensorArcs extends AbstractSensor {
         return arcStart.length;
     }
 
+    private static final Comparator<Pair<Object, Double>> COMPARATOR = new Comparator<Pair<Object, Double>>() {
+        @Override
+        public int compare(Pair<Object, Double> o1, Pair<Object, Double> o2) {
+            return Double.compare(o1.getRight(), o2.getRight());
+        }
+    };
+
+    /**
+     * Very efficient implementation using an ordered TreeMap
+     * Should ensure scalability when large numbers of objects are present,
+     * as there is no need to check angles with objects that are farther than
+     * the closest object in the given cone.
+     * Potential limitation (unlikely): if there are two objects at exactly the same distance
+     * but at different angles, only one of them will be considered, as the distance
+     * is used as key in the TreeMap
+     */    
     @Override
     public double[] readValues() {
-
         lastDistances = new double[valueCount()];
         Arrays.fill(lastDistances, Double.POSITIVE_INFINITY);
         Arrays.fill(closestObjects, null);
@@ -115,37 +136,44 @@ public class DistanceSensorArcs extends AbstractSensor {
             return lastDistances;
         }
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
-        
-        
+
         Collection<? extends Object> candidates = getCandidates();
-        for (Object n : candidates) {
-            if(n == ag) { // do not sense itself
-                continue;
-            }
-            if (!ignoreRadius && ag.isInside(n)) { // agent is inside the object
-                Arrays.fill(lastDistances, 0);
-                Arrays.fill(closestObjects, n);
-            } else {
-                double dist = ignoreRadius ? ag.centerDistanceTo(n) : ag.distanceTo(n);
+
+        TreeMap<Double,Object> distances = new TreeMap<>();
+        for (Object o : candidates) {
+            if(o != ag) {
+                if (!ignoreRadius && ag.isInside(o)) { // agent is inside an object
+                    Arrays.fill(lastDistances, 0);
+                    Arrays.fill(closestObjects, o);
+                    return lastDistances;
+                }                
+                double dist = ignoreRadius ? ag.centerDistanceTo(o) : ag.distanceTo(o);
                 if (rangeNoiseAbs > 0) {
                     dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                     dist = Math.max(dist, 0);
                 }
-                if (dist <= range) {
-                    double angle = ag.angleTo(field.getObjectLocation(n));
-                    if (orientationNoise > 0) {
-                        angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                        angle = EmboddiedAgent.normalizeAngle(angle);
-                    }
-                    for (int a = 0; a < arcStart.length; a++) {
-                        if ((angle >= arcStart[a] && angle <= arcEnd[a])
-                                || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a]))) {
-                            if (dist < lastDistances[a]) {
-                                lastDistances[a] = dist;
-                                closestObjects[a] = n;
-                            }
-                        }
-                    }
+                if(dist <= range) {
+                    distances.put(dist ,o);                
+                }                
+            }
+        }
+
+        int filled = 0;
+        for (Entry<Double,Object> e : distances.entrySet()) {
+            if (filled == arcStart.length) {
+                break;
+            }
+            double angle = ag.angleTo(e.getValue());
+            if (orientationNoise > 0) {
+                angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                angle = EmboddiedAgent.normalizeAngle(angle);
+            }
+            for (int a = 0; a < arcStart.length; a++) {
+                if (Double.isInfinite(lastDistances[a]) && ((angle >= arcStart[a] && angle <= arcEnd[a])
+                        || (arcStart[a] > arcEnd[a] && (angle >= arcStart[a] || angle <= arcEnd[a])))) {
+                    filled++;
+                    lastDistances[a] = e.getKey();
+                    closestObjects[a] = e.getValue();
                 }
             }
         }

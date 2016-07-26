@@ -42,12 +42,14 @@ public class EvolvedSoccerAgent extends SoccerAgent {
         own.setObjects(teamMates);
         own.setArcs(soc.par.sensorArcs);
         own.setRange(Double.POSITIVE_INFINITY);
+        own.ignoreRadius(true);
         super.addSensor(own);
 
         DistanceSensorArcs opp = new DistanceSensorArcs(sim, field, this);
         opp.setObjects(oppTeam);
         opp.setArcs(soc.par.sensorArcs);
         opp.setRange(Double.POSITIVE_INFINITY);
+        opp.ignoreRadius(true);
         super.addSensor(opp);
 
         RangeBearingSensor rbs = new RangeBearingSensor(sim, field, this);

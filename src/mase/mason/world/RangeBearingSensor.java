@@ -6,6 +6,7 @@
 package mase.mason.world;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,7 +38,7 @@ public class RangeBearingSensor extends AbstractSensor {
     public void setObjects(Collection<? extends Object> objs) {
         objects = new ArrayList<>(objs.size());
         for (Object o : objs) {
-            if(o == null) {
+            if (o == null) {
                 System.out.println("WARNING: NULL OBJECT");
             }
             if (o != ag) {
@@ -58,7 +59,7 @@ public class RangeBearingSensor extends AbstractSensor {
     public void setRange(double range) {
         this.range = range;
     }
-    
+
     /**
      * @param rangeNoise In percentage, relative to current range
      * @param orientationNoise In radians
@@ -78,49 +79,47 @@ public class RangeBearingSensor extends AbstractSensor {
     @Override
     public double[] readValues() {
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
-        List<Pair<Double, Double>> readings = new ArrayList<>(objects.size());
+
+        final double[] distanceReadings = new double[objects.size()];
+        final double[] angleReadings = new double[objects.size()];
+        Integer[] indexes = new Integer[objects.size()];
+
+        int index = 0;
         for (Object o : objects) {
             double dist = ag.distanceTo(o);
-            if(rangeNoiseAbs > 0) {
+            if (rangeNoiseAbs > 0) {
                 dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 dist = Math.max(dist, 0);
             }
-            if (Double.isInfinite(range) || dist <= range) {
-                Double2D point = (o instanceof Double2D) ? (Double2D) o : field.getObjectLocation(o);
-                if (point != null) {
-                    double angle = ag.angleTo(point);
-                    if(orientationNoise > 0) {
-                        angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                        angle = EmboddiedAgent.normalizeAngle(angle);
-                    }
-                    readings.add(Pair.of(dist, angle));
-                } else {
-                    readings.add(Pair.of(Double.POSITIVE_INFINITY, 0d));
+            if ((Double.isInfinite(range) || dist <= range) && (o instanceof Double2D || field.exists(o))) {
+                double angle = ag.angleTo(o);
+                if (orientationNoise > 0) {
+                    angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
+                    angle = EmboddiedAgent.normalizeAngle(angle);
                 }
+                distanceReadings[index] = dist;
+                angleReadings[index] = angle;
             } else {
-                readings.add(Pair.of(Double.POSITIVE_INFINITY, 0d));
+                distanceReadings[index] = Double.POSITIVE_INFINITY;
+                angleReadings[index] = 0d;
             }
+            indexes[index] = index;
+            index++;
         }
 
-        if (objectCount > 1 && sort) {
-            Collections.sort(readings, new Comparator<Pair<Double, Double>>() {
+        if (objects.size() > 1 && sort) {
+            Arrays.sort(indexes, new Comparator<Integer>() {
                 @Override
-                public int compare(Pair<Double, Double> o1, Pair<Double, Double> o2) {
-                    return Double.compare(o1.getLeft(), o2.getLeft());
+                public int compare(Integer o1, Integer o2) {
+                    return Double.compare(distanceReadings[o1], distanceReadings[o2]);
                 }
             });
         }
 
         double[] vals = new double[valueCount()];
         for (int i = 0; i < objectCount; i++) {
-            if (i < readings.size()) {
-                Pair<Double, Double> r = readings.get(i);
-                vals[i * 2] = r.getLeft();
-                vals[i * 2 + 1] = r.getRight();
-            } else {
-                vals[i * 2] = Double.POSITIVE_INFINITY;
-                vals[i * 2 + 1] = 0;
-            }
+            vals[i * 2] = distanceReadings[indexes[i]];
+            vals[i * 2 + 1] = angleReadings[indexes[i]];
         }
         return vals;
     }
