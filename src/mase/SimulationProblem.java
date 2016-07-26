@@ -13,6 +13,8 @@ import ec.simple.SimpleProblemForm;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.controllers.AgentController;
 import mase.controllers.AgentControllerIndividual;
 import mase.controllers.GroupController;
@@ -75,6 +77,11 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         String seedString = state.parameters.getStringWithDefault(base.push(P_SEED), null, V_RANDOM_SEED);
         if (seedString.equalsIgnoreCase(V_RANDOM_SEED)) {
             sameSeed = false;
+            try { // Try to fix issues with random number generation (concurrency aparently)
+                Thread.sleep(3000); // EXPERIMENTAL
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }            
         } else {
             sameSeed = true;
             seed = Long.parseLong(seedString);

@@ -35,11 +35,11 @@ public class EvolvedSoccerAgent extends SoccerAgent {
         eff.setSpeeds(moveSpeed, Math.PI);
         super.addEffector(eff);
         KickEffector k = new KickEffector(sim, field, this);
-        k.setKickCapabilities(kickSpeed, Math.PI);
+        k.setKickCapabilities(kickSpeed, soc.par.agentMinKickSpeed, Math.PI);
         super.addEffector(k);
 
         DistanceSensorArcs own = new DistanceSensorArcs(sim, field, this);
-        own.setObjects(ownTeam);
+        own.setObjects(teamMates);
         own.setArcs(soc.par.sensorArcs);
         own.setRange(Double.POSITIVE_INFINITY);
         super.addSensor(own);
@@ -74,15 +74,17 @@ public class EvolvedSoccerAgent extends SoccerAgent {
     static class KickEffector extends AbstractEffector {
 
         double kickSpeed;
+        double minKickSpeed;
         double kickAngle;
 
         public KickEffector(SimState state, Continuous2D field, EmboddiedAgent ag) {
             super(state, field, ag);
         }
 
-        public void setKickCapabilities(double kickSpeed, double kickAngle) {
+        public void setKickCapabilities(double kickSpeed, double minKickSpeed, double kickAngle) {
             this.kickSpeed = kickSpeed;
             this.kickAngle = kickAngle;
+            this.minKickSpeed = minKickSpeed;
         }
 
         @Override
@@ -93,7 +95,7 @@ public class EvolvedSoccerAgent extends SoccerAgent {
         @Override
         public void action(double[] values) {
             double kickDir = ag.orientation2D() + (values[1] * 2 - 1) * kickAngle;
-            double kickPower = values[0] * kickSpeed;
+            double kickPower = minKickSpeed + values[0] * (kickSpeed - minKickSpeed);
             ((SoccerAgent) ag).kickBall(kickDir, kickPower);
         }
     }

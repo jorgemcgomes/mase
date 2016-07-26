@@ -78,12 +78,13 @@ public class Rock extends WorldObject implements Steppable {
 
             // has all the required types, remove the red rock
             if (requiredAct.isEmpty()) {
+                int typeIndex = mr.par.usedTypes.indexOf(type);
                 stop.stop();
                 mr.field.remove(this);
-                mr.scores.put(type, mr.scores.get(type) + 1);
+                mr.scores[typeIndex]++;
                 mr.rocks.remove(this);
                 for(Rover r : ableRover) { // for behaviour measures
-                    r.captured++;
+                    r.captured[typeIndex]++;
                 }
                 if (mr.rocks.isEmpty()) { // all rocks have been collected
                     mr.kill();

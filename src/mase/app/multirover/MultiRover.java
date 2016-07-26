@@ -7,10 +7,8 @@ package mase.app.multirover;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.generic.SmartAgentProvider;
@@ -33,7 +31,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     protected Continuous2D field;
     protected MRParams par;
     private final MRParams originalPar;
-    protected Map<RockType,Integer> scores;
+    protected int[] scores;
     protected List<Rover> rovers;
     protected List<Rock> rocks;
     protected StaticPolygon walls;
@@ -46,18 +44,17 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     @Override
     public void start() {
         super.start();
-                
+
         par = originalPar.clone();
         par.linearSpeed += par.linearSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
         par.turnSpeed += par.turnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
-        par.roverSensorRange += par.roverSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
-        par.rockSensorRange += par.rockSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
-        
-        this.field = new Continuous2D(par.discretization, par.size, par.size);
-        this.scores = new LinkedHashMap<>();
-        for(RockType t : par.usedTypes) {
-            scores.put(t, 0);
+        if (par.sensorOffset > 0) {
+            par.roverSensorRange += par.roverSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
+            par.rockSensorRange += par.rockSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
         }
+
+        this.field = new Continuous2D(par.discretization, par.size, par.size);
+        this.scores = new int[par.usedTypes.size()];
 
         walls = new StaticPolygon(new Double2D[]{
             new Double2D(0, 0),
@@ -71,7 +68,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
 
         placeRocks();
         placeRovers();
-        for(Rover r : rovers) {
+        for (Rover r : rovers) {
             r.setupSensors();
         }
     }
@@ -81,8 +78,8 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
         AgentController[] controllers = gc.getAgentControllers(par.numAgents);
         rovers = new ArrayList<>(par.numAgents);
         for (int i = 0; i < par.numAgents;) {
-            double x = par.agentRadius + random.nextDouble() * (par.size - par.agentRadius * 2);
-            double y = par.agentRadius + random.nextDouble() * (par.size - par.agentRadius * 2);
+            double x = par.size / 2 + (random.nextDouble() * 2 - 1) * (par.startSize / 2 - par.agentRadius);
+            double y = par.size / 2 + (random.nextDouble() * 2 - 1) * (par.startSize / 2 - par.agentRadius);
             Double2D newLoc = new Double2D(x, y);
             boolean check = true;
             for (Rover r : rovers) {
@@ -98,7 +95,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
                 rover.setLocation(newLoc);
                 rover.setOrientation(random.nextDouble() * Math.PI * 2 - Math.PI);
                 rover.setStopper(schedule.scheduleRepeating(rover));
-                rover.setLabel("R"+i);
+                rover.setLabel("R" + i);
                 rovers.add(rover);
                 i++;
             }
@@ -109,8 +106,8 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     protected void placeRocks() {
         this.rocks = new LinkedList<>();
         int count = 0;
-        while (count < par.rockDistribution.length) {
-            RockType type = par.rockDistribution[count];
+        while (count < par.rockDistribution.size()) {
+            RockType type = par.rockDistribution.get(count);
             double x = type.radius + random.nextDouble() * (par.size - type.radius * 2);
             double y = type.radius + random.nextDouble() * (par.size - type.radius * 2);
             Bag close = field.getNeighborsExactlyWithinDistance(new Double2D(x, y), type.radius * 4);

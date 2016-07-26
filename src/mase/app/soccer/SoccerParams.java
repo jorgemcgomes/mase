@@ -39,6 +39,7 @@ public class SoccerParams implements Serializable {
     double agentRadius = 4;
     double agentMoveSpeed = 1; // 10cm/s
     double agentKickSpeed = 4; // 40cm/s
+    double agentMinKickSpeed = 1; // 10cm/s
     //double agentTurnSpeed = 0.157; // 90deg/s
     double agentKickDistance = 0;
     

@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.generic.SmartAgentProvider;
 import mase.mason.MasonSimState;
+import mase.mason.world.SmartAgent;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.StaticPolygon.Segment;
 import sim.field.continuous.Continuous2D;
@@ -22,7 +24,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class Soccer extends MasonSimState {
+public class Soccer extends MasonSimState implements SmartAgentProvider {
 
     private static final long serialVersionUID = 1L;
 
@@ -87,21 +89,21 @@ public class Soccer extends MasonSimState {
             AgentController[] acs = super.gc.getAgentControllers(teamSize);
             for (int i = 0; i < teamSize; i++) {
                 EvolvedSoccerAgent a = new EvolvedSoccerAgent(this, acs[i], par.agentMoveSpeed, par.agentKickSpeed);
-                a.setLabel("evo"+i);
+                a.setLabel("Le"+i);
                 leftTeam.add(a);
             }
         } else {
             for (int i = 0; i < teamSize; i++) {
-                ProgSoccerAgent a = new ProgSoccerAgent(this);
-                a.setLabel("prog"+i);
+                AIKAgent a = new AIKAgent(this);
+                a.setLabel("Lp"+i);
                 leftTeam.add(a);
             }
         }
 
         rightTeam = new ArrayList<>();
         for (int i = 0; i < teamSize; i++) {
-            ProgSoccerAgent a = new ProgSoccerAgent(this);
-            a.setLabel("prog"+i);
+            AIKAgent a = new AIKAgent(this);
+            a.setLabel("Rp"+i);
             //SoccerAgent a = new SoccerAgent(this, null, 0, 0);
             rightTeam.add(a);
         }
@@ -163,6 +165,11 @@ public class Soccer extends MasonSimState {
     @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
+    }
+
+    @Override
+    public List<? extends SmartAgent> getSmartAgents() {
+        return leftTeam;
     }
 }
 

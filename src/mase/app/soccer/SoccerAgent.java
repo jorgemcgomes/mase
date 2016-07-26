@@ -25,9 +25,11 @@ public class SoccerAgent extends SmartAgent {
     protected boolean hasPossession;
     protected double moveSpeed;
     protected double kickSpeed;
-    protected List<SoccerAgent> ownTeam;
-    protected List<SoccerAgent> oppTeam;
-    protected List<SoccerAgent> others;
+    protected List<SoccerAgent> teamMates; // other players of my team
+    protected List<SoccerAgent> ownTeam; // my team, including myself
+    protected List<SoccerAgent> oppTeam; // the opponents
+    protected List<SoccerAgent> others; // all other players
+    protected List<SoccerAgent> all; // all players, including myself
     protected Double2D ownGoal, oppGoal;
     protected Color teamColor;
 
@@ -49,16 +51,19 @@ public class SoccerAgent extends SmartAgent {
         return justKicked;
     }
     
-    public void setTeamContext(List<SoccerAgent> teamMates, List<SoccerAgent> opponents, Double2D ownGoal, Double2D oppGoal, Color teamColor) {
+    public void setTeamContext(List<SoccerAgent> ownTeam, List<SoccerAgent> opponents, Double2D ownGoal, Double2D oppGoal, Color teamColor) {
         this.teamColor = teamColor;
         this.setColor(teamColor);
-        this.ownTeam = new ArrayList<>(teamMates);
-        this.ownTeam.remove(this);
+        this.ownTeam = ownTeam;
+        this.teamMates = new ArrayList<>(ownTeam);
+        this.teamMates.remove(this);
         this.oppTeam = opponents;
         this.ownGoal = ownGoal;
         this.oppGoal = oppGoal;
-        this.others = new ArrayList<>(ownTeam);
-        this.others.addAll(opponents);
+        this.others = new ArrayList<>(this.teamMates);
+        this.others.addAll(oppTeam);
+        this.all = new ArrayList<>(this.ownTeam);
+        this.all.addAll(oppTeam);
     }
 
     @Override
@@ -83,8 +88,17 @@ public class SoccerAgent extends SmartAgent {
         }
     }
 
+    @Override
+    protected boolean isValidMove(Double2D target) {
+        Soccer soc = (Soccer) sim;
+        // do not allow to move through the goals
+        return super.isValidMove(target) && target.x > 0 && target.x < soc.par.fieldLength;
+    }
+    
+    
+
     protected void kickBall(double kickDir, double kickPower) {
-        if (!justKicked && hasPossession && kickPower >= 1) {
+        if (!justKicked && hasPossession) {
             justKicked = true;
             Soccer soc = (Soccer) sim;
             soc.ball.kick(this, kickDir, kickPower);

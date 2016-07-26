@@ -92,25 +92,27 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
 
   # file is a vector where the first position is the filepath and the other elements are the IDs for this file
   aux <- function(file, ...) {
-    f <- try(do.call(fun, args=c(file[1],list(...))))
-    if (class(file) == "try-error") {
-      cat("Fatal error:",file[1],"\n")
+    tryCatch({
+      f <- do.call(fun, args=c(file[1],list(...)))
+      if(!is.null(filter)) {
+        f <- do.call(filter, args=c(list(f),filter.par))
+      }
+      f[,Job := as.numeric(gsub("[^0-9]","",basename(file[1])))]
+      for(id in names(file[-1])) {
+        f[,(id) := file[id]]
+      }
+      return(f)
+    }, error = function(e) {
+      message("Error loading file ", file[1], ":")
+      message(e)
       return(NULL)
-    }
-    if(!is.null(filter)) {
-      f <- do.call(filter, args=c(list(f),filter.par))
-    }
-    f[,Job := as.numeric(gsub("[^0-9]","",basename(file[1])))]
-    for(id in names(file[-1])) {
-      f[,(id) := file[id]]
-    }
-    return(f)
+    })
   }
 
   if(parallel) {
-    clusterExport(cl, list("fun","filter"), envir=environment(NULL))
+    clusterExport(cl, list("fun","filter","aux"), envir=environment(NULL))
   }
-  result <- llply(allfiles, aux, ..., .progress="text", .parallel=parallel)
+  result <- llply(allfiles, aux, ..., .progress="text", .parallel=parallel, .paropts=list(.errorhandling="remove"))
   result <- rbindlist(result)
 
   cols <- c("Job",names(ids))

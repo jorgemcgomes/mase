@@ -9,6 +9,7 @@ package mase.app.multirover;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import org.apache.commons.math3.stat.StatUtils;
 
 /**
  *
@@ -30,7 +31,7 @@ public class MultiRoverFitness extends MasonEvaluation {
         super.postSimulation();
         MultiRover mr = (MultiRover) sim;
         int count = 0;
-        for(int c : mr.scores.values()) {
+        for(int c : mr.scores) {
             count += c;
         }
         fitnessResult = new FitnessResult(count, FitnessResult.ARITHMETIC);

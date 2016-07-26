@@ -85,3 +85,81 @@ splithyb[, Evaluations := floor(Evaluations / 10000) * 10000]
 ggplot(splithyb[, .(NumPops=mean(NumPops)), by=.(Evaluations,UniqueTargets,SplitThreshold)], aes(Evaluations,NumPops)) + geom_smooth(aes(colour=SplitThreshold,group=SplitThreshold)) + facet_wrap(~ UniqueTargets, labeller=label_both) + ylab("Mean number of populations") + ylim(1,NA)
 
 
+### MULTIROVER #############
+
+setwd("~/labmag/exps/multirover")
+fit <- loadData("sel5*","postfitness.stat",fun=loadFitness)
+
+ggplot(lastGen(fit), aes(ID3,BestSoFar)) + geom_boxplot(aes(fill=ID2)) + ylim(0,20)
+
+fit <- loadData("coop*","postfitness.stat",fun=loadFitness)
+ggplot(lastGen(fit), aes(ID3,BestSoFar)) + geom_boxplot()
+
+
+fitnessBoxplots(fit)
+hyb <- loadData("sel5*","hybrid.stat", fun=loadFile, colnames=hyb.cols)
+hyb[, Evaluations := floor(Evaluations / 1000) * 1000]
+ggplot(hyb, aes(Evaluations,NumPops)) + geom_smooth(aes(colour=Job,group=Job)) + facet_grid(ID2 ~ ID3) + ylim(1,5)
+ggplot(hyb, aes(Evaluations,NumPops)) + geom_smooth(aes(colour=ID2,group=ID2)) + facet_wrap(~ ID3) + ylim(1,5)
+
+min <- hyb[, .(NumPops=min(.SD[Evaluations > max(Evaluations)*0.75, NumPops])), by=.(Job,Setup)]
+ggplot(min, aes(Setup,NumPops)) + geom_bar(aes(fill=Job), stat="identity",position="dodge")
+
+
+
+fitnessDecay <- function(job, lookAhead=c(1,5,10)) {
+  res <- list()
+  for(d in lookAhead) {
+    diff <- c(job$BestGen[-1:-d],rep(NA,d)) - job$BestGen
+    res[[paste0("Baseline",d)]] <- mean(diff, na.rm=T)
+  }
+  for(d in lookAhead) {
+    diff <- c(job$BestGen[-1:-d],rep(NA,d)) - job$BestGen
+    merges <- diff[which(job$Merges > 0)]
+    res[[paste0("Merge",d)]] <- mean(merges, na.rm=T)
+  }
+  for(d in lookAhead) {
+    diff <- c(job$BestGen[-1:-d],rep(NA,d)) - job$BestGen
+    splits <- diff[which(job$Splits > 0)]
+    res[[paste0("Split",d)]] <- mean(splits, na.rm=T)
+  }
+  return(as.data.table(res))
+}
+
+hybfit <- merge(fit, hyb, by=c("Setup","ID1","ID2","ID3","Job","Generation"))
+hybfit <- hybfit[, .(ID2,ID3,Job,Generation,BestGen,Merges,Splits)]
+
+decays <- as.data.table(ddply(hybfit, .(ID2,ID3,Job), fitnessDecay))
+decays.melt <- melt(decays)
+
+ggplot(decays.melt[,.(Mean=mean(value),SE=se(value)), by=.(ID2,ID3,variable)], aes(ID2, Mean, fill=variable)) +
+  geom_bar(position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.2, position=position_dodge(.9)) +
+  facet_wrap(~ ID3) + xlab("Merge threshold") + ylab("Fitness difference after the operation")
+
+
+fit <- loadData("fin*","postfitness.stat",fun=loadFitness)
+ggplot(lastGen(fit), aes(ID4,BestSoFar)) + geom_boxplot(aes(fill=ID3))
+
+fit <- loadData("fin*","fitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=1000))
+ggplot(fit, aes(Evaluations,BestSoFar)) + geom_smooth(aes(colour=ID3)) + facet_wrap(~ ID4)
+
+hyb <- loadData("fin*","hybrid.stat", fun=loadFile, colnames=hyb.cols, parallel=T)
+hyb[, Evaluations := floor(Evaluations / 1000) * 1000]
+ggplot(hyb, aes(Evaluations,NumPops)) + geom_smooth(aes(colour=ID3,group=ID3)) + facet_wrap(~ ID4) + ylim(1,5)
+
+
+fit <- loadData("lr*","postfitness.stat",fun=loadFitness)
+ggplot(lastGen(fit), aes(ID4,BestSoFar)) + geom_boxplot(aes(fill=ID3))
+bestSoFarFitness(fit)
+
+fit <- loadData("vlr*","postfitness.stat",fun=loadFitness)
+fit <- loadData("mr*","postfitness.stat",fun=loadFitness)
+fit <- loadData("sparse_*","postfitness.stat",fun=loadFitness)
+
+ggplot(lastGen(fit), aes(ID4,BestSoFar)) + geom_boxplot(aes(fill=ID3)) + ylim(0,25) + facet_wrap(~ ID1)
+ggplot(fit[,.(Mean=mean(BestSoFar)),by=.(Generation,ID1,ID3,ID4)], aes(Generation,Mean)) + geom_line(aes(colour=ID3,group=ID3)) + facet_grid(ID1 ~ ID4) + ylim(0,25)
+ggplot(fit[,.(Mean=mean(BestSoFar)),by=.(Generation,ID1,ID3,ID4)], aes(Generation,Mean)) + geom_line(aes(colour=ID1,group=ID1)) + facet_grid(ID3 ~ ID4) + ylim(0,25)
+
+fit <- loadData("sparse_*","fitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=500))
+ggplot(fit[,.(Mean=mean(BestSoFar)),by=.(Evaluations,ID1,ID3,ID4)], aes(Evaluations,Mean)) + geom_line(aes(colour=ID3,group=ID3)) + facet_grid(ID1 ~ ID4) + ylim(0,25)

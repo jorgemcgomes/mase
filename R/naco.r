@@ -106,3 +106,24 @@ ggplot(fronts,aes(TimeWithin,Fitness)) + geom_point(aes(colour=Generation)) + fa
   
 
 
+#### FINAL REVISION #######
+
+
+setwd("/media/jorge/Orico/naco")
+fit <- loadData(c("**/gaga","**/neatga","**/ganeat","**/fit"),"postfitness.stat",fun=loadFitness, auto.ids.sep="/",auto.ids.names=c("Task","Method"))
+fit <- fit[Task != "down_sep_long" & Task != "stable_mid"]
+fit[, Task := factor(Task, levels=c("stable_tog","stable_sep","down_tog","down_mid","down_sep"), labels=c("Fix-Tog","Fix-Sep","Var-Tog","Var-Mid","Var-Sep"))]
+fit[, Method := factor(Method, labels=c("GA-GA","NEAT-GA","GA-NEAT","NEAT-NEAT"))]
+
+ggplot(lastGen(fit), aes(Task,BestSoFar)) + geom_boxplot(aes(fill=Method),outlier.size=1, lwd=.4) + ylim(0,6) + ylab("Fitness")
+ggsave("~/Dropbox/Work/Papers/NACO/revision_submission/ga_boxplot.pdf", width=5,height=3.5)
+
+
+load("~/Dropbox/Work/Papers/NACO/rdata/improv.div.rdata")
+
+data <- as.data.frame(improv.div$data)
+data[,"Task"] <- rownames(data)
+data <- addTaskInfo(data,"Task")
+d <- melt(data)
+ggplot(d, aes(Task,value)) + geom_boxplot(aes(fill=Method),outlier.size=1, lwd=.4) + ylab("Behavioural diversity")
+ggsave("~/Dropbox/Work/Papers/NACO/revision_submission/improv_diversity_boxplot.pdf", width=5,height=3.5)

@@ -2,8 +2,11 @@ package mase;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,6 +21,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -84,7 +90,7 @@ public class MaseManager {
                                     completed.add(nextJob);
                                     listener.message("Job completed: " + nextJob + " @ " + nextRunner);
                                 } else if (nextJob.tries < maxTries) {
-                                    if(!existsSimilar(nextJob)) {
+                                    if (!existsSimilar(nextJob)) {
                                         listener.message("Job failed: " + nextJob + " @ " + nextRunner + " -- Retrying later (" + nextJob.tries + "/" + maxTries + ")");
                                         waitingList.add(nextJob);
                                     }
@@ -280,17 +286,28 @@ public class MaseManager {
         for (int j = currentJob; j < jobs; j++) {
             File check = new File(absolute(out), "job." + j + ".run.params");
             if (check.exists() && checkRepetitions) {
-                listener.message("Job already completed, not adding: " + out + " (" + j + ")");
-            } else {
-                Job newJob = new Job();
-                newJob.outfolder = out;
-                newJob.params = " -p current-job=" + j + " -p jobs=" + (j + 1) + " " + cleanParams + " -force";
-                newJob.jobNumber = j;
-                newJob.submitted = new Date();
-                newJob.id = strId + j;
-                if (!existsSimilar(newJob)) {
-                    waitingList.add(newJob);
+                try {
+                    ReversedLinesFileReader rl = new ReversedLinesFileReader(check);
+                    String last = rl.readLine();
+                    rl.close();
+                    if (last.startsWith("# Generation")) {
+                        listener.message("Job already completed, not adding: " + out + " (" + j + ")");
+                        continue;
+                    } else {
+                        listener.message("Job started but not completed, adding: " + out + " (" + j + ")");
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
+            }
+            Job newJob = new Job();
+            newJob.outfolder = out;
+            newJob.params = " -p current-job=" + j + " -p jobs=" + (j + 1) + " " + cleanParams + " -force";
+            newJob.jobNumber = j;
+            newJob.submitted = new Date();
+            newJob.id = strId + j;
+            if (!existsSimilar(newJob)) {
+                waitingList.add(newJob);
             }
         }
         jobId++;
@@ -326,8 +343,8 @@ public class MaseManager {
                 return true;
             }
         }
-        for(Job j : completed) {
-            if(j.params.equals(check.params)) {
+        for (Job j : completed) {
+            if (j.params.equals(check.params)) {
                 listener.error("Job is already in the completed list");
             }
         }
@@ -550,7 +567,7 @@ public class MaseManager {
             } else {
                 listener.message("Initializing @ " + toString());
                 boolean conn = checkConnection();
-                if(!conn) {
+                if (!conn) {
                     throw new Exception("Unnable to establish connection @ " + toString());
                 }
                 if (Runtime.getRuntime().exec("ssh " + ip + " rm -rf build lib").waitFor() != 0

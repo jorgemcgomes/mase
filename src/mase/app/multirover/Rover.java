@@ -5,7 +5,6 @@
  */
 package mase.app.multirover;
 
-import java.util.Arrays;
 import java.util.Collections;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
@@ -22,30 +21,38 @@ public class Rover extends SmartAgent {
 
     private static final long serialVersionUID = 1L;
     protected int actuatorType = RockEffector.NO_ACTIVATION;
-    protected int captured = 0;
+    protected int[] captured;
 
     public Rover(MultiRover sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, RockEffector.NOACTUATOR_COLOUR, ac);
         this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
 
-        super.circledPortrayal.scale = (sim.par.agentRadius + sim.par.rockSensorRange) * 2;
-        
+        if (!Double.isInfinite(sim.par.rockSensorRange)) {
+            super.circledPortrayal.scale = (sim.par.agentRadius + sim.par.rockSensorRange) * 2;
+        }
+
         DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
         dm.allowBackwardMove(false);
         dm.setNoise(sim.par.actuatorNoise, sim.par.actuatorNoise);
         super.addEffector(dm);
-        
-        RockEffector re = new RockEffector(sim, field, this);
-        super.addEffector(re);
 
+        if (sim.par.typeSensorMode == MRParams.TYPE_BINARY) {
+            RockEffector re = new RockEffector(sim, field, this);
+            super.addEffector(re);
+        } else if (sim.par.typeSensorMode == MRParams.TYPE_DISCRETISED) {
+            MultiRockTypeEffector re = new MultiRockTypeEffector(sim, field, this);
+            super.addEffector(re);
+        }
+        
+        captured = new int[sim.par.usedTypes.size()];
     }
 
     protected void setupSensors() {
         MultiRover mr = (MultiRover) sim;
         MRParams par = mr.par;
-        
+
         // Obstacle sensor
         DistanceSensorRays dw = new DistanceSensorRays(sim, field, this);
         dw.setRays(5, -Math.PI / 6, Math.PI / 6);
@@ -56,7 +63,7 @@ public class Rover extends SmartAgent {
 
         // rock sensor
         SelectiveRockSensor rockSensor = new SelectiveRockSensor(sim, field, this);
-        rockSensor.setArcs(4);
+        rockSensor.setArcs(6);
         rockSensor.setRange(par.rockSensorRange);
         rockSensor.setObjectTypes(Rock.class);
         rockSensor.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
@@ -72,8 +79,13 @@ public class Rover extends SmartAgent {
         super.addSensor(dsr);
 
         // closest rovers type
-        for (int i = 0; i < par.numActuators; i++) {
-            NeighbourTypeSensor ts = new NeighbourTypeSensor(dsr, i);
+        if (mr.par.typeSensorMode == MRParams.TYPE_BINARY) {
+            for (int i = 0; i < par.numActuators; i++) {
+                NeighbourTypeSensor ts = new NeighbourTypeSensor(dsr, i);
+                super.addSensor(ts);
+            }
+        } else if (mr.par.typeSensorMode == MRParams.TYPE_DISCRETISED) {
+            NeighbourMultiTypeSensor ts = new NeighbourMultiTypeSensor(dsr);
             super.addSensor(ts);
         }
     }

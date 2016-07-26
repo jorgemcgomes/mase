@@ -12,13 +12,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import mase.controllers.GroupController;
 import mase.mason.GUIState2D;
 import mase.mason.MasonSimulationProblem;
 import mase.mason.ParamUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import sim.display.GUIState;
 
 /**
@@ -58,14 +58,17 @@ public class MultiRoverSimulator extends MasonSimulationProblem {
                 dist.add(allTypes[idx]);
             }
         }
-        par.rockDistribution = dist.toArray(new RockType[dist.size()]);
+        par.rockDistribution = dist;
         state.output.message("Using a total of " + dist.size() + " rocks");
         
         // Find the rocktypes that are actually used
         par.usedTypes = new LinkedList<>();
+        par.usedTypesFrequency = new LinkedList<>();
         for(RockType t : allTypes) {
-            if(ArrayUtils.contains(par.rockDistribution, t)) {
+            int freq = Collections.frequency(dist, t);
+            if(freq > 0) {
                 par.usedTypes.add(t);
+                par.usedTypesFrequency.add(freq);
             }
         }
         state.output.message("There is a total of " + par.usedTypes.size() + " unique types");

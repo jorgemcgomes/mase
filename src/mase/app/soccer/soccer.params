@@ -1,15 +1,19 @@
 eval.base.problem =                mase.app.soccer.SoccerSimulator
 problem.trials-merge =             best
-problem.number-evals =             1
-problem.eval.0 =                   mase.app.soccer.GoalsFitness
-problem.eval.0.update-freq =       0
+problem.number-evals =             2
+problem.eval.0 =                   mase.app.soccer.WinsFitness
+problem.eval.0.update-freq =       1
+problem.eval.1 =                   mase.app.soccer.SoccerIndEval
+problem.eval.1.update-freq =       1
+
 fitness.fitness-index =            0
 
 # general params
 problem.repetitions =               1
 problem.seed =                      random
-problem.max-steps =                 3000
+problem.max-steps =                 5000
 
+# BALL PARAMS 
 # values at 10 fps
 # slip decel 3.5 cm/s^2; roll decel 0.3 cm/s^2; min speed 2cm/s
 problem.ballRadius = 2
@@ -18,25 +22,29 @@ problem.ballSlipDeceleration = 0.35
 problem.ballRollDeceleration = 0.03
 problem.ballMinSpeed = 0.2
 problem.ballCOR = 0.85
-    
-problem.formation = 3
+ 
+# GAME PARAMS   
+problem.formation = 1,2
 problem.locationRandom = 10
 problem.fieldLength = 274
 problem.fieldWidth = 152
 problem.cornerDiag = 5
 problem.goalWidth = 50
-problem.discretization = 10
+problem.discretization = 50
 problem.maxGameDuration = 1000
-problem.ballStuckTime = 150
+problem.ballStuckTime = 100
 problem.ballStuckMovement = 10
     
+# GENERAL AGENT PARAMS
 # values at 10 fps
 # move 10cm/s kick 40cm/s
 problem.agentRadius = 4
 problem.agentMoveSpeed = 1
 problem.agentKickSpeed = 4
+problem.agentMinKickSpeed = 1
 problem.agentKickDistance = 0.1
 
+# EVOLVED AGENT PARAMS
 problem.sensorArcs = 4
 problem.goalSensors = true
 problem.locationSensor = false

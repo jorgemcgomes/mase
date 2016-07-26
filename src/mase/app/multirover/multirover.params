@@ -18,13 +18,18 @@ problem.max-steps =                500
 problem.discretization =           20
 problem.linearSpeed =              1
 problem.turnSpeed =                0.393
-problem.roverSensorRange =         25
+problem.roverSensorRange =         50
 # the agent radius is added to the rocksensorrange, as the sensor is center-to-center
-problem.rockSensorRange =          27
+problem.rockSensorRange =          Infinity
 problem.agentRadius =              2
 problem.numAgents =                5
-problem.size =                     150
+problem.size =                     250
+problem.startSize =                50
 problem.minActivationTime =        50
+problem.typeSensorMode =           1
+
+neat.INPUT.NODES = 13
+neat.OUTPUT.NODES = 3
 
 # rock type default values
 problem.type.radius =              5
@@ -61,15 +66,5 @@ problem.type.11.color =      yellow
 problem.type.12.actuators =  0,2  
 problem.type.12.color =      cyan
 
-problem.rocks = 10*0,10*1
-# 10 + numActuators
-neat.INPUT.NODES=12
-# 2 + numActuators
-neat.OUTPUT.NODES=4
-
-#-p problem.rocks=20*0 -p neat.INPUT.NODES=11 -p neat.OUTPUT.NODES=3
-#-p problem.rocks=10*0,10*1 -p neat.INPUT.NODES=12 -p neat.OUTPUT.NODES=4
-#-p problem.rocks=6*0,7*1,7*2 -p neat.INPUT.NODES=13 -p neat.OUTPUT.NODES=5
-#-p problem.rocks=5*0,5*1,5*2,5*3 -p neat.INPUT.NODES=14 -p neat.OUTPUT.NODES=6
-#-p problem.rocks=4*0,4*1,4*2,4*3,4*4 -p neat.INPUT.NODES=15 -p neat.OUTPUT.NODES=7  
-
+#25*0;9*0,8*1,8*2;5*0,5*1,5*2,5*3,5*4
+problem.rocks = 25*0

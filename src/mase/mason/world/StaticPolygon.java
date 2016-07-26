@@ -81,6 +81,10 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
         }
         return closestDist;
     }
+    
+    public Segment[] segments() {
+        return segments;
+    }
 
     public double closestDistance(Double2D testPoint) {
         double min = Double.POSITIVE_INFINITY;
@@ -166,10 +170,28 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
     public static boolean isLeftOf(Double2D p, Double2D v, Double2D w) {
         return (p.y-v.y)*(w.x-v.x) > (p.x-v.x)*(w.y-v.y);
     }
+    
+    // Return the point belonging to line segment vw that is closest to point p
+    public static Double2D closestPointInSegment(Double2D p, Double2D v, Double2D w) {
+        double l2 = FastMath.pow2(v.x - w.x) + FastMath.pow2(v.y - w.y);
+        if (l2 == 0.0) {
+            return v;   // v == w case
+        }
+        // Consider the line extending the segment, parameterized as v + t (w - v).
+        // We find projection of point p onto the line. 
+        // It falls where t = [(p-v) . (w-v)] / |w-v|^2
+        double t = p.subtract(v).dot(w.subtract(v)) / l2;
+        if (t < 0.0) {
+            return v; // Beyond the 'v' end of the segment
+        } else if (t > 1.0) {
+            return w;  // Beyond the 'w' end of the segment
+        }
+        Double2D projection = v.add((w.subtract(v)).multiply(t));  // Projection falls on the segment
+        return projection;        
+    }
 
     // Return minimum distance between line segment vw and point p
     public static double distToSegment(Double2D p, Double2D v, Double2D w) {
-
         double l2 = FastMath.pow2(v.x - w.x) + FastMath.pow2(v.y - w.y);
         if (l2 == 0.0) {
             return p.distance(v);   // v == w case
