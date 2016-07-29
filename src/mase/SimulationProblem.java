@@ -13,8 +13,6 @@ import ec.simple.SimpleProblemForm;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mase.controllers.AgentController;
 import mase.controllers.AgentControllerIndividual;
 import mase.controllers.GroupController;

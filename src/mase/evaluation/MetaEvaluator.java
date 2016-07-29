@@ -25,6 +25,8 @@ public class MetaEvaluator extends Evaluator {
     private PostEvaluator[] postEvaluators;
     public int totalEvaluations;
     public int maxEvaluations;
+    public long lastEvaluationTime = 0;
+    public long lastPostEvaluationTime = 0;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -47,13 +49,18 @@ public class MetaEvaluator extends Evaluator {
 
     @Override
     public void evaluatePopulation(EvolutionState state) {
+        long t1 = System.currentTimeMillis();
         baseEvaluator.evaluatePopulation(state);
         for(Subpopulation sub : state.population.subpops) {
             totalEvaluations += sub.individuals.length;
         }
+        long t2 = System.currentTimeMillis();        
         for (PostEvaluator postEval : postEvaluators) {
             postEval.processPopulation(state);
         }
+        long t3 = System.currentTimeMillis();
+        lastEvaluationTime = t2 - t1;
+        lastPostEvaluationTime = t3 - t2;
         // necessary hack to load the elites in the CoevolutionaryEvaluator
         if (baseEvaluator instanceof CoevolutionaryEvaluator) {            
             ((CoevolutionaryEvaluator) baseEvaluator).afterCoevolutionaryEvaluation(state, state.population, null);

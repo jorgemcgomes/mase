@@ -7,6 +7,7 @@ problem.eval.1 =                   mase.app.soccer.SoccerIndEval
 problem.eval.1.update-freq =       1
 
 fitness.fitness-index =            0
+exch.behaviour-index =             1
 
 # general params
 problem.repetitions =               1

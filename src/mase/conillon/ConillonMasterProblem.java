@@ -18,12 +18,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
+import mase.evaluation.MetaEvaluator;
 import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 import mase.stat.FitnessStat;
+import mase.stat.RunTimeStat;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -36,6 +41,7 @@ import mase.stat.FitnessStat;
  */
 public class ConillonMasterProblem extends MasterProblem {
 
+    public static final String P_DEFAULT_BASE = "conillon";
     public static final String P_SERVER_PORT = "server-port";
     public static final String P_CODE_PORT = "code-port";
     public static final String P_PRIORITY = "priority";
@@ -88,6 +94,13 @@ public class ConillonMasterProblem extends MasterProblem {
     }
 
     @Override
+    public Parameter defaultBase() {
+        return new Parameter(P_DEFAULT_BASE);
+    }
+    
+    
+
+    @Override
     public void prepareToEvaluate(EvolutionState state, int threadnum) {
         jobs = new HashMap<>();
         tasks = new ArrayList<>();
@@ -96,8 +109,10 @@ public class ConillonMasterProblem extends MasterProblem {
 
     private String getDesc(EvolutionState state) {
         File statFile = ((FitnessStat) state.statistics.children[1]).statisticsFile;
-        String exp = statFile.getParentFile().getParentFile().getParentFile().getName() + "/" + statFile.getParentFile().getParentFile().getName() + "/" + statFile.getParentFile().getName();
-        String desc = exp + " / job " + state.job[0] + " / gen " + state.generation + " (" + state.numGenerations + ")";
+        String exp = statFile.getParentFile().getParentFile().getParentFile().getName() + "/" + statFile.getParentFile().getParentFile().getName() + "/" + statFile.getParentFile().getName();               
+        RunTimeStat stat = ((RunTimeStat) state.statistics.children[29]);
+        String eta = DurationFormatUtils.formatDuration(stat.eta(state), "HH:mm:ss");
+        String desc = exp + " / job " + state.job[0] + " / gen " + state.generation + "/ eta " + eta;
         return desc;
     }
 
@@ -304,12 +319,12 @@ public class ConillonMasterProblem extends MasterProblem {
         }
     }
 
-    @Override
+    /*@Override
     public void closeContacts(EvolutionState state, int result) {
         client.cancelAllTasks();
         client.disconnect();
         state.output.message("*** CLIENT " + client.getMyID() + " CLOSED ***");
-    }
+    }*/
 
     @Override
     public void reinitializeContacts(EvolutionState state) {
@@ -321,7 +336,12 @@ public class ConillonMasterProblem extends MasterProblem {
     @Override
     public void initializeContacts(EvolutionState state) {
         client = new Client(getDesc(state), ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
-        client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
+        MetaEvaluator me = (MetaEvaluator) state.evaluator;
+        if(me.maxEvaluations > 0) {
+            client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
+        } else {
+            client.setTotalNumberOfTasks((me.maxEvaluations - me.totalEvaluations) / jobSize);
+        }
         state.output.message("*** CONILLON CLIENT " + client.getMyID() + " INITIALIZED ***");
     }
 

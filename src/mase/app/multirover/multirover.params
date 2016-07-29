@@ -7,9 +7,10 @@ problem.eval.1 =                   mase.app.multirover.MultiRoverIndEval
 problem.eval.1.update-freq =       1
 
 fitness.fitness-index =            0
+exch.behaviour-index =             1
 
 generations =                      500
-pop.subpops =                      5
+pop.subpops =                      1
 neat.size =                        100
 
 problem.seed =                     random
@@ -18,12 +19,12 @@ problem.max-steps =                500
 problem.discretization =           20
 problem.linearSpeed =              1
 problem.turnSpeed =                0.393
-problem.roverSensorRange =         50
+problem.roverSensorRange =         100
 # the agent radius is added to the rocksensorrange, as the sensor is center-to-center
 problem.rockSensorRange =          Infinity
 problem.agentRadius =              2
-problem.numAgents =                5
-problem.size =                     250
+problem.numAgents =                10
+problem.size =                     400
 problem.startSize =                50
 problem.minActivationTime =        50
 problem.typeSensorMode =           1
@@ -32,7 +33,7 @@ neat.INPUT.NODES = 13
 neat.OUTPUT.NODES = 3
 
 # rock type default values
-problem.type.radius =              5
+problem.type.radius =              2
 problem.type.time =                1
 problem.type.color =               red
 
@@ -67,4 +68,4 @@ problem.type.12.actuators =  0,2
 problem.type.12.color =      cyan
 
 #25*0;9*0,8*1,8*2;5*0,5*1,5*2,5*3,5*4
-problem.rocks = 25*0
+problem.rocks = 30*0

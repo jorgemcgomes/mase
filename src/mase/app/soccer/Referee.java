@@ -6,6 +6,7 @@
 package mase.app.soccer;
 
 import java.awt.Color;
+import java.util.HashMap;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Double2D;
@@ -27,6 +28,15 @@ public class Referee implements Steppable {
     protected long gameStart = 0;
     protected Double2D lastBallPos;
     protected int ballStuckTime = 0;
+    protected HashMap<SoccerAgent,Integer> scorers;
+    protected SoccerAgent lastTouched = null;
+
+    public Referee(Soccer state) {
+        scorers = new HashMap<>();
+        for(SoccerAgent a : state.all) {
+            scorers.put(a, 0);
+        }
+    }
     
     @Override
     public void step(SimState state) {
@@ -37,6 +47,7 @@ public class Referee implements Steppable {
         for(SoccerAgent ag : soc.all) {
             if(ag.hasPossession) {
                 teamPossession = ag.teamColor;
+                lastTouched = ag;
                 break;
             }
         }
@@ -73,11 +84,17 @@ public class Referee implements Steppable {
         /*
         Check if a goal was scored or the game max time was reached
         */
-        if(soc.ball.getLocation().x < 0) {
+        if(soc.ball.getLocation().x < 0) { // right team scored
             rightTeamScore++;
+            if(lastTouched != null && lastTouched.teamColor == soc.rightTeamColor) {
+                scorers.put(lastTouched, scorers.get(lastTouched) + 1);
+            }
             restart(soc, true);
-        } else if(soc.ball.getLocation().x > soc.field.width) {
+        } else if(soc.ball.getLocation().x > soc.field.width) { // left team scored
             leftTeamScore++;
+            if(lastTouched != null && lastTouched.teamColor == soc.leftTeamColor) {
+                scorers.put(lastTouched, scorers.get(lastTouched) + 1);
+            }
             restart(soc, false);
         } else if(state.schedule.getSteps() - gameStart > soc.par.maxGameDuration) {
             timeOuts++;
@@ -103,6 +120,7 @@ public class Referee implements Steppable {
         lastBallPos = null;
         gameStart = soc.schedule.getSteps();
         teamPossession = null;
+        lastTouched = null;
         games++;
     }
     

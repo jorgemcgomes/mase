@@ -50,10 +50,10 @@ public class SoccerSimulator extends MasonSimulationProblem {
     public static void main(String[] args) {
         SoccerSimulator ss = new SoccerSimulator();
         ss.par = new SoccerParams();
-        ss.par.formation = new int[]{1,3,3,2};
-        ss.par.fieldLength = 400;
-        ss.par.fieldWidth = 225;
-        ss.par.goalWidth = 50;
+        ss.par.formation = new int[]{1,2,2};
+        //ss.par.fieldLength = 400;
+        //ss.par.fieldWidth = 225;
+        //ss.par.goalWidth = 50;
         
         GUIState gui = ss.createSimStateWithUI(null, 0);
         gui.createController();

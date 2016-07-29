@@ -9,7 +9,6 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
-import sim.util.MutableDouble2D;
 
 /**
  *
@@ -20,7 +19,7 @@ public class SoccerIndEval extends MasonEvaluation {
     private static final long serialVersionUID = 1L;
 
     private SubpopEvaluationResult ser;
-    private MutableDouble2D[] fieldPos;
+    private double[] distToOppGoal;
     private double[] distToBall;
     private double[] distToTeammate;
     private double[] distToOpponent;
@@ -29,13 +28,10 @@ public class SoccerIndEval extends MasonEvaluation {
     protected void preSimulation() {
         super.preSimulation();
         Soccer soc = (Soccer) sim;
-        fieldPos = new MutableDouble2D[soc.leftTeam.size()];
-        for (int i = 0; i < fieldPos.length; i++) {
-            fieldPos[i] = new MutableDouble2D(0, 0);
-        }
-        distToBall = new double[fieldPos.length];
-        distToTeammate = new double[fieldPos.length];
-        distToOpponent = new double[fieldPos.length];
+        distToOppGoal = new double[soc.leftTeam.size()];
+        distToBall = new double[soc.leftTeam.size()];
+        distToTeammate = new double[soc.leftTeam.size()];
+        distToOpponent = new double[soc.leftTeam.size()];
     }
 
     @Override
@@ -45,8 +41,8 @@ public class SoccerIndEval extends MasonEvaluation {
         for (int a = 0; a < soc.leftTeam.size(); a++) {
             SoccerAgent sa = soc.leftTeam.get(a);
 
-            // Agent location
-            fieldPos[a].addIn(sa.getLocation());
+            // Distance to opponent goal
+            distToOppGoal[a] += sa.distanceTo(sa.oppGoal);
 
             // Distance to ball
             distToBall[a] += sa.distanceTo(soc.ball.getLocation());
@@ -72,13 +68,14 @@ public class SoccerIndEval extends MasonEvaluation {
         super.postSimulation();
         Soccer soc = (Soccer) sim;
         VectorBehaviourResult[] res = new VectorBehaviourResult[soc.leftTeam.size()];
-        for (int i = 0; i < res.length; i++) {
-            res[i] = new VectorBehaviourResult(
-                    fieldPos[i].x / soc.field.width / currentEvaluationStep,
-                    fieldPos[i].y / soc.field.height / currentEvaluationStep,
-                    distToBall[i] / soc.field.width / currentEvaluationStep,
-                    distToTeammate[i] / soc.field.width / currentEvaluationStep,
-                    distToOpponent[i] / soc.field.width / currentEvaluationStep
+        for (int a = 0; a < res.length; a++) {
+            int scored = soc.referee.scorers.get(soc.leftTeam.get(a));
+            res[a] = new VectorBehaviourResult(
+                    distToOppGoal[a] / soc.field.width / currentEvaluationStep,
+                    distToBall[a] / soc.field.width / currentEvaluationStep,
+                    distToTeammate[a] / soc.field.width / currentEvaluationStep,
+                    distToOpponent[a] / soc.field.width / currentEvaluationStep,
+                    soc.referee.leftTeamScore > 0 ? (double) scored / soc.referee.leftTeamScore : 0
             );
         }
         this.ser = new SubpopEvaluationResult(res);

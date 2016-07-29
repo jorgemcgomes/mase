@@ -91,8 +91,9 @@ public class RangeBearingSensor extends AbstractSensor {
                 dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 dist = Math.max(dist, 0);
             }
-            if ((Double.isInfinite(range) || dist <= range) && (o instanceof Double2D || field.exists(o))) {
-                double angle = ag.angleTo(o);
+            Double2D loc = o instanceof Double2D ? (Double2D) o : field.getObjectLocation(o);
+            if ((Double.isInfinite(range) || dist <= range) && loc != null) {
+                double angle = ag.angleTo(loc);
                 if (orientationNoise > 0) {
                     angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                     angle = EmboddiedAgent.normalizeAngle(angle);

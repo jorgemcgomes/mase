@@ -69,6 +69,10 @@ stat.child.8.prefix =                   post
 stat.child.9 =                          mase.stat.ScoresStat
 stat.child.9.file =		        $scores.stat
 
+stat.child.29 =                         mase.stat.RunTimeStat
+stat.child.29.file =                    $timelog.stat
+
+
 # Placeholders for other statistics
 stat.child.10 =                         ec.Statistics
 stat.child.11 =                         ec.Statistics
@@ -89,4 +93,3 @@ stat.child.25 =                         ec.Statistics
 stat.child.26 =                         ec.Statistics
 stat.child.27 =                         ec.Statistics
 stat.child.28 =                         ec.Statistics
-stat.child.29 =                         ec.Statistics

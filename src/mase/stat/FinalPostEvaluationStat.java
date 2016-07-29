@@ -44,6 +44,7 @@ public class FinalPostEvaluationStat extends Statistics {
         for (Statistics stat : state.statistics.children) {
             if (stat instanceof BestSolutionGenStat) {
                 best = (BestSolutionGenStat) stat;
+                break;
             }
         }
         if (best != null) {

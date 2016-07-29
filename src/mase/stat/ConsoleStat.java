@@ -23,14 +23,9 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class ConsoleStat extends Statistics {
 
-    static final double SMOOTH_CONSTANT = 0.5;
     private static final long serialVersionUID = 1L;
-    long startTime;
-    long lastTime;
-    long genDuration;
     int jobs;
     int currentJob;
-    DateFormat df;
     DecimalFormat nf;
     double bestFitness = Double.NEGATIVE_INFINITY;
 
@@ -39,36 +34,8 @@ public class ConsoleStat extends Statistics {
         super.setup(state, base);
         jobs = state.parameters.getIntWithDefault(new Parameter("jobs"), null, 1);
         currentJob = state.job != null ? (Integer) state.job[0] : 0;
-        df = new SimpleDateFormat("HH:mm:ss[dd]");
         nf = new DecimalFormat("0.0000");
         state.output.setStore(false);
-    }
-
-    @Override
-    public void preInitializationStatistics(EvolutionState state) {
-        super.preInitializationStatistics(state);
-        startTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public void postBreedingStatistics(EvolutionState state) {
-        super.postBreedingStatistics(state);
-        long currentTime = System.currentTimeMillis();
-        long instantDuration = lastTime == 0 ? currentTime - startTime : currentTime - lastTime;
-        genDuration = genDuration == 0 ? instantDuration : Math.round(instantDuration * SMOOTH_CONSTANT + genDuration * (1 - SMOOTH_CONSTANT));
-        long remainingJobTime = (state.numGenerations - state.generation - 1) * genDuration;
-        long jobTime = (remainingJobTime + System.currentTimeMillis() - startTime);
-        long remainingBatchTime = remainingJobTime + (jobs - currentJob - 1) * jobTime;
-
-        Date jobEta = new Date(currentTime + remainingJobTime);
-        Date batchEta = new Date(currentTime + remainingBatchTime);
-
-        state.output.message("Gen: " + DurationFormatUtils.formatDuration(genDuration, "mm:ss:SSS")
-                + " | Job: " + DurationFormatUtils.formatDuration(jobTime, "HH:mm:ss")
-                + " | Job ETA: " + df.format(jobEta) + " (" + DurationFormatUtils.formatDuration(remainingJobTime, "HH:mm:ss") + ")"
-                + " | Batch ETA: " + df.format(batchEta) + " (" + DurationFormatUtils.formatDuration(remainingBatchTime, "HH:mm:ss") + ")");
-        
-        lastTime = currentTime;
     }
 
     @Override

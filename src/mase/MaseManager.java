@@ -346,6 +346,7 @@ public class MaseManager {
         for (Job j : completed) {
             if (j.params.equals(check.params)) {
                 listener.error("Job is already in the completed list");
+                return true;
             }
         }
         for (Entry<JobRunner, Job> e : running.entrySet()) {

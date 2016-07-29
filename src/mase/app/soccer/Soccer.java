@@ -67,9 +67,6 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
         fieldBoundaries.filled = false;
         field.setObjectLocation(fieldBoundaries, new Double2D(0, 0));
 
-        referee = new Referee();
-        schedule.scheduleRepeating(referee);
-
         ball = new Ball(this);
         ball.setLabel("");
         ball.setColor(Color.WHITE);
@@ -77,6 +74,9 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
 
         createAgents();
         resetTeams(true); // left (evolved) team starts
+
+        referee = new Referee(this);
+        schedule.scheduleRepeating(referee);
     }
 
     public void createAgents() {
