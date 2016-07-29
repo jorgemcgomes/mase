@@ -76,11 +76,11 @@ public class SoccerIndEvalAdjusted extends MasonEvaluation {
         Soccer soc = (Soccer) sim;
         VectorBehaviourResult[] res = new VectorBehaviourResult[soc.leftTeam.size()];
         for (int a = 0; a < res.length; a++) {
+            SoccerAgent sa = soc.leftTeam.get(a);
             for(int i = 0 ; i < accumDists[a].length ; i++) {
                 accumDists[a][i] = (accumDists[a][i] / currentEvaluationStep - initDists[a][i]) / soc.field.width;
             }
-            int scored = soc.referee.scorers.get(soc.leftTeam.get(a));
-            double[] behav = ArrayUtils.add(accumDists[a], soc.referee.leftTeamScore > 0 ? (double) scored / soc.referee.leftTeamScore : 0);
+            double[] behav = ArrayUtils.add(accumDists[a], soc.referee.scorer == sa ? 1 : 0);
             
             res[a] = new VectorBehaviourResult(behav);
         }

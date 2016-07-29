@@ -3,16 +3,16 @@ problem.trials-merge =             best
 problem.number-evals =             2
 problem.eval.0 =                   mase.app.soccer.WinsFitness
 problem.eval.0.update-freq =       1
-problem.eval.1 =                   mase.app.soccer.SoccerIndEval
+problem.eval.1 =                   mase.app.soccer.SoccerIndEvalAdjusted
 problem.eval.1.update-freq =       1
 
 fitness.fitness-index =            0
 exch.behaviour-index =             1
 
 # general params
-problem.repetitions =               1
+problem.repetitions =               10
 problem.seed =                      random
-problem.max-steps =                 5000
+problem.max-steps =                 1000
 
 # BALL PARAMS 
 # values at 10 fps
@@ -32,7 +32,6 @@ problem.fieldWidth = 152
 problem.cornerDiag = 5
 problem.goalWidth = 50
 problem.discretization = 50
-problem.maxGameDuration = 1000
 problem.ballStuckTime = 100
 problem.ballStuckMovement = 10
     

@@ -39,8 +39,8 @@ public class WinsFitness extends MasonEvaluation {
         super.postSimulation(); 
         Soccer soc = (Soccer) sim;
         double bootstrap = 1 - minDist / FastMath.sqrt(FastMath.pow2(soc.par.fieldLength) + FastMath.pow2(soc.par.fieldWidth / 2));
-        double wins = (double) soc.referee.leftTeamScore / soc.referee.games;
-        res = new FitnessResult(wins > 0 ? 1 + wins : bootstrap, FitnessResult.ARITHMETIC);
+        double time = 1 - soc.schedule.getSteps() / (double) maxSteps;
+        res = new FitnessResult(soc.referee.leftTeamScore > 0 ? 1 + time : bootstrap / 10, FitnessResult.ARITHMETIC);
     }
     
     

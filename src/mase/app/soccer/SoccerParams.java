@@ -31,7 +31,6 @@ public class SoccerParams implements Serializable {
     double cornerDiag = 5;
     double goalWidth = 50;
     double discretization = 25;
-    int maxGameDuration = 1000;
     int ballStuckTime = 150;
     double ballStuckMovement = 10;    
     

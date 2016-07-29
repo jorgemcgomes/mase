@@ -36,6 +36,7 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
     protected Color leftTeamColor, rightTeamColor;
     protected Ball ball;
     protected Referee referee;
+    protected boolean startFlag = true;
 
     Soccer(long seed, SoccerParams par, GroupController gc) {
         super(gc, seed);
@@ -73,9 +74,10 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
         schedule.scheduleRepeating(ball);
 
         createAgents();
-        resetTeams(true); // left (evolved) team starts
-
-        referee = new Referee(this);
+        resetTeams(startFlag);
+        startFlag = !startFlag;
+        
+        referee = new Referee();
         schedule.scheduleRepeating(referee);
     }
 
