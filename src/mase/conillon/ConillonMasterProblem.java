@@ -7,6 +7,9 @@ import ec.Individual;
 import ec.eval.MasterProblem;
 import ec.util.Parameter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -127,12 +130,11 @@ public class ConillonMasterProblem extends MasterProblem {
         MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
         GroupController gc = simProblem.createController(state, job.ind);
         int id = nextID();
-        MasonSimState sim = simProblem.createSimState(gc, simProblem.nextSeed(state, threadnum));
-        SlaveTask task = new SlaveTask(sim, id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
+        SlaveTask task = new SlaveTask(id, simProblem, gc, simProblem.nextSeed(state, threadnum));
         jobs.put(id, job);
         tasks.add(task);
     }
-
+    
     @Override
     public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
         Evaluation job = new Evaluation();
@@ -144,8 +146,7 @@ public class ConillonMasterProblem extends MasterProblem {
         MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
         GroupController gc = simProblem.createController(state, ind);
         int id = nextID();
-        MasonSimState sim = simProblem.createSimState(gc, simProblem.nextSeed(state, threadnum));
-        SlaveTask task = new SlaveTask(sim, id, simProblem.getEvalFunctions(), simProblem.getRepetitions(), simProblem.getMaxSteps());
+        SlaveTask task = new SlaveTask(id, simProblem, gc, simProblem.nextSeed(state, threadnum));
         jobs.put(id, job);
         tasks.add(task);
     }
@@ -156,6 +157,7 @@ public class ConillonMasterProblem extends MasterProblem {
         boolean done = false;
         currentTimeout = minTimeout;
         while (!done && tries < maxTries) {
+            long start = System.currentTimeMillis();
             try {
                 client.setDesc(getDesc(state));
                 // Old client failed, needs to create new one
@@ -196,6 +198,16 @@ public class ConillonMasterProblem extends MasterProblem {
                 // Something went wrong or timeout
                 state.output.message("*** ERROR WITH CLIENT " + client.getMyID() + " / TRY " + tries + "***");
                 e.printStackTrace();
+                
+                long t = System.currentTimeMillis();
+                if(t - start < currentTimeout * 1000) {
+                    try {
+                        Thread.sleep(currentTimeout * 1000 - (t - start));
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                
                 currentTimeout = Math.min(currentTimeout * 2, maxTimeout);
                 tries++;
             }

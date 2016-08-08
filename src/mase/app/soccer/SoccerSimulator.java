@@ -13,6 +13,7 @@ import mase.mason.GUIState2D;
 import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 import mase.mason.ParamUtils;
+//import mase.mason.ParamUtils;
 import sim.display.GUIState;
 
 /**
@@ -28,7 +29,7 @@ public class SoccerSimulator extends MasonSimulationProblem {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         par = new SoccerParams();
-        ParamUtils.autoSetParameters(par, state.parameters, base, defaultBase(), true);
+        ParamUtils.autoSetParameters(par, state, base, defaultBase(), true);
         
     }
 

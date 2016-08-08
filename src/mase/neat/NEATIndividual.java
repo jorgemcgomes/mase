@@ -36,7 +36,7 @@ public class NEATIndividual extends Individual implements AgentControllerIndivid
         descr.updateStructure(this.genome);
         this.network = new NEATNeuralNet();
         this.network.createNetStructure(descr);
-        this.network.updateNetStructure();
+        //this.network.updateNetStructure();
     }
 
     public NEATChromosome getChromosome() {

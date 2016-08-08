@@ -91,7 +91,8 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
             }
 
             if (check) {
-                AgentController controller = controllers[i].clone();
+                AgentController controller = controllers[i];
+                controller.reset();
                 Rover rover = new Rover(this, field, controller);
                 rover.setLocation(newLoc);
                 rover.setOrientation(random.nextDouble() * Math.PI * 2 - Math.PI);

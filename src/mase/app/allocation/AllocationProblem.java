@@ -53,7 +53,7 @@ public class AllocationProblem extends SimulationProblem {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        ParamUtils.autoSetParameters(this, state.parameters, base, defaultBase(), false);
+        ParamUtils.autoSetParameters(this, state, base, defaultBase(), false);
 
         dimensions = state.parameters.getInt(new Parameter("vector.species.genome-size"), null);
 

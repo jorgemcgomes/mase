@@ -5,8 +5,8 @@
  */
 package mase.mason;
 
+import ec.EvolutionState;
 import ec.util.Parameter;
-import ec.util.ParameterDatabase;
 import java.awt.Color;
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -76,7 +76,7 @@ public class ParamUtils {
      * @param defaultBase The default base parameter.
      * @param useAll If true, the attributes dont need to have the annotation
      */
-    public static void autoSetParameters(Object params, ParameterDatabase db, Parameter base, Parameter defaultBase, boolean useAll) {
+    public static void autoSetParameters(Object params, EvolutionState state, Parameter base, Parameter defaultBase, boolean useAll) {
         Field[] fields = params.getClass().getDeclaredFields();
         for (Field field : fields) {
             try {
@@ -106,17 +106,17 @@ public class ParamUtils {
                     if (type.isArray()) {
                         String name = annotation.name().equals("") ? field.getName() : annotation.name();
                         Parameter defaultRobot = base.push(annotation.base()).push(name);
-                        if(!db.exists(defaultRobot, null)) {
+                        if(!state.parameters.exists(defaultRobot, null)) {
                             defaultRobot = defaultBase.push(annotation.base()).push(name);
                         }
                         Object array = Array.newInstance(type.getComponentType(), MAX_COUNT);
                         for (int i = 0; i < (annotation.count() != 0 ? annotation.count() : MAX_COUNT); i++) {
                             Parameter paramRobot = base.push(annotation.base()).push(i + "").push(name);
-                            if(!db.exists(paramRobot, null)) {
+                            if(!state.parameters.exists(paramRobot, null)) {
                                 paramRobot = defaultBase.push(annotation.base()).push(i + "").push(name);
                             }
-                            if (db.exists(paramRobot, defaultRobot)) {
-                                Object value = getValue(type.getComponentType(), db, paramRobot, defaultRobot);
+                            if (state.parameters.exists(paramRobot, defaultRobot)) {
+                                Object value = getValue(type.getComponentType(), state, paramRobot, defaultRobot);
                                 Array.set(array, i, value);
                             }
                         }
@@ -128,8 +128,8 @@ public class ParamUtils {
                 } else if (field.isAnnotationPresent(Param.class) || useAll) { // It is a simple attribute
                     Param annotation = field.getAnnotation(Param.class);
                     String name = (annotation == null || annotation.name().equals("")) ? field.getName() : annotation.name();
-                    if (db.exists(base.push(name), defaultBase.push(name))) {
-                        Object value = getValue(field.getType(), db, base.push(name), defaultBase.push(name));
+                    if (state.parameters.exists(base.push(name), defaultBase.push(name))) {
+                        Object value = getValue(field.getType(), state, base.push(name), defaultBase.push(name));
                         field.set(params, value);
                         System.out.println("V " + field.getName() + ": SET Param: " + value);
                     } else {
@@ -142,8 +142,8 @@ public class ParamUtils {
         }
     }
 
-    public static Object getValue(Class<?> type, ParameterDatabase db, Parameter baseParam, Parameter defaultBaseParam) throws Exception {
-        String val = db.getString(baseParam, defaultBaseParam);
+    public static Object getValue(Class<?> type, EvolutionState state, Parameter baseParam, Parameter defaultBaseParam) throws Exception {
+        String val = state.parameters.getString(baseParam, defaultBaseParam);
         if (type.isArray()) {
             Class<?> componentType = type.getComponentType();
             String[] split = val.split(SEPARATOR_ARRAY);

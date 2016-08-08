@@ -35,14 +35,10 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     private static final long serialVersionUID = 1L;
     protected EvaluationFunction[] evalFunctions;
     public static final String P_TRIALS_MERGE = "trials-merge";
-
-    public enum TrialsMergeMode {
-
-        best, mean, median
-    }
+    public static final String V_MERGE_BEST = "best", V_MERGE_MEAN = "mean", V_MERGE_MEDIAN = "median";
+    protected String mergeMode;
     public static final String P_REPETITIONS = "repetitions";
     public static final String P_SEED = "seed";
-    protected TrialsMergeMode mergeMode;
     public static final String V_RANDOM_SEED = "random";
     protected boolean sameSeed;
     protected long seed;
@@ -66,10 +62,10 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
 
         /* trial merge */
         if (!state.parameters.exists(base.push(P_TRIALS_MERGE), null)) {
-            mergeMode = TrialsMergeMode.best;
+            mergeMode = V_MERGE_BEST;
             state.output.warning("Parameter not found. Going with best.", base.push(P_TRIALS_MERGE));
         } else {
-            mergeMode = TrialsMergeMode.valueOf(state.parameters.getString(base.push(P_TRIALS_MERGE), null));
+            mergeMode = state.parameters.getString(base.push(P_TRIALS_MERGE), null);
         }
 
         String seedString = state.parameters.getStringWithDefault(base.push(P_SEED), null, V_RANDOM_SEED);
@@ -111,18 +107,18 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         for (int i = 0; i < pop.subpops.length; i++) {
             for (Individual ind : pop.subpops[i].individuals) {
                 if (assessFitness[i]) {
-                    ExpandedFitness[] trials = Arrays.copyOf(ind.fitness.trials.toArray(), ind.fitness.trials.size(), ExpandedFitness[].class);
+                    ExpandedFitness[] trials = new ExpandedFitness[ind.fitness.trials.size()];
                     for (int k = 0; k < trials.length; k++) {
                         trials[k] = (ExpandedFitness) ind.fitness.trials.get(k);
                     }
                     switch (mergeMode) {
-                        case mean:
+                        case V_MERGE_MEAN:
                             ind.fitness.setToMeanOf(state, trials);
                             break;
-                        case median:
+                        case V_MERGE_MEDIAN:
                             ind.fitness.setToMedianOf(state, trials);
                             break;
-                        case best:
+                        case V_MERGE_BEST:
                             ind.fitness.setToBestOf(state, trials);
                             break;
                     }

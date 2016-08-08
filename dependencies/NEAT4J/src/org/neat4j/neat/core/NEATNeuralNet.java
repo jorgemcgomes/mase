@@ -34,10 +34,10 @@ public class NEATNeuralNet implements NeuralNet {
     
         private static final long serialVersionUID = -1L;
 	private NEATNetDescriptor descriptor;
-	private Synapse[] connections;
-	private NEATNeuron[] neurons;
-        private NEATNeuron[] outputNeurons;
-        private double[] activations;
+	private transient Synapse[] connections;
+	private transient NEATNeuron[] neurons;
+        private transient NEATNeuron[] outputNeurons;
+        private transient double[] activations;
 	
 	public NEATNeuron[] neurons() {
 		return (this.neurons);

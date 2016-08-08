@@ -25,7 +25,7 @@ public class PredatorPreySimulator extends MasonSimulationProblem {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         par = new PredParams();
-        ParamUtils.autoSetParameters(par, state.parameters, base, super.defaultBase(), true);
+        ParamUtils.autoSetParameters(par, state, base, super.defaultBase(), true);
 
 
         if (par.escapeStrategy != PredParams.V_NEAREST && par.escapeStrategy != PredParams.V_MEAN_VECTOR) {

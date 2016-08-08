@@ -73,6 +73,7 @@ public class NEATStatistics extends Statistics {
     }
 
     private int[] netDescription(NEATNeuralNet net) {
+        net.updateNetStructure();
         int[] res = new int[3];
         res[0] = net.neurons().length;
         res[1] = net.connections().length;

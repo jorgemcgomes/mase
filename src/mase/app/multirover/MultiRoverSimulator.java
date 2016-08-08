@@ -34,7 +34,7 @@ public class MultiRoverSimulator extends MasonSimulationProblem {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         par = new MRParams();
-        ParamUtils.autoSetParameters(par, state.parameters, base, super.defaultBase(), true);
+        ParamUtils.autoSetParameters(par, state, base, super.defaultBase(), true);
         
         // Parse rock types
         RockType[] allTypes = new RockType[par.numRockTypes];

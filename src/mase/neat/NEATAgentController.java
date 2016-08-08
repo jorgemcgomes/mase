@@ -10,7 +10,6 @@ import org.neat4j.neat.core.NEATNeuron;
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.data.csv.CSVInput;
-import org.neat4j.neat.nn.core.NeuralNetDescriptor;
 import org.neat4j.neat.nn.core.Synapse;
 
 /**
@@ -39,31 +38,26 @@ public class NEATAgentController implements AgentController {
 
     @Override
     public void reset() {
-        this.network = createNet(network.netDescriptor());
+        this.network.updateNetStructure();
     }
 
     @Override
     public AgentController clone() {
         try {
             NEATAgentController ac = (NEATAgentController) super.clone();
-            ac.network = createNet(network.netDescriptor());
+            ac.network = new NEATNeuralNet();
+            ac.network.createNetStructure(network.netDescriptor());
             return ac;
         } catch (CloneNotSupportedException ex) {
         }
         return null;
     }
 
-    private NEATNeuralNet createNet(NeuralNetDescriptor nnd) {
-        NEATNeuralNet net = new NEATNeuralNet();
-        net.createNetStructure(nnd);
-        net.updateNetStructure();
-        return net;
-    }
-
     @Override
     public String toString() {
         int selfRecurr = 0;
         int recurr = 0;
+        network.updateNetStructure();
         for (Synapse s : network.connections()) {
             if (((NEATNeuron) s.getFrom()).id() == ((NEATNeuron) s.getTo()).id()) {
                 selfRecurr++;

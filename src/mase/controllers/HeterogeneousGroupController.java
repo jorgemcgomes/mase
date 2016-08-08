@@ -19,7 +19,11 @@ public class HeterogeneousGroupController implements GroupController {
     
     @Override
     public AgentController[] getAgentControllers(int n) {
-        return controllers;
+        AgentController[] out = new AgentController[n];
+        for(int i = 0 ; i < n ; i++) {
+            out[i] = controllers[i].clone();
+        }
+        return out;
     }
 
     @Override

@@ -212,6 +212,9 @@ public class AIKAgent extends SoccerAgent {
                 ? ((gpb.y < 0.0) ? -1.0 : 1.0) : Math.sin(gpb.angle()));
         gp = new Double2D(goalieX, fieldWidth / 2 + k * goalWidth / 2);
         gp = gp.subtract(pos);
+        if(gp.length() < 0.01) {
+            return new Double2D(0,0);
+        }
         Double2D gpForce = gp.resize(GOALIE_G / (gp.length() * gp.length()));
         // check if I'm already acting goalie
         if (gp.length() < MARGIN) {
