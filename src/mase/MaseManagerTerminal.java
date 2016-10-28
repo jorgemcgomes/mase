@@ -99,6 +99,11 @@ public class MaseManagerTerminal implements StatusListener {
                             loadJobs(new File(sc.next()));
                         }
                         break;
+                    case "remove":
+                        while (sc.hasNext()) {
+                            mng.removeFromWaiting(sc.next());
+                        }                        
+                        break;
                     case "killrunner":
                         while (sc.hasNextInt()) {
                             mng.killRunner(sc.nextInt());
@@ -253,6 +258,7 @@ public class MaseManagerTerminal implements StatusListener {
                                 + "-- addjobs        job_params\n"
                                 + "-- loadjobs       [file]...\n"
                                 + "-- killrunner     [runner_id]...\n"
+                                + "-- remove         [job_id]...\n"
                                 + "-- kill           [job_id]...\n"
                                 + "-- killall        \n"
                                 + "-- output         runner_id [lines]\n"

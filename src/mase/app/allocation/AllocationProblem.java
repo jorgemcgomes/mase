@@ -24,6 +24,7 @@ import net.jafama.FastMath;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.ml.distance.EuclideanDistance;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  *
@@ -47,6 +48,7 @@ public class AllocationProblem extends SimulationProblem {
     double minSeparation = 0; // sqrt(dimensions)/3 if -1
 
     private static final EuclideanDistance DIST = new EuclideanDistance();
+    private double[] nulify;
     double[][] types;
     int dimensions = -1;
 
@@ -54,6 +56,9 @@ public class AllocationProblem extends SimulationProblem {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         ParamUtils.autoSetParameters(this, state, base, defaultBase(), false);
+        
+        nulify = new double[numAgents];
+        Arrays.fill(nulify, Double.NaN);    
 
         dimensions = state.parameters.getInt(new Parameter("vector.species.genome-size"), null);
 
@@ -184,8 +189,10 @@ public class AllocationProblem extends SimulationProblem {
             }
         }
 
+        DescriptiveStatistics pd = pairDistances(distanceMatrix);
+        
         // fitness
-        FitnessResult fr = new FitnessResult(score(distanceMatrix));
+        FitnessResult fr = new FitnessResult(1 - pd.getMean()  / FastMath.sqrt(dimensions));
 
         // individual characterisation -- distance to each type
         List<EvaluationResult> vbrs = new ArrayList<>();
@@ -193,33 +200,35 @@ public class AllocationProblem extends SimulationProblem {
             vbrs.add(new VectorBehaviourResult(dists));
         }
         SubpopEvaluationResult ser = new SubpopEvaluationResult(vbrs);
-
-        return new EvaluationResult[]{fr, ser};
+        
+        // aux characterisation -- min, mean, max, sd pair distances
+        VectorBehaviourResult aux = new VectorBehaviourResult(pd.getMin(), pd.getMean(), pd.getMax(), pd.getStandardDeviation());
+        
+        return new EvaluationResult[]{fr, aux, ser};
     }
     
-    private double score(RealMatrix distMatrix) {
-        double d = distClosest(distMatrix);
-        return 1 - d / Math.sqrt(dimensions);
-    }
-    
-    // MAX value = sqrt(dimensions), assuming [0,1] range
-    private static double distClosest(RealMatrix distMatrix) {
-        double d1 = distClosestAux(distMatrix);
-        RealMatrix tr = distMatrix.transpose();
-        double d2 = distClosestAux(tr);
-        double d = Math.max(d1, d2);
-        return d;        
-    }
-    
-    private static double distClosestAux(RealMatrix distMatrix) {
-        double mean = 0;
-        for(int i = 0 ; i < distMatrix.getRowDimension() ; i++) {
-            double closest = Double.POSITIVE_INFINITY;
-            for(int j = 0 ; j < distMatrix.getColumnDimension() ; j++) {
-                closest = Math.min(closest, distMatrix.getEntry(i, j));
+    private DescriptiveStatistics pairDistances(RealMatrix distMatrix) {
+        DescriptiveStatistics ds = new DescriptiveStatistics();
+        distMatrix = distMatrix.copy();
+  
+        for(int k = 0 ; k < numAgents ; k++) {
+            // find closest pair
+            double min = Double.POSITIVE_INFINITY;
+            int minI = -1, minJ = -1;
+            for(int i = 0 ; i < numAgents ; i++) {
+                for(int j = 0 ; j < numAgents ; j++) {
+                    double d = distMatrix.getEntry(i, j);
+                    if(!Double.isNaN(d) && d < min) {
+                        min = d;
+                        minI = i;
+                        minJ = j;
+                    }
+                }
             }
-            mean += closest;
+            ds.addValue(min);
+            distMatrix.setRow(minI, nulify);
+            distMatrix.setColumn(minJ, nulify);
         }
-        return mean / distMatrix.getRowDimension();
+        return ds;
     }
 }

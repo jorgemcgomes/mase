@@ -55,9 +55,8 @@ public class SubpopEvaluationResult implements EvaluationResult {
     public String toString() {
         String str = "";
         for (int i = 0; i < evals.size(); i++) {
-            str += i + ": " + evals.get(i).toString() + "\n";
+            str += i + " " + evals.get(i).toString() + " ";
         }
-        return str;
+        return str.trim();
     }
-
 }

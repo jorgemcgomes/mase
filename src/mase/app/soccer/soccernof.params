@@ -1,9 +1,9 @@
 eval.base.problem =                mase.app.soccer.SoccerSimulator
 problem.trials-merge =             best
 problem.number-evals =             2
-problem.eval.0 =                   mase.app.soccer.WinsFitness
+problem.eval.0 =                   mase.app.soccer.WinsFitnessAlt
 problem.eval.0.update-freq =       1
-problem.eval.1 =                   mase.app.soccer.SoccerIndEvalAdjusted
+problem.eval.1 =                   mase.app.soccer.SoccerIndEvalShort
 problem.eval.1.update-freq =       1
 
 fitness.fitness-index =            0
@@ -25,9 +25,9 @@ problem.ballMinSpeed = 0.2
 problem.ballCOR = 0.85
  
 # GAME PARAMS   
-problem.formation = 1,2
-problem.lineFormation = true
-problem.locationRandom = 10
+problem.formation = 5
+problem.lineFormation = false
+problem.locationRandom = 30
 problem.fieldLength = 274
 problem.fieldWidth = 152
 problem.cornerDiag = 5

@@ -6,18 +6,18 @@ import java.util.List;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.StaticPolygon.Segment;
 import net.jafama.FastMath;
+import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
 import sim.util.Double2D;
 import sim.util.MutableDouble2D;
 
 /**
- * A homogeneous robot soccer team. Based on the AIKHomoG player found in TeamBots.
- * Differences to the original player:
- * 1) Force limit significantly reduced.
- * 2) Fixed bugs in obstacle detection.
- * 3) Include walls in the obstacle list.
- * 4) When shooting the ball, do not consider teammates as obstacles.
- * 5) MARGIN increased.
+ * A homogeneous robot soccer team. Based on the AIKHomoG player found in
+ * TeamBots. Differences to the original player: 1) Force limit significantly
+ * reduced. 2) Fixed bugs in obstacle detection. 3) Include walls in the
+ * obstacle list. 4) When shooting the ball, do not consider teammates as
+ * obstacles. 5) MARGIN increased.
+ *
  * @author H&aring;kan L. Younes
  */
 public class AIKAgent extends SoccerAgent {
@@ -76,16 +76,22 @@ public class AIKAgent extends SoccerAgent {
     protected static int rad2deg(double alpha) {
         return (int) (180.0 * alpha / Math.PI);
     }
+    
+    protected static double deg2Rad(double deg) {
+        return deg * Math.PI / 180;
+    }
 
     private int side;
     private double goalieX;
     private Double2D offensivePos1, offensivePos2;
+    Pair<Double, Integer> kickR;
 
     public AIKAgent(Soccer sim) {
         super(sim, null, sim.par.agentMoveSpeed, sim.par.agentKickSpeed);
         this.fieldLength = sim.par.fieldLength;
         this.fieldWidth = sim.par.fieldWidth;
         this.goalWidth = sim.par.goalWidth;
+        this.kickR = sim.ball.maxDistance(sim, kickSpeed);
     }
 
     public String getStatus() {
@@ -138,7 +144,7 @@ public class AIKAgent extends SoccerAgent {
                 // do not move
                 status = "Not enough force -- do nothing";
             } else {
-                double freeDir = getFreeDirection(f, RANGE, true);
+                double freeDir = getFreeMoveDirection(f, RANGE, false);
                 super.move(freeDir, moveSpeed * 0.75);
                 status = "Moving without ball.";// Force: " + f + ", " + rad2deg(f.angle());
             }
@@ -149,14 +155,14 @@ public class AIKAgent extends SoccerAgent {
         // not near the ball
         if (!hasPossession) {
             // go towards the ball
-            double dir = getFreeDirection(getBallVector(), RANGE, false);
+            double dir = getFreeMoveDirection(getBallVector(), RANGE, true);
             super.move(dir, moveSpeed);
             status = "Closest to ball -- moving to it";
             // go for the kick
         } else {
             // desired kick direction (towards the goal, avoiding stuff)
-            Double2D oppGoal = getOppGoalVector();
-            double freeDir = getFreeDirection(oppGoal, oppGoal.length(), false); // max range
+            Double2D oppGoalVector = getOppGoalVector();
+            double freeDir = getFreeKickDirection(oppGoalVector, Math.min(oppGoalVector.length(), kickR.getLeft())); // max range
             status = "Kicking ball";
             super.kickBall(freeDir, kickSpeed);
         }
@@ -212,8 +218,8 @@ public class AIKAgent extends SoccerAgent {
                 ? ((gpb.y < 0.0) ? -1.0 : 1.0) : Math.sin(gpb.angle()));
         gp = new Double2D(goalieX, fieldWidth / 2 + k * goalWidth / 2);
         gp = gp.subtract(pos);
-        if(gp.length() < 0.01) {
-            return new Double2D(0,0);
+        if (gp.length() < 0.01) {
+            return new Double2D(0, 0);
         }
         Double2D gpForce = gp.resize(GOALIE_G / (gp.length() * gp.length()));
         // check if I'm already acting goalie
@@ -325,31 +331,75 @@ public class AIKAgent extends SoccerAgent {
         return ballCache;
     }
 
-    // TODO: Should also consider walls!!!
-    private double getFreeDirection(Double2D goal, double range, boolean includeTeam) {
+    private double getFreeKickDirection(Double2D goalVector, double range) {
+        Soccer soc = (Soccer) sim;
         ObstacleList obstacles = new ObstacleList();
-        for (int k = 0; k < (includeTeam ? 2 : 1); k++) {
-            List<Double2D> ps = (k == 0) ? getOpponentVectors() : getTeammateVectors();
+        // Add opponents as obstacles
+        for (Double2D p : getOpponentVectors()) {
+            if (p.length() < range + getRadius()) {
+                double r = this.getRadius() + (p.length() / kickR.getLeft()) * kickR.getRight() * moveSpeed * 0.6;
+                Obstacle o = new Obstacle(p, r, soc.ball.getRadius());
+                obstacles.add(o);
+            }
+        }
+        // Add walls as obstacles
+        for (Segment s : ((Soccer) sim).fieldBoundaries.segments()) {
+            Obstacle o = edgeObstacle(s, range);
+            if (o != null) {
+                obstacles.add(o);
+            }
+        }
+        // Add own goal as obstacle
+        Obstacle ownG = edgeObstacle(ownGoalSegment, range);
+        if (ownG != null) {
+            obstacles.add(ownG);
+        }
+
+        // Find the free direction
+        double dir = goalVector.angle();
+        if (obstacles.size() > 0) {
+            Obstacle bound = obstacles.getBoundaries();
+            if (bound.obscures(dir)) {
+                for (Obstacle o : obstacles.obstacles) {
+                    if (o.obscures(dir)) {
+                        if (angle(dir, o.getLeft()) < angle(o.getRight(), dir)) {
+                            dir = o.getLeft();
+                        } else {
+                            dir = o.getRight();
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        //System.out.println(this + ": " + rad2deg(goalVector.angle()) + ' ' + obstacles.toString() + " -> " + rad2deg(dir));
+        return dir;
+    }
+
+    private double getFreeMoveDirection(Double2D goalVector, double range, boolean ignoreWalls) {
+        ObstacleList obstacles = new ObstacleList();
+        // Add players as obstacles
+        for (List<Double2D> ps : new List[]{getOpponentVectors(), getTeammateVectors()}) {
             for (Double2D p : ps) {
-                //p = p.resize(p.length() + getRadius());
-                Double2D diff = goal.subtract(p);
-                if ((p.length() < 2 * getRadius() + MARGIN) // very close
-                        || (p.length() < range + getRadius() && p.length() < goal.length() + getRadius() // potentially obscuring goal
-                        && diff.length() < goal.length())) {
-                    Obstacle o = new Obstacle(p, getRadius(), getRadius());
+                if (p.length() < range + getRadius()) {
+                    Obstacle o = new Obstacle(p, this.getRadius(), this.getRadius());
                     obstacles.add(o);
                     //System.out.println(this + " A " + p + "-> [" + rad2deg(o.getLeft()) + "," + rad2deg(o.getRight()) + "]");
                 }
             }
         }
-        for (Segment s : ((Soccer) sim).fieldBoundaries.segments()) {
-            Obstacle o = edgeObstacle(s, RANGE);
-            if (o != null) {
-                obstacles.add(o);
-                //System.out.println(this + " S " + s.start + "-" + s.end + "-> [" + rad2deg(o.getLeft()) + "," + rad2deg(o.getRight()) + "]");
+        // Add walls as obstacles
+        if (!ignoreWalls) {
+            for (Segment s : ((Soccer) sim).fieldBoundaries.segments()) {
+                Obstacle o = edgeObstacle(s, range);
+                if (o != null) {
+                    obstacles.add(o);
+                    //System.out.println(this + " S " + s.start + "-" + s.end + "-> [" + rad2deg(o.getLeft()) + "," + rad2deg(o.getRight()) + "]");
+                }
             }
         }
-        double dir = goal.angle();
+        // Find the free direction
+        double dir = goalVector.angle();
         if (obstacles.size() > 0) {
             Obstacle bound = obstacles.getBoundaries();
             if (bound.obscures(dir)) {
@@ -368,7 +418,7 @@ public class AIKAgent extends SoccerAgent {
                 }
             }
         }
-        //System.out.println(this + ": " + rad2deg(goal.angle()) + ' ' + obstacles.toString() + " -> " + rad2deg(dir));
+        //System.out.println(this + ": " + rad2deg(goalVector.angle()) + ' ' + obstacles.toString() + " -> " + rad2deg(dir));
         return dir;
     }
 
@@ -413,7 +463,7 @@ public class AIKAgent extends SoccerAgent {
     /**
      * An obstacle, modelled as a left and right angle.
      */
-    class Obstacle extends Object {
+    static class Obstacle extends Object {
 
         /**
          * The left angle.
@@ -438,13 +488,12 @@ public class AIKAgent extends SoccerAgent {
             this.right = right;
         }
 
-        protected Obstacle(Double2D p, double r, double ownR) {
+        protected Obstacle(Double2D p, double otherR, double ownR) {
             this.p = p;
 
             Double2D vLeft = p.rotate(Math.PI / 2);
-            vLeft = vLeft.resize(r + ownR + MARGIN);
+            vLeft = vLeft.resize(otherR + ownR /*+ MARGIN*/);
             Double2D vRight = vLeft.negate();
-            
             this.left = vLeft.add(p).angle();
             this.right = vRight.add(p).angle();
         }
@@ -470,17 +519,10 @@ public class AIKAgent extends SoccerAgent {
          * <CODE>false</CODE> otherwise.
          */
         protected boolean obscures(double alpha) {
-            if (left * right < 0.0) {
-                if (left > 0.0) {
-                    return left > alpha && alpha > right;
-                } else {
-                    return left > alpha || alpha > right;
-                }
-            } else if (left > right) {
-
-                return left > alpha && alpha > right;
+            if (left > right) {
+                return alpha < left && alpha > right;
             } else {
-                return left > alpha || alpha > right;
+                return alpha < left || alpha > right;
             }
         }
 
@@ -522,7 +564,7 @@ public class AIKAgent extends SoccerAgent {
         }
     }
 
-    class ObstacleList extends Object {
+    static class ObstacleList extends Object {
 
         private ArrayList<Obstacle> obstacles;
 
@@ -547,26 +589,29 @@ public class AIKAgent extends SoccerAgent {
             if (obstacles.isEmpty()) {
                 obstacles.add(o);
             } else {
-                // Keep list sorted from left to right
-                for (int i = obstacles.size() - 1; i >= 0; i--) {
+                // first pass to check if needs to be merged
+                for(int i = 0 ; i < obstacles.size() ; i++) {
                     Obstacle tmp = obstacles.get(i);
-
-                    int c = o.compare(tmp);
-                    if (c < 0) { // completely to the left, keep searching unless it reached the end
-                        if (i == 0) {
-                            obstacles.add(0, o);
-                        }
-                    } else if (c > 0) { // completely to the right, insert now and stop!
-                        obstacles.add(i + 1, o);
-                        break;
-                    } else { // there is overlap between obstacles
+                    if(o.compare(tmp) == 0) {
                         obstacles.remove(tmp);
                         tmp.merge(o); // merge
-                        //if(i > 0) { // re-add to keep order
-                        //obstacles.remove(tmp);
-                        this.add(tmp);
-                        //}
-                        break;
+                        add(tmp);
+                        return;
+                    }
+                }
+                
+                // does not obscure any other, fit it in the right place
+                for(int i = obstacles.size() - 1; i >= 0; i--) {
+                    Obstacle tmp = obstacles.get(i);
+                    int c = o.compare(tmp);
+                    if(c < 0) { // completely to the left, keep searching unless it reached the end
+                        if (i == 0) { // reached the end
+                            obstacles.add(0, o);
+                            return;
+                        }                        
+                    } else { // completely to the right, insert now
+                        obstacles.add(i + 1, o);
+                        return;
                     }
                 }
             }

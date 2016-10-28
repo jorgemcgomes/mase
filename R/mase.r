@@ -14,10 +14,10 @@ library(RColorBrewer)
 library(formula.tools)
 library(arules)
 
-theme_set(theme_bw())
-theme_update(plot.margin=unit(c(1,1,1,1),"mm"), legend.position="bottom")
-#theme_set(theme_bw(base_size = 10))
-#theme_update(plot.title = element_text(size=10))
+#theme_set(theme_bw())
+theme_set(theme_bw(base_size = 8)) # 9?
+theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom")
+theme_update(plot.title = element_text(size=rel(1)), legend.key.height=unit(0.75,"line"))
 
 #### Parallel #############################################################################
 
@@ -51,7 +51,7 @@ metaLoadData <- function(folders, filenames=NULL, filename.ids=filenames, ids=li
 # names: vector with the setup names to be given for each of the folders. uses folder name if NULL
 # ids: list of vectors with additional ids to be given to each folder. 
 # auto.ids: determine ids based on the filepath
-# auto.ids.names: column names for automatically determined ids (ID1,ID2,... if NULL)
+# auto.ids.names: column names for automatically determined ids (ID1,ID2,... if NULL). Do NOT use the "Setup" name
 # jobs: vector with job numbers to be loaded
 # jobprefix: prefix used for jobs
 # recursive: search folders recursively
@@ -194,20 +194,56 @@ factorDT <- function(dt, unique.limit=50) {
   return(copy)
 }
 
-factorReorder <- function(col) {
+factorReorder <- function(col, natural.order=F) {
   num <- if(is.factor(col)) as.character(col) else col
   num[is.na(num)] <- Inf
   num <- as.numeric(num)
-  if(sum(is.na(num)) > 0) {
-    return(factor(col,levels=unique(col)))
+  if(sum(is.na(num)) > 0) { # there are non-numeric values in the column
+    if(natural.order) { # use natural order
+      return(factor(col))
+    } else { # use order of appearance
+      return(factor(col,levels=unique(col)))
+    }
   } else {
     return(reorder(col, num))
   }
 }
 
+factorNum <- function(x) {
+  return(as.numeric(as.character(x)))
+}
+
 # Convenience function to filter data to only last generation of each setup
 lastGen <- function(data) {
   return(data[, .SD[.N],by=.(Setup,Job)])
+}
+
+# Fix postfitness stats by getting the Evaluations from fitness stat
+
+fixPostFitness <- function(folder, postname="postfitness.stat") {
+  postfiles <- list.files(folder, pattern=postname, recursive=T, full.names=T)
+  regfiles <- gsub(postname, "fitness.stat", postfiles)
+  fixed <- 0; skipped <- 0 ; error <- 0
+  for(i in 1:length(postfiles)) {
+    cat("Fixing",postfiles[i],"\n")
+    post <- fread(postfiles[i])
+    if(max(post[,2,with=F])==0) {
+      reg <- fread(regfiles[i])
+      if(nrow(post) == nrow(reg)) {
+        post[, 2 := reg[,2,with=F], with=F]
+        write.table(post, file=postfiles[i], quote=F, sep=" ", row.names=F, col.names=F)
+        fixed <- fixed + 1
+        cat("Fixed\n")
+      } else {
+        error <- error + 1
+        cat("Number of rows does not match\n")
+      }
+    } else {
+      skipped <- skipped + 1
+      cat("Already fixed\n")
+    }
+  }
+  cat("Fixed:",fixed,"Skipped:",skipped,"Error:",error,"\n")
 }
 
 #### Fitness plotting functions #####################################################################
@@ -227,6 +263,8 @@ bestSoFarEvaluations <- function(dt, step=10000) {
   return(dt[, .(BestSoFar=max(BestSoFar)), by=.(Evaluations)])
 }
 
+# data: fitness data
+# thresholds: numeric vector with the fitness thresholds to be calculated
 fitnessLevels <- function(data, thresholds) {
   aux <- function(t) {
     w <- which(data[,BestSoFar] > t)
@@ -481,7 +519,7 @@ metaAnalysis <- function(frame, formula, split=NULL, ...) {
 frameAnalysis <- function(frame, formula, summary=T, ttests=T, data=F, ...) {
   res <- list()
   if(summary) {
-    res[["summary"]] <- summaryBy(formula, frame, FUN=c(length,mean,sd,se,min,max))
+    res[["summary"]] <- summaryBy(formula, data=frame, FUN=c(length,mean,sd,se,min,max))
   }
   split <- splitBy(get.vars(formula)[-1], frame)
   split <- lapply(split, function(x) x[[get.vars(formula)[1]]])

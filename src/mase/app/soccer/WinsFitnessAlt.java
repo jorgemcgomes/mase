@@ -14,45 +14,32 @@ import net.jafama.FastMath;
  *
  * @author jorge
  */
-public class TournamentFitness extends MasonEvaluation {
+public class WinsFitnessAlt extends MasonEvaluation {
 
     private static final long serialVersionUID = 1L;
-    private double avgDist;
-    private FitnessResult res;
+    private double avgDist = 0;
 
-    @Override
-    protected void preSimulation() {
-        super.preSimulation();
-        this.avgDist = 0;
-    }
+    private FitnessResult res;
     
     @Override
     public EvaluationResult getResult() {
         return res;
     }
-    
+
     @Override
     protected void evaluate() {
         super.evaluate();
         Soccer soc = (Soccer) sim;
         avgDist += soc.ball.getLocation().distance(soc.rightGoalCenter);
     }
-        
+    
     
     @Override
     protected void postSimulation() {
         super.postSimulation(); 
         Soccer soc = (Soccer) sim;
-        double score;
-        if(soc.referee.leftTeamScore > 0) { // win
-            score = 3;
-        } else if(soc.referee.rightTeamScore == 0) { // tie
-            score = 1;
-        } else { // loose
-            score = 0;
-        }
         double bootstrap = 1 - avgDist / currentEvaluationStep / FastMath.sqrt(FastMath.pow2(soc.par.fieldLength) + FastMath.pow2(soc.par.fieldWidth / 2));
-        res = new FitnessResult(score + bootstrap, FitnessResult.ARITHMETIC);
+        res = new FitnessResult(soc.referee.leftTeamScore + bootstrap / 100, FitnessResult.ARITHMETIC);
     }
     
     

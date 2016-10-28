@@ -54,6 +54,12 @@ public class MaseManager {
         this.listener = sl;
     }
 
+    void removeFromWaiting(String id) {
+        List<Job> w = findJobs(waitingList, id);
+        waitingList.removeAll(w);
+        listener.message("Jobs removed from waiting list: " + w.size());
+    }
+
     class RunnerThread implements Runnable {
 
         @Override
@@ -186,7 +192,7 @@ public class MaseManager {
             }
         }
     }
-
+    
     public void retryJob(String id) {
         for (Job j : findJobs(waitingList, id)) {
             listener.error("Job already in waiting list: " + j);
@@ -388,7 +394,7 @@ public class MaseManager {
     public void lowestPriority(String id) {
         List<Job> down = findJobs(waitingList, id);
         waitingList.removeAll(down);
-        waitingList.addAll(0, down);
+        waitingList.addAll(down);
         listener.message("Jobs moved to lowest priority: " + down.size());
     }
 

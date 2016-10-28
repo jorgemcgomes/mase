@@ -49,5 +49,56 @@ d <- loadData("*", "postfitness.stat", fun=loadFitness)
 fitnessBoxplots(d)
 bestSoFarFitness(d)
 
-setwd("~/exps/soccerwins2/")
-d <- loadData("*", "fitness.stat", fun=loadFitness)
+setwd("~/labmag/exps/soc4")
+d <- loadData("*", "postfitness.stat", fun=loadFitness)
+fitnessBoxplots(d)
+bestSoFarFitness(d)
+
+fit <- loadData("*","fitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=500))
+ggplot(fit[,.(Mean=mean(BestSoFar)),by=.(Evaluations,ID3)], aes(Evaluations,Mean)) + geom_line(aes(colour=ID3,group=ID3))
+
+hyb.cols <- c("Generation","Evaluations","NumPops",NA,NA,NA,"MeanAge","MaxAge","Merges","Splits","TotalMerges","TotalSplits","MinDist","MeanDist",NA)
+hyb <- loadData("*","hybrid.stat", fun=loadFile, colnames=hyb.cols)
+
+ggplot(hyb, aes(Evaluations,NumPops)) + geom_smooth() + ylim(1,5)
+ggplot(hyb, aes(Evaluations,MinDist)) + geom_smooth() + ylim(0,1)
+ggplot(hyb, aes(Evaluations,TotalMerges)) + geom_smooth() + ylim(0,NA)
+
+
+setwd("~/labmag/exps/soc5/")
+d <- loadData("*", "postfitness.stat", fun=loadFitness)
+ggplot(lastGen(d), aes(ID3,BestSoFar)) + geom_boxplot() + facet_wrap(~ ID2)
+
+hyb <- loadData("wins_5*","hybrid.stat", fun=loadFile, colnames=hyb.cols)
+ggplot(hyb, aes(Evaluations,NumPops,colour=Setup,group=Setup)) + geom_smooth() + ylim(1,5)
+ggplot(hyb, aes(Evaluations,MinDist,colour=Setup,group=Setup)) + geom_smooth() + ylim(0,1)
+ggplot(hyb, aes(Evaluations,TotalMerges,colour=Setup,group=Setup)) + geom_smooth() + ylim(0,NA)
+
+
+setwd("~/labmag/exps/mr3/")
+d <- loadData("*", "postfitness.stat", fun=loadFitness)
+fitnessBoxplots(d)
+
+setwd("~/labmag/exps/soc6/")
+d <- loadData("*", "postfitness.stat", fun=loadFitness)
+fitnessBoxplots(d)
+
+
+fit <- loadData("*","fitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=500))
+ggplot(fit[,.(Mean=mean(BestSoFar)),by=.(Evaluations,Setup)], aes(Evaluations,Mean)) + geom_line(aes(colour=Setup,group=Setup))
+
+
+setwd("~/labmag/exps/mr3/")
+fit <- loadData("*_0","fitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=1000))
+fit <- loadData("*_1","fitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=1000))
+ggplot(fit[,.(Mean=mean(BestSoFar)),by=.(Evaluations,Setup)], aes(Evaluations,Mean)) + geom_line(aes(colour=Setup,group=Setup))
+
+setwd("~/labmag/exps/soc6/")
+fit <- loadData("wins_9*","fitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=900))
+ggplot(fit[,.(Mean=mean(BestSoFar)),by=.(Evaluations,Setup)], aes(Evaluations,Mean)) + geom_line(aes(colour=Setup,group=Setup))
+ggplot(lastGen(fit), aes(Setup,BestSoFar)) + geom_boxplot()
+
+fit <- loadData("wins_5*","fitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=500))
+ggplot(fit[,.(Mean=mean(BestSoFar)),by=.(Evaluations,Setup)], aes(Evaluations,Mean)) + geom_line(aes(colour=Setup,group=Setup))
+ggplot(lastGen(fit), aes(Setup,BestSoFar)) + geom_boxplot()
+

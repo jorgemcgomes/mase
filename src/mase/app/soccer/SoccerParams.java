@@ -25,6 +25,7 @@ public class SoccerParams implements Serializable {
     double ballCOR = 0.85; // coefficient of restitution, golf ball
     
     int[] formation = new int[]{3};
+    boolean lineFormation = true;
     double locationRandom = 10;
     double fieldLength = 274;
     double fieldWidth = 152;

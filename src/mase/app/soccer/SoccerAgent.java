@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.mason.world.SmartAgent;
+import mase.mason.world.StaticPolygon.Segment;
 import sim.engine.SimState;
 import sim.util.Double2D;
 
@@ -32,6 +33,7 @@ public class SoccerAgent extends SmartAgent {
     protected List<SoccerAgent> all; // all players, including myself
     protected Double2D ownGoal, oppGoal;
     protected Color teamColor;
+    protected Segment ownGoalSegment, oppGoalSegment;
 
     public SoccerAgent(Soccer sim, AgentController ac, double moveSpeed, double kickSpeed) {
         super(sim, sim.field, sim.par.agentRadius, Color.WHITE, ac);
@@ -64,6 +66,9 @@ public class SoccerAgent extends SmartAgent {
         this.others.addAll(oppTeam);
         this.all = new ArrayList<>(this.ownTeam);
         this.all.addAll(oppTeam);
+        double w = ((Soccer) sim).par.goalWidth;
+        this.ownGoalSegment = new Segment(new Double2D(ownGoal.x,ownGoal.y-w/2), new Double2D(ownGoal.x,ownGoal.y+w/2));
+        this.oppGoalSegment = new Segment(new Double2D(oppGoal.x,oppGoal.y-w/2), new Double2D(oppGoal.x,oppGoal.y+w/2));
     }
 
     @Override

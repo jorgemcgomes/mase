@@ -20,10 +20,10 @@ public class SlaveTask extends Task {
 
     private static final long serialVersionUID = 1L;
 
-    private SimulationProblem sim;
-    private long seed;
+    private final SimulationProblem sim;
+    private final long seed;
     private SlaveResult res;
-    private GroupController gc;
+    private final GroupController gc;
 
     public SlaveTask(int id, SimulationProblem sim, GroupController gc, long seed) {
         super(id);
@@ -31,15 +31,6 @@ public class SlaveTask extends Task {
         this.seed = seed;
         this.gc = gc;
     }
-    
-    public static double[] serializeGC(GroupController gc) {
-        return null;
-    }
-    
-    public static GroupController deserializeGC(double[] data) {
-        return null;
-    }
-    
 
     @Override
     public SlaveResult getResult() {
@@ -53,9 +44,9 @@ public class SlaveTask extends Task {
         /*
         Dirty fix to remove SubpopEvaluationResults (causing problems with Conillon)
         The results from SER are added to the list in between nulls
-        */
-        for(EvaluationResult er : evalResults) {
-            if(er instanceof SubpopEvaluationResult) {
+         */
+        for (EvaluationResult er : evalResults) {
+            if (er instanceof SubpopEvaluationResult) {
                 resList.add(null);
                 SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
                 resList.addAll(ser.getAllEvaluations());
@@ -63,7 +54,7 @@ public class SlaveTask extends Task {
             } else {
                 resList.add(er);
             }
-        }        
+        }
         this.res = new SlaveResult(resList, getId());
     }
 

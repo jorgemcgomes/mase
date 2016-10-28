@@ -99,6 +99,26 @@ public class Ball extends WorldObject implements Steppable {
         currentDirection = direction;
         kickingAgent = agent;
     }
+
+    // How much distance is travelled + how much time until the ball stops
+    public Pair<Double,Integer> maxDistance(Soccer soc, double power) {
+        int steps = 0;
+        double dist = 0;
+        double initSpeed = power;
+        double curSpeed = power;
+        
+        while(curSpeed > soc.par.ballMinSpeed) {
+            dist += curSpeed;
+            steps++;
+            if(curSpeed > soc.par.ballSlipToRoll * initSpeed) { // slip
+                curSpeed = Math.max(0, curSpeed - soc.par.ballSlipDeceleration);
+            } else { // roll
+                curSpeed = Math.max(0, curSpeed - soc.par.ballRollDeceleration);
+            }
+        }
+        
+        return Pair.of(dist, steps);
+    }
     
     
 

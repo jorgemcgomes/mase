@@ -4,7 +4,7 @@ problem.trials-merge =             best
 problem.seed =                     0
 fitness.fitness-index =            0
 
-exch.behaviour-index =      1
+exch.behaviour-index =      2
 
 eval.max-evaluations = 1500000
 generations = 1000000
@@ -49,8 +49,8 @@ stat.child.20.file = $problem.params
 
 # No best-of-gen needed
 stat.child.4 = ec.Statistics
-# No behaviors
-stat.child.3 = ec.Statistics
+# Record only the best-of-gen team
+stat.child.3.best-only = true
 # No scores
 stat.child.9 = ec.Statistics
 

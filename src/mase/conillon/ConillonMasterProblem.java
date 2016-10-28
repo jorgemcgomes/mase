@@ -71,7 +71,7 @@ public class ConillonMasterProblem extends MasterProblem {
     private long maxTimeout;
     private int maxTries;
 
-    private transient HashMap<Integer, Evaluation> jobs;
+    private transient HashMap<Integer, Evaluation> evaluations;
     private transient ArrayList<SlaveTask> tasks;
     private transient Client client;
     private transient int idCounter;
@@ -105,7 +105,7 @@ public class ConillonMasterProblem extends MasterProblem {
 
     @Override
     public void prepareToEvaluate(EvolutionState state, int threadnum) {
-        jobs = new HashMap<>();
+        evaluations = new HashMap<>();
         tasks = new ArrayList<>();
         idCounter = 0;
     }
@@ -131,7 +131,7 @@ public class ConillonMasterProblem extends MasterProblem {
         GroupController gc = simProblem.createController(state, job.ind);
         int id = nextID();
         SlaveTask task = new SlaveTask(id, simProblem, gc, simProblem.nextSeed(state, threadnum));
-        jobs.put(id, job);
+        evaluations.put(id, job);
         tasks.add(task);
     }
     
@@ -147,7 +147,7 @@ public class ConillonMasterProblem extends MasterProblem {
         GroupController gc = simProblem.createController(state, ind);
         int id = nextID();
         SlaveTask task = new SlaveTask(id, simProblem, gc, simProblem.nextSeed(state, threadnum));
-        jobs.put(id, job);
+        evaluations.put(id, job);
         tasks.add(task);
     }
 
@@ -244,7 +244,6 @@ public class ConillonMasterProblem extends MasterProblem {
                 numberOfTasks = tasks.size();
                 tasks.clear();
             } else {
-                int index = 0;
                 ArrayList<SlaveTask> batch = new ArrayList<>();
                 Iterator<SlaveTask> iter = tasks.iterator();
                 while (iter.hasNext()) {
@@ -286,7 +285,7 @@ public class ConillonMasterProblem extends MasterProblem {
 
     private void parseResults(ArrayList<SlaveResult> resList, EvolutionState state, int threadnum) {
         for (SlaveResult r : resList) {
-            Evaluation j = jobs.get(r.getTaskId());
+            Evaluation j = evaluations.get(r.getTaskId());
             ArrayList<EvaluationResult> evalList = r.getEvaluationResults();
             EvaluationResult[] eval = new EvaluationResult[evalList.size()];
             evalList.toArray(eval);
@@ -331,12 +330,12 @@ public class ConillonMasterProblem extends MasterProblem {
         }
     }
 
-    /*@Override
+    @Override
     public void closeContacts(EvolutionState state, int result) {
         client.cancelAllTasks();
         client.disconnect();
         state.output.message("*** CLIENT " + client.getMyID() + " CLOSED ***");
-    }*/
+    }
 
     @Override
     public void reinitializeContacts(EvolutionState state) {

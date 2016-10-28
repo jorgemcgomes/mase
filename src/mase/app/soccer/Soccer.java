@@ -3,6 +3,7 @@ package mase.app.soccer;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
@@ -11,6 +12,7 @@ import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.StaticPolygon;
 import mase.mason.world.StaticPolygon.Segment;
+import org.apache.commons.math3.util.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.util.Double2D;
@@ -76,7 +78,7 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
         createAgents();
         resetTeams(startFlag);
         startFlag = !startFlag;
-        
+
         referee = new Referee();
         schedule.scheduleRepeating(referee);
     }
@@ -91,13 +93,13 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
             AgentController[] acs = super.gc.getAgentControllers(teamSize);
             for (int i = 0; i < teamSize; i++) {
                 EvolvedSoccerAgent a = new EvolvedSoccerAgent(this, acs[i], par.agentMoveSpeed, par.agentKickSpeed);
-                a.setLabel("Le"+i);
+                a.setLabel("Le" + i);
                 leftTeam.add(a);
             }
         } else {
             for (int i = 0; i < teamSize; i++) {
                 AIKAgent a = new AIKAgent(this);
-                a.setLabel("Lp"+i);
+                a.setLabel("Lp" + i);
                 leftTeam.add(a);
             }
         }
@@ -105,7 +107,7 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
         rightTeam = new ArrayList<>();
         for (int i = 0; i < teamSize; i++) {
             AIKAgent a = new AIKAgent(this);
-            a.setLabel("Rp"+i);
+            a.setLabel("Rp" + i);
             //SoccerAgent a = new SoccerAgent(this, null, 0, 0);
             rightTeam.add(a);
         }
@@ -137,25 +139,65 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
     }
 
     protected void initialPositions(List<SoccerAgent> team, boolean left, boolean starting) {
-        double xSpacing = (field.width / 2) / (par.formation.length + 1);
-        double mx = field.width / 2;
-        double side = left ? -1 : 1;
-        int agentIndex = 0;
-        double ori = left ? 0 : Math.PI;
-        for (int i = 0; i < par.formation.length; i++) {
-            double x = mx + side * xSpacing * (par.formation.length - i);
-            double ySpacing = (field.height) / (par.formation[i] + 1);
-            for (int j = 0; j < par.formation[i]; j++) {
-                double y = left ? ySpacing + ySpacing * j : field.height - ySpacing - ySpacing * j;
-                Double2D pos;
-                if (i == par.formation.length - 1 && j == par.formation[i] / 2 && starting) {
-                    pos = new Double2D(mx + side * par.agentRadius * 2, field.height / 2);
-                } else {
-                    pos = new Double2D(x + (random.nextDouble() * 2 - 1) * par.locationRandom, 
-                            y + (random.nextDouble() * 2 - 1) * par.locationRandom);
+        if (par.lineFormation) {
+            double xSpacing = (field.width / 2) / (par.formation.length + 1);
+            double mx = field.width / 2;
+            double side = left ? -1 : 1;
+            int agentIndex = 0;
+            double ori = left ? 0 : Math.PI;
+            for (int i = 0; i < par.formation.length; i++) {
+                double x = mx + side * xSpacing * (par.formation.length - i);
+                double ySpacing = (field.height) / (par.formation[i] + 1);
+                for (int j = 0; j < par.formation[i]; j++) {
+                    double y = left ? ySpacing + ySpacing * j : field.height - ySpacing - ySpacing * j;
+                    Double2D pos;
+                    if (i == par.formation.length - 1 && j == par.formation[i] / 2 && starting) { // place advanced in front
+                        pos = new Double2D(mx + side * par.agentRadius * 2, field.height / 2);
+                    } else {
+                        pos = new Double2D(x + (random.nextDouble() * 2 - 1) * par.locationRandom,
+                                y + (random.nextDouble() * 2 - 1) * par.locationRandom);
+                    }
+                    SoccerAgent a = team.get(agentIndex++);
+                    a.setLocation(pos);
+                    a.setOrientation(ori);
+                    if (a.getAgentController() != null) {
+                        a.getAgentController().reset();
+                    }
                 }
-                SoccerAgent a = team.get(agentIndex++);
-                a.setLocation(pos);
+            }
+        } else {
+            if (par.formation.length != 1 || par.formation[0] != team.size()) {
+                throw new RuntimeException("Not using line formation. Expecting just one number for formation (same as number of agents)");
+            }
+            List<Double2D> positions = new ArrayList<>(par.formation[0]);
+            double side = left ? -1 : 1;
+            double ori = left ? 0 : Math.PI;
+            if (starting) { // place one in front
+                double angle = ori - random.nextDouble() * Math.PI - Math.PI / 2; 
+                double dist = par.agentRadius * 2;
+                Double2D offset = new Double2D(dist * FastMath.cos(angle), dist * FastMath.sin(angle));
+                Double2D pos = new Double2D(field.width / 2, field.height / 2).add(offset);
+                positions.add(pos);
+            }
+            double middleX = field.width / 2 + side * (field.width / 4);
+            while (positions.size() < par.formation[0]) {
+                Double2D rand = new Double2D(middleX + (random.nextDouble() * 2 - 1) * par.locationRandom,
+                        field.height / 2 + (random.nextDouble() * 2 - 1) * par.locationRandom);
+                boolean valid = true;
+                for (Double2D other : positions) {
+                    if (other.distance(rand) < par.agentRadius * 2) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (valid) {
+                    positions.add(rand);
+                }
+            }
+            Iterator<SoccerAgent> teamIter = team.iterator();
+            for (Double2D p : positions) {
+                SoccerAgent a = teamIter.next();
+                a.setLocation(p);
                 a.setOrientation(ori);
                 if (a.getAgentController() != null) {
                     a.getAgentController().reset();

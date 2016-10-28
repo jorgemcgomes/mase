@@ -185,16 +185,7 @@ public class BatchReevaluate {
                 // Log behaviours
                 behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex() + " " + reev.meanFitness);
                 for (int j = 1; j < reev.mergedResults.length; j++) { // starts at 1 to skip fitness
-                    EvaluationResult br = reev.mergedResults[j];
-                    if (br instanceof SubpopEvaluationResult) {
-                        SubpopEvaluationResult ser = (SubpopEvaluationResult) br;
-                        ArrayList<EvaluationResult> allEvals = ser.getAllEvaluations();
-                        for (int x = 0; x < allEvals.size(); x++) {
-                            behavWriter.write(" " + x + " " + allEvals.get(x).toString());
-                        }
-                    } else {
-                        behavWriter.write(" " + br.toString());
-                    }
+                    behavWriter.write(" " + reev.mergedResults[j].toString());
                 }
                 behavWriter.newLine();
             }
