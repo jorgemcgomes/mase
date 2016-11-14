@@ -346,11 +346,30 @@ metaAnalysis(mrhyb[, .(NumPops = mean(NumPops)), by=.(Job,Task,Method)], NumPops
 
 ### Soccer task ###############
 
-fixPostFitness("~/exps/soclong")
-socfit <- loadData("~/exps/soclong/*","postfitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=1000))
+fixPostFitness("~/hpc/exps/soclong/")
+
+socfit <- loadData("~/hpc/exps/soclong/*","postfitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=1000))
+ggplot(socfit[,.(Mean=mean(BestSoFar),SE=se(BestSoFar)),by=.(Evaluations,ID9)], aes(Evaluations, Mean, group=ID9)) + 
+  geom_line(aes(colour=ID9)) + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=ID9), alpha = 0.15) + ylim(0,0.85)
+ggplot(lastGen(socfit), aes(ID9,BestSoFar)) + geom_boxplot() + geom_jitter() + ylim(0,1)
+
+
+socfit <- loadData("~/exps/soclong/wins_5*","postfitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=1000))
 ggplot(socfit[,.(Mean=mean(BestSoFar),SE=se(BestSoFar)),by=.(Evaluations,ID8)], aes(Evaluations, Mean, group=ID8)) + 
+  geom_line(aes(colour=ID8)) + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=ID8), alpha = 0.15) + ylim(0,0.85)
+ggplot(lastGen(socfit), aes(ID8,BestSoFar)) + geom_boxplot() + geom_jitter() + ylim(0,1)
+metaAnalysis(lastGen(socfit), BestSoFar~ID8)
+
+
+sochyb <- loadData("~/exps/soclong/easy_5*","hybrid.stat", fun=loadFile, colnames=hyb.cols)
+sochyb[, Evaluations := floor(Evaluations/10000)*10000]
+stat <- sochyb[, .(NumPops = mean(NumPops)), by=.(Job,ID8,Evaluations)]
+ggplot(stat[, .(Mean=mean(NumPops),SE=se(NumPops)), by=.(Evaluations,ID8)], aes(Evaluations/1000,Mean,group=ID8)) + 
   geom_line(aes(colour=ID8)) + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE), alpha = 0.1) 
-ggplot(lastGen(socfit), aes(ID8,BestSoFar)) + geom_boxplot() + geom_jitter()
+  
+geom_smooth(aes(colour=Method,fill=Method), alpha=0.2, size=0.2, method="loess", level=0.99, span=0.05, method.args=list(degree=1)) + 
+  ylab("Mean number of populations") + xlab("Evaluations (x1000)") + facet_wrap(~ Agents, labeller=label_both, scales="free_x") + scale_y_continuous(minor_breaks=NULL,breaks=1:10, limits=c(1,NA))
+
 
 setwd("~/exps/soccer/")
 socfit <- loadData("*","postfitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, auto.ids.names=c("Exp","Agents","Method"), filter.par=list(step=1000))

@@ -41,28 +41,6 @@ public class AIKAgent extends SoccerAgent {
     private String status = "";
 
     /**
-     * @return the cross product of the two given vectors.
-     */
-    protected static double cross(Double2D v, Double2D u) {
-        return v.x * u.y - v.y * u.x;
-    }
-
-    /**
-     * @return the dot product of the two given vectors.
-     */
-    protected static double dot(Double2D v, Double2D u) {
-        return v.x * u.x + v.y * u.y;
-    }
-
-    /**
-     * @return the angle, in the range 0 through <I>pi</I>, between the two
-     * given vectors.
-     */
-    protected static double angle(Double2D v, Double2D u) {
-        return FastMath.acos(dot(v, u) / (v.length() * u.length()));
-    }
-
-    /**
      * @return the angle, in the range 0 through <I>pi</I>, between the two
      * given angles.
      */
@@ -76,7 +54,7 @@ public class AIKAgent extends SoccerAgent {
     protected static int rad2deg(double alpha) {
         return (int) (180.0 * alpha / Math.PI);
     }
-    
+
     protected static double deg2Rad(double deg) {
         return deg * Math.PI / 180;
     }
@@ -84,10 +62,10 @@ public class AIKAgent extends SoccerAgent {
     private int side;
     private double goalieX;
     private Double2D offensivePos1, offensivePos2;
-    Pair<Double, Integer> kickR;
+    private Pair<Double, Integer> kickR;
 
     public AIKAgent(Soccer sim) {
-        super(sim, null, sim.par.agentMoveSpeed, sim.par.agentKickSpeed);
+        super(sim, null, sim.par.agentMoveSpeed * sim.par.progSpeedFactor, sim.par.agentKickSpeed * sim.par.progSpeedFactor);
         this.fieldLength = sim.par.fieldLength;
         this.fieldWidth = sim.par.fieldWidth;
         this.goalWidth = sim.par.goalWidth;
@@ -126,11 +104,7 @@ public class AIKAgent extends SoccerAgent {
     }
 
     private boolean isBehind(double x1, double x2) {
-        if (side < 0) {
-            return x1 < x2;
-        } else {
-            return x2 < x1;
-        }
+        return (side < 0 && x1 < x2) || (side > 0 && x2 < x1);
     }
 
     @Override
@@ -139,28 +113,24 @@ public class AIKAgent extends SoccerAgent {
         // I dont have the ball
         if (!isClosestToBall()) {
             Double2D f = getForce();
-
             if (f.length() < FORCE_LIMIT) {
                 // do not move
                 status = "Not enough force -- do nothing";
             } else {
                 double freeDir = getFreeMoveDirection(f, RANGE, false);
                 super.move(freeDir, moveSpeed * 0.75);
-                status = "Moving without ball.";// Force: " + f + ", " + rad2deg(f.angle());
+                status = "Moving without ball.";
             }
             return;
         }
 
         // Is closest to ball
-        // not near the ball
         if (!hasPossession) {
             // go towards the ball
             double dir = getFreeMoveDirection(getBallVector(), RANGE, true);
             super.move(dir, moveSpeed);
             status = "Closest to ball -- moving to it";
-            // go for the kick
-        } else {
-            // desired kick direction (towards the goal, avoiding stuff)
+        } else { // go for the kick
             Double2D oppGoalVector = getOppGoalVector();
             double freeDir = getFreeKickDirection(oppGoalVector, Math.min(oppGoalVector.length(), kickR.getLeft())); // max range
             status = "Kicking ball";
@@ -172,10 +142,8 @@ public class AIKAgent extends SoccerAgent {
         Double2D ball = getBallVector();
         for (Double2D p : getTeammateVectors()) {
             p = p.resize(p.length() + getRadius());
-            Double2D diff = ball;
-            diff = diff.subtract(p);
-            if (isBehind(p.x, ball.x) && isBehind(ball.x, 0.0)
-                    && diff.length() < RANGE) {
+            Double2D diff = ball.subtract(p);
+            if (isBehind(p.x, ball.x) && isBehind(ball.x, 0.0) && diff.length() < RANGE) {
                 return false;
             }
             if (ball.length() >= RANGE && diff.length() + MARGIN < ball.length()) {
@@ -189,7 +157,7 @@ public class AIKAgent extends SoccerAgent {
         Double2D ball = getBallVector();
         MutableDouble2D f = new MutableDouble2D(0, 0);
 
-        // add negative force for teammates -- working (dispersion)
+        // add negative force for teammates (dispersion)
         for (Double2D p : getTeammateVectors()) {
             p = p.resize(p.length() + this.getRadius());
             p = p.rotate(Math.PI);
@@ -197,27 +165,23 @@ public class AIKAgent extends SoccerAgent {
             f.addIn(p);
         }
 
-        // add negative force for walls on the long sides -- working (stay way from walls)
+        // add negative force for walls on the long sides (stay way from walls)
         double r1 = fieldWidth - pos.y;
         double r2 = pos.y;
         Double2D w = new Double2D(0.0, WALL_G / (r2 * r2) - WALL_G / (r1 * r1));
         f.addIn(w);
 
-        // add negative force for walls on the short sides -- working
+        // add negative force for walls on the short sides
         r1 = fieldLength - pos.x;
         r2 = pos.x;
         w = new Double2D(WALL_G / (r2 * r2) - WALL_G / (r1 * r1), 0.0);
         f.addIn(w);
 
-        // add positive force for goalie position  -- confirmed
-        Double2D gp = new Double2D(goalieX, fieldWidth / 2);
-        gp = gp.subtract(pos);
-        Double2D gpb = new Double2D(ball.x, ball.y);
-        gpb = gpb.subtract(gp);
-        double k = (isBehind(gpb.x, 0.0)
-                ? ((gpb.y < 0.0) ? -1.0 : 1.0) : Math.sin(gpb.angle()));
-        gp = new Double2D(goalieX, fieldWidth / 2 + k * goalWidth / 2);
-        gp = gp.subtract(pos);
+        // add positive force for goalie position  (go towards goal)
+        Double2D gp = new Double2D(goalieX, fieldWidth / 2).subtract(pos);
+        Double2D gpb = new Double2D(ball.x, ball.y).subtract(gp);
+        double k = isBehind(gpb.x, 0.0) ? ((gpb.y < 0.0) ? -1.0 : 1.0) : Math.sin(gpb.angle());
+        gp = new Double2D(goalieX, fieldWidth / 2 + k * goalWidth / 2).subtract(pos);
         if (gp.length() < 0.01) {
             return new Double2D(0, 0);
         }
@@ -227,7 +191,7 @@ public class AIKAgent extends SoccerAgent {
             return gpForce;
         }
 
-        // check if teammates is in goalie position -- confirmed (sensitive to MARGIN)
+        // check if teammates is in goalie position (sensitive to MARGIN)
         boolean goalie = false;
         for (Double2D p : getTeammateVectors()) {
             Double2D diff = p.subtract(gp);
@@ -240,7 +204,7 @@ public class AIKAgent extends SoccerAgent {
             f.addIn(gpForce);
         }
 
-        // add positive force for offensive positions -- confirmed (makes players move forward)
+        // add positive force for offensive positions (makes players move to forward positions)
         Double2D rf = getRoleForce(offensivePos1, GOALIE_G);
         if (rf == null) {
             return new Double2D(0.0, 0.0);
@@ -257,12 +221,12 @@ public class AIKAgent extends SoccerAgent {
 
     private Double2D getRoleForce(Double2D rolePos, double roleG) {
         Double2D rp = rolePos.subtract(pos);
-        /* check if I'm already acting in this role */
+        // check if I'm already acting in this role
         if (rp.length() < MARGIN) {
             return null;
         }
         boolean roleFilled = false;
-        /* check if teammate is acting in this role */
+        // check if teammate is acting in this role
         for (Double2D p : getTeammateVectors()) {
             Double2D diff = p.subtract(rp);
             if (diff.length() < MARGIN) {
@@ -278,66 +242,14 @@ public class AIKAgent extends SoccerAgent {
         return new Double2D(0.0, 0.0);
     }
 
-    private List<Double2D> tmCache = null;
-    private long tmTime = -1;
-    private List<Double2D> oppCache = null;
-    private long oppTime = -1;
-    private Double2D ballCache = null, ownGCache = null, oppGCache = null;
-    private long ballTime = -1, ownGTime = -1, oppGTime = -1;
-
-    private List<Double2D> getTeammateVectors() {
-        if (tmTime != sim.schedule.getSteps()) {
-            tmCache = new ArrayList<>(teamMates.size());
-            for (SoccerAgent a : teamMates) {
-                tmCache.add(a.getLocation().subtract(this.getLocation()));
-            }
-            tmTime = sim.schedule.getSteps();
-        }
-        return tmCache;
-    }
-
-    private List<Double2D> getOpponentVectors() {
-        if (oppTime != sim.schedule.getSteps()) {
-            oppCache = new ArrayList<>(oppTeam.size());
-            for (SoccerAgent a : oppTeam) {
-                oppCache.add(a.getLocation().subtract(this.getLocation()));
-            }
-            oppTime = sim.schedule.getSteps();
-        }
-        return oppCache;
-    }
-
-    private Double2D getOwnGoalVector() {
-        if (ownGTime != sim.schedule.getSteps()) {
-            ownGCache = ownGoal.subtract(this.getLocation());
-            ownGTime = sim.schedule.getSteps();
-        }
-        return ownGCache;
-    }
-
-    private Double2D getOppGoalVector() {
-        if (oppGTime != sim.schedule.getSteps()) {
-            oppGCache = oppGoal.subtract(this.getLocation());
-            oppGTime = sim.schedule.getSteps();
-        }
-        return oppGCache;
-    }
-
-    private Double2D getBallVector() {
-        if (ballTime != sim.schedule.getSteps()) {
-            ballCache = ((Soccer) sim).ball.getLocation().subtract(this.getLocation());
-            ballTime = sim.schedule.getSteps();
-        }
-        return ballCache;
-    }
-
     private double getFreeKickDirection(Double2D goalVector, double range) {
         Soccer soc = (Soccer) sim;
         ObstacleList obstacles = new ObstacleList();
         // Add opponents as obstacles
         for (Double2D p : getOpponentVectors()) {
             if (p.length() < range + getRadius()) {
-                double r = this.getRadius() + (p.length() / kickR.getLeft()) * kickR.getRight() * moveSpeed * 0.6;
+                // The obstacle 'size' depends on the opponent's distance, so that they cannot catch the ball
+                double r = this.getRadius() + (p.length() / kickR.getLeft()) * kickR.getRight() * soc.par.agentMoveSpeed * 0.6;
                 Obstacle o = new Obstacle(p, r, soc.ball.getRadius());
                 obstacles.add(o);
             }
@@ -349,42 +261,26 @@ public class AIKAgent extends SoccerAgent {
                 obstacles.add(o);
             }
         }
-        // Add own goal as obstacle
+        // Add own goal as obstacle -- prevent own-goals
         Obstacle ownG = edgeObstacle(ownGoalSegment, range);
         if (ownG != null) {
             obstacles.add(ownG);
         }
 
         // Find the free direction
-        double dir = goalVector.angle();
-        if (obstacles.size() > 0) {
-            Obstacle bound = obstacles.getBoundaries();
-            if (bound.obscures(dir)) {
-                for (Obstacle o : obstacles.obstacles) {
-                    if (o.obscures(dir)) {
-                        if (angle(dir, o.getLeft()) < angle(o.getRight(), dir)) {
-                            dir = o.getLeft();
-                        } else {
-                            dir = o.getRight();
-                        }
-                        break;
-                    }
-                }
-            }
-        }
+        double dir = obstacles.getFreeDirection(goalVector.angle());
         //System.out.println(this + ": " + rad2deg(goalVector.angle()) + ' ' + obstacles.toString() + " -> " + rad2deg(dir));
         return dir;
     }
 
     private double getFreeMoveDirection(Double2D goalVector, double range, boolean ignoreWalls) {
         ObstacleList obstacles = new ObstacleList();
-        // Add players as obstacles
+        // Add all players as obstacles
         for (List<Double2D> ps : new List[]{getOpponentVectors(), getTeammateVectors()}) {
             for (Double2D p : ps) {
                 if (p.length() < range + getRadius()) {
                     Obstacle o = new Obstacle(p, this.getRadius(), this.getRadius());
                     obstacles.add(o);
-                    //System.out.println(this + " A " + p + "-> [" + rad2deg(o.getLeft()) + "," + rad2deg(o.getRight()) + "]");
                 }
             }
         }
@@ -394,34 +290,18 @@ public class AIKAgent extends SoccerAgent {
                 Obstacle o = edgeObstacle(s, range);
                 if (o != null) {
                     obstacles.add(o);
-                    //System.out.println(this + " S " + s.start + "-" + s.end + "-> [" + rad2deg(o.getLeft()) + "," + rad2deg(o.getRight()) + "]");
                 }
             }
         }
         // Find the free direction
-        double dir = goalVector.angle();
-        if (obstacles.size() > 0) {
-            Obstacle bound = obstacles.getBoundaries();
-            if (bound.obscures(dir)) {
-                for (Obstacle o : obstacles.obstacles) {
-                    // Find the one obstacle that obscures the trajectory (if any)
-                    // remember that by the implementation of the obstacle list, a given direction
-                    // can only be obscured by ONE obstacle
-                    if (o.obscures(dir)) {
-                        if (angle(dir, o.getLeft()) < angle(o.getRight(), dir)) {
-                            dir = o.getLeft();
-                        } else {
-                            dir = o.getRight();
-                        }
-                        break;
-                    }
-                }
-            }
-        }
+        double dir = obstacles.getFreeDirection(goalVector.angle());
         //System.out.println(this + ": " + rad2deg(goalVector.angle()) + ' ' + obstacles.toString() + " -> " + rad2deg(dir));
         return dir;
     }
 
+    /*
+    Obstacle handling
+     */
     private Obstacle edgeObstacle(Segment seg, double range) {
         double d = StaticPolygon.distToSegment(getLocation(), seg.start, seg.end);
         if (d < range) {
@@ -590,31 +470,53 @@ public class AIKAgent extends SoccerAgent {
                 obstacles.add(o);
             } else {
                 // first pass to check if needs to be merged
-                for(int i = 0 ; i < obstacles.size() ; i++) {
+                for (int i = 0; i < obstacles.size(); i++) {
                     Obstacle tmp = obstacles.get(i);
-                    if(o.compare(tmp) == 0) {
+                    if (o.compare(tmp) == 0) {
                         obstacles.remove(tmp);
                         tmp.merge(o); // merge
                         add(tmp);
                         return;
                     }
                 }
-                
+
                 // does not obscure any other, fit it in the right place
-                for(int i = obstacles.size() - 1; i >= 0; i--) {
+                for (int i = obstacles.size() - 1; i >= 0; i--) {
                     Obstacle tmp = obstacles.get(i);
                     int c = o.compare(tmp);
-                    if(c < 0) { // completely to the left, keep searching unless it reached the end
+                    if (c < 0) { // completely to the left, keep searching unless it reached the end
                         if (i == 0) { // reached the end
                             obstacles.add(0, o);
                             return;
-                        }                        
+                        }
                     } else { // completely to the right, insert now
                         obstacles.add(i + 1, o);
                         return;
                     }
                 }
             }
+        }
+
+        public double getFreeDirection(double targetAngle) {
+            if (obstacles.size() > 0) {
+                Obstacle bound = getBoundaries();
+                if (bound.obscures(targetAngle)) {
+                    // Find the one obstacle that obscures the trajectory (if any)
+                    // remember that by the implementation of the obstacle list, a given direction
+                    // can only be obscured by ONE obstacle
+                    for (Obstacle o : obstacles) {
+                        if (o.obscures(targetAngle)) {
+                            if (angle(targetAngle, o.getLeft()) < angle(o.getRight(), targetAngle)) {
+                                targetAngle = o.getLeft();
+                            } else {
+                                targetAngle = o.getRight();
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            return targetAngle;
         }
 
         @Override
@@ -630,5 +532,61 @@ public class AIKAgent extends SoccerAgent {
             sb.append('}');
             return sb.toString();
         }
+    }
+
+    /*
+    General functions for perception
+     */
+    private List<Double2D> tmCache = null;
+    private long tmTime = -1;
+    private List<Double2D> oppCache = null;
+    private long oppTime = -1;
+    private Double2D ballCache = null, ownGCache = null, oppGCache = null;
+    private long ballTime = -1, ownGTime = -1, oppGTime = -1;
+
+    private List<Double2D> getTeammateVectors() {
+        if (tmTime != sim.schedule.getSteps()) {
+            tmCache = new ArrayList<>(teamMates.size());
+            for (SoccerAgent a : teamMates) {
+                tmCache.add(a.getLocation().subtract(this.getLocation()));
+            }
+            tmTime = sim.schedule.getSteps();
+        }
+        return tmCache;
+    }
+
+    private List<Double2D> getOpponentVectors() {
+        if (oppTime != sim.schedule.getSteps()) {
+            oppCache = new ArrayList<>(oppTeam.size());
+            for (SoccerAgent a : oppTeam) {
+                oppCache.add(a.getLocation().subtract(this.getLocation()));
+            }
+            oppTime = sim.schedule.getSteps();
+        }
+        return oppCache;
+    }
+
+    private Double2D getOwnGoalVector() {
+        if (ownGTime != sim.schedule.getSteps()) {
+            ownGCache = ownGoal.subtract(this.getLocation());
+            ownGTime = sim.schedule.getSteps();
+        }
+        return ownGCache;
+    }
+
+    private Double2D getOppGoalVector() {
+        if (oppGTime != sim.schedule.getSteps()) {
+            oppGCache = oppGoal.subtract(this.getLocation());
+            oppGTime = sim.schedule.getSteps();
+        }
+        return oppGCache;
+    }
+
+    private Double2D getBallVector() {
+        if (ballTime != sim.schedule.getSteps()) {
+            ballCache = ((Soccer) sim).ball.getLocation().subtract(this.getLocation());
+            ballTime = sim.schedule.getSteps();
+        }
+        return ballCache;
     }
 }

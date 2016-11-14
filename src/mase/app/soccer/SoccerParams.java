@@ -43,12 +43,10 @@ public class SoccerParams implements Serializable {
     //double agentTurnSpeed = 0.157; // 90deg/s
     double agentKickDistance = 0;
     
+    double progSpeedFactor = 1;
+    
     int sensorArcs = 4;
     boolean goalSensors = true;
     boolean locationSensor = false;
     boolean possessionSensor = false;
-    
-    /*double progClearDistance = 10;
-    double progOpenAngle;
-    double progOpenDistance;*/
 }

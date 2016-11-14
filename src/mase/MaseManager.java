@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -318,6 +319,36 @@ public class MaseManager {
         }
         jobId++;
     }
+    
+    public void loadJobs(File f) throws IOException {
+        String content = FileUtils.readFileToString(f);
+        String[] fileLines = content.split(System.getProperty("line.separator"));
+        for (String l : fileLines) {
+            if (!l.trim().isEmpty() && !l.startsWith("#")) {
+                try {
+                    addJob(l);
+                } catch (Exception ex) {
+                    listener.error(ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void loadRunners(File f) throws Exception {
+        String content = FileUtils.readFileToString(f);
+        String[] fileLines = content.split(System.getProperty("line.separator"));
+        for (String l : fileLines) {
+            if (!l.trim().isEmpty() && !l.startsWith("#")) {
+                try {
+                    addRunner(l);
+                } catch (Exception ex) {
+                    listener.error(ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }    
 
     public static <T> List<List<T>> permutations(List<List<T>> collections) {
         if (collections == null || collections.isEmpty()) {

@@ -62,14 +62,14 @@ public class MaseManagerTerminal implements StatusListener {
     public void run(File runnersFile, File jobsFile) {
         try {
             if (runnersFile != null) {
-                loadRunners(runnersFile);
+                mng.loadRunners(runnersFile);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         try {
             if (jobsFile != null) {
-                loadJobs(jobsFile);
+                mng.loadJobs(jobsFile);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -88,7 +88,7 @@ public class MaseManagerTerminal implements StatusListener {
                         break;
                     case "loadrunners":
                         while (sc.hasNext()) {
-                            loadRunners(new File(sc.next()));
+                            mng.loadRunners(new File(sc.next()));
                         }
                         break;
                     case "addjobs":
@@ -96,7 +96,7 @@ public class MaseManagerTerminal implements StatusListener {
                         break;
                     case "loadjobs":
                         while (sc.hasNext()) {
-                            loadJobs(new File(sc.next()));
+                            mng.loadJobs(new File(sc.next()));
                         }
                         break;
                     case "remove":
@@ -282,36 +282,6 @@ public class MaseManagerTerminal implements StatusListener {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-    public void loadJobs(File f) throws IOException {
-        String content = FileUtils.readFileToString(f);
-        String[] fileLines = content.split(System.getProperty("line.separator"));
-        for (String l : fileLines) {
-            if (!l.trim().isEmpty() && !l.startsWith("#")) {
-                try {
-                    mng.addJob(l);
-                } catch (Exception ex) {
-                    error(ex.getMessage());
-                    ex.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public void loadRunners(File f) throws Exception {
-        String content = FileUtils.readFileToString(f);
-        String[] fileLines = content.split(System.getProperty("line.separator"));
-        for (String l : fileLines) {
-            if (!l.trim().isEmpty() && !l.startsWith("#")) {
-                try {
-                    mng.addRunner(l);
-                } catch (Exception ex) {
-                    error(ex.getMessage());
-                    ex.printStackTrace();
-                }
             }
         }
     }

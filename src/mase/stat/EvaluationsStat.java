@@ -32,7 +32,7 @@ public class EvaluationsStat extends Statistics {
         super.setup(state, base);
         File statisticsFile = state.parameters.getFile(
                 base.push(P_BEHAVIOURS_FILE), null);
-        bestOnly = state.parameters.getBoolean(base, null, false);
+        bestOnly = state.parameters.getBoolean(base.push(P_BEST_ONLY), null, false);
         if (statisticsFile != null) {
             try {
                 log = state.output.addLog(statisticsFile, true, false);

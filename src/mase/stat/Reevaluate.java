@@ -178,7 +178,7 @@ public class Reevaluate {
 
     public static Reevaluation reevaluate(GroupController gc, int subpop, SimulationProblem sim, int reps) {
         // Make simulations
-        ArrayList<EvaluationResult[]> results = new ArrayList<EvaluationResult[]>(reps);
+        ArrayList<EvaluationResult[]> results = new ArrayList<>(reps);
         for (int i = 0; i < reps; i++) {
             results.add(sim.evaluateSolution(gc, i));
         }

@@ -45,6 +45,8 @@ problem.agentKickSpeed = 4
 problem.agentMinKickSpeed = 1
 problem.agentKickDistance = 0.1
 
+problem.progSpeedFactor = 1
+
 # EVOLVED AGENT PARAMS
 problem.sensorArcs = 4
 problem.goalSensors = true
