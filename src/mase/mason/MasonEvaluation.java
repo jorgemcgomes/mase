@@ -9,7 +9,6 @@ import ec.util.Parameter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.evaluation.EvaluationFunction;
-import sim.engine.SimState;
 
 /**
  *
@@ -20,11 +19,12 @@ public abstract class MasonEvaluation implements EvaluationFunction {
     public static final String P_DEFAULT = "mason-eval";
     public static final String P_FREQUENCY = "update-freq";
     private static final long serialVersionUID = 1L;
-    protected SimState sim;
+    protected MasonSimState sim;
     protected int currentEvaluationStep;
     protected int maxEvaluationSteps;
     protected int updateFrequency;
     protected int maxSteps;
+    protected MasonEvaluation[] concurrentFunctions;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -51,8 +51,12 @@ public abstract class MasonEvaluation implements EvaluationFunction {
         }
     }
 
-    public void setSimulationModel(SimState sim) {
+    public void setSimulationModel(MasonSimState sim) {
         this.sim = sim;
+    }
+    
+    public void setConcurrentFunctions(MasonEvaluation[] functions) {
+        this.concurrentFunctions = functions;
     }
 
     /**

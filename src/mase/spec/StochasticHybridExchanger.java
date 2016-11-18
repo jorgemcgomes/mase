@@ -277,17 +277,22 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
     protected MetaPopulation fork(MetaPopulation parent, EvolutionState state) {
         List<Integer> forkAgents = new ArrayList<>();
 
-        if (splitProportion == SplitAgentsProportion.one || parent.agents.size() <= 3) {
-            forkAgents.add(parent.agents.get(0));
-        } else if (splitProportion == SplitAgentsProportion.half) {
+        if (splitProportion == SplitAgentsProportion.one || parent.agents.size() <= 2) { // A random one is split
+            int ag = state.random[0].nextInt(parent.agents.size());
+            forkAgents.add(parent.agents.get(ag));
+        } else if (splitProportion == SplitAgentsProportion.half) { // A random sample of size = half of agents
             int num = parent.agents.size() / 2;
+            List<Integer> copy = new ArrayList<>(parent.agents);
+            Collections.shuffle(copy);
             for (int i = 0; i < num; i++) {
-                forkAgents.add(parent.agents.get(i));
+                forkAgents.add(copy.get(i));
             }
-        } else if (splitProportion == SplitAgentsProportion.random) {
-            int num = 1 + state.random[0].nextInt(parent.agents.size() / 2 - 1);
+        } else if (splitProportion == SplitAgentsProportion.random) { // A random sample of random size
+            int num = 1 + state.random[0].nextInt(parent.agents.size() - 1);
+            List<Integer> copy = new ArrayList<>(parent.agents);
+            Collections.shuffle(copy);
             for (int i = 0; i < num; i++) {
-                forkAgents.add(parent.agents.get(i));
+                forkAgents.add(copy.get(i));
             }
         }
 

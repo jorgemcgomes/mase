@@ -26,13 +26,16 @@ public abstract class MasonSimState extends SimState {
         this.gc = gc;
     }
 
-    public EvaluationResult[] evaluate(int repetitions, int maxSteps, EvaluationFunction[] evalFunctions) {
+    public synchronized EvaluationResult[] evaluate(int repetitions, int maxSteps, EvaluationFunction[] evalFunctions) {
         EvaluationResult[][] evalResults = new EvaluationResult[evalFunctions.length][repetitions];
         for (int r = 0; r < repetitions; r++) {
             MasonEvaluation[] evals = new MasonEvaluation[evalFunctions.length];
             for (int i = 0; i < evalFunctions.length; i++) {
                 evals[i] = (MasonEvaluation) evalFunctions[i].clone();
                 evals[i].setSimulationModel(this);
+            }
+            for(MasonEvaluation e : evals) {
+                e.setConcurrentFunctions(evals);
             }
 
             start();
@@ -50,6 +53,9 @@ public abstract class MasonSimState extends SimState {
             }
             for (int i = 0; i < evals.length; i++) {
                 evals[i].postSimulation();
+            }
+            
+            for(int i = 0 ; i < evals.length ; i++) {
                 evalResults[i][r] = evals[i].getResult();
             }
             finish();

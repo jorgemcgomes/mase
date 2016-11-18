@@ -19,7 +19,7 @@ breed =                     mase.spec.SkipNewBreeder
 
 neat.shared-database =      true
 
-stat.child.15 =             mase.spec.HybridStat
-stat.child.15.file =        $hybrid.stat
+stat.child.17 =             mase.spec.HybridStat
+stat.child.17.file =        $hybrid.stat
 
 stat.child.1.do-subpops =   false
