@@ -84,7 +84,7 @@ public class ASAgentEvaluator extends MasonEvaluation {
         Collection<EvaluationResult> resList = new ArrayList<>();
         for(double[] c : concats) {
             VectorBehaviourResult vbr = new VectorBehaviourResult(c);
-            vbr.setDistance(VectorBehaviourResult.MANHATTAN);
+            //vbr.setDistance(VectorBehaviourResult.MANHATTAN);
             resList.add(vbr);
         }
         this.res = new SubpopEvaluationResult(resList);

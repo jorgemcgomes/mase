@@ -5,7 +5,9 @@
  */
 package mase.app.multirover;
 
+import java.awt.Color;
 import java.util.Collections;
+import static mase.app.multirover.MultiRockTypeEffector.NO_ACTIVATION;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
@@ -20,20 +22,20 @@ import sim.field.continuous.Continuous2D;
 public class Rover extends SmartAgent {
 
     private static final long serialVersionUID = 1L;
-    protected int actuatorType = RockEffector.NO_ACTIVATION;
+    private int actuatorType = RockEffector.NO_ACTIVATION;
     protected int[] captured;
 
     public Rover(MultiRover sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, RockEffector.NOACTUATOR_COLOUR, ac);
         this.enableAgentCollisions(true);
         this.enableBoundedArena(true);
-
-        if (Double.isInfinite(sim.par.rockSensorRange)) {
+        
+        this.circledPortrayal.setOnlyCircleWhenSelected(false);
+        this.circledPortrayal.setCircleShowing(false);
+        if (!Double.isInfinite(sim.par.rockSensorRange)) {
             super.circledPortrayal.scale = sim.par.roverSensorRange * 2;
-        } else {
-            super.circledPortrayal.scale = sim.par.rockSensorRange * 2;
         }
-
+        
         DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
         dm.allowBackwardMove(false);
@@ -47,7 +49,7 @@ public class Rover extends SmartAgent {
             MultiRockTypeEffector re = new MultiRockTypeEffector(sim, field, this);
             super.addEffector(re);
         }
-        
+
         captured = new int[sim.par.usedTypes.size()];
     }
 
@@ -95,5 +97,16 @@ public class Rover extends SmartAgent {
 
     public int getActuatorType() {
         return actuatorType;
+    }
+
+    public void setActuatorType(int type) {
+        this.actuatorType = type;
+
+        if (actuatorType == NO_ACTIVATION) {
+            circledPortrayal.setCircleShowing(false);
+        } else {
+            circledPortrayal.setCircleShowing(true);
+            circledPortrayal.paint = ((MultiRover) sim).actuatorColors[actuatorType];
+        }
     }
 }

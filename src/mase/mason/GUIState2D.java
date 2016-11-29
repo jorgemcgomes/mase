@@ -39,7 +39,7 @@ public class GUIState2D extends GUIState {
     public void start() {
         super.start();
         setupPortrayals();
-    }
+    }  
 
     @Override
     public void load(SimState state) {

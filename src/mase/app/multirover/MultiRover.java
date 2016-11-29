@@ -5,6 +5,7 @@
  */
 package mase.app.multirover;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -35,6 +36,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     protected List<Rover> rovers; // existing rovers
     protected List<Rock> rocks; // existing rocks
     protected List<Rock>[] matchingRocks; // rocks that match each actuator (index is actuator)
+    protected Color[] actuatorColors;
     protected StaticPolygon walls;
 
     public MultiRover(long seed, MRParams par, GroupController gc) {
@@ -130,6 +132,16 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
                 matchingRocks[a].add(newRock);
             }
         }
+        
+        this.actuatorColors = new Color[par.numActuators];
+        for(int i = 0 ; i < actuatorColors.length ; i++) {
+            List<Rock> matching = matchingRocks[i];
+            if(matching.isEmpty()) {
+                actuatorColors[i] = Color.BLACK;
+            } else {
+                actuatorColors[i] = matching.get(0).getType().color;
+            }
+        }        
     }
 
     @Override

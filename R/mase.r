@@ -16,8 +16,11 @@ library(arules)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
-theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom")
-theme_update(plot.title = element_text(size=rel(1)), legend.key.height=unit(0.75,"line"))
+theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-10,0,0,0,unit="pt"),
+             plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
+             axis.title.x=element_text(size=rel(.9)), axis.title.y=element_text(size=rel(.9)), legend.title=element_text(size=rel(.9)),
+             strip.background=element_blank(), strip.text=element_text(size=rel(.9)))
+
 
 #### Parallel #############################################################################
 
@@ -265,14 +268,16 @@ bestSoFarEvaluations <- function(dt, step=10000) {
 
 # data: fitness data
 # thresholds: numeric vector with the fitness thresholds to be calculated
-fitnessLevels <- function(data, thresholds) {
+fitnessLevels <- function(data, thresholds, return.failed=F) {
   aux <- function(t) {
     w <- which(data[,BestSoFar] > t)
     return(if(length(w) > 0) data$Evaluations[min(w)] else Inf)
   }
   evals <- sapply(thresholds, aux)
   res <- data.table(Threshold=thresholds,Evaluations=evals)
-  res <- res[!is.infinite(Evaluations)]
+  if(!return.failed) {
+    res <- res[!is.infinite(Evaluations)]
+  }
   return(res)
 }
 

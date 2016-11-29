@@ -39,7 +39,7 @@ public class NeighbourMultiTypeSensor extends AbstractSensor {
             }
         }
         if (closestRover != null) {
-            return new double[]{closestRover.actuatorType};
+            return new double[]{closestRover.getActuatorType()};
         } else {
             return new double[]{0};
         }

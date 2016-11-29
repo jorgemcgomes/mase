@@ -25,10 +25,10 @@ public class SelectiveRockSensor extends DistanceSensorArcs {
     @Override
     protected Collection<? extends Object> getCandidates() {
         Rover r = (Rover) ag;
-        if (r.actuatorType == RockEffector.NO_ACTIVATION) {
+        if (r.getActuatorType() == RockEffector.NO_ACTIVATION) {
             return Collections.EMPTY_LIST;
         } else {
-            return ((MultiRover) state).matchingRocks[r.actuatorType];
+            return ((MultiRover) state).matchingRocks[r.getActuatorType()];
         }
     }
 }

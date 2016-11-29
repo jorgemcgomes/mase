@@ -17,7 +17,7 @@ import mase.mason.MasonEvaluation;
  */
 public class AgentMergeGroupEvaluator extends MasonEvaluation {
     
-    public static final String P_AGENT_EVAL = "agent-eval-index";
+    public static final String P_AGENT_EVAL = "behaviour-index";
     private static final long serialVersionUID = 1L;
     private int agEvalIndex = -1;
     private EvaluationResult res = null;

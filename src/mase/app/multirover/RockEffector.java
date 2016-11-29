@@ -37,24 +37,23 @@ public class RockEffector extends AbstractEffector {
     @Override
     public void action(double[] values) {
         Rover rover = (Rover) ag;
-        if(rover.actuatorType != NO_ACTIVATION && state.schedule.getSteps() - lastActivationTime < minActivationTime) {
+        if(rover.getActuatorType() != NO_ACTIVATION && state.schedule.getSteps() - lastActivationTime < minActivationTime) {
             // locked in actuator, no change is allowed
             return;
         }
         
-        int oldType = rover.actuatorType;
-        rover.actuatorType = NO_ACTIVATION;
+        int oldType = rover.getActuatorType();
+        rover.setActuatorType(NO_ACTIVATION);
         double highestActivation = 0;
         for (int i = 0; i < values.length; i++) {
             if (values[i] > ACTIVATION_THRESHOLD && values[i] > highestActivation) {
                 highestActivation = values[i];
-                rover.actuatorType = i;
+                rover.setActuatorType(i);
             }
         }
-        if(oldType != rover.actuatorType) {
+        if(oldType != rover.getActuatorType()) {
             // changed actuator, update time stamp
             lastActivationTime = state.schedule.getSteps();
-            rover.setColor(rover.actuatorType == NO_ACTIVATION ? Color.GRAY : Color.BLACK);
         }
     }
 }
