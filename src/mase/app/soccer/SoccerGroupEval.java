@@ -10,8 +10,7 @@ import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 
 /**
- * Goals scored | Goals suffered | Avg. dist. of the ball to the goal | 
- * Avg min dist. of team to ball (own possesion) | Avg min dist of opps to ball (opps' possession)
+ * Goals scored | Goals suffered | Game duration | Avg dist of ball to goal | Amount of time with posession of ball
  * @author Jorge
  */
 public class SoccerGroupEval extends MasonEvaluation {
@@ -21,37 +20,26 @@ public class SoccerGroupEval extends MasonEvaluation {
     private VectorBehaviourResult res;
     private double avgDistBall;
     private double ownPossession;
-    private double oppPossession;
 
     @Override
     protected void preSimulation() {
         super.preSimulation();
         avgDistBall = 0;
         ownPossession = 0;
-        oppPossession = 0;
     }    
     
     @Override
     protected void evaluate() {
         super.evaluate();
         Soccer soc = (Soccer) sim;
-        
+               
         // Dist. of the ball to the goal
         avgDistBall += soc.ball.getLocation().distance(soc.rightGoalCenter);
         
-        // Min dist. of team to ball (own possesion)
-        double min = Double.POSITIVE_INFINITY;
-        for(SoccerAgent sa : soc.leftTeam) {
-            min = Math.min(min, sa.distanceTo(soc.ball));
+        // Own possession
+        if(soc.referee.teamPossession == soc.leftTeamColor) {
+            ownPossession += 1;
         }
-        ownPossession += min;
-        
-        // Min dist. of team to ball (own possesion)
-        min = Double.POSITIVE_INFINITY;
-        for(SoccerAgent sa : soc.rightTeam) {
-            min = Math.min(min, sa.distanceTo(soc.ball));
-        }       
-        oppPossession += min;
     }
     
     @Override
@@ -61,9 +49,9 @@ public class SoccerGroupEval extends MasonEvaluation {
         res = new VectorBehaviourResult(
                 soc.referee.leftTeamScore,
                 soc.referee.rightTeamScore,
+                currentEvaluationStep / (double) maxEvaluationSteps,
                 avgDistBall / currentEvaluationStep / soc.par.fieldLength,
-                ownPossession / currentEvaluationStep / soc.par.fieldLength,
-                oppPossession / currentEvaluationStep / soc.par.fieldLength
+                ownPossession / currentEvaluationStep
         );
     }
     

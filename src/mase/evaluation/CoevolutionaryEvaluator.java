@@ -28,7 +28,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
     public static final String P_RANDOM_CHAMPIONS = "num-random-champions";
     public static final String P_CURRENT_ELITE = "num-current-elite";
     public static final String P_ELITE_MODE = "elite-score";
-    public static final String V_ELITE_SCORES = "score";
+    public static final String V_SELECTION_SCORE = "score";
     public static final String P_PARETO_ELITE = "num-pareto-front";
 
     private static final long serialVersionUID = 1L;
@@ -54,7 +54,7 @@ public class CoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator {
         super.setup(state, base);
 
         String st = state.parameters.getString(base.push(P_ELITE_MODE), null);
-        if (st.equalsIgnoreCase(V_ELITE_SCORES)) {
+        if (st.equalsIgnoreCase(V_SELECTION_SCORE)) {
             eliteScore = new String[]{null};
         } else {
             eliteScore = st.split(",");

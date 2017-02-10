@@ -91,6 +91,7 @@ public class Fox extends EmboddiedAgent {
         double targetSpeed = s.getRealVelocity().length();
 
         double T = Math.min(50, this.distanceTo(s) / sim.par.sheepSpeed);
+        // targetDir.normalize().multiply(targetSpeed) == targetDir
         Double2D future = targetSpeed < 0.001 ? targetPos : targetPos.add(targetDir.normalize().multiply(targetSpeed).multiply(T));
         return future;
     }

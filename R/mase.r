@@ -16,21 +16,31 @@ library(arules)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
-theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-10,0,0,0,unit="pt"),
+theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-5,0,0,0,unit="pt"),
              plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
              axis.title.x=element_text(size=rel(.9)), axis.title.y=element_text(size=rel(.9)), legend.title=element_text(size=rel(.9)),
              strip.background=element_blank(), strip.text=element_text(size=rel(.9)))
 
+# theme_set(theme_bw())
+# theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-5,0,0,0,unit="pt"),
+#               plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
+#               strip.background=element_blank())
+
 
 #### Parallel #############################################################################
 
-if(exists("cl")) stopCluster(cl)
-cl <- makeCluster(detectCores(logical=T))
-registerDoParallel(cl, cores=length(cl))
-clusterEvalQ(cl, library(ggplot2))
-clusterEvalQ(cl, library(data.table))
-clusterEvalQ(cl, theme_set(theme_bw()))
-clusterEvalQ(cl, theme_update(plot.margin=unit(c(1,1,1,1),"mm")))
+createCluster <- function(cores=detectCores(logical=T)) {
+  if(exists("cl")) stopCluster(cl)
+  cl <<- makeCluster(cores)
+  setDefaultCluster(cl)
+  registerDoParallel(cl, cores=length(cl))
+  clusterEvalQ(cl, library(ggplot2))
+  clusterEvalQ(cl, library(data.table))
+  clusterEvalQ(cl, theme_set(theme_bw()))
+  clusterEvalQ(cl, theme_update(plot.margin=unit(c(1,1,1,1),"mm")))
+  return(TRUE)
+}
+
 
 #### Data loading #########################################################################
 
@@ -144,7 +154,7 @@ loadWideFile <- function(file, separator=" ", pre=c(), repeating=c(), post=c(), 
 # behaviour vars, following the four first fixed (Gen,Sub,Index,Fit)
 # columns with NA will be excluded
 # bestsOnly: keep only the best (highest fitness) individual of each generation and subpop. sample is ignored
-loadBehaviours <- function(file, sample=1, vars=NULL, bestsOnly=F) {
+loadBehaviours <- function(file, sample=1, vars=NULL) {
   frame <- fread(file, header=F, sep=" ", stringsAsFactors=F)
   fixedvars <- c("Generation","Subpop","Index","Fitness")
   if(is.null(vars)) {
@@ -159,15 +169,19 @@ loadBehaviours <- function(file, sample=1, vars=NULL, bestsOnly=F) {
   frame <- na.omit(frame) # remove rows with NAs
   frame$Subpop <- factor(frame$Subpop)
   
-  if(bestsOnly) {
-    bestInGen <- function(data) {data[which.max(data$Fitness),]}
-    frame <- ddply(frame, .(Generation,Subpop), bestInGen)
-  } else if(sample < 1) {
-    samp <- sample(1:nrow(frame), round(nrow(frame) * sample))
-    samp <- samp[order(samp)]
-    frame <- frame[samp,]
+  if(sample < 1) {
+    frame <- frame[order(sample(nrow(frame)), nrow(frame) * sample),]
   }
   return(frame)
+}
+
+filterBests <- function(data, subpops=F) {
+  bestInGen <- function(d) {d[which.max(d$Fitness),]}
+  if(subpops) {
+    return(data[, bestInGen(.SD), by=.(Generation,Subpop)])
+  } else {
+    return(data[, bestInGen(.SD), by=.(Generation)])
+  }
 }
 
 loadFitness <- function(file, loadSubs=F) {
@@ -352,7 +366,7 @@ meanDistSets <- function(data1, data2) {
 
 # calculate behavioural diversity per-run, based on vars
 # if subpops==T, diversity is calculated within each subpop
-diversity <- function(data, vars, subpops=F, parallel=T) {
+diversity <- function(data, vars, subpops=F, parallel=F) {
   clusterExport(cl, list("meanDist"))
   fun <- function(d) {c(Diversity=meanDist(subset(d,select=vars)))}
   split <- if(subpops) .(Setup,Job,Subpop) else .(Setup,Job)
@@ -383,7 +397,7 @@ diversityGens <- function(data, vars, interval, accum=T, subpops=F, parallel=T) 
 # prepare data for buildSom (optional)
 # vars: vars to be used in the som
 # sampleSize: number of vectors to be used in the som
-# cluster: cluster data to avoid large amounts of repeated vectors
+# cluster: cluster data to avoid large amounts of repeated vectors -- how many centers?
 preSomProcess <- function(data, vars=NULL, sampleSize=25000, cluster=0, ...) {
   data <- subset(data[sample(1:nrow(data),sampleSize),], select=c("Fitness",vars))
   if(cluster > 0) {
@@ -505,8 +519,27 @@ identifyBests <- function(som, data, n=10, interactive=T) {
   return(ldply(as.list(ids), aux))
 }
 
-
 #### General purpose statistics ###########################################################
+
+# histogram with the behaviour dimensions
+varsHist <- function(data, vars, breaks="Sturges") {
+  aux <- function(v, i=interval) {
+    h <- hist(v, breaks=breaks, plot=F)
+    return(data.table(Break=h$breaks[1:length(h$counts)],Density=h$density, Counts=h$counts, Frequency=h$counts/sum(h$counts)))
+  }
+  h <- lapply(data[,vars,with=F],aux)
+  return(rbindlist(h, idcol="Var"))
+}
+
+plotVarsHist <- function(...) {
+  hist <- varsHist(...)
+  g <- ggplot(hist, aes(Break,Frequency,group=Var,colour=Var)) + geom_line() + geom_point(aes(shape=Var))
+  return(g)
+}
+
+which.median <- function(x) which.min(abs(x - median(x)))
+
+which.mean <- function(x) which.min(abs(x - mean(x)))
 
 se <- function(x){sd(x)/sqrt(length(x))}
 
