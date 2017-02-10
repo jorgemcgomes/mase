@@ -57,6 +57,15 @@ ggplot(lastGen(dims), aes(Dimensions,BestSoFar,colour=UniqueTargets)) +
   labs(colour="Number of unique targets", y="Highest fitness score")
 ggsave("~/Dropbox/Work/Papers/TEC/fig3/dimensions_fitness.pdf", width=1.8, height=2.25) 
 
+# thesis
+ggplot(lastGen(dims), aes(Dimensions,BestSoFar,colour=UniqueTargets)) + 
+  stat_summary(fun.y=median, geom="line", aes(group=UniqueTargets,linetype=UniqueTargets), size=.3) + scale_linetype_manual(values=c("solid","dashed","dotted","twodash")) +
+  geom_boxplot(size=.3,outlier.size=.4, width=.5, position="identity") +
+  scale_color_brewer(palette="Set1") +ylim(0.985,1) +
+  labs(colour="Number of unique targets", y="Highest fitness score")
+ggsave("~/Dropbox/Work/Papers/TEC/fig_thesis/dimensions_fitness_wide.pdf", width=2.2, height=2.25) 
+
+
 # ggplot(lastGen(mergefit), aes(MergeThreshold,BestSoFar,colour=UniqueTargets)) + 
 #   stat_summary(fun.y=median, geom="line", aes(group=UniqueTargets), size=.2, position=pd) +
 #   geom_boxplot(size=.3,outlier.size=.4, position=pd) +
@@ -80,6 +89,13 @@ ggplot(stat, aes(Dimensions,NumPops,colour=UniqueTargets)) +
 ggsave("~/Dropbox/Work/Papers/TEC/fig3/dimensions_populations_mean.pdf", width=1.75, height=2.25) 
 ggsave("~/Dropbox/Work/Papers/TEC/fig3/dimensions_populations_extra.pdf", width=8, height=2.25) 
 
+# thesis
+ggplot(stat, aes(Dimensions,NumPops,colour=UniqueTargets)) + 
+  stat_summary(fun.y=median, geom="line", aes(group=UniqueTargets,linetype=UniqueTargets), size=.3) + scale_linetype_manual(values=c("solid","dashed","dotted","twodash")) +
+  geom_boxplot(size=.3,outlier.size=.4, width=.5, position="identity") +
+  pops_scale + scale_color_brewer(palette="Set1") + 
+  labs(colour="Number of unique targets", y="Mean number of populations")
+ggsave("~/Dropbox/Work/Papers/TEC/fig_thesis/dimensions_populations_mean.pdf", width=2.2, height=2.25) 
 
 
 ### Number of agents X number of targets #####
@@ -222,7 +238,7 @@ setwd("~/exps/multirover_fix")
 fixPostFitness(".")
 
 mrfit <- loadData("*","postfitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, auto.ids.names=c("Exp","Agents","Method","Task"), filter.par=list(step=1000))
-mrfit[, Task := factor(Task,labels=c("Multirover 2 item types","Multirover 5 item types"))]
+mrfit[, Task := factor(Task,labels=c("Multirover 2 rock types","Multirover 5 rock types"))]
 mrfit[, Method := factor(Method,levels=c("hybashomo","hybtshomo","ccea"), labels=c("Hyb-CCEA-GC","Hyb-CCEA-TS","CCEA"))]
 
 plotdata <- mrfit[,.(Mean=mean(BestSoFar),SE=se(BestSoFar)),by=.(Method,Task,Evaluations)]
@@ -235,8 +251,10 @@ ggsave("~/Dropbox/Work/Papers/TEC/fig3/mr_fitness.pdf", width=3.5, height=2, sca
 
 metaAnalysis(lastGen(mrfit), BestSoFar ~ Method, ~ Task)
 
+lastGen(mrfit)[, .SD[c(which.max(BestSoFar),which.median(BestSoFar))], by=.(Method,Task)]
+
 mrhyb <- loadData("*","hybrid.stat", auto.ids.names=c("Exp","Agents","Method","Task"),fun=loadFile, colnames=hyb.cols)
-mrhyb[, Task := factor(Task,labels=c("Multirover 2 item types","Multirover 5 item types"))]
+mrhyb[, Task := factor(Task,labels=c("Multirover 2 rock types","Multirover 5 rock types"))]
 mrhyb[, Method := factor(Method,levels=c("hybashomo","hybtshomo","ccea"), labels=c("Hyb-CCEA-GC","Hyb-CCEA-TS","CCEA"))]
 
 smoothed <- mrhyb[, .(Evaluations=seq(from=0,to=max(Evaluations),by=1000),NumPops=predict(loess(NumPops~Evaluations, span=0.1), newdata=seq(from=0,to=max(Evaluations),by=1000))) , by=.(Task,Method)]
@@ -269,8 +287,9 @@ ggplot(plotdata, aes(Evaluations/1000, Mean, group=Method)) +
   scale_color_brewer(palette="Set1") + scale_fill_brewer(palette="Set1") 
 ggsave("~/Dropbox/Work/Papers/TEC/fig3/soc_fitness.pdf", width=3.5, height=2, scale=1) 
 
-
 metaAnalysis(lastGen(socfit), BestSoFar ~ Method, ~ Task)
+
+lastGen(socfit)[, .SD[c(which.max(BestSoFar),which.median(BestSoFar))], by=.(Method,Task)]
 
 sochyb <- loadData("*","hybrid.stat", auto.ids.names=c("Task","Agents","Method"),fun=loadFile, colnames=hyb.cols)
 sochyb[, Task := factor(Task, labels=c("Soccer-80%","Soccer-100%"))]
@@ -294,7 +313,7 @@ metaAnalysis(sochyb[,.(NumPops=mean(NumPops)),by=.(Task,Method,Job)], NumPops ~ 
 
 ### Soccer NS ###############
 
-setwd("~/labmag/exps/socns")
+setwd("~/exps/socns")
 fixPostFitness(".")
 
 socfit <- loadData("*","postfitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, auto.ids.names=c("Task","Agents","Method"), filter.par=list(step=1000))
@@ -319,11 +338,12 @@ ggplot(smoothed, aes(Evaluations/1000, NumPops,group=Method)) +
 
 
 
+behavs <- loadData("easy_5_nstsccea", "behaviours.stat" ,fun=loadBehaviours, vars=c("i.distgoal","i.distball","i.scored","g.scored","g.suffered","g.distball","g.ownposs","g.oppposs"))
 
-
-
-
-
+d <- preSomProcess(behavs, vars=c("g.scored","g.suffered","g.distball","g.ownposs","g.oppposs"), cluster=1000)
+s <- buildSom(d)
+m <- mapBehaviours(s, behavs)
+plotSomFrequency(s, )
 
 
 
@@ -502,3 +522,32 @@ ggplot(socfit[,.(Mean=mean(BestSoFar),SE=se(BestSoFar)),by=.(Method,Evaluations)
   scale_color_brewer(palette="Set1") + scale_fill_brewer(palette="Set1") 
 
 
+## NS 
+
+setwd("~/exps/socns/")
+
+d <- loadData(c("veryeasy*","hard*"),"postfitness.stat", fun=loadFitness)
+ggplot(d[, .(Mean = mean(BestSoFar), SE=se(BestSoFar)), by=.(ID1,ID2,Generation)], aes(Generation,Mean,group=ID2)) + geom_line(aes(colour=ID2)) + ylab("Fitness") +
+  geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=ID2), alpha = 0.1) + facet_wrap(~ ID1, scales="free")
+
+ts <- c("ownscore","oppscore","time","ballgoaldist","possession")
+d <- loadData("veryeasy_nsga","behaviours.stat", fun=loadBehaviours, vars=ts, sample=0.25)
+plotVarsHist(d, ts, breaks=10)
+
+its <- c("i.dgoal","i.dball","i.scored") ; its.na <- rep(NA,3)
+gts <- c("g.ownscore","g.oppscore","g.dballgoal","g.dballteam","g.dballopp") ; gts.na <- rep(NA,5)
+ig <- paste0("ig.",1:18) ; ig.na <- rep(NA,18)
+gg <- paste0("gg.",1:18) ; gg.na <- rep(NA,18)
+d <- loadData("veryeasy_5_fit","behaviours.stat", fun=loadBehaviours, vars=c(its.na,gts,ig.na,gg.na), sample=0.2)
+
+
+
+View(d[ID3=="nsts"])
+div <- diversity(d[ID3=="nsts"], c("g.ownscore","g.oppscore","g.dballgoal","g.dballteam","g.dballopp"), parallel=F)
+
+somd <- preSomProcess(d, vars=gts, cluster=1000)
+s <- buildSom(somd, grid.size=8)
+m <- d[, mapBehaviours(s, .SD), by=.(ID3,Job)]
+plotSomFrequency(s, m, showMaxFitness=F) + facet_grid(ID3 ~ Job)
+
+div <- diversity(d, c("g.ownscore","g.oppscore","g.dballgoal","g.dballteam","g.dballopp"))
