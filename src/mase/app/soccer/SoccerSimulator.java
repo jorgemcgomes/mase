@@ -10,7 +10,6 @@ import ec.util.Parameter;
 import java.awt.Color;
 import mase.controllers.GroupController;
 import mase.mason.GUIState2D;
-import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 import mase.mason.ParamUtils;
 //import mase.mason.ParamUtils;
@@ -20,7 +19,7 @@ import sim.display.GUIState;
  *
  * @author jorge
  */
-public class SoccerSimulator extends MasonSimulationProblem {
+public class SoccerSimulator extends MasonSimulationProblem<Soccer> {
 
     private static final long serialVersionUID = 1L;
     private SoccerParams par;
@@ -34,13 +33,12 @@ public class SoccerSimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public Soccer createSimState(GroupController gc, long seed) {
         return new Soccer(seed, par, gc);
     }
     
     @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        Soccer sim = (Soccer) createSimState(gc, seed);
+    public GUIState getSimStateUI(Soccer sim) {
         double w = sim.par.fieldLength;
         double h = sim.par.fieldWidth;
         double ratio = 1000 / Math.max(w, h);
@@ -62,7 +60,8 @@ public class SoccerSimulator extends MasonSimulationProblem {
         ss.par.fieldWidth = 225;
         ss.par.goalWidth = 50;
         
-        GUIState gui = ss.createSimStateWithUI(null, 0);
+        Soccer sim = ss.getSimState(null, 0);
+        GUIState gui = ss.getSimStateUI(sim);
         gui.createController();
         
         /*Soccer sim = (Soccer) ss.createSimState(null, new Random().nextLong());

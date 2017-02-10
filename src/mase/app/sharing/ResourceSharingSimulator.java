@@ -17,7 +17,9 @@ import sim.display.GUIState;
  *
  * @author jorge
  */
-public class ResourceSharingSimulator extends MasonSimulationProblem {
+public class ResourceSharingSimulator extends MasonSimulationProblem<ResourceSharing> {
+
+    private static final long serialVersionUID = 1L;
 
     protected RSParams par;
 
@@ -43,12 +45,7 @@ public class ResourceSharingSimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public ResourceSharing createSimState(GroupController gc, long seed) {
         return new ResourceSharing(seed, par, gc);
-    }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new GUIState2D(createSimState(gc, seed), "Aggregation", 500, 500, Color.WHITE);
     }
 }

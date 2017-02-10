@@ -33,6 +33,8 @@ import sim.util.Double2D;
  */
 public class Indiana extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
+    private static final long serialVersionUID = 1L;
+
     protected IndianaParams par;
     protected List<IndianaAgent> agents;
     protected List<IndianaAgent> activeAgents;

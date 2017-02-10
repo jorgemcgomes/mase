@@ -9,6 +9,7 @@ package mase.app.multirover;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import org.apache.commons.math3.stat.StatUtils;
 
 /**
@@ -27,8 +28,8 @@ public class MultiRoverFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         MultiRover mr = (MultiRover) sim;
         int count = 0;
         for(int c : mr.scores) {

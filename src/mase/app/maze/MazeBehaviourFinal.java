@@ -8,6 +8,7 @@ package mase.app.maze;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.Double2D;
 
 /**
@@ -24,8 +25,8 @@ public class MazeBehaviourFinal extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         MazeTask mt = (MazeTask) sim;
         Double2D loc = mt.agent.getLocation();
         vbr = new VectorBehaviourResult( loc.x,  loc.y);

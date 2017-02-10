@@ -7,6 +7,7 @@ package mase.app.sharing;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -22,7 +23,7 @@ public class RSBehaviourEval extends MasonEvaluation {
     private VectorBehaviourResult vbr;
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         totalEvals = 0;
         averageMovement = 0;
         averageEnergy = 0;
@@ -30,7 +31,7 @@ public class RSBehaviourEval extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         ResourceSharing rs = (ResourceSharing) sim;
         for (RSAgent a : rs.agents) {
             if (a.isAlive()) {
@@ -43,7 +44,7 @@ public class RSBehaviourEval extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         ResourceSharing rs = (ResourceSharing) sim;
         survivors = 0;
         for (RSAgent a : rs.agents) {

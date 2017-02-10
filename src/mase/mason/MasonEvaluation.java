@@ -6,29 +6,27 @@ package mase.mason;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mase.evaluation.EvaluationFunction;
+import sim.engine.SimState;
+import sim.engine.Steppable;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class MasonEvaluation implements EvaluationFunction {
+public abstract class MasonEvaluation implements EvaluationFunction, Steppable {
 
     public static final String P_DEFAULT = "mason-eval";
     public static final String P_FREQUENCY = "update-freq";
     private static final long serialVersionUID = 1L;
-    protected MasonSimState sim;
     protected int currentEvaluationStep;
     protected int maxEvaluationSteps;
     protected int updateFrequency;
     protected int maxSteps;
-    protected MasonEvaluation[] concurrentFunctions;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
-        updateFrequency = state.parameters.getInt(base.push(P_FREQUENCY), defaultBase().push(P_FREQUENCY));
+        this.updateFrequency = state.parameters.getIntWithDefault(base.push(P_FREQUENCY), defaultBase().push(P_FREQUENCY), 1);
         if (updateFrequency < 0) {
             state.output.fatal("Update frequency must be >= 0", base.push(P_FREQUENCY), defaultBase().push(P_FREQUENCY));
         }
@@ -46,43 +44,33 @@ public abstract class MasonEvaluation implements EvaluationFunction {
         try {
             return super.clone();
         } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(MasonEvaluation.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
     }
 
-    public void setSimulationModel(MasonSimState sim) {
-        this.sim = sim;
-    }
-    
-    public void setConcurrentFunctions(MasonEvaluation[] functions) {
-        this.concurrentFunctions = functions;
+    @Override
+    public final void step(SimState sim) {
+        evaluate((MasonSimState) sim);
+        this.currentEvaluationStep++;
     }
 
     /**
-     * Should be called right before the simulation, after all initialization
+     * Is called right before the simulation, after all initialization
      * procedures are done
      */
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.currentEvaluationStep = 0;
-    }
-
-    protected final void evaluationStep() {
-        if (updateFrequency > 0 && sim.schedule.getSteps() % updateFrequency == 0) {
-            evaluate();
-            this.currentEvaluationStep++;
-        }
+    }    
+    
+    /**
+     * Does the evaluation every step (or at the specificied frequency)
+     */
+    protected void evaluate(MasonSimState sim) {
     }
 
     /**
-     * Should be called to do the actual evaluation
+     * Is called after the simulation is finished
      */
-    protected void evaluate() {
-    }
-
-    /**
-     * Should be called after the simulation is finished
-     */
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
     }
 }

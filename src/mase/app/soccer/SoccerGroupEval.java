@@ -8,6 +8,7 @@ package mase.app.soccer;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  * Goals scored | Goals suffered | Game duration | Avg dist of ball to goal | Amount of time with posession of ball
@@ -22,15 +23,15 @@ public class SoccerGroupEval extends MasonEvaluation {
     private double ownPossession;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         avgDistBall = 0;
         ownPossession = 0;
     }    
     
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         Soccer soc = (Soccer) sim;
                
         // Dist. of the ball to the goal
@@ -43,8 +44,8 @@ public class SoccerGroupEval extends MasonEvaluation {
     }
     
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         Soccer soc = (Soccer) sim;
         res = new VectorBehaviourResult(
                 soc.referee.leftTeamScore,

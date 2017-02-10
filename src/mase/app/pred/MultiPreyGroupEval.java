@@ -6,6 +6,7 @@ package mase.app.pred;
 
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
+import mase.mason.MasonSimState;
 import sim.util.MutableDouble2D;
 
 /**
@@ -19,14 +20,14 @@ public class MultiPreyGroupEval extends OnePreyGroupEval {
     protected double preyDispersion = 0;
 
     @Override
-    public void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         this.preyDispersion = 0;
     }
 
     @Override
-    public void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         PredatorPrey simState = (PredatorPrey) sim;
         if (!simState.activePreys.isEmpty()) {
             MutableDouble2D centerMass = new MutableDouble2D(0, 0);
@@ -46,8 +47,8 @@ public class MultiPreyGroupEval extends OnePreyGroupEval {
     }
 
     @Override
-    public void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         preyDispersion = Math.min(1, preyDispersion / currentEvaluationStep / (diagonal / 2));
     }
 

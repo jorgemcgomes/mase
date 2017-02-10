@@ -10,6 +10,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import org.apache.commons.math3.util.MathArrays;
 
 /**
@@ -34,8 +35,8 @@ public class MultiRoverIndEval extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         MultiRover mr = (MultiRover) sim;
         actuatorTime = new int[mr.rovers.size()][mr.par.numActuators];        
         distanceToRock = new double[mr.rovers.size()];
@@ -43,7 +44,7 @@ public class MultiRoverIndEval extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         MultiRover mr = (MultiRover) sim;
         for (int i = 0 ; i < mr.rovers.size() ; i++) {
             Rover r = mr.rovers.get(i);
@@ -74,7 +75,7 @@ public class MultiRoverIndEval extends MasonEvaluation {
     }
     
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         MultiRover mr = (MultiRover) sim;
         VectorBehaviourResult[] res = new VectorBehaviourResult[mr.rovers.size()];
         

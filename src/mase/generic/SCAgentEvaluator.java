@@ -13,6 +13,7 @@ import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
 
 /**
@@ -43,12 +44,12 @@ public class SCAgentEvaluator extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.counts = null;
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         SmartAgentProvider td = (SmartAgentProvider) sim;
         List<? extends SmartAgent> agents = td.getSmartAgents();
         
@@ -76,7 +77,7 @@ public class SCAgentEvaluator extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Collection<EvaluationResult> scs = new ArrayList<>(counts.size());
         for(HashMap<Integer, Integer> m : counts) {
             SCResult scr = new SCResult(m);

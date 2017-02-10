@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.evaluation.EvaluationFunction;
 import mase.generic.SmartAgentProvider;
 import mase.generic.systematic.EntityGroup;
 import mase.generic.systematic.TaskDescription;
@@ -26,6 +27,8 @@ import sim.util.Double2D;
  */
 public class ResourceSharing extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
+    private static final long serialVersionUID = 1L;
+
     protected RSParams par;
     protected List<RSAgent> agents, activeAgents;
     protected Continuous2D field;
@@ -35,7 +38,6 @@ public class ResourceSharing extends MasonSimState implements TaskDescriptionPro
     public ResourceSharing(long seed, RSParams par, GroupController gc) {
         super(gc, seed);
         this.par = par;
-        this.gc = gc;
     }
 
     @Override

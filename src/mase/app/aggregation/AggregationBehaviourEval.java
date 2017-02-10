@@ -7,6 +7,7 @@ package mase.app.aggregation;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.MutableDouble2D;
 
 /**
@@ -19,12 +20,12 @@ public class AggregationBehaviourEval extends MasonEvaluation {
     private VectorBehaviourResult vbr;
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.centerMass = new double[super.maxEvaluationSteps];
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         Aggregation agg = (Aggregation) sim;
         MutableDouble2D centre = new MutableDouble2D(0, 0);
         for (AggregationAgent aa : agg.agents) {

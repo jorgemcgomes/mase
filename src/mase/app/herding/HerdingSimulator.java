@@ -7,19 +7,15 @@ package mase.app.herding;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import java.awt.Color;
 import mase.controllers.GroupController;
-import mase.mason.MasonSimState;
-import mase.mason.GUIState2D;
 import mase.mason.MasonSimulationProblem;
 import mase.mason.ParamUtils;
-import sim.display.GUIState;
 
 /**
  *
  * @author jorge
  */
-public class HerdingSimulator extends MasonSimulationProblem {
+public class HerdingSimulator extends MasonSimulationProblem<Herding> {
 
     private static final long serialVersionUID = 1L;
     private HerdingParams par;
@@ -32,13 +28,7 @@ public class HerdingSimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public Herding createSimState(GroupController gc, long seed) {
         return new Herding(seed, par, gc);
     }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new GUIState2D(createSimState(gc, seed), "Herding", 500, 500, Color.WHITE);
-    }
-
 }

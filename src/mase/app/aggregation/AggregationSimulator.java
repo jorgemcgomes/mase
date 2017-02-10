@@ -17,7 +17,7 @@ import sim.display.GUIState;
  *
  * @author jorge
  */
-public class AggregationSimulator extends MasonSimulationProblem {
+public class AggregationSimulator extends MasonSimulationProblem<Aggregation> {
 
     protected AggregationParams par;
     
@@ -38,13 +38,7 @@ public class AggregationSimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public Aggregation createSimState(GroupController gc, long seed) {
         return new Aggregation(seed, par, gc);
     }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new GUIState2D(createSimState(gc, seed), "Aggregation", 500, 500, Color.WHITE);
-    }
-    
 }

@@ -11,6 +11,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 
 /**
@@ -29,7 +30,7 @@ public class GoFinalBehaviour extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Go go = (Go) sim;
         double d = go.schedule.getSteps() / 2.0f;
         ser = new SubpopEvaluationResult(

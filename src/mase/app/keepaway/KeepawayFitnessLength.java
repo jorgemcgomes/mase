@@ -11,6 +11,7 @@ import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.Double2D;
 
 /**
@@ -30,13 +31,13 @@ public class KeepawayFitnessLength extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.lastKeeper = null;
         this.sumPasses = 0;
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         Keepaway kw = (Keepaway) sim;
         for (Keeper k : kw.keepers) {
             if (k.hasPossession) {
@@ -51,7 +52,7 @@ public class KeepawayFitnessLength extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         fitnessResult = new FitnessResult( sumPasses);
     }
 

@@ -6,6 +6,7 @@
 package mase.app.multirover;
 
 import mase.evaluation.FitnessResult;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -17,9 +18,9 @@ public class MultiRoverFitnessBootstrap extends MultiRoverFitness {
     double proximity = 0;
     
     @Override
-    protected void evaluate() {
-        super.evaluate();
-        MultiRover mr = (MultiRover) super.sim;
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
+        MultiRover mr = (MultiRover) sim;
         if(mr.rocks.isEmpty()) {
             return;
         }
@@ -36,13 +37,10 @@ public class MultiRoverFitnessBootstrap extends MultiRoverFitness {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
-        MultiRover mr = (MultiRover) super.sim;
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
+        MultiRover mr = (MultiRover) sim;
         double bootstrap = 0.01 - proximity / mr.rovers.size() / currentEvaluationStep / mr.field.width / 100d;
         this.fitnessResult = new FitnessResult(fitnessResult.value() + bootstrap, fitnessResult.getAverageType());
     }
-    
-    
-    
 }

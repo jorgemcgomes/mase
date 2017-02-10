@@ -8,6 +8,7 @@ package mase.app.foraging;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -21,14 +22,14 @@ public class WithinFitness extends MasonEvaluation {
     private int time;
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         res = new FitnessResult((double) time / currentEvaluationStep, FitnessResult.ARITHMETIC);
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         boolean within = false;
         ForagingTask ft = (ForagingTask) sim;
         Object[] lastRead = ft.flyingBot.botArcs.getClosestObjects();
@@ -44,7 +45,7 @@ public class WithinFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         time = 0;
     }
 

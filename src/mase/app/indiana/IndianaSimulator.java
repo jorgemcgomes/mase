@@ -7,19 +7,15 @@ package mase.app.indiana;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import java.awt.Color;
 import mase.controllers.GroupController;
 import mase.app.indiana.Indiana.AgentPlacement;
-import mase.mason.MasonSimState;
-import mase.mason.GUIState2D;
 import mase.mason.MasonSimulationProblem;
-import sim.display.GUIState;
 
 /**
  *
  * @author jorge
  */
-public class IndianaSimulator extends MasonSimulationProblem {
+public class IndianaSimulator extends MasonSimulationProblem<Indiana> {
 
     protected IndianaParams par;
 
@@ -44,13 +40,7 @@ public class IndianaSimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public Indiana createSimState(GroupController gc, long seed) {
         return new Indiana(seed, par, gc);
     }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new GUIState2D(createSimState(gc, seed), "Indiana", 500, 500, Color.WHITE);
-    }
-
 }

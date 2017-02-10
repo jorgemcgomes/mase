@@ -29,6 +29,8 @@ import sim.util.Double2D;
  */
 public class Aggregation extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
+    private static final long serialVersionUID = 1L;
+
     protected AggregationParams par;
     protected List<AggregationAgent> agents;
     protected Continuous2D field;

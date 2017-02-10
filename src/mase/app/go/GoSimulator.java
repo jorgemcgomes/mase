@@ -6,22 +6,19 @@ package mase.app.go;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
-import java.awt.Color;
 import mase.app.go.Go.ControllerMode;
 import mase.controllers.GroupController;
-import mase.mason.MasonSimState;
-import mase.mason.GUIState2D;
 import mase.mason.MasonSimulationProblem;
-import sim.display.GUIState;
 
 /**
  *
  * @author Jorge
  */
-public class GoSimulator extends MasonSimulationProblem {
+public class GoSimulator extends MasonSimulationProblem<Go> {
 
     public static final String P_CONTROLLER_MODE = "controller-mode";
     public static final String P_BOARD_SIZE = "board-size";
+    private static final long serialVersionUID = 1L;
     private ControllerMode mode;
     private int size;
 
@@ -32,16 +29,9 @@ public class GoSimulator extends MasonSimulationProblem {
         this.size = state.parameters.getInt(df.push(P_BOARD_SIZE), null);
         this.mode = ControllerMode.valueOf(state.parameters.getString(df.push(P_CONTROLLER_MODE), null));
     }
-    
-    
-    
-    @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
-        return new Go(seed, gc, mode, size);
-    }
 
     @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new GUIState2D(createSimState(gc, seed), "Go", 500, 500, Color.RED);
+    public Go createSimState(GroupController gc, long seed) {
+        return new Go(seed, gc, mode, size);
     }
 }

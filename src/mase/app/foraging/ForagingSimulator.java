@@ -19,7 +19,7 @@ import sim.display.GUIState;
  *
  * @author jorge
  */
-public class ForagingSimulator extends MasonSimulationProblem {
+public class ForagingSimulator extends MasonSimulationProblem<ForagingTask> {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,17 +33,7 @@ public class ForagingSimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public ForagingTask createSimState(GroupController gc, long seed) {
         return new ForagingTask(seed, par, gc);
     }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        double w = par.arenaSize.x;
-        double h = par.arenaSize.y;
-        double ratio = 500 / Math.min(w, h);
-        return new GUIState2D(createSimState(gc, seed), "Foraging",
-                (int) Math.round(w * ratio), (int) Math.round(h * ratio), Color.WHITE);
-    }
-
 }

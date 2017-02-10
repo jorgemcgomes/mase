@@ -27,18 +27,18 @@ public class MasonMultiAgentWrapper extends MasonEvaluation {
     }    
     
     @Override
-    protected void postSimulation() {
-        super.postSimulation(); //To change body of generated methods, choose Tools | Templates.
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate(); //To change body of generated methods, choose Tools | Templates.
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation(); //To change body of generated methods, choose Tools | Templates.
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override

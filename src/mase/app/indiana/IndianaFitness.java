@@ -9,6 +9,7 @@ package mase.app.indiana;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -24,7 +25,7 @@ public class IndianaFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Indiana ind = (Indiana) sim;
         int count = 0;
         for(IndianaAgent a : ind.agents) {

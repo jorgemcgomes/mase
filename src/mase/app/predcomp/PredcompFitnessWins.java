@@ -12,6 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 
 /**
@@ -30,7 +31,7 @@ public class PredcompFitnessWins extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         ser = new SubpopEvaluationResult(
                 new FitnessResult(sim.schedule.getSteps() == maxSteps ? 0f : 1f , FitnessResult.ARITHMETIC),
                 new FitnessResult(sim.schedule.getSteps() == maxSteps ? 1f : 0f, FitnessResult.ARITHMETIC)

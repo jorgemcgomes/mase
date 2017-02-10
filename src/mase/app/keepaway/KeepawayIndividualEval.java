@@ -10,6 +10,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.Double2D;
 
 /**
@@ -37,8 +38,8 @@ public class KeepawayIndividualEval extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         Keepaway kw = (Keepaway) sim;
         this.lastKeeper = -1;
         this.passNumber = new double[kw.keepers.size()];
@@ -49,7 +50,7 @@ public class KeepawayIndividualEval extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         // should be similar to group evaluation
         // -- number of good passes (equivalent to group)
         // -- average pass length (also equivalent)
@@ -94,29 +95,26 @@ public class KeepawayIndividualEval extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Keepaway kw = (Keepaway) sim;
         for (int i = 0; i < kw.keepers.size(); i++) {
             passNumber[i] /= passesNormalization;
             if (allCount[i] > 0) {
-                passLength[i] =  (passLength[i] / allCount[i] / kw.par.size);
+                passLength[i] = (passLength[i] / allCount[i] / kw.par.size);
             }
-            distanceToOthers[i] =  (distanceToOthers[i] / currentEvaluationStep / (kw.keepers.size() - 1) / kw.par.size);
+            distanceToOthers[i] = (distanceToOthers[i] / currentEvaluationStep / (kw.keepers.size() - 1) / kw.par.size);
             movement[i] /= currentEvaluationStep;
         }
+        VectorBehaviourResult[] res = new VectorBehaviourResult[kw.keepers.size()];
+        for (int i = 0; i < res.length; i++) {
+            double[] b = new double[]{passNumber[i], passLength[i], distanceToOthers[i], movement[i]};
+            res[i] = new VectorBehaviourResult(b);
+        }
+        evaluation = new SubpopEvaluationResult(res);
     }
 
     @Override
     public EvaluationResult getResult() {
-        Keepaway kw = (Keepaway) sim;
-        if (evaluation == null) {
-            VectorBehaviourResult[] res = new VectorBehaviourResult[kw.keepers.size()];
-            for (int i = 0; i < res.length; i++) {
-                double[] b = new double[]{passNumber[i], passLength[i], distanceToOthers[i], movement[i]};
-                res[i] = new VectorBehaviourResult(b);
-            }
-            evaluation = new SubpopEvaluationResult(res);
-        }
         return evaluation;
     }
 }

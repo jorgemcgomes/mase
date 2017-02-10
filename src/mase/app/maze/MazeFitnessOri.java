@@ -9,6 +9,7 @@ package mase.app.maze;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -25,8 +26,8 @@ public class MazeFitnessOri extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         MazeTask mt = (MazeTask) sim;
         
         

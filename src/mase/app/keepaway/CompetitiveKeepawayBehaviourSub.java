@@ -11,6 +11,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.Double2D;
 import sim.util.MutableDouble2D;
 
@@ -48,7 +49,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.numPasses = 0;
         this.lastKeeper = null;
         this.passLength = 0;
@@ -59,7 +60,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         Keepaway kw = (Keepaway) sim;
         // number of effective passes and pass length
         double d = 0;
@@ -99,7 +100,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Keepaway kw = (Keepaway) sim;
         double steps = sim.schedule.getSteps();
         this.res = new SubpopEvaluationResult(

@@ -20,7 +20,7 @@ import sim.util.Double2D;
  *
  * @author Jorge
  */
-public class KeepawaySimulator extends MasonSimulationProblem {
+public class KeepawaySimulator extends MasonSimulationProblem<Keepaway> {
 
     protected KeepawayParams par;
 
@@ -80,13 +80,8 @@ public class KeepawaySimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public Keepaway createSimState(GroupController gc, long seed) {
         return new Keepaway(seed, par, gc);
-    }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new GUIState2D(createSimState(gc, seed), "Keepaway", 500, 500, new Color(0, 150, 0));
     }
 
 }

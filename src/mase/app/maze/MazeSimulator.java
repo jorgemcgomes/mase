@@ -29,7 +29,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class MazeSimulator extends MasonSimulationProblem {
+public class MazeSimulator extends MasonSimulationProblem<MazeTask> {
 
     private MazeParams par;
 
@@ -60,17 +60,17 @@ public class MazeSimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public MazeTask createSimState(GroupController gc, long seed) {
         return new MazeTask(seed, par, gc);
     }
 
-    @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
+    /*@Override
+    public GUIState getSimStateUI(GroupController gc, long seed) {
         double w = par.maze.getWidth();
         double h = par.maze.getHeight();
         double ratio = 500 / Math.max(w, h);
         return new GUIState2D(createSimState(gc, seed), "Maze",
                 (int) Math.round(w * ratio), (int) Math.round(h * ratio), Color.WHITE);
-    }
+    }*/
 
 }

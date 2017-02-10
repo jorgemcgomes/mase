@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import net.jafama.FastMath;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
@@ -83,7 +84,7 @@ public class SystematicEvaluator extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.td = ((TaskDescriptionProvider) sim).getTaskDescription();
 
         this.features = new ArrayList<List<Double>>(MAX_FEATURES);
@@ -93,7 +94,7 @@ public class SystematicEvaluator extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         int index = 0;
         for (int gi = 0; gi < td.groups().length; gi++) {
             EntityGroup eg = td.groups()[gi];
@@ -168,7 +169,7 @@ public class SystematicEvaluator extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         if (timeMode == TimeMode.mean) {
             // Make averages
             double[] res = new double[size + 1];

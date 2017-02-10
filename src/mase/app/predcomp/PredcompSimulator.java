@@ -19,7 +19,9 @@ import sim.display.GUIState;
  *
  * @author jorge
  */
-public class PredcompSimulator extends MasonSimulationProblem {
+public class PredcompSimulator extends MasonSimulationProblem<Predcomp> {
+
+    private static final long serialVersionUID = 1L;
 
     private PredcompParams par;
 
@@ -41,14 +43,8 @@ public class PredcompSimulator extends MasonSimulationProblem {
     }
 
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
+    public Predcomp createSimState(GroupController gc, long seed) {
         Predcomp sim = new Predcomp(seed, par, gc);
         return sim;
     }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController gc, long seed) {
-        return new GUIState2D(createSimState(gc, seed), "Competitive predator", 500, 500, Color.WHITE);
-    }
-
 }

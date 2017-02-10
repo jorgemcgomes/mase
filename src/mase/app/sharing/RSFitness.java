@@ -9,6 +9,7 @@ import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -29,7 +30,7 @@ public class RSFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         ResourceSharing rs = (ResourceSharing) sim;
         for(RSAgent a : rs.agents) {
             averageEnergy += a.energyLevel;
@@ -37,7 +38,7 @@ public class RSFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         ResourceSharing rs = (ResourceSharing) sim;
         int count = 0;
         for(RSAgent a : rs.agents) {

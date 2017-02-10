@@ -14,6 +14,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -36,14 +37,14 @@ public class ASAgentEvaluator extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         states = new ArrayList<>(super.maxEvaluationSteps);
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         SmartAgentProvider td = (SmartAgentProvider) sim;
         List<? extends SmartAgent> agents = td.getSmartAgents();
         List<double[]> genStates = new ArrayList<>();
@@ -61,8 +62,8 @@ public class ASAgentEvaluator extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         List<double[]> concats = new ArrayList<>(states.get(0).size());
         for(int ag = 0 ; ag < states.get(0).size() ; ag++) {
             concats.add(new double[]{});

@@ -8,6 +8,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.generic.systematic.TaskDescription;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import net.jafama.FastMath;
 import sim.util.MutableDouble2D;
 
@@ -26,14 +27,14 @@ public class OnePreyGroupEval extends MasonEvaluation {
     protected int captured;
 
     @Override
-    public void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         predatorDispersion = 0;
     }
 
     @Override
-    public void evaluate() {
-        super.evaluate();     
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);     
         PredatorPrey pp = (PredatorPrey) sim;
         MutableDouble2D center = new MutableDouble2D(0,0);
         for(Predator p : pp.predators) {
@@ -46,8 +47,8 @@ public class OnePreyGroupEval extends MasonEvaluation {
     }
 
     @Override
-    public void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         
         PredatorPrey simState = (PredatorPrey) sim;
         diagonal =  FastMath.sqrtQuick(FastMath.pow2(simState.field.width) * 2);

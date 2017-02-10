@@ -8,6 +8,7 @@ package mase.app.soccer;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -25,8 +26,8 @@ public class GoalsFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation(); 
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null); 
         Soccer soc = (Soccer) sim;
         res = new FitnessResult(100 + soc.referee.leftTeamScore - soc.referee.rightTeamScore);
     }

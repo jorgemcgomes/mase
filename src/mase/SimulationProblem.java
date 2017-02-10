@@ -37,12 +37,10 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     public static final String P_TRIALS_MERGE = "trials-merge";
     public static final String V_MERGE_BEST = "best", V_MERGE_MEAN = "mean", V_MERGE_MEDIAN = "median";
     protected String mergeMode;
-    public static final String P_REPETITIONS = "repetitions";
     public static final String P_SEED = "seed";
     public static final String V_RANDOM_SEED = "random";
     protected boolean sameSeed;
     protected long seed;
-    protected int repetitions;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -79,15 +77,6 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         } else {
             sameSeed = true;
             seed = Long.parseLong(seedString);
-        }
-
-        repetitions = state.parameters.getIntWithDefault(base.push(P_REPETITIONS), null, 1);
-        if (repetitions < 1) {
-            state.output.fatal("Parameter invalid value. Must be > 0.", base.push(P_REPETITIONS));
-        }
-        
-        if(repetitions > 1 && sameSeed) {
-            state.output.fatal("Using multiple repetitions, but the random seed is fixed.");
         }
     }
 
@@ -192,14 +181,6 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
     }
 
     public abstract EvaluationResult[] evaluateSolution(GroupController gc, long seed);
-
-    public void setRepetitions(int repetitions) {
-        this.repetitions = repetitions;
-    }
-
-    public int getRepetitions() {
-        return repetitions;
-    }
 
     public synchronized long nextSeed(EvolutionState state, int threadnum) {
         if (sameSeed) {

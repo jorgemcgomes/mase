@@ -10,6 +10,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.world.EmboddiedAgent;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 import sim.util.Double2D;
 import sim.util.MutableDouble2D;
@@ -42,7 +43,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.numPasses = 0;
         this.lastKeeper = null;
         this.keeperDispersion = 0;
@@ -51,7 +52,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         Keepaway kw = (Keepaway) sim;
         // number of passes
         for (Keeper k : kw.keepers) {
@@ -89,7 +90,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Keepaway kw = (Keepaway) sim;
         double steps = sim.schedule.getSteps();
         this.res = new VectorBehaviourResult(

@@ -8,6 +8,7 @@ import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import net.jafama.FastMath;
 
 /**
@@ -22,8 +23,8 @@ public class OnePreyIndividualEval extends MasonEvaluation {
     protected SubpopEvaluationResult evaluation;
 
     @Override
-    public void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         PredatorPrey predSim = (PredatorPrey) sim;
         int nAgents = predSim.predators.size();
         partnerAvgDist = new double[nAgents];
@@ -31,8 +32,8 @@ public class OnePreyIndividualEval extends MasonEvaluation {
     }
 
     @Override
-    public void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         PredatorPrey simState = (PredatorPrey) sim;
         for (int i = 0; i < simState.predators.size(); i++) {
             Predator pred = simState.predators.get(i);
@@ -45,8 +46,8 @@ public class OnePreyIndividualEval extends MasonEvaluation {
     }
 
     @Override
-    public void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         PredatorPrey predSim = (PredatorPrey) sim;
         double diagonal =  FastMath.sqrtQuick(FastMath.pow2(predSim.field.width) * 2);
 

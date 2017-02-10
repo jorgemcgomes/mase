@@ -7,6 +7,7 @@ package mase.app.aggregation;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.MutableDouble2D;
 
 /**
@@ -18,7 +19,7 @@ public class AggregationFitness extends MasonEvaluation {
     private FitnessResult res;
     
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Aggregation agg = (Aggregation) sim;
         MutableDouble2D centre = new MutableDouble2D(0,0);
         for(AggregationAgent aa : agg.agents) {

@@ -7,7 +7,9 @@ package mase.mason;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
+import sim.engine.Schedule;
 import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
 
@@ -18,51 +20,77 @@ import sim.portrayal.continuous.ContinuousPortrayal2D;
 public abstract class MasonSimState extends SimState {
 
     private static final long serialVersionUID = 1L;
-    
-    protected GroupController gc;
+
+    protected final GroupController gc;
+    protected EvaluationFunction[] evalPrototypes = new EvaluationFunction[0];
+    protected int maxSteps = 0;
+    public MasonEvaluation[] currentEvals;
 
     public MasonSimState(GroupController gc, long seed) {
         super(seed);
         this.gc = gc;
     }
 
-    public synchronized EvaluationResult[] evaluate(int repetitions, int maxSteps, EvaluationFunction[] evalFunctions) {
-        EvaluationResult[][] evalResults = new EvaluationResult[evalFunctions.length][repetitions];
-        for (int r = 0; r < repetitions; r++) {
-            MasonEvaluation[] evals = new MasonEvaluation[evalFunctions.length];
-            for (int i = 0; i < evalFunctions.length; i++) {
-                evals[i] = (MasonEvaluation) evalFunctions[i].clone();
-                evals[i].setSimulationModel(this);
-            }
-            for(MasonEvaluation e : evals) {
-                e.setConcurrentFunctions(evals);
-            }
+    public void setMaxSteps(int maxSteps) {
+        this.maxSteps = maxSteps;
+    }
 
-            start();
-            for (int i = 0; i < evals.length; i++) {
-                evals[i].preSimulation();
+    public void setEvalFunctions(EvaluationFunction[] evalPrototypes) {
+        this.evalPrototypes = evalPrototypes;
+    }
+
+    @Override
+    public void start() {
+        super.start();
+
+        // Init eval functions and schedule them
+        currentEvals = new MasonEvaluation[evalPrototypes.length];
+        for (int i = 0; i < evalPrototypes.length; i++) {
+            currentEvals[i] = (MasonEvaluation) evalPrototypes[i].clone();
+            if (currentEvals[i].updateFrequency > 0) {
+                super.schedule.scheduleRepeating(currentEvals[i], currentEvals[i].updateFrequency, 1 + i);
             }
-            while (schedule.getSteps() < maxSteps) {
-                boolean b = schedule.step(this);
-                for (int i = 0; i < evals.length; i++) {
-                    evals[i].evaluationStep();
-                }
-                if (!b) {
-                    break;
-                }
-            }
-            for (int i = 0; i < evals.length; i++) {
-                evals[i].postSimulation();
-            }
-            
-            for(int i = 0 ; i < evals.length ; i++) {
-                evalResults[i][r] = evals[i].getResult();
-            }
-            finish();
         }
 
-        EvaluationResult[] mergedResult = new EvaluationResult[evalFunctions.length];
-        for (int i = 0; i < evalFunctions.length; i++) {
+        // Schedule pre-simulation evaluation
+        super.schedule.scheduleOnce(Schedule.EPOCH, -1, new Steppable() {
+            @Override
+            public void step(SimState state) {
+                for (MasonEvaluation e : currentEvals) {
+                    e.preSimulation(MasonSimState.this);
+                }
+            }
+        });
+
+        // Schedule termination by max steps
+        super.schedule.scheduleOnce(maxSteps, Integer.MAX_VALUE, new Steppable() {
+            @Override
+            public void step(SimState state) {
+                state.kill();
+            }
+        });
+    }
+
+    @Override
+    public void kill() {
+        for (MasonEvaluation e : currentEvals) {
+            e.postSimulation(this);
+        }
+        super.kill();
+    }
+
+    public synchronized EvaluationResult[] evaluate(int repetitions) {
+        EvaluationResult[][] evalResults = new EvaluationResult[evalPrototypes.length][repetitions];
+        for (int r = 0; r < repetitions; r++) {
+            start();
+            while (schedule.step(this));
+            for (int i = 0; i < currentEvals.length; i++) {
+                evalResults[i][r] = currentEvals[i].getResult();
+            }
+        }
+
+        EvaluationResult[] mergedResult = new EvaluationResult[evalPrototypes.length];
+        for (int i = 0; i < evalPrototypes.length; i++) {
             mergedResult[i] = evalResults[i][0].mergeEvaluations(evalResults[i]);
         }
         return mergedResult;

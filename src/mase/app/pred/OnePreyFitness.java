@@ -6,6 +6,7 @@ package mase.app.pred;
 
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import net.jafama.FastMath;
 import sim.util.Double2D;
 
@@ -27,7 +28,7 @@ public class OnePreyFitness extends MasonEvaluation {
     }
 
     @Override
-    public void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         PredatorPrey simState = (PredatorPrey) sim;
         Prey prey = simState.preys.get(0);
         initialDistance = 0;
@@ -39,7 +40,7 @@ public class OnePreyFitness extends MasonEvaluation {
     }
 
     @Override
-    public void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         PredatorPrey simState = (PredatorPrey) sim;
 
         Double2D preyLoc = simState.preys.get(0).getLocation();

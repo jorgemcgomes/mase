@@ -10,10 +10,8 @@ import java.awt.Color;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.MasonSimState;
-import org.apache.commons.lang3.tuple.Pair;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
-import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Double2D;
 
@@ -22,6 +20,8 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class MazeTask extends MasonSimState {
+
+    private static final long serialVersionUID = 1L;
     
     protected MazeParams par;
     protected Continuous2D field;

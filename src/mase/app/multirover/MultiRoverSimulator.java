@@ -25,7 +25,7 @@ import sim.display.GUIState;
  *
  * @author jorge
  */
-public class MultiRoverSimulator extends MasonSimulationProblem {
+public class MultiRoverSimulator extends MasonSimulationProblem<MultiRover> {
 
     private static final long serialVersionUID = 1L;
     private MRParams par;
@@ -87,12 +87,4 @@ public class MultiRoverSimulator extends MasonSimulationProblem {
     public MultiRover createSimState(GroupController gc, long seed) {
         return new MultiRover(seed, par, gc);
     }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController cs, long seed) {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int size = (int) screenSize.getHeight() - 200;
-        return new GUIState2D(createSimState(cs, seed), "Multi-rover", size, size, Color.WHITE);
-    }
-    
 }

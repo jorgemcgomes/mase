@@ -8,6 +8,7 @@ package mase.app.soccer;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import net.jafama.FastMath;
 
 /**
@@ -27,16 +28,16 @@ public class WinsFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         Soccer soc = (Soccer) sim;
         minDist = Math.min(minDist, soc.ball.getLocation().distance(soc.rightGoalCenter));
     }
     
     
     @Override
-    protected void postSimulation() {
-        super.postSimulation(); 
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null); 
         Soccer soc = (Soccer) sim;
         double bootstrap = 1 - minDist / FastMath.sqrt(FastMath.pow2(soc.par.fieldLength) + FastMath.pow2(soc.par.fieldWidth / 2));
         double time = 1 - soc.schedule.getSteps() / (double) maxSteps;

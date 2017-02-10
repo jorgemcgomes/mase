@@ -8,6 +8,7 @@ package mase.app.herding;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -23,8 +24,8 @@ public class HerdingGroupEval extends MasonEvaluation {
     private double initSheepCurral, initSheepFox;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         sheepFence = 0;
         sheepFox = 0;
         Herding herd = (Herding) sim;
@@ -36,8 +37,8 @@ public class HerdingGroupEval extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
 
         Herding herd = (Herding) sim;
         Sheep s = herd.sheeps.get(0);
@@ -49,8 +50,8 @@ public class HerdingGroupEval extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         Herding herd = (Herding) sim;
         Sheep s = herd.sheeps.get(0);
         double sheepCurral = herd.curral.closestDistance(s.getLocation());

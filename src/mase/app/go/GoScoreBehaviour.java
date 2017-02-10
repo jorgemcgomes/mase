@@ -9,6 +9,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import net.jafama.FastMath;
 
 /**
@@ -20,7 +21,7 @@ public class GoScoreBehaviour extends MasonEvaluation {
     private SubpopEvaluationResult ser;
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Go go = (Go) sim;
         double d = go.schedule.getSteps() / 2.0f;
         double s = FastMath.pow2(go.boardSize);

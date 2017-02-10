@@ -12,6 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 import sim.util.Double2D;
 
@@ -35,8 +36,8 @@ public class PredcompBehaviour extends MasonEvaluation {
     }    
     
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         this.wallProximity = new double[2];
         this.movement = new double[2];
         this.distanceToOther = 0;
@@ -44,8 +45,8 @@ public class PredcompBehaviour extends MasonEvaluation {
     }    
 
     @Override
-    protected void evaluate() {
-        super.evaluate(); 
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null); 
         Predcomp pc = (Predcomp) sim;
         distanceToOther += pc.predator.distanceTo(pc.prey);
         
@@ -57,12 +58,11 @@ public class PredcompBehaviour extends MasonEvaluation {
         lastPos[0] = pc.predator.getLocation();
         lastPos[1] = pc.prey.getLocation();
         
-        wallProximity[0] += prox(pc.predator.getLocation());
-        wallProximity[1] += prox(pc.prey.getLocation());
+        wallProximity[0] += prox(pc.predator.getLocation(), pc.par.size);
+        wallProximity[1] += prox(pc.prey.getLocation(), pc.par.size);
     }
     
-    private double prox(Double2D loc) {
-        double size = ((Predcomp) sim).par.size;
+    private double prox(Double2D loc, double size) {
         double dx = size / 2 - Math.abs(loc.x - size / 2);
         double dy = size / 2 - Math.abs(loc.y - size / 2);
         return  Math.min(dx, dy);
@@ -70,7 +70,7 @@ public class PredcompBehaviour extends MasonEvaluation {
         
     
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Predcomp pc = (Predcomp) sim;
         int steps = (int) sim.schedule.getSteps();
         this.res = new SubpopEvaluationResult(

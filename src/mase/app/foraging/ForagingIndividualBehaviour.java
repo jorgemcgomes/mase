@@ -9,6 +9,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.Double2D;
 
 /**
@@ -27,8 +28,8 @@ public class ForagingIndividualBehaviour extends MasonEvaluation {
     private SubpopEvaluationResult ser;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         landProximity = 0;
         flyingProximity = 0;
         landFlyingDistance = 0;
@@ -41,8 +42,8 @@ public class ForagingIndividualBehaviour extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         ForagingTask ft = (ForagingTask) sim;
         landFlyingDistance += ft.landBot.getLocation().distance(ft.flyingBot.getLocation());
 
@@ -63,8 +64,8 @@ public class ForagingIndividualBehaviour extends MasonEvaluation {
     }
     
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         ForagingTask ft = (ForagingTask) sim;
         double diag = ft.par.arenaSize.length();
         ser = new SubpopEvaluationResult(

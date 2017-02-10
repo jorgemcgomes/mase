@@ -8,6 +8,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -18,7 +19,7 @@ public class GoFitness extends MasonEvaluation {
     private SubpopEvaluationResult res;
     
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Go go = (Go) sim;
         int blackScore = go.state.getScore(GoState.BLACK);
         int whiteScore = go.state.getScore(GoState.WHITE);

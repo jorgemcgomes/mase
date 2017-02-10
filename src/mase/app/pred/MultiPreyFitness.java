@@ -6,6 +6,7 @@ package mase.app.pred;
 
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -23,7 +24,7 @@ public class MultiPreyFitness extends MasonEvaluation {
     }
 
     @Override
-    public void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         PredatorPrey predSim = (PredatorPrey) sim;
         int captureCount = predSim.getCaptureCount();
         double captured = captureCount / (double) predSim.preys.size();

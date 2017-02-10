@@ -11,6 +11,7 @@ import java.util.Map;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.Double2D;
 
 /**
@@ -27,9 +28,9 @@ public class HerdingFitnessBootstrap extends MasonEvaluation {
     private Double2D gate;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
-        Herding herd = (Herding) super.sim;
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
+        Herding herd = (Herding) sim;
         gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
         initialDistances = new HashMap<Sheep,Double>();
         for(Sheep s : herd.sheeps) {
@@ -40,9 +41,9 @@ public class HerdingFitnessBootstrap extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
-        Herding herd = (Herding) super.sim;
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
+        Herding herd = (Herding) sim;
         for(int i = 0 ; i < herd.sheeps.size() ; i++) {
             for(Shepherd shep : herd.shepherds) {
                 closestShepherd[i] = Math.min(closestShepherd[i], herd.sheeps.get(i).distanceTo(shep));
@@ -51,9 +52,9 @@ public class HerdingFitnessBootstrap extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
-        Herding herd = (Herding) super.sim;
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
+        Herding herd = (Herding) sim;
         double fitness = 0;
         for(Sheep sheep : herd.sheeps) {
             if (sheep.corraledTime > 0) { // sheep curraled

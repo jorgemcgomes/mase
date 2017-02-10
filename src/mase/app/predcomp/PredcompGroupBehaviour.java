@@ -12,6 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 import sim.util.Double2D;
 
@@ -33,8 +34,8 @@ public class PredcompGroupBehaviour extends MasonEvaluation {
  
     
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         //this.wallProximity = new double[2];
         //this.movement = new double[2];
         this.distanceToOther = 0;
@@ -42,8 +43,8 @@ public class PredcompGroupBehaviour extends MasonEvaluation {
     }    
 
     @Override
-    protected void evaluate() {
-        super.evaluate(); 
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null); 
         Predcomp pc = (Predcomp) sim;
         distanceToOther += pc.predator.distanceTo(pc.prey);
         
@@ -68,7 +69,7 @@ public class PredcompGroupBehaviour extends MasonEvaluation {
         
     
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Predcomp pc = (Predcomp) sim;
         int steps = (int) sim.schedule.getSteps();
         this.res = new VectorBehaviourResult((double) steps / maxSteps,  (distanceToOther / steps / pc.par.size));

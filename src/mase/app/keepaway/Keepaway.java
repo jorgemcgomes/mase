@@ -28,6 +28,8 @@ import sim.util.Double2D;
  */
 public class Keepaway extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
 
+    private static final long serialVersionUID = 1L;
+
     protected KeepawayParams par;
     protected Continuous2D field;
     protected List<Keeper> keepers;

@@ -8,6 +8,7 @@ package mase.app.foraging;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -24,8 +25,8 @@ public class ForagingFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         ForagingTask ft = (ForagingTask) sim;
         res = new FitnessResult( (ft.par.items.length - ft.items.size()), FitnessResult.ARITHMETIC);
     }

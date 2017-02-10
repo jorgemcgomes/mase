@@ -12,6 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 import sim.util.Double2D;
 
@@ -34,16 +35,16 @@ public class PredcompBehaviourSimple extends MasonEvaluation {
     }    
     
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         this.movement = new double[2];
         this.distanceToOther = 0;
         this.lastPos = new Double2D[2];
     }    
 
     @Override
-    protected void evaluate() {
-        super.evaluate(); 
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null); 
         Predcomp pc = (Predcomp) sim;
         distanceToOther += pc.predator.distanceTo(pc.prey);
         
@@ -57,7 +58,7 @@ public class PredcompBehaviourSimple extends MasonEvaluation {
     }
     
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Predcomp pc = (Predcomp) sim;
         int steps = (int) sim.schedule.getSteps();
         this.res = new SubpopEvaluationResult(

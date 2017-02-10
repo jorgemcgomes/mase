@@ -9,6 +9,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.util.MathArrays;
 
@@ -25,28 +26,27 @@ public class SoccerIndEvalAdjusted extends MasonEvaluation {
     private double[][] accumDists;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         Soccer soc = (Soccer) sim;
         initDists = new double[soc.leftTeam.size()][];
         accumDists = new double[soc.leftTeam.size()][];
         for (int a = 0; a < soc.leftTeam.size(); a++) {
-            initDists[a] = computeDistances(soc.leftTeam.get(a));
+            initDists[a] = computeDistances(soc.leftTeam.get(a), (Soccer) sim);
         }
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         Soccer soc = (Soccer) sim;
         for (int a = 0; a < soc.leftTeam.size(); a++) {
-            double[] d = computeDistances(soc.leftTeam.get(a));
+            double[] d = computeDistances(soc.leftTeam.get(a), (Soccer) sim);
             accumDists[a] = accumDists[a] == null ? d : MathArrays.ebeAdd(accumDists[a], d);
         }
     }
 
-    private double[] computeDistances(SoccerAgent sa) {
-        Soccer soc = (Soccer) sim;
+    private double[] computeDistances(SoccerAgent sa, Soccer soc) {
         double[] res = new double[4];
         // Distance to opponent goal
         res[0] = sa.distanceTo(sa.oppGoal);
@@ -71,8 +71,8 @@ public class SoccerIndEvalAdjusted extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         Soccer soc = (Soccer) sim;
         VectorBehaviourResult[] res = new VectorBehaviourResult[soc.leftTeam.size()];
         for (int a = 0; a < res.length; a++) {

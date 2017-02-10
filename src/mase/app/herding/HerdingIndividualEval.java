@@ -9,6 +9,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.Double2D;
 
 /**
@@ -27,8 +28,8 @@ public class HerdingIndividualEval extends MasonEvaluation {
     private SubpopEvaluationResult ser;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         Herding herd = (Herding) sim;
         sheepDist = new double[herd.shepherds.size()][herd.sheeps.size()];
         foxDist = new double[herd.shepherds.size()][herd.foxes.size()];
@@ -38,8 +39,8 @@ public class HerdingIndividualEval extends MasonEvaluation {
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         Herding herd = (Herding) sim;
         for (int i = 0; i < herd.shepherds.size(); i++) {
             Shepherd shep = herd.shepherds.get(i);
@@ -66,8 +67,8 @@ public class HerdingIndividualEval extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         Herding herd = (Herding) sim;
         VectorBehaviourResult[] res = new VectorBehaviourResult[herd.shepherds.size()];
         double maxD = herd.par.arenaSize;

@@ -12,6 +12,7 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 
 /**
@@ -32,13 +33,13 @@ public class GoGroupCharacterisation extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.biggestGroupSize = new double[2];
         this.groupNumber = new double[2];
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         Go go = (Go) sim;
         for (int i = 0; i < 2; i++) {
             int sizeLargest = -1;
@@ -58,7 +59,7 @@ public class GoGroupCharacterisation extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Go go = (Go) sim;
         double d = go.schedule.getSteps() / 2.0f;
         ser = new SubpopEvaluationResult(

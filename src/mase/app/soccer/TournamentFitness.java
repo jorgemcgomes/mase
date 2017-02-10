@@ -8,6 +8,7 @@ package mase.app.soccer;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import net.jafama.FastMath;
 
 /**
@@ -21,8 +22,8 @@ public class TournamentFitness extends MasonEvaluation {
     private FitnessResult res;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         this.avgDist = 0;
     }
     
@@ -32,16 +33,16 @@ public class TournamentFitness extends MasonEvaluation {
     }
     
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         Soccer soc = (Soccer) sim;
         avgDist += soc.ball.getLocation().distance(soc.rightGoalCenter);
     }
         
     
     @Override
-    protected void postSimulation() {
-        super.postSimulation(); 
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null); 
         Soccer soc = (Soccer) sim;
         double score;
         if(soc.referee.leftTeamScore > 0) { // win

@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import sim.util.Double2D;
 
 /**
@@ -22,21 +23,21 @@ public class MazeBehaviourExt extends MasonEvaluation {
     private LinkedList<Double2D> positions;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         positions = new LinkedList<Double2D>();
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         MazeTask mt = (MazeTask) sim;
         positions.add(mt.agent.getLocation());
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         MazeTask mt = (MazeTask) sim;
         while (positions.size() < maxEvaluationSteps) {
             positions.add(mt.agent.getLocation());

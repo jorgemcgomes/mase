@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.evaluation.EvaluationFunction;
 import mase.generic.SmartAgentProvider;
 import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;

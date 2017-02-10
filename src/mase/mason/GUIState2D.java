@@ -6,10 +6,13 @@ package mase.mason;
 
 import java.awt.Color;
 import javax.swing.JFrame;
+import mase.evaluation.EvaluationFunction;
 import sim.display.Controller;
 import sim.display.Display2D;
 import sim.display.GUIState;
+import sim.engine.Schedule;
 import sim.engine.SimState;
+import sim.engine.Steppable;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.Inspector;
 
@@ -39,6 +42,19 @@ public class GUIState2D extends GUIState {
     public void start() {
         super.start();
         setupPortrayals();
+        super.scheduleAtEnd(new Steppable() {
+            @Override
+            public void step(SimState state) {
+                MasonSimState mss = (MasonSimState) state;
+                if(mss.schedule.getTime() != Schedule.AFTER_SIMULATION) { // hack to run post-eval when stop button is pressed
+                    mss.kill();
+                }
+                for(int i = 0 ; i < mss.currentEvals.length ; i++) {
+                    EvaluationFunction e = mss.currentEvals[i];
+                    System.out.println("Evaluation " + i + " " + e.getClass().getSimpleName() + ":\n" + e.getResult());
+                }
+            }
+        });
     }  
 
     @Override
@@ -93,4 +109,6 @@ public class GUIState2D extends GUIState {
         displayFrame = null;
         display = null;
     }
+    
+    
 }

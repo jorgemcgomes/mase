@@ -8,6 +8,7 @@ package mase.app.foraging;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 
 /**
  *
@@ -22,16 +23,16 @@ public class ForagingGroupBehaviour extends MasonEvaluation {
     private VectorBehaviourResult vbr;
 
     @Override
-    protected void preSimulation() {
-        super.preSimulation();
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(null);
         dispersion = 0;
         averageProximity = 0;
         timeWithin = 0;
     }
 
     @Override
-    protected void evaluate() {
-        super.evaluate();
+    protected void evaluate(MasonSimState sim) {
+        super.evaluate(null);
         ForagingTask ft = (ForagingTask) sim;
         dispersion += ft.landBot.getLocation().distance(ft.flyingBot.getLocation());
 
@@ -55,8 +56,8 @@ public class ForagingGroupBehaviour extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
-        super.postSimulation();
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(null);
         ForagingTask ft = (ForagingTask) sim;
         double diag = ft.par.arenaSize.length();
         vbr = new VectorBehaviourResult(

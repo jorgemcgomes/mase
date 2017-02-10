@@ -8,6 +8,7 @@ import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import net.jafama.FastMath;
 
 /**
@@ -19,7 +20,7 @@ public class AggregationFitnessMax extends MasonEvaluation {
     private FitnessResult res;
     
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         Aggregation agg = (Aggregation) sim;
         double maxDist = Double.NEGATIVE_INFINITY;
         List<AggregationAgent> list = agg.agents;

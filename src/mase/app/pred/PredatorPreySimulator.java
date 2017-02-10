@@ -16,7 +16,7 @@ import sim.display.GUIState;
 /**
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredatorPreySimulator extends MasonSimulationProblem {
+public class PredatorPreySimulator extends MasonSimulationProblem<PredatorPrey> {
 
     private static final long serialVersionUID = 1L;
     private PredParams par;
@@ -42,10 +42,5 @@ public class PredatorPreySimulator extends MasonSimulationProblem {
     @Override
     public PredatorPrey createSimState(GroupController gc, long seed) {
         return new PredatorPrey(seed, par, gc);
-    }
-
-    @Override
-    public GUIState createSimStateWithUI(GroupController cs, long seed) {
-        return new GUIState2D(createSimState(cs, seed), "Predator-prey", 500, 500, Color.WHITE);
     }
 }

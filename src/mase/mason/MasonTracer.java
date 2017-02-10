@@ -72,7 +72,7 @@ public class MasonTracer {
     }
 
     public void trace(GroupController gc, MasonSimulationProblem sim, long seed, File out) throws IOException {
-        MasonSimState simState = sim.createSimState(gc, seed);
+        MasonSimState simState = sim.getSimState(gc, seed);
 
         simState.start();
         FieldPortrayal2D port = simState.createFieldPortrayal();
@@ -135,8 +135,8 @@ public class MasonTracer {
 
         // record paths
         boolean keepGoing = true;
-        HashMap<EmboddiedAgent, List<Int2D>> points = new HashMap<EmboddiedAgent, List<Int2D>>();
-        while (keepGoing && simState.schedule.getSteps() < sim.maxSteps) {
+        HashMap<EmboddiedAgent, List<Int2D>> points = new HashMap<>();
+        while (keepGoing) {
             for (EmboddiedAgent ag : agents) {
                 if (!points.containsKey(ag)) {
                     points.put(ag, new ArrayList<Int2D>());

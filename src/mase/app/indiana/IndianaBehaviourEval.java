@@ -11,6 +11,7 @@ import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
+import mase.mason.MasonSimState;
 import mase.mason.MasonSimulationProblem;
 import sim.util.MutableDouble2D;
 
@@ -32,13 +33,13 @@ public class IndianaBehaviourEval extends MasonEvaluation {
     }
 
     @Override
-    protected void preSimulation() {
+    protected void preSimulation(MasonSimState sim) {
         this.avgDisp = 0;
         this.avgDist = 0;
     }
 
     @Override
-    protected void evaluate() {
+    protected void evaluate(MasonSimState sim) {
         Indiana ind = (Indiana) sim;
         MutableDouble2D centre = new MutableDouble2D(0, 0);
         for (IndianaAgent a : ind.agents) {
@@ -52,7 +53,7 @@ public class IndianaBehaviourEval extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation() {
+    protected void postSimulation(MasonSimState sim) {
         int count = 0;
         Indiana ind = (Indiana) sim;
         for (IndianaAgent a : ind.agents) {

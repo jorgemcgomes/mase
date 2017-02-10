@@ -5,14 +5,11 @@
  */
 package mase.app.predcomp;
 
-import java.util.ArrayList;
-import java.util.List;
 import mase.app.predcomp.PredcompParams.ORIENTATION;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.mason.MasonSimState;
-import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;

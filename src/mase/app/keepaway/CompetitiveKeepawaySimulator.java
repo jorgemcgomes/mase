@@ -7,7 +7,6 @@
 package mase.app.keepaway;
 
 import mase.controllers.GroupController;
-import mase.mason.MasonSimState;
 
 /**
  *
@@ -15,9 +14,10 @@ import mase.mason.MasonSimState;
  */
 public class CompetitiveKeepawaySimulator extends KeepawaySimulator {
 
+    private static final long serialVersionUID = 1L;
+
     @Override
-    public MasonSimState createSimState(GroupController gc, long seed) {
-        CompetitiveKeepaway kw = new CompetitiveKeepaway(seed, par, gc);
-        return kw;
+    public CompetitiveKeepaway createSimState(GroupController gc, long seed) {
+        return new CompetitiveKeepaway(seed, par, gc);
     }
 }

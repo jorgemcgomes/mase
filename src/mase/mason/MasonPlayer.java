@@ -20,7 +20,8 @@ public class MasonPlayer {
         GroupController controller = Reevaluate.createController(args);
         long startSeed = 0;
         MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args, parent);
-        GUIState gui = sim.createSimStateWithUI(controller, startSeed);
+        MasonSimState state = sim.getSimState(controller, startSeed);
+        GUIState gui = sim.getSimStateUI(state);
         gui.createController();
     }
 }
