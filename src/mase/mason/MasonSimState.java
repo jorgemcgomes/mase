@@ -48,12 +48,13 @@ public abstract class MasonSimState extends SimState {
         for (int i = 0; i < evalPrototypes.length; i++) {
             currentEvals[i] = (MasonEvaluation) evalPrototypes[i].clone();
             if (currentEvals[i].updateFrequency > 0) {
-                super.schedule.scheduleRepeating(currentEvals[i], currentEvals[i].updateFrequency, 1 + i);
+                // Time of first event (begining); ordering (after agents, in the declared order); Steppable; interval (update-freq)
+                super.schedule.scheduleRepeating(Schedule.EPOCH, 100 + i, currentEvals[i], currentEvals[i].updateFrequency);
             }
         }
 
         // Schedule pre-simulation evaluation
-        super.schedule.scheduleOnce(Schedule.EPOCH, -1, new Steppable() {
+        super.schedule.scheduleOnce(Schedule.EPOCH, -Integer.MAX_VALUE, new Steppable() {
             @Override
             public void step(SimState state) {
                 for (MasonEvaluation e : currentEvals) {
@@ -73,10 +74,17 @@ public abstract class MasonSimState extends SimState {
 
     @Override
     public void kill() {
-        for (MasonEvaluation e : currentEvals) {
-            e.postSimulation(this);
-        }
-        super.kill();
+        // let the current epoch finish and schedule termination for next
+        schedule.clear();
+        schedule.scheduleOnceIn(Schedule.EPOCH_PLUS_EPSILON, new Steppable() {
+            @Override
+            public void step(SimState state) {
+                for (MasonEvaluation e : currentEvals) {
+                    e.postSimulation(MasonSimState.this);
+                }
+                MasonSimState.super.kill();                
+            }
+        });
     }
 
     public synchronized EvaluationResult[] evaluate(int repetitions) {
