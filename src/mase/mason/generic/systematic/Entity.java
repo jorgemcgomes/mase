@@ -4,17 +4,14 @@
  * and open the template in the editor.
  */
 
-package mase.generic;
-
-import java.util.List;
-import mase.mason.world.SmartAgent;
+package mase.mason.generic.systematic;
 
 /**
  *
  * @author jorge
  */
-public interface SmartAgentProvider {
-    
-    public List<? extends SmartAgent> getSmartAgents();
-    
+public interface Entity {
+            
+    public double[] getStateVariables();
+        
 }

@@ -7,7 +7,7 @@ package mase.app.aggregation;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import mase.controllers.AgentController;
-import mase.generic.systematic.Entity;
+import mase.mason.generic.systematic.Entity;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;

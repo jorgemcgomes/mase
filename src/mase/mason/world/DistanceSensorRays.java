@@ -26,7 +26,7 @@ public class DistanceSensorRays extends AbstractSensor {
     private double orientationNoise = 0;
     private int noiseType;
     private double[] angles;
-    private Collection<StaticPolygon> polygons;
+    private Collection<StaticPolygonObject> polygons;
 
     public DistanceSensorRays(SimState state, Continuous2D field, EmboddiedAgent ag) {
         super(state, field, ag);
@@ -45,7 +45,7 @@ public class DistanceSensorRays extends AbstractSensor {
     /*
     If not set, or set to null, it will search for existing polygons every timestep
      */
-    public void setObjects(Collection<StaticPolygon> polygons) {
+    public void setObjects(Collection<StaticPolygonObject> polygons) {
         this.polygons = polygons;
     }
 
@@ -110,7 +110,7 @@ public class DistanceSensorRays extends AbstractSensor {
                 re = rayEnds[i].rotate(ag.orientation2D()).add(ag.getLocation());
             }
 
-            for (StaticPolygon p : getCandidates()) {
+            for (StaticPolygonObject p : getCandidates()) {
                 double dist = p.closestDistance(rs, re);
                 if (!Double.isInfinite(dist)) {
                     vals[i] = binary ? 1 : Math.min(vals[i], dist);
@@ -120,14 +120,14 @@ public class DistanceSensorRays extends AbstractSensor {
         return vals;
     }
 
-    protected Collection<StaticPolygon> getCandidates() {
+    protected Collection<StaticPolygonObject> getCandidates() {
         if (polygons != null) {
             return polygons;
         } else {
-            Collection<StaticPolygon> p = new ArrayList<>();
+            Collection<StaticPolygonObject> p = new ArrayList<>();
             for (Object o : field.allObjects) {
-                if (o instanceof StaticPolygon) {
-                    p.add((StaticPolygon) o);
+                if (o instanceof StaticPolygonObject) {
+                    p.add((StaticPolygonObject) o);
                 }
             }
             return p;

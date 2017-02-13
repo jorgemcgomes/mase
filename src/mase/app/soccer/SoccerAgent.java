@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticPolygon.Segment;
+import mase.mason.world.StaticPolygonObject.Segment;
 import sim.engine.SimState;
 import sim.util.Double2D;
 

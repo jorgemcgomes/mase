@@ -11,12 +11,12 @@ import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.generic.SmartAgentProvider;
-import mase.generic.systematic.EntityGroup;
-import mase.generic.systematic.TaskDescription;
-import mase.generic.systematic.TaskDescriptionProvider;
+import mase.mason.generic.SmartAgentProvider;
+import mase.mason.generic.systematic.EntityGroup;
+import mase.mason.generic.systematic.TaskDescription;
+import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.StaticPolygon;
+import mase.mason.world.StaticPolygonObject;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -34,14 +34,14 @@ public class Aggregation extends MasonSimState implements TaskDescriptionProvide
     protected AggregationParams par;
     protected List<AggregationAgent> agents;
     protected Continuous2D field;
-    protected StaticPolygon walls;
+    protected StaticPolygonObject walls;
     protected TaskDescription td;
 
     public Aggregation(long seed, AggregationParams par, GroupController gc) {
         super(gc, seed);
         this.par = par;
 
-        walls = new StaticPolygon(new Double2D[]{
+        walls = new StaticPolygonObject(new Double2D[]{
             new Double2D(0,0),
             new Double2D(par.size, 0),
             new Double2D(par.size, par.size),

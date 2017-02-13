@@ -3,10 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.controllers;
+package mase.deprecated;
 
 import java.util.Arrays;
 import java.util.List;
+import mase.controllers.AgentController;
+import mase.controllers.GroupController;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**

@@ -13,10 +13,10 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationFunction;
-import mase.generic.SmartAgentProvider;
+import mase.mason.generic.SmartAgentProvider;
 import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticPolygon;
+import mase.mason.world.StaticPolygonObject;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.util.Bag;
@@ -38,7 +38,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     protected List<Rock> rocks; // existing rocks
     protected List<Rock>[] matchingRocks; // rocks that match each actuator (index is actuator)
     protected Color[] actuatorColors;
-    protected StaticPolygon walls;
+    protected StaticPolygonObject walls;
 
     public MultiRover(long seed, MRParams par, GroupController gc) {
         super(gc, seed);
@@ -60,7 +60,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
         this.field = new Continuous2D(par.discretization, par.size, par.size);
         this.scores = new int[par.usedTypes.size()];
 
-        walls = new StaticPolygon(new Double2D[]{
+        walls = new StaticPolygonObject(new Double2D[]{
             new Double2D(0, 0),
             new Double2D(par.size, 0),
             new Double2D(par.size, par.size),

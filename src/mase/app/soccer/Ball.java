@@ -6,8 +6,8 @@ package mase.app.soccer;
 
 import java.awt.Color;
 import mase.mason.world.EmboddiedAgent;
-import mase.mason.world.StaticPolygon.Segment;
-import mase.mason.world.WorldObject;
+import mase.mason.world.StaticPolygonObject.Segment;
+import mase.mason.world.CircularObject;
 import net.jafama.FastMath;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
@@ -20,7 +20,7 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Ball extends WorldObject implements Steppable {
+public class Ball extends CircularObject implements Steppable {
 
     private static final long serialVersionUID = 1L;
         

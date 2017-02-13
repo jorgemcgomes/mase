@@ -7,7 +7,7 @@ package mase.mason.world;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import mase.generic.systematic.Entity;
+import mase.mason.generic.systematic.Entity;
 import net.jafama.FastMath;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -18,13 +18,12 @@ import sim.portrayal.simple.OrientedPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Bag;
 import sim.util.Double2D;
-import sim.util.MutableDouble2D;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class EmboddiedAgent extends WorldObject implements Steppable, Oriented2D, Entity {
+public abstract class EmboddiedAgent extends CircularObject implements Steppable, Oriented2D, Entity {
 
     private static final long serialVersionUID = 1L;
 
@@ -40,7 +39,7 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
     public static final double COLLISION_SPEED_DECAY = 0.5;
     public static final double COLLISION_DIRECTION = Math.PI / 2;
     private boolean isAlive;
-    private List<StaticPolygon> obstacleList;
+    private List<StaticPolygonObject> obstacleList;
     private boolean rotate = true;
 
     protected OvalPortrayal2D ovalPortrayal;
@@ -171,14 +170,14 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
         if (obstacleList == null) {
             obstacleList = new ArrayList<>();
             for (Object o : field.allObjects) {
-                if (o instanceof StaticPolygon) {
-                    obstacleList.add((StaticPolygon) o);
+                if (o instanceof StaticPolygonObject) {
+                    obstacleList.add((StaticPolygonObject) o);
                 }
             }
         }
 
         // check for collisions
-        for (StaticPolygon p : obstacleList) {
+        for (StaticPolygonObject p : obstacleList) {
             double d = p.closestDistance(target);
             if (d <= radius) {
                 return false;
@@ -265,15 +264,15 @@ public abstract class EmboddiedAgent extends WorldObject implements Steppable, O
         return FastMath.atan2(agentDirX * agToPointY - agentDirY * agToPointX, agentDirX * agToPointX + agentDirY * agToPointY);
     }
 
-    public double angleTo(WorldObject obj) {
+    public double angleTo(CircularObject obj) {
         return angleTo(obj.getLocation());
     }
 
     public double angleTo(Object obj) {
         if (obj instanceof Double2D) {
             return angleTo((Double2D) obj);
-        } else if (obj instanceof WorldObject) {
-            return angleTo((WorldObject) obj);
+        } else if (obj instanceof CircularObject) {
+            return angleTo((CircularObject) obj);
         } else {
             return angleTo(field.getObjectLocation(obj));
         }

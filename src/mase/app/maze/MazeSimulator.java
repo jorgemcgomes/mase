@@ -5,24 +5,15 @@
  */
 package mase.app.maze;
 
-import com.kitfox.svg.SVGException;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mase.controllers.GroupController;
-import mase.mason.MasonSimState;
-import mase.mason.GUIState2D;
 import mase.mason.MasonSimulationProblem;
 import mase.mason.ParamUtils;
-import mase.mason.world.PolygonGenerator;
-import mase.mason.world.StaticPolygon;
-import sim.display.GUIState;
+import mase.mason.world.StaticPolygonObject;
 import sim.util.Double2D;
 
 /**
@@ -30,6 +21,8 @@ import sim.util.Double2D;
  * @author jorge
  */
 public class MazeSimulator extends MasonSimulationProblem<MazeTask> {
+
+    private static final long serialVersionUID = 1L;
 
     private MazeParams par;
 
@@ -46,7 +39,7 @@ public class MazeSimulator extends MasonSimulationProblem<MazeTask> {
             }
             state.output.message("Maze: " + svg.getAbsolutePath());
             MazeReader mr = new MazeReader(svg);
-            par.maze = new StaticPolygon(mr.getSegments());
+            par.maze = new StaticPolygonObject(mr.getSegments());
             par.maze.filled = false;
             par.maze.paint = Color.BLACK;
             par.maze.setStroke(new BasicStroke(2f));

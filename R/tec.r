@@ -526,9 +526,12 @@ ggplot(socfit[,.(Mean=mean(BestSoFar),SE=se(BestSoFar)),by=.(Method,Evaluations)
 
 setwd("~/exps/socns/")
 
-d <- loadData(c("veryeasy*","hard*"),"postfitness.stat", fun=loadFitness)
+d <- loadData(c("easy*","med*","hard*"),"postfitness.stat", fun=loadFitness)
 ggplot(d[, .(Mean = mean(BestSoFar), SE=se(BestSoFar)), by=.(ID1,ID2,Generation)], aes(Generation,Mean,group=ID2)) + geom_line(aes(colour=ID2)) + ylab("Fitness") +
   geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=ID2), alpha = 0.1) + facet_wrap(~ ID1, scales="free")
+
+ggplot(lastGen(d), aes(ID2,BestSoFar)) + geom_boxplot(aes(colour=ID2)) + ylab("Fitness") + facet_wrap(~ ID1, scales="free")
+
 
 ts <- c("ownscore","oppscore","time","ballgoaldist","possession")
 d <- loadData("veryeasy_nsga","behaviours.stat", fun=loadBehaviours, vars=ts, sample=0.25)

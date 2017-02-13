@@ -30,13 +30,16 @@ import mase.spec.AbstractHybridExchanger;
  */
 public abstract class SimulationProblem extends Problem implements GroupedProblemForm, SimpleProblemForm {
 
+    private static final long serialVersionUID = 1L;
+
     public static final String P_EVAL_NUMBER = "number-evals";
     public static final String P_EVAL = "eval";
-    private static final long serialVersionUID = 1L;
     protected EvaluationFunction[] evalFunctions;
+    
     public static final String P_TRIALS_MERGE = "trials-merge";
     public static final String V_MERGE_BEST = "best", V_MERGE_MEAN = "mean", V_MERGE_MEDIAN = "median";
     protected String mergeMode;
+    
     public static final String P_SEED = "seed";
     public static final String V_RANDOM_SEED = "random";
     protected boolean sameSeed;
@@ -118,7 +121,7 @@ public abstract class SimulationProblem extends Problem implements GroupedProble
         }
     }
 
-    // TODO: Bad dependence -- should be improved with interfaces
+    // TODO: Bad dependencies -- should be improved with interfaces
     public GroupController createController(EvolutionState state, Individual... ind) {
         ArrayList<AgentController> acs = new ArrayList<>();
         for (Individual ind1 : ind) {

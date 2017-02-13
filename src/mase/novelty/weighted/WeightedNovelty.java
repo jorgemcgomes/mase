@@ -15,7 +15,7 @@ import java.util.List;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.VectorBehaviourResult;
-import mase.generic.systematic.SystematicResult;
+import mase.mason.generic.systematic.SystematicResult;
 import mase.novelty.NoveltyEvaluation;
 import net.jafama.FastMath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;

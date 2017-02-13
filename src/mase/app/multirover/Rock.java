@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import mase.mason.world.WorldObject;
+import mase.mason.world.CircularObject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
@@ -22,7 +22,7 @@ import sim.portrayal.simple.OvalPortrayal2D;
  *
  * @author jorge
  */
-public class Rock extends WorldObject implements Steppable {
+public class Rock extends CircularObject implements Steppable {
 
     private static final long serialVersionUID = 1L;
 

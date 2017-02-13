@@ -8,7 +8,7 @@ package mase.mason.world;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.util.LinkedHashSet;
-import mase.generic.systematic.Entity;
+import mase.mason.generic.systematic.Entity;
 import net.jafama.FastMath;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.portrayal.simple.ShapePortrayal2D;
@@ -18,8 +18,42 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class StaticPolygon extends ShapePortrayal2D implements Entity {
+public class StaticPolygonObject extends ShapePortrayal2D implements Entity {
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Format by segment: x1,y1,x2,y2;x3,y3,x4,y4;...
+     * @param s
+     * @return
+     */
+    public static StaticPolygonObject generateFromSegments(String s) {
+        String[] segStrings = s.split(";");
+        Segment[] segments = new Segment[segStrings.length];
+        for (int i = 0; i < segStrings.length; i++) {
+            String[] v = segStrings[i].split(",");
+            Double2D start = new Double2D(Double.parseDouble(v[0].trim()), Double.parseDouble(v[1].trim()));
+            Double2D end = new Double2D(Double.parseDouble(v[2].trim()), Double.parseDouble(v[3].trim()));
+            segments[i] = new Segment(start, end);
+        }
+        StaticPolygonObject pol = new StaticPolygonObject(segments);
+        return pol;
+    }
+
+    /**
+     * Format by point: x1,y1;x2,y2;x3,y3;...
+     * @param s
+     * @return
+     */
+    public static StaticPolygonObject generateFromPoints(String s) {
+        String[] pointStrings = s.split(";");
+        Double2D[] points = new Double2D[pointStrings.length];
+        for (int i = 0; i < pointStrings.length; i++) {
+            String[] v = pointStrings[i].split(",");
+            points[i] = new Double2D(Double.parseDouble(v[0].trim()), Double.parseDouble(v[1].trim()));
+        }
+        StaticPolygonObject pol = new StaticPolygonObject(points);
+        return pol;
+    }
 
     private final Segment[] segments;
     private final Double2D[] points;
@@ -33,7 +67,7 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
      * @param base
      * @param points
      */
-    public StaticPolygon(Double2D... points) {
+    public StaticPolygonObject(Double2D... points) {
         super(buildShape(points));
 
         this.segments = new Segment[points.length - 1];
@@ -52,10 +86,10 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
      * @param base
      * @param segs
      */
-    public StaticPolygon(Segment... segs) {
+    public StaticPolygonObject(Segment... segs) {
         super(buildShape(segs));
 
-        LinkedHashSet<Double2D> ps = new LinkedHashSet<Double2D>();
+        LinkedHashSet<Double2D> ps = new LinkedHashSet<>();
         for (int i = 0; i < segs.length; i++) {
             ps.add(segs[i].start);
             ps.add(segs[i].end);
@@ -108,7 +142,7 @@ public class StaticPolygon extends ShapePortrayal2D implements Entity {
         return Pair.of(min, s);        
     }
 
-    public double closestDistance(StaticPolygon other) {
+    public double closestDistance(StaticPolygonObject other) {
         double closest = Double.NEGATIVE_INFINITY;
         for (Double2D p : this.points) {
             closest = Math.min(closest, other.closestDistance(p));

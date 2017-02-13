@@ -3,8 +3,8 @@ package mase.app.soccer;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import mase.mason.world.StaticPolygon;
-import mase.mason.world.StaticPolygon.Segment;
+import mase.mason.world.StaticPolygonObject;
+import mase.mason.world.StaticPolygonObject.Segment;
 import net.jafama.FastMath;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
@@ -303,7 +303,7 @@ public class AIKAgent extends SoccerAgent {
     Obstacle handling
      */
     private Obstacle edgeObstacle(Segment seg, double range) {
-        double d = StaticPolygon.distToSegment(getLocation(), seg.start, seg.end);
+        double d = StaticPolygonObject.distToSegment(getLocation(), seg.start, seg.end);
         if (d < range) {
             // find the intersection between the line defined by the points of the segment
             // and the perpendicular line that passes through the agent's center

@@ -12,12 +12,12 @@ import java.util.Collections;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.generic.SmartAgentProvider;
-import mase.generic.systematic.EntityGroup;
-import mase.generic.systematic.TaskDescription;
-import mase.generic.systematic.TaskDescriptionProvider;
+import mase.mason.generic.SmartAgentProvider;
+import mase.mason.generic.systematic.EntityGroup;
+import mase.mason.generic.systematic.TaskDescription;
+import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.StaticPolygon;
+import mase.mason.world.StaticPolygonObject;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.engine.SimState;
@@ -39,7 +39,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
     protected List<IndianaAgent> agents;
     protected List<IndianaAgent> activeAgents;
     protected Continuous2D field;
-    protected StaticPolygon walls;
+    protected StaticPolygonObject walls;
     protected Gate gate;
     protected TaskDescription td;
 
@@ -57,7 +57,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
         super(gc, seed);
         this.par = par;
 
-        this.walls = new StaticPolygon(new Double2D[]{
+        this.walls = new StaticPolygonObject(new Double2D[]{
             new Double2D(0, par.size / 2 + par.gateSize / 2),
             new Double2D(0, par.size),
             new Double2D(par.size, par.size),
@@ -134,7 +134,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
         activeAgents = new ArrayList<IndianaAgent>(agents);
     }
 
-    protected static class Gate extends StaticPolygon implements Steppable {
+    protected static class Gate extends StaticPolygonObject implements Steppable {
 
         protected long openTime = -1;
         protected boolean closed = false;

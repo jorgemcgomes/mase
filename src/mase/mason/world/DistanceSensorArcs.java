@@ -111,13 +111,6 @@ public class DistanceSensorArcs extends AbstractSensor {
         return arcStart.length;
     }
 
-    private static final Comparator<Pair<Object, Double>> COMPARATOR = new Comparator<Pair<Object, Double>>() {
-        @Override
-        public int compare(Pair<Object, Double> o1, Pair<Object, Double> o2) {
-            return Double.compare(o1.getRight(), o2.getRight());
-        }
-    };
-
     /**
      * Very efficient implementation using an ordered TreeMap
      * Should ensure scalability when large numbers of objects are present,

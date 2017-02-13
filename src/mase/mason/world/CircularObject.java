@@ -19,7 +19,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class WorldObject extends CircledPortrayal2D implements Fixed2D {
+public class CircularObject extends CircledPortrayal2D implements Fixed2D {
 
     private static final long serialVersionUID = 1L;
     protected Continuous2D field;
@@ -34,7 +34,7 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
     protected MovablePortrayal2D movablePortrayal;
     protected SimplePortrayal2D woChild;
 
-    public WorldObject(SimplePortrayal2D child, SimState sim, Continuous2D field, double radius) {
+    public CircularObject(SimplePortrayal2D child, SimState sim, Continuous2D field, double radius) {
         super(new LabelledPortrayal2D(new MovablePortrayal2D(child), ""));
 
         this.woChild = child;
@@ -100,7 +100,7 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
         field.setObjectLocation(this, pos);
     }
 
-    public double distanceTo(WorldObject other) {
+    public double distanceTo(CircularObject other) {
         return Math.max(0, pos.distance(other.getLocation()) - other.radius - this.radius);
     }
 
@@ -108,17 +108,17 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
         return Math.max(0, pos.distance(point) - this.radius);
     }
     
-    public double distanceTo(StaticPolygon poly) {
+    public double distanceTo(StaticPolygonObject poly) {
         return Math.max(0, poly.closestDistance(pos) - this.radius);
     }
     
     public double distanceTo(Object obj) {
-         if(obj instanceof WorldObject) {
-            return distanceTo((WorldObject) obj);
+         if(obj instanceof CircularObject) {
+            return distanceTo((CircularObject) obj);
         } else if(obj instanceof Double2D) {
             return distanceTo((Double2D) obj);
-        } else if(obj instanceof StaticPolygon) {
-            return distanceTo((StaticPolygon) obj);
+        } else if(obj instanceof StaticPolygonObject) {
+            return distanceTo((StaticPolygonObject) obj);
         } else {
             Double2D p = field.getObjectLocation(obj);
             if(p == null) {
@@ -130,8 +130,8 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
 
     public double centerDistanceTo(Object obj) {
         Double2D center;
-        if(obj instanceof WorldObject) {
-            center = ((WorldObject) obj).getLocation();
+        if(obj instanceof CircularObject) {
+            center = ((CircularObject) obj).getLocation();
         } else if(obj instanceof Double2D) {
             center = (Double2D) obj;
         } else {
@@ -141,10 +141,10 @@ public class WorldObject extends CircledPortrayal2D implements Fixed2D {
     }    
 
     public boolean isInside(Object obj) {
-        if(obj instanceof WorldObject) {
+        if(obj instanceof CircularObject) {
             double dist = centerDistanceTo(obj);
-            return dist < ((WorldObject) obj).getRadius();
-        } else if(obj instanceof StaticPolygon) {
+            return dist < ((CircularObject) obj).getRadius();
+        } else if(obj instanceof StaticPolygonObject) {
             return false; // TODO: needs to be implemented, but the current static polygons can be open, which makes this currently impossible
         } else {
             return false;

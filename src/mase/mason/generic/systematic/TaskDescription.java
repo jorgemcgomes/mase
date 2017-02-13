@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package mase.generic.systematic;
+package mase.mason.generic.systematic;
 
 /**
  *

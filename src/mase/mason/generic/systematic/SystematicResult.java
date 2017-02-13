@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.generic.systematic;
+package mase.mason.generic.systematic;
 
 import java.util.Arrays;
 import mase.evaluation.EvaluationResult;

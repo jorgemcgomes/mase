@@ -5,7 +5,7 @@
 package mase.app.sharing;
 
 import java.awt.Color;
-import mase.generic.systematic.Entity;
+import mase.mason.generic.systematic.Entity;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.portrayal.simple.OvalPortrayal2D;
