@@ -275,7 +275,7 @@ public class MasterTournament {
         PersistentSolution sol = new PersistentSolution();
         sol.setController(newC);
         sol.setEvalResults(new EvaluationResult[]{ser});
-        File superBest = new File(outPath + "challenge" + name + ".ind");
+        File superBest = new File(outPath + "challenge" + name + ".xml");
         SolutionPersistence.writeSolution(sol, superBest);
     }
 

@@ -151,7 +151,7 @@ public class BatchReevaluate {
         // Output files
         File fitnessLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "fitness.stat"));
         File behavLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "behaviours.stat"));
-        File bestFile = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "best.ind"));
+        File bestFile = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "best.xml"));
 
         BufferedWriter fitWriter = new BufferedWriter(new FileWriter(fitnessLog));
         BufferedWriter behavWriter = new BufferedWriter(new FileWriter(behavLog));

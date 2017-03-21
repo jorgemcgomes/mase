@@ -4,6 +4,7 @@
  */
 package mase.stat;
 
+import com.thoughtworks.xstream.XStream;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.eval.MasterProblem;
@@ -14,11 +15,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import mase.SimulationProblem;
@@ -38,6 +38,8 @@ import org.apache.commons.lang3.SerializationUtils;
  */
 public abstract class SolutionPersistence {
 
+    public static final XStream XSTREAM = new XStream();
+
     public static PersistentSolution createPersistentController(EvolutionState state, Individual ind, int sub, int index) {
         SimulationProblem sp = (SimulationProblem) (state.evaluator.p_problem instanceof MasterProblem
                 ? ((MasterProblem) state.evaluator.p_problem).problem
@@ -55,45 +57,48 @@ public abstract class SolutionPersistence {
         return pc;
     }
 
-    public static void writeSolutionInFolder(PersistentSolution c, File outFolder) throws IOException {
-        File out = new File(outFolder, String.format("%03d", c.getGeneration()) + "_"
+    public static String autoFileName(PersistentSolution c) {
+        return String.format("%03d", c.getGeneration()) + "_"
                 + String.format("%02d", c.getSubpop()) + "_"
                 + String.format("%03d", c.getIndex()) + "_"
-                + String.format("%.2f", c.getFitness()) + ".ind");
+                + String.format(Locale.ENGLISH, "%.2f", c.getFitness()) + ".xml";
+    }
+    
+    public static void writeSolutionInFolder(PersistentSolution c, File outFolder) throws IOException {
+        File out = new File(outFolder, autoFileName(c));
         writeSolution(c, out);
     }
 
     public static void writeSolution(PersistentSolution c, File output) throws IOException {
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(output));
-        oos.writeObject(c);
-        oos.flush();
-        oos.close();
+        FileOutputStream fos = new FileOutputStream(output);
+        XSTREAM.toXML(c, fos);
+        fos.close();
     }
 
     public static void writeSolutionToTar(PersistentSolution c, TarArchiveOutputStream out) throws IOException {
-        String fileName = String.format("%03d", c.getGeneration()) + "_"
-                + String.format("%02d", c.getSubpop()) + "_"
-                + String.format("%03d", c.getIndex()) + "_"
-                + String.format("%.2f", c.getFitness()) + ".ind";
-
-        byte[] ser = SerializationUtils.serialize(c);
+        String fileName = autoFileName(c);
+        String xml = XSTREAM.toXML(c);
+        byte[] ser = xml.getBytes();
         TarArchiveEntry e = new TarArchiveEntry(fileName);
         e.setSize(ser.length);
         out.putArchiveEntry(e);
         out.write(ser, 0, ser.length);
-
-        /*File temp = File.createTempFile("solution", ".ind");
-         writeSolution(c, temp);
-         BufferedInputStream bis = new BufferedInputStream(new FileInputStream(temp));
-         IOUtils.copy(bis, out);*/
         out.closeArchiveEntry();
         out.flush();
     }
 
     public static PersistentSolution readSolution(InputStream is) throws Exception {
-        ObjectInputStream ois = new ObjectInputStream(is);
-        PersistentSolution controller = (PersistentSolution) ois.readObject();
-        return controller;
+        try { // Assume new XML version
+            return (PersistentSolution) XSTREAM.fromXML(is);
+        } catch (Exception ex) { // Fallback, try java serialization
+            System.err.println("Error reading XML. Fallback to java serialization.");
+            return SerializationUtils.deserialize(is);
+        }
+    }
+
+    public static PersistentSolution readSolutionFromFile(File f) throws Exception {
+        PersistentSolution sol = (PersistentSolution) XSTREAM.fromXML(f);
+        return sol;
     }
 
     public static List<PersistentSolution> readSolutionsFromTar(File tarFile) throws Exception {

@@ -65,7 +65,7 @@ public class CompetitiveBestStat extends FileWriterStat {
         if (state.parameters.getBoolean(base.push(P_KEEP_LAST), null, true)) {
             last = new File[n];
             for (int i = 0; i < n; i++) {
-                last[i] = new File(outFile[i].getParent(), jobPrefix + "last." + i + ".ind");
+                last[i] = new File(outFile[i].getParent(), jobPrefix + "last." + i + ".xml");
             }
         }
     }
