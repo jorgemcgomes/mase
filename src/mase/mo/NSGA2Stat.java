@@ -49,9 +49,21 @@ public class NSGA2Stat extends Statistics {
     }
 
     @Override
+    public void preInitializationStatistics(EvolutionState state) {
+        super.preInitializationStatistics(state);
+        state.output.print("Generation Subpop Scalarized Rank CrowdingDist", log);
+        for(String o : evaluator.include) {
+            state.output.print(" " + o, log);
+        }
+        state.output.println("", log);
+    }
+    
+    
+
+    @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        List<NSGAIndividual>[] inds = evaluator.indsRank;
+        List<NSGAIndividual>[] inds = evaluator.indsRank;        
         for (int s = 0; s < inds.length; s++) {
             Collections.sort(inds[s], new Comparator<NSGAIndividual>() {
                 @Override

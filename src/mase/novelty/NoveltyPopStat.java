@@ -53,10 +53,18 @@ public class NoveltyPopStat extends Statistics {
     }
 
     @Override
+    public void preInitializationStatistics(EvolutionState state) {
+        super.preInitializationStatistics(state);
+        // header
+        state.output.println("Generation Subpop Archive MinNS MeanNS MaxNS", log);
+    }
+    
+    
+
+    @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
 
-        state.output.print(state.generation + "", log);
         for (NoveltyEvaluation ne : neList) {
             DescriptiveStatistics ds = new DescriptiveStatistics();        
             for (int i = 0; i < state.population.subpops.length; i++) {
@@ -65,14 +73,13 @@ public class NoveltyPopStat extends Statistics {
                     ds.addValue(nf.scores().get(ne.scoreName));
                 }
                 if(doSubpops) {
-                    state.output.print(" " + ne.archives[i].size() + " " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax() , log);
+                    state.output.println(state.generation + " " + i + " " + ne.archives[i].size() + " " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax() , log);
                     ds.clear();
                 }
             }
             if(!doSubpops) {
-                state.output.print(" " + ne.archives[0].size() + " " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax() , log);
+                state.output.println(state.generation + " NA " + ne.archives[0].size() + " " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax() , log);
             }
         }
-        state.output.println("", log);
     }
 }

@@ -51,6 +51,8 @@ public class RunTimeStat extends Statistics {
         super.preInitializationStatistics(state);
         runStartTime = System.currentTimeMillis();
         totalGenTime = runStartTime;
+        
+        state.output.println("Generation Duration TimeStamp TotalGen TotalEval Eval PostEvals PreBreed Breed PostBreed", log);
     }
         
     @Override

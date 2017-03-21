@@ -117,7 +117,7 @@ public abstract class SolutionPersistence {
         return gcs;
     }
 
-    public static TarArchiveOutputStream reopen(File file) {
+    public static TarArchiveOutputStream reopenTar(File file) {
         try {
             File temp = File.createTempFile("tararchive", ".gz");
             FileUtils.copyFile(file, temp);

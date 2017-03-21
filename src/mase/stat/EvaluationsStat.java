@@ -9,6 +9,7 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.ExpandedFitness;
@@ -61,12 +62,64 @@ public class EvaluationsStat extends Statistics {
                     }
                 }
             }
+
+            // File header
+            if (state.generation == 0) {
+                String header = "Generation Subpop Index";
+                EvaluationResult[] sample = best.getEvaluationResults();
+                for (int i = 0; i < sample.length; i++) {
+                    if (sample[i] instanceof SubpopEvaluationResult) {
+                        ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) sample[i]).getAllEvaluations();
+                        for (int j = 0 ; j < allEvals.size() ; j++) {
+                            for (int k = 0; k < allEvals.get(j).toString().split(" ").length; k++) {
+                                header += " Eval." + i + ".Sub." + j + "_" + k;
+                            }                            
+                        }
+                    } else {
+                        for(int j = 0 ; j < sample[i].toString().split(" ").length; j++) {
+                            header += " Eval." + i + "_" + j;
+                        }
+                    }                    
+                }
+                state.output.println(header, log);
+            }
+
+            // Generational log
             state.output.print(state.generation + " " + sub + " " + index, log);
-            for(EvaluationResult er : best.getEvaluationResults()) {
-                state.output.print(" " + er.toString(), log);
+            for (EvaluationResult er : best.getEvaluationResults()) {
+                if(er instanceof SubpopEvaluationResult) {
+                    ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) er).getAllEvaluations();
+                    for(EvaluationResult e : allEvals) {
+                        state.output.print(" " + e, log);
+                    }
+                } else {
+                    state.output.print(" " + er, log);
+                }
             }
             state.output.println("", log);
         } else {
+            // File header -- supports SubpopEvaluationResults with different evaluation lengths for each subpop
+            if (state.generation == 0) {
+                EvaluationResult[] sample = ((ExpandedFitness) state.population.subpops[0].individuals[0].fitness).getEvaluationResults();
+                String header = "Generation Subpop Index";
+                for (int i = 0; i < sample.length; i++) {
+                    int max = 0;
+                    if (sample[i] instanceof SubpopEvaluationResult) {
+                        ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) sample[i]).getAllEvaluations();
+                        for (EvaluationResult e : allEvals) {
+                            max = Math.max(e.toString().split(" ").length, max);
+                        }
+                    } else {
+                        max = sample[i].toString().split(" ").length;
+                    }
+                    for (int j = 0; j < max; j++) {
+                        header += " Eval." + i + "_" + j;
+                    }
+                }
+                state.output.println(header, log);
+            }
+
+             // Generational log
             for (int i = 0; i < state.population.subpops.length; i++) {
                 for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                     ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;

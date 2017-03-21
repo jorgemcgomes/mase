@@ -64,7 +64,7 @@ public class BatchReevaluate {
             System.out.println("Nothing to evaluate!");
             return;
         }
-        
+
         BatchReevaluate mt = new BatchReevaluate(reps, force, prefix);
 
         for (File f : folders) {
@@ -81,13 +81,13 @@ public class BatchReevaluate {
                 e.printStackTrace();
             }
         }
-        
+
         mt.shutdown();
     }
 
     private static void processDir(File f, String[] args, BatchReevaluate mt, boolean recursive) throws Exception {
         System.out.println(f.getAbsolutePath());
-        
+
         // Reevaluate this folder if there are any files here
         File[] list = f.listFiles(new FilenameFilter() {
             @Override
@@ -154,12 +154,15 @@ public class BatchReevaluate {
         File bestFile = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "best.xml"));
 
         BufferedWriter fitWriter = new BufferedWriter(new FileWriter(fitnessLog));
+        fitWriter.write("Generation Evaluations Subpop Individuals MinFitness MeanFitness MaxFitness BestSoFar");
+        fitWriter.newLine();
+
         BufferedWriter behavWriter = new BufferedWriter(new FileWriter(behavLog));
 
         try {
             // Read solutions
             List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(tar);
-            
+
             // Reevaluate solutions
             List<Worker> workers = new ArrayList<>(sols.size());
             for (PersistentSolution sol : sols) {
@@ -179,13 +182,42 @@ public class BatchReevaluate {
                     bestEval = reev.mergedResults;
                     bestIndex = i;
                 }
-                fitWriter.write(i + " 0 " + reev.meanFitness + " " + bestFar + " 0 " + reev.meanFitness + " " + bestFar);
+                fitWriter.write(i + " 0 NA 0 0 0 " + reev.meanFitness + " " + bestFar);
                 fitWriter.newLine();
 
+                // file header
+                if (i == 0) {
+                    String header = "Generation Subpop Index";
+                    EvaluationResult[] sample = reev.mergedResults;
+                    for (int x = 0; x < sample.length; x++) {
+                        if (sample[x] instanceof SubpopEvaluationResult) {
+                            ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) sample[x]).getAllEvaluations();
+                            for (int y = 0; y < allEvals.size(); y++) {
+                                for (int z = 0; z < allEvals.get(y).toString().split(" ").length; z++) {
+                                    header += " Eval." + x + ".Sub." + y + "_" + z;
+                                }
+                            }
+                        } else {
+                            for (int y = 0; y < sample[x].toString().split(" ").length; y++) {
+                                header += " Eval." + x + "_" + y;
+                            }
+                        }
+                    }
+                    behavWriter.write(header);
+                    behavWriter.newLine();
+                }
+
                 // Log behaviours
-                behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex() + " " + reev.meanFitness);
-                for (int j = 1; j < reev.mergedResults.length; j++) { // starts at 1 to skip fitness
-                    behavWriter.write(" " + reev.mergedResults[j].toString());
+                behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex());
+                for (EvaluationResult e : reev.mergedResults) {
+                    if (e instanceof SubpopEvaluationResult) {
+                        ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) e).getAllEvaluations();
+                        for (EvaluationResult es : allEvals) {
+                            behavWriter.write(" " + es);
+                        }
+                    } else {
+                        behavWriter.write(" " + e);
+                    }
                 }
                 behavWriter.newLine();
             }

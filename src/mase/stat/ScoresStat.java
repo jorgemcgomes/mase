@@ -9,6 +9,7 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map.Entry;
 import mase.evaluation.ExpandedFitness;
 
 /**
@@ -38,7 +39,19 @@ public class ScoresStat extends Statistics {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
+        
+        // header
+        if(state.generation == 0) {
+            ExpandedFitness sample = (ExpandedFitness) state.population.subpops[0].individuals[0].fitness;
+            String header = "Generation Subpop Index";
+            for(String s : sample.scores().keySet()) {
+                header += " " + s;
+            }
+            header += " Score";
+            state.output.println(header, log);
+        }
 
+        // generational log
         for (int i = 0; i < state.population.subpops.length; i++) {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
                 ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;

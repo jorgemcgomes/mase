@@ -57,7 +57,7 @@ public class SampleSolutionsStat extends FileWriterStat {
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
         if (taos == null && compress) { // can happen in case of resuming from checkpoint
-            taos = SolutionPersistence.reopen(outFile);
+            taos = SolutionPersistence.reopenTar(outFile);
         }
 
         int[] subs = new int[sampleSize];

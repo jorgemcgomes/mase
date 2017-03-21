@@ -37,11 +37,12 @@ checkpoint-modulo =                     25
 # Statistics
 stat =                                  mase.stat.ConsoleStat
 stat.num-children = 			30
-stat.child.0 = 				ec.simple.SimpleShortStatistics
-stat.child.0.file =			$extended.stat
-stat.child.0.do-time =                  true
-stat.child.0.do-size =                  false
-stat.child.0.do-subpops =               true
+stat.child.0 =                          ec.Statistics
+#stat.child.0 = 			ec.simple.SimpleShortStatistics
+#stat.child.0.file =			$extended.stat
+#stat.child.0.do-time =                  true
+#stat.child.0.do-size =                  false
+#stat.child.0.do-subpops =               true
 stat.child.1 =                          mase.stat.FitnessStat
 stat.child.1.file =			$fitness.stat
 stat.child.1.do-subpops =               true

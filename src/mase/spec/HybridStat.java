@@ -42,6 +42,17 @@ public class HybridStat extends Statistics {
     }
 
     @Override
+    public void preInitializationStatistics(EvolutionState state) {
+        super.preInitializationStatistics(state);
+        // header
+        state.output.print("Generation Evaluations Pops MinSize MeanSize MaxSize MeanAge MaxAge Merges Splits TotalMerges TotalSplits", log);
+        if(state.exchanger instanceof StochasticHybridExchanger) {
+            state.output.print(" PotentialMerges MinDistance MeanDistance MaxDistance", log);
+        }
+        state.output.println("", log);
+    }
+    
+    @Override
     public void postPreBreedingExchangeStatistics(EvolutionState state) {
         super.postPreBreedingExchangeStatistics(state);
         AbstractHybridExchanger exc = (AbstractHybridExchanger) state.exchanger;
@@ -79,10 +90,12 @@ public class HybridStat extends Statistics {
                     }
                 }
             }
-            if (ds.getN() == 0) {
-                ds.addValue(0);
+            if(ds.getN() > 0) {
+                state.output.print(" " + ds.getN() + " " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);
+            } else {
+                state.output.print(" 0 0 0 0", log);
             }
-            state.output.print(" " + ds.getMin() + " " + ds.getMean() + " " + ds.getMax(), log);
+            
             //printMatrix(she.distanceMatrix, state);
         }
         
