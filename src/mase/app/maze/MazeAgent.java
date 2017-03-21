@@ -9,7 +9,7 @@ import java.awt.Color;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
-import mase.mason.world.DistanceSensorRays;
+import mase.mason.world.PolygonRaySensor;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 
@@ -35,7 +35,7 @@ public class MazeAgent extends SmartAgent {
         arcSensor.setBinary(true);
         arcSensor.setObjectTypes(MazeTask.Target.class);
         
-        DistanceSensorRays raySensor = new DistanceSensorRays(sim, field, this);
+        PolygonRaySensor raySensor = new PolygonRaySensor(sim, field, this);
         super.addSensor(raySensor);
         raySensor.setBinary(false);
         raySensor.setRays(sim.par.sensorRange, -Math.PI/2, -Math.PI / 4, 0, Math.PI / 4, Math.PI / 2, Math.PI);

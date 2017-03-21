@@ -17,14 +17,14 @@ library(arules)
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
 theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-5,0,0,0,unit="pt"),
-             plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
-             axis.title.x=element_text(size=rel(.9)), axis.title.y=element_text(size=rel(.9)), legend.title=element_text(size=rel(.9)),
-             strip.background=element_blank(), strip.text=element_text(size=rel(.9)))
+            plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
+            axis.title.x=element_text(size=rel(.9)), axis.title.y=element_text(size=rel(.9)), legend.title=element_text(size=rel(.9)),
+            strip.background=element_blank(), strip.text=element_text(size=rel(.9)))
 
 # theme_set(theme_bw())
 # theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-5,0,0,0,unit="pt"),
-#               plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
-#               strip.background=element_blank())
+#                plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
+#                strip.background=element_blank())
 
 
 #### Parallel #############################################################################

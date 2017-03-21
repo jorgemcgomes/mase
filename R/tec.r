@@ -182,6 +182,13 @@ grid <- loadData("*","fitness.stat", auto.ids.names=c("Experiment","UniqueTarget
 #ggplot(lastGen(grid), aes(MergeThreshold,Maturation)) + geom_tile(aes(fill=BestSoFar)) + facet_wrap(~ UniqueTargets)
 grid[, MergeThreshold := factor(MergeThreshold, labels=sub("0\\.","\\.",levels(MergeThreshold)))]
 
+ggplot(lastGen(grid), aes(MergeThreshold,Maturation)) + geom_tile(aes(fill=BestSoFar)) +facet_wrap(~ UniqueTargets, labeller=ut_labeller) +
+  scale_fill_distiller(palette="YlOrRd", direction=1, limits=c(0.7,1)) + theme(legend.key.height=unit(0.3,"line")) +
+  scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0)) +
+  labs(x=expression(Merge~threshold~T[M]), y=expression(Maturation~limit~T[L]), fill="Highest fitness scores")
+ggsave("~/Dropbox/Work/Papers/TEC/fig_thesis/params_fitness.pdf", width=3.5, height=3.5) 
+
+
 levels <- grid[factorNum(MergeThreshold)<1, fitnessLevels(.SD,0.995, return.failed=T), by=.(Job,MergeThreshold,Maturation,UniqueTargets)]
 l <- levels[, .(Evaluations = if(sum(is.finite(Evaluations)) >= 20) mean(Evaluations[is.finite(Evaluations)]) else Inf), by=.(MergeThreshold,Maturation,UniqueTargets)]
 
@@ -532,6 +539,7 @@ ggplot(d[, .(Mean = mean(BestSoFar), SE=se(BestSoFar)), by=.(ID1,ID2,Generation)
 
 ggplot(lastGen(d), aes(ID2,BestSoFar)) + geom_boxplot(aes(colour=ID2)) + ylab("Fitness") + facet_wrap(~ ID1, scales="free")
 
+metaAnalysis(lastGen(d), BestSoFar ~ ID2, ~ ID1)
 
 ts <- c("ownscore","oppscore","time","ballgoaldist","possession")
 d <- loadData("veryeasy_nsga","behaviours.stat", fun=loadBehaviours, vars=ts, sample=0.25)

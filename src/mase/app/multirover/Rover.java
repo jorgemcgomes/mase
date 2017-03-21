@@ -11,7 +11,7 @@ import static mase.app.multirover.MultiRockTypeEffector.NO_ACTIVATION;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
-import mase.mason.world.DistanceSensorRays;
+import mase.mason.world.PolygonRaySensor;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 
@@ -58,11 +58,11 @@ public class Rover extends SmartAgent {
         MRParams par = mr.par;
 
         // Obstacle sensor
-        DistanceSensorRays dw = new DistanceSensorRays(sim, field, this);
+        PolygonRaySensor dw = new PolygonRaySensor(sim, field, this);
         dw.setRays(5, -Math.PI / 6, Math.PI / 6);
         dw.setObjects(Collections.singleton(mr.walls));
         dw.setBinary(true);
-        dw.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
+        dw.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, PolygonRaySensor.UNIFORM);
         super.addSensor(dw);
 
         // rock sensor
@@ -70,7 +70,7 @@ public class Rover extends SmartAgent {
         rockSensor.setArcs(6);
         rockSensor.setRange(par.rockSensorRange);
         rockSensor.setObjectTypes(Rock.class);
-        rockSensor.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
+        rockSensor.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, PolygonRaySensor.UNIFORM);
         rockSensor.ignoreRadius(true);
         super.addSensor(rockSensor);
 
@@ -79,7 +79,7 @@ public class Rover extends SmartAgent {
         dsr.setArcs(4);
         dsr.setRange(par.roverSensorRange);
         dsr.setObjects(mr.rovers);
-        dsr.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, DistanceSensorRays.UNIFORM);
+        dsr.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, PolygonRaySensor.UNIFORM);
         dsr.ignoreRadius(true); // not relevant
         super.addSensor(dsr);
 

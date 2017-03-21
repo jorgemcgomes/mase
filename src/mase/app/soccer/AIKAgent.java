@@ -165,7 +165,7 @@ public class AIKAgent extends SoccerAgent {
             f.addIn(p);
         }
 
-        // add negative force for walls on the long sides (stay way from walls)
+        // add negative force for walls on the long sides (stay away from walls)
         double r1 = fieldWidth - pos.y;
         double r2 = pos.y;
         Double2D w = new Double2D(0.0, WALL_G / (r2 * r2) - WALL_G / (r1 * r1));

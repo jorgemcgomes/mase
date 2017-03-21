@@ -13,10 +13,9 @@ import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 
 /**
- *
  * @author jorge
  */
-public class DistanceSensorRays extends AbstractSensor {
+public class PolygonRaySensor extends AbstractSensor {
 
     private Double2D[] rayStarts, rayEnds;
     private boolean binary = false;
@@ -28,7 +27,7 @@ public class DistanceSensorRays extends AbstractSensor {
     private double[] angles;
     private Collection<StaticPolygonObject> polygons;
 
-    public DistanceSensorRays(SimState state, Continuous2D field, EmboddiedAgent ag) {
+    public PolygonRaySensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
         super(state, field, ag);
     }
 
