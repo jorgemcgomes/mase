@@ -8,13 +8,9 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Statistics;
 import ec.util.Parameter;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.MetaEvaluator;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**

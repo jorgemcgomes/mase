@@ -18,7 +18,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import mase.SimulationProblem;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
 import mase.stat.Reevaluate.Reevaluation;
 
 /**
@@ -187,38 +186,13 @@ public class BatchReevaluate {
 
                 // file header
                 if (i == 0) {
-                    String header = "Generation Subpop Index";
-                    EvaluationResult[] sample = reev.mergedResults;
-                    for (int x = 0; x < sample.length; x++) {
-                        if (sample[x] instanceof SubpopEvaluationResult) {
-                            ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) sample[x]).getAllEvaluations();
-                            for (int y = 0; y < allEvals.size(); y++) {
-                                for (int z = 0; z < allEvals.get(y).toString().split(" ").length; z++) {
-                                    header += " Eval." + x + ".Sub." + y + "_" + z;
-                                }
-                            }
-                        } else {
-                            for (int y = 0; y < sample[x].toString().split(" ").length; y++) {
-                                header += " Eval." + x + "_" + y;
-                            }
-                        }
-                    }
-                    behavWriter.write(header);
+                    behavWriter.write(EvaluationsStat.headerAll(reev.mergedResults));
                     behavWriter.newLine();
                 }
 
                 // Log behaviours
-                behavWriter.write(i + " " + sols.get(i).getSubpop() + " " + sols.get(i).getIndex());
-                for (EvaluationResult e : reev.mergedResults) {
-                    if (e instanceof SubpopEvaluationResult) {
-                        ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) e).getAllEvaluations();
-                        for (EvaluationResult es : allEvals) {
-                            behavWriter.write(" " + es);
-                        }
-                    } else {
-                        behavWriter.write(" " + e);
-                    }
-                }
+                behavWriter.write(EvaluationsStat.entryAll(sols.get(i).getGeneration(), 
+                        sols.get(i).getSubpop(), sols.get(i).getIndex(), reev.mergedResults));
                 behavWriter.newLine();
             }
             PersistentSolution best = sols.get(bestIndex);

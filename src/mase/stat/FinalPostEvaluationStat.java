@@ -52,7 +52,7 @@ public class FinalPostEvaluationStat extends Statistics {
         }
         if (best != null) {
             try {
-                reav.reevaluateTar(best.outFile, prob);
+                reav.reevaluateTar(best.archiveFile, prob);
             } catch (Exception ex) {
                 state.output.warning("Post-evaluation error: " + ex.getMessage());
                 ex.printStackTrace();
