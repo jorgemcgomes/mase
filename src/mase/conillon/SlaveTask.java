@@ -6,7 +6,7 @@
 package mase.conillon;
 
 import java.util.ArrayList;
-import mase.SimulationProblem;
+import mase.MaseProblem;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
@@ -20,12 +20,12 @@ public class SlaveTask extends Task {
 
     private static final long serialVersionUID = 1L;
 
-    private final SimulationProblem sim;
+    private final MaseProblem sim;
     private final long seed;
     private SlaveResult res;
     private final GroupController gc;
 
-    public SlaveTask(int id, SimulationProblem sim, GroupController gc, long seed) {
+    public SlaveTask(int id, MaseProblem sim, GroupController gc, long seed) {
         super(id);
         this.sim = sim;
         this.seed = seed;

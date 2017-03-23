@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import mase.SimulationProblem;
+import mase.MaseProblem;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
@@ -30,7 +30,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  * @author jorge
  */
-public class AllocationProblem extends SimulationProblem {
+public class AllocationProblem extends MaseProblem {
 
     private static final long serialVersionUID = 1L;
 

@@ -11,14 +11,14 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
-import mase.SimulationProblem;
+import mase.MaseProblem;
 import sim.display.GUIState;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class MasonSimulationProblem<T extends MasonSimState> extends SimulationProblem {
+public abstract class MasonSimulationProblem<T extends MasonSimState> extends MaseProblem {
 
     private static final long serialVersionUID = 1L;
 

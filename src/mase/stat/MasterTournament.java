@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import mase.SimulationProblem;
+import mase.MaseProblem;
 import mase.controllers.AgentController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.evaluation.BehaviourResult;
@@ -92,7 +92,7 @@ public class MasterTournament {
             return;
         }
 
-        SimulationProblem sim = Reevaluate.createSimulator(args);
+        MaseProblem sim = Reevaluate.createSimulator(args);
         MasterTournament mt = new MasterTournament(sampleFolders, testFolders, sim, name);
 
         if (individuals != null) {
@@ -107,11 +107,11 @@ public class MasterTournament {
     }
     private final List<File> sampleFolders;
     private final List<File> testFolders;
-    private final SimulationProblem sim;
+    private final MaseProblem sim;
     private final ExecutorService executor;
     private final String name;
 
-    public MasterTournament(List<File> sampleFolders, List<File> testFolders, SimulationProblem sim, String name) {
+    public MasterTournament(List<File> sampleFolders, List<File> testFolders, MaseProblem sim, String name) {
         this.sampleFolders = sampleFolders;
         this.testFolders = testFolders;
         this.sim = sim;

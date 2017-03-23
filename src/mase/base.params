@@ -69,6 +69,7 @@ stat.child.7 =                          mase.stat.RunStatistics
 stat.child.7.file =                     $run.params
 stat.child.8 =                          mase.stat.FinalPostEvaluationStat
 stat.child.8.repetitions =              50
+stat.child.8.all-subpops =              true
 stat.child.8.prefix =                   post
 stat.child.9 =                          mase.stat.ScoresStat
 stat.child.9.file =		        $scores.stat

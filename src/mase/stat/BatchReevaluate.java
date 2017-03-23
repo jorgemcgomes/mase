@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import mase.SimulationProblem;
+import mase.MaseProblem;
 import mase.evaluation.EvaluationResult;
 import mase.stat.Reevaluate.Reevaluation;
 
@@ -30,6 +30,7 @@ public class BatchReevaluate {
     public static final String FORCE = "-force";
     public static final String RECURSIVE = "-recursive";
     public static final String PREFIX = "-prefix";
+    public static final String ALL_SUBPOPS = "-allsubs";
     public static final String DEFAULT_PREFIX = "post";
 
     public static void main(String[] args) throws Exception {
@@ -37,6 +38,7 @@ public class BatchReevaluate {
         int reps = 0;
         boolean recursive = false;
         boolean force = false;
+        boolean allSubpops = false;
         String prefix = DEFAULT_PREFIX;
         for (int x = 0; x < args.length; x++) {
             if (args[x].equalsIgnoreCase(FOLDER)) {
@@ -53,6 +55,8 @@ public class BatchReevaluate {
                 recursive = true;
             } else if (args[x].equalsIgnoreCase(PREFIX)) {
                 prefix = args[1 + x++];
+            } else if (args[x].equalsIgnoreCase(ALL_SUBPOPS)) {
+                allSubpops = true;
             }
         }
         if (reps <= 0) {
@@ -64,14 +68,14 @@ public class BatchReevaluate {
             return;
         }
 
-        BatchReevaluate mt = new BatchReevaluate(reps, force, prefix);
+        BatchReevaluate mt = new BatchReevaluate(reps, allSubpops, force, prefix);
 
         for (File f : folders) {
             try {
                 if (f.isDirectory()) {
                     processDir(f, args, mt, recursive);
                 } else if (f.getName().endsWith("tar.gz")) {
-                    SimulationProblem sim = Reevaluate.createSimulator(args, f.getParentFile());
+                    MaseProblem sim = Reevaluate.createSimulator(args, f.getParentFile());
                     mt.reevaluateTar(f, sim);
                 } else {
                     System.out.println("Cannot handle file: " + f.getAbsolutePath());
@@ -95,7 +99,7 @@ public class BatchReevaluate {
             }
         });
         if (!recursive || list.length > 0) {
-            SimulationProblem sim = Reevaluate.createSimulator(args, f);
+            MaseProblem sim = Reevaluate.createSimulator(args, f);
             mt.reevaluateFolder(f, sim);
         }
 
@@ -117,15 +121,17 @@ public class BatchReevaluate {
     private final boolean force;
     private final String prefix;
     private final ExecutorService executor;
+    private final boolean allSubpops;
 
-    public BatchReevaluate(int reps, boolean force, String prefix) {
+    public BatchReevaluate(int reps, boolean allSubpops, boolean force, String prefix) {
         this.reps = reps;
+        this.allSubpops = allSubpops;
         this.force = force;
         this.prefix = prefix;
         this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
-    public void reevaluateFolder(File folder, SimulationProblem sim) throws Exception {
+    public void reevaluateFolder(File folder, MaseProblem sim) throws Exception {
         System.out.println(folder.getAbsolutePath());
         // Find all the relevant tars under the given folders
         List<File> tars = new ArrayList<>();
@@ -145,7 +151,7 @@ public class BatchReevaluate {
         }
     }
 
-    protected void reevaluateTar(File tar, SimulationProblem sim) throws Exception {
+    protected void reevaluateTar(File tar, MaseProblem sim) throws Exception {
         System.out.println("\n" + tar.getAbsolutePath());
         // Output files
         File fitnessLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "fitness.stat"));
@@ -186,13 +192,13 @@ public class BatchReevaluate {
 
                 // file header
                 if (i == 0) {
-                    behavWriter.write(EvaluationsStat.headerAll(reev.mergedResults));
+                    behavWriter.write(EvaluationsStat.header(reev.mergedResults, allSubpops));
                     behavWriter.newLine();
                 }
 
                 // Log behaviours
-                behavWriter.write(EvaluationsStat.entryAll(sols.get(i).getGeneration(), 
-                        sols.get(i).getSubpop(), sols.get(i).getIndex(), reev.mergedResults));
+                behavWriter.write(EvaluationsStat.entry(sols.get(i).getGeneration(), 
+                        sols.get(i).getSubpop(), sols.get(i).getIndex(), reev.mergedResults, allSubpops));
                 behavWriter.newLine();
             }
             PersistentSolution best = sols.get(bestIndex);
@@ -219,9 +225,9 @@ public class BatchReevaluate {
     private class Worker implements Callable<Reevaluation> {
 
         private final PersistentSolution sol;
-        private final SimulationProblem sim;
+        private final MaseProblem sim;
 
-        public Worker(PersistentSolution sol, SimulationProblem sim) {
+        public Worker(PersistentSolution sol, MaseProblem sim) {
             this.sol = sol;
             this.sim = sim;
         }

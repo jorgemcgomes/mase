@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import mase.SimulationProblem;
+import mase.MaseProblem;
 import mase.controllers.GroupController;
 import mase.evaluation.ExpandedFitness;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -41,7 +41,7 @@ public abstract class SolutionPersistence {
     public static final XStream XSTREAM = new XStream();
 
     public static PersistentSolution createPersistentController(EvolutionState state, Individual ind, int sub, int index) {
-        SimulationProblem sp = (SimulationProblem) (state.evaluator.p_problem instanceof MasterProblem
+        MaseProblem sp = (MaseProblem) (state.evaluator.p_problem instanceof MasterProblem
                 ? ((MasterProblem) state.evaluator.p_problem).problem
                 : state.evaluator.p_problem);
         PersistentSolution pc = new PersistentSolution();

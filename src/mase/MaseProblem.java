@@ -28,7 +28,7 @@ import mase.spec.AbstractHybridExchanger;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class SimulationProblem extends Problem implements GroupedProblemForm, SimpleProblemForm {
+public abstract class MaseProblem extends Problem implements GroupedProblemForm, SimpleProblemForm {
 
     private static final long serialVersionUID = 1L;
 

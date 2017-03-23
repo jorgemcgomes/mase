@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import mase.MaseEvolve;
 import mase.evaluation.MetaEvaluator;
-import mase.SimulationProblem;
+import mase.MaseProblem;
 import mase.controllers.AgentController;
 import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
@@ -38,18 +38,18 @@ public class Reevaluate {
     public static void main(String[] args) throws Exception {
         int reps = getRepetitions(args);
         File gc = findControllerFile(args);
-        SimulationProblem simulator = createSimulator(args, gc.getParentFile());
+        MaseProblem simulator = createSimulator(args, gc.getParentFile());
         GroupController controller = createController(args);
         Reevaluation res = reevaluate(controller, simulator, reps);
         System.out.println(res);
     }
 
-    public static SimulationProblem createSimulator(String[] args) {
+    public static MaseProblem createSimulator(String[] args) {
         ParameterDatabase db = Evolve.loadParameterDatabase(args);
         EvolutionState state = Evolve.initialize(db, 0);
         Parameter base = new Parameter(EvolutionState.P_EVALUATOR).push(Evaluator.P_PROBLEM);
         Parameter def = new Parameter(EvolutionState.P_EVALUATOR).push(MetaEvaluator.P_BASE_EVAL).push(Evaluator.P_PROBLEM);
-        SimulationProblem sim = (SimulationProblem) db.getInstanceForParameter(base, def, SimulationProblem.class);
+        MaseProblem sim = (MaseProblem) db.getInstanceForParameter(base, def, MaseProblem.class);
         sim.setup(state, base);
         if(sim instanceof MasonSimulationProblem) {
             ((MasonSimulationProblem) sim).setRepetitions(1);
@@ -57,7 +57,7 @@ public class Reevaluate {
         return sim;
     }    
     
-    public static SimulationProblem createSimulator(String[] args, File searchDir) {
+    public static MaseProblem createSimulator(String[] args, File searchDir) {
         boolean found = false;
         for(String a : args) {
             if(a.equalsIgnoreCase(Evolve.A_FILE)) {
@@ -171,15 +171,15 @@ public class Reevaluate {
     /*
      * WARNING: assumes that fitness is always the first evaluation result
      */
-    public static Reevaluation reevaluate(PersistentSolution gc, SimulationProblem sim, int reps) {
+    public static Reevaluation reevaluate(PersistentSolution gc, MaseProblem sim, int reps) {
         return reevaluate(gc.getController(), gc.getSubpop(), sim, reps);
     }
 
-    public static Reevaluation reevaluate(GroupController gc, SimulationProblem sim, int reps) {
+    public static Reevaluation reevaluate(GroupController gc, MaseProblem sim, int reps) {
         return reevaluate(gc, 0, sim, reps);
     }
 
-    public static Reevaluation reevaluate(GroupController gc, int subpop, SimulationProblem sim, int reps) {
+    public static Reevaluation reevaluate(GroupController gc, int subpop, MaseProblem sim, int reps) {
         // Make simulations
         ArrayList<EvaluationResult[]> results = new ArrayList<>(reps);
         for (int i = 0; i < reps; i++) {
