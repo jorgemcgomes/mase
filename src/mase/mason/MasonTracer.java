@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Random;
 import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
-import mase.mason.world.PolygonUtils.Segment;
+import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.StaticMultilineObject;
 import mase.mason.world.StaticPointObject;
 import mase.stat.Reevaluate;

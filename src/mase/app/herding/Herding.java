@@ -16,7 +16,7 @@ import mase.mason.generic.systematic.EntityGroup;
 import mase.mason.generic.systematic.TaskDescription;
 import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.PolygonUtils.Segment;
+import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.StaticMultilineObject;
 import mase.mason.world.StaticPointObject;

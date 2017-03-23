@@ -7,7 +7,7 @@ package mase.app.soccer;
 import java.awt.Color;
 import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.CircularObject;
-import mase.mason.world.PolygonUtils.Segment;
+import mase.mason.world.GeomUtils.Segment;
 import net.jafama.FastMath;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;

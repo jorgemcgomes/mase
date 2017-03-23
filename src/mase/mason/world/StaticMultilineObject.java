@@ -7,7 +7,7 @@ package mase.mason.world;
 
 import java.util.LinkedHashSet;
 import mase.mason.generic.systematic.Entity;
-import mase.mason.world.PolygonUtils.Segment;
+import mase.mason.world.GeomUtils.Segment;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.portrayal.simple.ShapePortrayal2D;
 import sim.util.Double2D;
@@ -33,14 +33,14 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
      * @param points
      */
     public StaticMultilineObject(Double2D... points) {
-        super(PolygonUtils.buildShape(points));
+        super(GeomUtils.buildShape(points));
 
         this.segments = new Segment[points.length - 1];
         for (int i = 0; i < points.length - 1; i++) {
             segments[i] = new Segment(points[i], points[i + 1]);
         }
         this.points = points;
-        this.boundingBox = PolygonUtils.computeBB(points);
+        this.boundingBox = GeomUtils.computeBB(points);
         this.width = boundingBox.getRight().x - boundingBox.getLeft().x;
         this.height = boundingBox.getRight().y - boundingBox.getLeft().y;
         this.center = new Double2D((boundingBox.getLeft().x + boundingBox.getRight().x) /2,
@@ -54,7 +54,7 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
      * @param segs
      */
     public StaticMultilineObject(Segment... segs) {
-        super(PolygonUtils.buildShape(segs));
+        super(GeomUtils.buildShape(segs));
 
         LinkedHashSet<Double2D> ps = new LinkedHashSet<>();
         for (int i = 0; i < segs.length; i++) {
@@ -64,7 +64,7 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
         this.segments = segs;
         this.points = new Double2D[ps.size()];
         ps.toArray(points);
-        this.boundingBox = PolygonUtils.computeBB(points);
+        this.boundingBox = GeomUtils.computeBB(points);
         this.width = boundingBox.getRight().x - boundingBox.getLeft().x;
         this.height = boundingBox.getRight().y - boundingBox.getLeft().y;
         this.center = new Double2D((boundingBox.getLeft().x + boundingBox.getRight().x) /2,
@@ -74,7 +74,7 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
     public double closestDistance(Double2D rayStart, Double2D rayEnd) {
         double closestDist = Double.POSITIVE_INFINITY;
         for (Segment seg : segments) {
-            Double2D inters = PolygonUtils.segmentIntersection(rayStart, rayEnd, seg.start, seg.end);
+            Double2D inters = GeomUtils.segmentIntersection(rayStart, rayEnd, seg.start, seg.end);
             if (inters != null) {
                 double d = rayStart.distance(inters);
                 if (d < closestDist) {
@@ -88,7 +88,7 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
     public double closestDistance(Double2D testPoint) {
         double min = Double.POSITIVE_INFINITY;
         for (Segment seg : segments) {
-            double d = PolygonUtils.distToSegment(testPoint, seg.start, seg.end);
+            double d = GeomUtils.distToSegment(testPoint, seg.start, seg.end);
             min = Math.min(min, Math.max(0, d));
         }
         return min;
@@ -109,7 +109,7 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
         double min = Double.POSITIVE_INFINITY;
         Segment s = null;
         for (Segment seg : segments) {
-            double d = PolygonUtils.distToSegment(testPoint, seg.start, seg.end);
+            double d = GeomUtils.distToSegment(testPoint, seg.start, seg.end);
             if(d < min) {
                 min = d;
                 s = seg;

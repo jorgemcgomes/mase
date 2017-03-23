@@ -15,7 +15,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class PolygonUtils {
+public class GeomUtils {
 
     public static Pair<Double2D, Double2D> computeBB(Double2D[] points) {
         double xMin = Double.POSITIVE_INFINITY;

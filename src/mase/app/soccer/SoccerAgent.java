@@ -9,7 +9,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
-import mase.mason.world.PolygonUtils.Segment;
+import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.StaticPointObject;
 import sim.engine.SimState;

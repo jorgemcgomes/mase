@@ -21,7 +21,7 @@ import java.io.FileReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import mase.mason.world.PolygonUtils;
+import mase.mason.world.GeomUtils;
 import sim.util.Double2D;
 
 /**
@@ -41,9 +41,9 @@ public class MazeReader {
         diagram = univ.getDiagram(uri);
     }
     
-    public PolygonUtils.Segment[] getSegments() throws SVGException {
+    public GeomUtils.Segment[] getSegments() throws SVGException {
         SVGElement maze = diagram.getElement(MAZE_ID);
-        List<PolygonUtils.Segment> segs = new ArrayList<PolygonUtils.Segment>();
+        List<GeomUtils.Segment> segs = new ArrayList<GeomUtils.Segment>();
         for(Object o : maze.getChildren(null)) {
             if(o instanceof ShapeElement) {
                 Shape shape = ((ShapeElement) o).getShape();
@@ -54,14 +54,14 @@ public class MazeReader {
                     iter.currentSegment(coords);
                     Double2D curr = new Double2D(coords[0],coords[1]);
                     if(last != null) {
-                        segs.add(new PolygonUtils.Segment(last, curr));
+                        segs.add(new GeomUtils.Segment(last, curr));
                     }
                     last = curr;
                     iter.next();
                 }
             }
         }
-        return segs.toArray(new PolygonUtils.Segment[segs.size()]);
+        return segs.toArray(new GeomUtils.Segment[segs.size()]);
     }
     
     public Double2D getStart() throws SVGException {
