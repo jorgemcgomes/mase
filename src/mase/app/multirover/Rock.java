@@ -51,7 +51,7 @@ public class Rock extends CircularObject implements Steppable {
 
         // find near rovers
         for (Rover r : mr.rovers) {
-            if (r.getLocation().distance(pos) <= type.radius) {
+            if (r.getCenterLocation().distance(pos) <= type.radius) {
                 Pair<Long, Integer> mem = cache.get(r);
                 if (mem == null || mem.getRight() != r.getActuatorType()) {
                     // rover just arrived at this rock or the actuator changed

@@ -64,13 +64,13 @@ public class Prey extends SmartAgent {
 
         // Proximity sensors
         for (int i = 0; i < rayStarts.length; i++) {
-            Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
-            Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
+            Double2D rs = rayStarts[i].rotate(orientation2D()).add(getCenterLocation());
+            Double2D re = rayEnds[i].rotate(orientation2D()).add(getCenterLocation());
             boolean wallInt = false;
             for(int j = 0 ; j < obsStarts.length && !wallInt ; j++) {
                 wallInt = segmentIntersection(rs, re, obsStarts[j], obsEnds[j]) != null;
             }
-            double d = Predator.distToSegment(pred.predator.getLocation(), rs, re);
+            double d = Predator.distToSegment(pred.predator.getCenterLocation(), rs, re);
             boolean preyInt = d <= RADIUS;
             if (wallInt || preyInt) {
                 sensorValues[i] = 1;

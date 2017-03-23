@@ -68,7 +68,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
         for (Keeper k : kw.keepers) {
             if (k.hasPossession) {
                 if (lastKeeper != null && k != lastKeeper) { // pass between different agents
-                    double passDist = lastPossession.distance(kw.ball.getLocation());
+                    double passDist = lastPossession.distance(kw.ball.getCenterLocation());
                     if (passDist > minPass) {
                         numPasses++;
                     }
@@ -76,7 +76,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
                     passLength += passDist;
                 }
                 lastKeeper = k;
-                lastPossession = kw.ball.getLocation();
+                lastPossession = kw.ball.getCenterLocation();
                 return;
             }
 
@@ -84,7 +84,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
             d += k.distanceTo(kw.takers.get(0));
 
             // centre of mass
-            centre.addIn(k.getLocation());
+            centre.addIn(k.getCenterLocation());
 
             // distance to ball
             ballDist[0] += k.distanceTo(kw.ball) / kw.keepers.size();
@@ -93,7 +93,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
         centre.multiplyIn(1.0 / kw.keepers.size());
 
         for (Keeper k : kw.keepers) {
-            keeperDispersion += centre.distance(k.getLocation()) / kw.keepers.size();
+            keeperDispersion += centre.distance(k.getCenterLocation()) / kw.keepers.size();
         }
 
         ballDist[1] += kw.takers.get(0).distanceTo(kw.ball);

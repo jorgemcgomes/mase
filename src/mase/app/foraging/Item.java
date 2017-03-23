@@ -6,27 +6,18 @@
 package mase.app.foraging;
 
 import java.awt.Color;
-import sim.portrayal.simple.OvalPortrayal2D;
-import sim.util.Double2D;
+import mase.mason.world.CircularObject;
 
 /**
  *
  * @author jorge
  */
-public class Item extends OvalPortrayal2D {
+public class Item extends CircularObject {
 
     private static final long serialVersionUID = 1L;
 
-    protected final double radius;
-    protected final Double2D position;
-
-    public Item(double radius, Double2D position) {
-        super(new Color(0,153,0), radius * 2, true);
-        this.radius = radius;
-        this.position = position;
+    public Item(ForagingTask sim, double radius) {
+        super(new Color(0,153,0), sim, sim.field, radius);
     }
 
-    public Double2D getLocation() {
-        return position;
-    }
 }

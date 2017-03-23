@@ -8,16 +8,12 @@ package mase.mason.world;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.util.Bag;
-import sim.util.Double2D;
 
 /**
  *
@@ -28,13 +24,13 @@ public class DistanceSensorArcs extends AbstractSensor {
     private double[] arcStart;
     private double[] arcEnd;
     private double range = Double.POSITIVE_INFINITY;
-    private Class[] types = new Class[]{Object.class};
-    private Collection<? extends Object> objects;
+    private Class<? extends SensableObject>[] types = new Class[]{SensableObject.class};
+    private Collection<? extends SensableObject> objects;
     private boolean binary = false;
-    private Object[] closestObjects;
+    private SensableObject[] closestObjects;
     private double[] lastDistances;
 
-    private boolean ignoreRadius = false;
+    private boolean centerToCenter = false;
     public static final int UNIFORM = 0, GAUSSIAN = 1;
     private double orientationNoise = 0;
     private double rangeNoise = 0;
@@ -50,7 +46,7 @@ public class DistanceSensorArcs extends AbstractSensor {
         }
         this.arcStart = arcStart;
         this.arcEnd = arcEnd;
-        this.closestObjects = new Object[valueCount()];
+        this.closestObjects = new SensableObject[valueCount()];
     }
 
     public void setArcs(int numArcs) {
@@ -94,7 +90,7 @@ public class DistanceSensorArcs extends AbstractSensor {
      *
      * @param obj
      */
-    public void setObjects(Collection<? extends Object> obj) {
+    public void setObjects(Collection<? extends SensableObject> obj) {
         this.objects = obj;
     }
 
@@ -102,8 +98,8 @@ public class DistanceSensorArcs extends AbstractSensor {
         this.binary = binary;
     }
 
-    public void ignoreRadius(boolean ignore) {
-        this.ignoreRadius = ignore;
+    public void centerToCenter(boolean centerToCenter) {
+        this.centerToCenter = centerToCenter;
     }
 
     @Override
@@ -130,17 +126,18 @@ public class DistanceSensorArcs extends AbstractSensor {
         }
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
 
-        Collection<? extends Object> candidates = getCandidates();
+        Collection<? extends SensableObject> candidates = getCandidates();
 
-        TreeMap<Double,Object> distances = new TreeMap<>();
-        for (Object o : candidates) {
+        TreeMap<Double,SensableObject> distances = new TreeMap<>();
+        for (SensableObject o : candidates) {
             if(o != ag) {
-                if (!ignoreRadius && ag.isInside(o)) { // agent is inside an object
+                if(!centerToCenter && o.isInside(ag)) {
                     Arrays.fill(lastDistances, 0);
                     Arrays.fill(closestObjects, o);
-                    return lastDistances;
-                }                
-                double dist = ignoreRadius ? ag.centerDistanceTo(o) : ag.distanceTo(o);
+                    return lastDistances;                    
+                }
+                
+                double dist = centerToCenter ? ag.getCenterLocation().distance(o.getCenterLocation()) : Math.max(0, o.distanceTo(ag));
                 if (rangeNoiseAbs > 0) {
                     dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                     dist = Math.max(dist, 0);
@@ -152,7 +149,7 @@ public class DistanceSensorArcs extends AbstractSensor {
         }
 
         int filled = 0;
-        for (Entry<Double,Object> e : distances.entrySet()) {
+        for (Entry<Double,SensableObject> e : distances.entrySet()) {
             if (filled == arcStart.length) {
                 break;
             }
@@ -173,18 +170,19 @@ public class DistanceSensorArcs extends AbstractSensor {
         return lastDistances;
     }
 
-    protected Collection<? extends Object> getCandidates() {
+    protected Collection<? extends SensableObject> getCandidates() {
         if (objects != null) {
             return new ArrayList<>(objects);
         } else {
-            Collection<Object> objs = new LinkedList<>();
+            Collection<SensableObject> objs = new LinkedList<>();
+            // TODO: nearest neighbours
             Bag neighbours = (Double.isInfinite(range) || field.allObjects.size() < 20) ? field.allObjects
-                    : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
+                    : field.getNeighborsWithinDistance(ag.getCenterLocation(), range + ag.getRadius(), false, true);
             for (Object n : neighbours) {
                 if (n != ag) {
                     for (Class type : types) {
                         if (type.isInstance(n)) {
-                            objs.add(n);
+                            objs.add((SensableObject) n);
                             break;
                         }
                     }
@@ -194,7 +192,7 @@ public class DistanceSensorArcs extends AbstractSensor {
         }
     }
 
-    public Object[] getClosestObjects() {
+    public SensableObject[] getClosestObjects() {
         return closestObjects;
     }
 

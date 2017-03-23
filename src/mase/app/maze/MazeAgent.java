@@ -6,10 +6,11 @@
 package mase.app.maze;
 
 import java.awt.Color;
+import java.util.Collections;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
-import mase.mason.world.PolygonRaySensor;
+import mase.mason.world.RaySensor;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 
@@ -20,6 +21,7 @@ import sim.field.continuous.Continuous2D;
 public class MazeAgent extends SmartAgent {
 
     public static final Color COLOR = Color.BLUE;
+    private static final long serialVersionUID = 1L;
 
     public MazeAgent(MazeTask sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, COLOR, ac);
@@ -33,9 +35,9 @@ public class MazeAgent extends SmartAgent {
         arcSensor.setRange(Double.POSITIVE_INFINITY);
         arcSensor.setArcs(4);
         arcSensor.setBinary(true);
-        arcSensor.setObjectTypes(MazeTask.Target.class);
+        arcSensor.setObjects(Collections.singleton(sim.target));
         
-        PolygonRaySensor raySensor = new PolygonRaySensor(sim, field, this);
+        RaySensor raySensor = new RaySensor(sim, field, this);
         super.addSensor(raySensor);
         raySensor.setBinary(false);
         raySensor.setRays(sim.par.sensorRange, -Math.PI/2, -Math.PI / 4, 0, Math.PI / 4, Math.PI / 2, Math.PI);
@@ -53,7 +55,7 @@ public class MazeAgent extends SmartAgent {
         
         MazeTask mt = (MazeTask) sim;
         // target reached
-        if(this.distanceTo(mt.par.targetPos) <= mt.par.targetRadius) {
+        if(mt.target.distanceTo(this) <= 0) {
             mt.kill(); // done
         }
     }

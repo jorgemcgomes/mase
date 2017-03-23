@@ -16,7 +16,7 @@ import sim.util.Bag;
 public class CountSensor extends AbstractSensor {
 
     private double range = Double.POSITIVE_INFINITY;
-    private Class[] types = new Class[]{Object.class};
+    private Class<? extends SensableObject>[] types = new Class[]{SensableObject.class};
     private int max = 1;
 
     public CountSensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
@@ -27,7 +27,7 @@ public class CountSensor extends AbstractSensor {
         this.max = max;
     }
 
-    public void setObjectTypes(Class... types) {
+    public void setObjectTypes(Class<SensableObject>... types) {
         this.types = types;
     }
 
@@ -44,10 +44,10 @@ public class CountSensor extends AbstractSensor {
     public double[] readValues() {
         int count = 0;
         Bag neighbours = Double.isInfinite(range) ? field.allObjects
-                : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
+                : field.getNeighborsWithinDistance(ag.getCenterLocation(), range + ag.getRadius(), false, true);
         for (Object n : neighbours) {
             if (objectMatch(n)) {
-                double dist = ag.distanceTo(n);
+                double dist = ((SensableObject) n).distanceTo(ag);
                 if (dist <= range) {
                     count++;
                 }

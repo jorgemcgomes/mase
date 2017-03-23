@@ -70,9 +70,9 @@ public class IndianaAgent extends SmartAgent {
 
         // target sensor
         Double2D target = ((Indiana) sim).gate.getCenter();
-        double d = this.getLocation().distance(target);
+        double d = this.getCenterLocation().distance(target);
         if (d <= par.gateSensorRange) {
-            sens[0] = (this.getLocation().distance(target) / par.gateSensorRange) * 2 - 1;
+            sens[0] = (this.getCenterLocation().distance(target) / par.gateSensorRange) * 2 - 1;
             sens[1] = this.angleTo(target) / Math.PI;
         } else {
             sens[0] = 1;
@@ -84,14 +84,14 @@ public class IndianaAgent extends SmartAgent {
         }
         // agent sensors
         int count = 0;
-        Bag neighbours = field.getNeighborsWithinDistance(this.getLocation(), par.agentSensorRadius + RADIUS * 2);
+        Bag neighbours = field.getNeighborsWithinDistance(this.getCenterLocation(), par.agentSensorRadius + RADIUS * 2);
         for (Object n : neighbours) {
             if (n != this && n instanceof IndianaAgent) {
                 IndianaAgent aa = (IndianaAgent) n;
                 double dist = this.distanceTo(aa);
                 if (dist <= par.agentSensorRadius) {
                     count++;
-                    double angle = this.angleTo(aa.getLocation());
+                    double angle = this.angleTo(aa.getCenterLocation());
                     int arc = angleToArc(angle);
                     sens[arc + 3] = Math.min(sens[arc + 3], (dist / par.agentSensorRadius) * 2 - 1); // arc sensors
                 }
@@ -100,14 +100,14 @@ public class IndianaAgent extends SmartAgent {
         // count sensor
         sens[2] = ((double) count / (par.numAgents - 1)) * 2 - 1;
         // wall sensors
-        Double2D l = getLocation();
+        Double2D l = getCenterLocation();
         double r = par.wallRadius + RADIUS;
         // only if it is close to the boundaries
         if (l.x <= r || l.x >= field.width - r || l.y <= r || l.y >= field.height - r) {
             for (int i = 0; i < rayStarts.length; i++) {
                 int si = i + par.agentSensorArcs + 3;
-                Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
-                Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
+                Double2D rs = rayStarts[i].rotate(orientation2D()).add(getCenterLocation());
+                Double2D re = rayEnds[i].rotate(orientation2D()).add(getCenterLocation());
                 double dist = indSim.walls.closestDistance(rs, re);
                 if(!Double.isInfinite(dist)) {
                     sens[si] = dist / par.wallRadius * 2 - 1;

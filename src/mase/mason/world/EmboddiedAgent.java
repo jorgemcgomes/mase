@@ -39,7 +39,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     public static final double COLLISION_SPEED_DECAY = 0.5;
     public static final double COLLISION_DIRECTION = Math.PI / 2;
     private boolean isAlive;
-    private List<StaticPolygonObject> obstacleList;
+    private List<StaticMultilineObject> obstacleList;
     private boolean rotate = true;
 
     protected OvalPortrayal2D ovalPortrayal;
@@ -81,7 +81,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
 
     @Override
     public double[] getStateVariables() {
-        return new double[]{getLocation().x, getLocation().y, getTurningSpeed(), getSpeed()};
+        return new double[]{getCenterLocation().x, getCenterLocation().y, getTurningSpeed(), getSpeed()};
     }
 
     public final void enableRotation(boolean r) {
@@ -140,7 +140,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
 
     private boolean attemptMove(double ori, double speed) {
         Double2D displacement = new Double2D(speed * FastMath.cos(ori), speed * FastMath.sin(ori));
-        Double2D newPos = getLocation().add(displacement);
+        Double2D newPos = getCenterLocation().add(displacement);
         if (isValidMove(newPos)) {
             this.collisionStatus = false;
             this.speed = speed;
@@ -170,14 +170,14 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         if (obstacleList == null) {
             obstacleList = new ArrayList<>();
             for (Object o : field.allObjects) {
-                if (o instanceof StaticPolygonObject) {
-                    obstacleList.add((StaticPolygonObject) o);
+                if (o instanceof StaticMultilineObject) {
+                    obstacleList.add((StaticMultilineObject) o);
                 }
             }
         }
 
         // check for collisions
-        for (StaticPolygonObject p : obstacleList) {
+        for (StaticMultilineObject p : obstacleList) {
             double d = p.closestDistance(target);
             if (d <= radius) {
                 return false;
@@ -191,11 +191,12 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     }
 
     protected boolean checkAgentCollisions(Double2D target) {
+        // TODO: nearest neighbours
         Bag objects = field.allObjects.size() < 20 ? field.allObjects : field.getNeighborsWithinDistance(target, radius, false, true);
         for (Object o : objects) {
             if (o != this && o instanceof EmboddiedAgent) {
                 EmboddiedAgent a = (EmboddiedAgent) o;
-                if (a.agentCollisions && a.distanceTo(target) <= radius) {
+                if (a.agentCollisions && target.distance(a.getCenterLocation()) <= this.getRadius() + a.getRadius()) {
                     return false;
                 }
             }
@@ -262,19 +263,5 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         double agentDirX = FastMath.cosQuick(orientation);
         double agentDirY = FastMath.sinQuick(orientation);
         return FastMath.atan2(agentDirX * agToPointY - agentDirY * agToPointX, agentDirX * agToPointX + agentDirY * agToPointY);
-    }
-
-    public double angleTo(CircularObject obj) {
-        return angleTo(obj.getLocation());
-    }
-
-    public double angleTo(Object obj) {
-        if (obj instanceof Double2D) {
-            return angleTo((Double2D) obj);
-        } else if (obj instanceof CircularObject) {
-            return angleTo((CircularObject) obj);
-        } else {
-            return angleTo(field.getObjectLocation(obj));
-        }
     }
 }

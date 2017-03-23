@@ -46,20 +46,20 @@ public class RSAgent extends SmartAgent {
         for (int i = 0; i < rs.par.agentSensorArcs; i++) {
             sens[i] = 1; // initialize distance sensors to max value
         }
-        Bag neighbours = field.getNeighborsWithinDistance(this.getLocation(), rs.par.agentSensorRange + rs.par.agentRadius * 2);
+        Bag neighbours = field.getNeighborsWithinDistance(this.getCenterLocation(), rs.par.agentSensorRange + rs.par.agentRadius * 2);
         for (Object n : neighbours) {
             if (n != this && n instanceof RSAgent) {
                 RSAgent a = (RSAgent) n;
                 double dist = this.distanceTo(a);
                 if (dist <= rs.par.agentSensorRange) {
-                    double angle = this.angleTo(a.getLocation());
+                    double angle = this.angleTo(a.getCenterLocation());
                     int arc = angleToArc(angle);
                     sens[arc] = Math.min(sens[arc], (dist / rs.par.agentSensorRange) * 2 - 1); // arc sensors
                 }
             }
         }
 
-        sens[rs.par.agentSensorArcs] = (this.getLocation().distance(rs.resource.getLocation()) / (rs.par.size / 2)) * 2 - 1;
+        sens[rs.par.agentSensorArcs] = (this.getCenterLocation().distance(rs.resource.getLocation()) / (rs.par.size / 2)) * 2 - 1;
         sens[rs.par.agentSensorArcs + 1] = this.angleTo(rs.resource.getLocation()) / Math.PI;
         sens[rs.par.agentSensorArcs + 2] = (this.energyLevel / rs.par.maxEnergy) * 2 - 1;
         sens[rs.par.agentSensorArcs + 3] = inStation ? 1 : -1;
@@ -102,7 +102,7 @@ public class RSAgent extends SmartAgent {
         // Update inner sensors        
         energyLevel = Math.max(0, energyLevel - rs.par.minEnergyDecay
                 - (rs.par.maxEnergyDecay - rs.par.minEnergyDecay) * speed);
-        inStation = getLocation().distance(rs.resource.getLocation())
+        inStation = getCenterLocation().distance(rs.resource.getLocation())
                 < rs.par.resourceRadius - rs.par.agentRadius;
 
         // Death procedures

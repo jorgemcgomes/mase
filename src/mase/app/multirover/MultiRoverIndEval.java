@@ -52,7 +52,7 @@ public class MultiRoverIndEval extends MasonEvaluation {
             // Distance to closest rock
             double min = Double.POSITIVE_INFINITY;
             for(Rock rock : mr.rocks) {
-                min = Math.min(min, r.distanceTo(rock.getLocation()));
+                min = Math.min(min, rock.distanceTo(r));
             }
             distanceToRock[i] += min;
             

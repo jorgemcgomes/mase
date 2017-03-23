@@ -23,16 +23,14 @@ public class HerdingFitness extends MasonEvaluation {
 
     private FitnessResult res;
     private Map<Sheep, Double> initialDistances;
-    private Double2D gate;
 
     @Override
     protected void preSimulation(MasonSimState sim) {
         super.preSimulation(null);
         Herding herd = (Herding) sim;
-        gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
         initialDistances = new HashMap<>();
         for(Sheep s : herd.sheeps) {
-            initialDistances.put(s, s.distanceTo(gate));
+            initialDistances.put(s, ((Herding) sim).curralCenter.distanceTo(s));
         }
     }
 
@@ -45,7 +43,7 @@ public class HerdingFitness extends MasonEvaluation {
             if (sheep.corraledTime > 0) { // sheep curraled
                 fitness += 2 - sheep.corraledTime / (double) maxSteps;
             } else {
-                fitness += Math.max(0, 1 - sheep.distanceTo(gate) / initialDistances.get(sheep));
+                fitness += Math.max(0, 1 - ((Herding) sim).curralCenter.distanceTo(sheep) / initialDistances.get(sheep));
             }      
         }
         res = new FitnessResult( fitness, FitnessResult.ARITHMETIC);

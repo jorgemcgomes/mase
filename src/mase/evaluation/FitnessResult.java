@@ -17,7 +17,7 @@ public class FitnessResult implements EvaluationResult {
     protected int average;
 
     public FitnessResult(double value) {
-        this(value, HARMONIC);
+        this(value, ARITHMETIC);
     }
 
     public FitnessResult(double value, int average) {

@@ -52,7 +52,7 @@ public class LandRobot extends SmartAgent {
 
         botArcs = new DistanceSensorArcs(sim, field, this);
         super.addSensor(botArcs);
-        botArcs.ignoreRadius(true);
+        botArcs.centerToCenter(true);
         double vRange = sim.par.flyingStartHeight * FastMath.tan(sim.par.flyingVisionAngle / 2);
         botArcs.setRange(vRange);
         botArcs.setArcs(sim.par.landArcs);
@@ -69,7 +69,7 @@ public class LandRobot extends SmartAgent {
         Iterator<Item> iter = ft.items.iterator();
         while (iter.hasNext()) {
             Item i = iter.next();
-            if (this.distanceTo(i.getLocation()) < i.radius) {
+            if (i.distanceTo(this) <= 0) {
                 ft.field.remove(i);
                 iter.remove();
             }

@@ -10,6 +10,8 @@ import java.awt.Color;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.MasonSimState;
+import mase.mason.world.CircularObject;
+import mase.mason.world.StaticPointObject;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
@@ -26,6 +28,7 @@ public class MazeTask extends MasonSimState {
     protected MazeParams par;
     protected Continuous2D field;
     protected MazeAgent agent;
+    protected CircularObject target;
 
     public MazeTask(long seed, MazeParams par, GroupController gc) {
         super(gc, seed);
@@ -38,7 +41,8 @@ public class MazeTask extends MasonSimState {
         // Setup maze
         field = new Continuous2D(20, par.maze.getWidth(), par.maze.getHeight());
         field.setObjectLocation(par.maze, new Double2D(0,0));
-        field.setObjectLocation(new Target(par.targetRadius), par.targetPos);
+        target = new CircularObject(Color.RED, this, field, par.targetRadius);
+        field.setObjectLocation(target, par.targetPos);
         
         // Place agent
         AgentController ac = gc.getAgentControllers(1)[0];
@@ -52,13 +56,4 @@ public class MazeTask extends MasonSimState {
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
     }
-    
-    protected static class Target extends OvalPortrayal2D {
-        
-        Target(double radius) {
-            super(Color.RED, radius * 2, true);
-        }
-        
-    }
-    
 }

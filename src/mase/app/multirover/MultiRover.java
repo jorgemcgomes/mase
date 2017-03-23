@@ -16,7 +16,7 @@ import mase.evaluation.EvaluationFunction;
 import mase.mason.generic.SmartAgentProvider;
 import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticPolygonObject;
+import mase.mason.world.StaticMultilineObject;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.util.Bag;
@@ -38,7 +38,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
     protected List<Rock> rocks; // existing rocks
     protected List<Rock>[] matchingRocks; // rocks that match each actuator (index is actuator)
     protected Color[] actuatorColors;
-    protected StaticPolygonObject walls;
+    protected StaticMultilineObject walls;
 
     public MultiRover(long seed, MRParams par, GroupController gc) {
         super(gc, seed);
@@ -60,7 +60,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
         this.field = new Continuous2D(par.discretization, par.size, par.size);
         this.scores = new int[par.usedTypes.size()];
 
-        walls = new StaticPolygonObject(new Double2D[]{
+        walls = new StaticMultilineObject(new Double2D[]{
             new Double2D(0, 0),
             new Double2D(par.size, 0),
             new Double2D(par.size, par.size),
@@ -87,7 +87,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
             Double2D newLoc = new Double2D(x, y);
             boolean check = true;
             for (Rover r : rovers) {
-                if (r.getLocation().distance(newLoc) <= par.agentRadius * 2) {
+                if (r.getCenterLocation().distance(newLoc) <= par.agentRadius * 2) {
                     check = false;
                     break;
                 }

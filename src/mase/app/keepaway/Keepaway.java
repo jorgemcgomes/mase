@@ -112,7 +112,7 @@ public class Keepaway extends MasonSimState implements TaskDescriptionProvider, 
             double y = (par.takersPlacement * r) * Math.sin(q) + center.getY();
             t.setLocation(new Double2D(x, y));
         }
-        Double2D ballDir = ball.getLocation().subtract(t.getLocation());
+        Double2D ballDir = ball.getCenterLocation().subtract(t.getCenterLocation());
         t.setOrientation(ballDir.angle());
         t.enableAgentCollisions(par.collisions);
         t.setStopper(schedule.scheduleRepeating(t));
@@ -130,7 +130,7 @@ public class Keepaway extends MasonSimState implements TaskDescriptionProvider, 
         double angle = k.orientation2D();
         double op = FastMath.sin(angle) * BALL_OFFSET;
         double ad = FastMath.cos(angle) * BALL_OFFSET;
-        ball.setLocation(k.getLocation().add(new Double2D(ad, op)));
+        ball.setLocation(k.getCenterLocation().add(new Double2D(ad, op)));
         ball.setStopper(schedule.scheduleRepeating(ball));
     }
 

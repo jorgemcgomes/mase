@@ -63,7 +63,7 @@ public class KeepawayIndividualEval extends MasonEvaluation {
             Keeper k = kw.keepers.get(i);
             if (k.hasPossession) {
                 if (lastKeeper != -1 && i != lastKeeper) { // pass between different agents
-                    double passDist = lastPossession.distance(kw.ball.getLocation());
+                    double passDist = lastPossession.distance(kw.ball.getCenterLocation());
                     if (passDist > minPass) {
                         passNumber[lastKeeper]++;
                     }
@@ -71,7 +71,7 @@ public class KeepawayIndividualEval extends MasonEvaluation {
                     passLength[lastKeeper] += passDist;
                 }
                 lastKeeper = i;
-                lastPossession = kw.ball.getLocation();
+                lastPossession = kw.ball.getCenterLocation();
                 return;
             }
         }

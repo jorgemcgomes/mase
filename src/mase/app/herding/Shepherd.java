@@ -12,6 +12,7 @@ import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.RangeBearingSensor;
 import mase.mason.world.SmartAgent;
+import mase.mason.world.StaticPointObject;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 
@@ -42,7 +43,7 @@ public class Shepherd extends SmartAgent {
         super.addSensor(rbSheep);
         
         RangeBearingSensor rbGate = new RangeBearingSensor(sim, field, this);
-        rbGate.setObjects(Collections.singletonList(new Double2D(sim.par.arenaSize, sim.par.arenaSize / 2)));
+        rbGate.setObjects(Collections.singletonList(sim.curralCenter));
         rbGate.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         super.addSensor(rbGate);
         

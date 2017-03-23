@@ -9,8 +9,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.AgentController;
+import mase.mason.world.PolygonUtils.Segment;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticPolygonObject.Segment;
+import mase.mason.world.StaticPointObject;
 import sim.engine.SimState;
 import sim.util.Double2D;
 
@@ -31,7 +32,7 @@ public class SoccerAgent extends SmartAgent {
     protected List<SoccerAgent> oppTeam; // the opponents
     protected List<SoccerAgent> others; // all other players
     protected List<SoccerAgent> all; // all players, including myself
-    protected Double2D ownGoal, oppGoal;
+    protected StaticPointObject ownGoal, oppGoal;
     protected Color teamColor;
     protected Segment ownGoalSegment, oppGoalSegment;
 
@@ -60,8 +61,8 @@ public class SoccerAgent extends SmartAgent {
         this.teamMates = new ArrayList<>(ownTeam);
         this.teamMates.remove(this);
         this.oppTeam = opponents;
-        this.ownGoal = ownGoal;
-        this.oppGoal = oppGoal;
+        this.ownGoal = new StaticPointObject(((Soccer) sim).field, ownGoal);
+        this.oppGoal = new StaticPointObject(((Soccer) sim).field, oppGoal);
         this.others = new ArrayList<>(this.teamMates);
         this.others.addAll(oppTeam);
         this.all = new ArrayList<>(this.ownTeam);
@@ -75,7 +76,7 @@ public class SoccerAgent extends SmartAgent {
     public void step(SimState state) {
         Soccer soc = (Soccer) state;
         // is the ball within kicking distance?
-        hasPossession = distanceTo(soc.ball.getLocation()) <= soc.par.agentKickDistance;
+        hasPossession = soc.ball.distanceTo(this) <= soc.par.agentKickDistance;
         // If the ball is stoped or the agent does not have possession, turn-off the just-kicked flag
         if (justKicked && (soc.ball.getCurrentSpeed() < 0.01 || !hasPossession)) {
             justKicked = false;

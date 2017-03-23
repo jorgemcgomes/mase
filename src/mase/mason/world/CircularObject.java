@@ -13,14 +13,17 @@ import sim.portrayal.SimplePortrayal2D;
 import sim.portrayal.simple.CircledPortrayal2D;
 import sim.portrayal.simple.LabelledPortrayal2D;
 import sim.portrayal.simple.MovablePortrayal2D;
+import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Double2D;
 
 /**
  *
  * @author jorge
  */
-public class CircularObject extends CircledPortrayal2D implements Fixed2D {
+public class CircularObject extends CircledPortrayal2D implements Fixed2D, SensableObject {
 
+    public static final Color DEFAULT_COLOR = Color.RED;
+    
     private static final long serialVersionUID = 1L;
     protected Continuous2D field;
     protected Double2D pos;
@@ -34,6 +37,15 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D {
     protected MovablePortrayal2D movablePortrayal;
     protected SimplePortrayal2D woChild;
 
+
+    public CircularObject(SimState sim, Continuous2D field, double radius) {
+        this(DEFAULT_COLOR, sim, field, radius);
+    }
+    
+    public CircularObject(Color color, SimState sim, Continuous2D field, double radius) {
+        this(new OvalPortrayal2D(color, radius * 2, true), sim, field, radius);
+    }    
+    
     public CircularObject(SimplePortrayal2D child, SimState sim, Continuous2D field, double radius) {
         super(new LabelledPortrayal2D(new MovablePortrayal2D(child), ""));
 
@@ -75,9 +87,6 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D {
         this.labelPortrayal.paint = Color.BLACK;
     }
 
-    public Double2D getLocation() {
-        return pos;
-    }
     
     public void setLabel(String lab) {
         this.label = lab;
@@ -100,7 +109,9 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D {
         field.setObjectLocation(this, pos);
     }
 
-    public double distanceTo(CircularObject other) {
+    
+    
+    /*public double distanceTo(CircularObject other) {
         return Math.max(0, pos.distance(other.getLocation()) - other.radius - this.radius);
     }
 
@@ -126,9 +137,9 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D {
             }
             return Math.max(0, p.distance(pos) - this.radius);
         }
-    }
+    }*/
 
-    public double centerDistanceTo(Object obj) {
+    /*public double centerDistanceTo(Object obj) {
         Double2D center;
         if(obj instanceof CircularObject) {
             center = ((CircularObject) obj).getLocation();
@@ -138,16 +149,25 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D {
             center = field.getObjectLocation(obj);
         }        
         return center == null ? Double.NaN : pos.distance(center);
-    }    
+    }    */
 
-    public boolean isInside(Object obj) {
-        if(obj instanceof CircularObject) {
-            double dist = centerDistanceTo(obj);
-            return dist < ((CircularObject) obj).getRadius();
-        } else if(obj instanceof StaticPolygonObject) {
-            return false; // TODO: needs to be implemented, but the current static polygons can be open, which makes this currently impossible
-        } else {
-            return false;
-        }          
+    @Override
+    public Double2D getCenterLocation() {
+        return pos;
     }    
+    
+    @Override
+    public double distanceTo(EmboddiedAgent ag) {
+        return Math.max(0, pos.distance(ag.getCenterLocation()) - ag.getRadius() - getRadius());
+    }
+
+    @Override
+    public boolean isInside(EmboddiedAgent ag) {
+        return pos.distance(ag.getCenterLocation()) < ag.getRadius();
+    }
+
+    @Override
+    public double closestRayIntersection(Double2D start, Double2D end) {
+        throw new UnsupportedOperationException("Not supported yet: ray-circle intersection");
+    }
 }

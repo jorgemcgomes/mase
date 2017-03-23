@@ -110,7 +110,7 @@ public class FlyingEffector extends AbstractEffector {
             Double2D velocity = new Double2D(xVelocity, yVelocity);
 
             velocity = velocity.rotate(ag.orientation2D());
-            Double2D newLoc = ag.getLocation().add(velocity);
+            Double2D newLoc = ag.getCenterLocation().add(velocity);
 
             ag.setLocation(newLoc);
             ag.setSpeed(velocity.length());

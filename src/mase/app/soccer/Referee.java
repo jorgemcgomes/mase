@@ -45,18 +45,18 @@ public class Referee implements Steppable {
         The ball is stuck if it is near a player and hasnt moved for a given amount of time
         */
         if(lastBallPos == null) {
-            lastBallPos = soc.ball.getLocation();
+            lastBallPos = soc.ball.getCenterLocation();
             ballStuckTime = 0;
         } else {
             boolean close = false;
             for(SoccerAgent ag : soc.all) {
-                if(ag.hasPossession || ag.distanceTo(soc.ball.getLocation()) < ag.getRadius() * 2) {
+                if(ag.hasPossession || soc.ball.distanceTo(ag) < ag.getRadius() * 2) {
                     close = true;
                     break;
                 }
             }
-            if(!close || soc.ball.getLocation().distance(lastBallPos) > soc.par.ballStuckMovement) {
-                lastBallPos = soc.ball.getLocation();
+            if(!close || soc.ball.getCenterLocation().distance(lastBallPos) > soc.par.ballStuckMovement) {
+                lastBallPos = soc.ball.getCenterLocation();
                 ballStuckTime = 0;
             } else {
                 ballStuckTime++;
@@ -69,13 +69,13 @@ public class Referee implements Steppable {
         /*
         Check if a goal was scored or the game max time was reached
         */
-        if(soc.ball.getLocation().x < 0) { // right team scored
+        if(soc.ball.getCenterLocation().x < 0) { // right team scored
             rightTeamScore++;
             if(lastTouched != null && lastTouched.teamColor == soc.rightTeamColor) {
                 scorer = lastTouched;
             }
             state.kill();
-        } else if(soc.ball.getLocation().x > soc.field.width) { // left team scored
+        } else if(soc.ball.getCenterLocation().x > soc.field.width) { // left team scored
             leftTeamScore++;
             if(lastTouched != null && lastTouched.teamColor == soc.leftTeamColor) {
                 scorer = lastTouched;

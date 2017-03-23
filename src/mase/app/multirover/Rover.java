@@ -5,13 +5,12 @@
  */
 package mase.app.multirover;
 
-import java.awt.Color;
 import java.util.Collections;
 import static mase.app.multirover.MultiRockTypeEffector.NO_ACTIVATION;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
-import mase.mason.world.PolygonRaySensor;
+import mase.mason.world.RaySensor;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 
@@ -58,11 +57,11 @@ public class Rover extends SmartAgent {
         MRParams par = mr.par;
 
         // Obstacle sensor
-        PolygonRaySensor dw = new PolygonRaySensor(sim, field, this);
+        RaySensor dw = new RaySensor(sim, field, this);
         dw.setRays(5, -Math.PI / 6, Math.PI / 6);
         dw.setObjects(Collections.singleton(mr.walls));
         dw.setBinary(true);
-        dw.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, PolygonRaySensor.UNIFORM);
+        dw.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, RaySensor.UNIFORM);
         super.addSensor(dw);
 
         // rock sensor
@@ -70,8 +69,8 @@ public class Rover extends SmartAgent {
         rockSensor.setArcs(6);
         rockSensor.setRange(par.rockSensorRange);
         rockSensor.setObjectTypes(Rock.class);
-        rockSensor.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, PolygonRaySensor.UNIFORM);
-        rockSensor.ignoreRadius(true);
+        rockSensor.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, RaySensor.UNIFORM);
+        rockSensor.centerToCenter(true);
         super.addSensor(rockSensor);
 
         // closest rovers distance
@@ -79,8 +78,8 @@ public class Rover extends SmartAgent {
         dsr.setArcs(4);
         dsr.setRange(par.roverSensorRange);
         dsr.setObjects(mr.rovers);
-        dsr.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, PolygonRaySensor.UNIFORM);
-        dsr.ignoreRadius(true); // not relevant
+        dsr.setNoise(par.sensorRangeNoise, par.sensorAngleNoise, RaySensor.UNIFORM);
+        dsr.centerToCenter(true); // not relevant
         super.addSensor(dsr);
 
         // closest rovers type

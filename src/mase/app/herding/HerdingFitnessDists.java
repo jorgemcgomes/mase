@@ -34,7 +34,7 @@ public class HerdingFitnessDists extends MasonEvaluation {
         super.evaluate(null);
         Herding herd = (Herding) sim;
         Double2D gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
-        accum += gate.distance(herd.sheeps.get(0).getLocation());
+        accum += gate.distance(herd.sheeps.get(0).getCenterLocation());
     }
 
     @Override
@@ -43,7 +43,7 @@ public class HerdingFitnessDists extends MasonEvaluation {
         Herding herd = (Herding) sim;
         if (currentEvaluationStep < maxEvaluationSteps) {
             Double2D gate = new Double2D(herd.par.arenaSize, herd.par.arenaSize / 2);
-            accum += gate.distance(herd.sheeps.get(0).getLocation()) * (maxEvaluationSteps - currentEvaluationStep);
+            accum += gate.distance(herd.sheeps.get(0).getCenterLocation()) * (maxEvaluationSteps - currentEvaluationStep);
         }
         double maxDist = FastMath.sqrt(FastMath.pow(herd.par.arenaSize, 2) + FastMath.pow(herd.par.arenaSize / 2, 2));
         res = new FitnessResult( (1 - accum / maxEvaluationSteps / maxDist), FitnessResult.ARITHMETIC);

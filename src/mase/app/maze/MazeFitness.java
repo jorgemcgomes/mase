@@ -18,6 +18,7 @@ import mase.mason.MasonSimState;
 public class MazeFitness extends MasonEvaluation {
     
     private FitnessResult res;
+    private double initDist;
 
     @Override
     public EvaluationResult getResult() {
@@ -25,11 +26,17 @@ public class MazeFitness extends MasonEvaluation {
     }
 
     @Override
-    protected void postSimulation(MasonSimState sim) {
-        super.postSimulation(null);
+    protected void preSimulation(MasonSimState sim) {
+        super.preSimulation(sim);
         MazeTask mt = (MazeTask) sim;
-        double initDist = mt.par.startPos.distance(mt.par.targetPos) - mt.par.targetRadius - mt.par.agentRadius;
-        double finalDist = mt.agent.distanceTo(mt.par.targetPos) - mt.par.targetRadius;
+        initDist = mt.target.distanceTo(mt.agent);
+    }
+    
+    @Override
+    protected void postSimulation(MasonSimState sim) {
+        super.postSimulation(sim);
+        MazeTask mt = (MazeTask) sim;
+        double finalDist = mt.target.distanceTo(mt.agent);
         double norm = (initDist - finalDist) / initDist;
         res = new FitnessResult( Math.min(Math.max(norm, 0),1));
     }

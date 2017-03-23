@@ -17,7 +17,7 @@ import mase.mason.generic.systematic.EntityGroup;
 import mase.mason.generic.systematic.TaskDescription;
 import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.StaticPolygonObject;
+import mase.mason.world.StaticMultilineObject;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.engine.SimState;
@@ -39,7 +39,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
     protected List<IndianaAgent> agents;
     protected List<IndianaAgent> activeAgents;
     protected Continuous2D field;
-    protected StaticPolygonObject walls;
+    protected StaticMultilineObject walls;
     protected Gate gate;
     protected TaskDescription td;
 
@@ -57,7 +57,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
         super(gc, seed);
         this.par = par;
 
-        this.walls = new StaticPolygonObject(new Double2D[]{
+        this.walls = new StaticMultilineObject(new Double2D[]{
             new Double2D(0, par.size / 2 + par.gateSize / 2),
             new Double2D(0, par.size),
             new Double2D(par.size, par.size),
@@ -134,7 +134,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
         activeAgents = new ArrayList<IndianaAgent>(agents);
     }
 
-    protected static class Gate extends StaticPolygonObject implements Steppable {
+    protected static class Gate extends StaticMultilineObject implements Steppable {
 
         protected long openTime = -1;
         protected boolean closed = false;
@@ -157,7 +157,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
             for (IndianaAgent a : ind.agents) {
                 if (!a.escaped) {
                     anyInside = true;
-                    if (a.passingGate && a.getLocation().x < 0) {
+                    if (a.passingGate && a.getCenterLocation().x < 0) {
                         if (openTime == -1) {
                             this.paint = Color.RED;
                             openTime = ind.schedule.getSteps();

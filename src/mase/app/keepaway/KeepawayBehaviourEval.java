@@ -58,11 +58,11 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         for (Keeper k : kw.keepers) {
             if (k.hasPossession) {
                 if ((lastKeeper == null || k != lastKeeper)
-                        && (lastBallPos == null || lastBallPos.distance(kw.ball.getLocation()) > passLength)) {
+                        && (lastBallPos == null || lastBallPos.distance(kw.ball.getCenterLocation()) > passLength)) {
                     numPasses++;
                 }
                 lastKeeper = k;
-                lastBallPos = kw.ball.getLocation();
+                lastBallPos = kw.ball.getCenterLocation();
                 return;
             }
         }
@@ -70,11 +70,11 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
         // keeper dispersion
         MutableDouble2D centre = new MutableDouble2D(0, 0);
         for (Keeper k : kw.keepers) {
-            centre.addIn(k.getLocation());
+            centre.addIn(k.getCenterLocation());
         }
         centre.multiplyIn(1.0 / kw.keepers.size());
         for (Keeper k : kw.keepers) {
-            keeperDispersion += k.getLocation().distance(centre.x, centre.y);
+            keeperDispersion += k.getCenterLocation().distance(centre.x, centre.y);
         }
         
         // keeper movement
@@ -84,7 +84,7 @@ public class KeepawayBehaviourEval extends MasonEvaluation {
 
         // ball-taker distance
         for (EmboddiedAgent t : kw.takers) {
-            ballTakerDistance += t.getLocation().distance(kw.ball.getLocation());
+            ballTakerDistance += t.getCenterLocation().distance(kw.ball.getCenterLocation());
         }
 
     }

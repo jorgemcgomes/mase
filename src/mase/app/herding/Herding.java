@@ -16,9 +16,10 @@ import mase.mason.generic.systematic.EntityGroup;
 import mase.mason.generic.systematic.TaskDescription;
 import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
+import mase.mason.world.PolygonUtils.Segment;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticPolygonObject;
-import mase.mason.world.StaticPolygonObject.Segment;
+import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.StaticPointObject;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
@@ -40,7 +41,8 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider, S
     protected List<Fox> foxes;
     protected List<Sheep> sheeps;
     protected List<Sheep> activeSheeps;
-    protected StaticPolygonObject fence, openSide, curral;
+    protected StaticPointObject curralCenter;
+    protected StaticMultilineObject fence, openSide, curral;
 
     public Herding(long seed, HerdingParams par, GroupController gc) {
         super(gc, seed);
@@ -57,18 +59,20 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider, S
         par.shepherdSensorRange += par.shepherdSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
 
         // Static environment
-        fence = new StaticPolygonObject(new Segment(0, 0, par.arenaSize, 0),
+        fence = new StaticMultilineObject(new Segment(0, 0, par.arenaSize, 0),
                 new Segment(par.arenaSize, 0, par.arenaSize, par.arenaSize / 2 - par.gateSize / 2),
                 new Segment(par.arenaSize, par.arenaSize / 2 + par.gateSize / 2, par.arenaSize, par.arenaSize),
                 new Segment(par.arenaSize, par.arenaSize, 0, par.arenaSize));
         fence.paint = Color.BLACK;
 
-        openSide = new StaticPolygonObject(new Segment(0, 0, 0, par.arenaSize));
+        openSide = new StaticMultilineObject(new Segment(0, 0, 0, par.arenaSize));
         openSide.paint = Color.RED;
 
-        curral = new StaticPolygonObject(new Segment(par.arenaSize, par.arenaSize / 2 - par.gateSize / 2,
+        curral = new StaticMultilineObject(new Segment(par.arenaSize, par.arenaSize / 2 - par.gateSize / 2,
                 par.arenaSize, par.arenaSize / 2 + par.gateSize / 2));
         curral.paint = Color.BLUE;
+        
+        curralCenter = new StaticPointObject(field, new Double2D(par.arenaSize, par.arenaSize / 2));
 
         this.field = new Continuous2D(par.discretization, par.arenaSize, par.arenaSize);
 

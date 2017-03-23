@@ -11,6 +11,7 @@ import mase.controllers.AgentController;
 import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.RangeBearingSensor;
 import mase.mason.world.SmartAgent;
+import mase.mason.world.StaticPointObject;
 import org.apache.commons.math3.util.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
@@ -49,7 +50,7 @@ public class FlyingRobot extends SmartAgent {
 
         itemArcs = new DistanceSensorArcs(sim, field, this);
         super.addSensor(itemArcs);
-        itemArcs.ignoreRadius(true);
+        itemArcs.centerToCenter(true);
         itemArcs.setRange(vRange);
         itemArcs.setArcs(sim.par.flyingArcs);
         itemArcs.setBinary(false);
@@ -58,7 +59,7 @@ public class FlyingRobot extends SmartAgent {
         
         botArcs = new DistanceSensorArcs(sim, field, this);
         super.addSensor(botArcs);
-        botArcs.ignoreRadius(true);
+        botArcs.centerToCenter(true);
         botArcs.setRange(vRange);
         botArcs.setArcs(sim.par.flyingArcs);
         botArcs.setBinary(false);
@@ -74,7 +75,8 @@ public class FlyingRobot extends SmartAgent {
         }
         
         centre = new RangeBearingSensor(sim, field, this);
-        centre.setObjects(Collections.singletonList(new Double2D(sim.par.arenaSize.x / 2, sim.par.arenaSize.y / 2)));
+        centre.setObjects(Collections.singletonList(
+                new StaticPointObject(field, new Double2D(sim.par.arenaSize.x / 2, sim.par.arenaSize.y / 2))));
         centre.setRange(Double.POSITIVE_INFINITY);
         centre.setNoise(sim.par.sensorRangeNoise, sim.par.sensorAngleNoise, DistanceSensorArcs.UNIFORM);
         super.addSensor(centre);        

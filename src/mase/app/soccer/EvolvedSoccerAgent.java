@@ -42,14 +42,14 @@ public class EvolvedSoccerAgent extends SoccerAgent {
         own.setObjects(teamMates);
         own.setArcs(soc.par.sensorArcs);
         own.setRange(Double.POSITIVE_INFINITY);
-        own.ignoreRadius(true);
+        own.centerToCenter(true);
         super.addSensor(own);
 
         DistanceSensorArcs opp = new DistanceSensorArcs(sim, field, this);
         opp.setObjects(oppTeam);
         opp.setArcs(soc.par.sensorArcs);
         opp.setRange(Double.POSITIVE_INFINITY);
-        opp.ignoreRadius(true);
+        opp.centerToCenter(true);
         super.addSensor(opp);
 
         RangeBearingSensor rbs = new RangeBearingSensor(sim, field, this);
@@ -116,10 +116,10 @@ public class EvolvedSoccerAgent extends SoccerAgent {
         @Override
         public double[] readValues() {
             SoccerAgent sag = (SoccerAgent) ag;
-            if (sag.ownGoal.x < sag.oppGoal.x) { // playing left
-                return new double[]{ag.getLocation().x, ag.getLocation().y};
+            if (sag.ownGoal.getCenterLocation().x < sag.oppGoal.getCenterLocation().x) { // playing left
+                return new double[]{ag.getCenterLocation().x, ag.getCenterLocation().y};
             } else { // playing right
-                return new double[]{field.width - ag.getLocation().x, field.height - ag.getLocation().y};
+                return new double[]{field.width - ag.getCenterLocation().x, field.height - ag.getCenterLocation().y};
             }
         }
 

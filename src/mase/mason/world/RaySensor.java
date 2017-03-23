@@ -15,7 +15,7 @@ import sim.util.Double2D;
 /**
  * @author jorge
  */
-public class PolygonRaySensor extends AbstractSensor {
+public class RaySensor extends AbstractSensor {
 
     private Double2D[] rayStarts, rayEnds;
     private boolean binary = false;
@@ -25,9 +25,9 @@ public class PolygonRaySensor extends AbstractSensor {
     private double orientationNoise = 0;
     private int noiseType;
     private double[] angles;
-    private Collection<StaticPolygonObject> polygons;
+    private Collection<? extends SensableObject> objects;
 
-    public PolygonRaySensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
+    public RaySensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
         super(state, field, ag);
     }
 
@@ -44,8 +44,8 @@ public class PolygonRaySensor extends AbstractSensor {
     /*
     If not set, or set to null, it will search for existing polygons every timestep
      */
-    public void setObjects(Collection<StaticPolygonObject> polygons) {
-        this.polygons = polygons;
+    public void setObjects(Collection<? extends SensableObject> objects) {
+        this.objects = objects;
     }
 
     public void setRays(double range, double... angles) {
@@ -98,19 +98,19 @@ public class PolygonRaySensor extends AbstractSensor {
         }
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
         for (int i = 0; i < rayStarts.length; i++) {
-            Double2D rs = rayStarts[i].rotate(ag.orientation2D()).add(ag.getLocation());
+            Double2D rs = rayStarts[i].rotate(ag.orientation2D()).add(ag.getCenterLocation());
             Double2D re;
             if (rangeNoise > 0) {
                 double newRange = range + rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 newRange = Math.max(0, newRange);
                 double newOrientation = angles[i] + orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                re = new Double2D(ag.getRadius() + newRange, 0).rotate(newOrientation + ag.orientation2D()).add(ag.getLocation());
+                re = new Double2D(ag.getRadius() + newRange, 0).rotate(newOrientation + ag.orientation2D()).add(ag.getCenterLocation());
             } else {
-                re = rayEnds[i].rotate(ag.orientation2D()).add(ag.getLocation());
+                re = rayEnds[i].rotate(ag.orientation2D()).add(ag.getCenterLocation());
             }
 
-            for (StaticPolygonObject p : getCandidates()) {
-                double dist = p.closestDistance(rs, re);
+            for (SensableObject p : getCandidates()) {
+                double dist = p.closestRayIntersection(rs, re);
                 if (!Double.isInfinite(dist)) {
                     vals[i] = binary ? 1 : Math.min(vals[i], dist);
                 }
@@ -119,14 +119,14 @@ public class PolygonRaySensor extends AbstractSensor {
         return vals;
     }
 
-    protected Collection<StaticPolygonObject> getCandidates() {
-        if (polygons != null) {
-            return polygons;
+    protected Collection<? extends SensableObject> getCandidates() {
+        if (objects != null) {
+            return objects;
         } else {
-            Collection<StaticPolygonObject> p = new ArrayList<>();
+            Collection<SensableObject> p = new ArrayList<>();
             for (Object o : field.allObjects) {
-                if (o instanceof StaticPolygonObject) {
-                    p.add((StaticPolygonObject) o);
+                if (o instanceof SensableObject) {
+                    p.add((SensableObject) o);
                 }
             }
             return p;

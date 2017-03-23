@@ -8,21 +8,23 @@ package mase.mason;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import mase.app.foraging.Item;
 import mase.controllers.GroupController;
-import mase.mason.world.EmboddiedAgent;
+import mase.mason.world.CircularObject;
+import mase.mason.world.PolygonUtils.Segment;
+import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.StaticPointObject;
 import mase.stat.Reevaluate;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
-import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Bag;
-import sim.util.Double2D;
 import sim.util.Int2D;
 
 /**
@@ -34,13 +36,15 @@ public class MasonTracer {
     public static final String SIZE = "-s";
     public static final String OUT = "-o";
     public static final String SEED = "-seed";
-    //public static final String DRAW_AREA = "-draw-area";
+    public static final String BG_COLOR = "-bgcolor";
 
     public static void main(String[] args) throws Exception {
         int size = 0;
         File out = null;
         int index;
         long seed = new Random().nextLong();
+        Color bgColor = null;
+
         for (index = 0; index < args.length; index++) {
             if (args[index].equals(SIZE)) {
                 size = Integer.parseInt(args[1 + index++]);
@@ -48,8 +52,12 @@ public class MasonTracer {
                 out = new File(args[1 + index++]);
             } else if (args[index].equals(SEED)) {
                 seed = Long.parseLong(args[1 + index++]);
+            } else if (args[index].equals(BG_COLOR)) {
+                bgColor = parseColor(args[1 + index++]);
+
             }
         }
+
         File gc = Reevaluate.findControllerFile(args);
         if (out == null && gc != null) {
             out = new File(gc.getParentFile(), gc.getName() + ".svg");
@@ -57,23 +65,27 @@ public class MasonTracer {
 
         GroupController controller = Reevaluate.createController(args);
         MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args, gc.getParentFile());
+        MasonSimState simState = sim.getSimState(controller, seed);
+
         MasonTracer tracer = new MasonTracer(size);
-        tracer.trace(controller, sim, seed, out);
+        if (bgColor != null) {
+            tracer.canvasColor = bgColor;
+        }
+        tracer.trace(simState, out);
     }
 
     private final int size;
     public boolean drawInitialPositions = true;
     public boolean drawFinalPositions = true;
     public boolean drawArena = true;
-    public boolean drawOthers = false;
+    public boolean collapseRepeated = true;
+    public Color canvasColor = Color.WHITE;
 
     public MasonTracer(int size) {
         this.size = size;
     }
 
-    public void trace(GroupController gc, MasonSimulationProblem sim, long seed, File out) throws IOException {
-        MasonSimState simState = sim.getSimState(gc, seed);
-
+    public void trace(MasonSimState simState, File out) throws IOException {
         simState.start();
         FieldPortrayal2D port = simState.createFieldPortrayal();
         simState.setupPortrayal(port);
@@ -86,7 +98,7 @@ public class MasonTracer {
 
         // create canvas
         SVGGraphics2D gr = new SVGGraphics2D(w, h);
-        gr.setPaint(Color.WHITE);
+        gr.setPaint(canvasColor);
 
         // draw area
         if (drawArena) {
@@ -97,65 +109,79 @@ public class MasonTracer {
 
         // draw other objects
         Bag allObjects = field.getAllObjects();
-        ArrayList<EmboddiedAgent> agents = new ArrayList<>();
+        ArrayList<CircularObject> tracked = new ArrayList<>();
         for (Object o : allObjects) {
-            if (o instanceof EmboddiedAgent) {
-                agents.add((EmboddiedAgent) o);
-            } else if (o instanceof OvalPortrayal2D && drawOthers) {
-                OvalPortrayal2D oval = (OvalPortrayal2D) o;
-                Double2D loc = field.getObjectLocation(oval);
-                int x = (int) Math.round((loc.x - oval.scale / 2) * scale);
-                int y = (int) Math.round((loc.y - oval.scale / 2) * scale);
-                int s = (int) Math.round(oval.scale * scale);
-                Color c = (Color) oval.paint;
-                gr.setPaint(c);
-                gr.fillOval(x, y, s, s);
-            }
-        }
-
-        // Foraging exclusive
-        ArrayList<Item> items = new ArrayList<>();
-        for (Object o : allObjects) {
-            if (o instanceof Item) {
-                items.add((Item) o);
+            if (o instanceof CircularObject) {
+                tracked.add((CircularObject) o);
+            } else if (o instanceof StaticPointObject) {
+                StaticPointObject spo = (StaticPointObject) o;
+                int x = (int) Math.round(spo.getCenterLocation().x * scale);
+                int y = (int) Math.round(spo.getCenterLocation().y * scale);
+                gr.setPaint(spo.paint);
+                gr.drawLine(x, y, x, y);
+            } else if (o instanceof StaticMultilineObject) {
+                StaticMultilineObject smo = (StaticMultilineObject) o;
+                gr.setPaint(smo.paint);
+                for (Segment s : smo.segments()) {
+                    int x1 = (int) Math.round(s.start.x * scale);
+                    int y1 = (int) Math.round(s.start.y * scale);
+                    int x2 = (int) Math.round(s.end.x * scale);
+                    int y2 = (int) Math.round(s.end.y * scale);
+                    gr.drawLine(x1, y1, x2, y2);
+                }
             }
         }
 
         // draw initial positions
         if (drawInitialPositions) {
-            for (EmboddiedAgent ag : agents) {
-                int x = (int) Math.round((ag.getLocation().x - ag.getRadius() / 2) * scale);
-                int y = (int) Math.round((ag.getLocation().y - ag.getRadius() / 2) * scale);
+            for (CircularObject ag : tracked) {
+                int x = (int) Math.round((ag.getCenterLocation().x - ag.getRadius() / 2) * scale);
+                int y = (int) Math.round((ag.getCenterLocation().y - ag.getRadius() / 2) * scale);
                 int s = (int) Math.round(ag.getRadius() * scale);
-                Color c = (Color) ag.paint;
-                gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
+                gr.setPaint(ag.paint);
                 gr.fillRect(x, y, s, s);
             }
         }
 
         // record paths
         boolean keepGoing = true;
-        HashMap<EmboddiedAgent, List<Int2D>> points = new HashMap<>();
+        HashMap<CircularObject, List<Int2D>> points = new HashMap<>();
         while (keepGoing) {
-            for (EmboddiedAgent ag : agents) {
-                if (!points.containsKey(ag)) {
+            for (CircularObject ag : tracked) {
+                if (!points.containsKey(ag)) { // init
                     points.put(ag, new ArrayList<Int2D>());
                 }
-                points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale),
-                        (int) Math.round(ag.getLocation().y * scale)));
+                if (field.exists(ag)) {
+                    points.get(ag).add(new Int2D((int) Math.round(ag.getCenterLocation().x * scale),
+                            (int) Math.round(ag.getCenterLocation().y * scale)));
+                }
             }
             keepGoing = simState.schedule.step(simState);
         }
-        for (EmboddiedAgent ag : agents) {
-            points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale),
-                    (int) Math.round(ag.getLocation().y * scale)));
+        for (CircularObject ag : tracked) {
+            points.get(ag).add(new Int2D((int) Math.round(ag.getCenterLocation().x * scale),
+                    (int) Math.round(ag.getCenterLocation().y * scale)));
+        }
+
+        // collapse lists
+        if (collapseRepeated) {
+            for (List<Int2D> pts : points.values()) {
+                Int2D last = null;
+                Iterator<Int2D> iter = pts.iterator();
+                while (iter.hasNext()) {
+                    Int2D next = iter.next();
+                    if (last != null && next.equals(last)) {
+                        iter.remove();
+                    }
+                    last = next;
+                }
+            }
         }
 
         // draw paths
-        for (EmboddiedAgent ag : points.keySet()) {
+        for (CircularObject ag : points.keySet()) {
             List<Int2D> pts = points.get(ag);
-            Color c = (Color) ag.paint;
-            gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
+            gr.setPaint(ag.paint);
 
             int[] xs = new int[pts.size()];
             int[] ys = new int[pts.size()];
@@ -168,30 +194,33 @@ public class MasonTracer {
 
         // last positions
         if (drawFinalPositions) {
-            for (EmboddiedAgent ag : agents) {
-                int x = (int) Math.round((ag.getLocation().x - ag.getRadius()) * scale);
-                int y = (int) Math.round((ag.getLocation().y - ag.getRadius()) * scale);
+            for (CircularObject ag : tracked) {
+                int x = (int) Math.round((ag.getCenterLocation().x - ag.getRadius()) * scale);
+                int y = (int) Math.round((ag.getCenterLocation().y - ag.getRadius()) * scale);
                 int s = (int) Math.round(ag.getRadius() * 2 * scale);
-                Color c = (Color) ag.paint;
-                gr.setPaint(new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue()));
+                gr.setPaint(ag.paint);
                 gr.fillOval(x, y, s, s);
             }
         }
 
-        // foraging task exclusive
-        for (Item it : items) {
-            Double2D loc = it.getLocation();
-            int x = (int) Math.round(loc.x * scale);
-            int y = (int) Math.round(loc.y * scale);
-            int s = (int) Math.round(it.scale * scale * 3);
-            Color c = (Color) it.paint;
-            gr.setPaint(c);
-            gr.drawRect(x - s / 2, y - s / 2, s, s);
-            gr.drawLine(x - s / 2, y - s / 2, x + s / 2, y + s / 2);
-            gr.drawLine(x + s / 2, y - s / 2, x - s / 2, y + s / 2);
-        }
-
         SVGUtils.writeToSVG(out, gr.getSVGElement());
+    }
+
+    public static Color parseColor(String str) {
+        String[] split = str.split("-|\\.|,|;");
+        if (split.length == 1) {
+            try {
+                Field field = Color.class.getField(split[0]);
+                return (Color) field.get(null);
+            } catch (Exception ex) {
+                return Color.decode(split[0]);
+            }
+        } else if (split.length == 3) {
+            return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+        } else if (split.length == 4) {
+            return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+        }
+        return null;
     }
 
 }

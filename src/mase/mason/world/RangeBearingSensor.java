@@ -8,13 +8,10 @@ package mase.mason.world;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
-import sim.util.Double2D;
 
 /**
  *
@@ -22,7 +19,7 @@ import sim.util.Double2D;
  */
 public class RangeBearingSensor extends AbstractSensor {
 
-    private List<Object> objects;
+    private List<SensableObject> objects;
     private boolean sort = false;
     private double range = Double.POSITIVE_INFINITY;
     private int objectCount;
@@ -35,9 +32,9 @@ public class RangeBearingSensor extends AbstractSensor {
         super(state, field, ag);
     }
 
-    public void setObjects(Collection<? extends Object> objs) {
+    public void setObjects(Collection<? extends SensableObject> objs) {
         objects = new ArrayList<>(objs.size());
-        for (Object o : objs) {
+        for (SensableObject o : objs) {
             if (o == null) {
                 System.out.println("WARNING: NULL OBJECT");
             }
@@ -85,15 +82,14 @@ public class RangeBearingSensor extends AbstractSensor {
         Integer[] indexes = new Integer[objects.size()];
 
         int index = 0;
-        for (Object o : objects) {
-            double dist = ag.distanceTo(o);
+        for (SensableObject o : objects) {
+            double dist = o.distanceTo(ag);
             if (rangeNoiseAbs > 0) {
                 dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 dist = Math.max(dist, 0);
             }
-            Double2D loc = o instanceof Double2D ? (Double2D) o : field.getObjectLocation(o);
-            if ((Double.isInfinite(range) || dist <= range) && loc != null) {
-                double angle = ag.angleTo(loc);
+            if ((Double.isInfinite(range) || dist <= range) && o.getCenterLocation() != null) {
+                double angle = ag.angleTo(o.getCenterLocation());
                 if (orientationNoise > 0) {
                     angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                     angle = EmboddiedAgent.normalizeAngle(angle);

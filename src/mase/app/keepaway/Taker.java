@@ -35,7 +35,7 @@ public class Taker extends EmboddiedAgent {
         }
         
         // naive behaviour -- go towards the ball
-        Double2D d = kw.ball.getLocation().subtract(this.getLocation());
+        Double2D d = kw.ball.getCenterLocation().subtract(this.getCenterLocation());
         //double dir = this.angleTo(kw.ball.getLocation());
         super.move(FastMath.atan2(d.y, d.x), kw.par.takerSpeed);
     }

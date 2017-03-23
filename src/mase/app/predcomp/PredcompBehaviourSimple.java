@@ -49,12 +49,12 @@ public class PredcompBehaviourSimple extends MasonEvaluation {
         distanceToOther += pc.predator.distanceTo(pc.prey);
         
         if(lastPos[0] != null) {
-            movement[0] += pc.predator.getLocation().distance(lastPos[0]);
-            movement[1] += pc.prey.getLocation().distance(lastPos[1]);
+            movement[0] += pc.predator.getCenterLocation().distance(lastPos[0]);
+            movement[1] += pc.prey.getCenterLocation().distance(lastPos[1]);
         }      
         
-        lastPos[0] = pc.predator.getLocation();
-        lastPos[1] = pc.prey.getLocation();
+        lastPos[0] = pc.predator.getCenterLocation();
+        lastPos[1] = pc.prey.getCenterLocation();
     }
     
     @Override

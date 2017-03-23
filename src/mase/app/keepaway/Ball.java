@@ -34,10 +34,10 @@ public class Ball extends EmboddiedAgent {
             // move
             super.move(orientation2D(), getSpeed() - kw.par.ballDecay);
         }
-        distanceToCenter = kw.center.distance(getLocation());
+        distanceToCenter = kw.center.distance(getCenterLocation());
         
         // check if the ball has escaped the limits
-        if(getLocation().x < 0 || getLocation().x > kw.par.size || getLocation().y < 0 || getLocation().y > kw.par.size) {
+        if(getCenterLocation().x < 0 || getCenterLocation().x > kw.par.size || getCenterLocation().y < 0 || getCenterLocation().y > kw.par.size) {
             kw.outOfLimits = true;
             this.stop();
             state.kill();
@@ -51,7 +51,7 @@ public class Ball extends EmboddiedAgent {
 
     @Override
     public double[] getStateVariables() {
-        return new double[] {getLocation().x, getLocation().y, getSpeed()};
+        return new double[] {getCenterLocation().x, getCenterLocation().y, getSpeed()};
     }
     
     

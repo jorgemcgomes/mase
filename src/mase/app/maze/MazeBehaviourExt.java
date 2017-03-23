@@ -32,7 +32,7 @@ public class MazeBehaviourExt extends MasonEvaluation {
     protected void evaluate(MasonSimState sim) {
         super.evaluate(null);
         MazeTask mt = (MazeTask) sim;
-        positions.add(mt.agent.getLocation());
+        positions.add(mt.agent.getCenterLocation());
     }
 
     @Override
@@ -40,7 +40,7 @@ public class MazeBehaviourExt extends MasonEvaluation {
         super.postSimulation(null);
         MazeTask mt = (MazeTask) sim;
         while (positions.size() < maxEvaluationSteps) {
-            positions.add(mt.agent.getLocation());
+            positions.add(mt.agent.getCenterLocation());
         }
         double[] vec = new double[positions.size() * 2];
         int index = 0;

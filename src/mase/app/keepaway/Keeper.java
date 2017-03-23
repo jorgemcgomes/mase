@@ -10,6 +10,7 @@ import java.util.Arrays;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.RangeBearingSensor;
+import mase.mason.world.SensableObject;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 
@@ -21,6 +22,7 @@ public class Keeper extends SmartAgent {
 
     public static final double RADIUS = 2;
     public static final double KICK_DISTANCE = 0.5;
+    private static final long serialVersionUID = 1L;
     protected boolean hasPossession = false;
     protected double passSpeed;
     protected double moveSpeed;
@@ -44,7 +46,7 @@ public class Keeper extends SmartAgent {
         super.addSensor(keepersRBS);
 
         RangeBearingSensor otherRBS = new RangeBearingSensor(sim, field, this);
-        ArrayList<Object> list = new ArrayList<Object>(kw.takers);
+        ArrayList<SensableObject> list = new ArrayList<SensableObject>(kw.takers);
         list.add(kw.ball);
         otherRBS.setObjects(list);
         otherRBS.setSort(false);
@@ -56,7 +58,7 @@ public class Keeper extends SmartAgent {
         Keepaway kw = (Keepaway) sim;
         if (justKicked
                 && (kw.ball.getSpeed() < 0.0001
-                || kw.ball.getLocation().distance(getLocation()) > Keeper.RADIUS + Ball.RADIUS + KICK_DISTANCE)) {
+                || kw.ball.getCenterLocation().distance(getCenterLocation()) > Keeper.RADIUS + Ball.RADIUS + KICK_DISTANCE)) {
             justKicked = false;
         }
         if (!justKicked && kw.ball.distanceTo(this) < KICK_DISTANCE) {

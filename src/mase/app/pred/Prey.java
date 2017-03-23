@@ -32,7 +32,7 @@ public class Prey extends EmboddiedAgent {
 
     @Override
     public void step(SimState state) {
-        Bag objects = field.getNeighborsWithinDistance(getLocation(), predSim.escapeDistance + Prey.RADIUS + Predator.RADIUS, false);
+        Bag objects = field.getNeighborsWithinDistance(getCenterLocation(), predSim.escapeDistance + Prey.RADIUS + Predator.RADIUS, false);
         Double2D escapeVec = null;
         
         if (predSim.par.escapeStrategy == PredParams.V_NEAREST) { // escape from the nearest one, ignoring all the others
@@ -42,7 +42,7 @@ public class Prey extends EmboddiedAgent {
                     Predator pred = (Predator) o;
                      double dist = pred.distanceTo(this);
                     if (dist < closest && dist < predSim.escapeDistance) {
-                        escapeVec = getLocation().subtract(pred.getLocation());
+                        escapeVec = getCenterLocation().subtract(pred.getCenterLocation());
                         closest = dist;
                     }
                 }
@@ -54,8 +54,8 @@ public class Prey extends EmboddiedAgent {
                     Predator pred = ((Predator) o);
                     double dist = pred.distanceTo(this);
                     if (dist < predSim.escapeDistance && dist > 0) {
-                        MutableDouble2D vec = new MutableDouble2D(getLocation());
-                        vec.subtractIn(pred.getLocation()); // predator to prey vector
+                        MutableDouble2D vec = new MutableDouble2D(getCenterLocation());
+                        vec.subtractIn(pred.getCenterLocation()); // predator to prey vector
                         dist = 1 / dist;
                         vec.normalize();
                         vec.multiplyIn(dist);
@@ -69,7 +69,7 @@ public class Prey extends EmboddiedAgent {
         if (escapeVec != null && (escapeVec.x != 0 || escapeVec.y != 0)) {
             move(escapeVec.angle(), predSim.par.preySpeed);
         }
-        if (getLocation().x > predSim.par.size || getLocation().y > predSim.par.size || getLocation().x < 0 || getLocation().y < 0) {
+        if (getCenterLocation().x > predSim.par.size || getCenterLocation().y > predSim.par.size || getCenterLocation().x < 0 || getCenterLocation().y < 0) {
             disappear();
         }
     }

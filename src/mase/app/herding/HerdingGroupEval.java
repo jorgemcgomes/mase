@@ -29,7 +29,7 @@ public class HerdingGroupEval extends MasonEvaluation {
         sheepFence = 0;
         sheepFox = 0;
         Herding herd = (Herding) sim;
-        initSheepCurral =  herd.curral.closestDistance(herd.sheeps.get(0).getLocation());
+        initSheepCurral =  herd.curral.closestDistance(herd.sheeps.get(0).getCenterLocation());
         initSheepFox = 0;
         for (Fox f : herd.foxes) {
             initSheepFox += herd.sheeps.get(0).distanceTo(f) / herd.foxes.size();
@@ -43,7 +43,7 @@ public class HerdingGroupEval extends MasonEvaluation {
         Herding herd = (Herding) sim;
         Sheep s = herd.sheeps.get(0);
 
-        sheepFence += herd.fence.closestDistance(s.getLocation());
+        sheepFence += herd.fence.closestDistance(s.getCenterLocation());
         for (Fox f : herd.foxes) {
             sheepFox += s.distanceTo(f);
         }
@@ -54,7 +54,7 @@ public class HerdingGroupEval extends MasonEvaluation {
         super.postSimulation(null);
         Herding herd = (Herding) sim;
         Sheep s = herd.sheeps.get(0);
-        double sheepCurral = herd.curral.closestDistance(s.getLocation());
+        double sheepCurral = herd.curral.closestDistance(s.getCenterLocation());
 
         vbr = new VectorBehaviourResult(
                  (sheepCurral / initSheepCurral),
