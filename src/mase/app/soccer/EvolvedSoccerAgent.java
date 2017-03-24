@@ -116,10 +116,10 @@ public class EvolvedSoccerAgent extends SoccerAgent {
         @Override
         public double[] readValues() {
             SoccerAgent sag = (SoccerAgent) ag;
-            if (sag.ownGoal.getCenterLocation().x < sag.oppGoal.getCenterLocation().x) { // playing left
-                return new double[]{ag.getCenterLocation().x, ag.getCenterLocation().y};
+            if (sag.ownGoal.getLocation().x < sag.oppGoal.getLocation().x) { // playing left
+                return new double[]{ag.getLocation().x, ag.getLocation().y};
             } else { // playing right
-                return new double[]{field.width - ag.getCenterLocation().x, field.height - ag.getCenterLocation().y};
+                return new double[]{field.width - ag.getLocation().x, field.height - ag.getLocation().y};
             }
         }
 

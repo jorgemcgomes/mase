@@ -37,28 +37,28 @@ public class ForagingIndividualBehaviour extends MasonEvaluation {
         landMovement = 0;
         flyingMovement = 0;
         ForagingTask ft = (ForagingTask) sim;
-        landLast = ft.landBot.getCenterLocation();
-        flyingLast = ft.flyingBot.getCenterLocation();
+        landLast = ft.landBot.getLocation();
+        flyingLast = ft.flyingBot.getLocation();
     }
 
     @Override
     protected void evaluate(MasonSimState sim) {
         super.evaluate(null);
         ForagingTask ft = (ForagingTask) sim;
-        landFlyingDistance += ft.landBot.getCenterLocation().distance(ft.flyingBot.getCenterLocation());
+        landFlyingDistance += ft.landBot.getLocation().distance(ft.flyingBot.getLocation());
 
         double dLand = 10000, dFlying = 10000;
         for (Item it : ft.items) {
-            dLand = Math.min(ft.flyingBot.getCenterLocation().distance(it.getCenterLocation()), dLand);
-            dFlying = Math.min(ft.landBot.getCenterLocation().distance(it.getCenterLocation()), dFlying);
+            dLand = Math.min(ft.flyingBot.getLocation().distance(it.getLocation()), dLand);
+            dFlying = Math.min(ft.landBot.getLocation().distance(it.getLocation()), dFlying);
         }
         landProximity += dLand;
         flyingProximity += dFlying;
 
-        landMovement += landLast.distance(ft.landBot.getCenterLocation());
-        flyingMovement += flyingLast.distance(ft.flyingBot.getCenterLocation());
-        landLast = ft.landBot.getCenterLocation();
-        flyingLast = ft.flyingBot.getCenterLocation();
+        landMovement += landLast.distance(ft.landBot.getLocation());
+        flyingMovement += flyingLast.distance(ft.flyingBot.getLocation());
+        landLast = ft.landBot.getLocation();
+        flyingLast = ft.flyingBot.getLocation();
         
         flyingHeight += ft.flyingBot.effector.getHeight();
     }

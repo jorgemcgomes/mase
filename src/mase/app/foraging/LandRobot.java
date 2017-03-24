@@ -10,6 +10,7 @@ import java.util.Iterator;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
+import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.field.continuous.Continuous2D;
@@ -28,11 +29,11 @@ public class LandRobot extends SmartAgent {
 
     public LandRobot(ForagingTask sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.landRadius, Color.BLUE, ac);
-
-        this.enableAgentCollisions(sim.par.flyingStartHeight < 5);
-        this.enableCollisionRebound(sim.par.flyingStartHeight < 5);
+        
+        if(sim.par.flyingStartHeight < 5) {
+            this.setCollidableTypes(EmboddiedAgent.class);
+        }
         this.enableBoundedArena(false);
-        this.enablePolygonCollisions(false);
         //this.setOrientationShowing(false);
 
         // movement effector
@@ -69,7 +70,7 @@ public class LandRobot extends SmartAgent {
         Iterator<Item> iter = ft.items.iterator();
         while (iter.hasNext()) {
             Item i = iter.next();
-            if (i.distanceTo(this) <= 0) {
+            if (this.distanceTo(i) <= 0) {
                 ft.field.remove(i);
                 iter.remove();
             }

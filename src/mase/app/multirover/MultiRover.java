@@ -87,7 +87,7 @@ public class MultiRover extends MasonSimState implements SmartAgentProvider {
             Double2D newLoc = new Double2D(x, y);
             boolean check = true;
             for (Rover r : rovers) {
-                if (r.getCenterLocation().distance(newLoc) <= par.agentRadius * 2) {
+                if (r.getLocation().distance(newLoc) <= par.agentRadius * 2) {
                     check = false;
                     break;
                 }

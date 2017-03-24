@@ -157,7 +157,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
             for (IndianaAgent a : ind.agents) {
                 if (!a.escaped) {
                     anyInside = true;
-                    if (a.passingGate && a.getCenterLocation().x < 0) {
+                    if (a.passingGate && a.getLocation().x < 0) {
                         if (openTime == -1) {
                             this.paint = Color.RED;
                             openTime = ind.schedule.getSteps();

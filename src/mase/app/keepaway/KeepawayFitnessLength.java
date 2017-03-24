@@ -42,10 +42,10 @@ public class KeepawayFitnessLength extends MasonEvaluation {
         for (Keeper k : kw.keepers) {
             if (k.hasPossession) {
                 if (lastKeeper != null && k != lastKeeper) {
-                    sumPasses += lastBallPos.distance(kw.ball.getCenterLocation());
+                    sumPasses += lastBallPos.distance(kw.ball.getLocation());
                 }
                 lastKeeper = k;
-                lastBallPos = kw.ball.getCenterLocation();
+                lastBallPos = kw.ball.getLocation();
                 return;
             }
         }

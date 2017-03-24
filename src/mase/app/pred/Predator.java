@@ -8,6 +8,7 @@ import java.awt.Color;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
+import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.RangeBearingSensor;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -25,8 +26,9 @@ public class Predator extends SmartAgent {
 
     public Predator(PredatorPrey sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, COLOUR, ac);
-        this.enableAgentCollisions(sim.par.collisions);
-
+        if(sim.par.collisions) {
+            this.setCollidableTypes(EmboddiedAgent.class);
+        }
         DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         double linearSpeed = sim.par.speedsOffset == 0 ? sim.par.predatorLinearSpeed : sim.par.predatorLinearSpeed + sim.par.predatorLinearSpeed * (sim.random.nextDouble() * 2 - 1) * sim.par.speedsOffset;
         double turnSpeed = sim.par.speedsOffset == 0 ? sim.par.predatorTurnSpeed : sim.par.predatorTurnSpeed + sim.par.predatorTurnSpeed * (sim.random.nextDouble() * 2 - 1) * sim.par.speedsOffset;

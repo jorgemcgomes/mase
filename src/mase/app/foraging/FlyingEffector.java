@@ -110,7 +110,7 @@ public class FlyingEffector extends AbstractEffector {
             Double2D velocity = new Double2D(xVelocity, yVelocity);
 
             velocity = velocity.rotate(ag.orientation2D());
-            Double2D newLoc = ag.getCenterLocation().add(velocity);
+            Double2D newLoc = ag.getLocation().add(velocity);
 
             ag.setLocation(newLoc);
             ag.setSpeed(velocity.length());
@@ -179,8 +179,14 @@ public class FlyingEffector extends AbstractEffector {
         } else {
             child.paint = FlyingRobot.COLOR;
         }
-        ag.enableAgentCollisions(height < 5);
-        ag.enableCollisionRebound(height < 5);
+        if(height < 5) {
+            ag.setCollidableTypes(EmboddiedAgent.class);
+            ft.landBot.setCollidableTypes(EmboddiedAgent.class);
+        } else {
+            ag.setCollidableTypes();
+            ft.landBot.setCollidableTypes();            
+        }
+        
     }
 
     public double getHeight() {

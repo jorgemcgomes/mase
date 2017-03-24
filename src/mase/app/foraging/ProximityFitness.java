@@ -31,7 +31,7 @@ public class ProximityFitness extends MasonEvaluation {
     protected void evaluate(MasonSimState sim) {
         super.evaluate(null);
         ForagingTask ft = (ForagingTask) sim;
-        double dist = ft.landBot.getCenterLocation().distance(ft.flyingBot.getCenterLocation());
+        double dist = ft.landBot.getLocation().distance(ft.flyingBot.getLocation());
         prox += dist;
     }
 

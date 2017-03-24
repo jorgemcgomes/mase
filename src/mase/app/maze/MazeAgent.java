@@ -12,6 +12,7 @@ import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.RaySensor;
 import mase.mason.world.SmartAgent;
+import mase.mason.world.StaticMultilineObject;
 import sim.field.continuous.Continuous2D;
 
 /**
@@ -25,10 +26,9 @@ public class MazeAgent extends SmartAgent {
 
     public MazeAgent(MazeTask sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, COLOR, ac);
-        this.enableAgentCollisions(false);
         this.enableBoundedArena(false);
-        this.enablePolygonCollisions(true);
         this.enableCollisionRebound(false);
+        this.setCollidableTypes(StaticMultilineObject.class);
         
         DistanceSensorArcs arcSensor = new DistanceSensorArcs(sim, field, this);
         super.addSensor(arcSensor);
@@ -55,7 +55,7 @@ public class MazeAgent extends SmartAgent {
         
         MazeTask mt = (MazeTask) sim;
         // target reached
-        if(mt.target.distanceTo(this) <= 0) {
+        if(this.distanceTo(mt.target) <= 0) {
             mt.kill(); // done
         }
     }

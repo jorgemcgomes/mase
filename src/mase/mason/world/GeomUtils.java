@@ -36,6 +36,13 @@ public class GeomUtils {
         return (p.y - v.y) * (w.x - v.x) > (p.x - v.x) * (w.y - v.y);
     }
 
+    public static boolean isInsideBB(Pair<Double2D, Double2D> boundingBox, Double2D point) {
+        return point.x > boundingBox.getLeft().x
+                && point.y > boundingBox.getLeft().y
+                && point.x < boundingBox.getRight().x
+                && point.y < boundingBox.getRight().y;
+    }
+
     static Shape buildShape(Double2D[] points) {
         GeneralPath path = new GeneralPath();
         path.moveTo(points[0].x, points[0].y);
@@ -92,6 +99,7 @@ public class GeomUtils {
 
     /**
      * Format by point: x1,y1;x2,y2;x3,y3;...
+     *
      * @param s
      * @return
      */
@@ -108,6 +116,7 @@ public class GeomUtils {
 
     /**
      * Format by segment: x1,y1,x2,y2;x3,y3,x4,y4;...
+     *
      * @param s
      * @return
      */
@@ -142,6 +151,22 @@ public class GeomUtils {
         Double2D projection = v.add((w.subtract(v)).multiply(t)); // Projection falls on the segment
         return projection;
     }
+    
+    /*
+    only works if closed polygon
+     */
+    public static boolean pointInPolygon(Double2D test, Double2D[] points) {
+        int i;
+        int j;
+        boolean result = false;
+        for (i = 0, j = points.length - 1; i < points.length; j = i++) {
+            if ((points[i].y > test.y) != (points[j].y > test.y)
+                    && (test.x < (points[j].x - points[i].x) * (test.y - points[i].y) / (points[j].y - points[i].y) + points[i].x)) {
+                result = !result;
+            }
+        }
+        return result;
+    }
 
     /**
      *
@@ -164,5 +189,5 @@ public class GeomUtils {
             this.end = new Double2D(endX, endY);
         }
     }
-    
+
 }

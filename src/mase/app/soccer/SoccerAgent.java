@@ -11,6 +11,7 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
+import mase.mason.world.StaticMultilineObject;
 import mase.mason.world.StaticPointObject;
 import sim.engine.SimState;
 import sim.util.Double2D;
@@ -38,8 +39,7 @@ public class SoccerAgent extends SmartAgent {
 
     public SoccerAgent(Soccer sim, AgentController ac, double moveSpeed, double kickSpeed) {
         super(sim, sim.field, sim.par.agentRadius, Color.WHITE, ac);
-        this.enableAgentCollisions(true);
-        this.enablePolygonCollisions(true);
+        this.setCollidableTypes(SoccerAgent.class, StaticMultilineObject.class);
         this.enableCollisionRebound(true); 
         this.enableRotation(false);
         this.moveSpeed = moveSpeed;
@@ -76,7 +76,7 @@ public class SoccerAgent extends SmartAgent {
     public void step(SimState state) {
         Soccer soc = (Soccer) state;
         // is the ball within kicking distance?
-        hasPossession = soc.ball.distanceTo(this) <= soc.par.agentKickDistance;
+        hasPossession = this.distanceTo(soc.ball) <= soc.par.agentKickDistance;
         // If the ball is stoped or the agent does not have possession, turn-off the just-kicked flag
         if (justKicked && (soc.ball.getCurrentSpeed() < 0.01 || !hasPossession)) {
             justKicked = false;

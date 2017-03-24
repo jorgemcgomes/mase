@@ -59,7 +59,7 @@ public class HerdingIndividualEval extends MasonEvaluation {
             }
 
             // Gate
-            curralDist[i] += shep.getCenterLocation().distance(curral);
+            curralDist[i] += shep.getLocation().distance(curral);
         }
         for (int s = 0; s < herd.sheeps.size(); s++) {
             sheepLife[s]++;

@@ -34,12 +34,12 @@ public class ForagingGroupBehaviour extends MasonEvaluation {
     protected void evaluate(MasonSimState sim) {
         super.evaluate(null);
         ForagingTask ft = (ForagingTask) sim;
-        dispersion += ft.landBot.getCenterLocation().distance(ft.flyingBot.getCenterLocation());
+        dispersion += ft.landBot.getLocation().distance(ft.flyingBot.getLocation());
 
         double dFlying = 10000, dLand = 10000;
         for (Item it : ft.items) {
-            dFlying = Math.min(ft.flyingBot.getCenterLocation().distance(it.getCenterLocation()), dFlying);
-            dLand = Math.min(ft.landBot.getCenterLocation().distance(it.getCenterLocation()), dLand);
+            dFlying = Math.min(ft.flyingBot.getLocation().distance(it.getLocation()), dFlying);
+            dLand = Math.min(ft.landBot.getLocation().distance(it.getLocation()), dLand);
         }
         averageProximity += (dFlying + dLand) / 2;
         

@@ -35,7 +35,7 @@ public class SoccerGroupEval extends MasonEvaluation {
         Soccer soc = (Soccer) sim;
                
         // Dist. of the ball to the goal
-        avgDistBall += soc.ball.getCenterLocation().distance(soc.rightGoalCenter);
+        avgDistBall += soc.ball.getLocation().distance(soc.rightGoalCenter);
         
         // Own possession
         if(soc.referee.teamPossession == soc.leftTeamColor) {

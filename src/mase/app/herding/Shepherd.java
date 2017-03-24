@@ -10,11 +10,10 @@ import java.util.Collections;
 import mase.controllers.AgentController;
 import mase.mason.world.DashMovementEffector;
 import mase.mason.world.DistanceSensorArcs;
+import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.RangeBearingSensor;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticPointObject;
 import sim.field.continuous.Continuous2D;
-import sim.util.Double2D;
 
 /**
  *
@@ -26,7 +25,7 @@ public class Shepherd extends SmartAgent {
     
     public Shepherd(Herding sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, Color.BLUE, ac);
-        this.enableAgentCollisions(true);
+        this.setCollidableTypes(EmboddiedAgent.class);
         this.enableBoundedArena(true);
         
         DistanceSensorArcs ds = new DistanceSensorArcs(sim, field, this);

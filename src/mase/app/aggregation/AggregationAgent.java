@@ -24,7 +24,7 @@ public class AggregationAgent extends SmartAgent implements Entity {
     private final double slice;
     private final double start;
     private final Double2D[] rayStarts, rayEnds;
-    private static DecimalFormat DF = new DecimalFormat("0.0");
+    private static final DecimalFormat DF = new DecimalFormat("0.0");
 
     public static void main(String[] args) {
         System.out.println(new Double2D(1, 0).angle());
@@ -32,7 +32,7 @@ public class AggregationAgent extends SmartAgent implements Entity {
 
     public AggregationAgent(Aggregation sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.BLUE, ac);
-        this.enableAgentCollisions(true);
+        this.setCollidableTypes(AggregationAgent.class);
         this.enableBoundedArena(true);
 
         // aux variables for agent sensors
@@ -66,14 +66,14 @@ public class AggregationAgent extends SmartAgent implements Entity {
             sens[i] = 1; // initialize distance sensors to max value
         }
         int count = 0;
-        Bag neighbours = field.getNeighborsWithinDistance(this.getCenterLocation(), par.agentRadius + RADIUS * 2);
+        Bag neighbours = field.getNeighborsWithinDistance(this.getLocation(), par.agentRadius + RADIUS * 2);
         for (Object n : neighbours) {
             if (n instanceof AggregationAgent && n != this) {
                 AggregationAgent aa = (AggregationAgent) n;
                 double dist = this.distanceTo(aa);
                 if (dist <= par.agentRadius) {
                     count++;
-                    double angle = this.angleTo(aa.getCenterLocation());
+                    double angle = this.angleTo(aa.getLocation());
                     int arc = angleToArc(angle);
                     sens[arc + 1] = Math.min(sens[arc + 1], (dist / par.agentRadius) * 2 - 1); // arc sensors
                 }
@@ -86,14 +86,14 @@ public class AggregationAgent extends SmartAgent implements Entity {
             sens[i + par.agentArcs + 1] = 1;
         }
 
-        Double2D l = getCenterLocation();
+        Double2D l = getLocation();
         double r = par.wallRadius + RADIUS;
         // only if it is close to the boundaries
         if (l.x <= r || l.x >= field.width - r || l.y <= r || l.y >= field.height - r) {
             for (int i = 0; i < rayStarts.length; i++) {
                 int si = i + par.agentArcs + 1;
-                Double2D rs = rayStarts[i].rotate(orientation2D()).add(getCenterLocation());
-                Double2D re = rayEnds[i].rotate(orientation2D()).add(getCenterLocation());
+                Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
+                Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
                 double dist = agg.walls.closestDistance(rs, re);
                 if(!Double.isInfinite(dist)) {
                     sens[si] = dist / par.wallRadius * 2 - 1;

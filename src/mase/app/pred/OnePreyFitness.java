@@ -43,10 +43,10 @@ public class OnePreyFitness extends MasonEvaluation {
     protected void postSimulation(MasonSimState sim) {
         PredatorPrey simState = (PredatorPrey) sim;
 
-        Double2D preyLoc = simState.preys.get(0).getCenterLocation();
+        Double2D preyLoc = simState.preys.get(0).getLocation();
         finalDistance = 0;
         for (Predator pred : simState.predators) {
-            finalDistance += preyLoc.distance(pred.getCenterLocation());
+            finalDistance += preyLoc.distance(pred.getLocation());
         }
         finalDistance /= simState.predators.size();
 

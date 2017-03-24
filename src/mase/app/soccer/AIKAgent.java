@@ -80,7 +80,7 @@ public class AIKAgent extends SoccerAgent {
     @Override
     public void setTeamContext(List<SoccerAgent> ownTeam, List<SoccerAgent> opponents, Double2D ownGoal, Double2D oppGoal, Color teamColor) {
         super.setTeamContext(ownTeam, opponents, ownGoal, oppGoal, teamColor);
-        Double2D goal = this.oppGoal.getCenterLocation();
+        Double2D goal = this.oppGoal.getLocation();
         if (goal.x > fieldLength / 2) { // left team
             side = -1;
             //forwardAngle = 0.0;
@@ -304,16 +304,16 @@ public class AIKAgent extends SoccerAgent {
     Obstacle handling
      */
     private Obstacle edgeObstacle(Segment seg, double range) {
-        double d = GeomUtils.distToSegment(getCenterLocation(), seg.start, seg.end);
+        double d = GeomUtils.distToSegment(getLocation(), seg.start, seg.end);
         if (d < range) {
             // find the intersection between the line defined by the points of the segment
             // and the perpendicular line that passes through the agent's center
             // the intersection might fall outside the line segment
             double l2 = FastMath.pow2(seg.start.x - seg.end.x) + FastMath.pow2(seg.start.y - seg.end.y);
-            double t = getCenterLocation().subtract(seg.start).dot(seg.end.subtract(seg.start)) / l2;
+            double t = getLocation().subtract(seg.start).dot(seg.end.subtract(seg.start)) / l2;
             Double2D projection = seg.start.add((seg.end.subtract(seg.start)).multiply(t));
 
-            Double2D robToP = projection.subtract(getCenterLocation());
+            Double2D robToP = projection.subtract(getLocation());
 
             double size = FastMath.sqrtQuick(FastMath.pow2(range) - FastMath.pow2(d));
             Double2D rightLimit = robToP.rotate(Math.PI / 2).resize(size).add(projection);
@@ -323,18 +323,18 @@ public class AIKAgent extends SoccerAgent {
             Double2D closestEndLeft = leftLimit.distance(seg.start) < leftLimit.distance(seg.end) ? seg.start : seg.end;
 
             // falls outside the segment
-            if (getCenterLocation().distance(rightLimit) > getCenterLocation().distance(closestEndRight)) {
+            if (getLocation().distance(rightLimit) > getLocation().distance(closestEndRight)) {
                 rightLimit = closestEndRight;
             }
-            if (getCenterLocation().distance(leftLimit) > getCenterLocation().distance(closestEndLeft)) {
+            if (getLocation().distance(leftLimit) > getLocation().distance(closestEndLeft)) {
                 leftLimit = closestEndLeft;
             }
             if (rightLimit.distance(leftLimit) < 0.01) {
                 return null;
             }
 
-            double leftAngle = leftLimit.subtract(getCenterLocation()).angle();
-            double rightAngle = rightLimit.subtract(getCenterLocation()).angle();
+            double leftAngle = leftLimit.subtract(getLocation()).angle();
+            double rightAngle = rightLimit.subtract(getLocation()).angle();
             return new Obstacle(rightAngle, leftAngle);
         } else {
             return null;
@@ -549,7 +549,7 @@ public class AIKAgent extends SoccerAgent {
         if (tmTime != sim.schedule.getSteps()) {
             tmCache = new ArrayList<>(teamMates.size());
             for (SoccerAgent a : teamMates) {
-                tmCache.add(a.getCenterLocation().subtract(this.getCenterLocation()));
+                tmCache.add(a.getLocation().subtract(this.getLocation()));
             }
             tmTime = sim.schedule.getSteps();
         }
@@ -560,7 +560,7 @@ public class AIKAgent extends SoccerAgent {
         if (oppTime != sim.schedule.getSteps()) {
             oppCache = new ArrayList<>(oppTeam.size());
             for (SoccerAgent a : oppTeam) {
-                oppCache.add(a.getCenterLocation().subtract(this.getCenterLocation()));
+                oppCache.add(a.getLocation().subtract(this.getLocation()));
             }
             oppTime = sim.schedule.getSteps();
         }
@@ -569,7 +569,7 @@ public class AIKAgent extends SoccerAgent {
 
     private Double2D getOwnGoalVector() {
         if (ownGTime != sim.schedule.getSteps()) {
-            ownGCache = ownGoal.getCenterLocation().subtract(this.getCenterLocation());
+            ownGCache = ownGoal.getLocation().subtract(this.getLocation());
             ownGTime = sim.schedule.getSteps();
         }
         return ownGCache;
@@ -577,7 +577,7 @@ public class AIKAgent extends SoccerAgent {
 
     private Double2D getOppGoalVector() {
         if (oppGTime != sim.schedule.getSteps()) {
-            oppGCache = oppGoal.getCenterLocation().subtract(this.getCenterLocation());
+            oppGCache = oppGoal.getLocation().subtract(this.getLocation());
             oppGTime = sim.schedule.getSteps();
         }
         return oppGCache;
@@ -585,7 +585,7 @@ public class AIKAgent extends SoccerAgent {
 
     private Double2D getBallVector() {
         if (ballTime != sim.schedule.getSteps()) {
-            ballCache = ((Soccer) sim).ball.getCenterLocation().subtract(this.getCenterLocation());
+            ballCache = ((Soccer) sim).ball.getLocation().subtract(this.getLocation());
             ballTime = sim.schedule.getSteps();
         }
         return ballCache;

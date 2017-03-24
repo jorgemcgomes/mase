@@ -25,7 +25,7 @@ public class RaySensor extends AbstractSensor {
     private double orientationNoise = 0;
     private int noiseType;
     private double[] angles;
-    private Collection<? extends SensableObject> objects;
+    private Collection<? extends WorldObject> objects;
 
     public RaySensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
         super(state, field, ag);
@@ -44,7 +44,7 @@ public class RaySensor extends AbstractSensor {
     /*
     If not set, or set to null, it will search for existing polygons every timestep
      */
-    public void setObjects(Collection<? extends SensableObject> objects) {
+    public void setObjects(Collection<? extends WorldObject> objects) {
         this.objects = objects;
     }
 
@@ -98,18 +98,18 @@ public class RaySensor extends AbstractSensor {
         }
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
         for (int i = 0; i < rayStarts.length; i++) {
-            Double2D rs = rayStarts[i].rotate(ag.orientation2D()).add(ag.getCenterLocation());
+            Double2D rs = rayStarts[i].rotate(ag.orientation2D()).add(ag.getLocation());
             Double2D re;
             if (rangeNoise > 0) {
                 double newRange = range + rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 newRange = Math.max(0, newRange);
                 double newOrientation = angles[i] + orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                re = new Double2D(ag.getRadius() + newRange, 0).rotate(newOrientation + ag.orientation2D()).add(ag.getCenterLocation());
+                re = new Double2D(ag.getRadius() + newRange, 0).rotate(newOrientation + ag.orientation2D()).add(ag.getLocation());
             } else {
-                re = rayEnds[i].rotate(ag.orientation2D()).add(ag.getCenterLocation());
+                re = rayEnds[i].rotate(ag.orientation2D()).add(ag.getLocation());
             }
 
-            for (SensableObject p : getCandidates()) {
+            for (WorldObject p : getCandidates()) {
                 double dist = p.closestRayIntersection(rs, re);
                 if (!Double.isInfinite(dist)) {
                     vals[i] = binary ? 1 : Math.min(vals[i], dist);
@@ -119,14 +119,14 @@ public class RaySensor extends AbstractSensor {
         return vals;
     }
 
-    protected Collection<? extends SensableObject> getCandidates() {
+    protected Collection<? extends WorldObject> getCandidates() {
         if (objects != null) {
             return objects;
         } else {
-            Collection<SensableObject> p = new ArrayList<>();
+            Collection<WorldObject> p = new ArrayList<>();
             for (Object o : field.allObjects) {
-                if (o instanceof SensableObject) {
-                    p.add((SensableObject) o);
+                if (o instanceof WorldObject) {
+                    p.add((WorldObject) o);
                 }
             }
             return p;

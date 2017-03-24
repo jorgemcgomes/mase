@@ -32,12 +32,12 @@ public class MultiPreyGroupEval extends OnePreyGroupEval {
         if (!simState.activePreys.isEmpty()) {
             MutableDouble2D centerMass = new MutableDouble2D(0, 0);
             for (Prey prey : simState.activePreys) {
-                centerMass.addIn(prey.getCenterLocation());
+                centerMass.addIn(prey.getLocation());
             }
             centerMass.multiplyIn(1.0 / simState.preys.size());
             double d = 0;
             for (Prey prey : simState.activePreys) {
-                d += centerMass.distance(prey.getCenterLocation());
+                d += centerMass.distance(prey.getLocation());
             }
             preyDispersion += d / simState.activePreys.size();
         } else {

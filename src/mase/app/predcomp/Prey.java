@@ -27,7 +27,6 @@ public class Prey extends SmartAgent {
     public Prey(Predcomp sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.BLUE, ac);
         this.enableBoundedArena(true);
-        this.enableAgentCollisions(false);
         
         // Aux variables for proximity sensors -- sensor rays
         rayStarts = new Double2D[sim.par.proximitySensors];
@@ -64,13 +63,13 @@ public class Prey extends SmartAgent {
 
         // Proximity sensors
         for (int i = 0; i < rayStarts.length; i++) {
-            Double2D rs = rayStarts[i].rotate(orientation2D()).add(getCenterLocation());
-            Double2D re = rayEnds[i].rotate(orientation2D()).add(getCenterLocation());
+            Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
+            Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
             boolean wallInt = false;
             for(int j = 0 ; j < obsStarts.length && !wallInt ; j++) {
                 wallInt = segmentIntersection(rs, re, obsStarts[j], obsEnds[j]) != null;
             }
-            double d = Predator.distToSegment(pred.predator.getCenterLocation(), rs, re);
+            double d = Predator.distToSegment(pred.predator.getLocation(), rs, re);
             boolean preyInt = d <= RADIUS;
             if (wallInt || preyInt) {
                 sensorValues[i] = 1;

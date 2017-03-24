@@ -27,7 +27,7 @@ public class Sheep extends EmboddiedAgent {
 
     public Sheep(Herding sim, Continuous2D field) {
         super(sim, field, sim.par.agentRadius, Color.GREEN);
-        this.enableAgentCollisions(true);
+        this.setCollidableTypes(EmboddiedAgent.class);
         this.enableBoundedArena(true);
         this.positionHistory = new LinkedList<>();
     }
@@ -36,7 +36,7 @@ public class Sheep extends EmboddiedAgent {
     public void step(SimState state) {
         Herding herd = (Herding) state;
 
-        Double2D thisLoc = this.getCenterLocation();
+        Double2D thisLoc = this.getLocation();
         Shepherd closest = null;
         for (Shepherd s : herd.shepherds) {
             double d = this.distanceTo(s);
@@ -47,13 +47,13 @@ public class Sheep extends EmboddiedAgent {
         }
 
         if (closest != null) { // if there is a shepherd nearby, run away from it
-            move(thisLoc.subtract(closest.getCenterLocation()).angle(), herd.par.sheepSpeed);
+            move(thisLoc.subtract(closest.getLocation()).angle(), herd.par.sheepSpeed);
         } else if (herd.par.activeSheep) { // else, go straight towards the escape
             move(new Double2D(-1, 0).angle(), herd.par.sheepSpeed);
         }
         
         // Update real velocity
-        positionHistory.addLast(getCenterLocation());
+        positionHistory.addLast(getLocation());
         if(positionHistory.size() > HISTORY_SIZE) {
             positionHistory.removeFirst();
         }
@@ -69,9 +69,9 @@ public class Sheep extends EmboddiedAgent {
             disappear();
         }*/
         // check if sheep entered the curral
-        if (getCenterLocation().x >= herd.par.arenaSize - herd.par.agentRadius - herd.par.sheepSpeed
-                && getCenterLocation().y >= herd.par.arenaSize / 2 - herd.par.gateSize / 2
-                && getCenterLocation().y <= herd.par.arenaSize / 2 + herd.par.gateSize / 2) {
+        if (getLocation().x >= herd.par.arenaSize - herd.par.agentRadius - herd.par.sheepSpeed
+                && getLocation().y >= herd.par.arenaSize / 2 - herd.par.gateSize / 2
+                && getLocation().y <= herd.par.arenaSize / 2 + herd.par.gateSize / 2) {
             corraledTime = (int) state.schedule.getSteps();
             disappear();
         }

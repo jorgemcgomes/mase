@@ -27,7 +27,7 @@ public class MultiRoverFitnessBootstrap extends MultiRoverFitness {
         for(Rover r : mr.rovers) {
             double closestD = Double.POSITIVE_INFINITY;
             for(Rock rock : mr.rocks) {
-                double d = r.getCenterLocation().distance(rock.getCenterLocation());
+                double d = r.getLocation().distance(rock.getLocation());
                 if(d < closestD) {
                     closestD = d;
                 }

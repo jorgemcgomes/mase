@@ -16,7 +16,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class StaticMultilineObject extends ShapePortrayal2D implements Entity, SensableObject {
+public class StaticMultilineObject extends ShapePortrayal2D implements Entity, WorldObject {
     private static final long serialVersionUID = 1L;
 
     private final Segment[] segments;
@@ -104,6 +104,17 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
         }
         return closest;
     }
+    
+    /*
+    If the given point is potentially within the distance, it returns true for sure.
+    Otherwise, its just best-effort. Might be wrong.
+    */
+    public boolean quickProximityCheck(Double2D point, double distance) {
+        return point.x > boundingBox.getLeft().x - distance &&
+                point.y > boundingBox.getLeft().y - distance &&
+                point.x < boundingBox.getRight().x + distance &&
+                point.y < boundingBox.getRight().y + distance;
+    }
 
     public Pair<Double, Segment> closestSegment(Double2D testPoint) {
         double min = Double.POSITIVE_INFINITY;
@@ -141,17 +152,13 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
 
 
     @Override
-    public Double2D getCenterLocation() {
+    public Double2D getLocation() {
         return center;
     }
 
-    @Override
-    public double distanceTo(EmboddiedAgent ag) {
-        return closestDistance(ag.getCenterLocation()) - ag.getRadius();
-    }
 
     @Override
-    public boolean isInside(EmboddiedAgent ag) {
+    public boolean isInside(Double2D p) {
         return false;
     }
 
@@ -159,5 +166,11 @@ public class StaticMultilineObject extends ShapePortrayal2D implements Entity, S
     public double closestRayIntersection(Double2D start, Double2D end) {
         return closestDistance(start, end);
     }
+
+    @Override
+    public double distanceTo(Double2D p) {
+        return closestDistance(p);
+    }
+
 
 }

@@ -19,7 +19,7 @@ import sim.field.continuous.Continuous2D;
  */
 public class RangeBearingSensor extends AbstractSensor {
 
-    private List<SensableObject> objects;
+    private List<WorldObject> objects;
     private boolean sort = false;
     private double range = Double.POSITIVE_INFINITY;
     private int objectCount;
@@ -32,9 +32,9 @@ public class RangeBearingSensor extends AbstractSensor {
         super(state, field, ag);
     }
 
-    public void setObjects(Collection<? extends SensableObject> objs) {
+    public void setObjects(Collection<? extends WorldObject> objs) {
         objects = new ArrayList<>(objs.size());
-        for (SensableObject o : objs) {
+        for (WorldObject o : objs) {
             if (o == null) {
                 System.out.println("WARNING: NULL OBJECT");
             }
@@ -82,14 +82,14 @@ public class RangeBearingSensor extends AbstractSensor {
         Integer[] indexes = new Integer[objects.size()];
 
         int index = 0;
-        for (SensableObject o : objects) {
-            double dist = o.distanceTo(ag);
+        for (WorldObject o : objects) {
+            double dist = ag.distanceTo(o);
             if (rangeNoiseAbs > 0) {
                 dist += rangeNoiseAbs * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                 dist = Math.max(dist, 0);
             }
-            if ((Double.isInfinite(range) || dist <= range) && o.getCenterLocation() != null) {
-                double angle = ag.angleTo(o.getCenterLocation());
+            if ((Double.isInfinite(range) || dist <= range) && o.getLocation() != null) {
+                double angle = ag.angleTo(o.getLocation());
                 if (orientationNoise > 0) {
                     angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
                     angle = EmboddiedAgent.normalizeAngle(angle);

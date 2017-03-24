@@ -51,15 +51,15 @@ public class PredcompBehaviour extends MasonEvaluation {
         distanceToOther += pc.predator.distanceTo(pc.prey);
         
         if(lastPos[0] != null) {
-            movement[0] += pc.predator.getCenterLocation().distance(lastPos[0]);
-            movement[1] += pc.prey.getCenterLocation().distance(lastPos[1]);
+            movement[0] += pc.predator.getLocation().distance(lastPos[0]);
+            movement[1] += pc.prey.getLocation().distance(lastPos[1]);
         }      
         
-        lastPos[0] = pc.predator.getCenterLocation();
-        lastPos[1] = pc.prey.getCenterLocation();
+        lastPos[0] = pc.predator.getLocation();
+        lastPos[1] = pc.prey.getLocation();
         
-        wallProximity[0] += prox(pc.predator.getCenterLocation(), pc.par.size);
-        wallProximity[1] += prox(pc.prey.getCenterLocation(), pc.par.size);
+        wallProximity[0] += prox(pc.predator.getLocation(), pc.par.size);
+        wallProximity[1] += prox(pc.prey.getLocation(), pc.par.size);
     }
     
     private double prox(Double2D loc, double size) {

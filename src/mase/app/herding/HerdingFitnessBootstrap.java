@@ -31,7 +31,7 @@ public class HerdingFitnessBootstrap extends MasonEvaluation {
         Herding herd = (Herding) sim;
         initialDistances = new HashMap<>();
         for(Sheep s : herd.sheeps) {
-            initialDistances.put(s, ((Herding) sim).curralCenter.distanceTo(s));
+            initialDistances.put(s, s.distanceTo(((Herding) sim).curralCenter));
         }
         closestShepherd = new double[herd.sheeps.size()];
         Arrays.fill(closestShepherd, Double.POSITIVE_INFINITY);
@@ -57,7 +57,7 @@ public class HerdingFitnessBootstrap extends MasonEvaluation {
             if (sheep.corraledTime > 0) { // sheep curraled
                 fitness += 2 - sheep.corraledTime / (double) maxSteps;
             } else {
-                fitness += Math.max(0, 1 - ((Herding) sim).curralCenter.distanceTo(sheep) / initialDistances.get(sheep));
+                fitness += Math.max(0, 1 - sheep.distanceTo(((Herding) sim).curralCenter) / initialDistances.get(sheep));
             }      
         }
         double closest = 0;

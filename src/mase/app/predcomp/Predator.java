@@ -30,7 +30,6 @@ public class Predator extends SmartAgent {
     public Predator(Predcomp sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.RED, ac);
         this.enableBoundedArena(true);
-        this.enableAgentCollisions(false);
 
         // Vision sensor aux variables
         visionArcStart = new double[sim.par.visionNeurons];
@@ -75,8 +74,8 @@ public class Predator extends SmartAgent {
 
         // Vision sensors
         Predcomp pred = (Predcomp) sim;
-        double dist = this.getCenterLocation().distance(pred.prey.getCenterLocation()) - RADIUS;
-        double angle = this.angleTo(pred.prey.getCenterLocation());
+        double dist = this.getLocation().distance(pred.prey.getLocation()) - RADIUS;
+        double angle = this.angleTo(pred.prey.getLocation());
         double extra = FastMath.atan(pred.prey.getRadius() / dist);
         if (this.distanceTo(pred.prey) < pred.par.visionRange) {
             for (int i = 0; i < visionArcStart.length; i++) {
@@ -88,13 +87,13 @@ public class Predator extends SmartAgent {
         
         // Proximity sensors
         for (int i = 0; i < rayStarts.length; i++) {
-            Double2D rs = rayStarts[i].rotate(orientation2D()).add(getCenterLocation());
-            Double2D re = rayEnds[i].rotate(orientation2D()).add(getCenterLocation());
+            Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
+            Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
             boolean wallInt = false;
             for(int j = 0 ; j < obsStarts.length && !wallInt ; j++) {
                 wallInt = segmentIntersection(rs, re, obsStarts[j], obsEnds[j]) != null;
             }
-            double d = distToSegment(pred.prey.getCenterLocation(), rs, re);
+            double d = distToSegment(pred.prey.getLocation(), rs, re);
             boolean preyInt = d <= RADIUS;
             if (wallInt || preyInt) {
                 sensorValues[i + visionArcStart.length] = 1;

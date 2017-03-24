@@ -29,12 +29,12 @@ public class AggregationBehaviourEval extends MasonEvaluation {
         Aggregation agg = (Aggregation) sim;
         MutableDouble2D centre = new MutableDouble2D(0, 0);
         for (AggregationAgent aa : agg.agents) {
-            centre.addIn(aa.getCenterLocation());
+            centre.addIn(aa.getLocation());
         }
         centre.multiplyIn(1.0 / agg.agents.size());
         double dist = 0;
         for (AggregationAgent aa : agg.agents) {
-            dist += centre.distance(aa.getCenterLocation());
+            dist += centre.distance(aa.getLocation());
         }
         dist = dist / agg.agents.size() / agg.par.size;
         centerMass[super.currentEvaluationStep] = dist;

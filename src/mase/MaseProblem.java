@@ -71,12 +71,7 @@ public abstract class MaseProblem extends Problem implements GroupedProblemForm,
 
         String seedString = state.parameters.getStringWithDefault(base.push(P_SEED), null, V_RANDOM_SEED);
         if (seedString.equalsIgnoreCase(V_RANDOM_SEED)) {
-            sameSeed = false;
-            try { // Try to fix issues with random number generation (concurrency aparently)
-                Thread.sleep(3000); // EXPERIMENTAL
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }            
+            sameSeed = false;      
         } else {
             sameSeed = true;
             seed = Long.parseLong(seedString);

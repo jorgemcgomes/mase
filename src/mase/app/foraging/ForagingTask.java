@@ -82,7 +82,7 @@ public class ForagingTask extends MasonSimState {
             flyingBot.setLocation(par.flyingStartPos);
             flyingBot.setOrientation(par.flyingStartOri);
         } else if (par.flyingPlacement == ForagingPar.SEMI_RANDOM) { // start near the land robot
-            Double2D landPos = landBot.getCenterLocation();
+            Double2D landPos = landBot.getLocation();
             double displacement = par.flyingRadius + par.landRadius * 2;
             double x = landPos.x < field.width / 2 ? landPos.x + displacement : landPos.x - displacement;
             double y = landPos.y < field.height / 2 ? landPos.y + displacement : landPos.y - displacement;
@@ -95,7 +95,7 @@ public class ForagingTask extends MasonSimState {
                 if (par.flyingMaxDist <= 0) { // use the entire field
                     candidate = new Double2D(random.nextDouble() * field.width, random.nextDouble() * field.height);
                 } else {
-                    Double2D l = landBot.getCenterLocation();
+                    Double2D l = landBot.getLocation();
                     double xmin = Math.max(0, l.x - par.flyingMaxDist - par.flyingRadius - par.landRadius);
                     double xmax = Math.min(field.width, l.x + par.flyingMaxDist + par.flyingRadius + par.landRadius);
                     double ymin = Math.max(0, l.y - par.flyingMaxDist - par.flyingRadius - par.landRadius);
@@ -103,7 +103,7 @@ public class ForagingTask extends MasonSimState {
                     candidate = new Double2D(random.nextDouble() * (xmax - xmin) + xmin, random.nextDouble() * (ymax - ymin) + ymin);
                 }
 
-                double dist = landBot.getCenterLocation().distance(candidate) - par.flyingRadius - par.landRadius;
+                double dist = landBot.getLocation().distance(candidate) - par.flyingRadius - par.landRadius;
                 if (dist > par.landRadius && (par.flyingMaxDist <= 0 || dist <= par.flyingMaxDist)) { // leave at least landRadius distance between them
                     pos = candidate;
                 }

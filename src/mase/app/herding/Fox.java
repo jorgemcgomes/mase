@@ -23,13 +23,13 @@ public class Fox extends EmboddiedAgent {
     public Fox(Herding sim, Continuous2D field) {
         super(sim, field, sim.par.agentRadius, Color.RED);
         this.enableBoundedArena(true);
-        this.enableAgentCollisions(true);
+        this.setCollidableTypes(EmboddiedAgent.class);
     }
 
     @Override
     public void step(SimState state) {
         Herding herd = (Herding) state;
-        Double2D thisLoc = this.getCenterLocation();
+        Double2D thisLoc = this.getLocation();
         Shepherd closestShepherd = null;
         for (Shepherd s : herd.shepherds) {
             double d = this.distanceTo(s);
@@ -53,7 +53,7 @@ public class Fox extends EmboddiedAgent {
             if (herd.par.smartFox) {
                 // go perpendicular to the predator, in the directo of the sheep
                 Double2D sheepPos = futureSheepPosition(herd, closestSheep);
-                Double2D foxToShepherd = (closestShepherd.getCenterLocation().subtract(thisLoc)).normalize();
+                Double2D foxToShepherd = (closestShepherd.getLocation().subtract(thisLoc)).normalize();
                 double sheepAngle = angleTo(thisLoc, foxToShepherd, sheepPos);
                 if (sheepAngle > Math.PI / 2 || sheepAngle < -Math.PI / 2) {
                     // Ignore shepherd
@@ -65,7 +65,7 @@ public class Fox extends EmboddiedAgent {
                 }
             } else {
                 // run away from the shepherd
-                moveVec = thisLoc.subtract(closestShepherd.getCenterLocation());
+                moveVec = thisLoc.subtract(closestShepherd.getLocation());
             }
         } else { // else, go towards the sheep
             Double2D future = futureSheepPosition(herd, closestSheep);
@@ -86,7 +86,7 @@ public class Fox extends EmboddiedAgent {
     }
 
     private Double2D futureSheepPosition(Herding sim, Sheep s) {
-        Double2D targetPos = s.getCenterLocation();
+        Double2D targetPos = s.getLocation();
         Double2D targetDir = s.getRealVelocity();
         double targetSpeed = s.getRealVelocity().length();
 

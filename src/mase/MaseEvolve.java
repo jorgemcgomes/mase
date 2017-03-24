@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class MaseEvolve {
             } catch (InterruptedException ex) {
             }
         }
-
+        
         // Get config file
         Map<String, String> pars = readParams(args);
 
@@ -198,7 +199,7 @@ public class MaseEvolve {
             String value = e.getValue();
             if (value.contains("$") && replaceDirWildcard) {
                 File f = new File(outDir, value.replace("$", ""));
-                value = f.getAbsolutePath();
+                value = f.getAbsolutePath().replace("\\", "/");
             }
             bw.write(StringUtils.rightPad(e.getKey(), maxLen) + " = " + value);
             bw.newLine();

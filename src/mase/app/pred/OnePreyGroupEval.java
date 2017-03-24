@@ -38,11 +38,11 @@ public class OnePreyGroupEval extends MasonEvaluation {
         PredatorPrey pp = (PredatorPrey) sim;
         MutableDouble2D center = new MutableDouble2D(0,0);
         for(Predator p : pp.predators) {
-            center.addIn(p.getCenterLocation());
+            center.addIn(p.getLocation());
         }
         center.multiplyIn(1.0 / pp.predators.size());
         for(Predator p : pp.predators) {
-            predatorDispersion += center.distance(p.getCenterLocation());
+            predatorDispersion += center.distance(p.getLocation());
         }
     }
 

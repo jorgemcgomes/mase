@@ -26,7 +26,7 @@ public class Rover extends SmartAgent {
 
     public Rover(MultiRover sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, RockEffector.NOACTUATOR_COLOUR, ac);
-        this.enableAgentCollisions(true);
+        this.setCollidableTypes(Rover.class);
         this.enableBoundedArena(true);
         
         this.circledPortrayal.setOnlyCircleWhenSelected(false);

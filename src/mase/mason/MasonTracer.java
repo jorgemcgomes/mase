@@ -115,8 +115,8 @@ public class MasonTracer {
                 tracked.add((CircularObject) o);
             } else if (o instanceof StaticPointObject) {
                 StaticPointObject spo = (StaticPointObject) o;
-                int x = (int) Math.round(spo.getCenterLocation().x * scale);
-                int y = (int) Math.round(spo.getCenterLocation().y * scale);
+                int x = (int) Math.round(spo.getLocation().x * scale);
+                int y = (int) Math.round(spo.getLocation().y * scale);
                 gr.setPaint(spo.paint);
                 gr.drawLine(x, y, x, y);
             } else if (o instanceof StaticMultilineObject) {
@@ -135,8 +135,8 @@ public class MasonTracer {
         // draw initial positions
         if (drawInitialPositions) {
             for (CircularObject ag : tracked) {
-                int x = (int) Math.round((ag.getCenterLocation().x - ag.getRadius() / 2) * scale);
-                int y = (int) Math.round((ag.getCenterLocation().y - ag.getRadius() / 2) * scale);
+                int x = (int) Math.round((ag.getLocation().x - ag.getRadius() / 2) * scale);
+                int y = (int) Math.round((ag.getLocation().y - ag.getRadius() / 2) * scale);
                 int s = (int) Math.round(ag.getRadius() * scale);
                 gr.setPaint(ag.paint);
                 gr.fillRect(x, y, s, s);
@@ -152,15 +152,15 @@ public class MasonTracer {
                     points.put(ag, new ArrayList<Int2D>());
                 }
                 if (field.exists(ag)) {
-                    points.get(ag).add(new Int2D((int) Math.round(ag.getCenterLocation().x * scale),
-                            (int) Math.round(ag.getCenterLocation().y * scale)));
+                    points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale),
+                            (int) Math.round(ag.getLocation().y * scale)));
                 }
             }
             keepGoing = simState.schedule.step(simState);
         }
         for (CircularObject ag : tracked) {
-            points.get(ag).add(new Int2D((int) Math.round(ag.getCenterLocation().x * scale),
-                    (int) Math.round(ag.getCenterLocation().y * scale)));
+            points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale),
+                    (int) Math.round(ag.getLocation().y * scale)));
         }
 
         // collapse lists
@@ -195,8 +195,8 @@ public class MasonTracer {
         // last positions
         if (drawFinalPositions) {
             for (CircularObject ag : tracked) {
-                int x = (int) Math.round((ag.getCenterLocation().x - ag.getRadius()) * scale);
-                int y = (int) Math.round((ag.getCenterLocation().y - ag.getRadius()) * scale);
+                int x = (int) Math.round((ag.getLocation().x - ag.getRadius()) * scale);
+                int y = (int) Math.round((ag.getLocation().y - ag.getRadius()) * scale);
                 int s = (int) Math.round(ag.getRadius() * 2 * scale);
                 gr.setPaint(ag.paint);
                 gr.fillOval(x, y, s, s);

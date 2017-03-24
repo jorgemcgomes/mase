@@ -41,7 +41,7 @@ public class CompetitiveTaker extends SmartAgent {
         // relative positions and angles of the ball and keepers
         for (EmboddiedAgent a : agents) {
             input[index++] = (this.distanceTo(a) / (kw.par.size)) * 2 - 1;
-            input[index++] = this.angleTo(a.getCenterLocation()) / Math.PI;
+            input[index++] = this.angleTo(a.getLocation()) / Math.PI;
         }
         
         // distance of the ball to the centre

@@ -9,8 +9,8 @@ import java.util.Collection;
 import java.util.Collections;
 import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.EmboddiedAgent;
-import mase.mason.world.SensableObject;
 import sim.field.continuous.Continuous2D;
+import mase.mason.world.WorldObject;
 
 /**
  *
@@ -24,7 +24,7 @@ public class SelectiveRockSensor extends DistanceSensorArcs {
     }
 
     @Override
-    protected Collection<? extends SensableObject> getCandidates() {
+    protected Collection<? extends WorldObject> getCandidates() {
         Rover r = (Rover) ag;
         if (r.getActuatorType() == RockEffector.NO_ACTIVATION) {
             return Collections.EMPTY_LIST;

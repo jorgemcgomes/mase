@@ -30,7 +30,9 @@ public class CompetitiveKeepaway extends Keepaway {
             k.setLocation(par.keeperStartPos[i]);
             k.setOrientation(par.keeperStartAngle[i]);
             k.setStopper(schedule.scheduleRepeating(k));
-            k.enableAgentCollisions(par.collisions);
+            if(par.collisions) {
+                k.setCollidableTypes(EmboddiedAgent.class);
+            }
             keepers.add(k);
         }
     }
@@ -49,9 +51,11 @@ public class CompetitiveKeepaway extends Keepaway {
             double y = (par.takersPlacement * r) * Math.sin(q) + center.getY();
             t.setLocation(new Double2D(x, y));
         }
-        Double2D ballDir = ball.getCenterLocation().subtract(t.getCenterLocation());
+        Double2D ballDir = ball.getLocation().subtract(t.getLocation());
         t.setOrientation(ballDir.angle());
-        t.enableAgentCollisions(par.collisions);
+        if(par.collisions) {
+            t.setCollidableTypes(EmboddiedAgent.class);
+        }
         t.setStopper(schedule.scheduleRepeating(t));
         takers.add(t);
     }

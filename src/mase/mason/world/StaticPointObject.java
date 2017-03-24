@@ -14,7 +14,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class StaticPointObject extends OvalPortrayal2D implements SensableObject {
+public class StaticPointObject extends OvalPortrayal2D implements WorldObject {
     
     public static final Color DEFAULT_COLOR = Color.BLACK;
     public static final double DEFAULT_SIZE = 1;
@@ -34,7 +34,7 @@ public class StaticPointObject extends OvalPortrayal2D implements SensableObject
     }
 
     @Override
-    public Double2D getCenterLocation() {
+    public Double2D getLocation() {
         return point;
     }
 
@@ -44,13 +44,12 @@ public class StaticPointObject extends OvalPortrayal2D implements SensableObject
     }
 
     @Override
-    public double distanceTo(EmboddiedAgent ag) {
-        return point.distance(ag.getCenterLocation()) - ag.getRadius();
+    public boolean isInside(Double2D p) {
+        return false;
     }
 
     @Override
-    public boolean isInside(EmboddiedAgent ag) {
-        return false;
+    public double distanceTo(Double2D p) {
+        return point.distance(p);
     }
-    
 }

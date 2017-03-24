@@ -49,10 +49,10 @@ public class SoccerIndEvalShort extends MasonEvaluation {
     private double[] computeDistances(SoccerAgent sa, Soccer soc) {
         double[] res = new double[2];
         // Distance to opponent goal
-        res[0] = sa.oppGoal.distanceTo(sa);
+        res[0] = sa.distanceTo(sa.oppGoal);
 
         // Distance to ball
-        res[1] = soc.ball.distanceTo(sa);
+        res[1] = sa.distanceTo(soc.ball);
         return res;
     }
 

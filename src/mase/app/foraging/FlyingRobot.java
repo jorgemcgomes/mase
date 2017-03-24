@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.util.Collections;
 import mase.controllers.AgentController;
 import mase.mason.world.DistanceSensorArcs;
+import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.RangeBearingSensor;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.StaticPointObject;
@@ -32,10 +33,10 @@ public class FlyingRobot extends SmartAgent {
     public FlyingRobot(ForagingTask sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.flyingRadius, COLOR, ac);
 
-        this.enableAgentCollisions(false);
+        if(sim.par.flyingStartHeight < 5) {
+            this.setCollidableTypes(EmboddiedAgent.class);
+        }
         this.enableBoundedArena(false);
-        this.enablePolygonCollisions(false);
-        this.enableCollisionRebound(false);
 
         effector = new FlyingEffector(sim, field, this);
         super.addEffector(effector);

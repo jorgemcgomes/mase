@@ -20,7 +20,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class CircularObject extends CircledPortrayal2D implements Fixed2D, SensableObject {
+public class CircularObject extends CircledPortrayal2D implements Fixed2D, WorldObject {
 
     public static final Color DEFAULT_COLOR = Color.RED;
     
@@ -152,22 +152,23 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, Sensa
     }    */
 
     @Override
-    public Double2D getCenterLocation() {
+    public Double2D getLocation() {
         return pos;
     }    
     
-    @Override
-    public double distanceTo(EmboddiedAgent ag) {
-        return Math.max(0, pos.distance(ag.getCenterLocation()) - ag.getRadius() - getRadius());
-    }
 
     @Override
-    public boolean isInside(EmboddiedAgent ag) {
-        return pos.distance(ag.getCenterLocation()) < ag.getRadius();
+    public boolean isInside(Double2D p) {
+        return distanceTo(p) <= 0;
     }
 
     @Override
     public double closestRayIntersection(Double2D start, Double2D end) {
         throw new UnsupportedOperationException("Not supported yet: ray-circle intersection");
+    }
+
+    @Override
+    public double distanceTo(Double2D p) {
+        return Math.max(0, pos.distance(p) - this.getRadius());
     }
 }

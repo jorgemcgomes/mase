@@ -6,7 +6,12 @@ package mase.mason.world;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import mase.mason.generic.systematic.Entity;
 import net.jafama.FastMath;
 import sim.engine.SimState;
@@ -32,14 +37,12 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     private double turningSpeed;
     private boolean collisionStatus;
     private Stoppable stopper;
-    private boolean agentCollisions;
     private boolean boundedArena;
-    private boolean polygonCollisions;
     private boolean collisionRebound;
+    private Collection<Class<? extends WorldObject>> collidableTypes;
     public static final double COLLISION_SPEED_DECAY = 0.5;
     public static final double COLLISION_DIRECTION = Math.PI / 2;
     private boolean isAlive;
-    private List<StaticMultilineObject> obstacleList;
     private boolean rotate = true;
 
     protected OvalPortrayal2D ovalPortrayal;
@@ -61,9 +64,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         this.collisionStatus = false;
         this.speed = 0;
         this.turningSpeed = 0;
-        this.agentCollisions = false;
         this.boundedArena = false;
-        this.polygonCollisions = false;
         this.collisionRebound = true;
         this.isAlive = true;
     }
@@ -81,7 +82,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
 
     @Override
     public double[] getStateVariables() {
-        return new double[]{getCenterLocation().x, getCenterLocation().y, getTurningSpeed(), getSpeed()};
+        return new double[]{getLocation().x, getLocation().y, getTurningSpeed(), getSpeed()};
     }
 
     public final void enableRotation(boolean r) {
@@ -89,16 +90,73 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         orientedPortrayal.setOrientationShowing(r);
     }
 
-    public final void enableAgentCollisions(boolean enable) {
-        this.agentCollisions = enable;
+    public void setCollidableTypes(Class<? extends WorldObject>... types) {
+        this.collidableTypes = Arrays.asList(types);
+    }
+
+    private boolean collisionFree(Double2D target) {
+        if (collidableTypes.isEmpty()) {
+            return true;
+        }
+        Collection<WorldObject> possible = candidateCollisions();
+        for (WorldObject so : possible) {
+            double d = so.distanceTo(target);
+            if (d <= getRadius()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Collection<WorldObject> cache;
+    private int cacheHash;
+
+    private int fieldHash() {
+        int h = 0;
+        for (Object o : field.allObjects) {
+            if (o instanceof WorldObject) {
+                h += o.hashCode();
+            }
+        }
+        return h;
+    }
+
+    private void updateCache() {
+        int fieldHash = fieldHash();
+        if (cache == null || fieldHash != cacheHash) {
+            cacheHash = fieldHash;
+            cache = new ArrayList<>();
+            for (Object n : field.allObjects) {
+                if (n != this && n instanceof WorldObject) {
+                    for (Class<? extends WorldObject> type : collidableTypes) {
+                        if (type.isInstance(n)) {
+                            cache.add((WorldObject) n);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Collection<WorldObject> candidateCollisions() {
+        updateCache();
+        Collection<WorldObject> candidates = new LinkedList<>();
+        for (WorldObject so : cache) {
+            // Optional quick check to speedup things
+            if (so instanceof StaticMultilineObject) {
+                if (((StaticMultilineObject) so).quickProximityCheck(getLocation(), getRadius() * 2)) {
+                    candidates.add(so);
+                }
+            } else {
+                candidates.add(so);
+            }
+        }
+        return candidates;
     }
 
     public final void enableBoundedArena(boolean enable) {
         this.boundedArena = enable;
-    }
-
-    public final void enablePolygonCollisions(boolean enable) {
-        this.polygonCollisions = enable;
     }
 
     public final void enableCollisionRebound(boolean enable) {
@@ -140,7 +198,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
 
     private boolean attemptMove(double ori, double speed) {
         Double2D displacement = new Double2D(speed * FastMath.cos(ori), speed * FastMath.sin(ori));
-        Double2D newPos = getCenterLocation().add(displacement);
+        Double2D newPos = getLocation().add(displacement);
         if (isValidMove(newPos)) {
             this.collisionStatus = false;
             this.speed = speed;
@@ -160,48 +218,11 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
      * @return
      */
     protected boolean isValidMove(Double2D target) {
-        return (!boundedArena || checkInsideArena(target))
-                && (!agentCollisions || checkAgentCollisions(target))
-                && (!polygonCollisions || checkPolygonCollisions(target));
-    }
-
-    protected boolean checkPolygonCollisions(Double2D target) {
-        // initialisation
-        if (obstacleList == null) {
-            obstacleList = new ArrayList<>();
-            for (Object o : field.allObjects) {
-                if (o instanceof StaticMultilineObject) {
-                    obstacleList.add((StaticMultilineObject) o);
-                }
-            }
-        }
-
-        // check for collisions
-        for (StaticMultilineObject p : obstacleList) {
-            double d = p.closestDistance(target);
-            if (d <= radius) {
-                return false;
-            }
-        }
-        return true;
+        return (!boundedArena || checkInsideArena(target)) && collisionFree(target);
     }
 
     protected boolean checkInsideArena(Double2D target) {
         return target.x >= radius && target.x <= field.width - radius && target.y >= radius && target.y <= field.height - radius;
-    }
-
-    protected boolean checkAgentCollisions(Double2D target) {
-        // TODO: nearest neighbours
-        Bag objects = field.allObjects.size() < 20 ? field.allObjects : field.getNeighborsWithinDistance(target, radius, false, true);
-        for (Object o : objects) {
-            if (o != this && o instanceof EmboddiedAgent) {
-                EmboddiedAgent a = (EmboddiedAgent) o;
-                if (a.agentCollisions && target.distance(a.getCenterLocation()) <= this.getRadius() + a.getRadius()) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     public void setStopper(Stoppable s) {
@@ -221,6 +242,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     public void setOrientation(double angle) {
         this.orientation = angle;
     }
+    
 
     public boolean getCollisionStatus() {
         return collisionStatus;
@@ -264,4 +286,8 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         double agentDirY = FastMath.sinQuick(orientation);
         return FastMath.atan2(agentDirX * agToPointY - agentDirY * agToPointX, agentDirX * agToPointX + agentDirY * agToPointY);
     }
+    
+    public double distanceTo(WorldObject so) {
+        return Math.max(0, so.distanceTo(this.getLocation()) - this.getRadius());
+    }    
 }
