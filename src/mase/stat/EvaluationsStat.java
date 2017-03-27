@@ -10,6 +10,7 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import mase.MaseProblem;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.SubpopEvaluationResult;
 import mase.evaluation.ExpandedFitness;
@@ -53,7 +54,7 @@ public class EvaluationsStat extends Statistics {
         // header
         if(state.generation == 0) {
             EvaluationResult[] sample = ((ExpandedFitness) state.population.subpops[0].individuals[0].fitness).getEvaluationResults();
-            state.output.println(header(sample, mode.equals(V_BEST_SUB)), log);            
+            state.output.println(header((MaseProblem) state.evaluator.p_problem, sample, mode.equals(V_BEST_SUB)), log);            
         }
         
         if (mode.equals(V_BEST)) {
@@ -78,25 +79,26 @@ public class EvaluationsStat extends Statistics {
         state.output.flush();
     }
     
-    public static String header(EvaluationResult[] sample, boolean allSubpops) {
+    public static String header(MaseProblem prob, EvaluationResult[] sample, boolean allSubpops) {
         String header = "Generation Subpop Index";
         for (int i = 0; i < sample.length; i++) {
+            String evalName = prob.getEvalFunctions()[i].getClass().getSimpleName();
             if (sample[i] instanceof SubpopEvaluationResult) {
                 ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) sample[i]).getAllEvaluations();
                 if (allSubpops) {
                     for (int j = 0; j < allEvals.size(); j++) {
                         for (int k = 0; k < allEvals.get(j).toString().split(" ").length; k++) {
-                            header += " Eval." + i + ".Sub." + j + "_" + k;
+                            header += " " + evalName + "." + i + ".Sub." + j + "_" + k;
                         }
                     }
                 } else {
                     for (int k = 0; k < allEvals.get(0).toString().split(" ").length; k++) {
-                        header += " Eval." + i + "_" + k;
+                        header += " " + evalName + "." + i + "_" + k;
                     }
                 }
             } else {
                 for (int j = 0; j < sample[i].toString().split(" ").length; j++) {
-                    header += " Eval." + i + "_" + j;
+                    header += " " + evalName + "." + i + "_" + j;
                 }
             }
         }

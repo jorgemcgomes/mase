@@ -29,7 +29,7 @@ public class StatUtils {
             this.fitness = ((ExpandedFitness) ind.fitness).getFitnessScore();
         }
     }
-
+    
     public static IndividualInfo getBest(EvolutionState state) {
         Individual best = null;
         int sub = -1;

@@ -83,6 +83,10 @@ public class ExpandedFitness extends SimpleFitness {
     public void setFitnessIndex(int index) {
         this.fitnessIndex = index;
     }
+    
+    public int getFitnessIndex() {
+        return fitnessIndex;
+    }
 
     public int getCorrespondingSubpop() {
         return subpop;

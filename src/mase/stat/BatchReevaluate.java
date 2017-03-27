@@ -192,7 +192,7 @@ public class BatchReevaluate {
 
                 // file header
                 if (i == 0) {
-                    behavWriter.write(EvaluationsStat.header(reev.mergedResults, allSubpops));
+                    behavWriter.write(EvaluationsStat.header(sim, reev.mergedResults, allSubpops));
                     behavWriter.newLine();
                 }
 

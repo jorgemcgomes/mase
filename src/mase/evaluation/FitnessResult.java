@@ -4,6 +4,8 @@
  */
 package mase.evaluation;
 
+import java.util.Locale;
+
 /**
  *
  * @author jorge
@@ -83,7 +85,7 @@ public class FitnessResult implements EvaluationResult {
 
     @Override
     public String toString() {
-        return value + "";
+        return String.format(Locale.ENGLISH, "%.5f", value);
     }
 
 }

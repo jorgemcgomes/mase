@@ -9,7 +9,7 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map.Entry;
+import java.util.Locale;
 import mase.evaluation.ExpandedFitness;
 
 /**
@@ -57,9 +57,9 @@ public class ScoresStat extends Statistics {
                 ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;
                 state.output.print(state.generation + " " + i + " " + j, log);
                 for(double score : nf.scores().values()) {
-                    state.output.print(" " + score, log);
+                    state.output.print(String.format(Locale.ENGLISH, " %.5f", score), log);
                 }
-                state.output.print(" " + nf.fitness() + "\n", log);
+                state.output.println(String.format(Locale.ENGLISH, " %.5f", nf.fitness()), log);
             }
         }
         state.output.getLog(log).writer.flush(); // flush        
