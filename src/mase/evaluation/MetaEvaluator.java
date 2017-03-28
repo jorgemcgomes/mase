@@ -62,8 +62,8 @@ public class MetaEvaluator extends Evaluator {
         lastEvaluationTime = t2 - t1;
         lastPostEvaluationTime = t3 - t2;
         // necessary hack to load the elites in the CoevolutionaryEvaluator
-        if (baseEvaluator instanceof CoevolutionaryEvaluator) {            
-            ((CoevolutionaryEvaluator) baseEvaluator).afterCoevolutionaryEvaluation(state, state.population, null);
+        if (baseEvaluator instanceof MaseCoevolutionaryEvaluator) {            
+            ((MaseCoevolutionaryEvaluator) baseEvaluator).forceAfterCoevolutionaryEvaluation(state, state.population, null);
         }
     }
 

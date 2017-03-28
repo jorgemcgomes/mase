@@ -9,7 +9,7 @@ import ec.EvolutionState;
 import ec.Fitness;
 import ec.Individual;
 import ec.Subpopulation;
-import mase.evaluation.CoevolutionaryEvaluator;
+import mase.evaluation.MaseCoevolutionaryEvaluator;
 import ec.util.Parameter;
 import mase.evaluation.MetaEvaluator;
 import mase.controllers.AgentController;
@@ -34,7 +34,7 @@ public class HaltedStagedEvolution extends StagedEvolution {
             backup = null;
             super.updateFitness(state);
             
-            CoevolutionaryEvaluator base = (CoevolutionaryEvaluator) ((MetaEvaluator) state.evaluator).getBaseEvaluator();
+            MaseCoevolutionaryEvaluator base = (MaseCoevolutionaryEvaluator) ((MetaEvaluator) state.evaluator).getBaseEvaluator();
             Individual[][] elites = base.getEliteIndividuals();
             Individual[][] newElites = new Individual[2][elites[0].length];
             for(int i = 0 ; i < elites[0].length ; i++) {
