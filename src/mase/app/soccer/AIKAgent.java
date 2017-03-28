@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import mase.mason.world.GeomUtils;
 import mase.mason.world.GeomUtils.Segment;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.MultilineObject;
 import net.jafama.FastMath;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
@@ -256,7 +256,7 @@ public class AIKAgent extends SoccerAgent {
             }
         }
         // Add walls as obstacles
-        for (Segment s : ((Soccer) sim).fieldBoundaries.segments()) {
+        for (Segment s : ((Soccer) sim).fieldBoundaries.getPolygon().segments) {
             Obstacle o = edgeObstacle(s, range);
             if (o != null) {
                 obstacles.add(o);
@@ -287,7 +287,7 @@ public class AIKAgent extends SoccerAgent {
         }
         // Add walls as obstacles
         if (!ignoreWalls) {
-            for (Segment s : ((Soccer) sim).fieldBoundaries.segments()) {
+            for (Segment s : ((Soccer) sim).fieldBoundaries.getPolygon().segments) {
                 Obstacle o = edgeObstacle(s, range);
                 if (o != null) {
                     obstacles.add(o);

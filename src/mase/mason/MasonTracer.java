@@ -17,7 +17,7 @@ import java.util.Random;
 import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
 import mase.mason.world.GeomUtils.Segment;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.MultilineObject;
 import mase.mason.world.StaticPointObject;
 import mase.stat.Reevaluate;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
@@ -119,10 +119,10 @@ public class MasonTracer {
                 int y = (int) Math.round(spo.getLocation().y * scale);
                 gr.setPaint(spo.paint);
                 gr.drawLine(x, y, x, y);
-            } else if (o instanceof StaticMultilineObject) {
-                StaticMultilineObject smo = (StaticMultilineObject) o;
+            } else if (o instanceof MultilineObject) {
+                MultilineObject smo = (MultilineObject) o;
                 gr.setPaint(smo.paint);
-                for (Segment s : smo.segments()) {
+                for (Segment s : smo.getPolygon().segments) {
                     int x1 = (int) Math.round(s.start.x * scale);
                     int y1 = (int) Math.round(s.start.y * scale);
                     int x2 = (int) Math.round(s.end.x * scale);

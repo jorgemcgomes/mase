@@ -18,7 +18,7 @@ import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.MultilineObject;
 import mase.mason.world.StaticPointObject;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -42,7 +42,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider, S
     protected List<Sheep> sheeps;
     protected List<Sheep> activeSheeps;
     protected StaticPointObject curralCenter;
-    protected StaticMultilineObject fence, openSide, curral;
+    protected MultilineObject fence, openSide, curral;
 
     public Herding(long seed, HerdingParams par, GroupController gc) {
         super(gc, seed);
@@ -58,23 +58,24 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider, S
         par.shepherdTurnSpeed += par.shepherdTurnSpeed * par.actuatorOffset * (random.nextDouble() * 2 - 1);
         par.shepherdSensorRange += par.shepherdSensorRange * par.sensorOffset * (random.nextDouble() * 2 - 1);
 
+        this.field = new Continuous2D(par.discretization, par.arenaSize, par.arenaSize);
+
         // Static environment
-        fence = new StaticMultilineObject(new Segment(0, 0, par.arenaSize, 0),
+        fence = new MultilineObject(field, new Segment(0, 0, par.arenaSize, 0),
                 new Segment(par.arenaSize, 0, par.arenaSize, par.arenaSize / 2 - par.gateSize / 2),
                 new Segment(par.arenaSize, par.arenaSize / 2 + par.gateSize / 2, par.arenaSize, par.arenaSize),
                 new Segment(par.arenaSize, par.arenaSize, 0, par.arenaSize));
         fence.paint = Color.BLACK;
 
-        openSide = new StaticMultilineObject(new Segment(0, 0, 0, par.arenaSize));
+        openSide = new MultilineObject(field, new Segment(0, 0, 0, par.arenaSize));
         openSide.paint = Color.RED;
 
-        curral = new StaticMultilineObject(new Segment(par.arenaSize, par.arenaSize / 2 - par.gateSize / 2,
+        curral = new MultilineObject(field, new Segment(par.arenaSize, par.arenaSize / 2 - par.gateSize / 2,
                 par.arenaSize, par.arenaSize / 2 + par.gateSize / 2));
         curral.paint = Color.BLUE;
         
         curralCenter = new StaticPointObject(field, new Double2D(par.arenaSize, par.arenaSize / 2));
 
-        this.field = new Continuous2D(par.discretization, par.arenaSize, par.arenaSize);
 
         placeSheeps();
         placeFoxes();

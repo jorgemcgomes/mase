@@ -17,7 +17,8 @@ import mase.mason.generic.systematic.EntityGroup;
 import mase.mason.generic.systematic.TaskDescription;
 import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.MultilineObject;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
 import sim.engine.SimState;
@@ -39,7 +40,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
     protected List<IndianaAgent> agents;
     protected List<IndianaAgent> activeAgents;
     protected Continuous2D field;
-    protected StaticMultilineObject walls;
+    protected MultilineObject walls;
     protected Gate gate;
     protected TaskDescription td;
 
@@ -56,17 +57,6 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
     public Indiana(long seed, IndianaParams par, GroupController gc) {
         super(gc, seed);
         this.par = par;
-
-        this.walls = new StaticMultilineObject(new Double2D[]{
-            new Double2D(0, par.size / 2 + par.gateSize / 2),
-            new Double2D(0, par.size),
-            new Double2D(par.size, par.size),
-            new Double2D(par.size, 0),
-            new Double2D(0, 0),
-            new Double2D(0, par.size / 2 - par.gateSize / 2)});
-        this.walls.filled = false;
-        this.walls.paint = Color.BLACK;
-        this.walls.setStroke(new BasicStroke(2f));
     }
 
     @Override
@@ -88,6 +78,18 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
+        
+        this.walls = new MultilineObject(field, 
+            new Double2D(0, par.size / 2 + par.gateSize / 2),
+            new Double2D(0, par.size),
+            new Double2D(par.size, par.size),
+            new Double2D(par.size, 0),
+            new Double2D(0, 0),
+            new Double2D(0, par.size / 2 - par.gateSize / 2));
+        this.walls.filled = false;
+        this.walls.paint = Color.BLACK;
+        this.walls.setStroke(new BasicStroke(2f));        
+        
         this.gate = new Gate(this, field);
         schedule.scheduleRepeating(gate);
         field.setObjectLocation(gate, new Double2D(0.5,0));
@@ -134,15 +136,15 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
         activeAgents = new ArrayList<IndianaAgent>(agents);
     }
 
-    protected static class Gate extends StaticMultilineObject implements Steppable {
+    protected static class Gate extends MultilineObject implements Steppable {
 
         protected long openTime = -1;
         protected boolean closed = false;
         protected Double2D center;
         
         protected Gate(Indiana sim, Continuous2D field) {
-            super(new Double2D[]{new Double2D(-0.1, sim.par.size / 2 - sim.par.gateSize / 2),
-                new Double2D(-0.1, sim.par.size / 2 + sim.par.gateSize / 2)});
+            super(field, new Polygon(new Double2D(-0.1, sim.par.size / 2 - sim.par.gateSize / 2),
+                new Double2D(-0.1, sim.par.size / 2 + sim.par.gateSize / 2)));
             this.paint = Color.BLUE;
             this.filled = false;
             this.setStroke(new BasicStroke(3));

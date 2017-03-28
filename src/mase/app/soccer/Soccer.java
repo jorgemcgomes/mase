@@ -9,9 +9,10 @@ import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.generic.SmartAgentProvider;
 import mase.mason.MasonSimState;
+import mase.mason.world.GeomUtils.Polygon;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.MultilineObject;
 import org.apache.commons.math3.util.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -33,7 +34,7 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
     protected SoccerParams par;
     protected Continuous2D field;
     protected List<SoccerAgent> leftTeam, rightTeam, all;
-    protected StaticMultilineObject fieldBoundaries;
+    protected MultilineObject fieldBoundaries;
     protected Double2D leftGoalCenter, rightGoalCenter;
     protected Color leftTeamColor, rightTeamColor;
     protected Ball ball;
@@ -64,11 +65,11 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
         leftGoalCenter = new Double2D(0, fw / 2);
         rightGoalCenter = new Double2D(fl, fw / 2);
 
-        fieldBoundaries = new StaticMultilineObject(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
+        fieldBoundaries = new MultilineObject(field, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
         fieldBoundaries.setStroke(new BasicStroke(1));
         fieldBoundaries.paint = Color.BLACK;
         fieldBoundaries.filled = false;
-        field.setObjectLocation(fieldBoundaries, new Double2D(0, 0));
+        fieldBoundaries.setLocation(new Double2D(0, 0));
 
         ball = new Ball(this);
         ball.setLabel("");

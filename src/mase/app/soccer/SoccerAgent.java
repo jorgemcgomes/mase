@@ -11,7 +11,7 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.MultilineObject;
 import mase.mason.world.StaticPointObject;
 import sim.engine.SimState;
 import sim.util.Double2D;
@@ -39,7 +39,7 @@ public class SoccerAgent extends SmartAgent {
 
     public SoccerAgent(Soccer sim, AgentController ac, double moveSpeed, double kickSpeed) {
         super(sim, sim.field, sim.par.agentRadius, Color.WHITE, ac);
-        this.setCollidableTypes(SoccerAgent.class, StaticMultilineObject.class);
+        this.setCollidableTypes(SoccerAgent.class, MultilineObject.class);
         this.enableCollisionRebound(true); 
         this.enableRotation(false);
         this.moveSpeed = moveSpeed;

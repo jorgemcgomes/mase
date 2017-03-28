@@ -16,7 +16,8 @@ import mase.mason.generic.systematic.EntityGroup;
 import mase.mason.generic.systematic.TaskDescription;
 import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.MultilineObject;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -34,29 +35,26 @@ public class Aggregation extends MasonSimState implements TaskDescriptionProvide
     protected AggregationParams par;
     protected List<AggregationAgent> agents;
     protected Continuous2D field;
-    protected StaticMultilineObject walls;
+    protected MultilineObject walls;
     protected TaskDescription td;
 
     public Aggregation(long seed, AggregationParams par, GroupController gc) {
         super(gc, seed);
         this.par = par;
-
-        walls = new StaticMultilineObject(new Double2D[]{
-            new Double2D(0,0),
-            new Double2D(par.size, 0),
-            new Double2D(par.size, par.size),
-            new Double2D(0, par.size),
-            new Double2D(0,0)
-        });
-        walls.paint = Color.BLACK;
-        walls.setStroke(new BasicStroke(3f));
-        walls.filled = false;
     }
 
     @Override
     public void start() {
         super.start();
         this.field = new Continuous2D(par.discretization, par.size, par.size);
+        walls = new MultilineObject(field, new Double2D(0,0),
+            new Double2D(par.size, 0),
+            new Double2D(par.size, par.size),
+            new Double2D(0, par.size),
+            new Double2D(0,0));
+        walls.paint = Color.BLACK;
+        walls.setStroke(new BasicStroke(3f));
+        walls.filled = false;        
         placeAgents();
         field.setObjectLocation(walls, new Double2D(0,0));
         

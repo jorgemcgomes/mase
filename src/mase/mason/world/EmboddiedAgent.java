@@ -8,10 +8,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 import mase.mason.generic.systematic.Entity;
 import net.jafama.FastMath;
 import sim.engine.SimState;
@@ -21,7 +18,6 @@ import sim.field.continuous.Continuous2D;
 import sim.portrayal.Oriented2D;
 import sim.portrayal.simple.OrientedPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
-import sim.util.Bag;
 import sim.util.Double2D;
 
 /**
@@ -144,8 +140,8 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         Collection<WorldObject> candidates = new LinkedList<>();
         for (WorldObject so : cache) {
             // Optional quick check to speedup things
-            if (so instanceof StaticMultilineObject) {
-                if (((StaticMultilineObject) so).quickProximityCheck(getLocation(), getRadius() * 2)) {
+            if (so instanceof MultilineObject) {
+                if (((MultilineObject) so).quickProximityCheck(getLocation(), getRadius() * 2)) {
                     candidates.add(so);
                 }
             } else {

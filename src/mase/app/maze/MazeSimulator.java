@@ -13,7 +13,8 @@ import java.io.File;
 import mase.controllers.GroupController;
 import mase.mason.MasonSimulationProblem;
 import mase.mason.ParamUtils;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.MultilineObject;
 import sim.util.Double2D;
 
 /**
@@ -39,10 +40,7 @@ public class MazeSimulator extends MasonSimulationProblem<MazeTask> {
             }
             state.output.message("Maze: " + svg.getAbsolutePath());
             MazeReader mr = new MazeReader(svg);
-            par.maze = new StaticMultilineObject(mr.getSegments());
-            par.maze.filled = false;
-            par.maze.paint = Color.BLACK;
-            par.maze.setStroke(new BasicStroke(2f));
+            par.maze = new Polygon(mr.getSegments());
             par.startPos = mr.getStart();
             par.targetPos = mr.getEnd();
             Double2D dir = par.targetPos.subtract(par.startPos);

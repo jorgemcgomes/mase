@@ -5,25 +5,27 @@
  */
 package mase.mason.world;
 
+import mase.mason.world.GeomUtils.Polygon;
 import org.apache.commons.lang3.ArrayUtils;
+import sim.field.continuous.Continuous2D;
 import sim.util.Double2D;
 
 /**
  *
  * @author jorge
  */
-public class StaticPolygonObject extends StaticMultilineObject {
+public class ClosedPolygonObject extends MultilineObject {
 
     private static final long serialVersionUID = 1L;
-    private final Double2D[] boundary;
 
     /**
      * @param boundary Should not repeat the first and last. I.e, number of edges = number of points
      */
-    public StaticPolygonObject(Double2D... boundary) {
-        super(closeLoop(boundary));
-        this.boundary = boundary;
+    public ClosedPolygonObject(Continuous2D field, Double2D... boundary) {
+        super(field, closeLoop(boundary));
     }
+    
+    // TODO: constructor with polygon -- must check that it is a closed polygon
     
     private static Double2D[] closeLoop(Double2D[] points) {
         // Already closed
@@ -38,10 +40,10 @@ public class StaticPolygonObject extends StaticMultilineObject {
     @Override
     public boolean isInside(Double2D p) {
         // outside the bounding box
-        if(!GeomUtils.isInsideBB(getBoundingBox(), p)) {
+        if(!poly.isInsideBB(p)) {
             return false;
         }
-        return GeomUtils.pointInPolygon(p, boundary);
+        return GeomUtils.pointInPolygon(p, poly.points);
     }
 
 }

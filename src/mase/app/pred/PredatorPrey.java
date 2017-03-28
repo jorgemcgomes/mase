@@ -17,7 +17,8 @@ import mase.mason.generic.systematic.EntityGroup;
 import mase.mason.generic.systematic.TaskDescription;
 import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.StaticMultilineObject;
+import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.MultilineObject;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -38,7 +39,7 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
     protected List<Prey> preys;
     protected List<Prey> activePreys;
     protected int captureCount;
-    protected StaticMultilineObject boundaries;
+    protected MultilineObject boundaries;
     protected TaskDescription td;
     protected double escapeDistance;
 
@@ -51,10 +52,12 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
     public void start() {
         super.start();
         this.escapeDistance = par.escapeDistanceRandom == 0 ? par.escapeDistance : par.escapeDistance + (random.nextDouble() * 2 - 1) * par.escapeDistanceRandom;
-        this.boundaries = new StaticMultilineObject(new Double2D(0, 0), new Double2D(par.size, 0), new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0, 0));
+        this.field = new Continuous2D(par.discretization, par.size, par.size);
+
+        this.boundaries = new MultilineObject(field, new Double2D(0, 0), new Double2D(par.size, 0), 
+                new Double2D(par.size, par.size), new Double2D(0, par.size), new Double2D(0, 0));
         boundaries.paint = Color.WHITE;
         
-        this.field = new Continuous2D(par.discretization, par.size, par.size);
         field.setObjectLocation(boundaries, new Double2D(0, 0));
 
         this.predators = null;

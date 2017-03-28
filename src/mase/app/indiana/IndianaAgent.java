@@ -109,7 +109,7 @@ public class IndianaAgent extends SmartAgent {
                 int si = i + par.agentSensorArcs + 3;
                 Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
                 Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
-                double dist = indSim.walls.closestDistance(rs, re);
+                double dist = indSim.walls.getPolygon().closestDistance(rs, re);
                 if(!Double.isInfinite(dist)) {
                     sens[si] = dist / par.wallRadius * 2 - 1;
                 }

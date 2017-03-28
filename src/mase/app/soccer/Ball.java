@@ -54,7 +54,7 @@ public class Ball extends CircularObject implements Steppable {
         }
 
         // TODO: harcode best-effort check for computational efficiency
-        Pair<Double, Segment> closest = soc.fieldBoundaries.closestSegment(newPos);
+        Pair<Double, Segment> closest = soc.fieldBoundaries.getPolygon().closestSegment(newPos);
         if(closest.getLeft() < soc.par.ballRadius) {
             Segment seg = closest.getRight();
             // WARNING: this assumes the field boundaries were constructed clockwise

@@ -94,7 +94,7 @@ public class AggregationAgent extends SmartAgent implements Entity {
                 int si = i + par.agentArcs + 1;
                 Double2D rs = rayStarts[i].rotate(orientation2D()).add(getLocation());
                 Double2D re = rayEnds[i].rotate(orientation2D()).add(getLocation());
-                double dist = agg.walls.closestDistance(rs, re);
+                double dist = agg.walls.getPolygon().closestDistance(rs, re);
                 if(!Double.isInfinite(dist)) {
                     sens[si] = dist / par.wallRadius * 2 - 1;
                 }
