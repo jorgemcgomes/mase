@@ -6,7 +6,7 @@
 package mase.app.maze;
 
 import mase.mason.ParamUtils.Param;
-import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.GeomUtils.Multiline;
 import sim.util.Double2D;
 
 /**
@@ -15,7 +15,7 @@ import sim.util.Double2D;
  */
 public class MazeParams {
 
-    protected Polygon maze;
+    protected Multiline maze;
     protected Double2D startPos;
     protected Double2D targetPos;
 

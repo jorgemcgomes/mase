@@ -17,7 +17,7 @@ import mase.mason.generic.systematic.EntityGroup;
 import mase.mason.generic.systematic.TaskDescription;
 import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.GeomUtils.Multiline;
 import mase.mason.world.MultilineObject;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
@@ -143,7 +143,7 @@ public class Indiana extends MasonSimState implements TaskDescriptionProvider, S
         protected Double2D center;
         
         protected Gate(Indiana sim, Continuous2D field) {
-            super(field, new Polygon(new Double2D(-0.1, sim.par.size / 2 - sim.par.gateSize / 2),
+            super(field, new Multiline(new Double2D(-0.1, sim.par.size / 2 - sim.par.gateSize / 2),
                 new Double2D(-0.1, sim.par.size / 2 + sim.par.gateSize / 2)));
             this.paint = Color.BLUE;
             this.filled = false;

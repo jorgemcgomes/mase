@@ -6,7 +6,7 @@
 package mase.mason.world;
 
 import mase.mason.generic.systematic.Entity;
-import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.GeomUtils.Multiline;
 import mase.mason.world.GeomUtils.Segment;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.simple.ShapePortrayal2D;
@@ -20,26 +20,26 @@ public class MultilineObject extends ShapePortrayal2D implements Entity, WorldOb
     private static final long serialVersionUID = 1L;
 
     protected final Continuous2D field;
-    private final Polygon defPolygon;
-    protected Polygon poly;
+    private final Multiline defPolygon;
+    protected Multiline poly;
     private static final double[] EMPTY_ARRAY = new double[]{};
 
     public MultilineObject(Continuous2D field, Double2D... points) {
-        this(field, new Polygon(points));
+        this(field, new Multiline(points));
     }
     
     public MultilineObject(Continuous2D field, Segment... segments) {
-        this(field, new Polygon(segments));
+        this(field, new Multiline(segments));
     }
     
-    public MultilineObject(Continuous2D field, Polygon pol) {
+    public MultilineObject(Continuous2D field, Multiline pol) {
         super(pol.buildShape());
         this.field = field;
         this.defPolygon = pol;
         this.poly = pol;
     }
    
-    public Polygon getPolygon() {
+    public Multiline getPolygon() {
         return poly;
     }
     

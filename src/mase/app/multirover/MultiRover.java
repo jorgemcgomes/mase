@@ -15,7 +15,7 @@ import mase.controllers.GroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.mason.generic.SmartAgentProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.GeomUtils.Multiline;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.MultilineObject;
 import sim.field.continuous.Continuous2D;

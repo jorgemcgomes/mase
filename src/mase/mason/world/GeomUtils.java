@@ -114,14 +114,14 @@ public class GeomUtils {
      * @param s
      * @return
      */
-    public static Polygon generateFromPoints(String s) {
+    public static Multiline generateFromPoints(String s) {
         String[] pointStrings = s.split(";");
         Double2D[] points = new Double2D[pointStrings.length];
         for (int i = 0; i < pointStrings.length; i++) {
             String[] v = pointStrings[i].split(",");
             points[i] = new Double2D(Double.parseDouble(v[0].trim()), Double.parseDouble(v[1].trim()));
         }
-        return new Polygon(points);
+        return new Multiline(points);
     }
 
     /**
@@ -130,7 +130,7 @@ public class GeomUtils {
      * @param s
      * @return
      */
-    public static Polygon generateFromSegments(String s) {
+    public static Multiline generateFromSegments(String s) {
         String[] segStrings = s.split(";");
         Segment[] segments = new Segment[segStrings.length];
         for (int i = 0; i < segStrings.length; i++) {
@@ -139,12 +139,12 @@ public class GeomUtils {
             Double2D end = new Double2D(Double.parseDouble(v[2].trim()), Double.parseDouble(v[3].trim()));
             segments[i] = new Segment(start, end);
         }
-        return new Polygon(segments);
+        return new Multiline(segments);
     }    
     
 
 
-    public static class Polygon {
+    public static class Multiline {
 
         public final Segment[] segments;
         public final Double2D[] points;
@@ -152,7 +152,7 @@ public class GeomUtils {
         public final Double2D center;
         public final double width, height;
 
-        private Polygon(Segment[] segments, Double2D[] points, Pair<Double2D, Double2D> boundingBox, Double2D center, double width, double height) {
+        private Multiline(Segment[] segments, Double2D[] points, Pair<Double2D, Double2D> boundingBox, Double2D center, double width, double height) {
             this.segments = segments;
             this.points = points;
             this.boundingBox = boundingBox;
@@ -161,7 +161,10 @@ public class GeomUtils {
             this.height = height;
         }
 
-        public Polygon(Double2D... points) {
+        public Multiline(Double2D... points) {
+            if(points.length < 2) {
+                throw new RuntimeException("Not enough points. Need at least 2.");
+            }
             this.segments = new Segment[points.length - 1];
             for (int i = 0; i < points.length - 1; i++) {
                 segments[i] = new Segment(points[i], points[i + 1]);
@@ -180,7 +183,7 @@ public class GeomUtils {
          * @param segs Coordinates are relative to the object location in the
          * field
          */
-        public Polygon(Segment... segs) {
+        public Multiline(Segment... segs) {
             // cleanup line sequences, remove duplicates
             LinkedHashSet<Double2D> ps = new LinkedHashSet<>();
             for (int i = 0; i < segs.length; i++) {
@@ -221,7 +224,7 @@ public class GeomUtils {
             return min;
         }
 
-        public double closestDistance(Polygon other) {
+        public double closestDistance(Multiline other) {
             double closest = Double.NEGATIVE_INFINITY;
             for (Double2D p : points) {
                 closest = Math.min(closest, other.closestDistance(p));
@@ -252,7 +255,7 @@ public class GeomUtils {
                     && point.y < boundingBox.getRight().y;
         }
 
-        public Polygon add(Double2D pos) {
+        public Multiline add(Double2D pos) {
             Double2D[] newPoints = new Double2D[points.length];
             for (int i = 0; i < points.length; i++) {
                 newPoints[i] = points[i].add(pos);
@@ -261,7 +264,7 @@ public class GeomUtils {
             for (int i = 0; i < segments.length; i++) {
                 newSegments[i] = new Segment(segments[i].start.add(pos), segments[i].end.add(pos));
             }
-            Polygon newPoly = new Polygon(newSegments, newPoints, Pair.of(boundingBox.getLeft().add(pos),
+            Multiline newPoly = new Multiline(newSegments, newPoints, Pair.of(boundingBox.getLeft().add(pos),
                     boundingBox.getRight().add(pos)), center.add(pos), width, height);
             return newPoly;
         }

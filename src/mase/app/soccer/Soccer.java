@@ -9,7 +9,7 @@ import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.mason.generic.SmartAgentProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GeomUtils.Polygon;
+import mase.mason.world.GeomUtils.Multiline;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.MultilineObject;
