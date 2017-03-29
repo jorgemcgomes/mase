@@ -12,7 +12,7 @@ import mase.controllers.GroupController;
 import mase.mason.MasonSimState;
 import mase.mason.world.CircularObject;
 import mase.mason.world.MultilineObject;
-import mase.mason.world.StaticPointObject;
+import mase.mason.world.PointObject;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;

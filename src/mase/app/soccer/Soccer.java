@@ -13,6 +13,7 @@ import mase.mason.world.GeomUtils.Multiline;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.MultilineObject;
+import mase.mason.world.PointObject;
 import org.apache.commons.math3.util.FastMath;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
@@ -35,7 +36,7 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
     protected Continuous2D field;
     protected List<SoccerAgent> leftTeam, rightTeam, all;
     protected MultilineObject fieldBoundaries;
-    protected Double2D leftGoalCenter, rightGoalCenter;
+    protected PointObject leftGoalCenter, rightGoalCenter;
     protected Color leftTeamColor, rightTeamColor;
     protected Ball ball;
     protected Referee referee;
@@ -62,8 +63,8 @@ public class Soccer extends MasonSimState implements SmartAgentProvider {
         Segment t9 = new Segment(t8.end, new Double2D(0, fw - d));
         Segment t10 = new Segment(t9.end, new Double2D(0, fw / 2 + hg));
 
-        leftGoalCenter = new Double2D(0, fw / 2);
-        rightGoalCenter = new Double2D(fl, fw / 2);
+        leftGoalCenter = new PointObject(field, new Double2D(0, fw / 2));
+        rightGoalCenter = new PointObject(field, new Double2D(fl, fw / 2));
 
         fieldBoundaries = new MultilineObject(field, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);
         fieldBoundaries.setStroke(new BasicStroke(1));

@@ -19,7 +19,7 @@ import mase.mason.MasonSimState;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.MultilineObject;
-import mase.mason.world.StaticPointObject;
+import mase.mason.world.PointObject;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.FieldPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
@@ -41,7 +41,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider, S
     protected List<Fox> foxes;
     protected List<Sheep> sheeps;
     protected List<Sheep> activeSheeps;
-    protected StaticPointObject curralCenter;
+    protected PointObject curralCenter;
     protected MultilineObject fence, openSide, curral;
 
     public Herding(long seed, HerdingParams par, GroupController gc) {
@@ -74,7 +74,7 @@ public class Herding extends MasonSimState implements TaskDescriptionProvider, S
                 par.arenaSize, par.arenaSize / 2 + par.gateSize / 2));
         curral.paint = Color.BLUE;
         
-        curralCenter = new StaticPointObject(field, new Double2D(par.arenaSize, par.arenaSize / 2));
+        curralCenter = new PointObject(field, new Double2D(par.arenaSize, par.arenaSize / 2));
 
 
         placeSheeps();

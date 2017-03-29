@@ -7,6 +7,7 @@ package mase.mason.world;
 
 import java.awt.Color;
 import sim.field.continuous.Continuous2D;
+import sim.portrayal.Fixed2D;
 import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Double2D;
 
@@ -14,28 +15,35 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class StaticPointObject extends OvalPortrayal2D implements WorldObject {
-    
+public class PointObject extends OvalPortrayal2D implements Fixed2D, WorldObject {
+
     public static final Color DEFAULT_COLOR = Color.BLACK;
     public static final double DEFAULT_SIZE = 1;
     private static final long serialVersionUID = 1L;
-    private final Double2D point;
-    
-    public StaticPointObject(Color color, Continuous2D field, Double2D point) {
+    private Double2D point;
+    private Continuous2D field;
+    private final int hash;
+
+    public PointObject(Color color, Continuous2D field, Double2D point) {
         super(color, DEFAULT_SIZE, false);
         this.point = point;
-        if(field != null) {
-            field.setObjectLocation(this, point);
-        }
+        this.field = field;
+        field.setObjectLocation(this, point);
+        this.hash = System.identityHashCode(this);
     }
 
-    public StaticPointObject(Continuous2D field, Double2D point) {
+    public PointObject(Continuous2D field, Double2D point) {
         this(DEFAULT_COLOR, field, point);
     }
 
     @Override
     public Double2D getLocation() {
         return point;
+    }
+
+    public void setLocation(Double2D p) {
+        this.point = p;
+        this.field.setObjectLocation(this, point);
     }
 
     @Override
@@ -51,5 +59,21 @@ public class StaticPointObject extends OvalPortrayal2D implements WorldObject {
     @Override
     public double distanceTo(Double2D p) {
         return point.distance(p);
+    }
+
+    @Override
+    public boolean maySetLocation(Object field, Object newObjectLocation) {
+        this.setLocation((Double2D) newObjectLocation);
+        return true;
+    }
+    
+    @Override
+    public int hashCode() {
+        return hash;
+    }    
+
+    @Override
+    public String toString() {
+        return point.toString();
     }
 }

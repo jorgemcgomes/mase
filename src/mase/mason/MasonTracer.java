@@ -18,7 +18,7 @@ import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.MultilineObject;
-import mase.mason.world.StaticPointObject;
+import mase.mason.world.PointObject;
 import mase.stat.Reevaluate;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
@@ -113,8 +113,8 @@ public class MasonTracer {
         for (Object o : allObjects) {
             if (o instanceof CircularObject) {
                 tracked.add((CircularObject) o);
-            } else if (o instanceof StaticPointObject) {
-                StaticPointObject spo = (StaticPointObject) o;
+            } else if (o instanceof PointObject) {
+                PointObject spo = (PointObject) o;
                 int x = (int) Math.round(spo.getLocation().x * scale);
                 int y = (int) Math.round(spo.getLocation().y * scale);
                 gr.setPaint(spo.paint);

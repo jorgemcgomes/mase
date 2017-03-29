@@ -6,6 +6,7 @@ import java.util.List;
 import mase.mason.world.GeomUtils;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.MultilineObject;
+import mase.mason.world.PointObject;
 import net.jafama.FastMath;
 import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
@@ -78,13 +79,13 @@ public class AIKAgent extends SoccerAgent {
     }
 
     @Override
-    public void setTeamContext(List<SoccerAgent> ownTeam, List<SoccerAgent> opponents, Double2D ownGoal, Double2D oppGoal, Color teamColor) {
+    public void setTeamContext(List<SoccerAgent> ownTeam, List<SoccerAgent> opponents, PointObject ownGoal, PointObject oppGoal, Color teamColor) {
         super.setTeamContext(ownTeam, opponents, ownGoal, oppGoal, teamColor);
         Double2D goal = this.oppGoal.getLocation();
         if (goal.x > fieldLength / 2) { // left team
             side = -1;
             //forwardAngle = 0.0;
-            goalieX = ownGoal.x + getRadius();
+            goalieX = ownGoal.getLocation().x + getRadius();
             offensivePos1 = new Double2D((fieldLength / 2) + 4.0 * fieldLength / 10.0,
                     (fieldWidth / 2) + goalWidth / 2.0
                     + this.getRadius());
@@ -94,7 +95,7 @@ public class AIKAgent extends SoccerAgent {
         } else { // right team
             side = 1;
             //forwardAngle = Math.PI;
-            goalieX = ownGoal.x - getRadius();
+            goalieX = ownGoal.getLocation().x - getRadius();
             offensivePos1 = new Double2D((fieldLength / 2) - 4.0 * fieldLength / 10.0,
                     (fieldWidth / 2) + goalWidth / 2.0
                     + this.getRadius());

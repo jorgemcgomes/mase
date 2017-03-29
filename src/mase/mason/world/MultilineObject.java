@@ -9,6 +9,7 @@ import mase.mason.generic.systematic.Entity;
 import mase.mason.world.GeomUtils.Multiline;
 import mase.mason.world.GeomUtils.Segment;
 import sim.field.continuous.Continuous2D;
+import sim.portrayal.Fixed2D;
 import sim.portrayal.simple.ShapePortrayal2D;
 import sim.util.Double2D;
 
@@ -16,13 +17,14 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class MultilineObject extends ShapePortrayal2D implements Entity, WorldObject {
+public class MultilineObject extends ShapePortrayal2D implements Entity, WorldObject, Fixed2D {
     private static final long serialVersionUID = 1L;
 
     protected final Continuous2D field;
     private final Multiline defPolygon;
     protected Multiline poly;
     private static final double[] EMPTY_ARRAY = new double[]{};
+    private final int hash;
 
     public MultilineObject(Continuous2D field, Double2D... points) {
         this(field, new Multiline(points));
@@ -37,6 +39,7 @@ public class MultilineObject extends ShapePortrayal2D implements Entity, WorldOb
         this.field = field;
         this.defPolygon = pol;
         this.poly = pol;
+        this.hash = System.identityHashCode(this);
     }
    
     public Multiline getPolygon() {
@@ -89,5 +92,14 @@ public class MultilineObject extends ShapePortrayal2D implements Entity, WorldOb
         return poly.closestDistance(p);
     }
 
+    @Override
+    public boolean maySetLocation(Object field, Object newObjectLocation) {
+        this.setLocation((Double2D) newObjectLocation);
+        return true;    
+    }
 
+    @Override
+    public int hashCode() {
+        return hash;
+    }
 }

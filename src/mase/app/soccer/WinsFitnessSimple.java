@@ -31,7 +31,7 @@ public class WinsFitnessSimple extends MasonEvaluation {
     protected void evaluate(MasonSimState sim) {
         super.evaluate(null);
         Soccer soc = (Soccer) sim;
-        minDist = Math.min(minDist, soc.ball.getLocation().distance(soc.rightGoalCenter));
+        minDist = Math.min(minDist, soc.ball.getLocation().distance(soc.rightGoalCenter.getLocation()));
     }
     
     

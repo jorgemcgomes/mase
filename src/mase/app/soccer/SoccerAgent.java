@@ -12,7 +12,7 @@ import mase.controllers.AgentController;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.MultilineObject;
-import mase.mason.world.StaticPointObject;
+import mase.mason.world.PointObject;
 import sim.engine.SimState;
 import sim.util.Double2D;
 
@@ -33,7 +33,7 @@ public class SoccerAgent extends SmartAgent {
     protected List<SoccerAgent> oppTeam; // the opponents
     protected List<SoccerAgent> others; // all other players
     protected List<SoccerAgent> all; // all players, including myself
-    protected StaticPointObject ownGoal, oppGoal;
+    protected PointObject ownGoal, oppGoal;
     protected Color teamColor;
     protected Segment ownGoalSegment, oppGoalSegment;
 
@@ -54,22 +54,24 @@ public class SoccerAgent extends SmartAgent {
         return justKicked;
     }
     
-    public void setTeamContext(List<SoccerAgent> ownTeam, List<SoccerAgent> opponents, Double2D ownGoal, Double2D oppGoal, Color teamColor) {
+    public void setTeamContext(List<SoccerAgent> ownTeam, List<SoccerAgent> opponents, PointObject ownGoal, PointObject oppGoal, Color teamColor) {
         this.teamColor = teamColor;
         this.setColor(teamColor);
         this.ownTeam = ownTeam;
         this.teamMates = new ArrayList<>(ownTeam);
         this.teamMates.remove(this);
         this.oppTeam = opponents;
-        this.ownGoal = new StaticPointObject(((Soccer) sim).field, ownGoal);
-        this.oppGoal = new StaticPointObject(((Soccer) sim).field, oppGoal);
+        this.ownGoal = ownGoal;
+        this.oppGoal = oppGoal;
         this.others = new ArrayList<>(this.teamMates);
         this.others.addAll(oppTeam);
         this.all = new ArrayList<>(this.ownTeam);
         this.all.addAll(oppTeam);
         double w = ((Soccer) sim).par.goalWidth;
-        this.ownGoalSegment = new Segment(new Double2D(ownGoal.x,ownGoal.y-w/2), new Double2D(ownGoal.x,ownGoal.y+w/2));
-        this.oppGoalSegment = new Segment(new Double2D(oppGoal.x,oppGoal.y-w/2), new Double2D(oppGoal.x,oppGoal.y+w/2));
+        this.ownGoalSegment = new Segment(new Double2D(ownGoal.getLocation().x,ownGoal.getLocation().y-w/2), 
+                new Double2D(ownGoal.getLocation().x,ownGoal.getLocation().y+w/2));
+        this.oppGoalSegment = new Segment(new Double2D(oppGoal.getLocation().x,oppGoal.getLocation().y-w/2), 
+                new Double2D(oppGoal.getLocation().x,oppGoal.getLocation().y+w/2));
     }
 
     @Override

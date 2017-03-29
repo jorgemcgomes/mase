@@ -109,53 +109,10 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
         field.setObjectLocation(this, pos);
     }
 
-    
-    
-    /*public double distanceTo(CircularObject other) {
-        return Math.max(0, pos.distance(other.getLocation()) - other.radius - this.radius);
-    }
-
-    public double distanceTo(Double2D point) {
-        return Math.max(0, pos.distance(point) - this.radius);
-    }
-    
-    public double distanceTo(StaticPolygonObject poly) {
-        return Math.max(0, poly.closestDistance(pos) - this.radius);
-    }
-    
-    public double distanceTo(Object obj) {
-         if(obj instanceof CircularObject) {
-            return distanceTo((CircularObject) obj);
-        } else if(obj instanceof Double2D) {
-            return distanceTo((Double2D) obj);
-        } else if(obj instanceof StaticPolygonObject) {
-            return distanceTo((StaticPolygonObject) obj);
-        } else {
-            Double2D p = field.getObjectLocation(obj);
-            if(p == null) {
-                return Double.NaN;
-            }
-            return Math.max(0, p.distance(pos) - this.radius);
-        }
-    }*/
-
-    /*public double centerDistanceTo(Object obj) {
-        Double2D center;
-        if(obj instanceof CircularObject) {
-            center = ((CircularObject) obj).getLocation();
-        } else if(obj instanceof Double2D) {
-            center = (Double2D) obj;
-        } else {
-            center = field.getObjectLocation(obj);
-        }        
-        return center == null ? Double.NaN : pos.distance(center);
-    }    */
-
     @Override
     public Double2D getLocation() {
         return pos;
     }    
-    
 
     @Override
     public boolean isInside(Double2D p) {
