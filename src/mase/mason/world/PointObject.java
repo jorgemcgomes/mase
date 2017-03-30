@@ -28,8 +28,8 @@ public class PointObject extends OvalPortrayal2D implements Fixed2D, WorldObject
         super(color, DEFAULT_SIZE, false);
         this.point = point;
         this.field = field;
-        field.setObjectLocation(this, point);
         this.hash = System.identityHashCode(this);
+        field.setObjectLocation(this, point);
     }
 
     public PointObject(Continuous2D field, Double2D point) {

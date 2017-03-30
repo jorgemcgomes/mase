@@ -122,7 +122,7 @@ public class ConillonMasterProblem extends MasterProblem {
         job.subpops = Arrays.copyOf(subpops, subpops.length);
         job.threadnum = threadnum;
         MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
-        GroupController gc = simProblem.createController(state, job.ind);
+        GroupController gc = simProblem.getControllerFactory().createController(state, job.ind);
         int id = nextID();
         SlaveTask task = new SlaveTask(id, simProblem, gc, simProblem.nextSeed(state, threadnum));
         evaluations.put(id, job);
@@ -138,7 +138,7 @@ public class ConillonMasterProblem extends MasterProblem {
         job.subpops = new int[]{subpopulation};
         job.threadnum = threadnum;
         MasonSimulationProblem simProblem = (MasonSimulationProblem) problem;
-        GroupController gc = simProblem.createController(state, ind);
+        GroupController gc = simProblem.getControllerFactory().createController(state, ind);
         int id = nextID();
         SlaveTask task = new SlaveTask(id, simProblem, gc, simProblem.nextSeed(state, threadnum));
         evaluations.put(id, job);

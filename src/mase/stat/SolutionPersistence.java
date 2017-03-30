@@ -46,8 +46,8 @@ public abstract class SolutionPersistence {
                 : state.evaluator.p_problem);
         PersistentSolution pc = new PersistentSolution();
         GroupController gc = ind.fitness.getContext() == null
-                ? sp.createController(state, ind)
-                : sp.createController(state, ind.fitness.getContext());
+                ? sp.getControllerFactory().createController(state, ind)
+                : sp.getControllerFactory().createController(state, ind.fitness.getContext());
         pc.setController(gc);
 
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;

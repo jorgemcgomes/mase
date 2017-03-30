@@ -4,6 +4,7 @@
  */
 package mase;
 
+import mase.controllers.ControllerFactory;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.Population;
@@ -12,17 +13,10 @@ import ec.coevolve.GroupedProblemForm;
 import ec.simple.SimpleProblemForm;
 import ec.util.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import mase.controllers.AgentController;
-import mase.controllers.AgentControllerIndividual;
 import mase.controllers.GroupController;
-import mase.controllers.HeterogeneousGroupController;
-import mase.controllers.HomogeneousGroupController;
-import mase.controllers.MultiAgentControllerIndividual;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
-import mase.spec.AbstractHybridExchanger;
 
 /**
  *
@@ -44,6 +38,9 @@ public abstract class MaseProblem extends Problem implements GroupedProblemForm,
     public static final String V_RANDOM_SEED = "random";
     protected boolean sameSeed;
     protected long seed;
+    
+    public static final String P_CONTROLLER_FACTORY = "controller-factory";
+    protected ControllerFactory controllerFactory;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -76,6 +73,9 @@ public abstract class MaseProblem extends Problem implements GroupedProblemForm,
             sameSeed = true;
             seed = Long.parseLong(seedString);
         }
+        
+        controllerFactory = (ControllerFactory) state.parameters.getInstanceForParameter(base.push(P_CONTROLLER_FACTORY), null, ControllerFactory.class);
+        controllerFactory.setup(state, base.push(P_CONTROLLER_FACTORY));
     }
 
     @Override
@@ -116,43 +116,10 @@ public abstract class MaseProblem extends Problem implements GroupedProblemForm,
         }
     }
 
-    // TODO: Bad dependencies -- should be improved with interfaces
-    public GroupController createController(EvolutionState state, Individual... ind) {
-        ArrayList<AgentController> acs = new ArrayList<>();
-        for (Individual ind1 : ind) {
-            if (ind1 instanceof AgentControllerIndividual) {
-                acs.add(((AgentControllerIndividual) ind1).decodeController());
-            } else if (ind1 instanceof MultiAgentControllerIndividual) {
-                AgentController[] as = ((MultiAgentControllerIndividual) ind1).decodeControllers();
-                acs.addAll(Arrays.asList(as));
-            }
-        }
-        GroupController gc;
-        if (acs.size() == 1) {
-            gc = new HomogeneousGroupController(acs.get(0));
-        } else {
-            AgentController[] acsArray = new AgentController[acs.size()];
-            acs.toArray(acsArray);
-            
-            if (state.exchanger instanceof AbstractHybridExchanger) {
-                AbstractHybridExchanger exc = (AbstractHybridExchanger) state.exchanger;
-                int[] allocations = exc.getAllocations();
-                AgentController[] temp = new AgentController[allocations.length];
-                for (int i = 0; i < allocations.length; i++) {
-                    temp[i] = acsArray[allocations[i]].clone();
-                }
-                acsArray = temp;
-            }
-            gc = new HeterogeneousGroupController(acsArray);
-        }
-        return gc;
-    }
-
     @Override
     public void evaluate(EvolutionState state, Individual[] ind, boolean[] updateFitness, boolean countVictoriesOnly, int[] subpops, int threadnum) {
-        GroupController gc = createController(state, ind);
+        GroupController gc = controllerFactory.createController(state, ind);
         EvaluationResult[] eval = evaluateSolution(gc, nextSeed(state, threadnum));
-        /* Save results */
         for (int i = 0; i < ind.length; i++) {
             if (updateFitness[i]) {
                 ExpandedFitness trial = (ExpandedFitness) ind[i].fitness.clone();
@@ -167,7 +134,7 @@ public abstract class MaseProblem extends Problem implements GroupedProblemForm,
 
     @Override
     public void evaluate(EvolutionState state, Individual ind, int subpopulation, int threadnum) {
-        GroupController gc = createController(state, ind);
+        GroupController gc = controllerFactory.createController(state, ind);
         EvaluationResult[] eval = evaluateSolution(gc, nextSeed(state, threadnum));
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
         fit.setEvaluationResults(state, eval, subpopulation);
@@ -177,8 +144,10 @@ public abstract class MaseProblem extends Problem implements GroupedProblemForm,
     public EvaluationFunction[] getEvalFunctions() {
         return evalFunctions;
     }
-
-    public abstract EvaluationResult[] evaluateSolution(GroupController gc, long seed);
+    
+    public ControllerFactory getControllerFactory() {
+        return controllerFactory;
+    }
 
     public synchronized long nextSeed(EvolutionState state, int threadnum) {
         if (sameSeed) {
@@ -188,4 +157,6 @@ public abstract class MaseProblem extends Problem implements GroupedProblemForm,
         }
     }
 
+    public abstract EvaluationResult[] evaluateSolution(GroupController gc, long seed);
+    
 }

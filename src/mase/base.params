@@ -26,6 +26,7 @@ pop = 					ec.Population
 eval =                                  mase.evaluation.MetaEvaluator
 eval.base =                             ec.simple.SimpleEvaluator
 eval.max-evaluations =                  -1
+problem.controller-factory =            mase.controllers.GenericControllerFactory
 vector.species.fitness =                mase.evaluation.ExpandedFitness
 
 # Checkpointing

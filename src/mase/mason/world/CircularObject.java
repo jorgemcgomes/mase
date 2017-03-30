@@ -58,7 +58,6 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
         this.circledPortrayal.setOnlyCircleWhenSelected(true);
         this.circledPortrayal.scale = radius * 2 + field.width / 50;
 
-        this.hash = System.identityHashCode(this);
         this.label = this.toString();
         this.labelPortrayal = (LabelledPortrayal2D) circledPortrayal.child;
         this.labelPortrayal.label = label;
@@ -66,6 +65,8 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
 
         this.movablePortrayal = (MovablePortrayal2D) labelPortrayal.child;
         movablePortrayal.setSelectsWhenMoved(true);
+        
+        this.hash = System.identityHashCode(this);
     }
 
     @Override
