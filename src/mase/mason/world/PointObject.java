@@ -71,7 +71,12 @@ public class PointObject extends OvalPortrayal2D implements Fixed2D, WorldObject
     public int hashCode() {
         return hash;
     }    
-
+    
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj;
+    }
+    
     @Override
     public String toString() {
         return point.toString();

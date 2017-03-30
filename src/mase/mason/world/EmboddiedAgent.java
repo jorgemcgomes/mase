@@ -5,10 +5,7 @@
 package mase.mason.world;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
 import mase.mason.generic.systematic.Entity;
 import net.jafama.FastMath;
 import sim.engine.SimState;
@@ -35,7 +32,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     private Stoppable stopper;
     private boolean boundedArena;
     private boolean collisionRebound;
-    private Collection<Class<? extends WorldObject>> collidableTypes;
+    private Class<? extends WorldObject>[] collidableTypes;
     public static final double COLLISION_SPEED_DECAY = 0.5;
     public static final double COLLISION_DIRECTION = Math.PI / 2;
     private boolean isAlive;
@@ -87,14 +84,14 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     }
 
     public void setCollidableTypes(Class<? extends WorldObject>... types) {
-        this.collidableTypes = Arrays.asList(types);
+        this.collidableTypes = types;
     }
 
     private boolean collisionFree(Double2D target) {
-        if (collidableTypes.isEmpty()) {
+        if (collidableTypes == null || collidableTypes.length == 0) {
             return true;
         }
-        Collection<WorldObject> possible = candidateCollisions();
+        WorldObject[] possible = candidateCollisions();
         for (WorldObject so : possible) {
             double d = so.distanceTo(target);
             if (d <= getRadius()) {
@@ -104,7 +101,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         return true;
     }
 
-    private Collection<WorldObject> cache;
+    private WorldObject[] cache;
     private int cacheHash;
 
     private int fieldHash() {
@@ -121,32 +118,40 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         int fieldHash = fieldHash();
         if (cache == null || fieldHash != cacheHash) {
             cacheHash = fieldHash;
-            cache = new ArrayList<>();
+            cache = new WorldObject[field.allObjects.size()];
+            int index = 0;
             for (Object n : field.allObjects) {
                 if (n != this && n instanceof WorldObject) {
                     for (Class<? extends WorldObject> type : collidableTypes) {
                         if (type.isInstance(n)) {
-                            cache.add((WorldObject) n);
+                            cache[index++] = (WorldObject) n;
                             break;
                         }
                     }
                 }
             }
+            if (index != cache.length) {
+                cache = Arrays.copyOf(cache, index);
+            }
         }
     }
 
-    private Collection<WorldObject> candidateCollisions() {
+    private WorldObject[] candidateCollisions() {
         updateCache();
-        Collection<WorldObject> candidates = new LinkedList<>();
+        WorldObject[] candidates = new WorldObject[cache.length];
+        int index = 0;
         for (WorldObject so : cache) {
             // Optional quick check to speedup things
             if (so instanceof MultilineObject) {
                 if (((MultilineObject) so).quickProximityCheck(getLocation(), getRadius() * 2)) {
-                    candidates.add(so);
+                    candidates[index++] = so;
                 }
             } else {
-                candidates.add(so);
+                candidates[index++] = so;
             }
+        }
+        if (index != candidates.length) {
+            candidates = Arrays.copyOf(candidates, index);
         }
         return candidates;
     }
@@ -238,7 +243,6 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     public void setOrientation(double angle) {
         this.orientation = angle;
     }
-    
 
     public boolean getCollisionStatus() {
         return collisionStatus;
@@ -282,8 +286,8 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         double agentDirY = FastMath.sinQuick(orientation);
         return FastMath.atan2(agentDirX * agToPointY - agentDirY * agToPointX, agentDirX * agToPointX + agentDirY * agToPointY);
     }
-    
+
     public double distanceTo(WorldObject so) {
         return Math.max(0, so.distanceTo(this.getLocation()) - this.getRadius());
-    }    
+    }
 }

@@ -99,6 +99,11 @@ public class MultilineObject extends ShapePortrayal2D implements Entity, WorldOb
     }
 
     @Override
+    public boolean equals(Object obj) {
+        return this == obj;
+    }    
+    
+    @Override
     public int hashCode() {
         return hash;
     }
