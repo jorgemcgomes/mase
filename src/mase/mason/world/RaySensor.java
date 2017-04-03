@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
+import sim.util.Bag;
 import sim.util.Double2D;
 
 /**
@@ -25,7 +26,8 @@ public class RaySensor extends AbstractSensor {
     private double orientationNoise = 0;
     private int noiseType;
     private double[] angles;
-    private Collection<? extends WorldObject> objects;
+    private WorldObject[] objects;
+    private Class<? extends WorldObject>[] types = new Class[]{WorldObject.class};
 
     public RaySensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
         super(state, field, ag);
@@ -45,9 +47,13 @@ public class RaySensor extends AbstractSensor {
     If not set, or set to null, it will search for existing polygons every timestep
      */
     public void setObjects(Collection<? extends WorldObject> objects) {
-        this.objects = objects;
+        this.objects = objects.toArray(new WorldObject[objects.size()]);
     }
-
+    
+    public void setObjectTypes(Class... types) {
+        this.types = types;
+    }
+    
     public void setRays(double range, double... angles) {
         this.range = range;
         this.angles = angles;
@@ -88,7 +94,6 @@ public class RaySensor extends AbstractSensor {
     }
 
     @Override
-    // ONLY WORKS FOR StaticPolygons
     public double[] readValues() {
         double[] vals = new double[valueCount()];
         if (binary) {
@@ -119,20 +124,31 @@ public class RaySensor extends AbstractSensor {
         return vals;
     }
 
-    protected Collection<? extends WorldObject> getCandidates() {
+    protected WorldObject[] getCandidates() {
         if (objects != null) {
             return objects;
         } else {
-            Collection<WorldObject> p = new ArrayList<>();
-            for (Object o : field.allObjects) {
-                if (o instanceof WorldObject) {
-                    p.add((WorldObject) o);
+            // TODO: due to polygon location in the field limitations, you cannot rely on nearest neighbours
+            Bag neighbours = field.allObjects;
+            WorldObject[] objs = new WorldObject[neighbours.size()];
+            int index = 0;
+            for (Object n : neighbours) {
+                if (n != ag) {
+                    for (Class type : types) {
+                        if (type.isInstance(n)) {
+                            objs[index++] = (WorldObject) n;
+                            break;
+                        }
+                    }
                 }
             }
-            return p;
+            if (index < objs.length) {
+                objs = Arrays.copyOf(objs, index);
+            }
+            return objs;
         }
     }
-
+    
     @Override
     public double[] normaliseValues(double[] vals) {
         double[] norm = new double[vals.length];

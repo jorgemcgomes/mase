@@ -5,11 +5,9 @@
  */
 package mase.mason.world;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 
@@ -19,7 +17,7 @@ import sim.field.continuous.Continuous2D;
  */
 public class RangeBearingSensor extends AbstractSensor {
 
-    private List<WorldObject> objects;
+    private WorldObject[] objects;
     private boolean sort = false;
     private double range = Double.POSITIVE_INFINITY;
     private int objectCount;
@@ -33,16 +31,20 @@ public class RangeBearingSensor extends AbstractSensor {
     }
 
     public void setObjects(Collection<? extends WorldObject> objs) {
-        objects = new ArrayList<>(objs.size());
+        objects = new WorldObject[objs.size()];
+        int index = 0;
         for (WorldObject o : objs) {
             if (o == null) {
                 System.out.println("WARNING: NULL OBJECT");
             }
             if (o != ag) {
-                objects.add(o);
+                objects[index++] = o;
             }
         }
-        objectCount = objects.size();
+        if(index < objects.length) {
+            objects = Arrays.copyOf(objects, index);
+        }
+        objectCount = objects.length;
     }
 
     public void setObjectCount(int count) {
@@ -77,9 +79,9 @@ public class RangeBearingSensor extends AbstractSensor {
     public double[] readValues() {
         double rangeNoiseAbs = Double.isInfinite(range) ? rangeNoise * fieldDiagonal : range * rangeNoise;
 
-        final double[] distanceReadings = new double[objects.size()];
-        final double[] angleReadings = new double[objects.size()];
-        Integer[] indexes = new Integer[objects.size()];
+        final double[] distanceReadings = new double[objects.length];
+        final double[] angleReadings = new double[objects.length];
+        Integer[] indexes = new Integer[objects.length];
 
         int index = 0;
         for (WorldObject o : objects) {
@@ -104,7 +106,7 @@ public class RangeBearingSensor extends AbstractSensor {
             index++;
         }
 
-        if (objects.size() > 1 && sort) {
+        if (objects.length > 1 && sort) {
             Arrays.sort(indexes, new Comparator<Integer>() {
                 @Override
                 public int compare(Integer o1, Integer o2) {

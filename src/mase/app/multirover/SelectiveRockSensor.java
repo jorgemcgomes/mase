@@ -7,6 +7,7 @@ package mase.app.multirover;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.EmboddiedAgent;
 import sim.field.continuous.Continuous2D;
@@ -24,12 +25,13 @@ public class SelectiveRockSensor extends DistanceSensorArcs {
     }
 
     @Override
-    protected Collection<? extends WorldObject> getCandidates() {
+    protected WorldObject[] getCandidates() {
         Rover r = (Rover) ag;
         if (r.getActuatorType() == RockEffector.NO_ACTIVATION) {
-            return Collections.EMPTY_LIST;
+            return new WorldObject[0];
         } else {
-            return ((MultiRover) state).matchingRocks[r.getActuatorType()];
+            List<Rock> matchingRocks = ((MultiRover) state).matchingRocks[r.getActuatorType()];
+            return matchingRocks.toArray(new WorldObject[matchingRocks.size()]);
         }
     }
 }

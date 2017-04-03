@@ -43,7 +43,7 @@ public class CountSensor extends AbstractSensor {
     @Override
     public double[] readValues() {
         int count = 0;
-        Bag neighbours = Double.isInfinite(range) ? field.allObjects
+        Bag neighbours = Double.isInfinite(range) || field.allObjects.size() < 30 ? field.allObjects
                 : field.getNeighborsWithinDistance(ag.getLocation(), range + ag.getRadius(), false, true);
         for (Object n : neighbours) {
             if (objectMatch(n)) {

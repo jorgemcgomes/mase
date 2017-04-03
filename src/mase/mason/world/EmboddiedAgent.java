@@ -91,6 +91,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         if (collidableTypes == null || collidableTypes.length == 0) {
             return true;
         }
+        // TODO: this should use nearest neighbours
         WorldObject[] possible = candidateCollisions();
         for (WorldObject so : possible) {
             double d = so.distanceTo(target);
