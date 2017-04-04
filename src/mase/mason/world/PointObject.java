@@ -6,6 +6,7 @@
 package mase.mason.world;
 
 import java.awt.Color;
+import mase.mason.generic.systematic.Entity;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.Fixed2D;
 import sim.portrayal.simple.OvalPortrayal2D;
@@ -15,7 +16,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class PointObject extends OvalPortrayal2D implements Fixed2D, WorldObject {
+public class PointObject extends OvalPortrayal2D implements Fixed2D, WorldObject, Entity {
 
     public static final Color DEFAULT_COLOR = Color.BLACK;
     public static final double DEFAULT_SIZE = 1;
@@ -80,5 +81,10 @@ public class PointObject extends OvalPortrayal2D implements Fixed2D, WorldObject
     @Override
     public String toString() {
         return point.toString();
+    }
+
+    @Override
+    public double[] getStateVariables() {
+        return new double[]{getLocation().x, getLocation().y};
     }
 }

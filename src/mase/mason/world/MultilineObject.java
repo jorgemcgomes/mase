@@ -66,7 +66,7 @@ public class MultilineObject extends ShapePortrayal2D implements Entity, WorldOb
 
     @Override
     public double[] getStateVariables() {
-        return EMPTY_ARRAY;
+        return new double[]{getLocation().x, getLocation().y};
     }
 
 
