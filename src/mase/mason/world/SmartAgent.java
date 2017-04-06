@@ -16,7 +16,7 @@ import sim.field.continuous.Continuous2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class SmartAgent extends EmboddiedAgent {
+public class SmartAgent extends EmboddiedAgent {
 
     private static final long serialVersionUID = 1L;
 

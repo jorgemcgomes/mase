@@ -59,9 +59,10 @@ public class ConsoleStat extends Statistics {
                 bestFitness = ds.getMax();
             }
         }
-        FitnessStat stat = (FitnessStat) state.statistics.children[1];
+        // TODO: so much hacking, just to obtain the output folder :/
+        RunStatistics stat = (RunStatistics) state.statistics.children[7];
         String ip = RunStatistics.getComputerName();
-        state.output.message("Exp: " + stat.statisticsFile.getParent() + " Job: " + state.job[0] + " IP: " + ip);
+        state.output.message("Exp: " + stat.file.getParent() + " Job: " + state.job[0] + " IP: " + ip);
         MetaEvaluator me = (MetaEvaluator) state.evaluator;
         String status = me.maxEvaluations > 0 ? "Evals: " + me.totalEvaluations/1000 + "/" + me.maxEvaluations/1000+"k" : "Gens: " + state.generation + "/" + state.numGenerations;        
         state.output.message(status + " | Best gen: " + nf.format(maxGen) + " | "

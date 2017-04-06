@@ -24,11 +24,12 @@ public class RunStatistics extends Statistics {
     public static final String P_FILE = "file";
     private static final long serialVersionUID = 1L;
     private int log;
+    protected File file;
     
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        File file = state.parameters.getFile(base.push(P_FILE), null);
+        file = state.parameters.getFile(base.push(P_FILE), null);
         try {
             log = state.output.addLog(file, true);
         } catch (IOException ex) {

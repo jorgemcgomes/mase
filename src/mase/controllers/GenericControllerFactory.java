@@ -10,12 +10,6 @@ import ec.Individual;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import mase.controllers.AgentController;
-import mase.controllers.AgentControllerIndividual;
-import mase.controllers.GroupController;
-import mase.controllers.HeterogeneousGroupController;
-import mase.controllers.HomogeneousGroupController;
-import mase.controllers.MultiAgentControllerIndividual;
 import mase.spec.AbstractHybridExchanger;
 
 /**
