@@ -1,0 +1,15 @@
+# remove sample stats
+stat.child.5 = ec.Statistics
+
+eval.base.problem =                mase.app.metest.LocomotionSimulator
+problem.number-evals =             2
+problem.eval.0 =                   mase.app.metest.DistanceFitness
+problem.eval.0.update-freq =       1
+problem.eval.1 =                   mase.app.metest.FinalPositionEval
+problem.eval.1.update-freq =       0
+
+problem.repetitions =              1
+problem.same-seed =                true
+problem.max-steps =                50
+
+vector.species.genome-size =       2

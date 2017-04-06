@@ -1,0 +1,44 @@
+parent.0=../base.params
+
+# Populations configuration
+pop.subpops =                           1
+pop.subpop.0 =                          mase.me.MAPElitesSubpopulation
+pop.default-subpop = 			0
+ec.subpop.duplicate-retries =           10
+ec.subpop.initial-batch =               10000
+ec.subpop.size = 			1000
+ec.subpop.behaviour-index =             1
+ec.subpop.resolution =                  0.05
+
+# Individual representation
+ec.subpop.species = 			ec.vector.FloatVectorSpecies
+vector.species.min-gene =               0
+vector.species.max-gene =               1
+vector.species.ind =                    mase.controllers.FixedValuesControllerIndividual
+
+# Elitism configuration (pre-breeding)
+breed.elite.0 =                           0
+
+# Breeding
+breed =                                 mase.me.MAPElitesBreeder
+vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline
+vector.mutate.source.0 =                mase.me.MAPElitesRepertoireSource
+vector.species.mutation-type =          gauss
+vector.species.mutation-stdev =         0.50
+vector.species.mutation-prob =          0.1
+vector.species.mutation-bounded =       TRUE
+
+# Statistics
+# instead of FitnessStat
+stat.child.1 =                         mase.me.MAPElitesRepertoireStat
+stat.child.1.file =                    $repertoire.stat
+# Remove BestEverSolutionStat
+stat.child.2 =                         ec.Statistics
+# instead of BestSolutionGenStat
+stat.child.4 =                         mase.me.MAPElitesFinalRepertoireStat
+stat.child.4.file =                    $finalrep.tar.gz
+stat.child.4.compress =                true
+# instead of FinalPostEvaluationStat
+stat.child.8 =                         mase.me.MAPElitesFinalRepertoireTextStat
+stat.child.8.file =                    $finalrep.stat
+
