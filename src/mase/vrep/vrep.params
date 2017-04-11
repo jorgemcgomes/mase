@@ -1,0 +1,10 @@
+evalthreads =               1
+
+eval =                      ec.simple.SimpleEvaluator
+eval.problem =              mase.vrep.VRepProblem
+
+problem.workers =           127.0.0.1-8
+problem.base-port =         19996
+problem.timeout =           300
+problem.retry-delay =       10 
+problem.allowed-faults =    3

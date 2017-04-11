@@ -9,7 +9,7 @@ package mase.controllers;
  *
  * @author jorge
  */
-public class FixedValuesController implements AgentController {
+public class FixedValuesController implements EncodableAgentController {
 
     private static final long serialVersionUID = 1L;
 
@@ -18,7 +18,11 @@ public class FixedValuesController implements AgentController {
     public FixedValuesController(double[] values) {
         this.values = values;
     }
-
+    
+    public FixedValuesController() {
+        this.values = null;
+    }
+    
     public double[] getValues() {
         return values;
     }
@@ -40,6 +44,16 @@ public class FixedValuesController implements AgentController {
     @Override
     public AgentController clone() {
         return new FixedValuesController(values);
+    }
+
+    @Override
+    public double[] encode() {
+        return values;
+    }
+
+    @Override
+    public void decode(double[] params) {
+        this.setValues(params);
     }
 
 }

@@ -1,3 +1,0 @@
-#!/bin/bash
-CLASSPATH="build/classes:dist/lib/*"
-

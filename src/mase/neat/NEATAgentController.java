@@ -5,6 +5,7 @@
 package mase.neat;
 
 import mase.controllers.AgentController;
+import mase.controllers.EncodableAgentController;
 import org.neat4j.neat.core.NEATNeuralNet;
 import org.neat4j.neat.core.NEATNeuron;
 import org.neat4j.neat.data.core.NetworkInput;
@@ -16,10 +17,14 @@ import org.neat4j.neat.nn.core.Synapse;
  *
  * @author jorge
  */
-public class NEATAgentController implements AgentController {
+public class NEATAgentController implements EncodableAgentController {
 
     private static final long serialVersionUID = 1;
     private NEATNeuralNet network;
+    
+    public NEATAgentController() {
+        this.network = null;
+    }
 
     public NEATAgentController(NEATNeuralNet network) {
         this.network = network;
@@ -69,6 +74,17 @@ public class NEATAgentController implements AgentController {
         return "Neurons:" + network.neurons().length + " Con:" + network.connections().length
                 + " Self-rec:" + selfRecurr + " Rec:" + recurr + "\n\n"
                 + NEATSerializer.serializeToString(network);
+    }
+
+    @Override
+    public double[] encode() {
+        return NEATSerializer.serializeToArray(network);
+    }
+
+    @Override
+    public void decode(double[] params) {
+        NEATNeuralNet net = NEATSerializer.deserialize(params);
+        this.network = net;
     }
 
 }

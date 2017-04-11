@@ -1,5 +1,5 @@
 #!/bin/bash
+CLASSPATH="build/classes:dist/lib/*"
 PROGRAM=$1
-source classpath
 shift
 java -cp $CLASSPATH $PROGRAM "$@"

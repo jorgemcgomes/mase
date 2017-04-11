@@ -1,5 +1,5 @@
 #!/bin/bash
-source classpath
+CLASSPATH="build/classes:dist/lib/*"
 
 IP=${1-robot@10.40.50.135}
 FOLDER=${2-mase}
