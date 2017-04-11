@@ -34,6 +34,20 @@ public class MultiPopCoevolutionaryEvaluatorThreaded extends MultiPopCoevolution
     }    
     
     @Override
+    protected void afterCoevolutionaryEvaluation(EvolutionState state, Population population, GroupedProblemForm prob) {
+        if(!(state.evaluator instanceof MetaEvaluator)) {
+            // Do not do this until explicitly asked to (forceAfterCoevolutionaryEvaluation)
+            // Delayed to allow for PostEvaluators in MetaEvaluator to influence the elites selection
+            // If the evaluator is not a MetaEvaluator, this works as usual
+            super.afterCoevolutionaryEvaluation(state, population, prob);
+        }
+    }
+    
+    public void forceAfterCoevolutionaryEvaluation(EvolutionState state, Population population, GroupedProblemForm prob) {
+        super.afterCoevolutionaryEvaluation(state, population, prob);
+    }
+    
+    @Override
     public void performCoevolutionaryEvaluation(final EvolutionState state,
             final Population population,
             final GroupedProblemForm prob) {

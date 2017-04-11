@@ -1,6 +1,3 @@
-# remove sample stats
-stat.child.5 = ec.Statistics
-
 eval.base.problem =                mase.app.metest.LocomotionSimulator
 problem.number-evals =             2
 problem.eval.0 =                   mase.app.metest.DistanceFitness

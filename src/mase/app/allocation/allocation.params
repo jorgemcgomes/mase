@@ -6,8 +6,7 @@ fitness.fitness-index =            0
 
 exch.behaviour-index =      2
 
-eval.max-evaluations = 1500000
-generations = 1000000
+evaluations = 1500000
 
 problem.numAgents = 10
 problem.numUniqueTypes = 10

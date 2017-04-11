@@ -58,8 +58,7 @@ stat.child.1.do-subpops = false
 # No post-evaluation needed
 stat.child.8 = ec.Statistics
 
-eval.max-evaluations = 125000
-generations = 1250
+evaluations = 125000
 
 pop.subpops =           5
 neat.size =             100

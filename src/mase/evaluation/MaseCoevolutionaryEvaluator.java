@@ -39,7 +39,6 @@ public class MaseCoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator
     protected int paretoFront;
     protected List<Individual>[] hallOfFame;
 
-
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
@@ -77,17 +76,6 @@ public class MaseCoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator
             }
         }
     }
-
-    @Override
-    protected void afterCoevolutionaryEvaluation(EvolutionState state, Population population, GroupedProblemForm prob) {
-        // Do not do this until explicitly asked to (forceAfterCoevolutionaryEvaluation)
-        // Delayed to allow for PostEvaluators to influence the elites selection
-    }
-    
-    public void forceAfterCoevolutionaryEvaluation(EvolutionState state, Population population, GroupedProblemForm prob) {
-        super.afterCoevolutionaryEvaluation(state, population, prob);
-    }
-
 
     @Override
     protected void loadElites(final EvolutionState state, int whichSubpop) {

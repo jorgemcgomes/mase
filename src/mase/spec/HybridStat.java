@@ -11,7 +11,7 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import mase.evaluation.MetaEvaluator;
+import mase.MaseProblem;
 import mase.spec.AbstractHybridExchanger.MetaPopulation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -56,9 +56,8 @@ public class HybridStat extends Statistics {
     public void postPreBreedingExchangeStatistics(EvolutionState state) {
         super.postPreBreedingExchangeStatistics(state);
         AbstractHybridExchanger exc = (AbstractHybridExchanger) state.exchanger;
-        MetaEvaluator me = (MetaEvaluator) state.evaluator;
         // generation, evaluations, and number of metapops
-        state.output.print(state.generation + " " + me.totalEvaluations + " " + exc.metaPops.size(), log);
+        state.output.print(state.generation + " " + ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations() + " " + exc.metaPops.size(), log);
 
         DescriptiveStatistics ds = new DescriptiveStatistics();
         for (MetaPopulation mp : exc.metaPops) {

@@ -9,8 +9,8 @@ import ec.Individual;
 import ec.Statistics;
 import ec.util.Parameter;
 import java.text.DecimalFormat;
+import mase.MaseProblem;
 import mase.evaluation.ExpandedFitness;
-import mase.evaluation.MetaEvaluator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -63,8 +63,14 @@ public class ConsoleStat extends Statistics {
         RunStatistics stat = (RunStatistics) state.statistics.children[7];
         String ip = RunStatistics.getComputerName();
         state.output.message("Exp: " + stat.file.getParent() + " Job: " + state.job[0] + " IP: " + ip);
-        MetaEvaluator me = (MetaEvaluator) state.evaluator;
-        String status = me.maxEvaluations > 0 ? "Evals: " + me.totalEvaluations/1000 + "/" + me.maxEvaluations/1000+"k" : "Gens: " + state.generation + "/" + state.numGenerations;        
+        String status;
+        if(state.evaluator.p_problem instanceof MaseProblem && state.numEvaluations > 0) {
+            int done = ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations();
+            int limit = (int) state.numEvaluations;
+            status = "Evals: " + done / 1000 + "/" + limit / 1000+"k";
+        } else {
+            status = state.generation + "/" + state.numGenerations;
+        }        
         state.output.message(status + " | Best gen: " + nf.format(maxGen) + " | "
                 + "Best so far: " + nf.format(bestFitness));
     }

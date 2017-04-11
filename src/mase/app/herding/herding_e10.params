@@ -7,8 +7,7 @@ problem.smartFox = true
 
 problem.numShepherds = 10
 
-eval.max-evaluations = 500000
-generations = 5000
+evaluations = 500000
 
 pop.subpops =           10
 neat.INPUT.NODES =      14

@@ -26,7 +26,7 @@ public abstract class MasonSimulationProblem<T extends MasonSimState> extends Ma
     public static final String P_REPETITIONS = "repetitions";
     protected int maxSteps;
     protected int repetitions;
-
+    
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
@@ -39,7 +39,7 @@ public abstract class MasonSimulationProblem<T extends MasonSimState> extends Ma
         }
         if(repetitions > 1 && sameSeed) {
             state.output.fatal("Using multiple repetitions, but the random seed is fixed.");
-        }       
+        }      
     }
     
     @Override

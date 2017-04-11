@@ -10,7 +10,6 @@ import ec.Exchanger;
 import ec.Individual;
 import ec.Population;
 import ec.Subpopulation;
-import mase.evaluation.MaseCoevolutionaryEvaluator;
 import ec.util.Parameter;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.List;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.ExpandedFitness;
+import mase.evaluation.MultiPopCoevolutionaryEvaluatorThreaded;
 import mase.evaluation.SubpopEvaluationResult;
 import org.apache.commons.lang3.StringUtils;
 
@@ -149,7 +149,9 @@ public class AbstractHybridExchanger extends Exchanger {
     }
 
     protected void updateRepresentatives(EvolutionState state) {
-        MaseCoevolutionaryEvaluator base = (MaseCoevolutionaryEvaluator) ((MetaEvaluator) state.evaluator).getBaseEvaluator();
+        MultiPopCoevolutionaryEvaluatorThreaded base = state.evaluator instanceof MetaEvaluator ? 
+                (MultiPopCoevolutionaryEvaluatorThreaded) ((MetaEvaluator) state.evaluator).getBaseEvaluator() : 
+                (MultiPopCoevolutionaryEvaluatorThreaded) state.evaluator;
         Individual[][] newElites = new Individual[metaPops.size()][base.getEliteIndividuals()[0].length];
         for (int i = 0; i < metaPops.size(); i++) {
             MetaPopulation mp = metaPops.get(i);

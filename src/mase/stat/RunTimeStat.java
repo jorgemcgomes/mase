@@ -11,6 +11,7 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import mase.MaseProblem;
 import mase.evaluation.MetaEvaluator;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -58,7 +59,7 @@ public class RunTimeStat extends Statistics {
     @Override
     public void preEvaluationStatistics(EvolutionState state) {
         super.preEvaluationStatistics(state); 
-        totalEvalTime = totalGenTime;
+        totalEvalTime = System.currentTimeMillis();
     }
     
     @Override
@@ -150,31 +151,17 @@ public class RunTimeStat extends Statistics {
     }
     
     public long eta(EvolutionState state) {
-        MetaEvaluator me = (MetaEvaluator) state.evaluator;
-        double completed = me.maxEvaluations > 0 ?
-                (double) me.totalEvaluations / me.maxEvaluations :
-                (double) (state.generation + 1) / state.numGenerations;
+        double completed;
+        if(state.evaluator.p_problem instanceof MaseProblem && state.numEvaluations > 0) {
+            completed = (double) ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations() / state.numEvaluations;
+        } else {
+            completed = (double) (state.generation + 1) / state.numGenerations;
+        }
         if(completed == 0) {
             return 0;
         }
         long elapsed = System.currentTimeMillis() - runStartTime;
-        long remaining = Math.round(((1 - completed) * elapsed) / completed);
+        long remaining = Math.max(0, Math.round(((1 - completed) * elapsed) / completed));
         return remaining;        
     }
 }
-    /*@Override
-    public void postBreedingStatistics(EvolutionState state) {
-        super.postBreedingStatistics(state);
-        long jobTime = (remainingJobTime + System.currentTimeMillis() - startTime);
-        long remainingBatchTime = remainingJobTime + (jobs - currentJob - 1) * jobTime;
-
-        Date jobEta = new Date(currentTime + remainingJobTime);
-        Date batchEta = new Date(currentTime + remainingBatchTime);
-
-        state.output.message("Gen: " + DurationFormatUtils.formatDuration(genDuration, "mm:ss:SSS")
-                + " | Job: " + DurationFormatUtils.formatDuration(jobTime, "HH:mm:ss")
-                + " | Job ETA: " + df.format(jobEta) + " (" + DurationFormatUtils.formatDuration(remainingJobTime, "HH:mm:ss") + ")"
-                + " | Batch ETA: " + df.format(batchEta) + " (" + DurationFormatUtils.formatDuration(remainingBatchTime, "HH:mm:ss") + ")");
-        
-        lastTime = currentTime;
-    }*/

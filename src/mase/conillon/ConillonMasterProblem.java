@@ -18,10 +18,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import mase.MaseProblem;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
-import mase.evaluation.MetaEvaluator;
 import mase.mason.MasonSimulationProblem;
 import mase.stat.FitnessStat;
 import mase.stat.RunTimeStat;
@@ -341,11 +341,11 @@ public class ConillonMasterProblem extends MasterProblem {
     @Override
     public void initializeContacts(EvolutionState state) {
         client = new Client(getDesc(state), ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
-        MetaEvaluator me = (MetaEvaluator) state.evaluator;
-        if(me.maxEvaluations > 0) {
-            client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);
+        MaseProblem prob = (MaseProblem) state.evaluator.p_problem;
+        if(state.numEvaluations > 0) {
+            client.setTotalNumberOfTasks(((int) state.numEvaluations - prob.getTotalEvaluations()) / jobSize);
         } else {
-            client.setTotalNumberOfTasks((me.maxEvaluations - me.totalEvaluations) / jobSize);
+            client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);            
         }
         state.output.message("*** CONILLON CLIENT " + client.getMyID() + " INITIALIZED ***");
     }

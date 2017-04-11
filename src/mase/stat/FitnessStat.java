@@ -8,7 +8,7 @@ package mase.stat;
 import ec.*;
 import ec.util.*;
 import java.io.*;
-import mase.evaluation.MetaEvaluator;
+import mase.MaseProblem;
 import mase.evaluation.ExpandedFitness;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -66,7 +66,7 @@ public class FitnessStat extends Statistics {
         for (int i = 0; i < subpops; i++) {
             fitness[i] = new DescriptiveStatistics();
         }
-        int evals = ((MetaEvaluator) state.evaluator).totalEvaluations;
+        int evals = state.evaluator.p_problem instanceof MaseProblem ? ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations() : 0;
 
         // gather per-subpopulation statistics
         for (int x = 0; x < subpops; x++) {

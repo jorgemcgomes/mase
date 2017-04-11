@@ -60,7 +60,7 @@ public class ExpandedFitness extends SimpleFitness {
                 FitnessResult fr = (FitnessResult) e;
                 scores.put(AUTO_FITNESS_PREFIX + i, fr.value());
             }
-        }
+        }        
     }
     
     public EvaluationResult getCorrespondingEvaluation(int index) {

@@ -6,11 +6,10 @@ package mase.evaluation;
 
 import ec.Evaluator;
 import ec.EvolutionState;
-import ec.Subpopulation;
 import ec.util.Parameter;
 
 /**
- *
+ * A wrapper for another Evaluator, that adds the support of PostEvaluators
  * @author jorge
  */
 public class MetaEvaluator extends Evaluator {
@@ -18,13 +17,10 @@ public class MetaEvaluator extends Evaluator {
     public static final String P_NUM_POST_EVAL = "num-post";
     public static final String P_POST_EVAL = "post";
     public static final String P_BASE_EVAL = "base";
-    public static final String P_MAX_EVALUATIONS = "max-evaluations";
 
     private static final long serialVersionUID = 1L;
-    private Evaluator baseEvaluator;
-    private PostEvaluator[] postEvaluators;
-    public int totalEvaluations;
-    public int maxEvaluations;
+    protected Evaluator baseEvaluator;
+    protected PostEvaluator[] postEvaluators;
     public long lastEvaluationTime = 0;
     public long lastPostEvaluationTime = 0;
 
@@ -35,9 +31,6 @@ public class MetaEvaluator extends Evaluator {
         this.masterproblem = baseEvaluator.masterproblem;
         this.p_problem = baseEvaluator.p_problem;
     
-        maxEvaluations = state.parameters.getIntWithDefault(base.push(P_MAX_EVALUATIONS), null, -1);
-        totalEvaluations = 0;
-        
         int numPosts = state.parameters.getIntWithDefault(base.push(P_NUM_POST_EVAL), null, 0);
         postEvaluators = new PostEvaluator[numPosts];
         for (int i = 0; i < numPosts; i++) {
@@ -51,9 +44,6 @@ public class MetaEvaluator extends Evaluator {
     public void evaluatePopulation(EvolutionState state) {
         long t1 = System.currentTimeMillis();
         baseEvaluator.evaluatePopulation(state);
-        for(Subpopulation sub : state.population.subpops) {
-            totalEvaluations += sub.individuals.length;
-        }
         long t2 = System.currentTimeMillis();        
         for (PostEvaluator postEval : postEvaluators) {
             postEval.processPopulation(state);
@@ -61,15 +51,15 @@ public class MetaEvaluator extends Evaluator {
         long t3 = System.currentTimeMillis();
         lastEvaluationTime = t2 - t1;
         lastPostEvaluationTime = t3 - t2;
-        // necessary hack to load the elites in the CoevolutionaryEvaluator
-        if (baseEvaluator instanceof MaseCoevolutionaryEvaluator) {            
-            ((MaseCoevolutionaryEvaluator) baseEvaluator).forceAfterCoevolutionaryEvaluation(state, state.population, null);
+        // necessary to load the elites in the CoevolutionaryEvaluator
+        if (baseEvaluator instanceof MultiPopCoevolutionaryEvaluatorThreaded) {            
+            ((MultiPopCoevolutionaryEvaluatorThreaded) baseEvaluator).forceAfterCoevolutionaryEvaluation(state, state.population, null);
         }
     }
 
     @Override
     public boolean runComplete(EvolutionState state) {
-        return baseEvaluator.runComplete(state) || (maxEvaluations != -1 && totalEvaluations >= maxEvaluations);
+        return baseEvaluator.runComplete(state);
     }
     
     @Override
