@@ -65,6 +65,7 @@ public class MEFinalRepertoireStat extends FileWriterStat {
         Collection<Entry<Integer, Individual>> entries = sub.map.entries();
         for (Entry<Integer, Individual> e : entries) {
             PersistentSolution p = SolutionPersistence.createPersistentController(state, e.getValue(), 0, e.getKey());
+            p.setUserData(sub.binFromHash(e.getKey()));
             try {
                 if (compress) {
                     SolutionPersistence.writeSolutionToTar(p, taos);

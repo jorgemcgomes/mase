@@ -106,16 +106,6 @@ public class MESubpopulation extends Subpopulation {
     // TODO: does not guarantee zero collisions
     protected int hash(int[] array) {
         return Arrays.hashCode(array);
-        /*int hash = 0;
-        for (int b : array) {
-            hash += (b & 0xFF);
-            hash += (hash << 10);
-            hash ^= (hash >>> 6);
-        }
-        hash += (hash << 3);
-        hash ^= (hash >>> 11);
-        hash += (hash << 15);
-        return Math.abs(hash);*/
     }
 
     public MultiValuedMap<Integer, Individual> getRepertoire() {

@@ -25,67 +25,80 @@ import org.apache.commons.lang3.StringUtils;
 public class MEFinalRepertoireTextStat extends Statistics {
 
     public static final String P_FILE = "file";
+    public static final String P_UPDATE_ALWAYS = "update-always";
     private static final long serialVersionUID = 1L;
-    private int log;
+    private boolean updateAlways;
+    private File logFile;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        File file = state.parameters.getFile(base.push(P_FILE), null);
-        try {
-            log = state.output.addLog(file, true);
-        } catch (IOException ex) {
-            state.output.fatal("An IOException occurred while trying to create the log " + file);
+        logFile = state.parameters.getFile(base.push(P_FILE), null);
+        updateAlways = state.parameters.getBoolean(base.push(P_UPDATE_ALWAYS), null, false);
+    }
+
+    @Override
+    public void preBreedingStatistics(EvolutionState state) {
+        super.preBreedingStatistics(state);
+        if (updateAlways) {
+            logRepo(state, false);
         }
     }
 
     @Override
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
+        logRepo(state, true);
+    }
 
-        MESubpopulation sub = (MESubpopulation) state.population.subpops[0];
-        Collection<Entry<Integer, Individual>> entries = sub.map.entries();
+    private void logRepo(EvolutionState state, boolean print) {
+        try {
+            int log = state.output.addLog(logFile, true);
+            MESubpopulation sub = (MESubpopulation) state.population.subpops[0];
+            Collection<Entry<Integer, Individual>> entries = sub.map.entries();
 
-        boolean headed = false;
-        boolean twoDimensional = true;
+            boolean headed = false;
+            boolean twoDimensional = true;
 
-        for (Entry<Integer, Individual> e : entries) {
-            ExpandedFitness ef = (ExpandedFitness) e.getValue().fitness;
-            double[] behav = sub.getBehaviourVector(state, e.getValue());
-            int[] bin = sub.discretise(behav);
-            double[] genome = ((DoubleVectorIndividual) e.getValue()).genome;
+            for (Entry<Integer, Individual> e : entries) {
+                ExpandedFitness ef = (ExpandedFitness) e.getValue().fitness;
+                double[] behav = sub.getBehaviourVector(state, e.getValue());
+                int[] bin = sub.binFromHash(e.getKey());
+                double[] genome = ((DoubleVectorIndividual) e.getValue()).genome;
 
-            if (!headed) { // add file header
-                twoDimensional = bin.length == 2;
-                state.output.print("Hash Fitness", log);
-                for (int i = 0; i < bin.length; i++) {
-                    state.output.print(" Bin_" + i, log);
+                if (!headed) { // add file header
+                    twoDimensional = bin.length == 2;
+                    state.output.print("Hash Fitness", log);
+                    for (int i = 0; i < bin.length; i++) {
+                        state.output.print(" Bin_" + i, log);
+                    }
+                    for (int i = 0; i < behav.length; i++) {
+                        state.output.print(" Behav_" + i, log);
+                    }
+                    for (int i = 0; i < genome.length; i++) {
+                        state.output.print(" Genome_" + i, log);
+                    }
+                    state.output.println("", log);
+                    headed = true;
                 }
-                for (int i = 0; i < behav.length; i++) {
-                    state.output.print(" Behav_" + i, log);
+
+                state.output.print(e.getKey() + " " + ef.getFitnessScore(), log);
+                for (int b : bin) {
+                    state.output.print(" " + b, log);
                 }
-                for (int i = 0; i < genome.length; i++) {
-                    state.output.print(" Genome_" + i, log);
+                for (double v : behav) {
+                    state.output.print(" " + v, log);
+                }
+                for (double g : genome) {
+                    state.output.print(" " + g, log);
                 }
                 state.output.println("", log);
-                headed = true;
             }
-
-            state.output.print(e.getKey() + " " + ef.getFitnessScore(), log);
-            for (int b : bin) {
-                state.output.print(" " + b, log);
+            if (twoDimensional && print) {
+                state.output.message(toString2D(sub));
             }
-            for (double v : behav) {
-                state.output.print(" " + v, log);
-            }
-            for (double g : genome) {
-                state.output.print(" " + g, log);
-            }
-            state.output.println("", log);
-        }
-
-        if(twoDimensional) {
-            state.output.message(toString2D(sub));
+        } catch (IOException ex) {
+            state.output.fatal("An IOException occurred while trying to create the log " + logFile);
         }
     }
 

@@ -3,6 +3,8 @@ package mase.vrep;
 import coppelia.CharWA;
 import coppelia.FloatWA;
 import coppelia.remoteApi;
+import java.io.IOException;
+import java.io.Serializable;
 
 public class VRepComm {
 
@@ -23,12 +25,14 @@ public class VRepComm {
         VREP_API.simxFinish(-1); 
     }
 
-    public static class VRepClient {
+    public static class VRepClient implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         final String ip;
         final int port;
-        int clientId;
-        int faults = 0;
+        transient int clientId;
+        transient int faults = 0;
 
         public VRepClient(String ip, int port) {
             this.ip = ip;
@@ -36,6 +40,12 @@ public class VRepComm {
             this.faults = 0;
             this.clientId = -1;
         }
+        
+        private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+            in.defaultReadObject();
+            clientId = -1;
+            faults = 0;
+        }        
 
         public synchronized boolean init() {
             if(clientId != -1) { // restarting

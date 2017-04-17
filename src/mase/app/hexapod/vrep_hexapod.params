@@ -1,0 +1,23 @@
+parent.0=../../vrep/vrep.params
+
+problem.number-evals=3
+# x,y final position
+problem.eval.0 = mase.vrep.VRepEvaluationFunction
+problem.eval.0.value-index = 0,1
+# orientation+tilt
+problem.eval.1 = mase.app.hexapod.CircularFitnessMetricTilt
+problem.eval.1.value-index = 0,1,3,4
+# just to log the details
+problem.eval.2 = mase.vrep.VRepEvaluationFunction
+problem.eval.2.value-index = 3,4
+
+# evaluation time, max tilt
+problem.global-params = 2,45
+
+fitness.fitness-index = 1
+ec.subpop.behaviour-index = 0
+
+vector.species.genome-size = 37
+
+ec.subpop.initial-batch = 100
+ec.subpop.size = 100

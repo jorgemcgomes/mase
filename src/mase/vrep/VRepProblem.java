@@ -301,7 +301,6 @@ public class VRepProblem extends MaseProblemBatch {
 
         // expected: <value>*length
         private EvaluationResult[] decodeControllerResult(float[] a) {
-            int index = 0;
             EvaluationResult[] ers = new EvaluationResult[evalFunctions.length];
             for (int i = 0; i < evalFunctions.length; i++) {
                 EvaluationFunction proto = evalFunctions[i];
@@ -309,13 +308,8 @@ public class VRepProblem extends MaseProblemBatch {
                     out.fatal("Only VRepEvaluationFunction's are allowed: " + proto.getClass().getCanonicalName());
                 }
                 VRepEvaluationFunction ef = (VRepEvaluationFunction) proto.clone();
-                float[] range = Arrays.copyOfRange(a, index, index + ef.getNumberValues());
-                ef.setValues(ControllerFactory.floatToDouble(range));
+                ef.setValues(ControllerFactory.floatToDouble(a));
                 ers[i] = ef.getResult();
-                index += ef.getNumberValues();
-            }
-            if (index != a.length) {
-                out.warning("Some of the results were not processed by any evaluation function. Received: " + a.length + ". Processed: " + index);
             }
             return ers;
         }

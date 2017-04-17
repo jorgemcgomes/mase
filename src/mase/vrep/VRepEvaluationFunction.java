@@ -20,36 +20,42 @@ public class VRepEvaluationFunction implements EvaluationFunction {
 
     public static final Parameter DEFAULT_BASE = new Parameter("vrep-eval");
     private static final long serialVersionUID = 1L;
-    public static final String P_VALUES = "number-values";
-    protected int numValues;
+    public static final String P_VALUE_INDEX = "value-index";
+    protected int[] valueIndex;
     protected double[] values;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
-        this.numValues = state.parameters.getInt(base.push(P_VALUES), defaultBase().push(P_VALUES));
-        if(numValues < 1) {
-            state.output.fatal("Must be >= 1", base.push(P_VALUES), defaultBase().push(P_VALUES));
+        String s = state.parameters.getString(base.push(P_VALUE_INDEX), defaultBase().push(P_VALUE_INDEX));
+        String[] split = s.split("[;,]");
+        valueIndex = new int[split.length];
+        for(int i = 0 ; i < split.length ; i++) {
+            valueIndex[i] = Integer.parseInt(split[i]);
         }
     }
 
     @Override
     public EvaluationResult getResult() {
-        if(numValues == 1) {
+        if(values.length == 1) {
             return new FitnessResult(values[0]);
         } else {
             return new VectorBehaviourResult(values);
         }
     }
     
-    public void setValues(double[] v) {
-        if(v.length != numValues) {
-            throw new RuntimeException("Mismatch between number of received values (" + v.length + ") and expected (" + numValues +")");
+    public void setValues(double[] all) {
+        values = new double[valueIndex.length];
+        int index = 0;
+        for(int i : valueIndex) {
+            if(i > all.length) {
+                throw new RuntimeException("Index outside the range of results vector: " + i + "(length " + all.length +")");
+            }
+            values[index++] = all[i];
         }
-        values = v;
     }
 
-    public int getNumberValues() {
-        return numValues;
+    public int[] getIndexes() {
+        return valueIndex;
     }
     
     @Override

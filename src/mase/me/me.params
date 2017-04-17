@@ -41,4 +41,4 @@ stat.child.4.compress =                true
 # instead of FinalPostEvaluationStat
 stat.child.8 =                         mase.me.MEFinalRepertoireTextStat
 stat.child.8.file =                    $finalrep.stat
-
+stat.child.8.update-always =           false
