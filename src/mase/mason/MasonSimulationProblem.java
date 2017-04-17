@@ -38,7 +38,7 @@ public abstract class MasonSimulationProblem<T extends MasonSimState> extends Ma
             state.output.fatal("Parameter invalid value. Must be > 0.", base.push(P_REPETITIONS));
         }
         if(repetitions > 1 && sameSeed) {
-            state.output.fatal("Using multiple repetitions, but the random seed is fixed.");
+            state.output.warning("Using multiple repetitions, but the random seed is fixed.");
         }      
     }
     

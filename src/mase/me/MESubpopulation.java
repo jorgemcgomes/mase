@@ -9,18 +9,15 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.VectorBehaviourResult;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -64,7 +61,6 @@ public class MESubpopulation extends Subpopulation {
             int hash = hash(bin);
             Collection<Individual> binContents = map.get(hash);
             if (binContents.isEmpty()) {
-                // TODO: add bin center
                 map.put(hash, (Individual) ind.clone());
                 newInRepo++;
                 inverseHash.put(hash, bin);
@@ -97,7 +93,6 @@ public class MESubpopulation extends Subpopulation {
     protected int[] discretise(double[] v) {
         int[] r = new int[v.length];
         for (int i = 0; i < v.length; i++) {
-            // scale from [-1,1] to [0,2] to [0,1] to [0,bins-1]   
             r[i] = (int) Math.floor(v[i] / resolution);
         }
         return r;

@@ -23,10 +23,12 @@ public class PolygonObject extends MultilineObject {
      */
     public PolygonObject(Continuous2D field, Double2D... boundary) {
         super(field, closeLoop(boundary));
+        this.filled = true;
     }
     
     public PolygonObject(Continuous2D field, Multiline poly) {
         super(field, checkClosed(poly));
+        this.filled = true;
     }
     
     // TODO: constructor with polygon -- must check that it is a closed polygon

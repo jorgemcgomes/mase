@@ -23,7 +23,6 @@ public class MultilineObject extends ShapePortrayal2D implements Entity, WorldOb
     protected final Continuous2D field;
     private final Multiline defPolygon;
     protected Multiline poly;
-    private static final double[] EMPTY_ARRAY = new double[]{};
     private final int hash;
 
     public MultilineObject(Continuous2D field, Double2D... points) {
@@ -39,6 +38,7 @@ public class MultilineObject extends ShapePortrayal2D implements Entity, WorldOb
         this.field = field;
         this.defPolygon = pol;
         this.poly = pol;
+        this.filled = false;
         this.hash = System.identityHashCode(this);
     }
    

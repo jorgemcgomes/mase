@@ -53,7 +53,7 @@ public class MasonTracer {
             } else if (args[index].equals(SEED)) {
                 seed = Long.parseLong(args[1 + index++]);
             } else if (args[index].equals(BG_COLOR)) {
-                bgColor = parseColor(args[1 + index++]);
+                bgColor = ParamUtils.parseColor(args[1 + index++]);
 
             }
         }
@@ -204,23 +204,6 @@ public class MasonTracer {
         }
 
         SVGUtils.writeToSVG(out, gr.getSVGElement());
-    }
-
-    public static Color parseColor(String str) {
-        String[] split = str.split("-|\\.|,|;");
-        if (split.length == 1) {
-            try {
-                Field field = Color.class.getField(split[0]);
-                return (Color) field.get(null);
-            } catch (Exception ex) {
-                return Color.decode(split[0]);
-            }
-        } else if (split.length == 3) {
-            return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        } else if (split.length == 4) {
-            return new Color(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
-        }
-        return null;
     }
 
 }

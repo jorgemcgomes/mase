@@ -53,7 +53,7 @@ public class ASAgentEvaluator extends MasonEvaluation {
             double[] lastAction = a.lastNormalisedOutputs();
             double[] vec = new double[lastSensors.length + lastAction.length];
             for (int i = 0; i < lastSensors.length; i++) {
-                vec[i] = (lastSensors[i] + 1) / 2; // scale from [-1,1] to [0,1]
+                vec[i] = (lastSensors[i] + 1) / 2; // scale sensor values from [-1,1] to [0,1]
             }
             System.arraycopy(lastAction, 0, vec, lastSensors.length, lastAction.length);
             genStates.add(vec);
@@ -119,7 +119,11 @@ public class ASAgentEvaluator extends MasonEvaluation {
 
     @Override
     public EvaluationResult getResult() {
-        return res;
+        if(res.getAllEvaluations().size() == 1) {
+            return res.getAllEvaluations().get(0);
+        } else {
+            return res;
+        }
     }
 
 }

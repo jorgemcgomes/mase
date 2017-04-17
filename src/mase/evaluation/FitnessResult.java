@@ -5,6 +5,8 @@
 package mase.evaluation;
 
 import java.util.Locale;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
 
 /**
  *
@@ -13,7 +15,7 @@ import java.util.Locale;
 public class FitnessResult implements EvaluationResult {
 
     private static final long serialVersionUID = 1;
-    public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3, MIN_PLUS = 4;
+    public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3, MIN_PLUS = 4, MEDIAN = 5;
     public static final double FLOAT_THRESHOLD = 0.0001f;
     protected double value;
     protected int average;
@@ -39,24 +41,19 @@ public class FitnessResult implements EvaluationResult {
     @Override
     public FitnessResult mergeEvaluations(EvaluationResult[] results) {
         double score = 0;
+        DescriptiveStatistics ds = new DescriptiveStatistics();
+        for(EvaluationResult f : results) {
+            ds.addValue((double) f.value());
+        }
         switch (average) {
             case MAX:
-                score = Double.NEGATIVE_INFINITY;
-                for (EvaluationResult f : results) {
-                    score = Math.max(score, (Double) f.value());
-                }
+                score = ds.getMax();
                 break;
             case MIN:
-                score = Double.POSITIVE_INFINITY;
-                for (EvaluationResult f : results) {
-                    score = Math.min(score, (Double) f.value());
-                }
+                score = ds.getMin();
                 break;
             case ARITHMETIC:
-                for (EvaluationResult f : results) {
-                    score += (Double) f.value();
-                }
-                score /= results.length;
+                score = ds.getMean();
                 break;
             case HARMONIC:
                 for (EvaluationResult f : results) {
@@ -70,13 +67,13 @@ public class FitnessResult implements EvaluationResult {
                 score = results.length / score;
                 break;
             case MIN_PLUS:
-                double min = Double.MAX_VALUE;
-                double mean = 0;
-                for (EvaluationResult f : results) {
-                    mean += (Double) f.value();
-                    min = Math.min(min, (Double) f.value());
-                }
+                double min = ds.getMin();
+                double mean = ds.getMean();
                 score = 0.01f * (mean / results.length) + 0.99f * min;
+                break;
+            case MEDIAN:
+                ds.setMeanImpl(new Median());
+                score = ds.getMean();
                 break;
         }
         FitnessResult fit = new FitnessResult(score, average);

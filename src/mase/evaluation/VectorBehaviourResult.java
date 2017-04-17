@@ -18,11 +18,17 @@ public class VectorBehaviourResult implements BehaviourResult {
     protected double[] behaviour;
     protected int dist;
     public static final int COSINE = 0, BRAY_CURTIS = 1, EUCLIDEAN = 2, MANHATTAN = 3;
-
+    protected int average;
+    public static final int CW_MEAN = 0, CW_MEDIAN = 1, SPATIAL_MEDIAN = 2; 
 
     public VectorBehaviourResult(double... bs) {
         this.behaviour = bs;
         this.dist = EUCLIDEAN;
+    }
+    
+    public void setAverage(int avg) {
+        this.average = avg;
+        throw new UnsupportedOperationException("The different averages have not been implemented yet");
     }
     
     public void setDistance(int dist) {

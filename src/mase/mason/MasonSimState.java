@@ -21,22 +21,30 @@ public abstract class MasonSimState extends SimState {
 
     private static final long serialVersionUID = 1L;
 
-    protected final GroupController gc;
+    protected GroupController gc;
     protected EvaluationFunction[] evalPrototypes = new EvaluationFunction[0];
     protected int maxSteps = 0;
     public MasonEvaluation[] currentEvals;
 
-    public MasonSimState(GroupController gc, long seed) {
+    public MasonSimState(long seed) {
         super(seed);
-        this.gc = gc;
     }
 
+    public MasonSimState(GroupController gc, long seed) {
+        this(seed);
+        this.gc = gc;
+    }   
+    
     public void setMaxSteps(int maxSteps) {
         this.maxSteps = maxSteps;
     }
 
     public void setEvalFunctions(EvaluationFunction[] evalPrototypes) {
         this.evalPrototypes = evalPrototypes;
+    }
+    
+    public void setGroupController(GroupController gc) {
+        this.gc = gc;
     }
 
     @Override
@@ -96,12 +104,15 @@ public abstract class MasonSimState extends SimState {
                 evalResults[i][r] = currentEvals[i].getResult();
             }
         }
-
+        return mergeResults(evalResults);
+    }
+    
+    protected EvaluationResult[] mergeResults(EvaluationResult[][] evalResults) {
         EvaluationResult[] mergedResult = new EvaluationResult[evalPrototypes.length];
         for (int i = 0; i < evalPrototypes.length; i++) {
             mergedResult[i] = evalResults[i][0].mergeEvaluations(evalResults[i]);
         }
-        return mergedResult;
+        return mergedResult;        
     }
 
     public FieldPortrayal2D createFieldPortrayal() {

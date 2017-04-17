@@ -82,7 +82,9 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         }
         pattern.setActivationFunction(act);
         pattern.setInputNeurons(in);
-        pattern.addHiddenLayer(hidden);
+        if(hidden > 0) {
+            pattern.addHiddenLayer(hidden);
+        }
         pattern.setOutputNeurons(out);
         return (BasicNetwork) pattern.generate();
     }
