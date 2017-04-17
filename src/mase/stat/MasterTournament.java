@@ -387,7 +387,7 @@ public class MasterTournament {
 
             EvaluationResult[] merged = new EvaluationResult[iRes.length];
             for (int k = 0; k < iRes.length; k++) {
-                merged[k] = iRes[k][0].mergeEvaluations(iRes[k]);
+                merged[k] = iRes[k][0].getResultMerger().mergeEvaluations(iRes[k]);
             }
             return merged;
         }

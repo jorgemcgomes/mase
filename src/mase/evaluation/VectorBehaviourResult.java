@@ -12,7 +12,7 @@ import net.jafama.FastMath;
  *
  * @author jorge
  */
-public class VectorBehaviourResult implements BehaviourResult {
+public class VectorBehaviourResult implements BehaviourResult<double[]> {
 
     private static final long serialVersionUID = 1;
     protected double[] behaviour;
@@ -20,6 +20,7 @@ public class VectorBehaviourResult implements BehaviourResult {
     public static final int COSINE = 0, BRAY_CURTIS = 1, EUCLIDEAN = 2, MANHATTAN = 3;
     protected int average;
     public static final int CW_MEAN = 0, CW_MEDIAN = 1, SPATIAL_MEDIAN = 2; 
+    public static final VBRMerger MERGER = new VBRMerger();
 
     public VectorBehaviourResult(double... bs) {
         this.behaviour = bs;
@@ -41,7 +42,7 @@ public class VectorBehaviourResult implements BehaviourResult {
     }
 
     @Override
-    public Object value() {
+    public double[] value() {
         return getBehaviour();
     }
 
@@ -51,19 +52,6 @@ public class VectorBehaviourResult implements BehaviourResult {
 
     public double[] getBehaviour() {
         return this.behaviour;
-    }
-
-    @Override
-    public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
-        double[] merged = new double[behaviour.length];
-        Arrays.fill(merged, 0f);
-        for (int i = 0; i < merged.length; i++) {
-            for (EvaluationResult r : results) {
-                merged[i] += ((double[]) r.value())[i];
-            }
-            merged[i] /= results.length;
-        }
-        return new VectorBehaviourResult(merged);
     }
 
     @Override
@@ -122,5 +110,28 @@ public class VectorBehaviourResult implements BehaviourResult {
             return 0.0f;
         }
         return cosineSimilarity;
+    }
+
+    public static class VBRMerger implements EvaluationResultMerger {
+
+        @Override
+        public EvaluationResult mergeEvaluations(EvaluationResult... evaluations) {
+            double[] merged = new double[((VectorBehaviourResult)evaluations[0]).behaviour.length];
+            Arrays.fill(merged, 0f);
+            for (int i = 0; i < merged.length; i++) {
+                for (EvaluationResult r : evaluations) {
+                    VectorBehaviourResult vbr = (VectorBehaviourResult) r;
+                    merged[i] += vbr.value()[i];
+                }
+                merged[i] /= evaluations.length;
+            }
+            return new VectorBehaviourResult(merged);       
+        }
+    }
+        
+    
+    @Override
+    public EvaluationResultMerger getResultMerger() {
+        return MERGER;
     }
 }

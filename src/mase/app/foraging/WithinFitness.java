@@ -24,7 +24,7 @@ public class WithinFitness extends MasonEvaluation {
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(null);
-        res = new FitnessResult((double) time / currentEvaluationStep, FitnessResult.ARITHMETIC);
+        res = new FitnessResult((double) time / currentEvaluationStep);
     }
 
     @Override

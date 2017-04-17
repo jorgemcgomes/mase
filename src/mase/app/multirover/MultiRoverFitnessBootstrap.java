@@ -41,6 +41,6 @@ public class MultiRoverFitnessBootstrap extends MultiRoverFitness {
         super.postSimulation(null);
         MultiRover mr = (MultiRover) sim;
         double bootstrap = 0.01 - proximity / mr.rovers.size() / currentEvaluationStep / mr.field.width / 100d;
-        this.fitnessResult = new FitnessResult(fitnessResult.value() + bootstrap, fitnessResult.getAverageType());
+        this.fitnessResult = new FitnessResult(fitnessResult.value() + bootstrap);
     }
 }

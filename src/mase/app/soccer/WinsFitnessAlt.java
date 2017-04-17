@@ -40,7 +40,7 @@ public class WinsFitnessAlt extends MasonEvaluation {
         super.postSimulation(null); 
         Soccer soc = (Soccer) sim;
         double bootstrap = 1 - avgDist / currentEvaluationStep / FastMath.sqrt(FastMath.pow2(soc.par.fieldLength) + FastMath.pow2(soc.par.fieldWidth / 2));
-        res = new FitnessResult(soc.referee.leftTeamScore + bootstrap / 100, FitnessResult.ARITHMETIC);
+        res = new FitnessResult(soc.referee.leftTeamScore + bootstrap / 100);
     }
     
     

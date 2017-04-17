@@ -7,6 +7,7 @@ package mase.mason;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.EvaluationFunction;
+import mase.evaluation.EvaluationResult;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 
@@ -14,7 +15,7 @@ import sim.engine.Steppable;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class MasonEvaluation implements EvaluationFunction, Steppable {
+public abstract class MasonEvaluation<T extends EvaluationResult> implements EvaluationFunction<T>, Steppable {
 
     public static final String P_DEFAULT = "mason-eval";
     public static final String P_FREQUENCY = "update-freq";

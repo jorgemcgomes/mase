@@ -7,6 +7,7 @@ package mase.mason;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
+import mase.evaluation.EvaluationResultMerger;
 import sim.engine.Schedule;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -110,7 +111,8 @@ public abstract class MasonSimState extends SimState {
     protected EvaluationResult[] mergeResults(EvaluationResult[][] evalResults) {
         EvaluationResult[] mergedResult = new EvaluationResult[evalPrototypes.length];
         for (int i = 0; i < evalPrototypes.length; i++) {
-            mergedResult[i] = evalResults[i][0].mergeEvaluations(evalResults[i]);
+            EvaluationResultMerger merger = evalResults[i][0].getResultMerger();
+            mergedResult[i] = merger.mergeEvaluations(evalResults[i]);
         }
         return mergedResult;        
     }

@@ -36,7 +36,7 @@ public class AgentMergeGroupEvaluator extends MasonEvaluation {
         SubpopEvaluationResult ser = (SubpopEvaluationResult) sim.currentEvals[agEvalIndex].getResult();
         // merge
         EvaluationResult[] ers = ser.getAllEvaluations().toArray(new EvaluationResult[0]);
-        res = ers[0].mergeEvaluations(ers);
+        res = ers[0].getResultMerger().mergeEvaluations(ers);
     }
 
     @Override

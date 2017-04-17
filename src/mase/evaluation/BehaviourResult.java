@@ -8,7 +8,7 @@ package mase.evaluation;
  *
  * @author jorge
  */
-public interface BehaviourResult extends EvaluationResult {
+public interface BehaviourResult<T> extends EvaluationResult<T> {
 
     public double distanceTo(BehaviourResult other);
     

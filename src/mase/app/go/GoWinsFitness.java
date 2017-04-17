@@ -39,8 +39,8 @@ public class GoWinsFitness extends MasonEvaluation {
         }
     
         res = new SubpopEvaluationResult(
-                new FitnessResult(blackFit, FitnessResult.ARITHMETIC),  
-                new FitnessResult(whiteFit, FitnessResult.ARITHMETIC));
+                new FitnessResult(blackFit),  
+                new FitnessResult(whiteFit));
     }
 
     @Override

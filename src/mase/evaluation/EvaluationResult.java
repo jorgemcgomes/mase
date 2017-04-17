@@ -10,15 +10,16 @@ import java.io.Serializable;
  *
  * @author jorge
  */
-public interface EvaluationResult extends Serializable {
-    
-    public Object value();
-    
+public interface EvaluationResult<T> extends Serializable {
+
+    public T value();
+
     /**
-     * Merges the given EvaluationResults -- it should not use nor modify the attributes of this object
-     * @param results To be merged
-     * @return A new EvaluationResult with the merged results 
+     * The returned EvaluationResultMerger should be capable of merging
+     * EvaluationResult's of the same type of this one
+     *
+     * @return
      */
-    public EvaluationResult mergeEvaluations(EvaluationResult[] results);
-    
+    public EvaluationResultMerger getResultMerger();
+
 }

@@ -9,6 +9,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.EvaluationResult;
+import mase.evaluation.EvaluationResultMerger;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -43,7 +44,7 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
     @Override
     public EvaluationResult getResult() {
         return fr;
-    }
+    }    
 
     private static class BehaviourVarianceFitnessResult extends FitnessResult {
 
@@ -51,6 +52,7 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
 
         private final BehaviourResult reference;
         public static final double MAX = 10000;
+        private static final BVMerger MERGER = new BVMerger();
 
         public BehaviourVarianceFitnessResult(BehaviourResult reference) {
             super(0);
@@ -58,21 +60,31 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
         }
 
         @Override
-        public FitnessResult mergeEvaluations(EvaluationResult[] results) {
-            BehaviourResult[] brs = new BehaviourResult[results.length];
-            for (int i = 0; i < results.length; i++) {
-                brs[i] = ((BehaviourVarianceFitnessResult) results[i]).reference;
-            }
-            BehaviourResult br = (BehaviourResult) brs[0];
-            BehaviourResult merged = (BehaviourResult) br.mergeEvaluations(brs);
-            double sum = 0;
-            for (BehaviourResult b : brs) {
-                sum += FastMath.pow2(merged.distanceTo(b));
-            }
-            // ensure that the fitness value is positive
-            // minimise sum of squared errors
-            return new FitnessResult(MAX - sum);
+        public EvaluationResultMerger getResultMerger() {
+            return MERGER;
         }
 
+        private static class BVMerger implements EvaluationResultMerger {
+
+            @Override
+            public EvaluationResult mergeEvaluations(EvaluationResult[] evaluations) {
+                BehaviourResult[] brs = new BehaviourResult[evaluations.length];
+                for (int i = 0; i < evaluations.length; i++) {
+                    brs[i] = ((BehaviourVarianceFitnessResult) evaluations[i]).reference;
+                }
+                BehaviourResult br = (BehaviourResult) brs[0];
+                BehaviourResult merged = (BehaviourResult) br.getResultMerger().mergeEvaluations(brs);
+                double sum = 0;
+                for (BehaviourResult b : brs) {
+                    sum += FastMath.pow2(merged.distanceTo(b));
+                }
+                // ensure that the fitness value is positive
+                // minimise sum of squared errors
+                return new FitnessResult(MAX - sum);
+            }
+
+        }
+        
+        
     }
 }

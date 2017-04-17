@@ -10,18 +10,20 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import mase.evaluation.EvaluationResult;
 import mase.evaluation.BehaviourResult;
+import mase.evaluation.EvaluationResult;
+import mase.evaluation.EvaluationResultMerger;
 
 /**
  *
  * @author jorge
  */
-public class SCResult implements BehaviourResult {
+public class SCResult implements BehaviourResult<Map<Integer, Integer>> {
 
     private static final long serialVersionUID = 1;
     protected Map<Integer, Integer> counts;
     protected int originalSize;
+    private static final SCResultMerger MERGER = new SCResultMerger();
 
     public SCResult(Map<Integer, Integer> counts) {
         this.counts = counts;
@@ -29,23 +31,8 @@ public class SCResult implements BehaviourResult {
     }
 
     @Override
-    public Object value() {
+    public Map<Integer, Integer> value() {
         return counts;
-    }
-
-    @Override
-    public SCResult mergeEvaluations(EvaluationResult[] results) {
-        SCResult first = (SCResult) results[0];
-        int totalOriginalSize = first.originalSize;
-        Map<Integer, Integer> mergedCounts = (Map<Integer, Integer>) ((HashMap) first.counts).clone();
-        for (int i = 1 ; i < results.length ; i++) {
-            SCResult r = (SCResult) results[i];
-            totalOriginalSize += r.originalSize;
-            mergeCountMap(mergedCounts, r.counts);
-        }
-        SCResult newRes = new SCResult(mergedCounts);
-        newRes.originalSize = totalOriginalSize;
-        return newRes;
     }
 
     @Override
@@ -53,11 +40,11 @@ public class SCResult implements BehaviourResult {
         SCResult other = (SCResult) br;
         int diffs = 0;
         int total = 0;
-        
+
         // set intersection -- shared states
         Set<Integer> shared = new HashSet<>(this.counts.keySet());
         shared.retainAll(other.counts.keySet());
-               
+
         // shared elements
         for (Integer h : shared) {
             int c1 = this.counts.get(h);
@@ -87,7 +74,6 @@ public class SCResult implements BehaviourResult {
         }
         return (double) diffs / total;
     }
-
 
     @Override
     public String toString() {
@@ -120,30 +106,29 @@ public class SCResult implements BehaviourResult {
         int threshold = (int) Math.round(totalCount * percentageThreshold);
         filter(threshold);
     }
-    
+
     protected void filter(int countThreshold) {
         // fail-safe in case all are to be removed
         // retain only the element with highest count
-        Entry<Integer,Integer> highestCount = null;
-        for(Entry<Integer,Integer> e : counts.entrySet()) {
-            if(highestCount == null || e.getValue() > highestCount.getValue()) {
+        Entry<Integer, Integer> highestCount = null;
+        for (Entry<Integer, Integer> e : counts.entrySet()) {
+            if (highestCount == null || e.getValue() > highestCount.getValue()) {
                 highestCount = e;
             }
         }
-        
-        for(Iterator<Map.Entry<Integer, Integer>> it = counts.entrySet().iterator(); it.hasNext(); ) {
+
+        for (Iterator<Map.Entry<Integer, Integer>> it = counts.entrySet().iterator(); it.hasNext();) {
             Entry<Integer, Integer> next = it.next();
-            if(next.getValue() < countThreshold) {
+            if (next.getValue() < countThreshold) {
                 it.remove();
             }
         }
-        
-        if(counts.isEmpty()) {
+
+        if (counts.isEmpty()) {
             counts.put(highestCount.getKey(), highestCount.getValue());
-        }     
+        }
     }
 
-    
     protected static void mergeCountMap(Map<Integer, Integer> map, Map<Integer, Integer> other) {
         for (Map.Entry<Integer, Integer> e : other.entrySet()) {
             if (!map.containsKey(e.getKey())) {
@@ -151,6 +136,29 @@ public class SCResult implements BehaviourResult {
             } else {
                 map.put(e.getKey(), map.get(e.getKey()) + e.getValue());
             }
+        }
+    }
+
+    @Override
+    public EvaluationResultMerger getResultMerger() {
+        return MERGER;
+    }
+
+    public static class SCResultMerger implements EvaluationResultMerger {
+
+        @Override
+        public EvaluationResult mergeEvaluations(EvaluationResult[] results) {
+            SCResult first = (SCResult) results[0];
+            int totalOriginalSize = first.originalSize;
+            Map<Integer, Integer> mergedCounts = (Map<Integer, Integer>) ((HashMap) first.counts).clone();
+            for (int i = 1; i < results.length; i++) {
+                SCResult r = (SCResult) results[i];
+                totalOriginalSize += r.originalSize;
+                mergeCountMap(mergedCounts, r.counts);
+            }
+            SCResult newRes = new SCResult(mergedCounts);
+            newRes.originalSize = totalOriginalSize;
+            return newRes;
         }
     }
 }

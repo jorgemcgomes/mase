@@ -81,7 +81,7 @@ public class Playground extends MasonSimState implements SmartAgentProvider {
         RaySensor dw = new RaySensor(this, field, sa);
         dw.setRays(par.whiskerRange, -Math.PI / 6, Math.PI / 6);
         dw.setObjectTypes(MultilineObject.class);
-        dw.setBinary(false);
+        dw.setBinary(true);
         sa.addSensor(dw);
 
         // Object cone sensor

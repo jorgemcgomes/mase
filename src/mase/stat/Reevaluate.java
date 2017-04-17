@@ -193,7 +193,7 @@ public class Reevaluate {
             for (int j = 0; j < samples.length; j++) {
                 samples[j] = results.get(j)[i];
             }
-            merged[i] = samples[0].mergeEvaluations(samples);
+            merged[i] = samples[0].getResultMerger().mergeEvaluations(samples);
         }
 
         DescriptiveStatistics ds = new DescriptiveStatistics(results.size());

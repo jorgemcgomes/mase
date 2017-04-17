@@ -123,7 +123,7 @@ public class ExpandedFitness extends SimpleFitness {
                 for (int j = 0; j < fitnesses.length; j++) { // for each trial
                     evalTrials[j] = ((ExpandedFitness) fitnesses[j]).evalResults[i];
                 }
-                evalRes[i] = (EvaluationResult) evalTrials[0].mergeEvaluations(evalTrials);
+                evalRes[i] = (EvaluationResult) evalTrials[0].getResultMerger().mergeEvaluations(evalTrials);
             }
             this.setEvaluationResults(state, evalRes, subpop);
             

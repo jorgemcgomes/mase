@@ -10,7 +10,6 @@ import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
-import org.apache.commons.math3.stat.StatUtils;
 
 /**
  *
@@ -35,7 +34,7 @@ public class MultiRoverFitness extends MasonEvaluation {
         for(int c : mr.scores) {
             count += c;
         }
-        fitnessResult = new FitnessResult(count, FitnessResult.ARITHMETIC);
+        fitnessResult = new FitnessResult(count);
     }
     
     

@@ -6,6 +6,7 @@ package mase.mason.generic.systematic;
 
 import java.util.Arrays;
 import mase.evaluation.EvaluationResult;
+import mase.evaluation.EvaluationResultMerger;
 import mase.evaluation.VectorBehaviourResult;
 
 /**
@@ -16,6 +17,7 @@ public class SystematicResult extends VectorBehaviourResult {
 
     private static final long serialVersionUID = 1;
     protected double[] originalResult;
+    private static final SystematicResultMerger SR_MERGER = new SystematicResultMerger();
 
     public SystematicResult(double... bs) {
         super(bs);
@@ -31,12 +33,6 @@ public class SystematicResult extends VectorBehaviourResult {
     }
 
     @Override
-    public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
-        VectorBehaviourResult vbr = super.mergeEvaluations(results);
-        return new SystematicResult(vbr.getBehaviour());
-    }
-
-    @Override
     public String toString() {
         //String original = super.toString();
         String original = "";
@@ -44,6 +40,22 @@ public class SystematicResult extends VectorBehaviourResult {
             original += " " + originalResult[i];
         }
         return original;
+    }
+
+    @Override
+    public EvaluationResultMerger getResultMerger() {
+        return SR_MERGER;
+    }
+        
+    public static class SystematicResultMerger extends VBRMerger {
+
+        @Override
+        public EvaluationResult mergeEvaluations(EvaluationResult... evaluations) {
+            VectorBehaviourResult vbr = (VectorBehaviourResult)super.mergeEvaluations(evaluations);
+            return new SystematicResult(vbr.getBehaviour()); 
+        }
+
+        
     }
 
 }

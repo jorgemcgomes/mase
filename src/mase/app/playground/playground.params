@@ -27,7 +27,7 @@ problem.radius = 4
 problem.linearSpeed = 1
 problem.turnSpeed = 0.196
 problem.numCones = 4
-problem.coneRange = 50
+problem.coneRange = 100
 problem.whiskerRange = 10
 
 ec.subpop.species = 			ec.vector.FloatVectorSpecies
