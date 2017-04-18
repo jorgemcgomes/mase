@@ -10,8 +10,8 @@ import ec.Prototype;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public interface EvaluationFunction extends Prototype {
+public interface EvaluationFunction<T extends EvaluationResult> extends Prototype {
     
-    public EvaluationResult getResult();
+    public T getResult();
     
 }

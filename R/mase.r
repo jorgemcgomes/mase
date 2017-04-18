@@ -13,13 +13,22 @@ library(pdist)
 library(RColorBrewer)
 library(formula.tools)
 library(arules)
+library(MASS)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
-theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-5,0,0,0,unit="pt"),
-            plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
-            axis.title.x=element_text(size=rel(.9)), axis.title.y=element_text(size=rel(.9)), legend.title=element_text(size=rel(.9)),
-            strip.background=element_blank(), strip.text=element_text(size=rel(.9)))
+
+theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), 
+             legend.position="bottom", 
+             plot.title=element_text(size=rel(1)), 
+             strip.background=element_blank(), 
+             strip.text=element_text(size=rel(.9))
+             )
+
+# theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-5,0,0,0,unit="pt"),
+#             plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
+#             axis.title.x=element_text(size=rel(.9)), axis.title.y=element_text(size=rel(.9)), legend.title=element_text(size=rel(.9)),
+#             strip.background=element_blank(), strip.text=element_text(size=rel(.9)))
 
 # theme_set(theme_bw())
 # theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-5,0,0,0,unit="pt"),
@@ -135,7 +144,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
 
 # loads any file given the column names
 loadFile <- function(file, separator=" ",colnames=NULL, exclude.na=T) {
-  frame <- fread(file, header=F, sep=separator, stringsAsFactors=F)
+  frame <- fread(file, sep=separator, stringsAsFactors=F)
   if(!is.null(colnames)) {
     setnames(frame,colnames)
     if(exclude.na) {
@@ -517,6 +526,29 @@ identifyBests <- function(som, data, n=10, interactive=T) {
     return(cbind(x=som$grid$pts[id,"x"], y=som$grid$pts[id,"y"], head(submap,n)))
   }
   return(ldply(as.list(ids), aux))
+}
+
+# Reduces the dimensionality of the given variables to 2D
+# data: the frame that contains the data to be reduced
+# vars: the vars to be reduced
+# ...: to be passed to sammon()
+# returns data with two extra columns: X and Y
+sammonReduce <- function(data, vars, ...) {
+  sub <- data[, vars, with=F]
+  dists <- dist(sub)
+  sam <- sammon(dists, ...)
+  data[, X := sam$points[,1]]
+  data[, Y := sam$points[,2]]
+  return(data)
+}
+
+# Plots the sammon mapping in 2D
+# reduced: frame with the reduction done (sammonReduce)
+# color.var: optional. numeric variable to be used to color the dots
+sammonPlot <- function(reduced, color.var=NULL) {
+  g <- ggplot(reduced, aes(x=X, y=Y)) + geom_point(aes_string(colour=color.var), shape=4, size=1.5) + 
+    coord_fixed() + theme(legend.position="right")
+  return(g)
 }
 
 #### General purpose statistics ###########################################################

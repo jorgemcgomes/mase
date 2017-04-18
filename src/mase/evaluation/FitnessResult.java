@@ -4,6 +4,7 @@
  */
 package mase.evaluation;
 
+import java.util.Collection;
 import java.util.Locale;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
@@ -12,7 +13,7 @@ import org.apache.commons.math3.stat.descriptive.rank.Median;
  *
  * @author jorge
  */
-public class FitnessResult implements EvaluationResult {
+public class FitnessResult implements EvaluationResult<Double> {
 
     private static final long serialVersionUID = 1;
     public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3, MIN_PLUS = 4, MEDIAN = 5;

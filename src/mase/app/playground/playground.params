@@ -40,8 +40,8 @@ neural.input = 6
 neural.hidden = 3
 neural.output = 2
 
-generations = 500
-ec.subpop.initial-batch =               10000
+generations = 200
+ec.subpop.initial-batch =               5000
 ec.subpop.size = 			1000
 ec.subpop.behaviour-index =             0
 ec.subpop.resolution =                  0.251

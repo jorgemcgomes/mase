@@ -10,9 +10,9 @@ import java.io.Serializable;
  *
  * @author jorge
  */
-public interface EvaluationResult extends Serializable {
+public interface EvaluationResult<T> extends Serializable {
     
-    public Object value();
+    public T value();
     
     /**
      * Merges the given EvaluationResults -- it should not use nor modify the attributes of this object
