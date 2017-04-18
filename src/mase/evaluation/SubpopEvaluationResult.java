@@ -15,13 +15,13 @@ import java.util.Collection;
 public class SubpopEvaluationResult implements EvaluationResult {
 
     private static final long serialVersionUID = 1;
-    private final ArrayList<EvaluationResult> evals;
+    private final ArrayList<? extends EvaluationResult> evals;
 
     public SubpopEvaluationResult(EvaluationResult... evals) {
         this.evals = new ArrayList<>(Arrays.asList(evals));
     }
 
-    public SubpopEvaluationResult(Collection<EvaluationResult> evals) {
+    public SubpopEvaluationResult(Collection<? extends EvaluationResult> evals) {
         this.evals = new ArrayList<>(evals);
     }
 
@@ -29,7 +29,7 @@ public class SubpopEvaluationResult implements EvaluationResult {
         return evals.get(index);
     }
 
-    public ArrayList<EvaluationResult> getAllEvaluations() {
+    public ArrayList<? extends EvaluationResult> getAllEvaluations() {
         return evals;
     }
 

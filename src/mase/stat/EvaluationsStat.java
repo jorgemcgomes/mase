@@ -84,7 +84,7 @@ public class EvaluationsStat extends Statistics {
         for (int i = 0; i < sample.length; i++) {
             String evalName = prob.getEvalFunctions()[i].getClass().getSimpleName();
             if (sample[i] instanceof SubpopEvaluationResult) {
-                ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) sample[i]).getAllEvaluations();
+                ArrayList<? extends EvaluationResult> allEvals = ((SubpopEvaluationResult) sample[i]).getAllEvaluations();
                 if (allSubpops) {
                     for (int j = 0; j < allEvals.size(); j++) {
                         for (int k = 0; k < allEvals.get(j).toString().split(" ").length; k++) {
@@ -110,7 +110,7 @@ public class EvaluationsStat extends Statistics {
         for (EvaluationResult er : eval) {
             if (er instanceof SubpopEvaluationResult) {
                 if (allSubpops) {
-                    ArrayList<EvaluationResult> allEvals = ((SubpopEvaluationResult) er).getAllEvaluations();
+                    ArrayList<? extends EvaluationResult> allEvals = ((SubpopEvaluationResult) er).getAllEvaluations();
                     for (EvaluationResult e : allEvals) {
                         s += " " + e;
                     }

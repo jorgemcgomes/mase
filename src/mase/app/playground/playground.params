@@ -1,8 +1,7 @@
 eval.base.problem =                mase.app.playground.PlaygroundSimulator
 problem.number-evals =             2
-problem.eval.0 =                   mase.mason.generic.ASAgentEvaluator
+problem.eval.0 =                   mase.mason.generic.MSAgentEvaluator
 problem.eval.0.update-freq =       1
-problem.eval.0.windows =           1
 problem.eval.1 =                   mase.app.playground.BehaviourVarianceFitness
 problem.eval.1.behaviour-index =   0
 
@@ -27,7 +26,7 @@ problem.radius = 4
 problem.linearSpeed = 1
 problem.turnSpeed = 0.196
 problem.numCones = 4
-problem.coneRange = 50
+problem.coneRange = 100
 problem.whiskerRange = 10
 
 ec.subpop.species = 			ec.vector.FloatVectorSpecies
@@ -41,8 +40,9 @@ neural.input = 6
 neural.hidden = 3
 neural.output = 2
 
-ec.subpop.initial-batch =               1000
-ec.subpop.size = 			100
+generations = 500
+ec.subpop.initial-batch =               10000
+ec.subpop.size = 			1000
 ec.subpop.behaviour-index =             0
 ec.subpop.resolution =                  0.251
 

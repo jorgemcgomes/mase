@@ -67,7 +67,7 @@ public class SCStat extends Statistics {
                         sizeStat.addValue(scr.getCounts().size());
                     } else if (er instanceof SubpopEvaluationResult) {
                         SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
-                        ArrayList<EvaluationResult> all = ser.getAllEvaluations();
+                        ArrayList<? extends EvaluationResult> all = ser.getAllEvaluations();
                         for (EvaluationResult subEr : all) {
                             if (subEr instanceof SCResult) {
                                 SCResult scr = (SCResult) subEr;

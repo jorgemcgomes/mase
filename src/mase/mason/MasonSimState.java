@@ -72,7 +72,7 @@ public abstract class MasonSimState extends SimState {
         });
 
         // Schedule termination by max steps
-        super.schedule.scheduleOnce(maxSteps, Integer.MAX_VALUE, new Steppable() {
+        super.schedule.scheduleOnce(maxSteps - 1, Integer.MAX_VALUE, new Steppable() {
             @Override
             public void step(SimState state) {
                 state.kill();
