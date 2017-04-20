@@ -25,7 +25,7 @@ import mase.controllers.HeterogeneousGroupController;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -245,11 +245,11 @@ public class MasterTournament {
             for (int s = 0; s < 2; s++) {
                 EvaluationResult[] er = subpopEvals[s].get(g);
                 // assumes fitness evaluation is in first index
-                float fit = (Float) (((SubpopEvaluationResult) er[0]).getSubpopEvaluation(s).value());
+                float fit = (Float) (((CompoundEvaluationResult) er[0]).getEvaluation(s).value());
                 // assumes behaviour evaluation is in second index
                 BehaviourResult br = null;
-                if (er[1] instanceof SubpopEvaluationResult) {
-                    br = (BehaviourResult) ((SubpopEvaluationResult) er[1]).getSubpopEvaluation(s);
+                if (er[1] instanceof CompoundEvaluationResult) {
+                    br = (BehaviourResult) ((CompoundEvaluationResult) er[1]).getEvaluation(s);
                 } else {
                     br = (BehaviourResult) er[1];
                 }
@@ -269,7 +269,7 @@ public class MasterTournament {
             hc0.getAgentControllers(2)[0],
             hc1.getAgentControllers(2)[1]
         });
-        SubpopEvaluationResult ser = new SubpopEvaluationResult(
+        CompoundEvaluationResult ser = new CompoundEvaluationResult(
                 new FitnessResult(bestFar[0]),
                 new FitnessResult(bestFar[1]));
         PersistentSolution sol = new PersistentSolution();
@@ -284,7 +284,7 @@ public class MasterTournament {
         int bestIndex = -1;
         for (int i = 0; i < evals.size(); i++) {
             EvaluationResult[] e = evals.get(i);
-            float fit = (Float) (((SubpopEvaluationResult) e[0]).getSubpopEvaluation(subpop).value());
+            float fit = (Float) (((CompoundEvaluationResult) e[0]).getEvaluation(subpop).value());
             if (fit > best) {
                 best = fit;
                 bestIndex = i;

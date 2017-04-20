@@ -6,7 +6,7 @@
 package mase.app.soccer;
 
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -21,7 +21,7 @@ public class SoccerIndEvalShort extends MasonEvaluation {
 
     private static final long serialVersionUID = 1L;
 
-    private SubpopEvaluationResult ser;
+    private CompoundEvaluationResult ser;
     //private double[][] initDists;
     private double[][] accumDists;
 
@@ -70,7 +70,7 @@ public class SoccerIndEvalShort extends MasonEvaluation {
             
             res[a] = new VectorBehaviourResult(behav);
         }
-        this.ser = new SubpopEvaluationResult(res);
+        this.ser = new CompoundEvaluationResult(res);
     }
 
     @Override

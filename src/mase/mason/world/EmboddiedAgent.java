@@ -33,8 +33,8 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     private boolean boundedArena;
     private boolean collisionRebound;
     private Class<? extends WorldObject>[] collidableTypes;
-    public static final double COLLISION_SPEED_DECAY = 0.5;
-    public static final double COLLISION_DIRECTION = Math.PI / 2;
+    private double collisionSpeedDecay = 0.5;
+    private double collisionReboundDirection = Math.PI / 2;
     private boolean isAlive;
     private boolean rotate = true;
 
@@ -85,6 +85,14 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
 
     public void setCollidableTypes(Class<? extends WorldObject>... types) {
         this.collidableTypes = types;
+    }
+
+    public void setCollisionSpeedDecay(double collisionSpeedDecay) {
+        this.collisionSpeedDecay = collisionSpeedDecay;
+    }
+
+    public void setCollisionReboundDirection(double collisionReboundDirection) {
+        this.collisionReboundDirection = collisionReboundDirection;
     }
 
     private boolean collisionFree(Double2D target) {
@@ -171,16 +179,18 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
             this.turningSpeed = o - this.orientation;
             this.orientation = o;
         }
-
-        if (!attemptMove(orientation, speed) && collisionRebound) { // cannot move
+        
+        boolean tryMove = attemptMove(orientation, speed);
+        if (!tryMove && collisionRebound) { // cannot move, rebound if allowed
             // try to escape to both sides with a random order
-            double angle = sim.random.nextBoolean() ? COLLISION_DIRECTION : -COLLISION_DIRECTION;
-            if (!attemptMove(normalizeAngle(orientation + angle), speed * COLLISION_SPEED_DECAY)
-                    && !attemptMove(normalizeAngle(orientation - angle), COLLISION_SPEED_DECAY)) {
+            double angle = sim.random.nextBoolean() ? collisionReboundDirection : -collisionReboundDirection;
+            if (!attemptMove(normalizeAngle(orientation + angle), speed * collisionSpeedDecay)
+                    && !attemptMove(normalizeAngle(orientation - angle), collisionSpeedDecay)) {
+                // could not rebound as well
                 return false;
             }
         }
-        return true;
+        return tryMove;
     }
 
     // from anything to [-PI,PI]

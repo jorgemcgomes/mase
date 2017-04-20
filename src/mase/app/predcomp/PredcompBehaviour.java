@@ -9,7 +9,7 @@ package mase.app.predcomp;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -22,7 +22,7 @@ import sim.util.Double2D;
  */
 public class PredcompBehaviour extends MasonEvaluation {
     
-    protected SubpopEvaluationResult res;
+    protected CompoundEvaluationResult res;
     protected double[] wallProximity;
     protected double[] movement;
     protected double distanceToOther;
@@ -73,7 +73,7 @@ public class PredcompBehaviour extends MasonEvaluation {
     protected void postSimulation(MasonSimState sim) {
         Predcomp pc = (Predcomp) sim;
         int steps = (int) sim.schedule.getSteps();
-        this.res = new SubpopEvaluationResult(
+        this.res = new CompoundEvaluationResult(
             new VectorBehaviourResult(new double[]{
                 steps / maxSteps, 
                  (wallProximity[0] / steps / (pc.par.size / 2)),

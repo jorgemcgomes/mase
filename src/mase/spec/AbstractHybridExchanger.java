@@ -20,7 +20,7 @@ import mase.evaluation.MetaEvaluator;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.MultiPopCoevolutionaryEvaluatorThreaded;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -261,8 +261,8 @@ public class AbstractHybridExchanger extends Exchanger {
 
     protected static BehaviourResult getAgentBR(Individual ind, int agent, int index) {
         ExpandedFitness nf = (ExpandedFitness) ind.fitness;
-        SubpopEvaluationResult ser = (SubpopEvaluationResult) nf.getEvaluationResults()[index];
-        return (BehaviourResult) ser.getSubpopEvaluation(agent);
+        CompoundEvaluationResult ser = (CompoundEvaluationResult) nf.getEvaluationResults()[index];
+        return (BehaviourResult) ser.getEvaluation(agent);
     }
 
 }

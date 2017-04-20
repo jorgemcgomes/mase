@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import mase.MaseProblem;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import tasks.Task;
 
 /**
@@ -46,10 +46,10 @@ public class SlaveTask extends Task {
         The results from SER are added to the list in between nulls
          */
         for (EvaluationResult er : evalResults) {
-            if (er instanceof SubpopEvaluationResult) {
+            if (er instanceof CompoundEvaluationResult) {
                 resList.add(null);
-                SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
-                resList.addAll(ser.getAllEvaluations());
+                CompoundEvaluationResult ser = (CompoundEvaluationResult) er;
+                resList.addAll(ser.value());
                 resList.add(null);
             } else {
                 resList.add(er);

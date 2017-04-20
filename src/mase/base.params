@@ -25,7 +25,7 @@ pop = 					ec.Population
 # Evaluation config
 eval =                                  mase.evaluation.MetaEvaluator
 eval.base =                             ec.simple.SimpleEvaluator
-problem.controller-factory =            mase.controllers.GenericControllerFactory
+problem.controller-factory =            mase.controllers.DefaultControllerFactory
 vector.species.fitness =                mase.evaluation.ExpandedFitness
 
 # Checkpointing
@@ -68,7 +68,7 @@ stat.child.6.file =                     $checkpoint.gz
 stat.child.7 =                          mase.stat.RunStatistics
 stat.child.7.file =                     $run.params
 stat.child.8 =                          mase.stat.FinalPostEvaluationStat
-stat.child.8.repetitions =              50
+stat.child.8.repetitions =              100
 stat.child.8.all-subpops =              true
 stat.child.8.prefix =                   post
 stat.child.9 =                          mase.stat.ScoresStat

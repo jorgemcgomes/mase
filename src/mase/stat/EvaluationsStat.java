@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import mase.MaseProblem;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.ExpandedFitness;
 import mase.stat.StatUtils.IndividualInfo;
 
@@ -83,8 +83,8 @@ public class EvaluationsStat extends Statistics {
         String header = "Generation Subpop Index";
         for (int i = 0; i < sample.length; i++) {
             String evalName = prob.getEvalFunctions()[i].getClass().getSimpleName();
-            if (sample[i] instanceof SubpopEvaluationResult) {
-                ArrayList<? extends EvaluationResult> allEvals = ((SubpopEvaluationResult) sample[i]).getAllEvaluations();
+            if (sample[i] instanceof CompoundEvaluationResult) {
+                ArrayList<? extends EvaluationResult> allEvals = ((CompoundEvaluationResult) sample[i]).value();
                 if (allSubpops) {
                     for (int j = 0; j < allEvals.size(); j++) {
                         for (int k = 0; k < allEvals.get(j).toString().split(" ").length; k++) {
@@ -108,14 +108,14 @@ public class EvaluationsStat extends Statistics {
     public static String entry(int gen, int sub, int index, EvaluationResult[] eval, boolean allSubpops) {
         String s = gen + " " + sub + " " + index;
         for (EvaluationResult er : eval) {
-            if (er instanceof SubpopEvaluationResult) {
+            if (er instanceof CompoundEvaluationResult) {
                 if (allSubpops) {
-                    ArrayList<? extends EvaluationResult> allEvals = ((SubpopEvaluationResult) er).getAllEvaluations();
+                    ArrayList<? extends EvaluationResult> allEvals = ((CompoundEvaluationResult) er).value();
                     for (EvaluationResult e : allEvals) {
                         s += " " + e;
                     }
                 } else {
-                    s += " " + ((SubpopEvaluationResult) er).getSubpopEvaluation(sub).toString();
+                    s += " " + ((CompoundEvaluationResult) er).getEvaluation(sub).toString();
                 }
             } else {
                 s += " " + er;

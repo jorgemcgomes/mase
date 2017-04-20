@@ -7,7 +7,7 @@
 package mase.app.multirover;
 
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -24,7 +24,7 @@ public class MultiRoverIndEval extends MasonEvaluation {
 
     private static final long serialVersionUID = 1L;
     
-    private SubpopEvaluationResult br;
+    private CompoundEvaluationResult br;
     private int[][] actuatorTime;
     private double[] distanceToRock;
     private double[] distanceToNeighbor;
@@ -102,6 +102,6 @@ public class MultiRoverIndEval extends MasonEvaluation {
                         
             res[i] = new VectorBehaviourResult(MathArrays.concatenate(scores, tt, new double[]{dRock, dRover}));
         }
-        this.br = new SubpopEvaluationResult(res);
+        this.br = new CompoundEvaluationResult(res);
     }    
 }

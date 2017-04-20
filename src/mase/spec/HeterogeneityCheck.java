@@ -14,7 +14,7 @@ import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.neat.NEATAgentController;
 import mase.stat.PersistentSolution;
@@ -105,9 +105,9 @@ public class HeterogeneityCheck {
     private static int countParticipants(PersistentSolution sol, double threshold) {
         // check agent characterisation
         EvaluationResult[] evals = sol.getEvalResults();
-        SubpopEvaluationResult e = (SubpopEvaluationResult) evals[2];
+        CompoundEvaluationResult e = (CompoundEvaluationResult) evals[2];
         int participant = 0;
-        for (EvaluationResult er : e.getAllEvaluations()) { // for each agent
+        for (EvaluationResult er : e.value()) { // for each agent
             VectorBehaviourResult vbr = (VectorBehaviourResult) er;
             double[] behaviour = vbr.getBehaviour();
             for (int b = 1; b < behaviour.length; b++) { // for each distance

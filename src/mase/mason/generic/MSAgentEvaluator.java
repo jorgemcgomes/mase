@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.MedianVectorBehaviourResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
@@ -80,7 +80,7 @@ public class MSAgentEvaluator extends MasonEvaluation {
                 MedianVectorBehaviourResult m = new MedianVectorBehaviourResult(agentState);
                 list.add(m);
             }
-            res = new SubpopEvaluationResult(list);
+            res = new CompoundEvaluationResult(list);
         }
     }
 

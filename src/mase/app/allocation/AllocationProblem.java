@@ -16,7 +16,7 @@ import mase.controllers.AgentController;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.ParamUtils;
 import mase.mason.ParamUtils.Param;
@@ -199,7 +199,7 @@ public class AllocationProblem extends MaseProblem {
         for (double[] dists : distanceMatrix.getData()) {
             vbrs.add(new VectorBehaviourResult(dists));
         }
-        SubpopEvaluationResult ser = new SubpopEvaluationResult(vbrs);
+        CompoundEvaluationResult ser = new CompoundEvaluationResult(vbrs);
         
         // aux characterisation -- min, mean, max, sd pair distances
         VectorBehaviourResult aux = new VectorBehaviourResult(pd.getMin(), pd.getMean(), pd.getMax(), pd.getStandardDeviation());

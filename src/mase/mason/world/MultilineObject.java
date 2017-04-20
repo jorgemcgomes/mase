@@ -5,6 +5,7 @@
  */
 package mase.mason.world;
 
+import java.awt.Color;
 import mase.mason.generic.systematic.Entity;
 import mase.mason.world.GeomUtils.Multiline;
 import mase.mason.world.GeomUtils.Segment;
@@ -14,7 +15,7 @@ import sim.portrayal.simple.ShapePortrayal2D;
 import sim.util.Double2D;
 
 /**
- *
+ * VERY IMPORTANT: all the point definitions are relative to (0,0)
  * @author jorge
  */
 public class MultilineObject extends ShapePortrayal2D implements Entity, WorldObject, Fixed2D {
@@ -39,6 +40,7 @@ public class MultilineObject extends ShapePortrayal2D implements Entity, WorldOb
         this.defPolygon = pol;
         this.poly = pol;
         this.filled = false;
+        this.paint = Color.BLACK;
         this.hash = System.identityHashCode(this);
     }
    

@@ -53,7 +53,7 @@ public class MasonPlayerTar {
         DefaultTableModel mod = (DefaultTableModel) table.getModel();
         for(PersistentSolution s : sols) {
             Object ud = s.getUserData();
-            String udStr = ud == null ? "NA" : (ud.getClass().isArray() ? Arrays.toString((int[]) ud) : ud.toString()); 
+            String udStr = ud == null ? "NA" : (ud instanceof double[] ? Arrays.toString((double[]) ud) : ud.toString()); 
             mod.addRow(new Object[]{s.getGeneration(), s.getSubpop(), s.getIndex(), s.getFitness(), udStr});
         }
         

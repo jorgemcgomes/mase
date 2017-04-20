@@ -4,7 +4,7 @@
  */
 package mase.app.pred;
 
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
@@ -20,7 +20,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
     private static final long serialVersionUID = 1L;
 
     protected double[] partnerAvgDist;
-    protected SubpopEvaluationResult evaluation;
+    protected CompoundEvaluationResult evaluation;
 
     @Override
     protected void preSimulation(MasonSimState sim) {
@@ -61,7 +61,7 @@ public class OnePreyIndividualEval extends MasonEvaluation {
 
             res[i] = new VectorBehaviourResult((double)pred.getCaptureCount(), preyDist, partnerAvgDist[i]);
         }
-        evaluation = new SubpopEvaluationResult(res);
+        evaluation = new CompoundEvaluationResult(res);
 
     }
 

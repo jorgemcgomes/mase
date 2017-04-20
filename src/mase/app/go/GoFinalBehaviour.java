@@ -8,7 +8,7 @@ package mase.app.go;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -20,7 +20,7 @@ import mase.mason.MasonSimulationProblem;
  */
 public class GoFinalBehaviour extends MasonEvaluation {
 
-    private SubpopEvaluationResult ser;
+    private CompoundEvaluationResult ser;
     protected double maxSteps;
 
     @Override
@@ -33,7 +33,7 @@ public class GoFinalBehaviour extends MasonEvaluation {
     protected void postSimulation(MasonSimState sim) {
         Go go = (Go) sim;
         double d = go.schedule.getSteps() / 2.0f;
-        ser = new SubpopEvaluationResult(
+        ser = new CompoundEvaluationResult(
                 new VectorBehaviourResult(
                         go.state.captured[GoState.BLACK] / d, 
                         go.state.captured[GoState.WHITE] / d),

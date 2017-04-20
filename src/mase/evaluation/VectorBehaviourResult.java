@@ -12,7 +12,7 @@ import net.jafama.FastMath;
  *
  * @author jorge
  */
-public class VectorBehaviourResult implements BehaviourResult {
+public class VectorBehaviourResult implements BehaviourResult<double[]> {
 
     private static final long serialVersionUID = 1;
     protected double[] behaviour;
@@ -34,7 +34,7 @@ public class VectorBehaviourResult implements BehaviourResult {
     }
 
     @Override
-    public Object value() {
+    public double[] value() {
         return getBehaviour();
     }
 

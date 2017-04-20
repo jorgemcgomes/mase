@@ -65,9 +65,9 @@ public class ExpandedFitness extends SimpleFitness {
     
     public EvaluationResult getCorrespondingEvaluation(int index) {
         EvaluationResult er = evalResults[index];
-        if (er instanceof SubpopEvaluationResult) {
-            SubpopEvaluationResult aer = (SubpopEvaluationResult) er;
-            er = (EvaluationResult) aer.getSubpopEvaluation(getCorrespondingSubpop());
+        if (er instanceof CompoundEvaluationResult) {
+            CompoundEvaluationResult aer = (CompoundEvaluationResult) er;
+            er = (EvaluationResult) aer.getEvaluation(getCorrespondingSubpop());
         }
         return er;
     }    

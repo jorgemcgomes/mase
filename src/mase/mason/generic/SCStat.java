@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
@@ -65,9 +65,9 @@ public class SCStat extends Statistics {
                         filteredAbs.addValue(scr.originalSize - scr.getCounts().size());
                         filteredRel.addValue(1 - (double) scr.getCounts().size() / scr.originalSize);
                         sizeStat.addValue(scr.getCounts().size());
-                    } else if (er instanceof SubpopEvaluationResult) {
-                        SubpopEvaluationResult ser = (SubpopEvaluationResult) er;
-                        ArrayList<? extends EvaluationResult> all = ser.getAllEvaluations();
+                    } else if (er instanceof CompoundEvaluationResult) {
+                        CompoundEvaluationResult ser = (CompoundEvaluationResult) er;
+                        ArrayList<? extends EvaluationResult> all = ser.value();
                         for (EvaluationResult subEr : all) {
                             if (subEr instanceof SCResult) {
                                 SCResult scr = (SCResult) subEr;

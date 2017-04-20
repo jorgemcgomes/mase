@@ -8,7 +8,7 @@ package mase.app.go;
 
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
 
@@ -18,7 +18,7 @@ import mase.mason.MasonSimState;
  */
 public class GoWinsFitness extends MasonEvaluation {
     
-        private SubpopEvaluationResult res;
+        private CompoundEvaluationResult res;
     
     @Override
     protected void postSimulation(MasonSimState sim) {
@@ -38,7 +38,7 @@ public class GoWinsFitness extends MasonEvaluation {
             whiteFit = 0.5f;
         }
     
-        res = new SubpopEvaluationResult(
+        res = new CompoundEvaluationResult(
                 new FitnessResult(blackFit, FitnessResult.ARITHMETIC),  
                 new FitnessResult(whiteFit, FitnessResult.ARITHMETIC));
     }

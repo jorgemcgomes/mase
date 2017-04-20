@@ -17,7 +17,7 @@ import sim.portrayal.continuous.ContinuousPortrayal2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public abstract class MasonSimState extends SimState {
+public abstract class MasonSimState<T> extends SimState {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,6 +25,7 @@ public abstract class MasonSimState extends SimState {
     protected EvaluationFunction[] evalPrototypes = new EvaluationFunction[0];
     protected int maxSteps = 0;
     public MasonEvaluation[] currentEvals;
+    public T par;
 
     public MasonSimState(long seed) {
         super(seed);
@@ -33,10 +34,23 @@ public abstract class MasonSimState extends SimState {
     public MasonSimState(GroupController gc, long seed) {
         this(seed);
         this.gc = gc;
-    }   
+    }
+    
+    public MasonSimState(GroupController gc, long seed, T params) {
+        this(gc, seed);
+        this.par = params;
+    }
+    
+    public void setParams(T par) {
+        this.par = par;
+    }
     
     public void setMaxSteps(int maxSteps) {
         this.maxSteps = maxSteps;
+    }
+    
+    public int getMaxSteps() {
+        return maxSteps;
     }
 
     public void setEvalFunctions(EvaluationFunction[] evalPrototypes) {

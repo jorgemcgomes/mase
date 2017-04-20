@@ -6,7 +6,7 @@
 package mase.app.herding;
 
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -25,7 +25,7 @@ public class HerdingIndividualEval extends MasonEvaluation {
     private double[][] foxDist;
     private double[] curralDist;
     private Double2D curral;
-    private SubpopEvaluationResult ser;
+    private CompoundEvaluationResult ser;
 
     @Override
     protected void preSimulation(MasonSimState sim) {
@@ -84,7 +84,7 @@ public class HerdingIndividualEval extends MasonEvaluation {
             }
             res[i] = new VectorBehaviourResult(br);
         }
-        this.ser = new SubpopEvaluationResult(res);
+        this.ser = new CompoundEvaluationResult(res);
     }
 
     @Override

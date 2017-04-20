@@ -1,4 +1,4 @@
-setwd("~/exps/plmetest2/")
+setwd("~/exps/playgroundrepas/")
 d <- loadFile("job.0.finalrep.stat")
 
 vars <- paste0("Behav_",0:7)

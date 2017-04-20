@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
 import mase.mason.world.SmartAgent;
@@ -29,7 +29,7 @@ public class SCAgentEvaluator extends MasonEvaluation {
     private double filter;
     
     private List<HashMap<Integer, Integer>> counts;
-    private SubpopEvaluationResult res;
+    private CompoundEvaluationResult res;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -39,7 +39,7 @@ public class SCAgentEvaluator extends MasonEvaluation {
     }
 
     @Override
-    public SubpopEvaluationResult getResult() {
+    public CompoundEvaluationResult getResult() {
         return res;
     }
 
@@ -86,7 +86,7 @@ public class SCAgentEvaluator extends MasonEvaluation {
             }
             scs.add(scr);
         }
-        res = new SubpopEvaluationResult(scs);
+        res = new CompoundEvaluationResult(scs);
     }
 
     protected byte[] discretise(double[] sensors, double[] actions) {

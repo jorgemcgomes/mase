@@ -106,8 +106,8 @@ public class GeomUtils {
             }
         }
         return result;
-    }    
-    
+    }
+
     /**
      * Format by point: x1,y1;x2,y2;x3,y3;...
      *
@@ -140,9 +140,7 @@ public class GeomUtils {
             segments[i] = new Segment(start, end);
         }
         return new Multiline(segments);
-    }    
-    
-
+    }
 
     public static class Multiline {
 
@@ -162,7 +160,7 @@ public class GeomUtils {
         }
 
         public Multiline(Double2D... points) {
-            if(points.length < 2) {
+            if (points.length < 2) {
                 throw new RuntimeException("Not enough points. Need at least 2.");
             }
             this.segments = new Segment[points.length - 1];
@@ -170,7 +168,7 @@ public class GeomUtils {
                 segments[i] = new Segment(points[i], points[i + 1]);
             }
             this.points = points;
-            this.boundingBox = GeomUtils.computeBB(points);
+            this.boundingBox = computeBB(points);
             this.width = boundingBox.getRight().x - boundingBox.getLeft().x;
             this.height = boundingBox.getRight().y - boundingBox.getLeft().y;
             this.center = new Double2D((boundingBox.getLeft().x + boundingBox.getRight().x) / 2,
@@ -193,18 +191,17 @@ public class GeomUtils {
             this.segments = segs;
             this.points = new Double2D[ps.size()];
             ps.toArray(points);
-            this.boundingBox = GeomUtils.computeBB(points);
+            this.boundingBox = computeBB(points);
             this.width = boundingBox.getRight().x - boundingBox.getLeft().x;
             this.height = boundingBox.getRight().y - boundingBox.getLeft().y;
             this.center = new Double2D((boundingBox.getLeft().x + boundingBox.getRight().x) / 2,
                     (boundingBox.getLeft().y + boundingBox.getRight().y) / 2);
         }
-        
 
         public double closestDistance(Double2D rayStart, Double2D rayEnd) {
             double closestDist = Double.POSITIVE_INFINITY;
             for (Segment seg : segments) {
-                Double2D inters = GeomUtils.segmentIntersection(rayStart, rayEnd, seg.start, seg.end);
+                Double2D inters = segmentIntersection(rayStart, rayEnd, seg.start, seg.end);
                 if (inters != null) {
                     double d = rayStart.distance(inters);
                     if (d < closestDist) {
@@ -218,14 +215,24 @@ public class GeomUtils {
         public double closestDistance(Double2D testPoint) {
             double min = Double.POSITIVE_INFINITY;
             for (Segment seg : segments) {
-                double d = GeomUtils.distToSegment(testPoint, seg.start, seg.end);
+                double d = distToSegment(testPoint, seg.start, seg.end);
                 min = Math.min(min, Math.max(0, d));
             }
             return min;
         }
 
+        /**
+         * TODO WARNING: This does not work for overlapping shapes
+         *
+         * @param other
+         * @return
+         */
         public double closestDistance(Multiline other) {
-            double closest = Double.NEGATIVE_INFINITY;
+            if (intersects(other)) {
+                return 0;
+            }
+
+            double closest = Double.POSITIVE_INFINITY;
             for (Double2D p : points) {
                 closest = Math.min(closest, other.closestDistance(p));
             }
@@ -239,7 +246,7 @@ public class GeomUtils {
             double min = Double.POSITIVE_INFINITY;
             Segment s = null;
             for (Segment seg : segments) {
-                double d = GeomUtils.distToSegment(testPoint, seg.start, seg.end);
+                double d = distToSegment(testPoint, seg.start, seg.end);
                 if (d < min) {
                     min = d;
                     s = seg;
@@ -253,6 +260,29 @@ public class GeomUtils {
                     && point.y > boundingBox.getLeft().y
                     && point.x < boundingBox.getRight().x
                     && point.y < boundingBox.getRight().y;
+        }
+
+        public boolean intersects(Multiline other) {
+            if (boundingBoxOverlap(other)) {
+                for (Segment s : segments) {
+                    for (Segment s2 : other.segments) {
+                        Double2D inters = segmentIntersection(s.start, s.end, s2.start, s2.end);
+                        if (inters != null) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        public boolean boundingBoxOverlap(Multiline other) {
+            for (Double2D p : points) {
+                if (other.isInsideBB(p)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public Multiline add(Double2D pos) {

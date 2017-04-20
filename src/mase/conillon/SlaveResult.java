@@ -7,7 +7,7 @@ package mase.conillon;
 
 import java.util.ArrayList;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import result.Result;
 
 /**
@@ -38,7 +38,7 @@ public class SlaveResult extends Result {
             } else if(er != null && temp != null) { // add to existing SER
                 temp.add(er);
             } else if(er == null && temp != null) { // end existing SER
-                resList.add(new SubpopEvaluationResult(temp));
+                resList.add(new CompoundEvaluationResult(temp));
                 temp = null;
             } else { // not SER
                 resList.add(er);

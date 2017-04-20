@@ -10,7 +10,7 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
 import sim.util.Double2D;
@@ -23,7 +23,7 @@ public class CompetitiveKeepawayFitness extends MasonEvaluation {
 
     public static final String P_PASS_LENGTH = "pass-length";
     private double passLength;
-    private SubpopEvaluationResult fitnessResult;
+    private CompoundEvaluationResult fitnessResult;
     private int numPasses;
     private transient Keeper lastKeeper;
     private Double2D lastBallPos;
@@ -58,7 +58,7 @@ public class CompetitiveKeepawayFitness extends MasonEvaluation {
 
     @Override
     protected void postSimulation(MasonSimState sim) {
-        fitnessResult = new SubpopEvaluationResult(new EvaluationResult[] {
+        fitnessResult = new CompoundEvaluationResult(new EvaluationResult[] {
             new FitnessResult(100f +  numPasses, FitnessResult.ARITHMETIC),
             new FitnessResult(100f - numPasses, FitnessResult.ARITHMETIC)
         });

@@ -21,7 +21,7 @@ import mase.controllers.AgentController;
 import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.mason.MasonSimulationProblem;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -199,9 +199,9 @@ public class Reevaluate {
         DescriptiveStatistics ds = new DescriptiveStatistics(results.size());
         for (EvaluationResult[] rs : results) {
             double fit;
-            if (rs[0] instanceof SubpopEvaluationResult) {
-                SubpopEvaluationResult ser = (SubpopEvaluationResult) rs[0];
-                fit = (Double) ser.getSubpopEvaluation(subpop).value();
+            if (rs[0] instanceof CompoundEvaluationResult) {
+                CompoundEvaluationResult ser = (CompoundEvaluationResult) rs[0];
+                fit = (Double) ser.getEvaluation(subpop).value();
             } else {
                 fit = (Double) rs[0].value();
             }

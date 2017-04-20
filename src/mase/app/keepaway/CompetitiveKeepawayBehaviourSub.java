@@ -8,7 +8,7 @@ package mase.app.keepaway;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -24,7 +24,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
     public static final String P_PASS_LENGTH = "pass-length";
     public static final String P_PASS_NORMALIZATION = "pass-normalization";
 
-    private SubpopEvaluationResult res;
+    private CompoundEvaluationResult res;
 
     private double minPass;
     private int passesNormalization;
@@ -103,7 +103,7 @@ public class CompetitiveKeepawayBehaviourSub extends MasonEvaluation {
     protected void postSimulation(MasonSimState sim) {
         Keepaway kw = (Keepaway) sim;
         double steps = sim.schedule.getSteps();
-        this.res = new SubpopEvaluationResult(
+        this.res = new CompoundEvaluationResult(
                 new VectorBehaviourResult(
                         numPasses / (double) passesNormalization,
                          (ballDist[0] / kw.par.size / steps),

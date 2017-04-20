@@ -6,7 +6,7 @@
 package mase.app.foraging;
 
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -25,7 +25,7 @@ public class ForagingIndividualBehaviour extends MasonEvaluation {
     private double landMovement, flyingMovement;
     private double flyingHeight;
     private Double2D landLast, flyingLast;
-    private SubpopEvaluationResult ser;
+    private CompoundEvaluationResult ser;
 
     @Override
     protected void preSimulation(MasonSimState sim) {
@@ -68,7 +68,7 @@ public class ForagingIndividualBehaviour extends MasonEvaluation {
         super.postSimulation(null);
         ForagingTask ft = (ForagingTask) sim;
         double diag = ft.par.arenaSize.length();
-        ser = new SubpopEvaluationResult(
+        ser = new CompoundEvaluationResult(
                 new VectorBehaviourResult(
                          ft.items.size() / (double) ft.par.items.length,
                          Math.min(1, landProximity / currentEvaluationStep / diag),

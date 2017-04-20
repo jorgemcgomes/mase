@@ -7,7 +7,7 @@ package mase.app.keepaway;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -28,7 +28,7 @@ public class KeepawayIndividualEval extends MasonEvaluation {
     private int[] allCount;
     private int lastKeeper;
     private Double2D lastPossession;
-    private SubpopEvaluationResult evaluation;
+    private CompoundEvaluationResult evaluation;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -110,7 +110,7 @@ public class KeepawayIndividualEval extends MasonEvaluation {
             double[] b = new double[]{passNumber[i], passLength[i], distanceToOthers[i], movement[i]};
             res[i] = new VectorBehaviourResult(b);
         }
-        evaluation = new SubpopEvaluationResult(res);
+        evaluation = new CompoundEvaluationResult(res);
     }
 
     @Override

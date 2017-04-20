@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -28,7 +28,7 @@ public class ASAgentEvaluator extends MasonEvaluation {
     public static final String P_WINDOWS = "windows";
     private int windows;
     private List<List<double[]>> states;
-    private SubpopEvaluationResult res;
+    private CompoundEvaluationResult res;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -88,7 +88,7 @@ public class ASAgentEvaluator extends MasonEvaluation {
             //vbr.setDistance(VectorBehaviourResult.MANHATTAN);
             resList.add(vbr);
         }
-        this.res = new SubpopEvaluationResult(resList);
+        this.res = new CompoundEvaluationResult(resList);
     }
 
     // excluding to
@@ -119,8 +119,8 @@ public class ASAgentEvaluator extends MasonEvaluation {
 
     @Override
     public EvaluationResult getResult() {
-        if(res.getAllEvaluations().size() == 1) {
-            return res.getAllEvaluations().get(0);
+        if(res.value().size() == 1) {
+            return res.value().get(0);
         } else {
             return res;
         }

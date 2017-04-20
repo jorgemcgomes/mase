@@ -8,7 +8,7 @@ package mase.mason.generic;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.SubpopEvaluationResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
 
@@ -33,9 +33,9 @@ public class AgentMergeGroupEvaluator extends MasonEvaluation {
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
         // Get result from the other
-        SubpopEvaluationResult ser = (SubpopEvaluationResult) sim.currentEvals[agEvalIndex].getResult();
+        CompoundEvaluationResult ser = (CompoundEvaluationResult) sim.currentEvals[agEvalIndex].getResult();
         // merge
-        EvaluationResult[] ers = ser.getAllEvaluations().toArray(new EvaluationResult[0]);
+        EvaluationResult[] ers = ser.value().toArray(new EvaluationResult[0]);
         res = ers[0].mergeEvaluations(ers);
     }
 

@@ -20,21 +20,6 @@ import mase.novelty.NoveltyEvaluation;
 import net.jafama.FastMath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeSelection;
-import weka.attributeSelection.BestFirst;
-import weka.attributeSelection.InfoGainAttributeEval;
-import weka.attributeSelection.Ranker;
-import weka.attributeSelection.ReliefFAttributeEval;
-import weka.clusterers.SimpleKMeans;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SelectedTag;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Discretize;
 
 /**
  * ONLY WORKS WITH ONE NOVELTY SCORE
@@ -156,28 +141,30 @@ public class WeightedNovelty extends NoveltyEvaluation {
                 indIndex++;
             }
 
-            // Compute correlation
-            if (correlation == CorrelationMethod.pearson) {
-                PearsonsCorrelation pearson = new PearsonsCorrelation();
-                for (int i = 0; i < instantCorrelation.length; i++) {
-                    instantCorrelation[i] = pearson.correlation(behaviourFeatures[0], behaviourFeatures[i + 1]);
-                }
-            } else if (correlation == CorrelationMethod.spearman) {
-                SpearmansCorrelation spearman = new SpearmansCorrelation();
-                for (int i = 0; i < instantCorrelation.length; i++) {
-                    instantCorrelation[i] = spearman.correlation(behaviourFeatures[0], behaviourFeatures[i + 1]);
-                }
-            } else if (correlation == CorrelationMethod.brownian) {
-                for (int i = 0; i < instantCorrelation.length; i++) {
-                    instantCorrelation[i] = distanceCorrelation(behaviourFeatures[0], behaviourFeatures[i + 1]);
-                }
+            if (null != correlation) // Compute correlation
+            switch (correlation) {
+                case pearson:
+                    PearsonsCorrelation pearson = new PearsonsCorrelation();
+                    for (int i = 0; i < instantCorrelation.length; i++) {
+                        instantCorrelation[i] = pearson.correlation(behaviourFeatures[0], behaviourFeatures[i + 1]);
+                    }   break;
+                case spearman:
+                    SpearmansCorrelation spearman = new SpearmansCorrelation();
+                    for (int i = 0; i < instantCorrelation.length; i++) {
+                        instantCorrelation[i] = spearman.correlation(behaviourFeatures[0], behaviourFeatures[i + 1]);
+                    }   break;
+                case brownian:
+                    for (int i = 0; i < instantCorrelation.length; i++) {
+                        instantCorrelation[i] = distanceCorrelation(behaviourFeatures[0], behaviourFeatures[i + 1]);
+                    }   break;
+                default:
+                    break;
             }
-            /*
-             Weka-based correlation
-             */
+
         } else if (correlation == CorrelationMethod.cfs || correlation == CorrelationMethod.relief || correlation == CorrelationMethod.mutualinfo) {
+            throw new UnsupportedOperationException("Removed support due to removal of WEKA dependency. Needs to be adapted to use SMILE methods.");
             /* Assemble data */
-            FastVector atts = new FastVector(instantCorrelation.length + 1);
+            /*FastVector atts = new FastVector(instantCorrelation.length + 1);
             atts.addElement(new Attribute("Fitness"));
             for (int i = 0; i < instantCorrelation.length; i++) {
                 atts.addElement(new Attribute("A" + i));
@@ -202,7 +189,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
                 as.setEvaluator(eval);
                 as.setSearch(search);
                 try {
-                    /* Apply the algorithm to the data set */
+                    // Apply the algorithm to the data set
                     as.SelectAttributes(data);
                     int[] selected = as.selectedAttributes();
                     Arrays.fill(instantCorrelation, 0);
@@ -219,7 +206,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
                 as.setEvaluator(eval);
                 as.setSearch(search);
                 try {
-                    /* Apply the algorithm to the data set */
+                    // Apply the algorithm to the data set
                     as.SelectAttributes(data);
                     double[][] score = as.rankedAttributes();
                     for (int i = 0; i < score.length; i++) {
@@ -230,9 +217,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
                 }
             } else if (correlation == CorrelationMethod.mutualinfo) {
                 try {
-                    /*
-                     Discretize fitness class
-                     */
+                    // Discretize fitness class
                     Instances discretized = null;
                     //double[] splits = null; // DEBUG
                     if (discMethod == DiscretizationMethod.equalfreq || discMethod == DiscretizationMethod.equalwidth) {
@@ -288,9 +273,8 @@ public class WeightedNovelty extends NoveltyEvaluation {
                     //Arrays.sort(splits);
                     //System.out.println(Arrays.toString(splits));
                     
-                    /*
-                    Compute mutual information
-                    */
+                    
+                    // Compute mutual information
                     ASEvaluation eval = new InfoGainAttributeEval();
                     ASSearch search = new Ranker();
                     AttributeSelection as = new AttributeSelection();
@@ -304,7 +288,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-            }
+            }*/
         }
 
         // calculate base weight -- absolute value and smooth
