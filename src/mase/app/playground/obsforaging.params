@@ -1,0 +1,8 @@
+parent.0 = freeforaging.params
+
+problem.minObstacles = 5
+problem.maxObstacles = 10
+problem.minObstacleSize = 15
+problem.maxObstacleSize = 30
+
+generations = 100

@@ -1,0 +1,24 @@
+parent.0 = playground.params
+
+problem.simstate =                 mase.app.playground.RandomMovingAgentsPlayground
+
+problem.number-evals =             1
+problem.eval.0 =                   mase.app.playground.AvoidanceFitness
+problem.eval.0.update-freq =       1
+
+fitness.fitness-index =            0
+
+problem.seed =                     random
+problem.repetitions =              20
+problem.max-steps =                500
+
+problem.minObjects = 5
+problem.maxObjects = 5
+problem.objectRadius = 2
+problem.minObjectDistance = 50
+problem.objectSpeed = 0.5
+    
+problem.minObstacles = 0
+problem.maxObstacles = 0
+
+generations = 100

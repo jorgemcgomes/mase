@@ -20,6 +20,8 @@ public class PlaygroundParams implements Serializable {
     int minObjects;
     int maxObjects;
     double objectRadius;
+    double minObjectDistance;
+    double objectSpeed;
     
     int minObstacles;
     int maxObstacles;
