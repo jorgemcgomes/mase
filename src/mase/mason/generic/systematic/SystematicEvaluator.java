@@ -10,7 +10,6 @@ import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import mase.evaluation.EvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
 import net.jafama.FastMath;
@@ -20,7 +19,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
  *
  * @author jorge
  */
-public class SystematicEvaluator extends MasonEvaluation {
+public class SystematicEvaluator extends MasonEvaluation<SystematicResult> {
     private static final long serialVersionUID = 1L;
 
     @Override
@@ -87,7 +86,7 @@ public class SystematicEvaluator extends MasonEvaluation {
     protected void preSimulation(MasonSimState sim) {
         this.td = ((TaskDescriptionProvider) sim).getTaskDescription();
 
-        this.features = new ArrayList<List<Double>>(MAX_FEATURES);
+        this.features = new ArrayList<>(MAX_FEATURES);
         for (int i = 0; i < MAX_FEATURES; i++) {
             features.add(new ArrayList(INITIAL_SIZE));
         }
@@ -137,6 +136,7 @@ public class SystematicEvaluator extends MasonEvaluation {
 
                 // Physical dispersion -- mean distance of each entity to the other entities
                 if (physicalRelations && eg.getMaxSize() > 1 && !eg.isStatic()) {
+                    throw new UnsupportedOperationException("Distance function undefined");
                     //double dist = td.distanceFunction().distance(eg, eg); 
                     //features.get(index++).add(dist);
                 }
@@ -147,6 +147,7 @@ public class SystematicEvaluator extends MasonEvaluation {
                 for (int go = gi + 1; go < td.groups().length; go++) {
                     EntityGroup otherG = td.groups()[go];
                     if ((!eg.isStatic() || !otherG.isStatic()) && (evaluateGroup[gi] || evaluateGroup[go])) {
+                        throw new UnsupportedOperationException("Distance function undefined");
                         //features.get(index++).add(td.distanceFunction().distance(eg, otherG));
                     }
                 }
@@ -280,7 +281,7 @@ public class SystematicEvaluator extends MasonEvaluation {
     }
 
     @Override
-    public EvaluationResult getResult() {
+    public SystematicResult getResult() {
         return vbr;
     }
 

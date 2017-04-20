@@ -49,7 +49,7 @@ public class PlaygroundAgent extends SmartAgent {
         // Effector
         DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
-        dm.allowBackwardMove(true);
+        dm.allowBackwardMove(sim.par.backMove);
         this.addEffector(dm);        
 
         this.enableBoundedArena(true);

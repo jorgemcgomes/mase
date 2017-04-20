@@ -185,7 +185,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
             // try to escape to both sides with a random order
             double angle = sim.random.nextBoolean() ? collisionReboundDirection : -collisionReboundDirection;
             if (!attemptMove(normalizeAngle(orientation + angle), speed * collisionSpeedDecay)
-                    && !attemptMove(normalizeAngle(orientation - angle), collisionSpeedDecay)) {
+                    && !attemptMove(normalizeAngle(orientation - angle), speed * collisionSpeedDecay)) {
                 // could not rebound as well
                 return false;
             }

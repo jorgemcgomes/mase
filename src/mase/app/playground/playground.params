@@ -29,6 +29,7 @@ problem.maxObstacleSize = 30
     
 problem.radius = 4
 problem.linearSpeed = 1
+problem.backMove = true
 problem.turnSpeed = 0.392
 problem.numCones = 4
 problem.coneRange = 100
@@ -38,11 +39,11 @@ ec.subpop.species = 			ec.vector.FloatVectorSpecies
 vector.species.min-gene =               -1
 vector.species.max-gene =               1
 vector.species.ind =                    mase.controllers.NeuralControllerIndividual
-vector.species.genome-size =   32
+vector.species.genome-size =   52
 vector.species.mutation-prob =          0.05
 neural.structure = feed-forward
 neural.input = 7
-neural.hidden = 3
+neural.hidden = 5
 neural.output = 2
 
 neat.INPUT.NODES = 7
@@ -52,7 +53,7 @@ generations = 1000
 ec.subpop.initial-batch =               10000
 ec.subpop.size = 			1000
 ec.subpop.behaviour-index =             0
-ec.subpop.resolution =                  0.34
+ec.subpop.resolution =                  0.251
 
 # useful for preliminary tests
 stat.child.8.update-always =           true

@@ -30,6 +30,7 @@ public class PlaygroundParams implements Serializable {
     
     double radius;
     double linearSpeed;
+    boolean backMove;
     double turnSpeed;
     int numCones;
     double coneRange;
