@@ -18,7 +18,7 @@ problem.objectRadius = 2
 problem.minObjectDistance = 75
 problem.objectSpeed = 0.5
     
-problem.minObstacles = 5
-problem.maxObstacles = 10
+problem.minObstacles = 1
+problem.maxObstacles = 5
 
-generations = 100
+generations = 250

@@ -5,7 +5,6 @@
  */
 package mase.mason.world;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import sim.engine.SimState;

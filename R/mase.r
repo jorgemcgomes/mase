@@ -194,20 +194,12 @@ filterBests <- function(data, subpops=F) {
 }
 
 loadFitness <- function(file, loadSubs=F) {
-  frame <- fread(file, header=F, sep=" ", stringsAsFactors=F)
-  fixedvars <- c("Generation","Evaluations")
-  df <- data.table(Generation=frame[[1]],Evaluations=frame[[2]],Subpop="Any",BestSoFar=frame[[ncol(frame)]], BestGen=frame[[ncol(frame)-1]], Mean=frame[[ncol(frame)-2]])
-  if(loadSubs) {
-    nsubs <- (ncol(frame) - 2) / 3 - 1
-    substart <- 3
-    for(sub in 0:(nsubs-1)) {
-      d <- data.table(Generation=frame[[1]],Evaluations=frame[[2]],Subpop=sub,BestSoFar=frame[[sub*3+substart+2]], BestGen=frame[[sub*3+substart+1]], Mean=frame[[sub*3+substart]])
-      df <- rbind(df,d)
-    }
-    df <- df[order(Generation, Subpop),]
+  frame <- fread(file, header=T, sep=" ", stringsAsFactors=F)
+  if(!loadSubs) {
+    frame <- frame[is.na(Subpop)]
   }
-  set(df,j="Subpop", value=as.factor(df$Subpop))
-  return(df)
+  frame[, Subpop := factor(Subpop)]
+  return(frame)
 }
 
 factorDT <- function(dt, unique.limit=50) {
@@ -275,11 +267,11 @@ fixPostFitness <- function(folder, postname="postfitness.stat") {
 #### Fitness plotting functions #####################################################################
 
 bestSoFarFitness <- function(data, showSE=T) {
-  agg <- summaryBy(BestSoFar ~ Setup + Generation, subset(data,Subpop=="Any"), FUN=c(mean,se))
+  agg <- summaryBy(BestSoFar ~ Setup + Generation, subset(data,is.na(Subpop)), FUN=c(mean,se))
   g <- ggplot(agg, aes(Generation,BestSoFar.mean,group=Setup)) + geom_line(aes(colour=Setup)) + ylab("Fitness") + 
     theme(legend.position="bottom")
   if(showSE) {
-    g <- g + geom_ribbon(aes(ymax = BestSoFar.mean + BestSoFar.se, ymin = BestSoFar.mean - BestSoFar.se), alpha = 0.1)
+    g <- g + geom_ribbon(aes(ymax = BestSoFar.mean + BestSoFar.se, ymin = BestSoFar.mean - BestSoFar.se, fill=Setup), alpha = 0.1)
   }
   return(g)
 }
@@ -315,7 +307,7 @@ fitnessBoxplots <- function(data, generation=NULL, ttests=T) {
 
 rankByFitness <- function(data, generation=NULL, ttests=T) {
   data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
-  agg <- summaryBy(BestSoFar ~ Setup, subset(data,Subpop=="Any"), FUN=c(mean,se))
+  agg <- summaryBy(BestSoFar ~ Setup, subset(data,is.na(Subpop)), FUN=c(mean,se))
   agg <- transform(agg, Setup = reorder(Setup, BestSoFar.mean))
   g <- ggplot(agg, aes(x=Setup, y=BestSoFar.mean, fill=Setup)) + 
     geom_bar(stat="identity") + geom_errorbar(aes(ymin=BestSoFar.mean-BestSoFar.se, ymax=BestSoFar.mean+BestSoFar.se),width=0.5) +
@@ -326,7 +318,7 @@ rankByFitness <- function(data, generation=NULL, ttests=T) {
 
 fitnessTtests <- function(data, generation=NULL) {
   data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
-  data <- subset(data, Subpop=="Any", select=c("Setup","BestSoFar"))
+  data <- subset(data, is.na(Subpop), select=c("Setup","BestSoFar"))
   d <- split(data, data$Setup)
   setlist <- lapply(d, function(x){x$BestSoFar})
   return(batch.ttest(setlist))

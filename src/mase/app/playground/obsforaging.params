@@ -5,4 +5,4 @@ problem.maxObstacles = 10
 problem.minObstacleSize = 15
 problem.maxObstacleSize = 30
 
-generations = 100
+generations = 250

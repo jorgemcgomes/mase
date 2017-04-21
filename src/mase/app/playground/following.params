@@ -21,4 +21,4 @@ problem.objectSpeed = 0.5
 problem.minObstacles = 5
 problem.maxObstacles = 10
 
-generations = 100
+generations = 250

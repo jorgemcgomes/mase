@@ -5,9 +5,10 @@
  */
 package mase.evorbc;
 
+import java.util.ArrayList;
+import java.util.List;
 import mase.controllers.AgentController;
-import smile.neighbor.KDTree;
-import smile.neighbor.Neighbor;
+import mase.util.KdTree;
 
 /**
  *
@@ -18,14 +19,14 @@ public class ArbitratorController implements AgentController {
     private static final long serialVersionUID = 1L;
 
     private AgentController arbitrator;
-    private KDTree<AgentController> repo;
+    private KdTree<AgentController> repo;
     private AgentController lastPrimitive = null;
 
     public ArbitratorController() {
         this(null, null);
     }
 
-    public ArbitratorController(AgentController arbitrator, KDTree<AgentController> repo) {
+    public ArbitratorController(AgentController arbitrator, KdTree<AgentController> repo) {
         this.arbitrator = arbitrator;
         this.repo = repo;
     }
@@ -35,7 +36,7 @@ public class ArbitratorController implements AgentController {
      *
      * @param repo
      */
-    public void setRepertoire(KDTree<AgentController> repo) {
+    public void setRepertoire(KdTree<AgentController> repo) {
         this.repo = repo;
     }
 
@@ -48,14 +49,14 @@ public class ArbitratorController implements AgentController {
         double[] arbitratorOutput = arbitrator.processInputs(input);
 
         // TODO: add fancy mapping support
-        Neighbor<double[], AgentController> nearest = repo.nearest(arbitratorOutput);
+        ArrayList<KdTree.SearchResult<AgentController>> nearest = repo.nearestNeighbours(arbitratorOutput, 1);
         
         /*for(double d : nearest.key) {
             System.out.print(d + " ");
         }
         System.out.println();*/
         
-        AgentController primitive = nearest.value;
+        AgentController primitive = nearest.get(0).payload;
         if (lastPrimitive == null || primitive != lastPrimitive) {
             primitive.reset();
             lastPrimitive = primitive;

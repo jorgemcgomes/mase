@@ -3,13 +3,13 @@ parent.0 = playground.params
 problem.number-evals =             1
 problem.eval.0 =                   mase.app.playground.ExplorationFitness
 problem.eval.0.update-freq =       1
-problem.eval.0.discretisation =    10
+problem.eval.0.discretisation =    30
 
 fitness.fitness-index =            0
 
 problem.seed =                     random
 problem.repetitions =              20
-problem.max-steps =                500
+problem.max-steps =                1000
 
 problem.minObjects = 0
 problem.maxObjects = 0
@@ -19,4 +19,4 @@ problem.maxObstacles = 5
 problem.minObstacleSize = 20
 problem.maxObstacleSize = 20
 
-generations = 100
+generations = 250

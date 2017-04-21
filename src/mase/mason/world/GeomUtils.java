@@ -256,10 +256,8 @@ public class GeomUtils {
         }
 
         public boolean isInsideBB(Double2D point) {
-            return point.x > boundingBox.getLeft().x
-                    && point.y > boundingBox.getLeft().y
-                    && point.x < boundingBox.getRight().x
-                    && point.y < boundingBox.getRight().y;
+            return point.x > boundingBox.getLeft().x && point.x < boundingBox.getRight().x &&
+                    point.y > boundingBox.getLeft().y && point.y < boundingBox.getRight().y;
         }
 
         public boolean intersects(Multiline other) {

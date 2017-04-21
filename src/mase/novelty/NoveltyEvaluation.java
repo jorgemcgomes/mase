@@ -15,14 +15,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mase.evaluation.PostEvaluator;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.VectorBehaviourResult;
-import smile.neighbor.KDTree;
-import smile.neighbor.Neighbor;
+import mase.util.KdTree;
 
 /**
  *
@@ -165,27 +162,23 @@ public class NoveltyEvaluation implements PostEvaluator {
 
     public class KDTreeCalculator implements KNNDistanceCalculator {
 
-        private KDTree<BehaviourResult> tree;
+        private KdTree<BehaviourResult> tree;
 
         @Override
         public void setPool(List<BehaviourResult> pool) {
-            double[][] keys = new double[pool.size()][];
-            for (int i = 0; i < pool.size(); i++) {
-                VectorBehaviourResult vbr = (VectorBehaviourResult) pool.get(i);
-                keys[i] = vbr.getBehaviour();
+            tree = new KdTree.Euclidean<>(((VectorBehaviourResult) pool.get(0)).value().length);
+            for(BehaviourResult br : pool) {
+                tree.addPoint(((VectorBehaviourResult) br).value(), br);
             }
-            BehaviourResult[] values = pool.toArray(new BehaviourResult[pool.size()]);
-            this.tree = new KDTree<>(keys, values);
-            this.tree.setIdenticalExcluded(true);
         }
 
         @Override
         public double getDistance(final BehaviourResult target, int k) {
             VectorBehaviourResult vbr = (VectorBehaviourResult) target;
-            Neighbor<double[], BehaviourResult>[] knn = tree.knn(vbr.getBehaviour(), k);
+            ArrayList<KdTree.SearchResult<BehaviourResult>> nearest = tree.nearestNeighbours(vbr.getBehaviour(), k + 1); // +1 to exclude self
             double dist = 0;
-            for (Neighbor<double[], BehaviourResult> n : knn) {
-                dist += n.distance;
+            for (KdTree.SearchResult<BehaviourResult> e : nearest) {
+                dist += e.distance;
             }
             return dist / k;
         }

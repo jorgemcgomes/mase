@@ -173,11 +173,10 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         this.collisionRebound = enable;
     }
 
-    protected boolean move(double orientation, double speed) {
-        double o = normalizeAngle(orientation);
+    protected boolean move(double orientation, double speed) {        
         if (rotate) {
-            this.turningSpeed = o - this.orientation;
-            this.orientation = o;
+            this.turningSpeed = orientation - this.orientation;
+            this.orientation = normalizeAngle(orientation);
         }
         
         boolean tryMove = attemptMove(orientation, speed);

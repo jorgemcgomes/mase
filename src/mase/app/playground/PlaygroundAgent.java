@@ -32,7 +32,7 @@ public class PlaygroundAgent extends SmartAgent {
         
         // Obstacle whisker sensor
         RaySensor dw = new RaySensor(sim, field, this);
-        dw.setRays(sim.par.whiskerRange, FastMath.toRadians(-45), 0, FastMath.toRadians(45)); // left, front, right
+        dw.setRays(sim.par.whiskerRange, -FastMath.toRadians(45), 0, FastMath.toRadians(45)); // left, front, right
         dw.setObjectTypes(MultilineObject.class);
         dw.setBinary(false);
         this.addSensor(dw);

@@ -51,7 +51,7 @@ public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
     // agent-to-walls distance ; agent-to-obstacles mean distance; agent-to-objects mean distance; agent linear speed; agent turn speed 
     protected double[] state(Playground pl) {
         double[] res = new double[5];
-        res[0] = pl.agent.distanceTo(pl.walls) / distNorm;
+        res[0] = pl.agent.distanceTo(pl.walls) / (distNorm / 2);
         
         double md = 0;
         for(MultilineObject o : pl.obstacles) {

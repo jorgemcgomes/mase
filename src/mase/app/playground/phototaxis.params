@@ -17,7 +17,7 @@ problem.minObjectDistance = 75
     
 problem.minObstacles = 5
 problem.maxObstacles = 10
-problem.minObstacleSize = 15
+problem.minObstacleSize = 20
 problem.maxObstacleSize = 30
 
-generations = 100
+generations = 250
