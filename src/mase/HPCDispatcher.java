@@ -17,7 +17,10 @@ import mase.MaseManager.Job;
 import mase.MaseManager.StatusListener;
 
 /**
- *
+ * USAGE INSTRUCTIONS:
+ * 1 - Run hpcsync.sh to copy all the required stuff to the cluster home
+ * 2 - Run hpcrun.sh in the cluster, which launches this main
+ * Ex: ./hpcrun.sh -t <number_threads> [-dry] [-nosort] <config_file>
  * @author jorge
  */
 public class HPCDispatcher {
@@ -30,7 +33,7 @@ public class HPCDispatcher {
         /*
         Read params from command line
          */
-        String file = args[0];
+        String file = args[args.length - 1];
         boolean sort = true;
         boolean dryRun = false;
         int threads = 8;
@@ -68,13 +71,12 @@ public class HPCDispatcher {
         if (sort) {
             mng.sortJobFirst();
         }
+        
 
-        /*
-        TODO: Clean existing scripts
-         */
- /*
-        Generate scripts
-         */
+        // TODO: Clean existing scripts
+        // Potential issue: might screw up with things if some are already running
+        
+        // Generate scripts
         List<String> scripts = new ArrayList<>();
         for (Job j : mng.waitingList) {
             String name = "mase_" + j.outfolder.replace("/", "_") + "_" + j.jobNumber + ".sh";

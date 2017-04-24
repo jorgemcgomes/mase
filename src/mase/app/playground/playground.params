@@ -56,4 +56,8 @@ ec.subpop.behaviour-index =             0
 ec.subpop.resolution =                  0.251
 
 # useful for preliminary tests
-stat.child.8.update-always =           true
+stat.child.8.update-always =           false
+
+# no need for scores
+stat.child.9 = ec.Statistics
+

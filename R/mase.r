@@ -1,4 +1,4 @@
-#install.packages(c("ggplot2","scales","reshape","kohonen","parallel","doParallel","pbapply","data.table","plyr","doBy","pdist","RColorBrewer","formula.tools"))
+#install.packages(c("ggplot2","scales","reshape","kohonen","parallel","doParallel","pbapply","data.table","plyr","doBy","pdist","RColorBrewer","formula.tools","arules","MASS","tsne"))
 library(ggplot2)
 library(scales)
 library(reshape)
@@ -14,6 +14,7 @@ library(RColorBrewer)
 library(formula.tools)
 library(arules)
 library(MASS)
+library(tsne)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
@@ -267,11 +268,10 @@ fixPostFitness <- function(folder, postname="postfitness.stat") {
 #### Fitness plotting functions #####################################################################
 
 bestSoFarFitness <- function(data, showSE=T) {
-  agg <- summaryBy(BestSoFar ~ Setup + Generation, subset(data,is.na(Subpop)), FUN=c(mean,se))
-  g <- ggplot(agg, aes(Generation,BestSoFar.mean,group=Setup)) + geom_line(aes(colour=Setup)) + ylab("Fitness") + 
-    theme(legend.position="bottom")
+  agg <- data[is.na(Subpop), .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,Generation)]
+  g <- ggplot(agg, aes(Generation,Mean,group=Setup)) + geom_line(aes(colour=Setup)) + ylab("Fitness")
   if(showSE) {
-    g <- g + geom_ribbon(aes(ymax = BestSoFar.mean + BestSoFar.se, ymin = BestSoFar.mean - BestSoFar.se, fill=Setup), alpha = 0.1)
+    g <- g + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=Setup), alpha = 0.1)
   }
   return(g)
 }

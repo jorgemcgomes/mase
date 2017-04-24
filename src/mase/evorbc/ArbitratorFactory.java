@@ -11,7 +11,9 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,33 +54,38 @@ public class ArbitratorFactory implements ControllerFactory {
         }
         state.output.message("Solutions found in repertoire: " + solutions.size());
 
-        double[][] coords = null;
+        Map<Integer, double[]> coords = null;
         if (state.parameters.exists(base.push(P_REDUCED), DEFAULT_BASE.push(P_REDUCED))) {
             reducedFile = new File(state.parameters.getString(base.push(P_REDUCED), DEFAULT_BASE.push(P_REDUCED)));
             if (reducedFile.exists()) {
                 coords = loadCoordinates(reducedFile);
-                if (coords.length != solutions.size()) {
+                if (coords.size() != solutions.size()) {
                     state.output.fatal("Number of solutions in repertoire does not match number of coordinates");
                 }
             } else {
                 state.output.fatal("Coordinate file does not exist: " + reducedFile.getAbsolutePath());
             }
         } else {
-            coords = new double[solutions.size()][];
+            coords = new HashMap<>();
             for (int i = 0; i < solutions.size(); i++) {
-                coords[i] = (double[]) solutions.get(i).getUserData();
+                PersistentSolution sol = solutions.get(i);
+                coords.put(sol.getIndex(), (double[]) solutions.get(i).getUserData());
             }
         }
         
         double prune = state.parameters.getDouble(base.push(P_PRUNE), DEFAULT_BASE.push(P_PRUNE));
 
         int pruned = 0;
-        repo = new Euclidean<>(coords[0].length);
+        repo = new Euclidean<>(coords.get(solutions.get(0).getIndex()).length);
         for(int i = 0 ; i < solutions.size() ; i++) {
             PersistentSolution sol = solutions.get(i);
             if(valid(sol, prune)) {
                 AgentController ac = sol.getController().getAgentControllers(1)[0];
-                repo.addPoint(coords[i], ac);
+                double[] c = coords.get(sol.getIndex());
+                if(c == null) {
+                    state.output.fatal("Coordinate not found for index " + sol.getIndex());
+                }
+                repo.addPoint(c, ac);
             } else {
                 pruned++;
             }
@@ -92,21 +99,21 @@ public class ArbitratorFactory implements ControllerFactory {
         return s.getFitness() > prune;
     }
     
-    private double[][] loadCoordinates(File file) {
+    private Map<Integer, double[]> loadCoordinates(File file) {
+        Map<Integer, double[]> res = new HashMap<>();
         try {
-            List<double[]> read = new ArrayList<>();
             Scanner sc = new Scanner(file);
             while (sc.hasNext()) {
                 String line = sc.nextLine();
                 String[] split = line.trim().split(" ");
-                double[] splitValues = new double[split.length];
-                for (int i = 0; i < splitValues.length; i++) {
-                    splitValues[i] = Double.parseDouble(split[i]);
+                int index = Integer.parseInt(split[0]);
+                double[] coords = new double[split.length - 1];
+                for (int i = 0; i < coords.length; i++) {
+                    coords[i] = Double.parseDouble(split[i + 1]);
                 }
-                read.add(splitValues);
+                res.put(index, coords);
             }
-            double[][] matrix = read.toArray(new double[read.size()][]);
-            return matrix;
+            return res;
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ArbitratorFactory.class.getName()).log(Level.SEVERE, null, ex);
             return null;

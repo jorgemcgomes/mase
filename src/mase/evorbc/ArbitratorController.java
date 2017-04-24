@@ -20,7 +20,7 @@ public class ArbitratorController implements AgentController {
 
     private AgentController arbitrator;
     private KdTree<AgentController> repo;
-    private AgentController lastPrimitive = null;
+    private transient AgentController lastPrimitive = null;
 
     public ArbitratorController() {
         this(null, null);
