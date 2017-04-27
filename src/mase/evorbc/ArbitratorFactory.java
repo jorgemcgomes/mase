@@ -73,6 +73,8 @@ public class ArbitratorFactory implements ControllerFactory {
             }
         }
         
+        scaleCoordinates(coords);
+        
         double prune = state.parameters.getDouble(base.push(P_PRUNE), DEFAULT_BASE.push(P_PRUNE));
 
         int pruned = 0;
@@ -93,6 +95,23 @@ public class ArbitratorFactory implements ControllerFactory {
 
         state.output.message("Pruned: " + pruned + ". New size: " + repo.size());
 
+    }
+    
+    protected void scaleCoordinates(Map<Integer, double[]> coords) {
+        double min = Double.POSITIVE_INFINITY;
+        double max = Double.NEGATIVE_INFINITY;
+        for(double[] c : coords.values()) {
+            for(double v : c) {
+                min = Math.min(min, v);
+                max = Math.max(max, v);
+            }
+        }
+        double range = max - min;
+        for(double[] c : coords.values()) {
+            for(int i = 0 ; i < c.length ; i++) {
+                c[i] = (c[i] - min) / range;
+            }
+        }
     }
     
     protected boolean valid(PersistentSolution s, double prune) {

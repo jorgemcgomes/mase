@@ -15,6 +15,7 @@ library(formula.tools)
 library(arules)
 library(MASS)
 library(tsne)
+library(Rtsne)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
@@ -520,25 +521,49 @@ identifyBests <- function(som, data, n=10, interactive=T) {
   return(ldply(as.list(ids), aux))
 }
 
-# Reduces the dimensionality of the given variables to 2D
+
+# Reduces the dimensionality of the given variables to k dimensions
 # data: the frame that contains the data to be reduced
-# vars: the vars to be reduced
-# ...: to be passed to sammon()
-# returns data with two extra columns: X and Y
-sammonReduce <- function(data, vars, ...) {
-  sub <- data[, vars, with=F]
-  dists <- dist(sub)
-  sam <- sammon(dists, ...)
-  data[, X := sam$points[,1]]
-  data[, Y := sam$points[,2]]
-  return(data)
+# vars: the vars to be reduced or NULL if all
+# method: dimensionality reduction method. currently supports sammon, tsne, Rtsne (fast Barnes-Hut tsne)
+# ...: to be passed to reduction method
+# returns data with extra columns for the reduced data
+reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon"), k=2, normalise=T, ...) {
+  d <- data
+  if(!is.null(vars)) {
+    d <- data[, vars, with=F]
+  }
+  if(method[1]=="sammon") {
+    dists <- dist(d)
+    sam <- sammon(dists, k=k, ...)
+    d <- sam$points
+  } else if(method[1]=="tsne") {
+    dists <- dist(d)
+    d <- tsne(dists, k=k, ...)
+  } else if(method[1]=="Rtsne") {
+    ts <- Rtsne(d, dims=k, ...)
+    d <- ts$Y
+  } else {
+    stop("unknown method:", method[1])
+  }
+  if(normalise) {
+    d <- scaleData(d)
+  }
+  d <- as.data.table(d)
+  colnames(d) <- paste0("V",1:ncol(d))
+  return(cbind(data,d))
+}
+
+# to [0,1]
+scaleData <- function(d) {
+  (d - min(d)) / (max(d) - min(d))
 }
 
 # Plots the sammon mapping in 2D
 # reduced: frame with the reduction done (sammonReduce)
 # color.var: optional. numeric variable to be used to color the dots
-sammonPlot <- function(reduced, color.var=NULL) {
-  g <- ggplot(reduced, aes(x=X, y=Y)) + geom_point(aes_string(colour=color.var), shape=4, size=1.5) + 
+plotReduced2D <- function(reduced, color.var=NULL) {
+  g <- ggplot(reduced, aes(x=V1, y=V2)) + geom_point(aes_string(colour=color.var), shape=4, size=1.5) + 
     coord_fixed() + theme(legend.position="right")
   return(g)
 }

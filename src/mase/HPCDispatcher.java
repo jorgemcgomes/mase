@@ -37,7 +37,7 @@ public class HPCDispatcher {
         boolean sort = true;
         boolean dryRun = false;
         int threads = 8;
-        for (int i = 1; i < args.length; i++) {
+        for (int i = 0; i < args.length - 1; i++) {
             if (args[i].equalsIgnoreCase(P_NOSORT)) {
                 sort = false;
             } else if (args[i].equalsIgnoreCase(P_DRY)) {
@@ -110,8 +110,8 @@ public class HPCDispatcher {
         /*
         Submit scripts
          */
-        for (String s : scripts) {
-            String cmd = "qsub -pe mp " + threads + " -q hpcgrid " + s;
+        for (String s : scripts) { /*for hpc: -pe mp*/
+            String cmd = "qsub -pe smp " + threads + /*" -q hpcgrid "*/ " " + s;
             System.out.println(cmd);
             if (!dryRun) {
                 Process p = Runtime.getRuntime().exec(cmd);

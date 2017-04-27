@@ -29,7 +29,7 @@ public abstract class KdTree<T>{
       _dimensions = dimensions;
  
    //initialise this big so that it ends up in 'old' memory
-      nodeMinMaxBounds = new ContiguousDoubleArrayList(512 * 1024 / 8 + 2*_dimensions);
+      nodeMinMaxBounds = new ContiguousDoubleArrayList(/*512 **/ 1024 / 8 + 2*_dimensions);
       mem_recycle = new double[_bucketSize*dimensions];
  
       bounds_template = new double[2*_dimensions];
