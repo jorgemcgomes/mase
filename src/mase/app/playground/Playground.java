@@ -50,7 +50,9 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
         placeWalls();
 
         agent = createAgent();
-        agent.getAgentController().reset();
+        if(agent.getAgentController() != null) {
+            agent.getAgentController().reset();
+        }
         placeAgent(agent);
         schedule.scheduleRepeating(agent);
 

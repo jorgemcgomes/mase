@@ -68,7 +68,7 @@ public class MEFinalRepertoireTextStat extends Statistics {
 
                 if (!headed) { // add file header
                     twoDimensional = bin.length == 2;
-                    state.output.print("Hash Fitness", log);
+                    state.output.print("Hash Hits Fitness", log);
                     for (int i = 0; i < bin.length; i++) {
                         state.output.print(" Bin_" + i, log);
                     }
@@ -82,7 +82,7 @@ public class MEFinalRepertoireTextStat extends Statistics {
                     headed = true;
                 }
 
-                state.output.print(e.getKey() + " " + ef.getFitnessScore(), log);
+                state.output.print(e.getKey() + " " + sub.numHits(e.getKey()) + " " + ef.getFitnessScore(), log);
                 for (int b : bin) {
                     state.output.print(" " + b, log);
                 }

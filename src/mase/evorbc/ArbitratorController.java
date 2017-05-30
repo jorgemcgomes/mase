@@ -5,10 +5,7 @@
  */
 package mase.evorbc;
 
-import java.util.ArrayList;
-import java.util.List;
 import mase.controllers.AgentController;
-import mase.util.KdTree;
 
 /**
  *
@@ -19,16 +16,18 @@ public class ArbitratorController implements AgentController {
     private static final long serialVersionUID = 1L;
 
     private AgentController arbitrator;
-    private KdTree<AgentController> repo;
+    private Repertoire repo;
+    private MappingFunction mapFun;
     private transient AgentController lastPrimitive = null;
 
     public ArbitratorController() {
-        this(null, null);
+        this(null, null, null);
     }
 
-    public ArbitratorController(AgentController arbitrator, KdTree<AgentController> repo) {
+    public ArbitratorController(AgentController arbitrator, Repertoire repo, MappingFunction fun) {
         this.arbitrator = arbitrator;
         this.repo = repo;
+        this.mapFun = fun;
     }
 
     /**
@@ -36,32 +35,34 @@ public class ArbitratorController implements AgentController {
      *
      * @param repo
      */
-    public void setRepertoire(KdTree<AgentController> repo) {
+    public void setRepertoire(Repertoire repo) {
         this.repo = repo;
     }
 
     public void setArbitrator(AgentController arbitrator) {
         this.arbitrator = arbitrator;
     }
+    
+    public void setMappingFunction(MappingFunction mapFun) {
+        this.mapFun = mapFun;
+    }
 
     @Override
     public double[] processInputs(double[] input) {
         double[] arbitratorOutput = arbitrator.processInputs(input);
 
-        // TODO: add fancy mapping support
-        ArrayList<KdTree.SearchResult<AgentController>> nearest = repo.nearestNeighbours(arbitratorOutput, 1);
+        double[] coords = mapFun.outputToCoordinates(arbitratorOutput);
         
-        /*for(double d : nearest.key) {
-            System.out.print(d + " ");
-        }
-        System.out.println();*/
-        
-        AgentController primitive = nearest.get(0).payload;
+        AgentController primitive = repo.nearest(coords);
         if (lastPrimitive == null || primitive != lastPrimitive) {
             primitive.reset();
             lastPrimitive = primitive;
         }
         double[] primitiveOutput = primitive.processInputs(input);
+        
+        //System.out.println(Arrays.toString(arbitratorOutput));
+        //System.out.println(Arrays.toString(coords));
+        //System.out.println(Arrays.toString(primitiveOutput));
         return primitiveOutput;
     }
 
@@ -73,6 +74,6 @@ public class ArbitratorController implements AgentController {
 
     @Override
     public AgentController clone() {
-        return new ArbitratorController(arbitrator, repo);
+        return new ArbitratorController(arbitrator, repo.deepCopy(), mapFun);
     }
 }

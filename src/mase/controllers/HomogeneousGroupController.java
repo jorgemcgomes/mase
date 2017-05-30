@@ -21,7 +21,7 @@ public class HomogeneousGroupController implements GroupController {
     public AgentController[] getAgentControllers(int nAgents) {
         AgentController[] acs = new AgentController[nAgents];
         for(int i = 0 ; i < nAgents ; i++) {
-            acs[i] = controller.clone();
+            acs[i] = controller == null ? null : controller.clone();
         }
         return acs;
     }

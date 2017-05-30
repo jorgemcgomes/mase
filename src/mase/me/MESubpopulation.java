@@ -37,6 +37,7 @@ public class MESubpopulation extends Subpopulation {
     // each unique key is a bin, can have multiple individuals in it
     protected MultiValuedMap<Integer, Individual> map;
     protected Map<Integer, int[]> inverseHash;
+    protected Map<Integer, Integer> hits;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -51,6 +52,7 @@ public class MESubpopulation extends Subpopulation {
 
         this.map = new ArrayListValuedHashMap<>();
         this.inverseHash = new HashMap<>();
+        this.hits = new HashMap<>();
     }
 
     protected void updateRepertoire(EvolutionState state) {
@@ -64,6 +66,7 @@ public class MESubpopulation extends Subpopulation {
                 map.put(hash, (Individual) ind.clone());
                 newInRepo++;
                 inverseHash.put(hash, bin);
+                hits.put(hash, 1);
             } else {
                 // TODO: currently it supports only one element per bin
                 Individual old = binContents.iterator().next();
@@ -72,6 +75,7 @@ public class MESubpopulation extends Subpopulation {
                     map.put(hash, (Individual) ind.clone());
                     newInRepo++;
                 }
+                hits.put(hash, hits.get(hash) + 1);                
             }
         }
     }
@@ -109,5 +113,10 @@ public class MESubpopulation extends Subpopulation {
 
     public int[] binFromHash(int h) {
         return inverseHash.get(h);
+    }
+    
+    public int numHits(int h) {
+        Integer get = hits.get(h);
+        return get == null ? 0 : get;
     }
 }

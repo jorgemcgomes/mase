@@ -28,7 +28,7 @@ public class PlaygroundAgent extends SmartAgent {
         
         this.circledPortrayal.setOnlyCircleWhenSelected(false);
         this.circledPortrayal.setCircleShowing(true);
-        this.circledPortrayal.scale = sim.par.coneRange;     
+        this.circledPortrayal.scale = sim.par.coneRange * 2;     
         
         // Obstacle whisker sensor
         RaySensor dw = new RaySensor(sim, field, this);

@@ -50,7 +50,7 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
         private static final long serialVersionUID = 1L;
 
         private final BehaviourResult reference;
-        public static final double MAX = 10000;
+        public static final double MAX = 1000;
 
         public BehaviourVarianceFitnessResult(BehaviourResult reference) {
             super(0);
@@ -63,15 +63,14 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
             for (int i = 0; i < results.length; i++) {
                 brs[i] = ((BehaviourVarianceFitnessResult) results[i]).reference;
             }
-            BehaviourResult br = (BehaviourResult) brs[0];
-            BehaviourResult merged = (BehaviourResult) br.mergeEvaluations(brs);
+            BehaviourResult merged = (BehaviourResult) brs[0].mergeEvaluations(brs);
             double sum = 0;
             for (BehaviourResult b : brs) {
-                sum += FastMath.pow2(merged.distanceTo(b));
+                sum += merged.distanceTo(b);
             }
             // ensure that the fitness value is positive
             // minimise sum of squared errors
-            return new FitnessResult(MAX - sum);
+            return new FitnessResult(MAX - sum / brs.length);
         }
 
     }

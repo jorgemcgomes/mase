@@ -17,17 +17,20 @@ import mase.MaseManager.Job;
 import mase.MaseManager.StatusListener;
 
 /**
- * USAGE INSTRUCTIONS:
- * 1 - Run hpcsync.sh to copy all the required stuff to the cluster home
- * 2 - Run hpcrun.sh in the cluster, which launches this main
- * Ex: ./hpcrun.sh -t <number_threads> [-dry] [-nosort] <config_file>
+ * USAGE INSTRUCTIONS: 1 - Run gridsync.sh <ip> [extra files to be copied] --
+ * copy all the required stuff to the cluster home 2 - Run gridrun.sh -c
+ * <hpc/local> -t <number_threads> [-dry] [-nosort] [-noclean] <config_file> --
+ * in the cluster, which launches this main
+ *
  * @author jorge
  */
-public class HPCDispatcher {
+public class GridDispatcher {
 
     public static final String P_NOSORT = "-nosort";
+    public static final String P_NOCLEAN = "-noclean";
     public static final String P_DRY = "-dry";
     public static final String P_THREADS = "-t";
+    public static final String P_CLUSTER = "-c";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         /*
@@ -36,7 +39,9 @@ public class HPCDispatcher {
         String file = args[args.length - 1];
         boolean sort = true;
         boolean dryRun = false;
+        boolean clean = true;
         int threads = 8;
+        String cluster = null;
         for (int i = 0; i < args.length - 1; i++) {
             if (args[i].equalsIgnoreCase(P_NOSORT)) {
                 sort = false;
@@ -45,6 +50,11 @@ public class HPCDispatcher {
             } else if (args[i].equalsIgnoreCase(P_THREADS)) {
                 threads = Integer.parseInt(args[i + 1].trim());
                 i++;
+            } else if (args[i].equalsIgnoreCase(P_CLUSTER)) {
+                cluster = args[i + 1];
+                i++;
+            } else if (args[i].equalsIgnoreCase(P_NOCLEAN)) {
+                clean = false;
             } else {
                 System.out.println("Unknown param");
             }
@@ -64,28 +74,33 @@ public class HPCDispatcher {
             public void error(String str) {
                 System.err.println(str);
             }
-            
+
         });
         mng.loadJobs(new File(file));
 
         if (sort) {
             mng.sortJobFirst();
         }
-        
 
-        // TODO: Clean existing scripts
-        // Potential issue: might screw up with things if some are already running
-        
+        if (clean) {
+            Runtime.getRuntime().exec("rm -rf mase_*");
+        }
+
         // Generate scripts
         List<String> scripts = new ArrayList<>();
         for (Job j : mng.waitingList) {
-            String name = "mase_" + j.outfolder.replace("/", "_") + "_" + j.jobNumber + ".sh";
-            FileWriter fw = new FileWriter(new File(name));
-            j.params = j.params + " -p evalthreads=" + threads; // TODO: possible problem with breed threads?
-            fw.write("#!/bin/bash\n"
-                    + "java -cp \"build/classes:lib/*\" mase.MaseEvolve -out " + j.outfolder + " " + j.params);
-            fw.close();
-            scripts.add(name);
+            String name = "mase_" + j.outfolder.substring(j.outfolder.lastIndexOf('/') + 1) + "_" + j.jobNumber + ".sh";
+            File f = new File(name);
+            if (f.exists()) {
+                System.out.println("Script already exists, not adding: " + f);
+            } else {
+                FileWriter fw = new FileWriter(f);
+                j.params = j.params + " -p evalthreads=" + threads; // TODO: possible problem with breed threads?
+                fw.write("#!/bin/bash\n"
+                        + "java -cp \"build/classes:lib/*\" mase.MaseEvolve -out " + j.outfolder + " " + j.params);
+                fw.close();
+                scripts.add(name);
+            }
         }
 
         /*
@@ -110,8 +125,17 @@ public class HPCDispatcher {
         /*
         Submit scripts
          */
-        for (String s : scripts) { /*for hpc: -pe mp*/
-            String cmd = "qsub -pe smp " + threads + /*" -q hpcgrid "*/ " " + s;
+        for (String s : scripts) {
+            /*for hpc: -pe mp*/
+            String cmd = null;
+            if (cluster.equalsIgnoreCase("hpc")) {
+                cmd = "qsub -pe mp " + threads + " -q hpcgrid " + s;
+            } else if (cluster.equalsIgnoreCase("local")) {
+                cmd = "qsub -pe smp " + threads + " " + s;
+            } else {
+                System.out.println("Choose the cluster! hpc or local");
+                System.exit(1);
+            }
             System.out.println(cmd);
             if (!dryRun) {
                 Process p = Runtime.getRuntime().exec(cmd);

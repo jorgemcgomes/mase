@@ -13,9 +13,6 @@ library(pdist)
 library(RColorBrewer)
 library(formula.tools)
 library(arules)
-library(MASS)
-library(tsne)
-library(Rtsne)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
@@ -528,21 +525,27 @@ identifyBests <- function(som, data, n=10, interactive=T) {
 # method: dimensionality reduction method. currently supports sammon, tsne, Rtsne (fast Barnes-Hut tsne)
 # ...: to be passed to reduction method
 # returns data with extra columns for the reduced data
-reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon"), k=2, normalise=T, ...) {
+reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca"), k=2, normalise=T, ...) {
   d <- data
   if(!is.null(vars)) {
     d <- data[, vars, with=F]
   }
   if(method[1]=="sammon") {
+    require(MASS)
     dists <- dist(d)
     sam <- sammon(dists, k=k, ...)
     d <- sam$points
   } else if(method[1]=="tsne") {
+    require(tsne)
     dists <- dist(d)
     d <- tsne(dists, k=k, ...)
   } else if(method[1]=="Rtsne") {
+    require(Rtsne)
     ts <- Rtsne(d, dims=k, ...)
     d <- ts$Y
+  } else if(method[1]=="pca") {
+    pc <- prcomp(d, center=T, scale.=T, rank.=k)
+    d <- pc$x
   } else {
     stop("unknown method:", method[1])
   }

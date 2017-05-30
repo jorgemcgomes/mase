@@ -8,6 +8,7 @@ package mase.app.playground;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
@@ -19,19 +20,29 @@ import mase.mason.world.MultilineObject;
  *
  * @author jorge
  */
-public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
+public class PlaygroundSDBCRaw extends MasonEvaluation<VectorBehaviourResult> {
 
     private static final long serialVersionUID = 1L;
+    private static final double BOUND = 2;
     private VectorBehaviourResult vbr;
     private List<double[]> states;
-    private double distNorm;
-    
+    private double[] sMeans;
+    private double[] sSDs;
 
+    protected void setStandardizationScores(double[] means, double[] sds) {
+        this.sMeans = means;
+        this.sSDs = sds;
+        for(int i = 0 ; i < sSDs.length ; i++) {
+            if(sSDs[i] == 0) {
+                sSDs[i] = 1;
+            }
+        }
+    }
+    
     @Override
     protected void preSimulation(MasonSimState sim) {
         super.preSimulation(sim);
         states = new ArrayList<>(maxEvaluationSteps+1);
-        distNorm = ((Playground) sim).par.arenaSize / 2;
     }
 
     @Override
@@ -44,23 +55,27 @@ public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
     // TODO: justifiable way to normalise: generate a lot of random environments, measure the min/mean/max for each distance and normalise based on that
     protected double[] state(Playground pl) {
         double[] res = new double[5];
-        res[0] = (pl.agent.distanceTo(pl.walls) / distNorm - 0.1) * 3;
+        res[0] = pl.agent.distanceTo(pl.walls);
         
-        double md = 0;
-        for(MultilineObject o : pl.obstacles) {
-            md += pl.agent.distanceTo(o);
+        if(!pl.obstacles.isEmpty()) {
+            double md = 0;
+            for(MultilineObject o : pl.obstacles) {
+                md += pl.agent.distanceTo(o);
+            }
+            res[1] = md / pl.obstacles.size();
         }
-        res[1] = (md / pl.obstacles.size() / distNorm - 0.6) * 3;
         
-        md = 0;
-        for(CircularObject o : pl.objects) {
-            md += pl.agent.distanceTo(o);
+        if(!pl.objects.isEmpty()) {
+            double md = 0;
+            for(CircularObject o : pl.objects) {
+                md += pl.agent.distanceTo(o);
+            }
+            res[2] = md / pl.objects.size();
         }
-        res[2] = (md / pl.objects.size() / distNorm - 0.4) * 1.2;
         
-        res[3] = pl.par.backMove ? (pl.agent.getSpeed() / pl.par.linearSpeed + 1) / 2 : pl.agent.getSpeed() / pl.par.linearSpeed;
+        res[3] = pl.par.backMove ? pl.agent.getSpeed() / pl.par.linearSpeed : (pl.agent.getSpeed() / pl.par.linearSpeed) * 2 - 1;
         
-        res[4] = (pl.agent.getTurningSpeed() / pl.par.turnSpeed + 1) / 2;
+        res[4] = pl.agent.getTurningSpeed() / pl.par.turnSpeed;
         
         return res;
     }
@@ -74,6 +89,12 @@ public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
                 mean[i] += state[i] / states.size();
             }
         }
+        
+        mean[0] = Math.max(-BOUND, Math.min(BOUND, (mean[0] - sMeans[0]) / sSDs[0]));
+        mean[1] = Math.max(-BOUND, Math.min(BOUND, (mean[1] - sMeans[1]) / sSDs[1]));
+        mean[2] = Math.max(-BOUND, Math.min(BOUND, (mean[2] - sMeans[2]) / sSDs[2]));
+        //mean[3] = mean[3] * BOUND;
+        //mean[4] = mean[4] * BOUND;
         
         vbr = new VectorBehaviourResult(mean);
         vbr.setDistance(VectorBehaviourResult.EUCLIDEAN);

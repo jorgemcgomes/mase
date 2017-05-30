@@ -11,7 +11,9 @@ import mase.evaluation.FitnessResult;
  *
  * @author jorge
  */
-public class ProximityFitness extends AvoidanceFitness {
+public class ProximityFitness extends DistanceFitness {
+
+    private static final long serialVersionUID = 1L;
 
     @Override
     public FitnessResult getResult() {

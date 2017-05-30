@@ -2,8 +2,7 @@ eval.base.problem =                mase.mason.DefaultMasonSimulator
 problem.simstate =                 mase.app.playground.Playground
 problem.params =                   mase.app.playground.PlaygroundParams
 problem.number-evals =             2
-problem.eval.0 =                   mase.mason.generic.ASAgentEvaluator
-problem.eval.0.windows =           1
+problem.eval.0 =                   mase.app.playground.PlaygroundSDBC
 problem.eval.0.update-freq =       1
 problem.eval.1 =                   mase.app.playground.BehaviourVarianceFitness
 problem.eval.1.behaviour-index =   0
@@ -11,19 +10,19 @@ problem.eval.1.behaviour-index =   0
 fitness.fitness-index =            1
 
 problem.seed =                     0
-problem.repetitions =              200
+problem.repetitions =              250
 problem.max-steps =                500
 
 problem.arenaSize = 150
     
 problem.minObjects = 1
-problem.maxObjects = 3
+problem.maxObjects = 5
 problem.objectRadius = 2
 problem.minObjectDistance = 0
 problem.objectSpeed = 0
     
 problem.minObstacles = 1
-problem.maxObstacles = 7
+problem.maxObstacles = 5
 problem.minObstacleSize = 10
 problem.maxObstacleSize = 30
     
@@ -33,7 +32,7 @@ problem.backMove = true
 problem.turnSpeed = 0.392
 problem.numCones = 4
 problem.coneRange = 100
-problem.whiskerRange = 20
+problem.whiskerRange = 25
 
 ec.subpop.species = 			ec.vector.FloatVectorSpecies
 vector.species.min-gene =               -1
@@ -50,10 +49,10 @@ neat.INPUT.NODES = 7
 neat.OUTPUT.NODES = 2
 
 generations = 1000
-ec.subpop.initial-batch =               10000
+ec.subpop.initial-batch =               25000
 ec.subpop.size = 			1000
 ec.subpop.behaviour-index =             0
-ec.subpop.resolution =                  0.251
+ec.subpop.resolution =                  0.201
 
 # useful for preliminary tests
 stat.child.8.update-always =           false

@@ -4,9 +4,18 @@
  */
 package mase.evaluation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import mase.util.Input;
+import mase.util.Output;
+import mase.util.Point;
+import mase.util.WeightedPoint;
+import mase.util.WeiszfeldAlgorithm;
 import net.jafama.FastMath;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
 
 /**
  *
@@ -17,15 +26,22 @@ public class VectorBehaviourResult implements BehaviourResult<double[]> {
     private static final long serialVersionUID = 1;
     protected double[] behaviour;
     protected int dist;
+    protected int estimator;
     public static final int COSINE = 0, BRAY_CURTIS = 1, EUCLIDEAN = 2, MANHATTAN = 3;
+    public static final int MEAN = 0, CW_MEDIAN = 1, GEOMETRIC_MEDIAN = 2;
 
     public VectorBehaviourResult(double... bs) {
         this.behaviour = bs;
         this.dist = EUCLIDEAN;
+        this.estimator = MEAN;
     }
-    
+
     public void setDistance(int dist) {
         this.dist = dist;
+    }
+
+    public void setLocationEstimator(int est) {
+        this.estimator = est;
     }
 
     @Override
@@ -49,12 +65,47 @@ public class VectorBehaviourResult implements BehaviourResult<double[]> {
     @Override
     public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
         double[] merged = new double[behaviour.length];
-        Arrays.fill(merged, 0f);
-        for (int i = 0; i < merged.length; i++) {
-            for (EvaluationResult r : results) {
-                merged[i] += ((double[]) r.value())[i];
-            }
-            merged[i] /= results.length;
+        switch (estimator) {
+            case MEAN:
+                Arrays.fill(merged, 0f);
+                for (int i = 0; i < merged.length; i++) {
+                    for (EvaluationResult r : results) {
+                        merged[i] += ((VectorBehaviourResult) r).value()[i];
+                    }
+                    merged[i] /= results.length;
+                }
+                break;
+            case CW_MEDIAN:
+                DescriptiveStatistics ds = new DescriptiveStatistics();
+                ds.setMeanImpl(new Median());
+                for (int i = 0; i < merged.length; i++) {
+                    for (EvaluationResult r : results) {
+                        ds.addValue(((VectorBehaviourResult) r).value()[i]);
+                    }
+                    merged[i] = ds.getMean();
+                    ds.clear();
+                }
+                break;
+            case GEOMETRIC_MEDIAN:
+                long t1 = System.currentTimeMillis();
+                List<WeightedPoint> wps = new ArrayList<>(results.length);
+                for (EvaluationResult r : results) {
+                    WeightedPoint wp = new WeightedPoint();
+                    wp.setPoint(new Point(((VectorBehaviourResult) r).value()));
+                    wp.setWeight(1);
+                    wps.add(wp);
+                }
+                Input input = new Input();
+                input.setDimension(merged.length);
+                input.setPoints(wps);
+                input.setPermissibleError(0.001);
+
+                WeiszfeldAlgorithm weiszfeld = new WeiszfeldAlgorithm();
+                Output output = weiszfeld.process(input);
+                //System.out.println("n " + wps.size() + " e " + output.getLastError() + " i " + output.getNumberOfIterations() + " t " + (System.currentTimeMillis() - t1));
+                Point result = output.getPoint();
+                merged = result.getValues();
+                break;
         }
         return new VectorBehaviourResult(merged);
     }
@@ -82,7 +133,7 @@ public class VectorBehaviourResult implements BehaviourResult<double[]> {
                 return cosineSimilarity(v1, v2);
             case MANHATTAN:
                 double diff = 0;
-                for(int i = 0 ; i < v1.length ; i++) {
+                for (int i = 0; i < v1.length; i++) {
                     diff += Math.abs(v1[i] - v2[i]);
                 }
                 return diff;
