@@ -1,0 +1,38 @@
+* How to Run V-REP experiments *
+* Instructions for Linux *
+
+# Prepare V-Rep
+
+1. Download and extract V-Rep to some folder
+2. Copy the content of dependencies/VRepPlugin/vrep to the vrep install directory ($VREP), replacing the files
+3. The plugin might have to be recompiled: cd $VREP/programming/v_repExtPluginJBot ; make
+4. Place the scripts in dependencies/VRepPlugin side by side with $VREP
+5. Make a jar with all the code and place it in the folder $VREP/programming/v_repExtPluginJBot/java/jbot.jar
+* target package-for-store available in build.xml of the main NB project (the jar location might have to be adjusted in build.xml)
+
+# Manage V-Rep workers
+
+1. Update/send V-Rep to workers:
+* Option A: ./copy_vrep.sh <worker_IP>
+* Option B: ./copy_vrep_all.sh (The workers are loaded from the file zombies.sh)
+* This should only be needed if there are major changes in the V-Rep distribution. The other stuff that typically changes with different experiments is sent every time the worker is started.
+* The workers need to have installed: screen xvfb
+
+2. To start workers:
+* Option A: start each worker at a time, using for instance: ./start.sh <worker_IP> <number_of_cores> <scene_file.ttt> [repertoire_file.txt]
+* Option B: start all workers: ./startall.sh <scene_file.ttt> [repertoire_file.txt] (The workers are loaded from the file zombies.sh)
+* The script automatically continues running on the machine, restarting the workers every 2h because of memory leaks issues.
+
+3. To stop workers:
+* Option A: ./stop.sh <worker_IP>
+* Option B: ./stopall.sh (Stops the workers specified in zombies.sh)
+
+
+# Evolutionary process
+
+1. Start workers, providing the scene file for the repertoire generation (such as hexapod_map.ttt or nao_map.ttt).
+2. Adjust the vrep specific parameteres accordingly (see mase/vrep/vrep.params), specifying the workers
+3. Adjust the evolutionary algorithm parameters (see mase/app/hexapod/vrep_hexapod.params for an example)
+4. Launch the evolutionary process. Ex: ./evolve.sh -out vrep -p jobs=1 -p generations=100 -p parent=build/classes/mase/app/hexapod/vrep_hexapod.params -p parent=build/classes/mase/me/me.params)
+5. Wait for magic to happen
+
