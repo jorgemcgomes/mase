@@ -134,7 +134,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
     clusterExport(cl, list("fun","filter","aux"), envir=environment(NULL))
   }
   result <- llply(allfiles, aux, ..., .progress="text", .parallel=parallel, .paropts=list(.errorhandling="remove"))
-  result <- rbindlist(result)
+  result <- rbindlist(result, fill=TRUE)
 
   cols <- c("Job",names(ids))
   result[,(cols) := lapply(.SD, factorReorder), .SDcols=cols]

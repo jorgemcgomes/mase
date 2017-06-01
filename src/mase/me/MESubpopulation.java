@@ -81,7 +81,7 @@ public class MESubpopulation extends Subpopulation {
     }
 
     protected boolean betterThan(Individual i1, Individual i2) {
-        return ((ExpandedFitness) i1.fitness).getFitnessScore() > ((ExpandedFitness) i2.fitness).getFitnessScore();
+        return ((ExpandedFitness) i1.fitness).getFitnessScore() >= ((ExpandedFitness) i2.fitness).getFitnessScore();
     }
 
     protected double[] getBehaviourVector(EvolutionState state, Individual ind) {

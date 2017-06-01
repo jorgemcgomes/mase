@@ -5,10 +5,7 @@
  */
 package mase.app.playground;
 
-import ec.EvolutionState;
-import ec.util.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
@@ -42,6 +39,12 @@ public class PlaygroundSDBCRaw extends MasonEvaluation<VectorBehaviourResult> {
     @Override
     protected void preSimulation(MasonSimState sim) {
         super.preSimulation(sim);
+        
+        if(sMeans == null || sSDs == null) {
+            System.out.println("Does not have the required standardization factors. See PlaygroundSDBCStandardizer.");
+            System.exit(1);
+        }
+        
         states = new ArrayList<>(maxEvaluationSteps+1);
     }
 

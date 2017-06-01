@@ -2,12 +2,17 @@ eval.base.problem =                mase.mason.DefaultMasonSimulator
 problem.simstate =                 mase.app.playground.Playground
 problem.params =                   mase.app.playground.PlaygroundParams
 problem.number-evals =             2
-problem.eval.0 =                   mase.app.playground.PlaygroundSDBC
+#problem.eval.0 =                   mase.app.playground.PlaygroundSDBC
+problem.eval.0 =                   mase.app.playground.PlaygroundSDBCRaw
 problem.eval.0.update-freq =       1
 problem.eval.1 =                   mase.app.playground.BehaviourVarianceFitness
 problem.eval.1.behaviour-index =   0
 
+ec.subpop.behaviour-index =        0
 fitness.fitness-index =            1
+
+# needed for the PlaygroundSDBCRaw evaluation
+stat.child.9 =                     mase.app.playground.PlaygroundSDBCStandardizer
 
 problem.seed =                     0
 problem.repetitions =              250
@@ -39,7 +44,7 @@ vector.species.min-gene =               -1
 vector.species.max-gene =               1
 vector.species.ind =                    mase.controllers.NeuralControllerIndividual
 vector.species.genome-size =   52
-vector.species.mutation-prob =          0.05
+vector.species.mutation-prob =          0.10
 neural.structure = feed-forward
 neural.input = 7
 neural.hidden = 5
@@ -51,12 +56,7 @@ neat.OUTPUT.NODES = 2
 generations = 1000
 ec.subpop.initial-batch =               25000
 ec.subpop.size = 			1000
-ec.subpop.behaviour-index =             0
-ec.subpop.resolution =                  0.201
+ec.subpop.resolution =                  0.4
 
 # useful for preliminary tests
-stat.child.8.update-always =           false
-
-# no need for scores
-stat.child.9 = ec.Statistics
-
+stat.child.8.update-always =           true

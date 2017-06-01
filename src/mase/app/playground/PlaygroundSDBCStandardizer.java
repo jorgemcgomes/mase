@@ -33,6 +33,11 @@ public class PlaygroundSDBCStandardizer extends Statistics {
             }
         }
         
+        if(fun == null) {
+            state.output.warning("PlaygroundSDBCRaw evaluation function not found. Standardizer not run.");
+            return;
+        }
+        
         DescriptiveStatistics[] ds = null;
         for (int i = 0; i < 1000; i++) {
             Playground pl = (Playground) prob.getSimState(new HomogeneousGroupController(null), i);

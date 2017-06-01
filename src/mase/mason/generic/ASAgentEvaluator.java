@@ -26,7 +26,9 @@ public class ASAgentEvaluator extends MasonEvaluation {
 
     private static final long serialVersionUID = 1L;
     public static final String P_WINDOWS = "windows";
+    public static final String P_AVERAGE = "average";
     private int windows;
+    private int average;
     private List<List<double[]>> states;
     private CompoundEvaluationResult res;
 
@@ -34,6 +36,7 @@ public class ASAgentEvaluator extends MasonEvaluation {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         windows = state.parameters.getInt(base.push(P_WINDOWS), null);
+        average = state.parameters.getInt(base.push(P_AVERAGE), null);
     }
 
     @Override
@@ -85,7 +88,8 @@ public class ASAgentEvaluator extends MasonEvaluation {
         Collection<EvaluationResult> resList = new ArrayList<>();
         for(double[] c : concats) {
             VectorBehaviourResult vbr = new VectorBehaviourResult(c);
-            //vbr.setDistance(VectorBehaviourResult.MANHATTAN);
+            vbr.setDistance(VectorBehaviourResult.EUCLIDEAN);
+            vbr.setLocationEstimator(average);
             resList.add(vbr);
         }
         this.res = new CompoundEvaluationResult(resList);
@@ -94,27 +98,27 @@ public class ASAgentEvaluator extends MasonEvaluation {
     // excluding to
     private List<double[]> averageStates(int from, int to) {
         // Init vectors with zeros
-        List<double[]> average = new ArrayList<>();
+        List<double[]> avg = new ArrayList<>();
         for(int ag = 0 ; ag < states.get(0).size() ; ag++) {
-            average.add(new double[states.get(0).get(ag).length]);
+            avg.add(new double[states.get(0).get(ag).length]);
         }
         
         // sum the vectors agent-wise
         for(List<double[]> step : states) {
             for(int ag = 0 ; ag < step.size() ; ag++) {
-                for(int i = 0 ; i < average.get(ag).length ; i++) {
-                    average.get(ag)[i] += step.get(ag)[i]; 
+                for(int i = 0 ; i < avg.get(ag).length ; i++) {
+                    avg.get(ag)[i] += step.get(ag)[i]; 
                 }
             }
         }
         
         // divide by the number of steps
-        for(double[] v : average) {
+        for(double[] v : avg) {
             for(int i = 0 ; i < v.length ; i++) {
                 v[i] /= (to - from);
             }
         }
-        return average;
+        return avg;
     }
 
     @Override
