@@ -1,3 +1,19 @@
+setwd("~/exps/playground/rep4")
+
+data <- loadData("*", "finalrep.stat", fun=loadFile, auto.ids.names=c("Var","Resolution"), jobs=0)
+r <- reduceData(data, paste0("Behav_",0:4), method="Rtsne", k=2)
+plotReduced2D(r, color.var="Fitness") + facet_wrap(~ Resolution)
+
+
+setwd("~/exps/playground/rep3")
+
+
+data <- loadData("base_*", "finalrep.stat", fun=loadFile, auto.ids.names=c("Env","Resolution"), jobs=0)
+
+r <- reduceData(data, paste0("Behav_",0:4), method="sammon", k=2)
+plotReduced2D(r, color.var="Fitness") + facet_wrap(~ Resolution)
+
+
 setwd("~/exps/playground/rep2")
 
 data <- loadFile("~/exps/testme/job.0.finalrep.stat")
