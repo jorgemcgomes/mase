@@ -6,7 +6,7 @@ package mase.mason;
 
 import java.io.File;
 import mase.controllers.GroupController;
-import mase.stat.Reevaluate;
+import mase.stat.ReevaluationTools;
 import sim.display.GUIState;
 
 /**
@@ -16,10 +16,10 @@ import sim.display.GUIState;
 public class MasonPlayer {
 
     public static void main(String[] args) throws Exception {
-        File parent = Reevaluate.findControllerFile(args).getParentFile();
-        GroupController controller = Reevaluate.createController(args);
+        File parent = ReevaluationTools.findControllerFile(args).getParentFile();
+        GroupController controller = ReevaluationTools.createController(args);
         long startSeed = 0;
-        MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args, parent);
+        MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, parent);
         MasonSimState state = sim.getSimState(controller, startSeed);
         GUIState gui = sim.getSimStateUI(state);
         gui.createController();

@@ -11,8 +11,8 @@ import ec.Subpopulation;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
@@ -23,7 +23,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  * @author jorge
  */
-public class SCStat extends Statistics {
+public class StateCountStat extends Statistics {
 
     public static final String P_LOG_FILE = "file";
     private static final long serialVersionUID = 1L;
@@ -44,9 +44,11 @@ public class SCStat extends Statistics {
     }
 
     /**
-     * Generation | Total unique states | Unique states this gen | total count this gen |
-     * mean filtered (absolute) | min/mean/max filtered (relative) | min/mean/max unique states in eval
-     * @param state 
+     * Generation | Total unique states | Unique states this gen | total count
+     * this gen | mean filtered (absolute) | min/mean/max filtered (relative) |
+     * min/mean/max unique states in eval
+     *
+     * @param state
      */
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
@@ -55,42 +57,32 @@ public class SCStat extends Statistics {
         DescriptiveStatistics filteredAbs = new DescriptiveStatistics();
         DescriptiveStatistics filteredRel = new DescriptiveStatistics();
         DescriptiveStatistics sizeStat = new DescriptiveStatistics();
-        
+
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {
-                    if (er instanceof SCResult) {
-                        SCResult scr = (SCResult) er;
-                        SCResult.mergeCountMap(genCount, scr.getCounts());
-                        filteredAbs.addValue(scr.originalSize - scr.getCounts().size());
-                        filteredRel.addValue(1 - (double) scr.getCounts().size() / scr.originalSize);
-                        sizeStat.addValue(scr.getCounts().size());
-                    } else if (er instanceof CompoundEvaluationResult) {
-                        CompoundEvaluationResult ser = (CompoundEvaluationResult) er;
-                        ArrayList<? extends EvaluationResult> all = ser.value();
-                        for (EvaluationResult subEr : all) {
-                            if (subEr instanceof SCResult) {
-                                SCResult scr = (SCResult) subEr;
-                                SCResult.mergeCountMap(genCount, scr.getCounts());
-                                filteredAbs.addValue(scr.originalSize - scr.getCounts().size());
-                                filteredRel.addValue(1 - (double) scr.getCounts().size() / scr.originalSize);
-                                sizeStat.addValue(scr.getCounts().size());
-                            }
+                    if (er instanceof CompoundEvaluationResult && ((CompoundEvaluationResult) er).value().get(0) instanceof StateCountResult) {
+                        CompoundEvaluationResult<StateCountResult> ser = (CompoundEvaluationResult<StateCountResult>) er;
+                        List<StateCountResult> all = ser.value();
+                        for (StateCountResult scr : all) {
+                            StateCountResult.mergeCountMap(genCount, scr.value());
+                            filteredAbs.addValue(scr.originalSize - scr.value().size());
+                            filteredRel.addValue(1 - (double) scr.value().size() / scr.originalSize);
+                            sizeStat.addValue(scr.value().size());
                         }
                     }
                 }
             }
         }
         int totalCount = 0;
-        for(Integer i : genCount.values()) {
+        for (Integer i : genCount.values()) {
             totalCount += i;
         }
-        SCResult.mergeCountMap(globalCount, genCount);
+        StateCountResult.mergeCountMap(globalCount, genCount);
         state.output.println(state.generation + " " + globalCount.size() + " "
                 + genCount.size() + " " + totalCount + " " + filteredAbs.getMean() + " " + filteredRel.getMin() + " "
                 + filteredRel.getMean() + " " + filteredRel.getMax() + " " + sizeStat.getMin() + " "
-                + sizeStat.getMean() + " " + sizeStat.getMax(), genLog);        
+                + sizeStat.getMean() + " " + sizeStat.getMax(), genLog);
     }
-    
-    
+
 }

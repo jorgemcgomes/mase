@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.MedianVectorBehaviourResult;
 import mase.evaluation.CompoundEvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -19,7 +18,7 @@ import mase.mason.world.SmartAgent;
  *
  * @author jorge
  */
-public class MSAgentEvaluator extends MasonEvaluation {
+public class MedianStateEvaluator extends MasonEvaluation {
 
     private static final long serialVersionUID = 1L;
     // agent / sensor-effector value / time-step

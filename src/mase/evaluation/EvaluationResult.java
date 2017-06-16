@@ -5,6 +5,7 @@
 package mase.evaluation;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  *
@@ -19,6 +20,6 @@ public interface EvaluationResult<T> extends Serializable {
      * @param results To be merged
      * @return A new EvaluationResult with the merged results 
      */
-    public EvaluationResult mergeEvaluations(EvaluationResult[] results);
+    public EvaluationResult<T> mergeEvaluations(Collection<EvaluationResult<T>> results);
     
 }

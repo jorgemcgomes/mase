@@ -7,6 +7,10 @@ package mase.app.playground;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
@@ -57,19 +61,19 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
         }
 
         @Override
-        public FitnessResult mergeEvaluations(EvaluationResult[] results) {
-            BehaviourResult[] brs = new BehaviourResult[results.length];
-            for (int i = 0; i < results.length; i++) {
-                brs[i] = ((BehaviourVarianceFitnessResult) results[i]).reference;
+        public FitnessResult mergeEvaluations(Collection results) {
+            List<BehaviourResult> brs = new ArrayList<>(results.size());
+            for(Object o : results) {
+                brs.add(((BehaviourVarianceFitnessResult) o).reference);
             }
-            BehaviourResult merged = (BehaviourResult) brs[0].mergeEvaluations(brs);
+            BehaviourResult merged = (BehaviourResult) brs.get(0).mergeEvaluations(brs);
             double sum = 0;
             for (BehaviourResult b : brs) {
                 sum += merged.distanceTo(b);
             }
             // ensure that the fitness value is positive
             // minimise sum of squared errors
-            return new FitnessResult(MAX - sum / brs.length);
+            return new FitnessResult(MAX - sum / brs.size());
         }
 
     }

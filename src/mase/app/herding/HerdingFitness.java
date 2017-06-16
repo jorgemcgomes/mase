@@ -46,7 +46,7 @@ public class HerdingFitness extends MasonEvaluation {
                 fitness += Math.max(0, 1 - sheep.distanceTo(((Herding) sim).curralCenter) / initialDistances.get(sheep));
             }      
         }
-        res = new FitnessResult( fitness, FitnessResult.ARITHMETIC);
+        res = new FitnessResult( fitness, FitnessResult.MergeMode.arithmetic);
     }
 
     @Override

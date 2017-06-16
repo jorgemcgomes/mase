@@ -61,6 +61,6 @@ public class OnePreyFitness extends MasonEvaluation {
         } else {
             score = Math.max(initialDistance - finalDistance, 0); // 0..1
         }
-        this.fitnessResult = new FitnessResult(score, FitnessResult.ARITHMETIC);
+        this.fitnessResult = new FitnessResult(score, FitnessResult.MergeMode.arithmetic);
     }
 }

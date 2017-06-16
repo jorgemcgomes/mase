@@ -6,6 +6,8 @@ package mase.evaluation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import mase.util.Input;
@@ -25,22 +27,28 @@ public class VectorBehaviourResult implements BehaviourResult<double[]> {
 
     private static final long serialVersionUID = 1;
     protected double[] behaviour;
-    protected int dist;
-    protected int estimator;
-    public static final int COSINE = 0, BRAY_CURTIS = 1, EUCLIDEAN = 2, MANHATTAN = 3;
-    public static final int MEAN = 0, CW_MEDIAN = 1, GEOMETRIC_MEDIAN = 2;
+    protected Distance dist;
+    protected LocationEstimator estimator;
+
+    public enum Distance {
+        cosine, brayCurtis, euclidean, manhattan
+    };
+
+    public enum LocationEstimator {
+        mean, cwMedian, geometricMedian, all
+    };
 
     public VectorBehaviourResult(double... bs) {
         this.behaviour = bs;
-        this.dist = EUCLIDEAN;
-        this.estimator = MEAN;
+        this.dist = Distance.euclidean;
+        this.estimator = LocationEstimator.mean;
     }
 
-    public void setDistance(int dist) {
+    public void setDistance(Distance dist) {
         this.dist = dist;
     }
 
-    public void setLocationEstimator(int est) {
+    public void setLocationEstimator(LocationEstimator est) {
         this.estimator = est;
     }
 
@@ -63,35 +71,34 @@ public class VectorBehaviourResult implements BehaviourResult<double[]> {
     }
 
     @Override
-    public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
+    public VectorBehaviourResult mergeEvaluations(Collection<EvaluationResult<double[]>> results) {
         double[] merged = new double[behaviour.length];
         switch (estimator) {
-            case MEAN:
+            case mean:
                 Arrays.fill(merged, 0f);
                 for (int i = 0; i < merged.length; i++) {
-                    for (EvaluationResult r : results) {
-                        merged[i] += ((VectorBehaviourResult) r).value()[i];
+                    for (EvaluationResult<double[]> r : results) {
+                        merged[i] += r.value()[i];
                     }
-                    merged[i] /= results.length;
+                    merged[i] /= results.size();
                 }
                 break;
-            case CW_MEDIAN:
+            case cwMedian:
                 DescriptiveStatistics ds = new DescriptiveStatistics();
                 ds.setMeanImpl(new Median());
                 for (int i = 0; i < merged.length; i++) {
-                    for (EvaluationResult r : results) {
-                        ds.addValue(((VectorBehaviourResult) r).value()[i]);
+                    for (EvaluationResult<double[]> r : results) {
+                        ds.addValue(r.value()[i]);
                     }
                     merged[i] = ds.getMean();
                     ds.clear();
                 }
                 break;
-            case GEOMETRIC_MEDIAN:
-                long t1 = System.currentTimeMillis();
-                List<WeightedPoint> wps = new ArrayList<>(results.length);
-                for (EvaluationResult r : results) {
+            case geometricMedian:
+                List<WeightedPoint> wps = new ArrayList<>(results.size());
+                for (EvaluationResult<double[]> r : results) {
                     WeightedPoint wp = new WeightedPoint();
-                    wp.setPoint(new Point(((VectorBehaviourResult) r).value()));
+                    wp.setPoint(new Point(r.value()));
                     wp.setWeight(1);
                     wps.add(wp);
                 }
@@ -102,12 +109,22 @@ public class VectorBehaviourResult implements BehaviourResult<double[]> {
 
                 WeiszfeldAlgorithm weiszfeld = new WeiszfeldAlgorithm();
                 Output output = weiszfeld.process(input);
-                //System.out.println("n " + wps.size() + " e " + output.getLastError() + " i " + output.getNumberOfIterations() + " t " + (System.currentTimeMillis() - t1));
                 Point result = output.getPoint();
                 merged = result.getValues();
                 break;
+            case all:
+                merged = new double[behaviour.length * results.size()];
+                Iterator<EvaluationResult<double[]>> iter = results.iterator();
+                for (int i = 0; i < results.size(); i++) {
+                    double[] r = iter.next().value();
+                    System.arraycopy(r, 0, merged, i * behaviour.length, behaviour.length);
+                }
+                break;
         }
-        return new VectorBehaviourResult(merged);
+        VectorBehaviourResult newVbr = new VectorBehaviourResult(merged);
+        newVbr.dist = this.dist;
+        newVbr.estimator = this.estimator;
+        return newVbr;
     }
 
     @Override
@@ -121,7 +138,7 @@ public class VectorBehaviourResult implements BehaviourResult<double[]> {
 
     public double vectorDistance(double[] v1, double[] v2) {
         switch (dist) {
-            case BRAY_CURTIS:
+            case brayCurtis:
                 double diffs = 0;
                 double total = 0;
                 for (int i = 0; i < v1.length; i++) {
@@ -129,22 +146,22 @@ public class VectorBehaviourResult implements BehaviourResult<double[]> {
                     total += v1[i] + v2[i];
                 }
                 return diffs / total;
-            case COSINE:
+            case cosine:
                 return cosineSimilarity(v1, v2);
-            case MANHATTAN:
+            case manhattan:
                 double diff = 0;
                 for (int i = 0; i < v1.length; i++) {
                     diff += Math.abs(v1[i] - v2[i]);
                 }
                 return diff;
-            default:
-            case EUCLIDEAN:
+            case euclidean:
                 double d = 0;
                 for (int i = 0; i < v1.length; i++) {
                     d += FastMath.pow2(v1[i] - v2[i]);
                 }
                 return FastMath.sqrtQuick(d);
         }
+        throw new RuntimeException("Not prepared for the given distance: " + dist);
     }
 
     private double cosineSimilarity(double[] docVector1, double[] docVector2) {

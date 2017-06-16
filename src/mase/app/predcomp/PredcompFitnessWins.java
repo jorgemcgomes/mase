@@ -33,8 +33,8 @@ public class PredcompFitnessWins extends MasonEvaluation {
     @Override
     protected void postSimulation(MasonSimState sim) {
         ser = new CompoundEvaluationResult(
-                new FitnessResult(sim.schedule.getSteps() == maxSteps ? 0f : 1f , FitnessResult.ARITHMETIC),
-                new FitnessResult(sim.schedule.getSteps() == maxSteps ? 1f : 0f, FitnessResult.ARITHMETIC)
+                new FitnessResult(sim.schedule.getSteps() == maxSteps ? 0f : 1f , FitnessResult.MergeMode.arithmetic),
+                new FitnessResult(sim.schedule.getSteps() == maxSteps ? 1f : 0f, FitnessResult.MergeMode.arithmetic)
         );
     }
 

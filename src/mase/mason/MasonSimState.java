@@ -4,6 +4,8 @@
  */
 package mase.mason;
 
+import java.util.ArrayList;
+import java.util.List;
 import mase.controllers.GroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.evaluation.EvaluationResult;
@@ -25,6 +27,7 @@ public abstract class MasonSimState<T> extends SimState {
     protected EvaluationFunction[] evalPrototypes = new EvaluationFunction[0];
     protected int maxSteps = 0;
     public MasonEvaluation[] currentEvals;
+    protected List<Steppable> loggers;
     public T par;
 
     public MasonSimState(long seed) {
@@ -57,6 +60,10 @@ public abstract class MasonSimState<T> extends SimState {
         this.evalPrototypes = evalPrototypes;
     }
     
+    public void setLoggers(List<Steppable> loggers) {
+        this.loggers = loggers;
+    }
+    
     public void setGroupController(GroupController gc) {
         this.gc = gc;
     }
@@ -71,7 +78,7 @@ public abstract class MasonSimState<T> extends SimState {
             currentEvals[i] = (MasonEvaluation) evalPrototypes[i].clone();
             if (currentEvals[i].updateFrequency > 0) {
                 // Time of first event (begining); ordering (after agents, in the declared order); Steppable; interval (update-freq)
-                super.schedule.scheduleRepeating(Schedule.EPOCH, 100 + i, currentEvals[i], currentEvals[i].updateFrequency);
+                super.schedule.scheduleRepeating(Schedule.EPOCH, 1000 + i, currentEvals[i], currentEvals[i].updateFrequency);
             }
         }
 
@@ -84,6 +91,11 @@ public abstract class MasonSimState<T> extends SimState {
                 }
             }
         });
+
+        // Schedule logging
+        for(int i = 0 ; i < loggers.size() ; i++) {
+            super.schedule.scheduleRepeating(loggers.get(i), 2000 + i, 1);
+        }
 
         // Schedule termination by max steps
         super.schedule.scheduleOnce(maxSteps - 1, Integer.MAX_VALUE, new Steppable() {
@@ -110,21 +122,27 @@ public abstract class MasonSimState<T> extends SimState {
     }
 
     public synchronized EvaluationResult[] evaluate(int repetitions) {
-        EvaluationResult[][] evalResults = new EvaluationResult[evalPrototypes.length][repetitions];
+        List<EvaluationResult[]> evalResults = new ArrayList<>(repetitions);
         for (int r = 0; r < repetitions; r++) {
             start();
             while (schedule.step(this));
+            EvaluationResult[] temp = new EvaluationResult[evalPrototypes.length];
             for (int i = 0; i < currentEvals.length; i++) {
-                evalResults[i][r] = currentEvals[i].getResult();
+                temp[i] = currentEvals[i].getResult();
             }
+            evalResults.add(temp);
         }
         return mergeResults(evalResults);
     }
     
-    protected EvaluationResult[] mergeResults(EvaluationResult[][] evalResults) {
+    protected EvaluationResult[] mergeResults(List<EvaluationResult[]> evalResults) {
         EvaluationResult[] mergedResult = new EvaluationResult[evalPrototypes.length];
         for (int i = 0; i < evalPrototypes.length; i++) {
-            mergedResult[i] = evalResults[i][0].mergeEvaluations(evalResults[i]);
+            List<EvaluationResult> temp = new ArrayList<>(evalResults.size());
+            for(EvaluationResult[] e : evalResults) {
+                temp.add(e[i]);
+            }
+            mergedResult[i] = temp.get(0).mergeEvaluations(temp);
         }
         return mergedResult;        
     }

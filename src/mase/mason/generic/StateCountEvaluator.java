@@ -7,10 +7,10 @@ package mase.mason.generic;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import mase.evaluation.EvaluationResult;
 import mase.evaluation.CompoundEvaluationResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
@@ -20,7 +20,7 @@ import mase.mason.world.SmartAgent;
  *
  * @author jorge
  */
-public class SCAgentEvaluator extends MasonEvaluation {
+public class StateCountEvaluator extends MasonEvaluation<CompoundEvaluationResult<StateCountResult>> {
 
     public static final String P_DISCRETIZATION = "discretisation";
     public static final String P_FILTER = "filter";
@@ -29,7 +29,7 @@ public class SCAgentEvaluator extends MasonEvaluation {
     private double filter;
     
     private List<HashMap<Integer, Integer>> counts;
-    private CompoundEvaluationResult res;
+    private CompoundEvaluationResult<StateCountResult> res;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -39,7 +39,7 @@ public class SCAgentEvaluator extends MasonEvaluation {
     }
 
     @Override
-    public CompoundEvaluationResult getResult() {
+    public CompoundEvaluationResult<StateCountResult> getResult() {
         return res;
     }
 
@@ -66,7 +66,7 @@ public class SCAgentEvaluator extends MasonEvaluation {
             double[] lastSensors = a.lastNormalisedInputs();
             double[] lastAction = a.lastNormalisedOutputs();
             byte[] d = discretise(lastSensors, lastAction);
-            int h = hashVector(d);
+            int h = Arrays.hashCode(d);
             HashMap<Integer,Integer> map = counts.get(i);
             Integer c = map.get(h);
             if (c == null) {
@@ -78,15 +78,15 @@ public class SCAgentEvaluator extends MasonEvaluation {
 
     @Override
     protected void postSimulation(MasonSimState sim) {
-        Collection<EvaluationResult> scs = new ArrayList<>(counts.size());
+        Collection<StateCountResult> scs = new ArrayList<>(counts.size());
         for(HashMap<Integer, Integer> m : counts) {
-            SCResult scr = new SCResult(m);
+            StateCountResult scr = new StateCountResult(m);
             if(filter > 0) {
                 scr.filter(filter);
             }
             scs.add(scr);
         }
-        res = new CompoundEvaluationResult(scs);
+        res = new CompoundEvaluationResult<>(scs);
     }
 
     protected byte[] discretise(double[] sensors, double[] actions) {
@@ -100,20 +100,5 @@ public class SCAgentEvaluator extends MasonEvaluation {
             r[i + sensors.length] = (byte) Math.round(Math.min(Math.max(actions[i], 0), 1) * (bins - 1));
         }
         return r;
-    }
-
-    // better: https://github.com/jpountz/lz4-java/blob/master/src/java/net/jpountz/xxhash/XXHash32JavaSafe.java
-    // http://stackoverflow.com/questions/415953/generate-md5-hash-in-java
-    protected int hashVector(byte[] array) {
-        int hash = 0;
-        for (byte b : array) {
-            hash += (b & 0xFF);
-            hash += (hash << 10);
-            hash ^= (hash >>> 6);
-        }
-        hash += (hash << 3);
-        hash ^= (hash >>> 11);
-        hash += (hash << 15);
-        return Math.abs(hash);
     }
 }

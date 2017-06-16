@@ -10,7 +10,6 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 public class ControllerFactory {
 
     private static final HashMap<Integer, EncodableAgentController> CONTROLLERS = new HashMap<>();
-
     private static final BidiMap<Integer, Class<? extends EncodableAgentController>> CLASS_MAP = new DualHashBidiMap();
 
     static {
@@ -31,6 +30,10 @@ public class ControllerFactory {
             ex.printStackTrace();
         }
     }
+    
+    public static void unloadController(int handle) {
+        CONTROLLERS.remove(handle);
+    }
 
     public static float[] controlStep(int handle, float[] inputs) {
         EncodableAgentController c = CONTROLLERS.get(handle);
@@ -42,7 +45,7 @@ public class ControllerFactory {
         }
     }
 
-    protected static Class<? extends EncodableAgentController> getCorrespondingControllerClass(int type) {
+    private static Class<? extends EncodableAgentController> getCorrespondingControllerClass(int type) {
         return CLASS_MAP.get(type);
     }
 

@@ -29,7 +29,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class Reevaluate {
+public class ReevaluationTools {
 
     public static final String P_AGENT_CONTROLLER = "-c";
     public static final String P_CONTROLLER = "-gc";
@@ -189,11 +189,11 @@ public class Reevaluate {
         // Merge evals
         EvaluationResult[] merged = new EvaluationResult[results.get(0).length];
         for (int i = 0; i < merged.length; i++) {
-            EvaluationResult[] samples = new EvaluationResult[results.size()];
-            for (int j = 0; j < samples.length; j++) {
-                samples[j] = results.get(j)[i];
+            List<EvaluationResult> samples = new ArrayList(results.size());
+            for(EvaluationResult[] ers : results) {
+                samples.add(ers[i]);
             }
-            merged[i] = samples[0].mergeEvaluations(samples);
+            merged[i] = samples.get(0).mergeEvaluations(samples);
         }
 
         DescriptiveStatistics ds = new DescriptiveStatistics(results.size());

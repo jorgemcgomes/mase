@@ -19,7 +19,7 @@ import mase.mason.world.CircularObject;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.MultilineObject;
 import mase.mason.world.PointObject;
-import mase.stat.Reevaluate;
+import mase.stat.ReevaluationTools;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
 import sim.field.continuous.Continuous2D;
@@ -58,13 +58,13 @@ public class MasonTracer {
             }
         }
 
-        File gc = Reevaluate.findControllerFile(args);
+        File gc = ReevaluationTools.findControllerFile(args);
         if (out == null && gc != null) {
             out = new File(gc.getParentFile(), gc.getName() + ".svg");
         }
 
-        GroupController controller = Reevaluate.createController(args);
-        MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args, gc.getParentFile());
+        GroupController controller = ReevaluationTools.createController(args);
+        MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, gc.getParentFile());
         MasonSimState simState = sim.getSimState(controller, seed);
 
         MasonTracer tracer = new MasonTracer(size);

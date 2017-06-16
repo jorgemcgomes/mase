@@ -6,6 +6,7 @@
 package mase.evorbc;
 
 import mase.controllers.AgentController;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
@@ -18,7 +19,10 @@ public class ArbitratorController implements AgentController {
     private AgentController arbitrator;
     private Repertoire repo;
     private MappingFunction mapFun;
-    private transient AgentController lastPrimitive = null;
+    public transient AgentController lastPrimitive = null;
+    public transient int lastPrimitiveId;
+    public transient double[] lastArbitratorOutput;
+    public transient double[] lastRepertoireCoords;
 
     public ArbitratorController() {
         this(null, null, null);
@@ -29,7 +33,7 @@ public class ArbitratorController implements AgentController {
         this.repo = repo;
         this.mapFun = fun;
     }
-
+    
     /**
      * Assumes that the values of the keys are in the range [0,1]
      *
@@ -49,21 +53,19 @@ public class ArbitratorController implements AgentController {
 
     @Override
     public double[] processInputs(double[] input) {
-        double[] arbitratorOutput = arbitrator.processInputs(input);
+        lastArbitratorOutput = arbitrator.processInputs(input);
 
-        double[] coords = mapFun.outputToCoordinates(arbitratorOutput);
+        lastRepertoireCoords = mapFun.outputToCoordinates(lastArbitratorOutput);
         
-        AgentController primitive = repo.nearest(coords);
+        Pair<Integer,AgentController> primitive = repo.nearest(lastRepertoireCoords);
+        lastPrimitiveId = primitive.getLeft();
         if (lastPrimitive == null || primitive != lastPrimitive) {
-            primitive.reset();
-            lastPrimitive = primitive;
+            primitive.getRight().reset();
+            lastPrimitive = primitive.getRight();
         }
-        double[] primitiveOutput = primitive.processInputs(input);
+        double[] out = primitive.getRight().processInputs(input);
         
-        //System.out.println(Arrays.toString(arbitratorOutput));
-        //System.out.println(Arrays.toString(coords));
-        //System.out.println(Arrays.toString(primitiveOutput));
-        return primitiveOutput;
+        return out;
     }
 
     @Override

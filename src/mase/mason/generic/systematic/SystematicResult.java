@@ -5,6 +5,7 @@
 package mase.mason.generic.systematic;
 
 import java.util.Arrays;
+import java.util.Collection;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 
@@ -31,7 +32,7 @@ public class SystematicResult extends VectorBehaviourResult {
     }
 
     @Override
-    public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
+    public VectorBehaviourResult mergeEvaluations(Collection<EvaluationResult<double[]>> results) {
         VectorBehaviourResult vbr = super.mergeEvaluations(results);
         return new SystematicResult(vbr.getBehaviour());
     }

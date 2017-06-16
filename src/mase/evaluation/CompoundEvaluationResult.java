@@ -7,45 +7,50 @@ package mase.evaluation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class CompoundEvaluationResult implements EvaluationResult<ArrayList<? extends EvaluationResult>> {
+public class CompoundEvaluationResult<T extends EvaluationResult> implements EvaluationResult<List<T>> {
 
     private static final long serialVersionUID = 1;
-    private final ArrayList<? extends EvaluationResult> evals;
+    private final ArrayList<T> evals;
 
-    public CompoundEvaluationResult(EvaluationResult... evals) {
+    public CompoundEvaluationResult(T... evals) {
         this.evals = new ArrayList<>(Arrays.asList(evals));
     }
 
-    public CompoundEvaluationResult(Collection<? extends EvaluationResult> evals) {
+    public CompoundEvaluationResult(Collection<T> evals) {
         this.evals = new ArrayList<>(evals);
     }
 
-    public EvaluationResult getEvaluation(int index) {
+    public T getEvaluation(int index) {
         return evals.get(index);
     }
 
     @Override
-    public ArrayList<? extends EvaluationResult> value() {
+    public List<T> value() {
         return evals;
     }
 
     @Override
-    public CompoundEvaluationResult mergeEvaluations(EvaluationResult[] results) {
-        EvaluationResult[] merged = new EvaluationResult[((CompoundEvaluationResult) results[0]).evals.size()];
-        for (int a = 0; a < merged.length; a++) {
-            EvaluationResult[] subpopEvals = new EvaluationResult[results.length];
-            for (int i = 0; i < results.length; i++) {
-                subpopEvals[i] = ((CompoundEvaluationResult) results[i]).evals.get(a);
+    public CompoundEvaluationResult<T> mergeEvaluations(Collection<EvaluationResult<List<T>>> results) {
+        Collection<T> merged = new ArrayList<>(); 
+        // assumes that all the results to merge have the same number of sub-results, so we just check the first
+        int n = results.iterator().next().value().size(); 
+        for(int i = 0 ; i < n ; i++) {
+            ArrayList<T> temp = new ArrayList<>();
+            for(EvaluationResult<List<T>> er : results) {
+                temp.add(er.value().get(i));
             }
-            merged[a] = subpopEvals[0].mergeEvaluations(subpopEvals);
+            T m = (T) temp.get(0).mergeEvaluations(temp);
+            merged.add(m);
         }
-        return new CompoundEvaluationResult(merged);
+        return new CompoundEvaluationResult<>(merged);
     }
+
 
     @Override
     public String toString() {
@@ -55,5 +60,6 @@ public class CompoundEvaluationResult implements EvaluationResult<ArrayList<? ex
         }
         return str.trim();
     }
+
 
 }

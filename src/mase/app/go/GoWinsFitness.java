@@ -39,8 +39,8 @@ public class GoWinsFitness extends MasonEvaluation {
         }
     
         res = new CompoundEvaluationResult(
-                new FitnessResult(blackFit, FitnessResult.ARITHMETIC),  
-                new FitnessResult(whiteFit, FitnessResult.ARITHMETIC));
+                new FitnessResult(blackFit, FitnessResult.MergeMode.arithmetic),  
+                new FitnessResult(whiteFit, FitnessResult.MergeMode.arithmetic));
     }
 
     @Override

@@ -5,9 +5,12 @@
  */
 package mase.app.playground;
 
+import ec.EvolutionState;
+import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import mase.evaluation.VectorBehaviourResult;
+import mase.evaluation.VectorBehaviourResult.LocationEstimator;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
 import mase.mason.world.CircularObject;
@@ -25,6 +28,14 @@ public class PlaygroundSDBCRaw extends MasonEvaluation<VectorBehaviourResult> {
     private List<double[]> states;
     private double[] sMeans;
     private double[] sSDs;
+    public static final String P_AGGREGATION = "aggregation";
+    private LocationEstimator agg;
+
+    @Override
+    public void setup(EvolutionState state, Parameter base) {
+        super.setup(state, base);
+        agg = VectorBehaviourResult.LocationEstimator.valueOf(state.parameters.getString(base.push(P_AGGREGATION), null));
+    }
 
     protected void setStandardizationScores(double[] means, double[] sds) {
         this.sMeans = means;
@@ -100,8 +111,8 @@ public class PlaygroundSDBCRaw extends MasonEvaluation<VectorBehaviourResult> {
         //mean[4] = mean[4] * BOUND;
         
         vbr = new VectorBehaviourResult(mean);
-        vbr.setDistance(VectorBehaviourResult.EUCLIDEAN);
-        vbr.setLocationEstimator(VectorBehaviourResult.GEOMETRIC_MEDIAN);
+        vbr.setDistance(VectorBehaviourResult.Distance.euclidean);
+        vbr.setLocationEstimator(agg);
     }
     
     @Override

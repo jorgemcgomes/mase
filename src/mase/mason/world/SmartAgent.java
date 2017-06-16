@@ -26,29 +26,53 @@ public class SmartAgent extends EmboddiedAgent {
     protected double[] lastActionOutput;
     protected List<Sensor> sensors;
     protected List<Effector> effectors;
-    
+
     public SmartAgent(SimState sim, Continuous2D field, double radius, Color c, AgentController ac) {
         super(sim, field, radius, c);
         this.ac = ac;
         this.sensors = new ArrayList<>();
         this.effectors = new ArrayList<>();
     }
-    
+
+    public int getNInputs() {
+        if (lastNormSensors != null) {
+            return lastNormSensors.length;
+        } else {
+            int c = 0;
+            for (Sensor s : sensors) {
+                c += s.valueCount();
+            }
+            return c;
+        }
+    }
+
+    public int getNOutputs() {
+        if (lastActionOutput != null) {
+            return lastActionOutput.length;
+        } else {
+            int c = 0;
+            for (Effector s : effectors) {
+                c += s.valueCount();
+            }
+            return c;
+        }
+    }
+
     public void addSensor(Sensor s) {
         sensors.add(s);
     }
-    
+
     public void addEffector(Effector e) {
         effectors.add(e);
     }
 
     @Override
     public void step(SimState state) {
-        if(ac != null) {
+        if (ac != null) {
             lastNormSensors = readNormalisedSensors();
             lastActionOutput = ac.processInputs(lastNormSensors);
-            for(int i = 0 ; i < lastActionOutput.length ; i++) {
-                if(Double.isNaN(lastActionOutput[i]) || Double.isInfinite(lastActionOutput[i])) {
+            for (int i = 0; i < lastActionOutput.length; i++) {
+                if (Double.isNaN(lastActionOutput[i]) || Double.isInfinite(lastActionOutput[i])) {
                     lastActionOutput[i] = 0.5;
                 }
             }
@@ -57,17 +81,14 @@ public class SmartAgent extends EmboddiedAgent {
     }
 
     public double[] readNormalisedSensors() {
-        if(lastRawSensors == null) {
-            int count = 0;
-            for(Sensor s : sensors) {
-                count += s.valueCount();
-            }
+        if (lastRawSensors == null) {
+            int count = getNInputs();
             lastRawSensors = new double[count];
             lastNormSensors = new double[count];
-        } 
-        
+        }
+
         int index = 0;
-        for(Sensor s : sensors) {
+        for (Sensor s : sensors) {
             double[] raw = s.readValues();
             double[] norm = s.normaliseValues(raw);
             System.arraycopy(raw, 0, lastRawSensors, index, raw.length);
@@ -78,11 +99,11 @@ public class SmartAgent extends EmboddiedAgent {
     }
 
     public void action(double[] output) {
-        if(effectors.size() == 1) {
+        if (effectors.size() == 1) {
             effectors.get(0).action(output);
         } else {
             int index = 0;
-            for(Effector e : effectors) {
+            for (Effector e : effectors) {
                 double[] o = Arrays.copyOfRange(output, index, index + e.valueCount());
                 index += e.valueCount();
                 e.action(o);
@@ -92,8 +113,8 @@ public class SmartAgent extends EmboddiedAgent {
 
     public AgentController getAgentController() {
         return ac;
-    }    
-    
+    }
+
     public double[] lastNormalisedOutputs() {
         return lastActionOutput;
     }
@@ -101,7 +122,7 @@ public class SmartAgent extends EmboddiedAgent {
     public double[] lastNormalisedInputs() {
         return lastNormSensors;
     }
-    
+
     public double[] lastRawInputs() {
         return lastRawSensors;
     }
@@ -117,16 +138,16 @@ public class SmartAgent extends EmboddiedAgent {
     public String getRawSensorsReport() {
         return formatSensors(lastNormSensors);
     }
-    
+
     private String formatSensors(double[] values) {
         int index = 0;
         StringBuilder sb = new StringBuilder();
-        for(Sensor s : sensors) {
+        for (Sensor s : sensors) {
             sb.append(s.getClass().getSimpleName()).append("{");
-            for(int i = 0 ; i < s.valueCount() ; i++) {
+            for (int i = 0; i < s.valueCount(); i++) {
                 sb.append("[").append(i).append("]").append(String.format("%.2f", values[index++])).append(" ");
             }
-            sb.setCharAt(sb.length()-1, '}');
+            sb.setCharAt(sb.length() - 1, '}');
         }
         return sb.toString();
     }
@@ -134,12 +155,12 @@ public class SmartAgent extends EmboddiedAgent {
     public String getRawActionsReport() {
         int index = 0;
         StringBuilder sb = new StringBuilder();
-        for(Effector e : effectors) {
+        for (Effector e : effectors) {
             sb.append(e.getClass().getSimpleName()).append("{");
-            for(int i = 0 ; i < e.valueCount() ; i++) {
+            for (int i = 0; i < e.valueCount(); i++) {
                 sb.append("[").append(i).append("]").append(String.format("%.2f", lastActionOutput[index++])).append(" ");
             }
-            sb.setCharAt(sb.length()-1, '}');
+            sb.setCharAt(sb.length() - 1, '}');
         }
         return sb.toString();
     }
@@ -151,6 +172,5 @@ public class SmartAgent extends EmboddiedAgent {
     public List<Effector> getEffectors() {
         return effectors;
     }
-    
-    
+
 }

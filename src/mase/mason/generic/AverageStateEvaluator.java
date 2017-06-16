@@ -10,7 +10,6 @@ import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import mase.evaluation.EvaluationResult;
 import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
@@ -22,21 +21,18 @@ import org.apache.commons.lang3.ArrayUtils;
  *
  * @author jorge
  */
-public class ASAgentEvaluator extends MasonEvaluation {
+public class AverageStateEvaluator extends MasonEvaluation<CompoundEvaluationResult<VectorBehaviourResult>> {
 
     private static final long serialVersionUID = 1L;
     public static final String P_WINDOWS = "windows";
-    public static final String P_AVERAGE = "average";
     private int windows;
-    private int average;
     private List<List<double[]>> states;
-    private CompoundEvaluationResult res;
+    private CompoundEvaluationResult<VectorBehaviourResult> res;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         windows = state.parameters.getInt(base.push(P_WINDOWS), null);
-        average = state.parameters.getInt(base.push(P_AVERAGE), null);
     }
 
     @Override
@@ -85,14 +81,14 @@ public class ASAgentEvaluator extends MasonEvaluation {
             }
         }
         
-        Collection<EvaluationResult> resList = new ArrayList<>();
+        Collection<VectorBehaviourResult> resList = new ArrayList<>();
         for(double[] c : concats) {
             VectorBehaviourResult vbr = new VectorBehaviourResult(c);
-            vbr.setDistance(VectorBehaviourResult.EUCLIDEAN);
-            vbr.setLocationEstimator(average);
+            vbr.setDistance(VectorBehaviourResult.Distance.euclidean);
+            vbr.setLocationEstimator(VectorBehaviourResult.LocationEstimator.mean);
             resList.add(vbr);
         }
-        this.res = new CompoundEvaluationResult(resList);
+        this.res = new CompoundEvaluationResult<>(resList);
     }
 
     // excluding to
@@ -104,12 +100,13 @@ public class ASAgentEvaluator extends MasonEvaluation {
         }
         
         // sum the vectors agent-wise
-        for(List<double[]> step : states) {
+        for(int i = from ; i < to ; i++) {
+            List<double[]> step = states.get(i);
             for(int ag = 0 ; ag < step.size() ; ag++) {
-                for(int i = 0 ; i < avg.get(ag).length ; i++) {
-                    avg.get(ag)[i] += step.get(ag)[i]; 
+                for(int j = 0 ; j < avg.get(ag).length ; j++) {
+                    avg.get(ag)[j] += step.get(ag)[j]; 
                 }
-            }
+            }            
         }
         
         // divide by the number of steps
@@ -122,12 +119,8 @@ public class ASAgentEvaluator extends MasonEvaluation {
     }
 
     @Override
-    public EvaluationResult getResult() {
-        if(res.value().size() == 1) {
-            return res.value().get(0);
-        } else {
-            return res;
-        }
+    public CompoundEvaluationResult<VectorBehaviourResult> getResult() {
+        return res;
     }
 
 }

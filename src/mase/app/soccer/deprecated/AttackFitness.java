@@ -42,7 +42,7 @@ public class AttackFitness extends MasonEvaluation {
         res = new FitnessResult(soc.referee.leftTeamScore < 1 ? 
                 1 - minDist / FastMath.sqrt(FastMath.pow2(soc.par.fieldLength) + FastMath.pow2(soc.par.fieldWidth / 2)) :
                 soc.referee.leftTeamScore, 
-                FitnessResult.ARITHMETIC);
+                FitnessResult.MergeMode.arithmetic);
     }
     
     

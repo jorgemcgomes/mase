@@ -1,0 +1,28 @@
+parent.0 = playground.params
+parent.1 = ../../novelty/novelty.params
+parent.2 = ../../gax.params
+
+problem.eval.1 = mase.mason.FixedFitnessEvaluation
+
+ec.subpop.size = 200
+generations = 2500
+
+novelty.behaviour-index = 0
+novelty.archive-growth = 0.1
+novelty.removal-criteria = random
+novelty.archive-size = 2000
+
+# do not want fitness
+stat.child.1 = ec.Statistics
+
+# do not want eval stat (too much space)
+stat.child.3 = ec.Statistics
+
+# do not want best ever
+stat.child.2 = ec.Statistics
+
+# do not want best-of-generation
+stat.child.4 = ec.Statistics
+
+# no need for post-evaluation
+stat.child.8 = ec.Statistics

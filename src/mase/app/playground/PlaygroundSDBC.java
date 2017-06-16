@@ -5,8 +5,6 @@
  */
 package mase.app.playground;
 
-import ec.EvolutionState;
-import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import mase.evaluation.VectorBehaviourResult;
@@ -76,8 +74,8 @@ public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
         }
         
         vbr = new VectorBehaviourResult(mean);
-        vbr.setDistance(VectorBehaviourResult.EUCLIDEAN);
-        vbr.setLocationEstimator(VectorBehaviourResult.GEOMETRIC_MEDIAN);
+        vbr.setDistance(VectorBehaviourResult.Distance.euclidean);
+        vbr.setLocationEstimator(VectorBehaviourResult.LocationEstimator.geometricMedian);
     }
     
     @Override

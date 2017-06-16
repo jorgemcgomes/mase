@@ -8,9 +8,11 @@ import ec.EvolutionState;
 import ec.Fitness;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 /**
@@ -119,11 +121,11 @@ public class ExpandedFitness extends SimpleFitness {
             // Merge evaluation results
             EvaluationResult[] evalRes = new EvaluationResult[((ExpandedFitness) fitnesses[0]).evalResults.length];
             for (int i = 0; i < evalRes.length; i++) { // for each evaluation function
-                EvaluationResult[] evalTrials = new EvaluationResult[fitnesses.length];
+                List<EvaluationResult> evalTrials = new ArrayList<>(fitnesses.length);
                 for (int j = 0; j < fitnesses.length; j++) { // for each trial
-                    evalTrials[j] = ((ExpandedFitness) fitnesses[j]).evalResults[i];
+                    evalTrials.add(((ExpandedFitness) fitnesses[j]).evalResults[i]);
                 }
-                evalRes[i] = (EvaluationResult) evalTrials[0].mergeEvaluations(evalTrials);
+                evalRes[i] = (EvaluationResult) evalTrials.get(0).mergeEvaluations(evalTrials);
             }
             this.setEvaluationResults(state, evalRes, subpop);
             

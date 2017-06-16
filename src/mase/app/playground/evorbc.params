@@ -1,5 +1,5 @@
 problem.controller-factory = mase.evorbc.ArbitratorFactory
-evorbc.repertoire = /home/jorge/exps/playgroundrepas2/job.0.finalrep.tar.gz
-evorbc.prune = 0
 
-neat.OUTPUT.NODES = 9
+evorbc.coordinates = direct
+
+neat.OUTPUT.NODES = 5

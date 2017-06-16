@@ -107,7 +107,7 @@ public class HeterogeneityCheck {
         EvaluationResult[] evals = sol.getEvalResults();
         CompoundEvaluationResult e = (CompoundEvaluationResult) evals[2];
         int participant = 0;
-        for (EvaluationResult er : e.value()) { // for each agent
+        for (Object er : e.value()) { // for each agent
             VectorBehaviourResult vbr = (VectorBehaviourResult) er;
             double[] behaviour = vbr.getBehaviour();
             for (int b = 1; b < behaviour.length; b++) { // for each distance

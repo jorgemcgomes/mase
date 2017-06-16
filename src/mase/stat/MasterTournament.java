@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -92,7 +93,7 @@ public class MasterTournament {
             return;
         }
 
-        MaseProblem sim = Reevaluate.createSimulator(args);
+        MaseProblem sim = ReevaluationTools.createSimulator(args);
         MasterTournament mt = new MasterTournament(sampleFolders, testFolders, sim, name);
 
         if (individuals != null) {
@@ -387,7 +388,7 @@ public class MasterTournament {
 
             EvaluationResult[] merged = new EvaluationResult[iRes.length];
             for (int k = 0; k < iRes.length; k++) {
-                merged[k] = iRes[k][0].mergeEvaluations(iRes[k]);
+                merged[k] = iRes[k][0].mergeEvaluations(Arrays.asList(iRes[k]));
             }
             return merged;
         }

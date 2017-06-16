@@ -13,8 +13,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import mase.evaluation.PostEvaluator;
 import mase.evaluation.BehaviourResult;
 import mase.evaluation.ExpandedFitness;
@@ -36,10 +42,13 @@ public class NoveltyEvaluation implements PostEvaluator {
     public static final String P_ARCHIVE_SIZE_LIMIT = "archive-size";
     public static final String P_ARCHIVE_MODE = "archive-mode";
     public static final String P_ARCHIVE_CRITERIA = "archive-criteria";
+    public static final String P_REMOVAL_CRITERIA = "removal-criteria";
     public static final String P_KD_TREE = "kd-tree";
     public static final String P_SCORE_NAME = "score-name";
+    public static final String P_THREADED = "threaded";
     protected ArchiveMode archiveMode;
     protected ArchiveCriteria archiveCriteria;
+    protected ArchiveCriteria removalCriteria;
     protected int k;
     protected double archiveGrowth;
     protected int sizeLimit;
@@ -47,6 +56,9 @@ public class NoveltyEvaluation implements PostEvaluator {
     protected int behaviourIndex;
     protected String scoreName;
     protected List<ArchiveEntry>[] archives;
+    protected boolean threaded;
+
+    private transient ExecutorService executor;
 
     public enum ArchiveMode {
 
@@ -66,9 +78,11 @@ public class NoveltyEvaluation implements PostEvaluator {
         this.sizeLimit = state.parameters.getInt(base.push(P_ARCHIVE_SIZE_LIMIT), DEFAULT_BASE.push(P_ARCHIVE_SIZE_LIMIT));
         this.archiveMode = ArchiveMode.valueOf(state.parameters.getString(base.push(P_ARCHIVE_MODE), DEFAULT_BASE.push(P_ARCHIVE_MODE)));
         this.archiveCriteria = ArchiveCriteria.valueOf(state.parameters.getString(base.push(P_ARCHIVE_CRITERIA), DEFAULT_BASE.push(P_ARCHIVE_CRITERIA)));
+        this.removalCriteria = ArchiveCriteria.valueOf(state.parameters.getString(base.push(P_REMOVAL_CRITERIA), DEFAULT_BASE.push(P_REMOVAL_CRITERIA)));
         this.useKDTree = state.parameters.getBoolean(base.push(P_KD_TREE), DEFAULT_BASE.push(P_KD_TREE), false);
         this.behaviourIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), DEFAULT_BASE.push(P_BEHAVIOUR_INDEX));
         this.scoreName = state.parameters.getString(base.push(P_SCORE_NAME), DEFAULT_BASE.push(P_SCORE_NAME));
+        this.threaded = state.parameters.getBoolean(base.push(P_THREADED), DEFAULT_BASE.push(P_THREADED), true);
 
         int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this should be more flexible?
         this.archives = new ArrayList[nPops];
@@ -81,6 +95,10 @@ public class NoveltyEvaluation implements PostEvaluator {
             for (int i = 0; i < nPops; i++) {
                 archives[i] = new ArrayList<>();
             }
+        }
+
+        if (threaded) {
+            executor = Executors.newFixedThreadPool(state.evalthreads);
         }
     }
 
@@ -110,20 +128,61 @@ public class NoveltyEvaluation implements PostEvaluator {
                 ExpandedFitness indFit = (ExpandedFitness) ind.fitness;
                 pool.add((BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex));
             }
-            KNNDistanceCalculator calc = useKDTree && pool.size() >= k * 2
-                    ? new KDTreeCalculator()
-                    : new BruteForceCalculator();
-            calc.setPool(pool);
-
+            
             // Calculate novelty for each individual
-            for (Individual ind : pop.subpops[p].individuals) {
+            List<BehaviourResult> inds = new ArrayList<>(pop.subpops[p].individuals.length);
+            for(Individual ind : pop.subpops[p].individuals) {
                 ExpandedFitness indFit = (ExpandedFitness) ind.fitness;
                 BehaviourResult br = (BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex);
-                double novScore = calc.getDistance(br, k);
+                inds.add(br);
+            }
+            List<Double> scores = computeKNNs(pool, inds, k);
+            
+            // Assign novelty scores
+            for (int i = 0 ; i < pop.subpops[p].individuals.length ; i++) {
+                ExpandedFitness indFit = (ExpandedFitness) pop.subpops[p].individuals[i].fitness;
+                double novScore = scores.get(i);
                 indFit.scores().put(scoreName, novScore);
                 indFit.setFitness(state, novScore, false);
             }
         }
+    }
+
+    protected List<Double> computeKNNs(List<BehaviourResult> pool, List<BehaviourResult> targets, final int k) {
+        final KNNDistanceCalculator calc = getKNNCalculator(pool);
+        List<Double> res = new ArrayList<>(targets.size());
+        if (threaded) {
+            List<Future<Double>> futures = new ArrayList<>(targets.size());
+            for (final BehaviourResult t : targets) {
+                Future<Double> task = executor.submit(new Callable<Double>() {
+                    @Override
+                    public Double call() throws Exception {
+                        return calc.getDistance(t, k);
+                    }
+                });
+                futures.add(task);
+            }
+            try {
+                for (Future<Double> f : futures) {
+                    res.add(f.get());
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            for (BehaviourResult t : targets) {
+                res.add(calc.getDistance(t, k));
+            }
+        }
+        return res;
+    }
+
+    protected KNNDistanceCalculator getKNNCalculator(List<BehaviourResult> pool) {
+        KNNDistanceCalculator calc = useKDTree && pool.size() >= k * 2
+                ? new KDTreeCalculator()
+                : new BruteForceCalculator();
+        calc.setPool(pool);
+        return calc;
     }
 
     public interface KNNDistanceCalculator {
@@ -167,7 +226,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         @Override
         public void setPool(List<BehaviourResult> pool) {
             tree = new KdTree.Euclidean<>(((VectorBehaviourResult) pool.get(0)).value().length);
-            for(BehaviourResult br : pool) {
+            for (BehaviourResult br : pool) {
                 tree.addPoint(((VectorBehaviourResult) br).value(), br);
             }
         }
@@ -194,6 +253,8 @@ public class NoveltyEvaluation implements PostEvaluator {
                 Individual[] popInds = pop.subpops[i].individuals;
                 List<ArchiveEntry> archive = archives[i];
                 LinkedHashSet<Individual> toAdd = new LinkedHashSet<>();
+
+                // select individuals to add to archive
                 if (archiveCriteria == ArchiveCriteria.random) {
                     while (toAdd.size() < archiveGrowth * popInds.length) {
                         int index = state.random[0].nextInt(popInds.length);
@@ -213,16 +274,14 @@ public class NoveltyEvaluation implements PostEvaluator {
                         toAdd.add(copy[j]);
                     }
                 }
+
+                // open up space for new individuals if needed
+                removeN(state, archive, archive.size() - sizeLimit + toAdd.size());
+
+                // add new individuals to the archive
                 for (Individual ind : toAdd) {
-                    ArchiveEntry ar = new ArchiveEntry(state,
-                            (BehaviourResult) ((ExpandedFitness) ind.fitness).getCorrespondingEvaluation(behaviourIndex),
-                            ((ExpandedFitness) ind.fitness).getFitnessScore());
-                    if (archive.size() == sizeLimit) {
-                        int index = state.random[0].nextInt(archive.size());
-                        archive.set(index, ar);
-                    } else {
-                        archive.add(ar);
-                    }
+                    ArchiveEntry ar = new ArchiveEntry(state, ind);
+                    archive.add(ar);
                 }
             }
         }
@@ -232,17 +291,55 @@ public class NoveltyEvaluation implements PostEvaluator {
         return archives;
     }
 
-    public static class ArchiveEntry implements Serializable {
+    protected void removeN(EvolutionState state, List<ArchiveEntry> archive, int n) {
+        if (removalCriteria == ArchiveCriteria.random) {
+            for (int i = 0; i < n; i++) {
+                int index = state.random[0].nextInt(archive.size());
+                archive.remove(index);
+            }
+        } else if (removalCriteria == ArchiveCriteria.novel) {
+            // compute novelty of all elements in the archive
+            List<BehaviourResult> pool = new ArrayList<>(archive.size());
+            for (ArchiveEntry e : archive) {
+                pool.add(e.getBehaviour());
+            }
+            List<Double> scores = computeKNNs(pool, pool, k);
+            for (int i = 0; i < archive.size(); i++) {
+                ArchiveEntry e = archive.get(i);
+                e.novelty = scores.get(i);
+            }
+
+            // sort archive according to novelty
+            Collections.sort(archive, new Comparator<ArchiveEntry>() {
+                @Override
+                public int compare(ArchiveEntry o1, ArchiveEntry o2) {
+                    return Double.compare(o1.novelty, o2.novelty);
+                }
+            });
+
+            // remove least novel
+            Iterator<ArchiveEntry> iter = archive.iterator();
+            for (int i = 0; i < n; i++) {
+                iter.next();
+                iter.remove();
+            }
+        }
+    }
+
+    public class ArchiveEntry implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
         protected BehaviourResult behaviour;
         protected int generation;
         protected double fitness;
+        protected Individual ind;
+        protected double novelty;
 
-        protected ArchiveEntry(EvolutionState state, BehaviourResult behaviour, double fitness) {
-            this.behaviour = behaviour;
-            this.fitness = fitness;
+        protected ArchiveEntry(EvolutionState state, Individual ind) {
+            this.ind = ind;
+            this.behaviour = (BehaviourResult) ((ExpandedFitness) ind.fitness).getCorrespondingEvaluation(behaviourIndex);
+            this.fitness = ((ExpandedFitness) ind.fitness).getFitnessScore();
             this.generation = state.generation;
         }
 
@@ -256,6 +353,10 @@ public class NoveltyEvaluation implements PostEvaluator {
 
         public double getFitness() {
             return fitness;
+        }
+
+        public Individual getIndividual() {
+            return ind;
         }
     }
 

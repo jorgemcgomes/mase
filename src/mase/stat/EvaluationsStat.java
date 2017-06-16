@@ -10,6 +10,7 @@ import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import mase.MaseProblem;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.CompoundEvaluationResult;
@@ -84,7 +85,7 @@ public class EvaluationsStat extends Statistics {
         for (int i = 0; i < sample.length; i++) {
             String evalName = prob.getEvalFunctions()[i].getClass().getSimpleName();
             if (sample[i] instanceof CompoundEvaluationResult) {
-                ArrayList<? extends EvaluationResult> allEvals = ((CompoundEvaluationResult) sample[i]).value();
+                List<? extends EvaluationResult> allEvals = ((CompoundEvaluationResult) sample[i]).value();
                 if (allSubpops) {
                     for (int j = 0; j < allEvals.size(); j++) {
                         for (int k = 0; k < allEvals.get(j).toString().split(" ").length; k++) {
@@ -110,7 +111,7 @@ public class EvaluationsStat extends Statistics {
         for (EvaluationResult er : eval) {
             if (er instanceof CompoundEvaluationResult) {
                 if (allSubpops) {
-                    ArrayList<? extends EvaluationResult> allEvals = ((CompoundEvaluationResult) er).value();
+                    List<? extends EvaluationResult> allEvals = ((CompoundEvaluationResult) er).value();
                     for (EvaluationResult e : allEvals) {
                         s += " " + e;
                     }

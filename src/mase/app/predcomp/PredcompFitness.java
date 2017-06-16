@@ -32,8 +32,8 @@ public class PredcompFitness extends MasonEvaluation {
     @Override
     protected void postSimulation(MasonSimState sim) {
         ser = new CompoundEvaluationResult(
-                new FitnessResult( maxSteps - sim.schedule.getSteps(), FitnessResult.ARITHMETIC),
-                new FitnessResult( sim.schedule.getSteps(), FitnessResult.ARITHMETIC)
+                new FitnessResult( maxSteps - sim.schedule.getSteps(), FitnessResult.MergeMode.arithmetic),
+                new FitnessResult( sim.schedule.getSteps(), FitnessResult.MergeMode.arithmetic)
         );
     }
 

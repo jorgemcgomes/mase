@@ -16,16 +16,19 @@ import org.apache.commons.math3.stat.descriptive.rank.Median;
 public class FitnessResult implements EvaluationResult<Double> {
 
     private static final long serialVersionUID = 1;
-    public static final int MAX = 0, MIN = 1, ARITHMETIC = 2, HARMONIC = 3, MIN_PLUS = 4, MEDIAN = 5;
     public static final double FLOAT_THRESHOLD = 0.0001f;
     protected double value;
-    protected int average;
+    protected MergeMode average;
 
-    public FitnessResult(double value) {
-        this(value, ARITHMETIC);
+    public enum MergeMode {
+        max, min, arithmetic, harmonic, minPlus, median
     }
 
-    public FitnessResult(double value, int average) {
+    public FitnessResult(double value) {
+        this(value, MergeMode.arithmetic);
+    }
+
+    public FitnessResult(double value, MergeMode average) {
         this.value = value;
         this.average = average;
     }
@@ -34,29 +37,29 @@ public class FitnessResult implements EvaluationResult<Double> {
     public Double value() {
         return value;
     }
-    
-    public int getAverageType() {
+
+    public MergeMode getAverageType() {
         return average;
     }
 
     @Override
-    public FitnessResult mergeEvaluations(EvaluationResult[] results) {
+    public FitnessResult mergeEvaluations(Collection<EvaluationResult<Double>> results) {
         double score = 0;
         DescriptiveStatistics ds = new DescriptiveStatistics();
-        for(EvaluationResult f : results) {
-            ds.addValue((double) f.value());
+        for (EvaluationResult<Double> f : results) {
+            ds.addValue(f.value());
         }
         switch (average) {
-            case MAX:
+            case max:
                 score = ds.getMax();
                 break;
-            case MIN:
+            case min:
                 score = ds.getMin();
                 break;
-            case ARITHMETIC:
+            case arithmetic:
                 score = ds.getMean();
                 break;
-            case HARMONIC:
+            case harmonic:
                 for (EvaluationResult f : results) {
                     Double val = (Double) f.value();
                     if (val > -FLOAT_THRESHOLD && val < FLOAT_THRESHOLD) {
@@ -65,19 +68,20 @@ public class FitnessResult implements EvaluationResult<Double> {
                         score += 1 / val;
                     }
                 }
-                score = results.length / score;
+                score = results.size() / score;
                 break;
-            case MIN_PLUS:
+            case minPlus:
                 double min = ds.getMin();
                 double mean = ds.getMean();
-                score = 0.01f * (mean / results.length) + 0.99f * min;
+                score = 0.01f * (mean / results.size()) + 0.99f * min;
                 break;
-            case MEDIAN:
+            case median:
                 ds.setMeanImpl(new Median());
                 score = ds.getMean();
                 break;
         }
         FitnessResult fit = new FitnessResult(score, average);
+        fit.average = this.average;
         return fit;
     }
 

@@ -24,7 +24,8 @@ public class ArbitratorFactory implements ControllerFactory {
 
     public static final Parameter DEFAULT_BASE = new Parameter("evorbc");
     public static final String P_REPERTOIRE = "repertoire";
-    public static final String P_REDUCED = "reduced";
+    public static final String P_COORDINATES = "coordinates";
+    public static final String V_DIRECT = "direct";
     private static final long serialVersionUID = 1L;
     private Repertoire repo;
     private MappingFunction mapFun;
@@ -36,15 +37,18 @@ public class ArbitratorFactory implements ControllerFactory {
     public void setup(EvolutionState state, Parameter base) {
         File repoFile = new File(state.parameters.getString(base.push(P_REPERTOIRE), DEFAULT_BASE.push(P_REPERTOIRE)));
         File coordsFile = null;
-        if (state.parameters.exists(base.push(P_REDUCED), DEFAULT_BASE.push(P_REDUCED))) {
-            File f = new File(state.parameters.getString(base.push(P_REDUCED), DEFAULT_BASE.push(P_REDUCED)));
-            if (f.exists()) {
-                coordsFile = f;
-            } else {
-                state.output.fatal("Given coordinate file does not exist: " + f.getAbsolutePath());
+        String fName = state.parameters.getString(base.push(P_COORDINATES), DEFAULT_BASE.push(P_COORDINATES));
+        if (!fName.equalsIgnoreCase(V_DIRECT)) {
+            if (!fName.endsWith(".txt")) {
+                fName += ".txt";
+            }
+            coordsFile = new File(repoFile.getParentFile(), repoFile.getName().replace(".tar.gz", "_") + fName);
+            if (!coordsFile.exists()) {
+                state.output.fatal("Given coordinate file does not exist: " + coordsFile.getAbsolutePath() + ".txt.\n"
+                        + "The coordinate file should be in the same folder as the repertoire.");
             }
         }
-        
+
         repo = new KdTreeRepertoire();
         try {
             repo.load(repoFile, coordsFile);
@@ -56,8 +60,6 @@ public class ArbitratorFactory implements ControllerFactory {
 
         mapFun = new CartesianMappingFunction(repo.coordinateBounds());
     }
-
-
 
     @Override
     public GroupController createController(EvolutionState state, Individual... inds) {

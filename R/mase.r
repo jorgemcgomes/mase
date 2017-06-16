@@ -13,6 +13,7 @@ library(pdist)
 library(RColorBrewer)
 library(formula.tools)
 library(arules)
+library(amap)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
@@ -37,7 +38,7 @@ theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"),
 
 #### Parallel #############################################################################
 
-createCluster <- function(cores=detectCores(logical=T)) {
+createCluster <- function(cores=detectCores()) {
   if(exists("cl")) stopCluster(cl)
   cl <<- makeCluster(cores)
   setDefaultCluster(cl)
@@ -525,19 +526,19 @@ identifyBests <- function(som, data, n=10, interactive=T) {
 # method: dimensionality reduction method. currently supports sammon, tsne, Rtsne (fast Barnes-Hut tsne)
 # ...: to be passed to reduction method
 # returns data with extra columns for the reduced data
-reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca"), k=2, normalise=T, ...) {
+reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","rpca"), k=2, normalise=T, ...) {
   d <- data
   if(!is.null(vars)) {
     d <- data[, vars, with=F]
   }
   if(method[1]=="sammon") {
     require(MASS)
-    dists <- dist(d)
+    dists <- Dist(d, nbproc=detectCores())
     sam <- sammon(dists, k=k, ...)
     d <- sam$points
   } else if(method[1]=="tsne") {
     require(tsne)
-    dists <- dist(d)
+    dists <- Dist(d, nbproc=detectCores())
     d <- tsne(dists, k=k, ...)
   } else if(method[1]=="Rtsne") {
     require(Rtsne)
@@ -546,6 +547,13 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca"),
   } else if(method[1]=="pca") {
     pc <- prcomp(d, center=T, scale.=T, rank.=k)
     d <- pc$x
+  } else if(method[1]=="rpca") {
+    require(rrcov)
+    pc <- PcaHubert(d, k=k, scale=F, ...)
+    print(summary(pc))
+    s <- cumsum(pc@eigenvalues / sum(pc@eigenvalues))
+    print(ggplot(data.table(PC=1:pc@k,CummulativeVariance=s), aes(PC,CummulativeVariance)) + geom_bar(stat="identity"))
+    d <- pc@scores
   } else {
     stop("unknown method:", method[1])
   }
@@ -569,6 +577,11 @@ plotReduced2D <- function(reduced, color.var=NULL) {
   g <- ggplot(reduced, aes(x=V1, y=V2)) + geom_point(aes_string(colour=color.var), shape=4, size=1.5) + 
     coord_fixed() + theme(legend.position="right")
   return(g)
+}
+
+plotReduced3D <- function(reduced, color.var=NULL) {
+  require(rgl)
+  plot3d(reduced$V1, reduced$V2, reduced$V3)
 }
 
 #### General purpose statistics ###########################################################

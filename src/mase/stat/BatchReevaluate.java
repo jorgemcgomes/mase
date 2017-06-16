@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import mase.MaseProblem;
 import mase.evaluation.EvaluationResult;
-import mase.stat.Reevaluate.Reevaluation;
+import mase.stat.ReevaluationTools.Reevaluation;
 
 /**
  *
@@ -34,6 +34,7 @@ public class BatchReevaluate {
     public static final String DEFAULT_PREFIX = "post";
 
     public static void main(String[] args) throws Exception {
+        /* Parse command line arguments */
         List<File> folders = new ArrayList<>();
         int reps = 0;
         boolean recursive = false;
@@ -47,7 +48,7 @@ public class BatchReevaluate {
                     throw new Exception("Folder does not exist: " + folder.getAbsolutePath());
                 }
                 folders.add(folder);
-            } else if (args[x].equalsIgnoreCase(Reevaluate.P_NREPS)) {
+            } else if (args[x].equalsIgnoreCase(ReevaluationTools.P_NREPS)) {
                 reps = Integer.parseInt(args[1 + x++]);
             } else if (args[x].equalsIgnoreCase(FORCE)) {
                 force = true;
@@ -75,7 +76,7 @@ public class BatchReevaluate {
                 if (f.isDirectory()) {
                     processDir(f, args, mt, recursive);
                 } else if (f.getName().endsWith("tar.gz")) {
-                    MaseProblem sim = Reevaluate.createSimulator(args, f.getParentFile());
+                    MaseProblem sim = ReevaluationTools.createSimulator(args, f.getParentFile());
                     mt.reevaluateTar(f, sim);
                 } else {
                     System.out.println("Cannot handle file: " + f.getAbsolutePath());
@@ -99,7 +100,7 @@ public class BatchReevaluate {
             }
         });
         if (!recursive || list.length > 0) {
-            MaseProblem sim = Reevaluate.createSimulator(args, f);
+            MaseProblem sim = ReevaluationTools.createSimulator(args, f);
             mt.reevaluateFolder(f, sim);
         }
 
@@ -235,7 +236,7 @@ public class BatchReevaluate {
         @Override
         public Reevaluation call() throws Exception {
             System.out.print(".");
-            Reevaluation reev = Reevaluate.reevaluate(sol, sim, reps);
+            Reevaluation reev = ReevaluationTools.reevaluate(sol, sim, reps);
             return reev;
         }
     }

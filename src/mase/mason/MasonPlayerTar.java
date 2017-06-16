@@ -18,7 +18,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import mase.stat.PersistentSolution;
-import mase.stat.Reevaluate;
+import mase.stat.ReevaluationTools;
 import mase.stat.SolutionPersistence;
 import sim.display.Controller;
 import sim.display.GUIState;
@@ -30,12 +30,12 @@ import sim.display.GUIState;
 public class MasonPlayerTar {
        
     public static void main(String[] args) throws Exception {
-        File tar = Reevaluate.findControllerFile(args);
+        File tar = ReevaluationTools.findControllerFile(args);
         if(tar == null) {
             System.exit(1);
         }
         long startSeed = 0;
-        MasonSimulationProblem sim = (MasonSimulationProblem) Reevaluate.createSimulator(args, tar.getParentFile());
+        MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, tar.getParentFile());
         final MasonSimState state = sim.getSimState(null, startSeed);
         
         final List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(tar);

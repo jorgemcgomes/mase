@@ -53,7 +53,7 @@ public class TournamentFitness extends MasonEvaluation {
             score = 0;
         }
         double bootstrap = 1 - avgDist / currentEvaluationStep / FastMath.sqrt(FastMath.pow2(soc.par.fieldLength) + FastMath.pow2(soc.par.fieldWidth / 2));
-        res = new FitnessResult(score + bootstrap, FitnessResult.ARITHMETIC);
+        res = new FitnessResult(score + bootstrap, FitnessResult.MergeMode.arithmetic);
     }
     
     

@@ -18,6 +18,9 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.controllers.AgentController;
+import mase.evaluation.CompoundEvaluationResult;
+import mase.evaluation.EvaluationResult;
+import mase.evaluation.VectorBehaviourResult;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import mase.util.KdTree;
@@ -29,9 +32,17 @@ import org.apache.commons.lang3.tuple.Pair;
  * @author jorge
  */
 public class KdTreeRepertoire implements Repertoire {
+    
+    // Cache to avoid many instances of the same repertoire when de-serializing many controllers using the same repertoire
+    // Currently only supports one repo at a time (should be enough for most cases)
+    // TODO: there WILL be problems if any controller modifies these structures for some reason
+    private static transient KdTree<Integer> cachedTree;
+    private static transient Map<Integer, AgentController> cachedPrimitives;
+    private static transient long cachedRepHash, cachedCoordsHash;
 
     private static final long serialVersionUID = 1L;
-    private transient KdTree<AgentController> tree;
+    private transient KdTree<Integer> tree;
+    private transient Map<Integer, AgentController> primitives;
     private Pair<Double, Double>[] bounds;
 
     private File repFile, coordsFile;
@@ -39,16 +50,27 @@ public class KdTreeRepertoire implements Repertoire {
 
     //coords.get(solutions.get(0).getIndex()).length
     @Override
-    public AgentController nearest(double[] coordinates) {
-        ArrayList<KdTree.SearchResult<AgentController>> nearest = tree.nearestNeighbours(coordinates, 1);
-        return nearest.get(0).payload;
+    public Pair<Integer, AgentController> nearest(double[] coordinates) {
+        ArrayList<KdTree.SearchResult<Integer>> nearest = tree.nearestNeighbours(coordinates, 1);
+        int id = nearest.get(0).payload;
+        return Pair.of(id, primitives.get(id));
     }
 
     @Override
     public Repertoire deepCopy() {
-        // TODO: clone repo -- needed because the agentcontrollers can have state, and therefore
-        // should not be used simultaneously in different evaluation threads
-        // but this should be fine for stateless ACs (fixed values or non-recurrent NNs)
+        /*KdTreeRepertoire newRep = new KdTreeRepertoire();
+        newRep.tree = this.tree;
+        newRep.bounds = this.bounds;
+        newRep.repFile = this.repFile;
+        newRep.coordsFile = this.coordsFile;
+        newRep.repFileHash = this.repFileHash;
+        newRep.coordsFileHash = this.coordsFileHash;
+        
+        newRep.primitives = new HashMap<>(this.primitives);
+        for(Map.Entry<Integer,AgentController> e : newRep.primitives.entrySet()) {
+            e.setValue(e.getValue().clone());
+        }
+        return newRep;*/
         return this;
     }
 
@@ -69,11 +91,11 @@ public class KdTreeRepertoire implements Repertoire {
             return;
         }
 
-        Map<Integer, double[]> coords = null;
+        Map<Integer, double[]> coords;
         if (coordinates != null) {
             coords = fileCoordinates(coordinates);
-            if (coords.size() != solutions.size()) {
-                throw new IOException("Number of solutions in repertoire does not match number of coordinates");
+            if (coords.size() > solutions.size()) {
+                throw new IOException("Number of coordinates is greater than the number of solutions in repertoire");
             }
         } else {
             coords = encodedCoordinates(solutions);
@@ -81,33 +103,54 @@ public class KdTreeRepertoire implements Repertoire {
 
         int n = coords.get(solutions.get(0).getIndex()).length;
 
-        bounds = new Pair[n];
-        for (int i = 0; i < n; i++) {
-            double min = Double.POSITIVE_INFINITY;
-            double max = Double.NEGATIVE_INFINITY;
-            for (double[] c : coords.values()) {
-                min = Math.min(min, c[i]);
-                max = Math.max(max, c[i]);
-            }
-            bounds[i] = Pair.of(min, max);
+        // bounds might already have been computed if the object is being de-serialized
+        if(bounds == null) {
+            bounds = new Pair[n];
+            for (int i = 0; i < n; i++) {
+                double min = Double.POSITIVE_INFINITY;
+                double max = Double.NEGATIVE_INFINITY;
+                for (double[] c : coords.values()) {
+                    min = Math.min(min, c[i]);
+                    max = Math.max(max, c[i]);
+                }
+                bounds[i] = Pair.of(min, max);
+            }            
         }
 
+
         tree = new KdTree.Euclidean<>(n);
+        primitives = new HashMap<>();
         for (int i = 0; i < solutions.size(); i++) {
             PersistentSolution sol = solutions.get(i);
             AgentController ac = sol.getController().getAgentControllers(1)[0];
             double[] c = coords.get(sol.getIndex());
-            if (c == null) {
-                throw new IOException("Coordinate not found for index " + sol.getIndex());
+            if (c != null) {
+                tree.addPoint(c, sol.getIndex());
+                primitives.put(sol.getIndex(), ac);
             }
-            tree.addPoint(c, ac);
+        }
+        if (tree.size() != coords.size()) {
+            throw new IOException("Some of the coordinates were not used");
         }
     }
 
     private Map<Integer, double[]> encodedCoordinates(Collection<PersistentSolution> solutions) {
         Map<Integer, double[]> coords = new HashMap<>();
         for (PersistentSolution sol : solutions) {
-            coords.put(sol.getIndex(), (double[]) sol.getUserData());
+            if (sol.getUserData() instanceof double[]) {
+                coords.put(sol.getIndex(), (double[]) sol.getUserData());
+            } else {
+                EvaluationResult[] evalResults = sol.getEvalResults();
+                for (EvaluationResult e : evalResults) {
+                    if (e instanceof CompoundEvaluationResult) {
+                        e = ((CompoundEvaluationResult) e).getEvaluation(sol.getSubpop());
+                    }
+                    if (e instanceof VectorBehaviourResult) {
+                        coords.put(sol.getIndex(), ((VectorBehaviourResult) e).getBehaviour());
+                        break;
+                    }
+                }
+            }
         }
         return coords;
     }
@@ -155,6 +198,18 @@ public class KdTreeRepertoire implements Repertoire {
                 throw new IOException("Coordinates file does not match the expected file");
             }
         }
-        load(repFile, coordsFile);
+        
+        synchronized(KdTreeRepertoire.class) {
+            if(cachedTree != null && repFileHash == cachedRepHash && coordsFileHash == cachedCoordsHash) {
+                this.tree = cachedTree;
+                this.primitives = cachedPrimitives;
+            } else {
+                load(repFile, coordsFile);
+                cachedRepHash = repFileHash;
+                cachedCoordsHash = coordsFileHash;
+                cachedTree = this.tree;
+                cachedPrimitives = this.primitives;
+            }
+        }        
     }
 }

@@ -22,7 +22,7 @@ public interface Repertoire extends Serializable {
      * @param coordinates
      * @return 
      */
-    public AgentController nearest(double[] coordinates);
+    public Pair<Integer, AgentController> nearest(double[] coordinates);
     
     /**
      * The min and max values of the coordinates in the repertoire

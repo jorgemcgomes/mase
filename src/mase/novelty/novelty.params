@@ -7,12 +7,21 @@ novelty.archive-growth  =          0.025
 novelty.archive-size =             2000
 novelty.archive-mode =             shared
 novelty.archive-criteria =         random
+novelty.removal-criteria =         random
 novelty.kd-tree =                  true
 novelty.behaviour-index =          1
 novelty.score-name =               novelty
+novelty.threaded =                 true
 
 stat.child.11 =                    mase.novelty.NoveltyPopStat
 stat.child.11.file =		   $noveltypop.stat
 stat.child.11.do-subpops =         false
+
+stat.child.12 =                    mase.novelty.FinalArchiveStat
+stat.child.12.file =               $finalarchive.tar.gz
+
+stat.child.13 =                    mase.novelty.ArchiveTextStat
+stat.child.13.file =               $archive.stat
+stat.child.13.update-always =      false
 
 neat.SPECIE.FITNESS.MAX =          1000

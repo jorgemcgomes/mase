@@ -59,8 +59,8 @@ public class CompetitiveKeepawayFitness extends MasonEvaluation {
     @Override
     protected void postSimulation(MasonSimState sim) {
         fitnessResult = new CompoundEvaluationResult(new EvaluationResult[] {
-            new FitnessResult(100f +  numPasses, FitnessResult.ARITHMETIC),
-            new FitnessResult(100f - numPasses, FitnessResult.ARITHMETIC)
+            new FitnessResult(100f +  numPasses, FitnessResult.MergeMode.arithmetic),
+            new FitnessResult(100f - numPasses, FitnessResult.MergeMode.arithmetic)
         });
     }
 

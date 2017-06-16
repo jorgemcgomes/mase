@@ -3,8 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.evaluation;
+package mase.mason.generic;
 
+import java.util.Collection;
+import mase.evaluation.EvaluationResult;
+import mase.evaluation.VectorBehaviourResult;
 import org.apache.commons.math3.util.KthSelector;
 
 /**
@@ -24,16 +27,16 @@ public class MedianVectorBehaviourResult extends VectorBehaviourResult {
     }
 
     @Override
-    public VectorBehaviourResult mergeEvaluations(EvaluationResult[] results) {
-        int stateLen = ((MedianVectorBehaviourResult) results[0]).raw.length;
+    public VectorBehaviourResult mergeEvaluations(Collection<EvaluationResult<double[]>> results) {
+        int stateLen = ((MedianVectorBehaviourResult) results.iterator().next()).raw.length;
         int totalSteps = 0;
         for (EvaluationResult r : results) {
             totalSteps += ((MedianVectorBehaviourResult) r).raw[0].length;
         }
         double[][] merged = new double[stateLen][totalSteps];
         int index = 0;
-        for (int i = 0; i < results.length; i++) {
-            MedianVectorBehaviourResult m = (MedianVectorBehaviourResult) results[i];
+        for (EvaluationResult e : results) {
+            MedianVectorBehaviourResult m = (MedianVectorBehaviourResult) e;
             if (m.raw.length != stateLen) {
                 throw new RuntimeException("Trying to merge two results with different state lengths");
             }
@@ -48,7 +51,9 @@ public class MedianVectorBehaviourResult extends VectorBehaviourResult {
         // note that this prevents further merges
         newM.raw = null;
         return newM;
+        
     }
+
 
     private static double[] medianApply(double[][] raw) {
         double[] res = new double[raw.length];

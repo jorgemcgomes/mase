@@ -9,10 +9,13 @@ import ec.util.Parameter;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.util.ArrayList;
+import java.util.List;
 import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
 import mase.MaseProblem;
 import sim.display.GUIState;
+import sim.engine.Steppable;
 
 /**
  *
@@ -26,6 +29,7 @@ public abstract class MasonSimulationProblem<T extends MasonSimState> extends Ma
     public static final String P_REPETITIONS = "repetitions";
     protected int maxSteps;
     protected int repetitions;
+    protected List<Steppable> loggers;
     
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -40,6 +44,8 @@ public abstract class MasonSimulationProblem<T extends MasonSimState> extends Ma
         if(repetitions > 1 && sameSeed) {
             state.output.warning("Using multiple repetitions, but the random seed is fixed.");
         }      
+        
+        loggers = new ArrayList<>();
     }
     
     @Override
@@ -64,10 +70,15 @@ public abstract class MasonSimulationProblem<T extends MasonSimState> extends Ma
         return repetitions;
     }
     
+    public List<Steppable> loggers() {
+        return loggers;
+    }
+    
     public T getSimState(GroupController gc, long seed) {
         T s = createSimState(gc, seed);
         s.setMaxSteps(maxSteps);
         s.setEvalFunctions(evalFunctions);
+        s.setLoggers(loggers);
         return s;
     }
     

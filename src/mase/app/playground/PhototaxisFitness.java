@@ -35,7 +35,7 @@ public class PhototaxisFitness extends MasonEvaluation<FitnessResult> {
         Playground pl = (Playground) sim;
         double finalDist = pl.agent.distanceTo(pl.objects.get(0).getLocation());
         double diag = FastMath.sqrt(FastMath.pow2(pl.field.width) + FastMath.pow2(pl.field.height));
-        r = new FitnessResult(finalDist > 1 ? 1 - finalDist / diag : 2 - (double) pl.schedule.getTime() / pl.getMaxSteps());
+        r = new FitnessResult(finalDist > 1 ? 1 - finalDist / diag : 2 - (double) pl.schedule.getTime() / maxSteps);
     }
 
     @Override

@@ -88,11 +88,11 @@ public abstract class SolutionPersistence {
     }
 
     public static PersistentSolution readSolution(InputStream is) throws Exception {
-        try { // Assume new XML version
+        try {
             return (PersistentSolution) XSTREAM.fromXML(is);
-        } catch (Exception ex) { // Fallback, try java serialization
-            System.err.println("Error reading XML. Fallback to java serialization.");
-            return SerializationUtils.deserialize(is);
+        } catch (Exception ex) { 
+            ex.printStackTrace();
+            return null;
         }
     }
 
@@ -104,13 +104,13 @@ public abstract class SolutionPersistence {
     public static List<PersistentSolution> readSolutionsFromTar(File tarFile) throws Exception {
         GZIPInputStream gis = new GZIPInputStream(new FileInputStream(tarFile));
         TarArchiveInputStream tis = new TarArchiveInputStream(gis);
-
-        ArrayList<PersistentSolution> gcs = new ArrayList<PersistentSolution>();
+        ArrayList<PersistentSolution> gcs = new ArrayList<>();
         TarArchiveEntry e;
         while ((e = tis.getNextTarEntry()) != null) {
             PersistentSolution gc = readSolution(tis);
             gcs.add(gc);
         }
+        gis.close();
         tis.close();
 
         Collections.sort(gcs);

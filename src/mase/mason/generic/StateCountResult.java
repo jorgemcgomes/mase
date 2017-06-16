@@ -4,6 +4,7 @@
  */
 package mase.mason.generic;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,51 +18,49 @@ import mase.evaluation.BehaviourResult;
  *
  * @author jorge
  */
-public class SCResult implements BehaviourResult {
+public class StateCountResult implements BehaviourResult<Map<Integer, Integer>> {
 
     private static final long serialVersionUID = 1;
     protected Map<Integer, Integer> counts;
-    protected int originalSize;
+    protected int originalSize; // for statistics only
 
-    public SCResult(Map<Integer, Integer> counts) {
+    public StateCountResult(Map<Integer, Integer> counts) {
         this.counts = counts;
-        this.originalSize = counts.size();
+        this.originalSize = counts.size(); // for statistics only
     }
 
     @Override
-    public Object value() {
+    public Map<Integer, Integer> value() {
         return counts;
     }
 
     @Override
-    public SCResult mergeEvaluations(EvaluationResult[] results) {
-        SCResult first = (SCResult) results[0];
-        int totalOriginalSize = first.originalSize;
-        Map<Integer, Integer> mergedCounts = (Map<Integer, Integer>) ((HashMap) first.counts).clone();
-        for (int i = 1 ; i < results.length ; i++) {
-            SCResult r = (SCResult) results[i];
-            totalOriginalSize += r.originalSize;
-            mergeCountMap(mergedCounts, r.counts);
+    public StateCountResult mergeEvaluations(Collection<EvaluationResult<Map<Integer, Integer>>> results) {
+        int totalOriginalSize = 0;
+        Map<Integer, Integer> mergedCounts = new HashMap<>();
+        for (EvaluationResult<Map<Integer, Integer>> e : results) {
+            totalOriginalSize += ((StateCountResult) e).originalSize; // for statistics only
+            mergeCountMap(mergedCounts, e.value());
         }
-        SCResult newRes = new SCResult(mergedCounts);
-        newRes.originalSize = totalOriginalSize;
+        StateCountResult newRes = new StateCountResult(mergedCounts);
+        newRes.originalSize = totalOriginalSize; // for statistics only
         return newRes;
+
     }
 
     @Override
-    public double distanceTo(BehaviourResult br) {
-        SCResult other = (SCResult) br;
+    public double distanceTo(BehaviourResult<Map<Integer, Integer>> other) {
         int diffs = 0;
         int total = 0;
-        
+
         // set intersection -- shared states
         Set<Integer> shared = new HashSet<>(this.counts.keySet());
-        shared.retainAll(other.counts.keySet());
-               
+        shared.retainAll(other.value().keySet());
+
         // shared elements
         for (Integer h : shared) {
             int c1 = this.counts.get(h);
-            int c2 = other.counts.get(h);
+            int c2 = other.value().get(h);
             diffs += Math.abs(c1 - c2);
             total += c1 + c2;
         }
@@ -78,16 +77,15 @@ public class SCResult implements BehaviourResult {
             }
         }
         // only elements from other
-        for (Integer h : other.counts.keySet()) {
+        for (Integer h : other.value().keySet()) {
             if (!shared.contains(h)) {
-                int c = other.counts.get(h);
+                int c = other.value().get(h);
                 diffs += c;
                 total += c;
             }
         }
         return (double) diffs / total;
     }
-
 
     @Override
     public String toString() {
@@ -108,49 +106,51 @@ public class SCResult implements BehaviourResult {
         return new String(sb);*/
     }
 
-    public Map<Integer, Integer> getCounts() {
-        return counts;
-    }
-
     protected void filter(double percentageThreshold) {
         int totalCount = 0;
-        for (Integer c : getCounts().values()) {
+        for (Integer c : value().values()) {
             totalCount += c;
         }
         int threshold = (int) Math.round(totalCount * percentageThreshold);
         filter(threshold);
     }
-    
+
     protected void filter(int countThreshold) {
         // fail-safe in case all are to be removed
         // retain only the element with highest count
-        Entry<Integer,Integer> highestCount = null;
-        for(Entry<Integer,Integer> e : counts.entrySet()) {
-            if(highestCount == null || e.getValue() > highestCount.getValue()) {
+        Entry<Integer, Integer> highestCount = null;
+        for (Entry<Integer, Integer> e : counts.entrySet()) {
+            if (highestCount == null || e.getValue() > highestCount.getValue()) {
                 highestCount = e;
             }
         }
-        
-        for(Iterator<Map.Entry<Integer, Integer>> it = counts.entrySet().iterator(); it.hasNext(); ) {
+
+        for (Iterator<Map.Entry<Integer, Integer>> it = counts.entrySet().iterator(); it.hasNext();) {
             Entry<Integer, Integer> next = it.next();
-            if(next.getValue() < countThreshold) {
+            if (next.getValue() < countThreshold) {
                 it.remove();
             }
         }
-        
-        if(counts.isEmpty()) {
+
+        if (counts.isEmpty()) {
             counts.put(highestCount.getKey(), highestCount.getValue());
-        }     
+        }
     }
 
-    
     protected static void mergeCountMap(Map<Integer, Integer> map, Map<Integer, Integer> other) {
-        for (Map.Entry<Integer, Integer> e : other.entrySet()) {
-            if (!map.containsKey(e.getKey())) {
-                map.put(e.getKey(), e.getValue());
+        if (!other.isEmpty()) {
+            if (map.isEmpty()) {
+                map.putAll(other);
             } else {
-                map.put(e.getKey(), map.get(e.getKey()) + e.getValue());
+                for (Map.Entry<Integer, Integer> e : other.entrySet()) {
+                    if (!map.containsKey(e.getKey())) {
+                        map.put(e.getKey(), e.getValue());
+                    } else {
+                        map.put(e.getKey(), map.get(e.getKey()) + e.getValue());
+                    }
+                }
             }
         }
     }
+
 }

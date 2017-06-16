@@ -35,7 +35,7 @@ public class MultiRoverFitness extends MasonEvaluation {
         for(int c : mr.scores) {
             count += c;
         }
-        fitnessResult = new FitnessResult(count, FitnessResult.ARITHMETIC);
+        fitnessResult = new FitnessResult(count, FitnessResult.MergeMode.arithmetic);
     }
     
     
