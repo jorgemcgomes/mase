@@ -2,4 +2,3 @@ problem.controller-factory = mase.evorbc.ArbitratorFactory
 
 evorbc.coordinates = direct
 
-neat.OUTPUT.NODES = 5

@@ -1,6 +1,6 @@
 parent.0 = playground.params
-parent.1 = ../../novelty/novelty.params
-parent.2 = ../../gax.params
+parent.1 = ../../novelty/comb/nslc_scores.params
+parent.2 = ../../neat/neat.params
 
 problem.seed =                     0
 problem.repetitions =              100
@@ -18,13 +18,9 @@ fitness.fitness-index =            1
 # needed for the PlaygroundSDBCRaw evaluation
 stat.child.22 =                     mase.app.playground.PlaygroundSDBCStandardizer
 
-neural.structure = feed-forward
-neural.input = 7
-neural.hidden = 10
-neural.output = 2
-vector.species.genome-size =   102
-
-ec.subpop.size = 500
+neat.size = 500
+neat.SPECIE.COUNT = 10
+neat.RECURRENCY.ALLOWED = false
 generations = 500
 
 novelty.behaviour-index = 0

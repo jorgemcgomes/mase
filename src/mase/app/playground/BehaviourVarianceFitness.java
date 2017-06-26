@@ -9,9 +9,9 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import mase.evaluation.BehaviourResult;
+import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
@@ -38,9 +38,12 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
-        MasonEvaluation behaviourEval = sim.currentEvals[behavIndex];
-        BehaviourResult br = (BehaviourResult) behaviourEval.getResult();
-        fr = new BehaviourVarianceFitnessResult(br);
+        EvaluationResult er = sim.currentEvals[behavIndex].getResult();
+        if(er instanceof CompoundEvaluationResult) { // only supports single agent
+            fr = new BehaviourVarianceFitnessResult((BehaviourResult) ((CompoundEvaluationResult) er).getEvaluation(0));
+        } else {
+            fr = new BehaviourVarianceFitnessResult((BehaviourResult) er);
+        }
     }
 
     @Override

@@ -79,6 +79,7 @@ public class EvoRBCReevaluation {
                         for (int j = 0; j < ac.lastArbitratorOutput.length; j++) {
                             writer.write(" ArbitratorOut_" + j);
                         }
+                        writer.write(" Locked");
                         for (int j = 0; j < ac.lastRepertoireCoords.length; j++) {
                             writer.write(" Behav_" + j);
                         }
@@ -93,6 +94,7 @@ public class EvoRBCReevaluation {
                     writer.write(state.seed() + " " + state.schedule.getTime() + " " + i);
                     writeVec(ag.lastNormalisedInputs());
                     writeVec(ac.lastArbitratorOutput);
+                    writer.write(" " + (ac.locked ? 1 : 0));
                     writeVec(ac.lastRepertoireCoords);
                     writer.write(" " + ac.lastPrimitiveId);
                     writeVec(ag.lastNormalisedOutputs());

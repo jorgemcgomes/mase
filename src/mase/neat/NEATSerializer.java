@@ -8,6 +8,7 @@ package mase.neat;
 import java.util.ArrayList;
 import org.apache.commons.lang3.ArrayUtils;
 import org.neat4j.neat.core.NEATChromosome;
+import org.neat4j.neat.core.NEATFeatureGene;
 import org.neat4j.neat.core.NEATLinkGene;
 import org.neat4j.neat.core.NEATNetDescriptor;
 import org.neat4j.neat.core.NEATNeuralNet;
@@ -20,13 +21,13 @@ import org.neat4j.neat.ga.core.Gene;
  */
 public class NEATSerializer {
 
-    public static final double NODE = 0d, LINK = 1d;
+    public static final double NODE = 0d, LINK = 1d, FEATURE = 2d;
 
     public static double[] serializeToArray(NEATNeuralNet net) {
         NEATNetDescriptor descr = (NEATNetDescriptor) net.netDescriptor();
         NEATChromosome chromo = (NEATChromosome) descr.neatStructure();
         Gene[] genes = chromo.genes();
-        ArrayList<Double> res = new ArrayList<Double>();
+        ArrayList<Double> res = new ArrayList<>();
         for (Gene gene : genes) {
             if (gene instanceof NEATNodeGene) {
                 NEATNodeGene neatGene = (NEATNodeGene) gene;
@@ -42,6 +43,10 @@ public class NEATSerializer {
                 res.add((double) neatGene.getFromId());
                 res.add((double) neatGene.getToId());
                 res.add(neatGene.getWeight());
+            } else if(gene instanceof NEATFeatureGene) {
+                NEATFeatureGene neatGene = (NEATFeatureGene) gene;
+                res.add(FEATURE);
+                res.add(neatGene.geneAsNumber().doubleValue());
             }
         }
         Double[] array = new Double[res.size()];
@@ -49,6 +54,38 @@ public class NEATSerializer {
         return ArrayUtils.toPrimitive(array);
     }
 
+    public static NEATNeuralNet deserialize(double[] weights) {
+        ArrayList<Gene> genes = new ArrayList<>();
+        for (int i = 0; i < weights.length; ) {
+            double type = weights[i++];
+            if (type == NODE) {
+                int id = (int) (double) weights[i++];
+                double sigF = weights[i++];
+                int t = (int) (double) weights[i++];
+                double bias = weights[i++];
+                genes.add(new NEATNodeGene(0, id, sigF, t, bias));
+            } else if (type == LINK) {
+                boolean enabled = weights[i++] == 1d;
+                int from = (int) (double) weights[i++];
+                int to = (int) (double) weights[i++];
+                double weight = weights[i++];
+                genes.add(new NEATLinkGene(0, enabled, from, to, weight));
+            } else if(type == FEATURE) {
+                double v = weights[i++];
+                genes.add(new NEATFeatureGene(0, v));
+            }
+        }
+        Gene[] geneArray = new Gene[genes.size()];
+        genes.toArray(geneArray);
+        NEATChromosome chromo = new NEATChromosome(geneArray);
+        NEATNetDescriptor descr = new NEATNetDescriptor(0, null);
+        descr.updateStructure(chromo);
+        NEATNeuralNet network = new NEATNeuralNet();
+        network.createNetStructure(descr);
+        network.updateNetStructure();
+        return network;
+    }
+    
     public static String serializeToString(NEATNeuralNet net) {
         double[] array = serializeToArray(net);
         StringBuilder str = new StringBuilder();
@@ -68,32 +105,4 @@ public class NEATSerializer {
         return deserialize(stuff);
     }
 
-    public static NEATNeuralNet deserialize(double[] weights) {
-        ArrayList<Gene> genes = new ArrayList<>();
-        for (int i = 0; i < weights.length; ) {
-            double type = weights[i++];
-            if (type == NODE) {
-                int id = (int) (double) weights[i++];
-                double sigF = weights[i++];
-                int t = (int) (double) weights[i++];
-                double bias = weights[i++];
-                genes.add(new NEATNodeGene(0, id, sigF, t, bias));
-            } else if (type == LINK) {
-                boolean enabled = weights[i++] == 1d;
-                int from = (int) (double) weights[i++];
-                int to = (int) (double) weights[i++];
-                double weight = weights[i++];
-                genes.add(new NEATLinkGene(0, enabled, from, to, weight));
-            }
-        }
-        Gene[] geneArray = new Gene[genes.size()];
-        genes.toArray(geneArray);
-        NEATChromosome chromo = new NEATChromosome(geneArray);
-        NEATNetDescriptor descr = new NEATNetDescriptor(0, null);
-        descr.updateStructure(chromo);
-        NEATNeuralNet network = new NEATNeuralNet();
-        network.createNetStructure(descr);
-        network.updateNetStructure();
-        return network;
-    }
 }

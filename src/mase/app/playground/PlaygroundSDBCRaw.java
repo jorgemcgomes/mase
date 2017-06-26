@@ -23,7 +23,7 @@ import mase.mason.world.MultilineObject;
 public class PlaygroundSDBCRaw extends MasonEvaluation<VectorBehaviourResult> {
 
     private static final long serialVersionUID = 1L;
-    private static final double BOUND = 2;
+    private static final double BOUND = 3;
     private VectorBehaviourResult vbr;
     private List<double[]> states;
     private double[] sMeans;

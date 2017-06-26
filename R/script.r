@@ -1,23 +1,193 @@
+data <- loadFile("~/exps/playground/rep6/sdbc_neat/job.0.archive.stat")
+vars <- paste0("Behav_",0:4)
+plotVarsHist(data, vars)
+parallelCoordinates(data, vars, alpha=.05)
+
+# Generalization
+
+setwd("~/exps/playground/tasks5")
+fit <- loadData(c("pl_phototaxis_nsmedian_2","direct_phototaxis"), "postfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","Repo","Reduction"))
+ggplot(lastGen(fit), aes(Repo, BestSoFar)) + geom_boxplot()
+fitnoobs <- loadData(c("pl_phototaxis_nsmedian_2","direct_phototaxis"), "noobsfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","Repo","Reduction"))
+ggplot(lastGen(fitnoobs), aes(Repo, BestSoFar)) + geom_boxplot()
+fitmanyobs <- loadData(c("pl_phototaxis_nsmedian_2","direct_phototaxis"), "manyobsfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","Repo","Reduction"))
+ggplot(lastGen(fitmanyobs), aes(Repo, BestSoFar)) + geom_boxplot()
+
+
+# test
+
+setwd("~/exps/playground/rep6/")
+data <- loadFile("sdbc_pure/job.0.archive.stat")
+vars <- paste0("Behav_",0:4)
+
+red <- reduceData(data, vars=vars, method="rpca", k=5)
+plotReduced2D(red, color.var="Fitness")
+
+write.table(red[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_pure_direct_pca3.txt", row.names=F, col.names=F, sep=" ")
+
+
+
+rnew <- loadFile("~/exps/playground/rep6/sdbc_base/job.0.archive.stat")
+vars <- paste0("Behav_",0:4)
+
+cls <- kmeans(rnew[,vars,with=F], centers=2000, iter.max=1000, nstart=100)
+rnew[, Cluster := cls$cluster]
+sparse <- rnew[, .SD[which.max(Fitness)], by=.(Cluster)]
+
+red <- reduceData(sparse, vars=vars, method="rpca", k=5)
+plotReduced2D(red, color.var="Fitness")
+
+write.table(red[,.(Index,V1,V2)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_base_2000_pca2.txt", row.names=F, col.names=F, sep=" ")
+write.table(red[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_base_2000_pca3.txt", row.names=F, col.names=F, sep=" ")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_base_2000_pca4.txt", row.names=F, col.names=F, sep=" ")
+write.table(sparse[,.(Index,Behav_0,Behav_1,Behav_2,Behav_3,Behav_4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_base_2000_direct.txt", row.names=F, col.names=F, sep=" ")
+
+
+
+red <- reduceData(rnew, vars=vars, method="rpca", k=5)
+write.table(red[,.(Index,V1,V2)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_base_direct_pca2.txt", row.names=F, col.names=F, sep=" ")
+write.table(red[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_base_direct_pca3.txt", row.names=F, col.names=F, sep=" ")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_base_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+
+rnew <- loadFile("~/exps/playground/rep6/as_base/job.0.archive.stat")
+vars <- paste0("Behav_",0:8)
+
+cls <- kmeans(rnew[,vars,with=F], centers=500, iter.max=1000, nstart=100)
+rnew[, Cluster := cls$cluster]
+sparse <- rnew[, .SD[which.max(Fitness)], by=.(Cluster)]
+
+red <- reduceData(sparse, vars=vars, method="rpca", k=9)
+plotReduced2D(red, color.var="Fitness")
+parallelCoordinates(red, vars=paste0("V",1:5), color.var="Fitness")
+parallelCoordinates(sparse, vars=paste0("Behav_",0:8), color.var="Fitness")
+
+write.table(red[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/as_base_500_pca3.txt", row.names=F, col.names=F, sep=" ")
+write.table(red[,.(Index,V1,V2,V3,V4,V5)], file="~/Dropbox/mase/src/mase/app/playground/rep/as_base_500_pca5.txt", row.names=F, col.names=F, sep=" ")
+write.table(sparse[,.(Index,Behav_0,Behav_1,Behav_2,Behav_3,Behav_4,Behav_5,Behav_6,Behav_7,Behav_8)], file="~/Dropbox/mase/src/mase/app/playground/rep/as_base_500_direct.txt", row.names=F, col.names=F, sep=" ")
+
+
+
+
+# NSLC
+
+setwd("~/exps/playground/rep5")
+
+rep <- loadData(c("nslcmedian","nsmedian2"), "archive.stat")
+red <- reduceData(rep, vars=paste0("Behav_",0:4), method="rpca", k=5)
+plotReduced2D(red, color.var="Fitness") + facet_grid(Setup ~ Job)
+
+rep[, mean(Fitness), by=.(Setup,Job)]
+
+
+# 1. cluster into K clusters --> number of desired primitives
+# 2. select the primitive from the cluster with the highest fitness
+
+r <- loadFile("nslcmedian/job.0.archive.stat")
+cls <- kmeans(r[,vars,with=F], centers=100)
+r[, Cluster := cls$cluster]
+sparse <- r[, .SD[which.max(Fitness)], by=.(Cluster)]
+
+write.table(sparse[,.(Index,Behav_0,Behav_1,Behav_2,Behav_3,Behav_4)], file="~/Dropbox/mase/src/mase/app/playground/rep/nslcmedian_sparse.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(sparse, vars=vars, method="rpca", k=5)
+write.table(red[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/nslcmedian_sparserpca3.txt", row.names=F, col.names=F, sep=" ")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/nslcmedian_sparserpca4.txt", row.names=F, col.names=F, sep=" ")
+write.table(red[,.(Index,V1,V2,V3,V4,V5)], file="~/Dropbox/mase/src/mase/app/playground/rep/nslcmedian_sparserpca5.txt", row.names=F, col.names=F, sep=" ")
+
+pam <- pam(r[,vars,with=F], k=100)
+r[, Cluster := pam$clustering]
+bests <- r[, .SD[which.max(Fitness)], by=.(Cluster)]
+meds <- r[pam$id.med]
+
+all <- rbind(cbind(r,Sparse="original"), cbind(bests,Sparse="bests"),cbind(meds,Sparse="medoids"))
+red <- reduceData(all, vars=vars, method="rpca", k=5)
+plotReduced2D(red, color.var="Fitness") + facet_wrap(~Sparse)
+all[, mean(Fitness), by=.(Sparse)]
+
+
+all <- rbind(cbind(r,Sparse="original"), cbind(sparse,Sparse="sparse100"))
+red <- reduceData(all, vars=vars, method="rpca", k=5)
+plotReduced2D(red, color.var="Fitness") + facet_wrap(~Sparse)
+
+red <- reduceData(sparse, vars=vars, method="rpca", k=5)
+plotReduced2D(red, color.var="Fitness")
+
+r <- loadFile("nsmedian/job.0.archive.stat")
+pam <- pam(r[,vars,with=F], k=100)
+r[, Cluster := pam$clustering]
+
+meds <- r[pam$id.med]
+write.table(meds[,.(Index,Behav_0,Behav_1,Behav_2,Behav_3,Behav_4)], file="~/Dropbox/mase/src/mase/app/playground/rep/nsmedian_sparse.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(meds, vars=vars, method="rpca", k=3)
+write.table(red[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/nsmedian_sparserpca3.txt", row.names=F, col.names=F, sep=" ")
+
+
+
+
+require(FNN)
+r1 <- loadFile("nslcmedian/job.0.archive.stat")
+vars <- paste0("Behav_",0:4)
+
+k <- get.knn(r1[,vars,with=F], k=15)
+r1[, BetterThan := sum(Fitness > r1[k$nn.index[.GRP,], .(Fitness)]), by=.(Index)]
+copy <- r1[BetterThan > 10]
+all <- rbind(cbind(r1,Sparse="original"), cbind(copy,Sparse="better10"))
+
+red <- reduceData(all, vars=vars, method="rpca")
+plotReduced2D(red, color.var="Fitness") + facet_wrap(~Sparse)
+
+
+kdiv <- function(d) {
+  k <- knn.dist(d, k=9)
+  return(data.table(k=1:9,dist=colMeans(k)))
+}
+
+
+setwd("~/exps/playground/tasks6")
+fit <- loadData("*", "postfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","BC","RepoPar","Size","Reduction","Locking"))
+fit[, Reference := mean(.SD[is.na(BC) & Generation==max(Generation)]$BestSoFar), by=.(Task)]
+fit[, RelativeFitness := ((BestSoFar-Reference) / Reference) * 100]
+
+fit[Size=="direct", Size := NA]
+fit[Reduction=="direct", Reduction := NA]
+
+fit[, Method := paste(BC,RepoPar,Size,Reduction,Locking, sep="-")]
+
+sum <- lastGen(fit)[!is.na(BC), .(Fitness=mean(RelativeFitness)), by=.(Task, Method)]
+ggplot(sum, aes(Method,Fitness)) + geom_bar(aes(fill=Task), stat="identity") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Fitness relative to direct (%)")
+
+sum2 <- sum[, .(Mean=mean(Fitness),Min=min(Fitness), Max=max(Fitness)), by=.(Method)]
+ggplot(sum2, aes(Method,Mean)) + geom_bar(stat="identity", fill="steelblue") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Fitness relative to direct (%) [Min,Max]") +
+  geom_errorbar(aes(ymin=Min, ymax=Max),width=0.25)
+
+selected <- fit[is.na(BC) | Method=="sdbc-base-2000-pca3-locking"]
+ggplot(lastGen(selected), aes(Method,BestSoFar)) + geom_boxplot() + facet_wrap(~ Task, scales="free_y")
+ggplot(selected[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Generation,Task,Method)], aes(Generation,Mean,group=Method)) + 
+  geom_line(aes(colour=Method)) + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=Method), alpha = 0.1) + ylab("Fitness")  + facet_wrap(~ Task, scales="free_y")
+
+
 # Task performance
 
 setwd("~/exps/playground/tasks5")
 
-fit <- loadData("*", "postfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","Repo","Reduction"))
+fit <- loadData("*", "postfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","Repo","Reduction","Locking"))
 fit[, Reference := mean(.SD[is.na(Repo) & Generation==max(Generation)]$BestSoFar), by=.(Task)]
 fit[, RelativeFitness := ((BestSoFar-Reference) / Reference) * 100]
 fit[is.na(Repo), Repo := "Direct"]
 fit[, Reduction := factor(Reduction, levels=c("0","1","2","3","4","Direct"), labels=c("3","4","5","7","10","direct"))]
 
-sum <- lastGen(fit)[Repo!="Direct", .(Fitness=mean(RelativeFitness)), by=.(Repo, Task, Reduction)]
-ggplot(sum, aes(paste(Repo,Reduction),Fitness)) + 
+sum <- lastGen(fit)[Repo!="Direct", .(Fitness=mean(RelativeFitness)), by=.(Repo, Task, Reduction, Locking)]
+ggplot(sum, aes(paste(Repo,Reduction,Locking),Fitness)) + 
   geom_bar(aes(fill=Task), stat="identity") + 
   theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Fitness relative to direct (%)")
 
-
-
-sum <- lastGen(fit)[Repo!="Direct", .(Fitness=mean(RelativeFitness)), by=.(Repo, Task, Reduction)]
-sum <- sum[, .(Mean=mean(Fitness),Min=min(Fitness), Max=max(Fitness)), by=.(Repo,Reduction)]
-ggplot(sum, aes(paste(Repo,Reduction,sep="-"),Mean)) + geom_bar(stat="identity", fill="steelblue") + 
+sum <- lastGen(fit)[Repo!="Direct", .(Fitness=mean(RelativeFitness)), by=.(Repo, Task, Reduction, Locking)]
+sum <- sum[, .(Mean=mean(Fitness),Min=min(Fitness), Max=max(Fitness)), by=.(Repo,Reduction, Locking)]
+ggplot(sum, aes(paste(Repo,Reduction,Locking,sep="-"),Mean)) + geom_bar(stat="identity", fill="steelblue") + 
   theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Fitness relative to direct (%) [Min,Max]") +
   geom_errorbar(aes(ymin=Min, ymax=Max),width=0.25)
 
@@ -25,6 +195,9 @@ ggplot(sum, aes(paste(Repo,Reduction,sep="-"),Mean)) + geom_bar(stat="identity",
 selected <- lastGen(fit)[is.na(Repo) | Repo=="base" | Repo=="nsmedian"]
 ggplot(selected, aes(paste0(Repo,Reduction),BestSoFar)) + geom_boxplot() + facet_wrap(~ Task, scales="free_y")
 
+
+
+lastGen(fit)[, , by=.(Method)]
 
 
 # MAP-Elites vs NS comparison
@@ -175,6 +348,33 @@ write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playgr
 write.table(red[,.(Index,V1,V2,V3,V4,V5)], file="~/Dropbox/mase/src/mase/app/playground/rep/nsas3_rpca5.txt", row.names=F, col.names=F, sep=" ")
 write.table(red[,.(Index,V1,V2,V3,V4,V5,V6,V7)], file="~/Dropbox/mase/src/mase/app/playground/rep/nsas3_rpca7.txt", row.names=F, col.names=F, sep=" ")
 write.table(red[,.(Index,V1,V2,V3,V4,V5,V6,V7,V8,V9,V10)], file="~/Dropbox/mase/src/mase/app/playground/rep/nsas3_rpca10.txt", row.names=F, col.names=F, sep=" ")
+
+
+# NS-ALL analysis
+
+rep <- loadFile("~/exps/playground/rep5/nsall/job.0.archive.stat")
+rep[, grep("Genome_*", colnames(rep)) := NULL]
+rep[, Fitness := NULL]
+rep[, Archive := NULL]
+
+behav <- colnames(rep)[grep("Behav_*",colnames(rep))]
+m <- melt(rep, measure.vars=behav)
+setorder(m, Index)
+m[, Sample := rep(1:100,each=5)]
+m[, Feature := rep(paste0("Behav_",0:4),2000)]
+cast <- dcast(m, formula=Index+Sample~Feature)
+
+red <- reduceData(cast, vars=paste0("Behav_",0:4), method="rpca", k=2)
+ggplot(red[Index > 1950], aes(x=V1, y=V2)) + geom_point(data=red[sample(.N,2000),!"Index",with=F], aes(V1,V2), colour="lightgray", size=1) +
+  geom_point(shape=4, size=1.5, colour="red") + coord_fixed() + facet_wrap(~ Index)
+
+rep2 <- loadFile("~/exps/playground/rep5/nsmedian/job.0.archive.stat")
+red2 <- reduceData(rbind(cast,rep2,fill=T), vars=paste0("Behav_",0:4), method="rpca", k=2)
+
+ggplot(red2[!is.na(Sample) & Index > 1950], aes(x=V1, y=V2)) + 
+  geom_point(data=red2[is.na(Sample),!"Index",with=F], aes(V1,V2), colour="lightgray", size=1) +
+  geom_point(shape=4, size=1.5, colour="red") + coord_fixed() + facet_wrap(~ Index)
+
 
 
 

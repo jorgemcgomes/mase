@@ -9,7 +9,6 @@ import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
 import mase.mason.world.CircularObject;
-import net.jafama.FastMath;
 
 /**
  *

@@ -58,7 +58,7 @@ public class KdTreeRepertoire implements Repertoire {
 
     @Override
     public Repertoire deepCopy() {
-        /*KdTreeRepertoire newRep = new KdTreeRepertoire();
+        KdTreeRepertoire newRep = new KdTreeRepertoire();
         newRep.tree = this.tree;
         newRep.bounds = this.bounds;
         newRep.repFile = this.repFile;
@@ -70,8 +70,8 @@ public class KdTreeRepertoire implements Repertoire {
         for(Map.Entry<Integer,AgentController> e : newRep.primitives.entrySet()) {
             e.setValue(e.getValue().clone());
         }
-        return newRep;*/
-        return this;
+        return newRep;
+        //return this;
     }
 
     @Override
@@ -94,6 +94,9 @@ public class KdTreeRepertoire implements Repertoire {
         Map<Integer, double[]> coords;
         if (coordinates != null) {
             coords = fileCoordinates(coordinates);
+            if(coords == null || coords.isEmpty()) {
+                throw new IOException("Empty or invalid coordinate file");
+            }
             if (coords.size() > solutions.size()) {
                 throw new IOException("Number of coordinates is greater than the number of solutions in repertoire");
             }
@@ -101,7 +104,7 @@ public class KdTreeRepertoire implements Repertoire {
             coords = encodedCoordinates(solutions);
         }
 
-        int n = coords.get(solutions.get(0).getIndex()).length;
+        int n = coords.values().iterator().next().length;
 
         // bounds might already have been computed if the object is being de-serialized
         if(bounds == null) {
@@ -155,9 +158,8 @@ public class KdTreeRepertoire implements Repertoire {
         return coords;
     }
 
-    private Map<Integer, double[]> fileCoordinates(File file) {
+    private Map<Integer, double[]> fileCoordinates(File file) throws FileNotFoundException {
         Map<Integer, double[]> res = new HashMap<>();
-        try {
             Scanner sc = new Scanner(file);
             while (sc.hasNext()) {
                 String line = sc.nextLine();
@@ -170,10 +172,6 @@ public class KdTreeRepertoire implements Repertoire {
                 res.put(index, coords);
             }
             return res;
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(ArbitratorFactory.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
     }
 
     @Override

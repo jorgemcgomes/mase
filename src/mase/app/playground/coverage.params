@@ -1,0 +1,25 @@
+parent.0 = playground.params
+
+problem.simstate =                 mase.app.playground.Playground
+
+problem.number-evals =             1
+problem.eval.0 =                   mase.app.playground.ProximityFitness
+problem.eval.0.update-freq =       1
+
+fitness.fitness-index =            0
+
+problem.seed =                     random
+problem.repetitions =              10
+problem.max-steps =                500
+
+problem.minObjects = 1
+problem.maxObjects = 10
+problem.objectRadius = 1
+problem.minObjectDistance = 0
+    
+problem.minObstacles = 0
+problem.maxObstacles = 0
+problem.minObstacleSize = 0
+problem.maxObstacleSize = 0
+
+generations = 250

@@ -1,5 +1,5 @@
 parent.0 = playground.params
-parent.1 = ../../novelty/novelty.params
+parent.1 = ../../novelty/comb/true_nslc.params
 parent.2 = ../../gax.params
 
 problem.seed =                     0
@@ -24,7 +24,7 @@ neural.hidden = 10
 neural.output = 2
 vector.species.genome-size =   102
 
-ec.subpop.size = 500
+ec.subpop.size = 250
 generations = 500
 
 novelty.behaviour-index = 0

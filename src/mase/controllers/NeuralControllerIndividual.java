@@ -8,12 +8,15 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import ec.vector.DoubleVectorIndividual;
 import ec.vector.FloatVectorSpecies;
+import java.util.List;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.MLMethod;
+import org.encog.neural.flat.FlatLayer;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.layers.Layer;
 import org.encog.neural.pattern.FeedForwardPattern;
 import org.encog.neural.pattern.JordanPattern;
 import org.encog.neural.pattern.NeuralNetworkPattern;
@@ -35,7 +38,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
     public static final String ELMAN = "elman";
     public static final String JORDAN = "jordan";
     private static final long serialVersionUID = 1L;
-    private BasicNetwork prototypeNetwork;
+    private NeuralNetworkPattern prototypePattern;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -48,11 +51,13 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         int hidden = state.parameters.getInt(base.push(P_HIDDEN), def.push(P_HIDDEN));
         int output = state.parameters.getInt(base.push(P_OUTPUTS), def.push(P_OUTPUTS));
         boolean tanh = state.parameters.getBoolean(base.push(P_TANH), def.push(P_TANH), false);
-        prototypeNetwork = createPrototypeNetwork(structure, input, hidden, output, tanh);
+        prototypePattern = createNetworkPattern(structure, input, hidden, output, tanh);
+
+        BasicNetwork patternTest = (BasicNetwork) prototypePattern.generate();
 
         int genomeSize = ((FloatVectorSpecies) species).genomeSize;
-        if (genomeSize != prototypeNetwork.getStructure().calculateSize()) {
-            state.output.fatal("NN weights (" + prototypeNetwork.getStructure().calculateSize() + ") does not match genome size (" + genomeSize + ").");
+        if (genomeSize != patternTest.getStructure().calculateSize()) {
+            state.output.fatal("NN weights (" + patternTest.getStructure().calculateSize() + ") does not match genome size (" + genomeSize + ").");
         }
     }
 
@@ -63,12 +68,12 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
 
     @Override
     public AgentController decodeController() {
-        BasicNetwork network = (BasicNetwork) prototypeNetwork.clone();
+        BasicNetwork network = (BasicNetwork) prototypePattern.generate();
         network.decodeFromArray(genome);
-        return new NeuralAgentController(network);
+        return new NeuralAgentController(network.getFlat());
     }
 
-    protected static BasicNetwork createPrototypeNetwork(String structure, int in, int hidden, int out, boolean tanh) {
+    protected static NeuralNetworkPattern createNetworkPattern(String structure, int in, int hidden, int out, boolean tanh) {
         ActivationFunction act = tanh ? new ActivationTANH() : new ActivationSigmoid();
         NeuralNetworkPattern pattern = null;
         if (structure.equalsIgnoreCase(ELMAN)) {
@@ -82,11 +87,11 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         }
         pattern.setActivationFunction(act);
         pattern.setInputNeurons(in);
-        if(hidden > 0) {
+        if (hidden > 0) {
             pattern.addHiddenLayer(hidden);
         }
         pattern.setOutputNeurons(out);
-        return (BasicNetwork) pattern.generate();
+        return pattern;
     }
 
     public static class ElmanPattern2 implements NeuralNetworkPattern {
@@ -126,6 +131,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
 
         /**
          * Generate the Elman neural network.
+         *
          * @return The Elman neural network.
          */
         @Override

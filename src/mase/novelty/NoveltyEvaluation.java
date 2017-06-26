@@ -13,9 +13,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +28,8 @@ import mase.evaluation.BehaviourResult;
 import mase.evaluation.ExpandedFitness;
 import mase.evaluation.VectorBehaviourResult;
 import mase.util.KdTree;
+import net.jafama.FastMath;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
@@ -36,6 +40,7 @@ public class NoveltyEvaluation implements PostEvaluator {
     private static final long serialVersionUID = 1L;
 
     public static final Parameter DEFAULT_BASE = new Parameter("novelty");
+    public static final String LC_SCORE = "lc";
     public static final String P_BEHAVIOUR_INDEX = "behaviour-index";
     public static final String P_K_NN = "knn";
     public static final String P_ARCHIVE_GROWTH = "archive-growth";
@@ -46,6 +51,7 @@ public class NoveltyEvaluation implements PostEvaluator {
     public static final String P_KD_TREE = "kd-tree";
     public static final String P_SCORE_NAME = "score-name";
     public static final String P_THREADED = "threaded";
+    public static final String P_NSLC = "nslc";
     protected ArchiveMode archiveMode;
     protected ArchiveCriteria archiveCriteria;
     protected ArchiveCriteria removalCriteria;
@@ -57,6 +63,7 @@ public class NoveltyEvaluation implements PostEvaluator {
     protected String scoreName;
     protected List<ArchiveEntry>[] archives;
     protected boolean threaded;
+    protected boolean nslc;
 
     private transient ExecutorService executor;
 
@@ -79,10 +86,11 @@ public class NoveltyEvaluation implements PostEvaluator {
         this.archiveMode = ArchiveMode.valueOf(state.parameters.getString(base.push(P_ARCHIVE_MODE), DEFAULT_BASE.push(P_ARCHIVE_MODE)));
         this.archiveCriteria = ArchiveCriteria.valueOf(state.parameters.getString(base.push(P_ARCHIVE_CRITERIA), DEFAULT_BASE.push(P_ARCHIVE_CRITERIA)));
         this.removalCriteria = ArchiveCriteria.valueOf(state.parameters.getString(base.push(P_REMOVAL_CRITERIA), DEFAULT_BASE.push(P_REMOVAL_CRITERIA)));
-        this.useKDTree = state.parameters.getBoolean(base.push(P_KD_TREE), DEFAULT_BASE.push(P_KD_TREE), false);
+        this.useKDTree = state.parameters.getBoolean(base.push(P_KD_TREE), DEFAULT_BASE.push(P_KD_TREE), true);
         this.behaviourIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), DEFAULT_BASE.push(P_BEHAVIOUR_INDEX));
         this.scoreName = state.parameters.getString(base.push(P_SCORE_NAME), DEFAULT_BASE.push(P_SCORE_NAME));
         this.threaded = state.parameters.getBoolean(base.push(P_THREADED), DEFAULT_BASE.push(P_THREADED), true);
+        this.nslc = state.parameters.getBoolean(base.push(P_NSLC), DEFAULT_BASE.push(P_NSLC), false);
 
         int nPops = state.parameters.getInt(new Parameter("pop.subpops"), null); // TODO: this should be more flexible?
         this.archives = new ArrayList[nPops];
@@ -119,36 +127,65 @@ public class NoveltyEvaluation implements PostEvaluator {
             // Set the individuals pool that will be used to compute novelty
             List<ArchiveEntry> archive = archives[p];
             List<BehaviourResult> pool = new ArrayList<>();
+            Map<BehaviourResult, Double> fitnessMap = new HashMap<>();
+
             // Archive
             for (ArchiveEntry e : archive) {
                 pool.add(e.getBehaviour());
+                if (nslc) {
+                    fitnessMap.put(e.getBehaviour(), e.getFitness());
+                }
             }
             // Current population
             for (Individual ind : pop.subpops[p].individuals) {
                 ExpandedFitness indFit = (ExpandedFitness) ind.fitness;
-                pool.add((BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex));
+                BehaviourResult br = (BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex);
+                pool.add(br);
+                if (nslc) {
+                    fitnessMap.put(br, indFit.getFitnessScore());
+                }
             }
-            
+
             // Calculate novelty for each individual
             List<BehaviourResult> inds = new ArrayList<>(pop.subpops[p].individuals.length);
-            for(Individual ind : pop.subpops[p].individuals) {
+            for (Individual ind : pop.subpops[p].individuals) {
                 ExpandedFitness indFit = (ExpandedFitness) ind.fitness;
                 BehaviourResult br = (BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex);
                 inds.add(br);
             }
-            List<Double> scores = computeKNNs(pool, inds, k);
-            
-            // Assign novelty scores
-            for (int i = 0 ; i < pop.subpops[p].individuals.length ; i++) {
-                ExpandedFitness indFit = (ExpandedFitness) pop.subpops[p].individuals[i].fitness;
-                double novScore = scores.get(i);
-                indFit.scores().put(scoreName, novScore);
-                indFit.setFitness(state, novScore, false);
+
+            if (!nslc) {
+                // Assign novelty scores
+                List<Double> scores = computeKNNDistances(pool, inds, k);
+                for (int i = 0; i < pop.subpops[p].individuals.length; i++) {
+                    ExpandedFitness indFit = (ExpandedFitness) pop.subpops[p].individuals[i].fitness;
+                    double novScore = scores.get(i);
+                    indFit.scores().put(scoreName, novScore);
+                    indFit.setFitness(state, novScore, false);
+                }
+            } else {
+                List<List<Pair<BehaviourResult, Double>>> nearest = computeNearest(pool, inds, k);
+                for (int i = 0; i < pop.subpops[p].individuals.length; i++) {
+                    ExpandedFitness indFit = (ExpandedFitness) pop.subpops[p].individuals[i].fitness;
+
+                    double novScore = 0;
+                    double betterThan = 0;
+                    for (Pair<BehaviourResult, Double> n : nearest.get(i)) {
+                        novScore += n.getRight();
+                        if (indFit.getFitnessScore() > fitnessMap.get(n.getLeft())) {
+                            betterThan++;
+                        }
+                    }
+                    novScore /= k;
+                    indFit.scores().put(scoreName, novScore);
+                    indFit.scores().put(LC_SCORE, betterThan);
+                    indFit.setFitness(state, novScore, false);
+                }
             }
         }
     }
 
-    protected List<Double> computeKNNs(List<BehaviourResult> pool, List<BehaviourResult> targets, final int k) {
+    public List<Double> computeKNNDistances(List<BehaviourResult> pool, List<BehaviourResult> targets, final int k) {
         final KNNDistanceCalculator calc = getKNNCalculator(pool);
         List<Double> res = new ArrayList<>(targets.size());
         if (threaded) {
@@ -157,7 +194,7 @@ public class NoveltyEvaluation implements PostEvaluator {
                 Future<Double> task = executor.submit(new Callable<Double>() {
                     @Override
                     public Double call() throws Exception {
-                        return calc.getDistance(t, k);
+                        return calc.meanKNNDistance(t, k);
                     }
                 });
                 futures.add(task);
@@ -171,16 +208,50 @@ public class NoveltyEvaluation implements PostEvaluator {
             }
         } else {
             for (BehaviourResult t : targets) {
-                res.add(calc.getDistance(t, k));
+                res.add(calc.meanKNNDistance(t, k));
             }
         }
         return res;
     }
 
-    protected KNNDistanceCalculator getKNNCalculator(List<BehaviourResult> pool) {
-        KNNDistanceCalculator calc = useKDTree && pool.size() >= k * 2
-                ? new KDTreeCalculator()
-                : new BruteForceCalculator();
+    public List<List<Pair<BehaviourResult, Double>>> computeNearest(List<BehaviourResult> pool, List<BehaviourResult> targets, final int k) {
+        final KNNDistanceCalculator calc = getKNNCalculator(pool);
+        List<List<Pair<BehaviourResult, Double>>> res = new ArrayList<>(targets.size());
+        if (threaded) {
+            List<Future<List<Pair<BehaviourResult, Double>>>> futures = new ArrayList<>(targets.size());
+            for (final BehaviourResult t : targets) {
+                Future<List<Pair<BehaviourResult, Double>>> task = executor.submit(new Callable<List<Pair<BehaviourResult, Double>>>() {
+                    @Override
+                    public List<Pair<BehaviourResult, Double>> call() throws Exception {
+                        return calc.nearest(t, k);
+                    }
+                });
+                futures.add(task);
+            }
+            try {
+                for (Future<List<Pair<BehaviourResult, Double>>> f : futures) {
+                    res.add(f.get());
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            for (BehaviourResult t : targets) {
+                res.add(calc.nearest(t, k));
+            }
+        }
+        return res;
+    }
+
+    public KNNDistanceCalculator getKNNCalculator(List<BehaviourResult> pool) {
+        BehaviourResult sample = pool.get(0);
+        boolean kdtree = false;
+        if (useKDTree && sample instanceof VectorBehaviourResult) {
+            VectorBehaviourResult vbr = (VectorBehaviourResult) sample;
+            int dim = vbr.getBehaviour().length;
+            kdtree = pool.size() > FastMath.pow2(dim);
+        }
+        KNNDistanceCalculator calc = kdtree ? new KDTreeCalculator() : new BruteForceCalculator();
         calc.setPool(pool);
         return calc;
     }
@@ -189,7 +260,9 @@ public class NoveltyEvaluation implements PostEvaluator {
 
         public void setPool(List<BehaviourResult> pool);
 
-        public double getDistance(BehaviourResult target, int k);
+        public double meanKNNDistance(BehaviourResult target, int k);
+
+        public List<Pair<BehaviourResult, Double>> nearest(BehaviourResult target, int k);
 
     }
 
@@ -203,7 +276,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         }
 
         @Override
-        public double getDistance(BehaviourResult target, int k) {
+        public double meanKNNDistance(BehaviourResult target, int k) {
             ArrayList<Double> distances = new ArrayList<>();
             for (BehaviourResult br : pool) {
                 if (target != br) {
@@ -216,6 +289,27 @@ public class NoveltyEvaluation implements PostEvaluator {
                 dist += distances.get(i);
             }
             return dist / k;
+        }
+
+        @Override
+        public List<Pair<BehaviourResult, Double>> nearest(BehaviourResult target, int k) {
+            ArrayList<Pair<BehaviourResult, Double>> nearest = new ArrayList<>();
+            for (BehaviourResult br : pool) {
+                if (target != br) {
+                    nearest.add(Pair.of(br, distance(target, br)));
+                }
+            }
+            Collections.sort(nearest, new Comparator<Pair<BehaviourResult, Double>>() {
+                @Override
+                public int compare(Pair<BehaviourResult, Double> o1, Pair<BehaviourResult, Double> o2) {
+                    return Double.compare(o1.getRight(), o2.getRight());
+                }
+            });
+            ArrayList<Pair<BehaviourResult, Double>> res = new ArrayList<>(k);
+            for (int i = 0; i < k && i < nearest.size(); i++) {
+                res.add(nearest.get(i));
+            }
+            return res;
         }
     }
 
@@ -232,7 +326,7 @@ public class NoveltyEvaluation implements PostEvaluator {
         }
 
         @Override
-        public double getDistance(final BehaviourResult target, int k) {
+        public double meanKNNDistance(final BehaviourResult target, int k) {
             VectorBehaviourResult vbr = (VectorBehaviourResult) target;
             ArrayList<KdTree.SearchResult<BehaviourResult>> nearest = tree.nearestNeighbours(vbr.getBehaviour(), k + 1); // +1 to exclude self
             double dist = 0;
@@ -240,6 +334,17 @@ public class NoveltyEvaluation implements PostEvaluator {
                 dist += e.distance;
             }
             return dist / k;
+        }
+
+        @Override
+        public List<Pair<BehaviourResult, Double>> nearest(BehaviourResult target, int k) {
+            VectorBehaviourResult vbr = (VectorBehaviourResult) target;
+            ArrayList<KdTree.SearchResult<BehaviourResult>> nearest = tree.nearestNeighbours(vbr.getBehaviour(), k + 1); // +1 to exclude self
+            ArrayList<Pair<BehaviourResult, Double>> res = new ArrayList<>(k);
+            for (KdTree.SearchResult<BehaviourResult> n : nearest) {
+                res.add(Pair.of(n.payload, n.distance));
+            }
+            return res;
         }
     }
 
@@ -303,7 +408,7 @@ public class NoveltyEvaluation implements PostEvaluator {
             for (ArchiveEntry e : archive) {
                 pool.add(e.getBehaviour());
             }
-            List<Double> scores = computeKNNs(pool, pool, k);
+            List<Double> scores = computeKNNDistances(pool, pool, k);
             for (int i = 0; i < archive.size(); i++) {
                 ArchiveEntry e = archive.get(i);
                 e.novelty = scores.get(i);

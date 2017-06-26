@@ -18,12 +18,16 @@ library(amap)
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
 
-theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), 
+theme_update(plot.margin=unit(c(0,0,0,0),"mm"), 
              legend.position="bottom", 
              plot.title=element_text(size=rel(1)), 
              strip.background=element_blank(), 
-             strip.text=element_text(size=rel(.9))
-             )
+             strip.text=element_text(size=rel(.9)), 
+             axis.title.x=element_text(size=rel(.9)),
+             axis.title.y=element_text(size=rel(.9)),
+             legend.title=element_text(size=rel(.9)),
+             legend.key.height=unit(0.75,"line"),
+             legend.margin=margin(0,0,0,0,unit="pt"))
 
 # theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-5,0,0,0,unit="pt"),
 #             plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
@@ -582,6 +586,22 @@ plotReduced2D <- function(reduced, color.var=NULL) {
 plotReduced3D <- function(reduced, color.var=NULL) {
   require(rgl)
   plot3d(reduced$V1, reduced$V2, reduced$V3)
+}
+
+parallelCoordinates <- function(data, vars, color.var=NULL, points=T, lines=T, alpha=0.1) {
+  if(!is.null(vars)) {
+    data <- data[, c(vars,color.var), with=F]
+  }  
+  data[, Index := 1:.N]
+  m <- melt(data, id.vars=c("Index",color.var))
+  g <- ggplot(m, aes(variable, value, group=Index))
+  if(lines) {
+    g <- g + geom_line(aes_string(colour=color.var), alpha=alpha)
+  }
+  if(points) {
+    g <- g + geom_point(aes_string(colour=color.var), alpha=alpha)
+  }
+  return(g)
 }
 
 #### General purpose statistics ###########################################################

@@ -1,0 +1,6 @@
+parent.0 = true_nsga.params
+
+novelty.nslc = true
+
+eval.post.1.scores = novelty,lc
+

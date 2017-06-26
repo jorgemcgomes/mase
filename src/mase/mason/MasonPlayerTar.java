@@ -89,6 +89,7 @@ public class MasonPlayerTar {
         
         GUIState gui = sim.getSimStateUI(state);
         Controller contr = gui.createController();   
+        frame.setVisible(true);
         contr.registerFrame(frame);
     }
 

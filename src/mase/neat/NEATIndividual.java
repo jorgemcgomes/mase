@@ -7,11 +7,15 @@ package mase.neat;
 import ec.EvolutionState;
 import ec.Individual;
 import ec.util.Parameter;
+import java.util.ArrayList;
+import java.util.Collection;
 import mase.controllers.AgentController;
 import mase.controllers.AgentControllerIndividual;
 import org.neat4j.neat.core.NEATChromosome;
+import org.neat4j.neat.core.NEATFeatureGene;
 import org.neat4j.neat.core.NEATNetDescriptor;
 import org.neat4j.neat.core.NEATNeuralNet;
+import org.neat4j.neat.ga.core.Gene;
 
 /**
  * NEATGenome wrapper
@@ -45,6 +49,16 @@ public class NEATIndividual extends Individual implements AgentControllerIndivid
     
     public NEATNeuralNet getNeuralNet() {
         return network;
+    }
+    
+    public Collection<Double> getExtraFeatures() {
+        Collection<Double> features = new ArrayList<>();
+        for(Gene g : genome.genes()) {
+            if(g instanceof NEATFeatureGene) {
+                features.add(g.geneAsNumber().doubleValue());
+            }
+        }
+        return features;
     }
 
     @Override

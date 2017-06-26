@@ -8,6 +8,7 @@ package mase.mason.generic;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import mase.evaluation.CompoundEvaluationResult;
@@ -25,7 +26,9 @@ public class AverageStateEvaluator extends MasonEvaluation<CompoundEvaluationRes
 
     private static final long serialVersionUID = 1L;
     public static final String P_WINDOWS = "windows";
+    public static final String P_AGGREGATION = "aggregation";
     private int windows;
+    private VectorBehaviourResult.LocationEstimator est;
     private List<List<double[]>> states;
     private CompoundEvaluationResult<VectorBehaviourResult> res;
 
@@ -33,6 +36,7 @@ public class AverageStateEvaluator extends MasonEvaluation<CompoundEvaluationRes
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         windows = state.parameters.getInt(base.push(P_WINDOWS), null);
+        est = VectorBehaviourResult.LocationEstimator.valueOf(state.parameters.getString(base.push(P_AGGREGATION), null));
     }
 
     @Override
@@ -85,7 +89,7 @@ public class AverageStateEvaluator extends MasonEvaluation<CompoundEvaluationRes
         for(double[] c : concats) {
             VectorBehaviourResult vbr = new VectorBehaviourResult(c);
             vbr.setDistance(VectorBehaviourResult.Distance.euclidean);
-            vbr.setLocationEstimator(VectorBehaviourResult.LocationEstimator.mean);
+            vbr.setLocationEstimator(est);
             resList.add(vbr);
         }
         this.res = new CompoundEvaluationResult<>(resList);
