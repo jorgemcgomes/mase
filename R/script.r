@@ -1,9 +1,443 @@
-data <- loadFile("~/exps/playground/rep6/sdbc_neat/job.0.archive.stat")
-vars <- paste0("Behav_",0:4)
+processRepo <- function(setup, jobs=0:4, nvars=7, red="mds", k=3, bc="sdbc", srcdir="/home/jorge/Dropbox/mase/src/mase/app/playground/rep/", builddir="/home/jorge/Dropbox/mase/build/classes/mase/app/playground/rep/") {
+  for(j in jobs) {
+    cat(setup, j, "\n")
+    file.copy(from=paste0(setup,"/job.",j,".finalarchive.tar.gz"), to=paste0(srcdir,"sdbc_",setup,"_",j,".tar.gz"), overwrite=F)
+    file.copy(from=paste0(setup,"/job.",j,".finalarchive.tar.gz"), to=paste0(builddir,"sdbc_",setup,"_",j,".tar.gz"), overwrite=F)
+    if(!is.null(red)) {
+      d <- fread(paste0(setup,"/job.",j,".archive.stat"))
+      vars <- paste0("Behav_",0:(nvars-1))
+      r <- reduceData(d, vars, method=red, k=k)
+      write.table(r[,c("Index",paste0("V",1:k)), with=F], file=paste0(srcdir,bc,"_",setup,"_",j,"_",red,k,".txt"), row.names=F, col.names=F, sep=" ")
+      write.table(r[,c("Index",paste0("V",1:k)), with=F], file=paste0(builddir,bc,"_",setup,"_",j,"_",red,k,".txt"), row.names=F, col.names=F, sep=" ")
+    }
+  }
+}
+
+qdscore <- function(data, vars, d=0.5) {
+  datacopy <- copy(data)
+  bins <- paste0("bin",0:(length(vars)-1))
+  datacopy[ , (bins) := lapply(.SD, function(x){round(x/d)}), .SDcols=vars]
+  maxes <- datacopy[, .(Fitness=max(Fitness)), by=.(bin0,bin1,bin2,bin3,bin4,bin5,bin6)]
+  qdscore <- sum(maxes$Fitness)
+  return(list(QDscore=qdscore, N=nrow(maxes), MeanFitness=mean(maxes$Fitness)))
+}
+
+
+# DATA LOAD
+
+setwd("~/exps/playground")
+
+fit <- loadData("tasks10/*", "postfitness.stat", fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction","Locking"))
+fit[, Reference := mean(.SD[is.na(Repo) & Generation==max(Generation)]$BestSoFar), by=.(Task)]
+fit[, RelativeFitness := ((BestSoFar-Reference) / Reference) * 100]
+fit[, Conf := paste(BC,Repo,Reduction,Locking, sep="-")]
+fit[, Task := factor(Task, levels=c("freeforaging","obsforaging","dynforaging","phototaxis","dynphototaxis","exploration","maze","avoidance","predator"), labels=c("Foraging","Foraging-O","Foraging-D","Phototaxis-O","Phototaxis-D","Exploration","Maze","Avoidance","Prey"))]
+fit[Reduction=="direct", Reduction := NA]
+
+
+rep <- loadData("rep10/*", "archive.stat", auto.ids.names=c("NA","Repo"))
+rep[, Fitness := (Fitness-7)/3]
+
+act <- loadData("tasks10/pl_*_sdbc_ns_0_direct*", "postbest.xml.stat", auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction","Locking"))
+act[, Task := factor(Task, levels=c("freeforaging","obsforaging","dynforaging","phototaxis","dynphototaxis","exploration","maze","avoidance","predator"), labels=c("Foraging","Foraging-O","Foraging-D","Phototaxis-O","Phototaxis-D","Exploration","Maze","Avoidance","Prey"))]
+act[Reduction=="direct", Reduction := NA]
+
+vars <- paste0("Behav_", 0:6)
+
+
+# base comparison
+
+subfit <- fit[Repo %in% c("ns","rand",NA) & is.na(Reduction) & is.na(Locking)]
+sum <- lastGen(subfit)[, .(Fitness=mean(RelativeFitness), SE=se(RelativeFitness)), by=.(Task, Repo)]
+sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=0), by=.(Repo)])
+
+ggplot(sum[Repo=="ns"], aes(Task, Fitness)) + geom_bar(stat="identity", position="dodge") + 
+  geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.25) + ylab("Highest fitness relative to direct evolution (%)")
+
+ggplot(lastGen(subfit), aes(Repo,BestSoFar,fill=Repo)) + geom_boxplot() + facet_wrap(~ Task, scales="free_y")
+
+genmean <- subfit[, .(Fitness=mean(BestSoFar), SE=se(BestSoFar)), by=.(Generation,Task,Repo)]
+ggplot(genmean, aes(Generation, Fitness, group=Repo)) + geom_ribbon(aes(ymin=Fitness-SE,ymax=Fitness+SE,fill=Repo), alpha=.15) +
+  geom_line(aes(colour=Repo)) + facet_wrap(~ Task, scales="free_y")
+
+# Repo variability (base)
+
+sub <- rep[Repo=="ns"]
+gvars <- paste0("Genome_",0:101)
+gred <- reduceData(unique(sub,by=gvars), vars=gvars, method="Rtsne")
+bred <- reduceData(unique(sub,by=vars), vars=vars, method="Rtsne")
+
+ggplot(gred, aes(x=V1, y=V2)) + geom_point(aes(colour=Job), shape=16, size=1.5, alpha=.2) + 
+  coord_fixed() + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL) +
+  ggtitle("Genome space coverage (t-SNE)")
+
+ggplot(bred, aes(x=V1, y=V2)) + geom_point(shape=16, size=1.5, alpha=.2) + facet_wrap(~ Job) +
+  coord_fixed() + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL) +
+  ggtitle("Behaviour space coverage (t-SNE)")
+
+
+subfit <- fit[Repo=="ns" & is.na(Reduction) & is.na(Locking)]
+
+ggplot(lastGen(subfit), aes(RepoJob,BestSoFar,fill=RepoJob)) + geom_boxplot() + facet_wrap(~ Task, scales="free_y") +
+  ggtitle("Fitness achieved in each task, using different repertoires (10 runs per rep.)")
+
+m <- metaAnalysis(lastGen(subfit), BestSoFar ~ RepoJob, ~Task)
+sapply(m, function(x) x$ttest$kruskal$p.value)
+
+
+# Primitive complexity
+
+subfit <- fit[Reduction=="mds3" & !is.na(Locking) & Repo %in% c("base","neat","mlp5","slp")]
+subfit[, Repo := factor(Repo, levels=c("slp","mlp5","base","neat"), labels=c("SLP","MLP-5","MLP-10","NEAT"))]
+sum <- lastGen(subfit)[, .(Fitness=mean(RelativeFitness), SE=se(RelativeFitness)), by=.(Task, Repo)]
+sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=0), by=.(Repo)])
+
+ggplot(sum, aes(Task, Fitness, fill=Repo)) + geom_bar(stat="identity", position="dodge") + 
+  geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.25, position=position_dodge(.9)) + ylab("Fitness relative to direct (%)") +
+  ggtitle("Fitness achieved in each task, using different repertoires (each setup 5 repertoires X 10 runs)")
+
+
+subrep <- rep[Repo %in% c("base","neat","mlp5","slp")]
+subrep[, Repo := factor(Repo, levels=c("slp","mlp5","base","neat"), labels=c("SLP","MLP-5","MLP-10","NEAT"))]
+
+parallelCoordinates(subrep[Job==0], vars=vars) + facet_wrap(~ Repo)
+
+red <- reduceData(unique(subrep[Job==0], by=vars), vars=vars, method="Rtsne", k=2)
+plotReduced2D(red, color.var="Repo") + facet_wrap(~ Repo) + ggtitle("Behaviour space, one job (t-SNE)")
+
+scores <- subrep[, qdscore(.SD, vars=vars, d=0.5), by=.(Repo,Job)]
+ggplot(scores[, .(Mean=mean(N), SE=se(N)), by=.(Repo)], aes(Repo, Mean)) + geom_bar(stat="identity") + 
+  geom_errorbar(aes(ymin=Mean-SE,ymax=Mean+SE), width=.5) + ylab("Number of regions reached")
+metaAnalysis(scores, N ~ Repo)
+
+neatdata <- loadData("~/exps/playground/rep10/neat", filename="neat.stat")
+summary(neatdata)
+
+# identify which primitives belong to a bin that has not been visited by the other repo under comparison, and vice versa (colorize)
+red[ , Bin := do.call(paste, lapply(.SD/.5, round)), by=.(Repo,Job,Index), .SDcols=vars]
+r1 <- red[Repo=="MLP-10" & Job==0]
+r2 <- red[Repo=="SLP" & Job==0]
+r1[, Common := Bin %in% r2$Bin]
+r2[, Common := Bin %in% r1$Bin]
+plotReduced2D(rbind(r1,r2), color.var="Common") + facet_wrap(~ Repo)
+
+
+
+# Environment
+
+subfit <- fit[Reduction=="mds3" & !is.na(Locking) & Repo %in% c("base","noobj","noobs")]
+subfit[, Repo := factor(Repo, levels=c("base","noobj","noobs"), labels=c("Base","No-Objects","No-Obstacles"))]
+sum <- lastGen(subfit)[, .(Fitness=mean(RelativeFitness), SE=se(RelativeFitness)), by=.(Task, Repo)]
+sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=0), by=.(Repo)])
+
+ggplot(sum, aes(Task, Fitness, fill=Repo)) + geom_bar(stat="identity", position="dodge") + 
+  geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.25, position=position_dodge(.9)) +
+  ggtitle("Fitness achieved in each task, using different repo setups (each setup 5 repertoires X 10 runs)")
+
+
+
+# Activations
+
+act.stats <- act[is.na(Locking), .(Number=length(unique(Primitive)), 
+                                  Duration=mean(rle(Primitive)$lengths), 
+                                  MaxDuration=max(rle(Primitive)$lengths),
+                                  Used=sum(sapply(.SD[, paste0("ArbitratorOut_",0:6), with=F], sd) > 0.10, na.rm=T)),
+                 by=.(Seed, Job, Task)]
+
+act.sum <- act.stats[, .(Used = mean(Used)), by=.(Task,Job)][, .(Mean=mean(Used),SE=se(Used)), by=.(Task)]
+ggplot(act.sum, aes(Task, Mean)) + geom_bar(stat="identity") + ggtitle("Average number of outputs varied in one simulation (SD > 0.1)") +
+  geom_errorbar(aes(ymin=Mean-SE,ymax=Mean+SE), width=.5) + ylab("Outputs varied (/7)")
+
+act.sum <- act.stats[, .(Number = mean(Number)), by=.(Task,Job)][, .(Mean=mean(Number),SE=se(Number)), by=.(Task)]
+ggplot(act.sum, aes(Task, Mean)) + geom_bar(stat="identity") + ggtitle("Number of primitives chosen") +
+  geom_errorbar(aes(ymin=Mean-SE,ymax=Mean+SE), width=.5) + ylab("Number of primitives used (/5000)")
+
+act.sum <- act.stats[, .(Duration = mean(Duration)), by=.(Task,Job)][, .(Mean=mean(Duration),SE=se(Duration)), by=.(Task)]
+ggplot(act.sum, aes(Task, Mean)) + geom_bar(stat="identity") + ggtitle("Average time in primitive (steps)") +
+  geom_errorbar(aes(ymin=Mean-SE,ymax=Mean+SE), width=.5) + ylab("Number of consecutive steps in each primitive")
+
+# Sample
+r <- rep[Repo=="ns" & Job==0]
+r2 <- reduceData(unique(r,by=vars), vars, method="Rtsne", k=2)
+r <- merge(r, r2[,c("V1","V2",vars),with=F], by=vars)
+
+a <- act[Repo=="ns" & is.na(Reduction) & is.na(Locking) & RepoJob==0]
+a <- merge(a, r[, .(Index,V1,V2)], by.x="Primitive", by.y="Index")
+
+ggplot(a[Job==0], aes(x=V1, y=V2)) + geom_point(aes(colour=Job), shape=4, size=1.5) + coord_fixed() + facet_wrap(~ Task) +
+  theme(legend.position="right", axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL)
+
+# ellipse fitted to point cloud
+ggplot(a, aes(x=V1, y=V2, colour=Job, fill=Job)) + coord_fixed() + #geom_point(shape=4, size=1.5) +
+  geom_point(data=r, colour="lightgray", shape=16, size=1) + #xlim(-0.1,1.1) + ylim(-0.1,1.1) +
+  stat_ellipse(geom="polygon", alpha=.2, type="t", level=0.8) + facet_wrap(~ Task) +
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL) +
+  ggtitle("Primitives chosen by the best solutions of each run, for each task (80% CI)")
+
+
+# TODO: metrics
+
+
+# Dimensionality reduction
+
+subfit <- fit[Repo=="base" & !is.na(Locking) & RepoJob==0]
+sum <- lastGen(subfit)[, .(Fitness=mean(RelativeFitness), SE=se(RelativeFitness)), by=.(Task, Reduction)]
+sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=0), by=.(Reduction)])
+
+ggplot(sum, aes(Task, Fitness, fill=Reduction)) + geom_bar(stat="identity", position="dodge") + 
+  geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.25, position=position_dodge(.9)) +
+  ggtitle("Fitness achieved in each task, using different reduction techniques")
+
+m <- metaAnalysis(lastGen(subfit[Reduction!="mds2"]), BestSoFar ~ Reduction , ~ Task)
+sapply(m, function(x) x$ttest$kruskal$p.value)
+
+# R² fit
+
+baserep <- rep[Repo=="base" & Job==0]
+originalDists <- Dist(baserep[,vars,with=F], diag=T, upper=T)
+
+rsquarefit <- function(x) {
+  f <- fread(paste0("~/Dropbox/mase/src/mase/app/playground/rep/sdbc_base_0_",x,".txt"))
+  d <- Dist(f[,-1,with=F], diag=T, upper=T)
+  return(cor(c(d), c(originalDists))^2)
+}
+fits <- data.table(Reduction=c("mds1","mds2","mds3","mds4","mds5"))
+fits[, Rsquared := rsquarefit(Reduction), by=.(Reduction)]
+ggplot(fits, aes(Reduction,Rsquared)) + geom_point() + geom_line(aes(group=0)) +
+  ylab("Coefficient of determination R²") + ggtitle("Fit of SMACOF-MDS dimensionality reduction")
+
+
+# Locking
+
+subfit <- fit[Repo=="ns" & RepoJob==0 & is.na(Reduction)]
+sum <- lastGen(subfit)[, .(Fitness=mean(RelativeFitness), SE=se(RelativeFitness)), by=.(Task, Locking)]
+sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=0), by=.(Locking)])
+
+ggplot(sum, aes(Task, Fitness, fill=Locking)) + geom_bar(stat="identity", position="dodge") + 
+  geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.25, position=position_dodge(.9)) +
+  ggtitle("Fitness achieved in each task, using different reduction techniques")
+
+m <- metaAnalysis(lastGen(subfit), BestSoFar ~ Locking , ~ Task)
+sapply(m, function(x) x$ttest$kruskal$p.value)
+
+act.stats <- act[, .(Number=length(unique(Primitive)), 
+                                   Duration=mean(rle(Primitive)$lengths), 
+                                   MaxDuration=max(rle(Primitive)$lengths),
+                                   Used=sum(sapply(.SD[, paste0("ArbitratorOut_",0:6), with=F], sd) > 0.10, na.rm=T)),
+                 by=.(Seed, Job, Task, Locking)]
+
+act.sum <- act.stats[, .(Number = mean(Number)), by=.(Task,Job,Locking)][, .(Mean=mean(Number),SE=se(Number)), by=.(Task,Locking)]
+ggplot(act.sum, aes(Task, Mean,fill=Locking)) + geom_bar(stat="identity",position="dodge") + ggtitle("Number of primitives chosen") +
+  geom_errorbar(aes(ymin=Mean-SE,ymax=Mean+SE), width=.5, position=position_dodge(.9)) + ylab("Number of primitives used (/5000)")
+
+act.sum <- act.stats[, .(Duration = mean(Duration)), by=.(Task,Job,Locking)][, .(Mean=mean(Duration),SE=se(Duration)), by=.(Task,Locking)]
+ggplot(act.sum, aes(Task, Mean,fill=Locking)) + geom_bar(stat="identity",position="dodge") + ggtitle("Average time in primitive (steps)") +
+  geom_errorbar(aes(ymin=Mean-SE,ymax=Mean+SE), width=.5, position=position_dodge(.9)) + ylab("Number of consecutive steps in each primitive")
+
+lock.stat <- act[!is.na(Locking), .(LockTime=sum(Locked==1)/.N),  by=.(Seed, Job, Task)][, .(LockTime = mean(LockTime)), by=.(Task,Job)][, .(Mean=mean(LockTime),SE=se(LockTime)), by=.(Task)]
+ggplot(lock.stat, aes(Task, Mean)) + geom_bar(stat="identity") + ggtitle("Proportion of time in locked state") +
+  geom_errorbar(aes(ymin=Mean-SE,ymax=Mean+SE), width=.5) + ylab("Locked time")
+
+# NSLC vs NS
+
+sub <- rep[Repo=="base" | Repo=="ns"]
+
+reduced <- reduceData(unique(sub, by=vars), vars=vars, method="Rtsne", k=2)
+plotReduced2D(reduced, color.var="Fitness") + facet_grid(Repo ~ Job)
+
+qdscores <- sub[, qdscore(.SD,vars,d=0.5), by=.(Repo,Job)]
+metaAnalysis(qdscores, QDscore ~ Repo)
+
+subfit <- fit[(Repo=="base" | Repo=="ns") & Reduction=="mds3" & !is.na(Locking)]
+
+sum <- lastGen(subfit)[, .(Fitness=mean(RelativeFitness)), by=.(Task, Repo, RepoJob)]
+ggplot(sum, aes(paste(Repo,RepoJob),Fitness)) + geom_bar(aes(fill=Task), stat="identity") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Setup", y="Fitness relative to direct (%)")
+
+sum2 <- sum[, .(Fitness=mean(Fitness)), by=.(Task,Repo)]
+ggplot(sum2, aes(Repo,Fitness)) + geom_bar(aes(fill=Task), stat="identity") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Setup", y="Fitness relative to direct (%)")
+
+metaAnalysis(lastGen(subfit), BestSoFar ~ Repo , ~ Task)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+setwd("~/exps/playground/rep10")
+
+lapply(c("mlp5","slp","noobj","noobs"), processRepo)
+lapply(c("base","neat","ns"), processRepo)
+
+processRepo("base", jobs=0, k=2)
+processRepo("base", jobs=0, k=4)
+processRepo("base", jobsk=5)
+
+
+
+
+
+
+
+data <- loadFile("~/exps/playground/rep10/noobs/job.0.archive.stat")
 plotVarsHist(data, vars)
 parallelCoordinates(data, vars, alpha=.05)
 
+setwd("~/labmag/exps/playground/rep10")
+data <- loadData("*", "archive.stat")
+data[, Fitness := Fitness / 10]
+vars <- paste0("Behav_",0:6)
+
+lplot <- lapply(split(data, by="Setup"), plotVarsHist, vars=vars)
+plot_grid(plotlist=lplot, labels=names(lplot))
+
+qdscore <- function(data, vars, d=0.25) {
+  datacopy <- copy(data)
+  bins <- paste0("bin",0:(length(vars)-1))
+  datacopy[ , (bins) := lapply(.SD, function(x){round(x/d)}), .SDcols=vars]
+  maxes <- datacopy[, .(Fitness=max(Fitness)), by=.(bin0,bin1,bin2,bin3,bin4,bin5,bin6)]
+  qdscore <- sum(maxes$Fitness)
+  return(list(QDscore=qdscore, N=nrow(maxes), MeanFitness=mean(maxes$Fitness)))
+}
+
+data[, qdscore(.SD,vars,d=0.5), by=.(Setup,Job)]
+
+
+# R-squared fit
+red <- fread("~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_1_mds4.txt")
+ori <- fread("~/exps/playground/rep9/neat/job.1.archive.stat")
+dred <- Dist(red[,.(V2,V3,V4,V5)], diag=T, upper=T)
+dori <- Dist(ori[,vars,with=F], diag=T, upper=T)
+cor(c(dred), c(dori))^2
+
+
+plotVarsHist(data, vars)
+parallelCoordinates(data, vars, alpha=.05) + facet_wrap(~ Setup)
+
+data <- loadData("*", "archive.stat")
+
+d <- loadFile("~/exps/playground/rep9/neat/job.4.archive.stat")
+coords <- fread("~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_4_mds3.txt", col.names=c("Index","V1","V2","V3"))
+m <- merge(coords, d, by="Index")
+plotReduced3D(m, color.var="Fitness")
+
+d <- loadFile("~/exps/playground/tasks9/pl_phototaxis_sdbc_neat_0_mds3_locking/job.0.postbest.xml.stat")[Seed==2]
+coords <- fread("~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_0_mds3.txt", col.names=c("Index","V1","V2","V3"))
+m <- merge(d, coords, by.x="Primitive", by.y="Index")
+
+lines3D(m$Coord_0, m$Coord_1, m$Coord_2, phi=20, theta=45, cex=0.6, bty="b2", colvar=d$Time, ticktype="detailed", type="b", xlim=c(0,1),ylim=c(0,1),zlim=c(0,1))
+lines3D(m$V1, m$V2, m$V3, phi=20, theta=45, cex=0.6, bty="b2", colvar=d$Time, ticktype="detailed", type="b", xlim=c(0,1),ylim=c(0,1),zlim=c(0,1))
+
+
+setwd("~/exps/playground/tasks9")
+d <- loadData("*neat_0_mds3_locking", filename="postbest.xml.stat", auto.ids.names=c("Domain","Task","BC","Method","RepoJob","Reduction","Locking"))
+coords <- fread("~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_0_mds3.txt", col.names=c("Primitive","V1","V2","V3"))
+d <- merge(d, coords, by="Primitive")
+
+act <- d[Task!="coverage"]
+act[, Progress := Time / max(Time), by=.(Task,Job,Seed)]
+par(mfrow = c(3,3), mar=c(1, 1, 1, 1))#it goes c(bottom, left, top, right)
+act[, scatter3D(.SD$V1, .SD$V2, .SD$V3, phi=20, theta=45, pch=16, cex=0.75, bty="b2", colvar=as.numeric(.SD$Job), xlim=range(coords$V1), ylim=range(coords$V2),zlim=range(coords$V3), main=.BY[[1]] ,ticktype="detailed"), by=.(Task)]
+act[, scatter3D(.SD$ArbitratorOut_1, .SD$ArbitratorOut_2, .SD$ArbitratorOut_3, phi=20, theta=45, pch=16, cex=0.75, bty="b2", colvar=as.numeric(.SD$Job), xlim=c(0,1), ylim=c(0,1),zlim=c(0,1), main=.BY[[1]] ,ticktype="detailed"), by=.(Task)]
+
+
+setwd("~/exps/playground/tasks9")
+fit <- loadData("*", "postfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","BC","Method","RepoJob","Reduction","Locking"))
+fit[, Reference := mean(.SD[is.na(Method) & Generation==max(Generation)]$BestSoFar), by=.(Task)]
+fit[, RelativeFitness := ((BestSoFar-Reference) / Reference) * 100]
+fit[, Conf := paste(BC,Method,Reduction,Locking, sep="-")]
+fit <- fit[Task != "coverage"]
+
+fit <- fit[Method=="neat"]
+
+#fit <- fit[Task != "coverage" & Method=="neat" & RepoJob==1]
+
+# NSLC vs NS
+metaAnalysis(lastGen(fit)[!is.na(Method)], BestSoFar ~ Method, ~Task)
+
+# NSLC vs direct
+metaAnalysis(lastGen(fit)[is.na(Method) | Method=="neat"], BestSoFar ~ Method, ~Task)
+
+# Repo job differences
+metaAnalysis(lastGen(fit)[Method=="neat"], BestSoFar ~ RepoJob, ~Task)
+
+sum <- lastGen(fit)[!is.na(Repo), .(Fitness=mean(RelativeFitness)), by=.(Task, Conf, RepoJob)]
+ggplot(sum, aes(paste0(Conf,RepoJob),Fitness)) + geom_bar(aes(fill=Task), stat="identity") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Setup", y="Fitness relative to direct (%)")
+
+sum2 <- sum[, .(Mean=mean(Fitness),Min=min(Fitness), Max=max(Fitness)), by=.(Reduction)]
+ggplot(sum2, aes(Reduction,Mean)) + geom_bar(stat="identity", fill="steelblue") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Fitness relative to direct (%) [Min,Max]") +
+  geom_errorbar(aes(ymin=Min, ymax=Max),width=0.25)
+
+sum <- lastGen(fit)[Method %in% c("neat","many") & Reduction=="mds3", .(Fitness=mean(RelativeFitness)), by=.(Task, Conf, RepoJob)]
+sum <- lastGen(fit)[!is.na(Method), .(Fitness=mean(RelativeFitness)), by=.(Task, Conf, RepoJob)]
+ggplot(sum, aes(paste(Conf,RepoJob),Fitness)) + geom_bar(aes(fill=Task), stat="identity") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Setup", y="Fitness relative to direct (%)")
+
+abs <- lastGen(fit)[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Task, Conf)]
+ggplot(abs, aes(Task,Mean,fill=Conf)) + geom_bar(stat="identity",position="dodge") +
+  geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE),width=0.25,position=position_dodge(.9))
+
+
+sum2 <- sum[, .(Fitness=mean(Fitness)), by=.(Task,Conf)]
+ggplot(sum2, aes(Conf,Fitness)) + geom_bar(aes(fill=Task), stat="identity") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Setup", y="Fitness relative to direct (%)")
+
+sum3 <- sum[, .(Mean=mean(Fitness),Min=min(Fitness), Max=max(Fitness)), by=.(Conf, RepoJob)]
+ggplot(sum3, aes(paste(Conf,RepoJob),Mean)) + geom_bar(stat="identity", fill="steelblue") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Fitness relative to direct (%) [Min,Max]") +
+  geom_errorbar(aes(ymin=Min, ymax=Max),width=0.25)
+
+selected <- fit[is.na(BC) | (Method=="neat" & RepoJob==0)]
+ggplot(lastGen(selected), aes(Method,BestSoFar)) + geom_boxplot() + facet_wrap(~ Task, scales="free_y")
+ggplot(selected[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Generation,Task,Method)], aes(Generation,Mean,group=Method)) + 
+  geom_line(aes(colour=Method)) + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=Method), alpha = 0.1) + ylab("Fitness")  + facet_wrap(~ Task, scales="free_y")
+
+
+sum <- lastGen(fit)[Method %in% c("neat","many") & Reduction=="mds3", .(Fitness=mean(RelativeFitness), .N), by=.(Task, Conf, RepoJob)]
+ggplot(sum, aes(paste(Conf,RepoJob),Fitness)) + geom_bar(aes(fill=Task), stat="identity") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Setup", y="Fitness relative to direct (%)")
+
+
+
+
+fitnessBoxplots(fit) + ylim(0.3,1)
+
+
+setwd("~/labmag/exps/playground/tasks8")
+fit <- loadData(c("pl_avoidance","pl_coverage","pl_dynforaging","pl_dynphototaxis","pl_exploration","pl_freeforaging","pl_maze","pl_obsforaging","pl_phototaxis","pl_predator"), "postfitness.stat", fun=loadFitness)
+fitnessBoxplots(fit) + ylim(0.3,1)
+
+
+
+setwd("~/labmag/exps/playground/tasks8")
+fit <- loadData("*", "postfitness.stat", fun=loadFitness)
+ggplot(lastGen(fit), aes(ID2,BestSoFar)) + geom_boxplot() + facet_wrap(~ ID3)
+ggplot(fit[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Generation,ID2)], aes(Generation,Mean,group=ID2)) + 
+  geom_line(aes(colour=ID2)) + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=ID2), alpha = 0.1) + ylab("Fitness")
+
+sum <- lastGen(fit)[!is.na(BC), .(Fitness=mean(RelativeFitness)), by=.(Task, Method)]
+ggplot(sum, aes(Method,Fitness)) + geom_bar(aes(fill=Task), stat="identity") + 
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Fitness relative to direct (%)")
+
+
+
 # Generalization
+
+
+
 
 setwd("~/exps/playground/tasks5")
 fit <- loadData(c("pl_phototaxis_nsmedian_2","direct_phototaxis"), "postfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","Repo","Reduction"))
@@ -16,21 +450,89 @@ ggplot(lastGen(fitmanyobs), aes(Repo, BestSoFar)) + geom_boxplot()
 
 # test
 
-setwd("~/exps/playground/rep6/")
-data <- loadFile("sdbc_pure/job.0.archive.stat")
+setwd("~/labmag/exps/playground/rep7/")
+data <- loadData("*", "archive.stat")
+vars <- paste0("Behav_",0:6)
+data[, Fitness := Fitness / 10]
+
+qdscore <- function(data, vars, d=0.25) {
+  datacopy <- copy(data)
+  bins <- paste0("bin",0:(length(vars)-1))
+  datacopy[ , (bins) := lapply(.SD, function(x){round(x/d)}), .SDcols=vars]
+  maxes <- datacopy[, .(Fitness=max(Fitness)), by=.(bin0,bin1,bin2,bin3,bin4,bin5,bin6)]
+  qdscore <- sum(maxes$Fitness)
+  print(nrow(maxes))
+  return(list(QDscore=qdscore, N=nrow(maxes), MeanFitness=mean(maxes$Fitness)))
+}
+
+data[, qdscore(.SD,vars,d=0.5), by=.(Setup,Job)]
+
+red <- reduceData(unique(data,by=vars), vars=vars, method="Rtsne", k=2)
+
+
+
+plotReduced2D(red, color.var="Fitness") + facet_wrap(~ Setup)
+parallelCoordinates(data, vars, alpha=0.05) + facet_wrap(~ Setup)
+data[, .(CorObs=cor(Behav_1,Behav_2),CorObj=cor(Behav_3,Behav_4)), by=.(Setup)]
+
+red <- reduceData(data[Setup=="slp"], vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_slp_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(data[Setup=="mlp5"], vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_mlp5_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(data[Setup=="mlp10"], vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_mlp10_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(data[Setup=="neat" & Job==0], vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(data[Setup=="neat" & Job==1], vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat1_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(data[Setup=="neat" & Job==2], vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat2_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(data[Setup=="neat" & Job==3], vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat3_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+red <- reduceData(data[Setup=="neat" & Job==4], vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat4_direct_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+d <- unique(data[Setup=="neat" & Job==0], by=vars)
+red2 <- reduceData(d, vars=vars, method="mds", k=2)
+write.table(red2[,.(Index,V1,V2)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_direct_mds2.txt", row.names=F, col.names=F, sep=" ")
+
+red4 <- reduceData(d, vars=vars, method="mds", k=4)
+write.table(red4[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_direct_mds4.txt", row.names=F, col.names=F, sep=" ")
+
+red3 <- reduceData(d, vars=vars, method="mds", k=3)
+write.table(red3[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_direct_mds3.txt", row.names=F, col.names=F, sep=" ")
+
+d <- loadFile("~/labmag/exps/playground/rep7/neat/job.0.archive.stat")
+coords <- fread("~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_direct_mds3.txt", col.names=c("Index","V1","V2","V3"))
+m <- merge(coords, d, by="Index")
+
+cls <- kmeans(m[,.(V1,V2,V3)], centers=2500, iter.max=1000, nstart=100)
+m[, Cluster := cls$cluster]
+sparse <- m[, .SD[which.max(Fitness)], by=.(Cluster)]
+plotReduced2D(sparse,color.var="Fitness")
+write.table(sparse[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_2500_mds3.txt", row.names=F, col.names=F, sep=" ")
+
+
+
+d <- data[Setup=="neat"]
+cls <- kmeans(d[,vars,with=F], centers=1000, iter.max=1000, nstart=100)
+d[, Cluster := cls$cluster]
+sparse <- d[, .SD[which.max(Fitness)], by=.(Cluster)]
+red <- reduceData(sparse, vars=vars, method="rpca", k=7) ; plotReduced2D(red, color.var="Fitness")
+write.table(red[,.(Index,V1,V2,V3,V4)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_neat_1000_pca4.txt", row.names=F, col.names=F, sep=" ")
+
+
+
+rnew <- loadFile("~/exps/playground/rep6/sdbc_neat/job.0.archive.stat")
 vars <- paste0("Behav_",0:4)
-
-red <- reduceData(data, vars=vars, method="rpca", k=5)
-plotReduced2D(red, color.var="Fitness")
-
-write.table(red[,.(Index,V1,V2,V3)], file="~/Dropbox/mase/src/mase/app/playground/rep/sdbc_pure_direct_pca3.txt", row.names=F, col.names=F, sep=" ")
-
-
-
-rnew <- loadFile("~/exps/playground/rep6/sdbc_base/job.0.archive.stat")
-vars <- paste0("Behav_",0:4)
-
-cls <- kmeans(rnew[,vars,with=F], centers=2000, iter.max=1000, nstart=100)
+cls <- kmeans(rnew[,vars,with=F], centers=1000, iter.max=1000, nstart=100)
 rnew[, Cluster := cls$cluster]
 sparse <- rnew[, .SD[which.max(Fitness)], by=.(Cluster)]
 
@@ -145,14 +647,15 @@ kdiv <- function(d) {
 }
 
 
-setwd("~/exps/playground/tasks6")
+
+
+setwd("~/exps/playground/tasks8")
 fit <- loadData("*", "postfitness.stat", fun=loadFitness, auto.ids.names=c("Domain","Task","BC","RepoPar","Size","Reduction","Locking"))
 fit[, Reference := mean(.SD[is.na(BC) & Generation==max(Generation)]$BestSoFar), by=.(Task)]
 fit[, RelativeFitness := ((BestSoFar-Reference) / Reference) * 100]
 
 fit[Size=="direct", Size := NA]
 fit[Reduction=="direct", Reduction := NA]
-
 fit[, Method := paste(BC,RepoPar,Size,Reduction,Locking, sep="-")]
 
 sum <- lastGen(fit)[!is.na(BC), .(Fitness=mean(RelativeFitness)), by=.(Task, Method)]
@@ -164,11 +667,14 @@ ggplot(sum2, aes(Method,Mean)) + geom_bar(stat="identity", fill="steelblue") +
   theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Fitness relative to direct (%) [Min,Max]") +
   geom_errorbar(aes(ymin=Min, ymax=Max),width=0.25)
 
-selected <- fit[is.na(BC) | Method=="sdbc-base-2000-pca3-locking"]
+selected <- fit[is.na(BC) | Method=="sdbc-neat-NA-pca4-locking"]
 ggplot(lastGen(selected), aes(Method,BestSoFar)) + geom_boxplot() + facet_wrap(~ Task, scales="free_y")
 ggplot(selected[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Generation,Task,Method)], aes(Generation,Mean,group=Method)) + 
   geom_line(aes(colour=Method)) + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=Method), alpha = 0.1) + ylab("Fitness")  + facet_wrap(~ Task, scales="free_y")
 
+
+fitneat <- fit[grepl("neat", RepoPar) & is.na(Size)]
+metaAnalysis(lastGen(fitneat), BestSoFar ~ RepoPar, ~ Task)
 
 # Task performance
 

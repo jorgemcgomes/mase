@@ -1,5 +1,10 @@
 #install.packages(c("ggplot2","scales","reshape","kohonen","parallel","doParallel","pbapply","data.table","plyr","doBy","pdist","RColorBrewer","formula.tools","arules","MASS","tsne"))
+#.libPaths(c("/home/jorge/R/x86_64-pc-linux-gnu-library/3.4/", .libPaths()))
+
 library(ggplot2)
+library(plot3D)
+library(cowplot) # arrange multiple ggplots in a grid -- plot_grid
+
 library(scales)
 library(reshape)
 library(kohonen)
@@ -530,7 +535,7 @@ identifyBests <- function(som, data, n=10, interactive=T) {
 # method: dimensionality reduction method. currently supports sammon, tsne, Rtsne (fast Barnes-Hut tsne)
 # ...: to be passed to reduction method
 # returns data with extra columns for the reduced data
-reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","rpca"), k=2, normalise=T, ...) {
+reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","rpca","mds"), k=2, normalise=T, ...) {
   d <- data
   if(!is.null(vars)) {
     d <- data[, vars, with=F]
@@ -545,9 +550,16 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
     dists <- Dist(d, nbproc=detectCores())
     d <- tsne(dists, k=k, ...)
   } else if(method[1]=="Rtsne") {
-    require(Rtsne)
-    ts <- Rtsne(d, dims=k, ...)
-    d <- ts$Y
+    if(k==2 & require(Rtsne.multicore)) {
+      print("Using Rtsne.multicore implementation")
+      ts <- Rtsne.multicore(d, dims=2, num_threads=detectCores()*2, ...)
+      d <- ts$Y      
+    } else {
+      require(Rtsne)
+      print("Using Rtsne single-core implementation")
+      ts <- Rtsne(d, dims=k, ...)
+      d <- ts$Y      
+    }
   } else if(method[1]=="pca") {
     pc <- prcomp(d, center=T, scale.=T, rank.=k)
     d <- pc$x
@@ -558,6 +570,11 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
     s <- cumsum(pc@eigenvalues / sum(pc@eigenvalues))
     print(ggplot(data.table(PC=1:pc@k,CummulativeVariance=s), aes(PC,CummulativeVariance)) + geom_bar(stat="identity"))
     d <- pc@scores
+  } else if(method[1]=="mds") {
+    require(smacof)
+    dists <- Dist(d, nbproc=detectCores())
+    md <- mds(dists, ndim=k, verbose=T, ...)
+    d <- md$conf
   } else {
     stop("unknown method:", method[1])
   }
@@ -579,22 +596,23 @@ scaleData <- function(d) {
 # color.var: optional. numeric variable to be used to color the dots
 plotReduced2D <- function(reduced, color.var=NULL) {
   g <- ggplot(reduced, aes(x=V1, y=V2)) + geom_point(aes_string(colour=color.var), shape=4, size=1.5) + 
-    coord_fixed() + theme(legend.position="right")
+    coord_fixed() + theme(legend.position="right", axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL)
   return(g)
 }
 
-plotReduced3D <- function(reduced, color.var=NULL) {
-  require(rgl)
-  plot3d(reduced$V1, reduced$V2, reduced$V3)
+plotReduced3D <- function(reduced, color.var=NULL, ...) {
+  require(plot3D)
+  if(is.null(color.var)) {
+    scatter3D(reduced$V1, reduced$V2, reduced$V3, phi=20, theta=45, cex=0.6, bty="b2", ticktype="detailed", ...)
+  } else {
+    scatter3D(reduced$V1, reduced$V2, reduced$V3, phi=20, theta=45, cex=0.6, bty="b2", colvar=reduced[[color.var]], ticktype="detailed", ...)
+  }
 }
 
-parallelCoordinates <- function(data, vars, color.var=NULL, points=T, lines=T, alpha=0.1) {
-  if(!is.null(vars)) {
-    data <- data[, c(vars,color.var), with=F]
-  }  
-  data[, Index := 1:.N]
-  m <- melt(data, id.vars=c("Index",color.var))
-  g <- ggplot(m, aes(variable, value, group=Index))
+parallelCoordinates <- function(data, vars=NULL, color.var=NULL, points=T, lines=T, alpha=0.1) {
+  data[, IDX := 1:.N]
+  m <- melt(data, measure.vars=vars)
+  g <- ggplot(m, aes(variable, value, group=IDX))
   if(lines) {
     g <- g + geom_line(aes_string(colour=color.var), alpha=alpha)
   }
@@ -608,6 +626,7 @@ parallelCoordinates <- function(data, vars, color.var=NULL, points=T, lines=T, a
 
 # histogram with the behaviour dimensions
 varsHist <- function(data, vars, breaks="Sturges") {
+  setDT(data)
   aux <- function(v, i=interval) {
     h <- hist(v, breaks=breaks, plot=F)
     return(data.table(Break=h$breaks[1:length(h$counts)],Density=h$density, Counts=h$counts, Frequency=h$counts/sum(h$counts)))

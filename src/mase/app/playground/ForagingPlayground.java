@@ -8,6 +8,7 @@ package mase.app.playground;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import mase.app.playground.RandomMovingAgentsPlayground.RandomMovingAgent;
 import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
 import sim.engine.SimState;
@@ -29,17 +30,19 @@ public class ForagingPlayground extends Playground {
     @Override
     public void start() {
         super.start();
-        itemRemover = new ItemRemover(super.objects);
+        itemRemover = new ItemRemover(this);
         schedule.scheduleRepeating(itemRemover);
     }
     
-    protected class ItemRemover implements Steppable {
+    protected static class ItemRemover implements Steppable {
 
         private static final long serialVersionUID = 1L;
         protected List<CircularObject> aliveObjects;
+        protected Playground pl;
 
-        private ItemRemover(List<CircularObject> objects) {
-            aliveObjects = new ArrayList<>(objects);
+        protected ItemRemover(Playground pl) {
+            this.pl = pl;
+            aliveObjects = new ArrayList<>(pl.objects);
         }
 
         @Override
@@ -47,13 +50,16 @@ public class ForagingPlayground extends Playground {
             Iterator<CircularObject> iterator = aliveObjects.iterator();
             while(iterator.hasNext()) {
                 CircularObject next = iterator.next();
-                if(agent.distanceTo(next) == 0) {
+                if(pl.agent.distanceTo(next) == 0) {
                     iterator.remove();
-                    field.remove(next);
+                    pl.field.remove(next);
+                    if(next instanceof RandomMovingAgent) {
+                        ((RandomMovingAgent) next).stop.stop();
+                    }
                 }
             }
             if(aliveObjects.isEmpty()) {
-                kill();
+                pl.kill();
             }
         }
     }

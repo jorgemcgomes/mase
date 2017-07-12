@@ -10,7 +10,9 @@ import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
 import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.MultilineObject;
+import mase.mason.world.SmartAgent;
 import sim.engine.SimState;
+import sim.engine.Stoppable;
 
 /**
  *
@@ -19,7 +21,7 @@ import sim.engine.SimState;
 public class RandomMovingAgentsPlayground extends Playground {
 
     private static final long serialVersionUID = 1L;
-    
+
     public RandomMovingAgentsPlayground(GroupController gc, long seed, PlaygroundParams par) {
         super(gc, seed, par);
     }
@@ -32,15 +34,19 @@ public class RandomMovingAgentsPlayground extends Playground {
     @Override
     protected void placeObjects() {
         super.placeObjects();
-        for(CircularObject obj : objects) {
-            schedule.scheduleRepeating((RandomMovingAgent) obj);
+        for (CircularObject obj : objects) {
+            RandomMovingAgent rma = (RandomMovingAgent) obj;
+            rma.stop = schedule.scheduleRepeating(rma);
         }
-    }
-        
-    protected class RandomMovingAgent extends EmboddiedAgent {
+    }  
+
+    protected static class RandomMovingAgent extends EmboddiedAgent {
+
+        private static final long serialVersionUID = 1L;
 
         private double currentOrientation = Double.NaN;
-        
+        protected Stoppable stop;
+
         public RandomMovingAgent(Playground pl) {
             super(pl, pl.field, pl.par.objectRadius, Color.BLUE);
             this.enableBoundedArena(true);
@@ -51,16 +57,16 @@ public class RandomMovingAgentsPlayground extends Playground {
         @Override
         public void step(SimState state) {
             // orientation change
-            if(Double.isNaN(currentOrientation)) {
-                currentOrientation = -Math.PI + random.nextDouble() * Math.PI * 2;
+            if (Double.isNaN(currentOrientation)) {
+                currentOrientation = -Math.PI + sim.random.nextDouble() * Math.PI * 2;
             }
-            
-            boolean success = super.move(currentOrientation, par.linearSpeed * par.objectSpeed);
-            if(!success) {
+
+            boolean success = super.move(currentOrientation, ((Playground) sim).par.linearSpeed * ((Playground) sim).par.objectSpeed);
+            if (!success) {
                 currentOrientation = Double.NaN;
             }
         }
         
     }
-    
+
 }

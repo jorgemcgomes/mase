@@ -16,6 +16,8 @@ public class DashMovementEffector extends AbstractEffector {
 
     private double linearSpeed;
     private double turnSpeed;
+    private double linearAcc = Double.POSITIVE_INFINITY;
+    private double turnAcc = Double.POSITIVE_INFINITY;
     private boolean backward = false;
     private double turnNoise = 0;
     private double linearNoise = 0;
@@ -27,6 +29,11 @@ public class DashMovementEffector extends AbstractEffector {
     public void setSpeeds(double linear, double turn) {
         this.linearSpeed = linear;
         this.turnSpeed = turn;
+    }
+    
+    public void setAccelerations(double linear, double turn) {
+        this.linearAcc = linear;
+        this.turnAcc = turn;
     }
 
     public void allowBackwardMove(boolean allow) {
@@ -59,9 +66,17 @@ public class DashMovementEffector extends AbstractEffector {
             maxTurnSpeed += (turnNoise * maxTurnSpeed) * (state.random.nextDouble() * 2 - 1);
             maxTurnSpeed = Math.max(0, maxTurnSpeed);
         }
-        double forward = backward ? (values[0] * 2 - 1) * maxSpeed : values[0] * maxSpeed;
-        double r = (values[1] * 2 - 1) * maxTurnSpeed;
-        ag.move(ag.orientation2D() + r, forward);
+        double linear = backward ? (values[0] * 2 - 1) * maxSpeed : values[0] * maxSpeed;
+        double turn = (values[1] * 2 - 1) * maxTurnSpeed;
+        
+        if(!Double.isInfinite(linearAcc) && Math.abs(linear - ag.getSpeed()) > linearAcc) {
+           linear = linear < ag.getSpeed() ? ag.getSpeed() - linearAcc : ag.getSpeed() + linearAcc;
+        }
+        if(!Double.isInfinite(turnAcc) && Math.abs(turn - ag.getTurningSpeed()) > turnAcc) {
+            turn = turn < ag.getTurningSpeed() ? ag.getTurningSpeed() - turnAcc : ag.getTurningSpeed() + turnAcc;
+        }
+                
+        ag.move(ag.orientation2D() + turn, linear);
     }
 
 }

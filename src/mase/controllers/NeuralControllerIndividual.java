@@ -35,6 +35,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
     public static final String P_STRUCTURE = "structure";
     public static final String P_TANH = "tanh";
     public static final String FEED_FORWARD = "feed-forward";
+    public static final String FEED_FORWARD_2 = "feed-forward-2";
     public static final String ELMAN = "elman";
     public static final String JORDAN = "jordan";
     private static final long serialVersionUID = 1L;
@@ -80,7 +81,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
             pattern = new ElmanPattern2();
         } else if (structure.equalsIgnoreCase(JORDAN)) {
             pattern = new JordanPattern();
-        } else if (structure.equalsIgnoreCase(FEED_FORWARD)) {
+        } else if (structure.equalsIgnoreCase(FEED_FORWARD) || structure.equalsIgnoreCase(FEED_FORWARD_2)) {
             pattern = new FeedForwardPattern();
         } else {
             return null;
@@ -89,6 +90,9 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         pattern.setInputNeurons(in);
         if (hidden > 0) {
             pattern.addHiddenLayer(hidden);
+            if(structure.equalsIgnoreCase(FEED_FORWARD_2)) {
+                pattern.addHiddenLayer(hidden);
+            }
         }
         pattern.setOutputNeurons(out);
         return pattern;

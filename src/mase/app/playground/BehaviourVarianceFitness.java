@@ -56,7 +56,7 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
         private static final long serialVersionUID = 1L;
 
         private final BehaviourResult reference;
-        public static final double MAX = 1000;
+        public static final double MAX = 10;
 
         public BehaviourVarianceFitnessResult(BehaviourResult reference) {
             super(0);

@@ -41,6 +41,7 @@ public class PlaygroundSDBCStandardizer extends Statistics {
         DescriptiveStatistics[] ds = null;
         for (int i = 0; i < 1000; i++) {
             Playground pl = (Playground) prob.getSimState(new HomogeneousGroupController(null), i);
+            pl.par.randomPosition = true;
             pl.start();
             double[] s = fun.state(pl);
             

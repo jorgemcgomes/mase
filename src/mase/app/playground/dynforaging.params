@@ -1,0 +1,7 @@
+parent.0 = freeforaging.params
+
+problem.simstate =                 mase.app.playground.MovingForagingPlayground
+
+problem.objectSpeed = 0.5
+
+generations = 250

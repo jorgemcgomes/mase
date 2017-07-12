@@ -71,7 +71,6 @@ public class KdTreeRepertoire implements Repertoire {
             e.setValue(e.getValue().clone());
         }
         return newRep;
-        //return this;
     }
 
     @Override

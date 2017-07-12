@@ -5,20 +5,23 @@ problem.params =                   mase.app.playground.PlaygroundParams
 problem.arenaSize = 150
     
 problem.minObjects = 1
-problem.maxObjects = 5
+problem.maxObjects = 10
 problem.objectRadius = 2
 problem.minObjectDistance = 0
 problem.objectSpeed = 0
     
 problem.minObstacles = 1
-problem.maxObstacles = 5
+problem.maxObstacles = 10
 problem.minObstacleSize = 10
 problem.maxObstacleSize = 30
     
+problem.randomPosition = true
 problem.radius = 4
 problem.linearSpeed = 1
+problem.linearAcc = 0.1
 problem.backMove = true
 problem.turnSpeed = 0.392
+problem.turnAcc = 0.04
 problem.numCones = 4
 problem.coneRange = 100
 problem.whiskerRange = 25

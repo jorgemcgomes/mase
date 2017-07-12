@@ -13,6 +13,14 @@ seed.4=time
 seed.5=time
 seed.6=time
 seed.7=time
+seed.8=time
+seed.9=time
+seed.10=time
+seed.11=time
+seed.12=time
+seed.13=time
+seed.14=time
+seed.15=time
 
 # Basic generational configuration
 state = 				ec.simple.SimpleEvolutionState

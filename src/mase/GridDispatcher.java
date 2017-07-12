@@ -31,6 +31,7 @@ public class GridDispatcher {
     public static final String P_DRY = "-dry";
     public static final String P_THREADS = "-t";
     public static final String P_CLUSTER = "-c";
+    public static final String P_NJOBS = "-nj";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         /*
@@ -42,6 +43,7 @@ public class GridDispatcher {
         boolean clean = true;
         int threads = 8;
         String cluster = null;
+        int njobs = 1;
         for (int i = 0; i < args.length - 1; i++) {
             if (args[i].equalsIgnoreCase(P_NOSORT)) {
                 sort = false;
@@ -55,6 +57,9 @@ public class GridDispatcher {
                 i++;
             } else if (args[i].equalsIgnoreCase(P_NOCLEAN)) {
                 clean = false;
+            } else if(args[i].equalsIgnoreCase(P_NJOBS)) {
+                njobs = Integer.parseInt(args[i + 1].trim());
+                i++;                
             } else {
                 System.out.println("Unknown param");
             }
@@ -88,29 +93,27 @@ public class GridDispatcher {
 
         // Generate scripts
         List<String> scripts = new ArrayList<>();
-        for (Job j : mng.waitingList) {
-            String name = "mase_" + j.outfolder.substring(j.outfolder.lastIndexOf('/') + 1) + "_" + j.jobNumber + ".sh";
-            File f = new File(name);
-            if (f.exists()) {
-                System.out.println("Script already exists, not adding: " + f);
-            } else {
-                FileWriter fw = new FileWriter(f);
-                j.params = j.params + " -p evalthreads=" + threads; // TODO: possible problem with breed threads?
-                fw.write("#!/bin/bash\n"
-                        + "java -cp \"build/classes:lib/*\" mase.MaseEvolve -out " + j.outfolder + " " + j.params);
-                fw.close();
+        
+        FileWriter fw = null;
+        for(int i = 0 ; i < mng.waitingList.size() ; i++) {
+            Job j = mng.waitingList.get(i);
+            j.params = j.params + " -p evalthreads=" + threads; // TODO: possible problem with breed threads?
+            if(i % njobs == 0) {
+                if(fw != null) {
+                    fw.close();
+                }
+                String name = "M_" + j.jobNumber + "_" + j.outfolder.substring(j.outfolder.lastIndexOf('/') + 1) + ".sh";
+                fw = new FileWriter(name);
+                fw.write("#!/bin/bash\n");
                 scripts.add(name);
             }
+            fw.write("java -cp \"build/classes:lib/*\" mase.MaseEvolve -out " + j.outfolder + " " + j.params + "\n");
         }
 
         /*
         Confirmation
          */
-        int c = 0;
-        for (Job j : mng.waitingList) {
-            System.out.println("[" + c + "] " + j.params);
-            c++;
-        }
+        System.out.println("Submiting a total of " + mng.waitingList.size() + " jobs in " + scripts.size() + " batches");
         System.out.println("Enter y to submit jobs");
         if (dryRun) {
             System.out.println("** THIS IS A DRY RUN **");

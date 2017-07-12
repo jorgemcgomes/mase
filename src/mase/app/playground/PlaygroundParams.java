@@ -28,10 +28,13 @@ public class PlaygroundParams implements Serializable {
     double minObstacleSize;
     double maxObstacleSize;
     
+    boolean randomPosition;
     double radius;
     double linearSpeed;
+    double linearAcc;
     boolean backMove;
     double turnSpeed;
+    double turnAcc;
     int numCones;
     double coneRange;
     double whiskerRange;

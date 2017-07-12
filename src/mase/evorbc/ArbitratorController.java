@@ -54,7 +54,7 @@ public class ArbitratorController implements AgentController {
     public void setMappingFunction(MappingFunction mapFun) {
         this.mapFun = mapFun;
     }
-
+    
     @Override
     public double[] processInputs(double[] input) {        
         lastArbitratorOutput = arbitrator.processInputs(input);

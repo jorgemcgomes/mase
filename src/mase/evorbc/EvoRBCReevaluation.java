@@ -30,23 +30,28 @@ public class EvoRBCReevaluation {
         File gc = ReevaluationTools.findControllerFile(args);
         MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, gc.getParentFile());
 
-        logController(gc, simulator, reps);
+        File out = new File(gc.getAbsolutePath() + ".stat");
+        logController(gc, simulator, reps, out);
     }
 
-    public static void logController(File gc, MasonSimulationProblem simulator, int reps) throws Exception {
+    public static void logController(File gc, MasonSimulationProblem simulator, int reps, File out) {
         simulator.loggers().clear();
-
-        GroupController controller = SolutionPersistence.readSolutionFromFile(gc).getController();
-        if (controller.getAgentControllers(1)[0] instanceof ArbitratorController) {
-            FileWriter w = new FileWriter(new File(gc.getAbsolutePath() + ".stat"));
-            EvoRBCLogger log = new EvoRBCLogger(w);
-            simulator.loggers().add(log);
-            for (int i = 0; i < reps; i++) {
-                simulator.evaluateSolution(controller, i);
+        try {
+            GroupController controller = SolutionPersistence.readSolutionFromFile(gc).getController();
+            if (controller.getAgentControllers(1)[0] instanceof ArbitratorController) {
+                FileWriter w = new FileWriter(out);
+                EvoRBCLogger log = new EvoRBCLogger(w);
+                simulator.loggers().add(log);
+                for (int i = 0; i < reps; i++) {
+                    simulator.evaluateSolution(controller, i);
+                }
+                w.close();
+            } else {
+                System.out.println("Not an EvoRBC controller: " + gc.getAbsolutePath());
             }
-            w.close();
-        } else {
-            System.out.println("Not an EvoRBC controller: " + gc.getAbsolutePath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            out.delete();
         }
 
     }
@@ -81,7 +86,7 @@ public class EvoRBCReevaluation {
                         }
                         writer.write(" Locked");
                         for (int j = 0; j < ac.lastRepertoireCoords.length; j++) {
-                            writer.write(" Behav_" + j);
+                            writer.write(" Coord_" + j);
                         }
                         writer.write(" Primitive");
                         for (int j = 0; j < ag.lastNormalisedOutputs().length; j++) {

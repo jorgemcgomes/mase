@@ -65,31 +65,39 @@ public class PlaygroundSDBCRaw extends MasonEvaluation<VectorBehaviourResult> {
         states.add(state((Playground) sim));
     }
     
-    // agent-to-walls distance ; agent-to-obstacles mean distance; agent-to-objects mean distance; agent linear speed; agent turn speed 
+    // agent-to-walls distance ; agent-to-obstacles mean distance; agent-to-closest-obstacle distance; agent-to-objects mean distance; agent-to-closest-object mean distance; agent linear speed; agent turn speed 
     // TODO: justifiable way to normalise: generate a lot of random environments, measure the min/mean/max for each distance and normalise based on that
     protected double[] state(Playground pl) {
-        double[] res = new double[5];
+        double[] res = new double[7];
         res[0] = pl.agent.distanceTo(pl.walls);
         
         if(!pl.obstacles.isEmpty()) {
             double md = 0;
+            double min = Double.POSITIVE_INFINITY;
             for(MultilineObject o : pl.obstacles) {
-                md += pl.agent.distanceTo(o);
+                double d = pl.agent.distanceTo(o);
+                md += d;
+                min = Math.min(d, min);
             }
             res[1] = md / pl.obstacles.size();
+            res[2] = min;
         }
         
         if(!pl.objects.isEmpty()) {
             double md = 0;
+            double min = Double.POSITIVE_INFINITY;
             for(CircularObject o : pl.objects) {
-                md += pl.agent.distanceTo(o);
+                double d = pl.agent.distanceTo(o);
+                md += d;
+                min = Math.min(d, min);
             }
-            res[2] = md / pl.objects.size();
+            res[3] = md / pl.objects.size();
+            res[4] = min;
         }
         
-        res[3] = pl.par.backMove ? pl.agent.getSpeed() / pl.par.linearSpeed : (pl.agent.getSpeed() / pl.par.linearSpeed) * 2 - 1;
+        res[5] = pl.par.backMove ? pl.agent.getSpeed() / pl.par.linearSpeed : (pl.agent.getSpeed() / pl.par.linearSpeed) * 2 - 1;
         
-        res[4] = pl.agent.getTurningSpeed() / pl.par.turnSpeed;
+        res[6] = pl.agent.getTurningSpeed() / pl.par.turnSpeed;
         
         return res;
     }
@@ -104,11 +112,10 @@ public class PlaygroundSDBCRaw extends MasonEvaluation<VectorBehaviourResult> {
             }
         }
         
-        mean[0] = Math.max(-BOUND, Math.min(BOUND, (mean[0] - sMeans[0]) / sSDs[0]));
-        mean[1] = Math.max(-BOUND, Math.min(BOUND, (mean[1] - sMeans[1]) / sSDs[1]));
-        mean[2] = Math.max(-BOUND, Math.min(BOUND, (mean[2] - sMeans[2]) / sSDs[2]));
-        //mean[3] = mean[3] * BOUND;
-        //mean[4] = mean[4] * BOUND;
+        // the last 2 are assumed to be already normalised (agent turning and linear speed)
+        for(int i = 0 ; i < mean.length - 2 ; i++) {
+            mean[i] = Math.max(-BOUND, Math.min(BOUND, (mean[i] - sMeans[i]) / sSDs[i]));
+        }
         
         vbr = new VectorBehaviourResult(mean);
         vbr.setDistance(VectorBehaviourResult.Distance.euclidean);
