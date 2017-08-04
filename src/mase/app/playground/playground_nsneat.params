@@ -6,17 +6,10 @@ problem.seed =                     0
 problem.repetitions =              100
 problem.max-steps =                500
 
-problem.number-evals =             2
-problem.eval.0 =                   mase.app.playground.PlaygroundSDBCRaw
+problem.number-evals =             1
+problem.eval.0 =                   mase.app.playground.PlaygroundSDBC
 problem.eval.0.update-freq =       1
 problem.eval.0.aggregation =       geometricMedian
-problem.eval.1 =                   mase.app.playground.BehaviourVarianceFitness
-problem.eval.1.behaviour-index =   0
-
-fitness.fitness-index =            1
-
-# needed for the PlaygroundSDBCRaw evaluation
-stat.child.22 =                     mase.app.playground.PlaygroundSDBCStandardizer
 
 neat.size = 500
 neat.SPECIE.COUNT = 10

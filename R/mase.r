@@ -19,6 +19,7 @@ library(RColorBrewer)
 library(formula.tools)
 library(arules)
 library(amap)
+library(cluster)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
@@ -55,10 +56,8 @@ createCluster <- function(cores=detectCores()) {
   clusterEvalQ(cl, library(ggplot2))
   clusterEvalQ(cl, library(data.table))
   clusterEvalQ(cl, theme_set(theme_bw()))
-  clusterEvalQ(cl, theme_update(plot.margin=unit(c(1,1,1,1),"mm")))
   return(TRUE)
 }
-
 
 #### Data loading #########################################################################
 
@@ -536,54 +535,57 @@ identifyBests <- function(som, data, n=10, interactive=T) {
 # ...: to be passed to reduction method
 # returns data with extra columns for the reduced data
 reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","rpca","mds"), k=2, normalise=T, ...) {
-  d <- data
+  oldCoords <- copy(data)
   if(!is.null(vars)) {
-    d <- data[, vars, with=F]
+    oldCoords <- data[, vars, with=F]
   }
+  oldCoords <- unique(oldCoords) # remove duplicates
+  newCoords <- NULL
   if(method[1]=="sammon") {
     require(MASS)
-    dists <- Dist(d, nbproc=detectCores())
+    dists <- Dist(oldCoords, nbproc=detectCores())
     sam <- sammon(dists, k=k, ...)
-    d <- sam$points
+    newCoords <- sam$points
   } else if(method[1]=="tsne") {
     require(tsne)
-    dists <- Dist(d, nbproc=detectCores())
-    d <- tsne(dists, k=k, ...)
+    dists <- Dist(oldCoords, nbproc=detectCores())
+    newCoords <- tsne(dists, k=k, ...)
   } else if(method[1]=="Rtsne") {
     if(k==2 & require(Rtsne.multicore)) {
       print("Using Rtsne.multicore implementation")
-      ts <- Rtsne.multicore(d, dims=2, num_threads=detectCores()*2, ...)
-      d <- ts$Y      
+      ts <- Rtsne.multicore(oldCoords, dims=2, num_threads=detectCores()*2, ...)
+      newCoords <- ts$Y      
     } else {
       require(Rtsne)
       print("Using Rtsne single-core implementation")
-      ts <- Rtsne(d, dims=k, ...)
-      d <- ts$Y      
+      ts <- Rtsne(oldCoords, dims=k, ...)
+      newCoords <- ts$Y      
     }
   } else if(method[1]=="pca") {
-    pc <- prcomp(d, center=T, scale.=T, rank.=k)
-    d <- pc$x
+    pc <- prcomp(oldCoords, center=T, scale.=T, rank.=k)
+    newCoords <- pc$x
   } else if(method[1]=="rpca") {
     require(rrcov)
-    pc <- PcaHubert(d, k=k, scale=F, ...)
+    pc <- PcaHubert(oldCoords, k=k, scale=F, ...)
     print(summary(pc))
     s <- cumsum(pc@eigenvalues / sum(pc@eigenvalues))
     print(ggplot(data.table(PC=1:pc@k,CummulativeVariance=s), aes(PC,CummulativeVariance)) + geom_bar(stat="identity"))
-    d <- pc@scores
+    newCoords <- pc@scores
   } else if(method[1]=="mds") {
     require(smacof)
-    dists <- Dist(d, nbproc=detectCores())
+    dists <- Dist(oldCoords, nbproc=detectCores())
     md <- mds(dists, ndim=k, verbose=T, ...)
-    d <- md$conf
+    newCoords <- md$conf
   } else {
     stop("unknown method:", method[1])
   }
   if(normalise) {
-    d <- scaleData(d)
+    newCoords <- scaleData(newCoords)
   }
-  d <- as.data.table(d)
-  colnames(d) <- paste0("V",1:ncol(d))
-  return(cbind(data,d))
+  newCoords <- as.data.table(newCoords)
+  colnames(newCoords) <- paste0("V",1:k)
+  
+  return(merge(data, cbind(oldCoords,newCoords), by=vars))
 }
 
 # to [0,1]
@@ -675,7 +677,7 @@ frameAnalysis <- function(frame, formula, summary=T, ttests=T, data=F, ...) {
 }
 
 # ... : parameters to be passed to wilcox.test
-batch.ttest <- function(setlist, adjust.method="holm", ...) {
+batch.ttest <- function(setlist, adjust.method="holm", paired=F, ...) {
   for(n in names(setlist)) { # remove vectors with less than 3 elements
     setlist[[n]] <- if(length(setlist[[n]]) < 3) NULL else as.numeric(setlist[[n]])
   }
@@ -694,7 +696,7 @@ batch.ttest <- function(setlist, adjust.method="holm", ...) {
   for(i in 1:length(setlist)) {
     for(j in 1:length(setlist)) {
       if(i < j) {
-        matrix[i,j] <- wilcox.test(as.numeric(setlist[[i]]), as.numeric(setlist[[j]]), ...)$p.value
+        matrix[i,j] <- wilcox.test(as.numeric(setlist[[i]]), as.numeric(setlist[[j]]), paired=paired, ...)$p.value
         matrix[j,i] <- matrix[i,j]
         pvalues <- c(pvalues, matrix[i,j])
       }
@@ -715,8 +717,12 @@ batch.ttest <- function(setlist, adjust.method="holm", ...) {
   }
   
   # Kruskal-Wallis test
-  kruskal <- kruskal.test(setlist)
-  
-  return(list(kruskal=kruskal, uncorrected=matrix, holm=adj.matrix))
+  if(paired) {
+    fried <- friedman.test(t(as.data.frame(do.call(rbind, setlist))))
+    return(list(friedman=fried, uncorrected=matrix, holm=adj.matrix))
+  } else {
+    kruskal <- kruskal.test(setlist)
+    return(list(kruskal=kruskal, uncorrected=matrix, holm=adj.matrix))
+  }
 }
 

@@ -14,7 +14,8 @@ processRepo <- function(setup, jobs=0:4, nvars=7, red=NULL, k=3, bc="sdbc", srcd
 }
 
 setwd("~/exps/playground/rep10")
-processRepo("nsfew", jobs=4)
+processRepo("nsneat", jobs=9)
+processRepo("rand", jobs=0:9)
 
 shrinkRepo <- function(setup, jobs=0:4, nvars=7, size=NULL, bc="sdbc", srcdir="/home/jorge/Dropbox/mase/src/mase/app/playground/rep/", builddir="/home/jorge/Dropbox/mase/build/classes/mase/app/playground/rep/") {
   for(j in jobs) {
@@ -32,17 +33,17 @@ shrinkRepo <- function(setup, jobs=0:4, nvars=7, size=NULL, bc="sdbc", srcdir="/
   }
 }
 
-shrinkRepo("ns", jobs=3, size=50)
-shrinkRepo("ns", jobs=3, size=100)
-shrinkRepo("ns", jobs=3, size=500)
-shrinkRepo("ns", jobs=3, size=1000)
-shrinkRepo("ns", jobs=3, size=2500)
+shrinkRepo("nsneat", jobs=0, size=50)
+shrinkRepo("nsneat", jobs=0, size=100)
+shrinkRepo("nsneat", jobs=0, size=500)
+shrinkRepo("nsneat", jobs=0, size=1000)
+shrinkRepo("nsneat", jobs=0, size=2500)
 
-processRepo("ns", jobs=3, red="mds", k=1)
-processRepo("ns", jobs=3, red="mds", k=2)
-processRepo("ns", jobs=3, red="mds", k=3)
-processRepo("ns", jobs=3, red="mds", k=4)
-processRepo("ns", jobs=3, red="mds", k=5)
+processRepo("nsneat", jobs=0, red="mds", k=1)
+processRepo("nsneat", jobs=0, red="mds", k=2)
+processRepo("nsneat", jobs=0, red="mds", k=3)
+processRepo("nsneat", jobs=0, red="mds", k=4)
+processRepo("nsneat", jobs=0, red="mds", k=5)
 
 
 
@@ -60,18 +61,14 @@ qdscore <- function(data, vars, d=0.5) {
 
 setwd("~/exps/playground")
 
-fit <- loadData("tasks10/*", "postfitness.stat", fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction","Arbitrator"))
+fit <- loadData("tasks10/*", "postfitness.stat", fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
 #fit[, Reference := mean(.SD[is.na(Repo) & Generation==max(Generation)]$BestSoFar), by=.(Task)]
 #fit[, RelativeFitness := ((BestSoFar-Reference) / Reference) * 100]
 fit[, ScaledFitness := (BestSoFar - min(BestSoFar)) / (max(BestSoFar)-min(BestSoFar)) , by=.(Task)]
 fit[, Task := factor(Task, levels=c("freeforaging","obsforaging","dynforaging","simplephototaxis","phototaxis","exploration","maze","avoidance","predator","dynphototaxis"), labels=c("Foraging","Foraging-O","Foraging-D","Phototaxis","Phototaxis-O","Exploration","Maze","Avoidance","Prey","Tracking"))]
 fit <- fit[Task != "Foraging-D"]
 fit[Reduction=="direct", Reduction := NA]
-fit[BC %in% c("neat","gax"), Repo := BC]
-fit[BC %in% c("neat","gax"), BC := NA]
-fit[, Arbitrator := factor(Arbitrator, labels=c("SLP","MLP-5","MLP-10"))]
-fit[is.na(Arbitrator), Arbitrator := "NEAT"]
-fit[, Conf := paste(BC,Repo,Reduction,Arbitrator, sep="-")]
+fit[, Conf := paste(BC,Repo,Reduction, sep="-")]
 
 vars <- paste0("Behav_", 0:6)
 options(scipen = 99)
@@ -88,6 +85,11 @@ rep <- reduceData(rep, vars=vars, method="Rtsne", k=2)
 save(rep, file="reducedrep.rdata")
 
 
+red <- reduceData(rep[Repo%in%c("nsneat","rand")], vars=vars, method="rpca")
+plotReduced2D(red) + facet_grid(Repo ~ Job)
+
+
+
 # Correlation of tasks ###############
 
 means <- fit[, .(MeanHighest=mean(ScaledFitness)), by=.(Conf,RepoJob,Task)]
@@ -101,15 +103,16 @@ co[co > 0.8]
 
 # Base comparison ##################
 
-subfit <- fit[Repo %in% c("ns","rand","neat","gax") & is.na(Reduction)]
-subfit[, Repo := factor(Repo, levels=c("ns","rand","neat","gax"), labels=c("EvoRBC","EvoRBC(R)","TR-NEAT","TR-MLP"))]
+subfit <- fit[Repo %in% c("nsneat","rand",NA) & is.na(Reduction)]
+subfit[, Repo := factor(Repo, levels=c("nsneat","rand"), labels=c("EvoRBC","EvoRBC(R)"))]
+subfit[is.na(Repo), Repo := "TR"]
 
 sum <- lastGen(subfit)[, .(Fitness=mean(ScaledFitness), SE=se(ScaledFitness)), by=.(Task, Repo)]
 sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=se(Fitness)), by=.(Repo)])
 
 ggplot(sum, aes(Task, Fitness,fill=Repo)) + geom_bar(stat="identity", position="dodge") + 
   geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.25, position=position_dodge(.9)) +
-  scale_y_continuous(limits=c(0.65,1),oob=rescale_none) + labs(y="Scaled fitness",fill="Method")
+  scale_y_continuous(limits=c(0.4,1),oob=rescale_none) + labs(y="Scaled fitness",fill="Method")
 
 ggplot(lastGen(subfit), aes(Task,ScaledFitness,colour=Repo)) + geom_boxplot(outlier.size=1) + 
   geom_vline(xintercept=seq(1.5,9.5,by=1), size=.25) + coord_flip()
@@ -126,7 +129,7 @@ ggplot(genmean, aes(Generation, Fitness, group=Repo)) + geom_ribbon(aes(ymin=Fit
 
 # Repo variability (base) ################
 
-bred <- reduceData(unique(rep[Repo=="ns"],by=vars), vars=vars, method="Rtsne")
+bred <- reduceData(unique(rep[Repo=="nsneat"],by=vars), vars=vars, method="Rtsne")
 ggplot(bred, aes(x=V1, y=V2)) + geom_point(shape=16, size=1.5, alpha=.2) + facet_wrap(~ Job) +
   coord_fixed() + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL) +
   ggtitle("Behaviour space coverage (t-SNE)")
@@ -154,7 +157,7 @@ ggplot(bred, aes(x=V1, y=V2, colour=factor(Ubiquity))) + geom_point(shape=16, si
   ggtitle("Behaviour space coverage (t-SNE)") + scale_color_brewer(palette="Spectral")
 
 
-subfit <- fit[Repo=="ns" & is.na(Reduction) & Arbitrator=="NEAT"]
+subfit <- fit[Repo=="nsneat" & is.na(Reduction)]
 
 ggplot(lastGen(subfit), aes(Task,ScaledFitness,colour=RepoJob)) + geom_boxplot(outlier.size=1) + 
   geom_vline(xintercept=seq(1.5,9.5,by=1), size=.25) + coord_flip() +

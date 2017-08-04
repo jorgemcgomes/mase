@@ -40,7 +40,10 @@ public class ExpandedFitness extends SimpleFitness {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        this.fitnessIndex = state.parameters.getIntWithDefault(base.push(P_FITNESS_EVAL_INDEX), defaultBase().push(P_FITNESS_EVAL_INDEX), 0);
+        this.fitnessIndex = state.parameters.getIntWithDefault(base.push(P_FITNESS_EVAL_INDEX), defaultBase().push(P_FITNESS_EVAL_INDEX), -1);
+        if(fitnessIndex < 0) {
+            state.output.warning("Fitness index not defined or invalid: going with fixed fitness score", base.push(P_FITNESS_EVAL_INDEX), defaultBase().push(P_FITNESS_EVAL_INDEX));
+        }
     }
 
     public EvaluationResult[] getEvaluationResults() {
@@ -99,6 +102,9 @@ public class ExpandedFitness extends SimpleFitness {
     }
 
     private double getFitnessScoreAux() {
+        if(fitnessIndex < 0) {
+            return 0;
+        }
         EvaluationResult er = getCorrespondingEvaluation(fitnessIndex);
         return (double) er.value();
     }

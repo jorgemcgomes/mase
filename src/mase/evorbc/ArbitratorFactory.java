@@ -15,6 +15,7 @@ import mase.controllers.AgentControllerIndividual;
 import mase.controllers.ControllerFactory;
 import mase.controllers.GroupController;
 import mase.controllers.HomogeneousGroupController;
+import mase.controllers.NeuralControllerIndividual;
 import mase.neat.NEATSubpop;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -67,6 +68,10 @@ public class ArbitratorFactory implements ControllerFactory {
         Parameter pOut = new Parameter(NEATSubpop.P_NEAT_BASE).push("OUTPUT.NODES");
         state.output.message("Forcing " + pOut + " to: " + outputs);        
         state.parameters.set(pOut, outputs + "");
+
+        Parameter nOut = new Parameter(NeuralControllerIndividual.DEFAULT_BASE).push("output");
+        state.parameters.set(nOut, outputs + "");
+        state.output.message("Forcing " + nOut + " to: " + outputs);        
         
         mapFun = new CartesianMappingFunction(repo.coordinateBounds());
     }

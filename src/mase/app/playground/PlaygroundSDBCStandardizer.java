@@ -5,42 +5,47 @@
  */
 package mase.app.playground;
 
-import ec.EvolutionState;
-import ec.Statistics;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Scanner;
 import mase.controllers.HomogeneousGroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.mason.MasonSimulationProblem;
+import mase.stat.ReevaluationTools;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  *
  * @author jorge
  */
-public class PlaygroundSDBCStandardizer extends Statistics {
+public class PlaygroundSDBCStandardizer {
     
-    private static final long serialVersionUID = 1L;
+    public static final File STORE_FILE = new File("src/mase/app/playground/sdbcstandardization.txt");
     
-    @Override
-    public void preInitializationStatistics(EvolutionState state) {
-        super.preInitializationStatistics(state);
-        
-        MasonSimulationProblem prob = (MasonSimulationProblem) state.evaluator.p_problem;
-        PlaygroundSDBCRaw fun = null;
-        for (EvaluationFunction ef : prob.getEvalFunctions()) {
-            if (ef instanceof PlaygroundSDBCRaw) {
-                fun = (PlaygroundSDBCRaw) ef;
+    public static void main(String[] args) throws IOException {
+        MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args);
+        PlaygroundSDBC fun = null;
+        for (EvaluationFunction ef : sim.getEvalFunctions()) {
+            if (ef instanceof PlaygroundSDBC) {
+                fun = (PlaygroundSDBC) ef;
                 break;
             }
         }
         
         if(fun == null) {
-            state.output.warning("PlaygroundSDBCRaw evaluation function not found. Standardizer not run.");
+            System.err.println("PlaygroundSDBCRaw evaluation function not found. Standardizer not run.");
             return;
         }
         
         DescriptiveStatistics[] ds = null;
         for (int i = 0; i < 1000; i++) {
-            Playground pl = (Playground) prob.getSimState(new HomogeneousGroupController(null), i);
+            Playground pl = (Playground) sim.getSimState(new HomogeneousGroupController(null), i);
             pl.par.randomPosition = true;
             pl.start();
             double[] s = fun.state(pl);
@@ -57,17 +62,38 @@ public class PlaygroundSDBCStandardizer extends Statistics {
             }            
         }
         
-        double[] means = new double[ds.length];
-        double[] sds = new double[ds.length];
-        for(int i = 0 ; i < ds.length ; i++) {
-            means[i] = ds[i].getMean();
-            sds[i] = ds[i].getStandardDeviation();
-            state.output.message("Feature " + i + ": Mean: " + ds[i].getMean() + " SD: " + ds[i].getStandardDeviation() + " Min: " + ds[i].getMin() + " Max: " + ds[i].getMax());
+        FileWriter fw = new FileWriter(STORE_FILE);
+        
+        for(int i = 0 ; i < ds.length - 2 ; i++) { // the last two are the linear and turning speed
+            System.out.println("Feature " + i + ": Mean: " + ds[i].getMean() + " SD: " + ds[i].getStandardDeviation() + " Min: " + ds[i].getMin() + " Max: " + ds[i].getMax());
+            fw.write(i + " " + ds[i].getMean() + " " +  ds[i].getStandardDeviation() + "\n");
+        }        
+        
+        Playground pl = (Playground) sim.getSimState(new HomogeneousGroupController(null), 0);  
+        if(pl.par.backMove) {
+            fw.write(ds.length - 2 + " " + 0.0 + " " + pl.par.linearSpeed + "\n");
+        } else {
+            fw.write(ds.length - 2 + " " + pl.par.linearSpeed / 2 + " " + (pl.par.linearSpeed / 2) + "\n");
         }
-        
-        fun.setStandardizationScores(means, sds);
-        
+        fw.write(ds.length - 1 + " " + 0.0 + " " + pl.par.turnSpeed);
+
+        fw.close();
     }
-                 //double v = (vbr.getOriginalResult()[i] - means[i]) / sds[i];
-                //vbr.getBehaviour()[i] = (float) Math.max(-BOUND, Math.min(BOUND, v));   
+    
+    public static Pair<double[], double[]> readStandardization(File f) throws FileNotFoundException {
+        ArrayList<Double> means = new ArrayList<>();
+        ArrayList<Double> sds = new ArrayList<>();
+        Scanner sc = new Scanner(f);
+        sc.useLocale(Locale.ENGLISH);
+        while(sc.hasNext()) {
+            int idx = sc.nextInt();
+            double mean = sc.nextDouble();
+            double sd = sc.nextDouble();
+            means.add(mean);
+            sds.add(sd);
+        }
+        Double[] ma = means.toArray(new Double[means.size()]);
+        Double[] sa = sds.toArray(new Double[sds.size()]);
+        return Pair.of(ArrayUtils.toPrimitive(ma), ArrayUtils.toPrimitive(sa));
+    }
 }

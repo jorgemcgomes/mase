@@ -34,7 +34,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MaseManager {
 
-    public static final String ALLOWED_NAMES_PATTERN = "[^\\\\/:\\*\\?\"<>\\|\\s_]{1,15}";
+    public static final String ALLOWED_NAMES_PATTERN = "[^\\\\/:\\*\\?\"<>\\|\\s_]{1,20}";
     protected List<Job> waitingList = Collections.synchronizedList(new ArrayList<Job>());
     protected List<Job> completed = Collections.synchronizedList(new ArrayList<Job>());
     protected List<Job> failed = Collections.synchronizedList(new ArrayList<Job>());
