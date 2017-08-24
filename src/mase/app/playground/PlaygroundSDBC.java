@@ -8,6 +8,7 @@ package mase.app.playground;
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import mase.evaluation.VectorBehaviourResult;
 import mase.evaluation.VectorBehaviourResult.LocationEstimator;
@@ -71,6 +72,8 @@ public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
     // agent-to-walls distance ; agent-to-obstacles mean distance; agent-to-closest-obstacle distance; agent-to-objects mean distance; agent-to-closest-object mean distance; agent linear speed; agent turn speed 
     protected double[] state(Playground pl) {
         double[] res = new double[7];
+        Arrays.fill(res, Double.NaN);
+        
         res[0] = pl.agent.distanceTo(pl.walls);
         
         if(!pl.obstacles.isEmpty()) {
@@ -107,18 +110,24 @@ public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
-        double[] mean = new double[states.get(0).length];
+        double[] sum = new double[states.get(0).length];
+        int[] count = new int[sum.length];
         for(double[] state : states) {
             for(int i = 0 ; i < state.length ; i++) {
-                mean[i] += state[i] / states.size();
+                if(!Double.isNaN(state[i])) {
+                    sum[i] += state[i];
+                    count[i]++;
+                }
+                
             }
         }
         
+        double[] mean = new double[sum.length];
         for(int i = 0 ; i < mean.length; i++) {
-            if(sSDs[i] == 0) { // division by zero not cool
+            if(sSDs[i] == 0 || count[i] == 0) { // division by zero not cool
                 mean[i] = 0;
             } else {
-                mean[i] = Math.max(-BOUND, Math.min(BOUND, (mean[i] - sMeans[i]) / sSDs[i]));
+                mean[i] = Math.max(-BOUND, Math.min(BOUND, ((sum[i] / count[i]) - sMeans[i]) / sSDs[i]));
             }
         }
         

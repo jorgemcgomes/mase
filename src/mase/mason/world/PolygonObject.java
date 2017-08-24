@@ -28,9 +28,7 @@ public class PolygonObject extends MultilineObject {
     public PolygonObject(Continuous2D field, Multiline poly) {
         super(field, checkClosed(poly));
     }
-    
-    // TODO: constructor with polygon -- must check that it is a closed polygon
-    
+        
     private static Double2D[] closeLoop(Double2D[] points) {
         if(points.length < 3) {
             throw new RuntimeException("Not enough points for a closed polygon: " + points.length);

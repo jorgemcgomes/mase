@@ -5,6 +5,13 @@
  */
 package mase.mason;
 
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import mase.stat.PersistentSolution;
+
 /**
  *
  * @author jorge
@@ -56,7 +63,12 @@ public class SolutionsList extends javax.swing.JFrame {
         table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tableScroll.setViewportView(table);
 
-        launchButton.setText("Change controller");
+        launchButton.setText("Select controller");
+        launchButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                launchButtonActionPerformed(evt);
+            }
+        });
 
         text.setColumns(20);
         text.setRows(5);
@@ -93,6 +105,20 @@ public class SolutionsList extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void launchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_launchButtonActionPerformed
+        int r = table.getSelectedRow();
+        if (r != -1) {
+            r = table.convertRowIndexToModel(r);
+            PersistentSolution sol = solutions.get(r);
+            status.setText(sol.getGeneration() + " / " + sol.getSubpop() + " / " + sol.getIndex());
+            if (handler == null) {
+                System.err.println("No SolutionSelectionHandler specified!");
+            } else {
+                handler.solutionSelected(sol);
+            }
+        }
+    }//GEN-LAST:event_launchButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -126,6 +152,44 @@ public class SolutionsList extends javax.swing.JFrame {
                 new SolutionsList().setVisible(true);
             }
         });
+    }
+
+    public static interface SolutionSelectionHandler {
+
+        public void solutionSelected(PersistentSolution sol);
+
+    }
+
+    private List<PersistentSolution> solutions;
+    private SolutionSelectionHandler handler;
+
+    public void populateTable(final List<PersistentSolution> solutions) {
+        this.solutions = solutions;
+        DefaultTableModel mod = (DefaultTableModel) table.getModel();
+        for (PersistentSolution s : solutions) {
+            Object ud = s.getUserData();
+            String udStr = ud == null ? "NA" : (ud instanceof double[] ? Arrays.toString((double[]) ud) : ud.toString());
+            mod.addRow(new Object[]{s.getGeneration(), s.getSubpop(), s.getIndex(), s.getFitness(), udStr});
+        }
+
+        // Update text pane on row selection
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int r = table.getSelectedRow();
+                if (r != -1) {
+                    r = table.convertRowIndexToModel(r);
+                    PersistentSolution sol = solutions.get(r);
+                    text.setText(sol.toString());
+                } else {
+                    text.setText("");
+                }
+            }
+        });
+    }
+
+    public void setHandler(SolutionSelectionHandler handler) {
+        this.handler = handler;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

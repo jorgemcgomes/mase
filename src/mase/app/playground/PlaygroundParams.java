@@ -38,5 +38,6 @@ public class PlaygroundParams implements Serializable {
     int numCones;
     double coneRange;
     double whiskerRange;
+    boolean differentialDrive;
     
 }

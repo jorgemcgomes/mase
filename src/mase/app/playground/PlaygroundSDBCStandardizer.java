@@ -26,7 +26,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class PlaygroundSDBCStandardizer {
     
-    public static final File STORE_FILE = new File("src/mase/app/playground/sdbcstandardization.txt");
+    public static final File STORE_FILE = new File("build/classes/mase/app/playground/sdbcstandardization.txt");
     
     public static void main(String[] args) throws IOException {
         MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args);

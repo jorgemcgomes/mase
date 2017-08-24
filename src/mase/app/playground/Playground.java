@@ -35,9 +35,13 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
     protected SmartAgent agent;
     protected List<MultilineObject> obstacles;
     protected List<CircularObject> objects;
+    protected AgentController ac;
 
     public Playground(GroupController gc, long seed, PlaygroundParams par) {
         super(gc, seed, par);
+        if(gc != null) {
+            this.ac = gc.getAgentControllers(1)[0];
+        }
     }
 
     @Override
@@ -57,7 +61,11 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
         placeObstacles();
 
         placeObjects();
-
+        
+        agent.setLabel("");
+        for(CircularObject o : objects) {
+            o.setLabel("");
+        }
     }
 
     protected void placeWalls() {
@@ -171,7 +179,7 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
     }
 
     protected SmartAgent createAgent() {
-        AgentController ac = gc.getAgentControllers(1)[0];
+        ac.reset();
         return new PlaygroundAgent(this, ac);
     }
 
@@ -185,4 +193,12 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
         return Collections.singletonList(agent);
     }
 
+    @Override
+    public void setGroupController(GroupController gc) {
+        super.setGroupController(gc);
+        this.ac = gc.getAgentControllers(1)[0];
+    }
+
+    
+    
 }

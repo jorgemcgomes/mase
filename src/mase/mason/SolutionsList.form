@@ -117,8 +117,11 @@
     </Container>
     <Component class="javax.swing.JButton" name="launchButton">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Change controller"/>
+        <Property name="text" type="java.lang.String" value="Select controller"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="launchButtonActionPerformed"/>
+      </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
       </AuxValues>

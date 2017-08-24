@@ -18,8 +18,9 @@ library(pdist)
 library(RColorBrewer)
 library(formula.tools)
 library(arules)
-library(amap)
 library(cluster)
+library(amap)
+library(parallelDist)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
@@ -356,7 +357,8 @@ meanDist <- function(data) {
     d <- pdist(data, indices.A=index, indices.B=((index+1):nrow(data)))
     return(sum(attr(d, "dist")))
   }
-  dists <- sapply(1:(nrow(data)-1), aux)
+  clusterEvalQ(NULL, library(pdist))
+  dists <- parSapply(cl, 1:(nrow(data)-1), aux)
   return(sum(dists) / (nrow(data) * nrow(data) / 2))
 }
 
@@ -371,6 +373,14 @@ meanDistSets <- function(data1, data2) {
   }
   return(mean(dist,na.rm=T))
 }
+
+averageLinkageDistance <- function(data1, data2) {
+  m1 <- as.matrix(data1)
+  m2 <- as.matrix(data2)
+  d <- parApply(NULL, data1, MARGIN=1, function(x){require(pdist);mean(pdist(x, m2))})
+  return(mean(d))
+}
+
 
 # calculate behavioural diversity per-run, based on vars
 # if subpops==T, diversity is calculated within each subpop
@@ -543,12 +553,12 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
   newCoords <- NULL
   if(method[1]=="sammon") {
     require(MASS)
-    dists <- Dist(oldCoords, nbproc=detectCores())
+    dists <- parDist(oldCoords)
     sam <- sammon(dists, k=k, ...)
     newCoords <- sam$points
   } else if(method[1]=="tsne") {
     require(tsne)
-    dists <- Dist(oldCoords, nbproc=detectCores())
+    dists <- parDist(oldCoords)
     newCoords <- tsne(dists, k=k, ...)
   } else if(method[1]=="Rtsne") {
     if(k==2 & require(Rtsne.multicore)) {
@@ -562,7 +572,7 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
       newCoords <- ts$Y      
     }
   } else if(method[1]=="pca") {
-    pc <- prcomp(oldCoords, center=T, scale.=T, rank.=k)
+    pc <- prcomp(oldCoords, center=T, scale.=F, rank.=k)
     newCoords <- pc$x
   } else if(method[1]=="rpca") {
     require(rrcov)
@@ -573,7 +583,7 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
     newCoords <- pc@scores
   } else if(method[1]=="mds") {
     require(smacof)
-    dists <- Dist(oldCoords, nbproc=detectCores())
+    dists <- parDist(oldCoords)
     md <- mds(dists, ndim=k, verbose=T, ...)
     newCoords <- md$conf
   } else {
@@ -597,7 +607,7 @@ scaleData <- function(d) {
 # reduced: frame with the reduction done (sammonReduce)
 # color.var: optional. numeric variable to be used to color the dots
 plotReduced2D <- function(reduced, color.var=NULL) {
-  g <- ggplot(reduced, aes(x=V1, y=V2)) + geom_point(aes_string(colour=color.var), shape=4, size=1.5) + 
+  g <- ggplot(reduced, aes(x=V1, y=V2)) + geom_point(aes_string(colour=color.var), shape=20, size=.5) + 
     coord_fixed() + theme(legend.position="right", axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL)
   return(g)
 }

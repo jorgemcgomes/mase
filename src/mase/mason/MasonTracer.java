@@ -15,11 +15,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import mase.controllers.GroupController;
+import mase.mason.SolutionsList.SolutionSelectionHandler;
 import mase.mason.world.CircularObject;
+import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.MultilineObject;
 import mase.mason.world.PointObject;
+import mase.stat.PersistentSolution;
 import mase.stat.ReevaluationTools;
+import mase.stat.SolutionPersistence;
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
 import sim.field.continuous.Continuous2D;
@@ -37,6 +42,7 @@ public class MasonTracer {
     public static final String OUT = "-o";
     public static final String SEED = "-seed";
     public static final String BG_COLOR = "-bgcolor";
+    public static final String INDEX = "-index";
 
     public static void main(String[] args) throws Exception {
         int size = 0;
@@ -44,6 +50,7 @@ public class MasonTracer {
         int index;
         long seed = new Random().nextLong();
         Color bgColor = null;
+        List<Integer> indexes = new ArrayList<>();
 
         for (index = 0; index < args.length; index++) {
             if (args[index].equals(SIZE)) {
@@ -54,24 +61,95 @@ public class MasonTracer {
                 seed = Long.parseLong(args[1 + index++]);
             } else if (args[index].equals(BG_COLOR)) {
                 bgColor = ParamUtils.parseColor(args[1 + index++]);
+            } else if (args[index].equals(INDEX)) {
+                for (int k = index + 1; k < args.length; k++) {
+                    if (StringUtils.isNumeric(args[k])) {
+                        indexes.add(Integer.valueOf(args[k]));
+                        index++;
+                    } else {
+                        break;
+                    }
+                }
 
             }
         }
 
         File gc = ReevaluationTools.findControllerFile(args);
-        if (out == null && gc != null) {
-            out = new File(gc.getParentFile(), gc.getName() + ".svg");
+        if (gc == null) {
+            System.err.println("Controller(s) not found! Use -gc");
+            System.exit(1);
         }
 
-        GroupController controller = ReevaluationTools.createController(args);
-        MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, gc.getParentFile());
-        MasonSimState simState = sim.getSimState(controller, seed);
-
-        MasonTracer tracer = new MasonTracer(size);
+        final MasonTracer tracer = new MasonTracer(size);
         if (bgColor != null) {
             tracer.canvasColor = bgColor;
         }
-        tracer.trace(simState, out);
+        final MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, gc.getParentFile());
+
+        if (gc.getName().endsWith(".tar.gz")) {
+            // Collection of controllers
+            if (out == null) {
+                out = gc.getParentFile();
+            }
+            if (!out.isDirectory()) {
+                System.err.println("Provided output is not a directory: " + out.getAbsolutePath());
+                System.exit(1);
+            }
+            final File outDir = out;
+            final long fSeed = seed;
+
+            SolutionsList frame = new SolutionsList();
+            List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(gc);
+            frame.populateTable(sols);
+            frame.setHandler(new SolutionSelectionHandler() {
+                @Override
+                public void solutionSelected(PersistentSolution sol) {
+                    File o = new File(outDir, SolutionPersistence.autoFileName(sol) + ".svg");
+                    MasonSimState simState = sim.getSimState(sol.getController(), fSeed);
+                    try {
+                        tracer.trace(simState, o);
+                    } catch (Exception ex) {
+                        System.err.println("Error tracing " + SolutionPersistence.autoFileName(sol));
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            frame.setVisible(true);
+
+            if (!indexes.isEmpty()) {
+                for (PersistentSolution s : sols) {
+                    if (indexes.contains(s.getIndex())) {
+                        File o = new File(outDir, SolutionPersistence.autoFileName(s) + ".svg");
+                        MasonSimState simState = sim.getSimState(s.getController(), fSeed);
+                        try {
+                            tracer.trace(simState, o);
+                        } catch (Exception ex) {
+                            System.err.println("Error tracing " + SolutionPersistence.autoFileName(s));
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            }
+        } else {
+            // One controller
+            if (out == null) {
+                out = new File(gc.getParentFile(), gc.getName() + ".svg");
+            }
+            GroupController controller = ReevaluationTools.createController(args);
+            MasonSimState simState = sim.getSimState(controller, seed);
+            tracer.trace(simState, out);
+        }
+
+    }
+
+    private static class TracerHandler implements SolutionSelectionHandler {
+
+        @Override
+        public void solutionSelected(PersistentSolution sol) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
     }
 
     private final int size;
@@ -108,6 +186,7 @@ public class MasonTracer {
         }
 
         // draw other objects
+        // TODO: assumes that only CircularObjects can move -- not true anymore
         Bag allObjects = field.getAllObjects();
         ArrayList<CircularObject> tracked = new ArrayList<>();
         for (Object o : allObjects) {
@@ -200,6 +279,18 @@ public class MasonTracer {
                 int s = (int) Math.round(ag.getRadius() * 2 * scale);
                 gr.setPaint(ag.paint);
                 gr.fillOval(x, y, s, s);
+
+                // draw orientation
+                if (ag instanceof EmboddiedAgent) {
+                    EmboddiedAgent ea = (EmboddiedAgent) ag;
+                    double ori = ea.orientation2D();
+                    gr.setPaint(ea.paint.equals(Color.WHITE) ? Color.BLACK : Color.WHITE);
+                    int cx = (int) Math.round(ag.getLocation().x * scale);
+                    int cy = (int) Math.round(ag.getLocation().y * scale);
+                    int ox = (int) Math.round(Math.cos(ori) * ag.getRadius() * scale);
+                    int oy = (int) Math.round(Math.sin(ori) * ag.getRadius() * scale);
+                    gr.drawLine(cx, cy, cx - ox, cy - oy);
+                }
             }
         }
 

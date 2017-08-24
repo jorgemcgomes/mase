@@ -25,6 +25,7 @@ problem.turnAcc = 0.04
 problem.numCones = 4
 problem.coneRange = 100
 problem.whiskerRange = 25
+problem.differentialDrive = false
 
 # used for the arbitrator
 neat.INPUT.NODES = 7

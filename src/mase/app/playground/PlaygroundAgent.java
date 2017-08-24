@@ -9,6 +9,7 @@ import java.awt.Color;
 import mase.controllers.AgentController;
 import mase.mason.world.CircularObject;
 import mase.mason.world.DashMovementEffector;
+import mase.mason.world.DifferentialDriveEffector;
 import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.MultilineObject;
 import mase.mason.world.RaySensor;
@@ -28,6 +29,7 @@ public class PlaygroundAgent extends SmartAgent {
         
         this.circledPortrayal.setOnlyCircleWhenSelected(false);
         this.circledPortrayal.setCircleShowing(true);
+        //this.circledPortrayal.paint = Color.BLUE;
         this.circledPortrayal.scale = sim.par.coneRange * 2;     
         
         // Obstacle whisker sensor
@@ -47,11 +49,20 @@ public class PlaygroundAgent extends SmartAgent {
         this.addSensor(dsr);
 
         // Effector
-        DashMovementEffector dm = new DashMovementEffector(sim, field, this);
-        dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
-        dm.setAccelerations(sim.par.linearAcc, sim.par.turnAcc);
-        dm.allowBackwardMove(sim.par.backMove);
-        this.addEffector(dm);        
+        if(sim.par.differentialDrive) {
+            DifferentialDriveEffector dd = new DifferentialDriveEffector(sim, field, this);
+            dd.setSpeeds(sim.par.linearSpeed, sim.par.linearSpeed);
+            dd.setAccelerations(sim.par.linearAcc, sim.par.linearAcc);
+            dd.allowBackwardMove(sim.par.backMove);
+            this.addEffector(dd);                
+        } else {
+            DashMovementEffector dm = new DashMovementEffector(sim, field, this);
+            dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
+            dm.setAccelerations(sim.par.linearAcc, sim.par.turnAcc);
+            dm.allowBackwardMove(sim.par.backMove);
+            this.addEffector(dm);                 
+        }
+   
 
         this.enableBoundedArena(true);
         this.enableCollisionRebound(false);

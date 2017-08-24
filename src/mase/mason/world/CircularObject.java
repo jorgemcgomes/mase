@@ -84,6 +84,7 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
     }
 
     public void setColor(Color c) {
+        this.paint = c;
         this.circledPortrayal.paint = c;
         this.labelPortrayal.paint = Color.BLACK;
         if(woChild instanceof OvalPortrayal2D) {
