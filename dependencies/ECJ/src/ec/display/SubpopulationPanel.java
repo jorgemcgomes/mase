@@ -103,14 +103,14 @@ public class SubpopulationPanel
                 {
                 size = console.parameters.getInt(new Parameter("pop.subpop."+subPopNum+".size"),null);
                 }
-            else if (console.parameters.exists(new Parameter("pop.default-subpop"), null));
+            else if (console.parameters.exists(new Parameter("pop.default-subpop"), null))
+                {
+                int defaultsub = console.parameters.getInt(new Parameter("pop.default-subpop"), null);
+                if (defaultsub >= 0)
                     {
-                    int defaultsub = console.parameters.getInt(new Parameter("pop.default-subpop"), null);
-                    if (defaultsub >= 0)
-                        {
-                        size = console.parameters.getInt(new Parameter("pop.subpop." + defaultsub + ".size"), null);
-                        }
+                    size = console.parameters.getInt(new Parameter("pop.subpop." + defaultsub + ".size"), null);
                     }
+                }
             DefaultListModel model = new DefaultListModel();
             for (int i = 0; i < size; ++i)
                 {
@@ -125,8 +125,8 @@ public class SubpopulationPanel
                         {
                         JList source = (JList)evt.getSource();
                         int idx = source.getSelectedIndex();
-                        inspectionTree.setModel(new ReflectedObject(console.state.population.subpops[subPopNum].individuals[idx]));
-                        portrayal.portrayIndividual(console.state,console.state.population.subpops[subPopNum].individuals[idx]);
+                        inspectionTree.setModel(new ReflectedObject(console.state.population.subpops.get(subPopNum).individuals.get(idx)));
+                        portrayal.portrayIndividual(console.state,console.state.population.subpops.get(subPopNum).individuals.get(idx));
                         }
                     }
                 });
@@ -139,8 +139,8 @@ public class SubpopulationPanel
         int idx = individualsList.getSelectedIndex();
         if (idx >= 0)
             {
-            inspectionTree.setModel(new ReflectedObject(console.state.population.subpops[subPopNum].individuals[idx]));
-            portrayal.portrayIndividual(console.state,console.state.population.subpops[subPopNum].individuals[idx]);
+            inspectionTree.setModel(new ReflectedObject(console.state.population.subpops.get(subPopNum).individuals.get(idx)));
+            portrayal.portrayIndividual(console.state,console.state.population.subpops.get(subPopNum).individuals.get(idx));
             }
         }
     /**

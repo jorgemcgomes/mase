@@ -63,14 +63,14 @@ public class Checkpoint
             s.writeObject(state);
             s.close();
             state.output.message("Wrote out checkpoint file " + 
-                state.checkpointPrefix + /*"." + 
-                state.generation +*/ ".gz");
+                state.checkpointPrefix + "." + 
+                state.generation + ".gz");
             }
         catch (IOException e)
             {
             state.output.warning("Unable to create the checkpoint file " + 
-                state.checkpointPrefix + /*"." +
-                state.generation +*/ ".gz" + 
+                state.checkpointPrefix + "." +
+                state.generation + ".gz" + 
                 "because of an IOException:\n--EXCEPTION--\n" +
                 e + 
                 "\n--EXCEPTION-END--\n");
