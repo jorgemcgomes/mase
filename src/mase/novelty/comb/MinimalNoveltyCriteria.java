@@ -43,7 +43,7 @@ public class MinimalNoveltyCriteria implements PostEvaluator {
                 avgNovelty += nf.getScore(noveltyScore);
                 maxFit = Math.max(maxFit, nf.getFitnessScore());
             }
-            avgNovelty /= sub.individuals.length;
+            avgNovelty /= sub.individuals.size();
 
             // assign final scores
             for (Individual ind : sub.individuals) {

@@ -80,7 +80,7 @@ public class HybridExchanger extends Exchanger {
     @Override
     public Population preBreedingExchangePopulation(EvolutionState state) {
         if (metaPops == null) {
-            popSize = state.population.subpops[0].individuals.length;
+            popSize = state.population.subpops.get(0).individuals.size();
             metaPops = new ArrayList<MetaPopulation>();
             initProcess(state);
         }
@@ -99,10 +99,10 @@ public class HybridExchanger extends Exchanger {
     }
 
     protected void initProcess(EvolutionState state) {
-        for (int i = 0; i < state.population.subpops.length; i++) {
+        for (int i = 0; i < state.population.subpops.size(); i++) {
             MetaPopulation pi = new MetaPopulation();
             pi.agents.add(i);
-            pi.pop = state.population.subpops[i];
+            pi.pop = state.population.subpops.get(i);
             metaPops.add(pi);
         }
     }
@@ -128,7 +128,7 @@ public class HybridExchanger extends Exchanger {
             MetaPopulation mpNew = new MetaPopulation();
             mpNew.agents.add(ag);
             mpNew.pop = (Subpopulation) chosen.pop.emptyClone();
-            for (int k = 0; k < chosen.pop.individuals.length; k++) {
+            for (int k = 0; k < chosen.pop.individuals.size(); k++) {
                 mpNew.pop.individuals[k] = (Individual) chosen.pop.individuals[k].clone();
             }
             metaPops.add(mpNew);
@@ -210,15 +210,15 @@ public class HybridExchanger extends Exchanger {
         }
 
         // The number of individuals to pick from each pop
-        int from1 = mergeEqual ? mpNew.pop.individuals.length / 2 :
-                Math.round((float) mp1.agents.size() / (mp1.agents.size() + mp2.agents.size()) * mpNew.pop.individuals.length);
-        int from2 = mpNew.pop.individuals.length - from1;
+        int from1 = mergeEqual ? mpNew.pop.individuals.size() / 2 :
+                Math.round((float) mp1.agents.size() / (mp1.agents.size() + mp2.agents.size()) * mpNew.pop.individuals.size());
+        int from2 = mpNew.pop.individuals.size() - from1;
 
         if (mergeMode == MergeMode.pickone) {
             if (from1 >= from2) {
-                System.arraycopy(mp1.pop.individuals, 0, mpNew.pop.individuals, 0, mp1.pop.individuals.length);
+                System.arraycopy(mp1.pop.individuals, 0, mpNew.pop.individuals, 0, mp1.pop.individuals.size());
             } else {
-                System.arraycopy(mp2.pop.individuals, 0, mpNew.pop.individuals, 0, mp2.pop.individuals.length);
+                System.arraycopy(mp2.pop.individuals, 0, mpNew.pop.individuals, 0, mp2.pop.individuals.size());
             }
         } else if (mergeMode == MergeMode.elites) {
             int index = 0;
@@ -226,10 +226,10 @@ public class HybridExchanger extends Exchanger {
             Arrays.sort(mp2.pop.individuals, new FitnessComparator());
             // Pick the best
             for (int i = 0; i < from1; i++) {
-                mpNew.pop.individuals[index++] = (Individual) mp1.pop.individuals[i]/*.clone()*/;
+                mpNew.pop.individuals[index++] = (Individual) mp1.pop.individuals.get(i)/*.clone()*/;
             }
             for (int i = 0; i < from2; i++) {
-                mpNew.pop.individuals[index++] = (Individual) mp2.pop.individuals[i]/*.clone()*/;
+                mpNew.pop.individuals[index++] = (Individual) mp2.pop.individuals.get(i)/*.clone()*/;
             }
         } else if (mergeMode == MergeMode.probabilistic) {
             ArrayList<Individual> picked1 = probabilisticPick(mp1.pop.individuals, from1, state);
@@ -351,7 +351,7 @@ public class HybridExchanger extends Exchanger {
     public Population postBreedingExchangePopulation(EvolutionState state) {
         // Update pop after breeding
         for (int i = 0; i < metaPops.size(); i++) {
-            metaPops.get(i).pop = state.population.subpops[i];
+            metaPops.get(i).pop = state.population.subpops.get(i);
         }
 
         // Update age

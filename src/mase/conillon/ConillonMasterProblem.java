@@ -343,9 +343,9 @@ public class ConillonMasterProblem extends MasterProblem {
         client = new Client(getDesc(state), ClientPriority.VERY_HIGH, serverName, serverPort, serverName, codePort);
         MaseProblem prob = (MaseProblem) state.evaluator.p_problem;
         if(state.numEvaluations > 0) {
-            client.setTotalNumberOfTasks(((int) state.numEvaluations - prob.getTotalEvaluations()) / jobSize);
+            client.setTotalNumberOfTasks(((int) state.numEvaluations - state.evaluations) / jobSize);
         } else {
-            client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.length * state.population.subpops[0].individuals.length / jobSize);            
+            client.setTotalNumberOfTasks((state.numGenerations - state.generation) * state.population.subpops.size() * state.population.subpops.get(0).individuals.size() / jobSize);            
         }
         state.output.message("*** CONILLON CLIENT " + client.getMyID() + " INITIALIZED ***");
     }

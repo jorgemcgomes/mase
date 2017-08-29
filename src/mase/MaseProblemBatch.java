@@ -72,7 +72,6 @@ public abstract class MaseProblemBatch extends MaseProblem {
         List<GroupController> gcs = new ArrayList<>();
         List<Long> seeds = new ArrayList<>();
         for (Job e : queue) {
-            counter.increment(state);
             gcs.add(controllerFactory.createController(state, e.ind));
             seeds.add(nextSeed(state, threadnum));
         }

@@ -10,10 +10,11 @@ import ec.Statistics;
 import ec.util.Parameter;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -44,32 +45,28 @@ public class RunStatistics extends Statistics {
         state.output.println("# " + getComputerName(), log);
         state.output.println("# Generation " + state.generation + " " + new Date().toString(), log);
         
-        // Fetch config file
-        String[] args = state.runtimeArguments;
-        String f = null;
-        for(int i = 0 ; i < args.length ; i++) {
-            if(args[i].equalsIgnoreCase("-file")) {
-                f = args[i + 1];
-                break;
-            }
-        }
-        File file = f != null ? new File(f) : null;
-        // Write config file to log
-        if(file != null && file.exists()) {
-            try {
-                state.output.println("\n# " + file.getName(), log);
-                String content = FileUtils.readFileToString(file);
-                state.output.println(content+"\n", log);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
+        // Entire parameter tree
+        StringWriter sw = new StringWriter();
+        PrintWriter writer = new PrintWriter(sw);
+        writer.write("# Definitive parameter list\n");
+        state.parameters.list(writer, false);
+        writer.write("\n# Original parameter tree (shadowed included)\n");
+        state.parameters.list(writer, true);
+        state.output.println(sw.toString() + "\n", log);
     }
     
     @Override
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
         state.output.println("# Generation " + state.generation + " " + new Date().toString(), log);
+        
+        StringWriter sw = new StringWriter();
+        PrintWriter writer = new PrintWriter(sw);
+        sw.write("\n# Gotten parameters\n");
+        state.parameters.listGotten(writer);
+        sw.write("\n# Not-gotten parameaters\n");
+        state.parameters.listNotAccessed(writer);
+        state.output.println(sw.toString(), log);
     }
     
     public static String getComputerName() {

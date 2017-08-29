@@ -39,7 +39,7 @@ public class MultiPopStat extends Statistics {
         super.postPreBreedingExchangeStatistics(state);
         SelectionPoolBuilder spb = (SelectionPoolBuilder) state.exchanger;
         state.output.print(state.generation + "", log);
-        for(int i =  0 ; i < state.population.subpops.length ; i++) {
+        for(int i =  0 ; i < state.population.subpops.size() ; i++) {
             state.output.print(" " + spb.getPool(i).length + " " + 
                     spb.dispersion[i] + " " + spb.selfPicked[i], log);
         }

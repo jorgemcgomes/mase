@@ -16,7 +16,6 @@ import mase.controllers.GroupController;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
-import mase.neat.NEATAgentController;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import org.neat4j.neat.nn.core.Synapse;

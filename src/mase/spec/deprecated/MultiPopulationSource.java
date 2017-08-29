@@ -56,7 +56,7 @@ public class MultiPopulationSource extends BreedingSource {
         int best = tournament(pool, state, thread);
 
         // stat
-        if (best < state.population.subpops[subpopulation].individuals.length) {
+        if (best < state.population.subpops.get(subpopulation).individuals.size()) {
             spb.logPick(subpopulation);
         }
 

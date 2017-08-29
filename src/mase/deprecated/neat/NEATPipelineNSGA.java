@@ -31,14 +31,14 @@ public class NEATPipelineNSGA extends NEATPipeline {
     public int produce(int min, int max, int start, int subpopulation, Individual[] inds, EvolutionState state, int thread) {
         // save the original population sizes
         if (originalPopSizes == null) {
-            originalPopSizes = new int[state.population.subpops.length];
+            originalPopSizes = new int[state.population.subpops.size()];
             for (int i = 0; i < originalPopSizes.length; i++) {
-                originalPopSizes[i] = state.population.subpops[i].individuals.length;
+                originalPopSizes[i] = state.population.subpops.get(i).individuals.size();
             }
         }
 
         // Build archive P -- select the best half of each population
-        Individual[] subInds = state.population.subpops[subpopulation].individuals;
+        Individual[] subInds = state.population.subpops.get(subpopulation).individuals;
         if (state.generation > 0) {
             // Sort the population individuals in descending order
             Arrays.sort(subInds, new Comparator<Individual>() {
@@ -50,12 +50,12 @@ public class NEATPipelineNSGA extends NEATPipeline {
 
             });
             // Reduce the population to the best half
-            state.population.subpops[subpopulation].individuals = Arrays.copyOf(subInds, originalPopSizes[subpopulation]);
+            state.population.subpops.get(subpopulation).individuals = Arrays.copyOf(subInds, originalPopSizes[subpopulation]);
         }
         
         // Save this best half
         for (int j = 0; j < originalPopSizes[subpopulation]; j++) {
-            inds[j] = (Individual) state.population.subpops[subpopulation].individuals[j].clone();
+            inds[j] = (Individual) state.population.subpops.get(subpopulation).individuals.get(j).clone();
         }
         
         // Breed the populations (now composed only by the best half)

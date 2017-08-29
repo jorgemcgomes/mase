@@ -42,13 +42,13 @@ public class PMCNS implements PostEvaluator {
     public void processPopulation(EvolutionState state) {
         Population pop = state.population;
         if(aptCount == null) {
-            aptCount = new int[pop.subpops.length];
-            cutPoint = new double[pop.subpops.length];
+            aptCount = new int[pop.subpops.size()];
+            cutPoint = new double[pop.subpops.size()];
             Arrays.fill(cutPoint, 0);
         }
-        for (int i = 0 ; i < pop.subpops.length ; i++) {
-            Subpopulation sub = pop.subpops[i];
-            DescriptiveStatistics ds = new DescriptiveStatistics(sub.individuals.length);
+        for (int i = 0 ; i < pop.subpops.size() ; i++) {
+            Subpopulation sub = pop.subpops.get(i);
+            DescriptiveStatistics ds = new DescriptiveStatistics(sub.individuals.size());
             for (Individual ind : sub.individuals) {
                 ExpandedFitness nf = (ExpandedFitness) ind.fitness;
                 ds.addValue(nf.getFitnessScore());

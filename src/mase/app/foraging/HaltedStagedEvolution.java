@@ -10,6 +10,7 @@ import ec.Fitness;
 import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
+import java.util.ArrayList;
 import mase.evaluation.MetaEvaluator;
 import mase.controllers.AgentController;
 import mase.controllers.AgentControllerIndividual;
@@ -29,8 +30,11 @@ public class HaltedStagedEvolution extends StagedEvolution {
     @Override
     public void preEvaluationStatistics(EvolutionState state) {
         super.preEvaluationStatistics(state);
+        // ready to add the second coevolving population
         if (super.currentStage == super.numStages - 1 && backup != null) {
-            state.population.subpops = new Subpopulation[]{backup, state.population.subpops[0]};
+            state.population.subpops = new ArrayList<>(2);
+            state.population.subpops.add(backup);
+            state.population.subpops.add(state.population.subpops.get(0));
             backup = null;
             super.updateFitness(state);
             
@@ -39,7 +43,7 @@ public class HaltedStagedEvolution extends StagedEvolution {
             Individual[][] newElites = new Individual[2][elites[0].length];
             for(int i = 0 ; i < elites[0].length ; i++) {
                 Individual dummy = new DummyIndividual();
-                dummy.fitness = (Fitness) state.population.subpops[0].species.f_prototype.clone();
+                dummy.fitness = (Fitness) state.population.subpops.get(0).species.f_prototype.clone();
                 newElites[0][i] = dummy;
                 newElites[1][i] = elites[0][i];
             }     
@@ -50,8 +54,8 @@ public class HaltedStagedEvolution extends StagedEvolution {
     @Override
     public void postInitializationStatistics(EvolutionState state) {
         super.postInitializationStatistics(state);
-        backup = state.population.subpops[0];
-        state.population.subpops = new Subpopulation[]{state.population.subpops[1]};
+        backup = state.population.subpops.get(0);
+        state.population.subpops.remove(0); 
     }
     
     public static class DummyIndividual extends Individual implements AgentControllerIndividual {

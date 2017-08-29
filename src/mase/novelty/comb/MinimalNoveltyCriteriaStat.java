@@ -52,7 +52,7 @@ public class MinimalNoveltyCriteriaStat extends Statistics {
         state.output.print(state.generation + "", log);
         for (Subpopulation sub : state.population.subpops) {
             double maxFit = Float.NEGATIVE_INFINITY;
-            DescriptiveStatistics dsNov = new DescriptiveStatistics(sub.individuals.length);
+            DescriptiveStatistics dsNov = new DescriptiveStatistics(sub.individuals.size());
             for (Individual ind : sub.individuals) {
                 ExpandedFitness nf = (ExpandedFitness) ind.fitness;
                 maxFit = Math.max(maxFit, nf.getFitnessScore());

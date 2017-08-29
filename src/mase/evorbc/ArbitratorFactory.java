@@ -16,7 +16,6 @@ import mase.controllers.ControllerFactory;
 import mase.controllers.GroupController;
 import mase.controllers.HomogeneousGroupController;
 import mase.controllers.NeuralControllerIndividual;
-import mase.neat.NEATSubpop;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -65,9 +64,9 @@ public class ArbitratorFactory implements ControllerFactory {
         state.output.message("Coordinate bounds: " + boundsToString(repo.coordinateBounds()));
 
         int outputs = repo.coordinateBounds().length + (locking ? 1 : 0);
-        Parameter pOut = new Parameter(NEATSubpop.P_NEAT_BASE).push("OUTPUT.NODES");
+        /*Parameter pOut = new Parameter(NEATSubpop.P_NEAT_BASE).push("OUTPUT.NODES");
         state.output.message("Forcing " + pOut + " to: " + outputs);        
-        state.parameters.set(pOut, outputs + "");
+        state.parameters.set(pOut, outputs + "");*/
 
         Parameter nOut = new Parameter(NeuralControllerIndividual.DEFAULT_BASE).push("output");
         state.parameters.set(nOut, outputs + "");

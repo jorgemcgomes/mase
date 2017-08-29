@@ -78,12 +78,12 @@ public class SpecialisationExchanger extends Exchanger {
     public Population preBreedingExchangePopulation(EvolutionState state) {
         // First generation initialisation
         if (metaPops == null) {
-            popSize = state.population.subpops[0].individuals.length;
+            popSize = state.population.subpops.get(0).individuals.size();
             metaPops = new ArrayList<MetaPopulation>();
             breedMetaPops = new ArrayList<MetaPopulation>();
-            prototypeSubs = new Subpopulation[state.population.subpops.length];
+            prototypeSubs = new Subpopulation[state.population.subpops.size()];
             for (int i = 0; i < prototypeSubs.length; i++) {
-                prototypeSubs[i] = (Subpopulation) state.population.subpops[i].emptyClone();
+                prototypeSubs[i] = (Subpopulation) state.population.subpops.get(i).emptyClone();
             }
             initMetaPopulations(state);
         }
@@ -111,20 +111,20 @@ public class SpecialisationExchanger extends Exchanger {
             int drawPop = 0;
             for (int i = 0; i < popSize; i++) {
                 int r = state.random[0].nextInt(popSize);
-                inds[i] = state.population.subpops[drawPop].individuals[r];
-                drawPop = (drawPop + 1) % state.population.subpops.length;
+                inds[i] = state.population.subpops.get(drawPop).individuals.get(r);
+                drawPop = (drawPop + 1) % state.population.subpops.size();
             }
             MetaPopulation mp = new MetaPopulation();
-            for (int i = 0; i < state.population.subpops.length; i++) {
+            for (int i = 0; i < state.population.subpops.size(); i++) {
                 mp.populations.add(i);
             }
             mp.individuals = inds;
             metaPops.add(mp);
         } else { // All initially heterogeneous
-            for (int i = 0; i < state.population.subpops.length; i++) {
+            for (int i = 0; i < state.population.subpops.size(); i++) {
                 MetaPopulation pi = new MetaPopulation();
                 pi.populations.add(i);
-                pi.individuals = state.population.subpops[i].individuals;
+                pi.individuals = state.population.subpops.get(i).individuals;
                 metaPops.add(pi);
             }
         }
@@ -266,7 +266,7 @@ public class SpecialisationExchanger extends Exchanger {
 
                     // Create new metapopulation with subpop and the same individuals as the former metapop
                     MetaPopulation mpj = new MetaPopulation();
-                    mpj.individuals = state.population.subpops[exitPop].individuals;
+                    mpj.individuals = state.population.subpops.get(exitPop).individuals;
                     mpj.populations.add(exitPop);
                     created.add(mpj);
                     splits++;
@@ -279,11 +279,11 @@ public class SpecialisationExchanger extends Exchanger {
 
     protected void updateScores(EvolutionState state) {
         for (MetaPopulation mp : metaPops) {
-            for (int i = 0; i < mp.individuals.length; i++) {
-                ExpandedFitness ef = (ExpandedFitness) mp.individuals[i].fitness;
+            for (int i = 0; i < mp.individuals.size(); i++) {
+                ExpandedFitness ef = (ExpandedFitness) mp.individuals.get(i).fitness;
                 float score = 0;
                 for (Integer p : mp.populations) {
-                    score += state.population.subpops[p].individuals[i].fitness.fitness();
+                    score += state.population.subpops.get(p).individuals.get(i).fitness.fitness();
                 }
                 ef.setFitness(state, score, false);
             }
@@ -297,7 +297,7 @@ public class SpecialisationExchanger extends Exchanger {
         for (MetaPopulation mp : metaPops) {
             for (Integer p : mp.populations) {
                 for (int i = 0; i < elites[p].length; i++) {
-                    elites[p][i] = (Individual) mp.individuals[i].clone();
+                    elites[p][i] = (Individual) mp.individuals.get(i).clone();
                 }
             }
         }
@@ -359,8 +359,8 @@ public class SpecialisationExchanger extends Exchanger {
             MetaPopulation mp = breedMetaPops.get(i);
             int anySub = mp.populations.get(0);
             Subpopulation newSub = (Subpopulation) prototypeSubs[anySub].emptyClone();
-            for (int j = 0; j < mp.individuals.length; j++) {
-                Individual newInd = (Individual) mp.individuals[j].clone();
+            for (int j = 0; j < mp.individuals.size(); j++) {
+                Individual newInd = (Individual) mp.individuals.get(j).clone();
                 newSub.individuals[j] = newInd;
             }
             newPop.subpops[i] = newSub;
@@ -376,7 +376,7 @@ public class SpecialisationExchanger extends Exchanger {
         // Update the individuals of the populations that went through breeding
         for (int i = 0; i < breedMetaPops.size(); i++) {
             MetaPopulation mp = breedMetaPops.get(i);
-            mp.individuals = state.population.subpops[i].individuals;
+            mp.individuals = state.population.subpops.get(i).individuals;
         }
 
         // Integrate the merges
@@ -392,7 +392,7 @@ public class SpecialisationExchanger extends Exchanger {
         for (MetaPopulation mp : metaPops) {
             for (Integer p : mp.populations) {
                 newPop.subpops[p] = (Subpopulation) prototypeSubs[p].emptyClone();
-                for (int j = 0; j < mp.individuals.length; j++) {
+                for (int j = 0; j < mp.individuals.size(); j++) {
                     newPop.subpops[p].individuals[j] = (Individual) mp.individuals[j].clone();
                 }
             }
@@ -402,8 +402,8 @@ public class SpecialisationExchanger extends Exchanger {
 
     protected void integrateMerges(MetaPopulation mp, EvolutionState state) {
         if(mergeMode == MergeMode.elites || mergeMode == MergeMode.partialrandom || mergeMode == MergeMode.fullrandom) {
-            int eachReplace = mp.individuals.length / mp.populations.size();
-            int index = mp.individuals.length - 1;
+            int eachReplace = mp.individuals.size() / mp.populations.size();
+            int index = mp.individuals.size() - 1;
                 for (Individual[] candidates : mp.waitingIndividuals) {
                     for (int i = 0; i < eachReplace; i++) {
                         if(mergeMode == MergeMode.elites) {
@@ -412,7 +412,7 @@ public class SpecialisationExchanger extends Exchanger {
                             int ind = state.random[0].nextInt(candidates.length);
                             mp.individuals[index] = candidates[ind];
                         } else if(mergeMode == MergeMode.fullrandom) {
-                            int insider = state.random[0].nextInt(mp.individuals.length);
+                            int insider = state.random[0].nextInt(mp.individuals.size());
                             int outsider = state.random[0].nextInt(candidates.length);
                             mp.individuals[insider] = candidates[outsider];
                         }

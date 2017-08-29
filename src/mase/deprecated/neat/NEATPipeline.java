@@ -36,7 +36,7 @@ public class NEATPipeline extends BreedingPipeline {
         // Get scores from individuals
         Map<Chromosome, Double> scores = new HashMap<>();
 
-        NEATSubpop sub = (NEATSubpop) state.population.subpops[subpopulation];
+        NEATSubpop sub = (NEATSubpop) state.population.subpops.get(subpopulation);
         for (Individual ind : sub.individuals) {
             NEATIndividual ni = (NEATIndividual) ind;
             scores.put(ni.getChromosome(), ni.fitness.fitness());
@@ -46,9 +46,9 @@ public class NEATPipeline extends BreedingPipeline {
         PreEvaluatedFitnessFunction fit = new PreEvaluatedFitnessFunction(scores);
 
         // Update NEAT population
-        Chromosome cs[] = new Chromosome[sub.individuals.length];
-        for (int j = 0; j < sub.individuals.length; j++) {
-            NEATIndividual ni = (NEATIndividual) sub.individuals[j];
+        Chromosome cs[] = new Chromosome[sub.individuals.size()];
+        for (int j = 0; j < sub.individuals.size(); j++) {
+            NEATIndividual ni = (NEATIndividual) sub.individuals.get(j);
             cs[j] = ni.getChromosome();
         }
         sub.getNEAT().population().updatePopulation(cs);
@@ -60,11 +60,11 @@ public class NEATPipeline extends BreedingPipeline {
         sub.getNEAT().runEpoch();
 
         // Update ECJ population
-        for (int j = 0; j < sub.individuals.length; j++) {
+        for (int j = 0; j < sub.individuals.size(); j++) {
             inds[start + j] = sub.species.newIndividual(state, 0);
             ((NEATIndividual) inds[start + j]).setChromosome((NEATChromosome) sub.getNEAT().population().genoTypes()[j]);
         }
-        return sub.individuals.length;
+        return sub.individuals.size();
     }
 
     @Override
@@ -74,7 +74,7 @@ public class NEATPipeline extends BreedingPipeline {
 
     @Override
     public boolean produces(EvolutionState state, Population newpop, int subpopulation, int thread) {
-        return state.population.subpops[subpopulation] instanceof NEATSubpop;
+        return state.population.subpops.get(subpopulation) instanceof NEATSubpop;
     }
 
     @Override

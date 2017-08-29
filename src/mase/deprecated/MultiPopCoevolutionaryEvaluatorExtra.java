@@ -128,7 +128,7 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
         super.beforeCoevolutionaryEvaluation(state, population, prob);
         if (state.generation == 0) {
             if (lastChampions > 0 || randomChampions > 0 || novelChampions > 0) {
-                hallOfFame = new ArrayList[state.population.subpops.length];
+                hallOfFame = new ArrayList[state.population.subpops.size()];
                 for (int i = 0; i < hallOfFame.length; i++) {
                     hallOfFame[i] = new ArrayList<Individual>();
                 }
@@ -151,12 +151,12 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
     @Override
     public void evaluatePopulation(final EvolutionState state) {
         // determine who needs to be evaluated
-        boolean[] preAssessFitness = new boolean[state.population.subpops.length];
-        boolean[] postAssessFitness = new boolean[state.population.subpops.length];
-        for (int i = 0; i < state.population.subpops.length; i++) {
+        boolean[] preAssessFitness = new boolean[state.population.subpops.size()];
+        boolean[] postAssessFitness = new boolean[state.population.subpops.size()];
+        for (int i = 0; i < state.population.subpops.size(); i++) {
             postAssessFitness[i] = shouldEvaluateSubpop(state, i, 0);
             preAssessFitness[i] = postAssessFitness[i] || (state.generation == 0);  // always prepare (set up trials) on generation 0
-            totalEvaluations += state.population.subpops[i].individuals.length;
+            totalEvaluations += state.population.subpops.get(i).individuals.size();
         }
 
         // first generation initialization
@@ -176,11 +176,11 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
             final GroupedProblemForm prob) {
 
         /* initialization */
-        inds = new Individual[population.subpops.length];
-        updates = new boolean[population.subpops.length];
+        inds = new Individual[population.subpops.size()];
+        updates = new boolean[population.subpops.size()];
 
         // build subpopulation array to pass in each time
-        int[] subpops = new int[population.subpops.length];
+        int[] subpops = new int[population.subpops.size()];
         for (int j = 0; j < subpops.length; j++) {
             subpops[j] = j;
         }
@@ -201,31 +201,31 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
             }
         }
 
-        this.competitors = new Individual[state.population.subpops.length][];
-        for (int p = 0; p < population.subpops.length; p++) {
+        this.competitors = new Individual[state.population.subpops.size()][];
+        for (int p = 0; p < population.subpops.size(); p++) {
             loadCompetitors(state, p);
         }
 
         /* subpops evaluation -- multi-threaded */
-        int numinds[][] = new int[state.evalthreads][population.subpops.length];
-        int from[][] = new int[state.evalthreads][population.subpops.length];
+        int numinds[][] = new int[state.evalthreads][population.subpops.size()];
+        int from[][] = new int[state.evalthreads][population.subpops.size()];
         // figure out multi-thread distribution
         for (int y = 0; y < state.evalthreads; y++) {
-            for (int x = 0; x < population.subpops.length; x++) {
+            for (int x = 0; x < population.subpops.size(); x++) {
                 if (shouldEvaluateSubpop(state, x, 0)) {
                     // figure numinds
                     if (y < state.evalthreads - 1) { // not last one
-                        numinds[y][x] = population.subpops[x].individuals.length / state.evalthreads;
+                        numinds[y][x] = population.subpops.get(x).individuals.size() / state.evalthreads;
                     } else { // in case we're slightly off in division
                         numinds[y][x]
-                                = population.subpops[x].individuals.length / state.evalthreads
-                                + (population.subpops[x].individuals.length
-                                - (population.subpops[x].individuals.length
+                                = population.subpops.get(x).individuals.size() / state.evalthreads
+                                + (population.subpops.get(x).individuals.size()
+                                - (population.subpops.get(x).individuals.size()
                                 / state.evalthreads) // note integer division
                                 * state.evalthreads);
                     }
                     // figure from
-                    from[y][x] = (population.subpops[x].individuals.length / state.evalthreads) * y;
+                    from[y][x] = (population.subpops.get(x).individuals.size() / state.evalthreads) * y;
                 }
             }
         }
@@ -299,14 +299,14 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
 
     protected void evalPopChunk(EvolutionState state, Population pop, int[] numinds, int[] from, int threadnum, int[] subpops, GroupedProblemForm prob) {
         ((Problem) prob).prepareToEvaluate(state, threadnum);
-        boolean[] tUpdates = new boolean[pop.subpops.length];
-        Individual[] tInds = new Individual[pop.subpops.length];
+        boolean[] tUpdates = new boolean[pop.subpops.size()];
+        Individual[] tInds = new Individual[pop.subpops.size()];
 
-        for (int p = 0; p < pop.subpops.length; p++) {
+        for (int p = 0; p < pop.subpops.size(); p++) {
             // start evaluatin'!
             int upperbound = from[p] + numinds[p];
             for (int x = from[p]; x < upperbound; x++) {
-                Individual individual = pop.subpops[p].individuals[x];
+                Individual individual = pop.subpops.get(p).individuals.get(x);
                 // Test against the competitors
                 for (int k = 0; k < competitors[p].length; k++) {
                     for (int ind = 0; ind < tInds.length; ind++) {
@@ -343,7 +343,7 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
 
     @Override
     void loadElites(final EvolutionState state, int whichSubpop) {
-        Subpopulation subpop = state.population.subpops[whichSubpop];
+        Subpopulation subpop = state.population.subpops.get(whichSubpop);
 
         // Update hall of fame
         if (hallOfFame != null) {
@@ -354,7 +354,7 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
                     best = x;
                 }
             }
-            hallOfFame[whichSubpop].add((Individual) subpop.individuals[best].clone());
+            hallOfFame[whichSubpop].add((Individual) subpop.individuals.get(best).clone());
         }
 
         int index = 0;
@@ -402,8 +402,8 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
                 for (int i = 0; i < genoTypes.length; i++) {
                     int specie = ((NEATChromosome) genoTypes[i]).getSpecieId();
                     if (!specieBests.containsKey(specie)
-                            || betterThan(subpop.individuals[i], specieBests.get(specie))) {
-                        specieBests.put(specie, subpop.individuals[i]);
+                            || betterThan(subpop.individuals.get(i), specieBests.get(specie))) {
+                        specieBests.put(specie, subpop.individuals.get(i));
                     }
                 }
                 Individual[] specBests = new Individual[specieBests.size()];
@@ -418,15 +418,15 @@ public class MultiPopCoevolutionaryEvaluatorExtra extends MultiPopCoevolutionary
         // Fill remaining with the elite of the current pop
         int toFill = numElite - index;
         if (toFill == 1) { // Just one to place
-            Individual best = subpop.individuals[0];
-            for (int x = 1; x < subpop.individuals.length; x++) {
-                if (betterThan(subpop.individuals[x], best)) {
-                    best = subpop.individuals[x];
+            Individual best = subpop.individuals.get(0);
+            for (int x = 1; x < subpop.individuals.size(); x++) {
+                if (betterThan(subpop.individuals.get(x), best)) {
+                    best = subpop.individuals.get(x);
                 }
             }
             eliteIndividuals[whichSubpop][index++] = (Individual) best.clone();
         } else if (toFill > 1) {
-            Individual[] orderedPop = Arrays.copyOf(subpop.individuals, subpop.individuals.length);
+            Individual[] orderedPop = Arrays.copyOf(subpop.individuals, subpop.individuals.size());
             QuickSort.qsort(orderedPop, new EliteComparator2());
             // load the top N individuals
             for (int j = 0; j < toFill; j++) {

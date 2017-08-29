@@ -50,7 +50,7 @@ public class FitnessStat extends Statistics {
         super.postInitializationStatistics(state);
         // set up our bestSoFar array -- can't do this in setup, because
         // we don't know if the number of subpopulations has been determined yet
-        bestSoFar = new double[state.population.subpops.length];
+        bestSoFar = new double[state.population.subpops.size()];
     }
 
     /**
@@ -61,19 +61,18 @@ public class FitnessStat extends Statistics {
     public void postEvaluationStatistics(final EvolutionState state) {
         super.postEvaluationStatistics(state);
 
-        int subpops = state.population.subpops.length;                          // number of supopulations
+        int subpops = state.population.subpops.size();                          // number of supopulations
         DescriptiveStatistics[] fitness = new DescriptiveStatistics[subpops];
         for (int i = 0; i < subpops; i++) {
             fitness[i] = new DescriptiveStatistics();
         }
-        int evals = state.evaluator.p_problem instanceof MaseProblem ? ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations() : 0;
 
         // gather per-subpopulation statistics
         for (int x = 0; x < subpops; x++) {
-            for (int y = 0; y < state.population.subpops[x].individuals.length; y++) {
-                if (state.population.subpops[x].individuals[y].evaluated) {// he's got a valid fitness
+            for (Individual ind : state.population.subpops.get(x).individuals) {
+                if (ind.evaluated) {// he's got a valid fitness
                     // update fitness
-                    double f = ((ExpandedFitness) state.population.subpops[x].individuals[y].fitness).getFitnessScore();
+                    double f = ((ExpandedFitness) ind.fitness).getFitnessScore();
                     bestSoFar[x] = Math.max(bestSoFar[x], f);
                     absoluteBest = Math.max(absoluteBest, f);
                     fitness[x].addValue(f);
@@ -81,7 +80,7 @@ public class FitnessStat extends Statistics {
             }
             // print out fitness information
             if (doSubpops) {
-                state.output.println(state.generation + " " + evals + " " + x + " "
+                state.output.println(state.generation + " " + state.evaluations + " " + x + " "
                         + fitness[x].getN() + " " + fitness[x].getMin()
                         + " " + fitness[x].getMean() + " " + fitness[x].getMax() + " "
                         + bestSoFar[x], statisticslog);
@@ -96,7 +95,7 @@ public class FitnessStat extends Statistics {
             }
         }
 
-        state.output.println(state.generation + " " + evals + " NA "
+        state.output.println(state.generation + " " + state.evaluations + " NA "
                 + global.getN() + " " + global.getMin()
                 + " " + global.getMean() + " " + global.getMax() + " "
                 + absoluteBest, statisticslog);

@@ -1,0 +1,18 @@
+parent.0 = oneprey_hom.params
+
+generations = 150
+
+problem.preyPlacement = 1
+
+problem.repetitions = 1
+
+problem.seed = 0
+
+seed.0 = 0
+seed.1 = 1
+seed.2 = 2
+seed.3 = 3
+seed.4 = 4
+seed.5 = 5
+seed.6 = 6
+seed.7 = 7

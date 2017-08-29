@@ -9,9 +9,9 @@ import ec.EvolutionState;
 import ec.Exchanger;
 import ec.Individual;
 import ec.Population;
-import ec.Subpopulation;
 import ec.util.Parameter;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * After breeding, randomly remove the foreign-proportion, and import individuals from other subpops
@@ -35,14 +35,15 @@ public class RandomExchanger extends Exchanger {
     }
 
     @Override
+    // TODO: this should really exchange individuals, not what it is currently doing
     public Population postBreedingExchangePopulation(EvolutionState state) {
-        Individual[][] old = new Individual[state.population.subpops.length][];
-        for(int i = 0 ; i < state.population.subpops.length ; i++) {
-            old[i] = Arrays.copyOf(state.population.subpops[i].individuals, state.population.subpops[i].individuals.length);
+        List<Individual>[] old = new List[state.population.subpops.size()];
+        for(int i = 0 ; i < state.population.subpops.size() ; i++) {
+            old[i] = new ArrayList(state.population.subpops.get(i).individuals);
         }
         
         for(int s = 0 ; s < old.length ; s++) {
-            int replace = (int) Math.round(old[s].length * foreignProportion);
+            int replace = (int) Math.round(old[s].size() * foreignProportion);
             for(int i = 0 ; i < replace ; i++) {
                 // pick population
                 int pickIndex = -1;
@@ -50,9 +51,9 @@ public class RandomExchanger extends Exchanger {
                     pickIndex = state.random[0].nextInt(old.length);
                 }
                 // pick individual
-                Individual ind = old[pickIndex][state.random[0].nextInt(old[pickIndex].length)];
+                Individual ind = old[pickIndex].get(state.random[0].nextInt(old[pickIndex].size()));
                 // replace from the beginning -- the elites are copied to the end!
-                state.population.subpops[s].individuals[i] = (Individual) ind.clone();
+                state.population.subpops.get(s).individuals.set(i, (Individual) ind.clone());
             }
         }
         return state.population;

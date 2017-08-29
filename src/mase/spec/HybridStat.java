@@ -57,7 +57,7 @@ public class HybridStat extends Statistics {
         super.postPreBreedingExchangeStatistics(state);
         AbstractHybridExchanger exc = (AbstractHybridExchanger) state.exchanger;
         // generation, evaluations, and number of metapops
-        state.output.print(state.generation + " " + ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations() + " " + exc.metaPops.size(), log);
+        state.output.print(state.generation + " " + state.evaluations + " " + exc.metaPops.size(), log);
 
         DescriptiveStatistics ds = new DescriptiveStatistics();
         for (MetaPopulation mp : exc.metaPops) {

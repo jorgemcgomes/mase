@@ -50,14 +50,14 @@ public class NEATStatistics extends Statistics {
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
         // Gen | Subpop | Species | Avg neurons | Avg links | Avg recurr | Best neurons | Best links | Best recurr
-        for (int i = 0; i < state.population.subpops.length; i++) {
-            if(state.population.subpops[i] instanceof NEATSubpop) {
-                NEATGeneticAlgorithm neat = ((NEATSubpop) state.population.subpops[i]).getNEAT();
+        for (int i = 0; i < state.population.subpops.size(); i++) {
+            if(state.population.subpops.get(i) instanceof NEATSubpop) {
+                NEATGeneticAlgorithm neat = ((NEATSubpop) state.population.subpops.get(i)).getNEAT();
                 double highestFitness = Double.NEGATIVE_INFINITY;
                 int[] bestDescr = null;
                 double[] avgDescr = new double[3];
-                for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                    NEATIndividual ind = (NEATIndividual) state.population.subpops[i].individuals[j];
+                for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
+                    NEATIndividual ind = (NEATIndividual) state.population.subpops.get(i).individuals.get(j);
                     int[] descr = netDescription(ind.getNeuralNet());
                     if(((ExpandedFitness) ind.fitness).getFitnessScore() > highestFitness) {
                         highestFitness = ind.fitness.fitness();
@@ -67,9 +67,9 @@ public class NEATStatistics extends Statistics {
                     avgDescr[1] += descr[1];
                     avgDescr[2] += descr[2];
                 }
-                avgDescr[0] /= state.population.subpops[i].individuals.length;
-                avgDescr[1] /= state.population.subpops[i].individuals.length;
-                avgDescr[2] /= state.population.subpops[i].individuals.length;
+                avgDescr[0] /= state.population.subpops.get(i).individuals.size();
+                avgDescr[1] /= state.population.subpops.get(i).individuals.size();
+                avgDescr[2] /= state.population.subpops.get(i).individuals.size();
                 state.output.println(state.generation + " " + i + " " + neat.getSpecies().specieList().size() + " " + 
                         avgDescr[0] + " " + avgDescr[1] + " " + avgDescr[2] + " " +
                         bestDescr[0] + " " + bestDescr[1] + " " + bestDescr[2], log);

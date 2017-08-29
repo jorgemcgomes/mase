@@ -29,13 +29,13 @@ public class SelectivePopScoring implements PostEvaluator {
 
     @Override
     public void processPopulation(EvolutionState state) {
-        if(popScores.length < state.population.subpops.length) {
-            state.output.fatal("More subpopulations (" + state.population.subpops.length + ") than scores (" + popScores.length +")");
-        } else if(popScores.length > state.population.subpops.length) {
-            state.output.warning("More scores (" + popScores.length + ") than populations (" + state.population.subpops.length +")");
+        if(popScores.length < state.population.subpops.size()) {
+            state.output.fatal("More subpopulations (" + state.population.subpops.size() + ") than scores (" + popScores.length +")");
+        } else if(popScores.length > state.population.subpops.size()) {
+            state.output.warning("More scores (" + popScores.length + ") than populations (" + state.population.subpops.size() +")");
         }
-        for(int i = 0 ; i < state.population.subpops.length ; i++) {
-            for(Individual ind : state.population.subpops[i].individuals) {
+        for(int i = 0 ; i < state.population.subpops.size() ; i++) {
+            for(Individual ind : state.population.subpops.get(i).individuals) {
                 ExpandedFitness ef = (ExpandedFitness) ind.fitness;
                 ef.setFitness(state, ef.getScore(popScores[i]), false);
             }

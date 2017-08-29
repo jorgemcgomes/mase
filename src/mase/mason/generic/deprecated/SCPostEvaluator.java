@@ -45,8 +45,8 @@ public class SCPostEvaluator implements PostEvaluator {
     @Override
     public void processPopulation(EvolutionState state) {
         // Auxiliary data structure
-        currentPop = new ArrayList<>(state.population.subpops.length
-                * state.population.subpops[0].individuals.length);
+        currentPop = new ArrayList<>(state.population.subpops.size()
+                * state.population.subpops.get(0).individuals.size());
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 for (EvaluationResult er : ((ExpandedFitness) ind.fitness).getEvaluationResults()) {

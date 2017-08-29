@@ -52,48 +52,48 @@ public class SelectionPoolBuilder extends Exchanger {
     @Override
     public Population preBreedingExchangePopulation(EvolutionState state) {
         if (selectionPools == null) {
-            selectionPools = new Individual[state.population.subpops.length][];
-            individualsOrigin = new Integer[state.population.subpops.length][];
+            selectionPools = new Individual[state.population.subpops.size()][];
+            individualsOrigin = new Integer[state.population.subpops.size()][];
             // stats
-            dispersion = new double[state.population.subpops.length];
-            selfPicked = new int[state.population.subpops.length];
+            dispersion = new double[state.population.subpops.size()];
+            selfPicked = new int[state.population.subpops.size()];
         }
         
         // Prepare
-        BehaviourResult[][] brs = new BehaviourResult[state.population.subpops.length][];
-        for (int i = 0; i < state.population.subpops.length; i++) {
-            brs[i] = new BehaviourResult[state.population.subpops[i].individuals.length];
-            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                brs[i][j] = getAgentBR(state.population.subpops[i].individuals[j]);
+        BehaviourResult[][] brs = new BehaviourResult[state.population.subpops.size()][];
+        for (int i = 0; i < state.population.subpops.size(); i++) {
+            brs[i] = new BehaviourResult[state.population.subpops.get(i).individuals.size()];
+            for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
+                brs[i][j] = getAgentBR(state.population.subpops.get(i).individuals.get(j));
             }
         }
 
-        for (int i = 0; i < state.population.subpops.length; i++) {
+        for (int i = 0; i < state.population.subpops.size(); i++) {
             // Compute threshold
             double sum = 0;
-            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
+            for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
                 sum += distance(brs[i][j], brs[i]);
             }
-            sum /= state.population.subpops[i].individuals.length;
+            sum /= state.population.subpops.get(i).individuals.size();
             dispersion[i] = sum;
             double threshold = selectionThreshold * sum;
 
             ArrayList<Individual> pool = new ArrayList<Individual>();
             ArrayList<Integer> origin = new ArrayList<Integer>();
             // Add all individuals of this subpop
-            pool.addAll(Arrays.asList(state.population.subpops[i].individuals));
-            for(Individual ind : state.population.subpops[i].individuals) {
+            pool.addAll(Arrays.asList(state.population.subpops.get(i).individuals));
+            for(Individual ind : state.population.subpops.get(i).individuals) {
                 origin.add(i);
             } 
             
             // Add similar individuals of other subpops
-            for (int k = 0; k < state.population.subpops.length; k++) {
+            for (int k = 0; k < state.population.subpops.size(); k++) {
                 if (k != i) {
-                    for (int j = 0; j < state.population.subpops[k].individuals.length; j++) {
+                    for (int j = 0; j < state.population.subpops.get(k).individuals.size(); j++) {
                         double d = distance(brs[k][j], brs[i]);
                         //System.out.println(d);
                         if (d <= threshold) {
-                            pool.add(state.population.subpops[k].individuals[j]);
+                            pool.add(state.population.subpops.get(k).individuals.get(j));
                             origin.add(k);
                         }
                     }

@@ -37,14 +37,14 @@ public class NEATBreeder extends SimpleBreeder {
         PreEvaluatedFitnessFunction fit = new PreEvaluatedFitnessFunction(scores);
 
         Population newpop = (Population) state.population.emptyClone();
-        for (int i = 0; i < state.population.subpops.length; i++) {
-            if(state.population.subpops[i] instanceof NEATSubpop) {
-                NEATSubpop sub = (NEATSubpop) state.population.subpops[i];
+        for (int i = 0; i < state.population.subpops.size(); i++) {
+            if(state.population.subpops.get(i) instanceof NEATSubpop) {
+                NEATSubpop sub = (NEATSubpop) state.population.subpops.get(i);
 
                 // Update NEAT population
-                Chromosome cs[] = new Chromosome[sub.individuals.length];
-                for(int j = 0 ; j < sub.individuals.length ; j++) {
-                    NEATIndividual ni = (NEATIndividual) sub.individuals[j];
+                Chromosome cs[] = new Chromosome[sub.individuals.size()];
+                for(int j = 0 ; j < sub.individuals.size() ; j++) {
+                    NEATIndividual ni = (NEATIndividual) sub.individuals.get(j);
                     cs[j] = ni.getChromosome();
                 }
                 sub.getNEAT().population().updatePopulation(cs);
@@ -56,9 +56,9 @@ public class NEATBreeder extends SimpleBreeder {
                 sub.getNEAT().runEpoch();
 
                 // Update ECJ population
-                for (int j = 0; j < sub.individuals.length; j++) {
-                    newpop.subpops[i].individuals[j] = sub.species.newIndividual(state, 0);
-                    ((NEATIndividual) newpop.subpops[i].individuals[j])
+                for (int j = 0; j < sub.individuals.size(); j++) {
+                    newpop.subpops.get(i).individuals.get(j) = sub.species.newIndividual(state, 0);
+                    ((NEATIndividual) newpop.subpops.get(i).individuals.get(j))
                             .setChromosome((NEATChromosome) sub.getNEAT().population().genoTypes()[j]);
                 }
             }

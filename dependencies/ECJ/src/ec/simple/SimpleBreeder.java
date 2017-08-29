@@ -255,7 +255,7 @@ public class SimpleBreeder extends Breeder
         
         // load elites into top of newpop
         loadElites(state, newpop);
-
+        
         // how many threads do we really need?  No more than the maximum number of individuals in any subpopulation
         int numThreads = 0;
         for(int x = 0; x < state.population.subpops.size(); x++)
@@ -327,7 +327,13 @@ public class SimpleBreeder extends Breeder
           // figure from
           from[y][x] = (firstBreedChunkSizes * y);
           }
-        */            
+        */        
+        // Jorge Gomes: this operation is broken in the breedPopChunk
+        for(int subpop = 0 ; subpop < newpop.subpops.size() ; subpop++) {
+            if(!shouldBreedSubpop(state, subpop, 0)) {
+                newpop.subpops.get(subpop).individuals.addAll(state.population.subpops.get(subpop).individuals);
+            }
+        }
         if (numThreads==1)
             {
             breedPopChunk(newpop,state,numinds[0],from[0],0);
@@ -413,15 +419,7 @@ public class SimpleBreeder extends Breeder
             ArrayList<Individual> putHere = (ArrayList<Individual>)newIndividuals[subpop][threadnum];
 
             // if it's subpop's turn and we're doing sequential breeding...
-            if (!shouldBreedSubpop(state, subpop, threadnum))  
-                {
-                // instead of breeding, we should just copy forward this subpopulation.  We'll copy the part we're assigned
-                for(int ind=from[subpop] ; ind < numinds[subpop] - from[subpop]; ind++)
-                    // newpop.subpops.get(subpop).individuals.get(ind) = (Individual)(state.population.subpops.get(subpop).individuals.get(ind).clone());
-                    // this could get dangerous
-                    newpop.subpops.get(subpop).individuals.set(ind, state.population.subpops.get(subpop).individuals.get(ind));
-                }
-            else
+            if (shouldBreedSubpop(state, subpop, threadnum))  
                 {
                 // do regular breeding of this subpopulation
                 BreedingSource bp = null;

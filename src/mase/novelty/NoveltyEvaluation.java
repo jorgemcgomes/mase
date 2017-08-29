@@ -123,7 +123,7 @@ public class NoveltyEvaluation implements PostEvaluator {
     }
 
     protected void setNoveltyScores(EvolutionState state, Population pop) {
-        for (int p = 0; p < pop.subpops.length; p++) {
+        for (int p = 0; p < pop.subpops.size(); p++) {
             // Set the individuals pool that will be used to compute novelty
             List<ArchiveEntry> archive = archives[p];
             List<BehaviourResult> pool = new ArrayList<>();
@@ -137,7 +137,7 @@ public class NoveltyEvaluation implements PostEvaluator {
                 }
             }
             // Current population
-            for (Individual ind : pop.subpops[p].individuals) {
+            for (Individual ind : pop.subpops.get(p).individuals) {
                 ExpandedFitness indFit = (ExpandedFitness) ind.fitness;
                 BehaviourResult br = (BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex);
                 pool.add(br);
@@ -147,8 +147,8 @@ public class NoveltyEvaluation implements PostEvaluator {
             }
 
             // Calculate novelty for each individual
-            List<BehaviourResult> inds = new ArrayList<>(pop.subpops[p].individuals.length);
-            for (Individual ind : pop.subpops[p].individuals) {
+            List<BehaviourResult> inds = new ArrayList<>(pop.subpops.get(p).individuals.size());
+            for (Individual ind : pop.subpops.get(p).individuals) {
                 ExpandedFitness indFit = (ExpandedFitness) ind.fitness;
                 BehaviourResult br = (BehaviourResult) indFit.getCorrespondingEvaluation(behaviourIndex);
                 inds.add(br);
@@ -157,16 +157,16 @@ public class NoveltyEvaluation implements PostEvaluator {
             if (!nslc) {
                 // Assign novelty scores
                 List<Double> scores = computeKNNDistances(pool, inds, k);
-                for (int i = 0; i < pop.subpops[p].individuals.length; i++) {
-                    ExpandedFitness indFit = (ExpandedFitness) pop.subpops[p].individuals[i].fitness;
+                for (int i = 0; i < pop.subpops.get(p).individuals.size(); i++) {
+                    ExpandedFitness indFit = (ExpandedFitness) pop.subpops.get(p).individuals.get(i).fitness;
                     double novScore = scores.get(i);
                     indFit.scores().put(scoreName, novScore);
                     indFit.setFitness(state, novScore, false);
                 }
             } else {
                 List<List<Pair<BehaviourResult, Double>>> nearest = computeNearest(pool, inds, k);
-                for (int i = 0; i < pop.subpops[p].individuals.length; i++) {
-                    ExpandedFitness indFit = (ExpandedFitness) pop.subpops[p].individuals[i].fitness;
+                for (int i = 0; i < pop.subpops.get(p).individuals.size(); i++) {
+                    ExpandedFitness indFit = (ExpandedFitness) pop.subpops.get(p).individuals.get(i).fitness;
 
                     double novScore = 0;
                     double betterThan = 0;
@@ -354,20 +354,20 @@ public class NoveltyEvaluation implements PostEvaluator {
 
     protected void updateArchive(EvolutionState state, Population pop) {
         if (archiveCriteria != ArchiveCriteria.none) {
-            for (int i = 0; i < pop.subpops.length; i++) {
-                Individual[] popInds = pop.subpops[i].individuals;
+            for (int i = 0; i < pop.subpops.size(); i++) {
+                List<Individual> popInds = pop.subpops.get(i).individuals;
                 List<ArchiveEntry> archive = archives[i];
                 LinkedHashSet<Individual> toAdd = new LinkedHashSet<>();
 
                 // select individuals to add to archive
                 if (archiveCriteria == ArchiveCriteria.random) {
-                    while (toAdd.size() < archiveGrowth * popInds.length) {
-                        int index = state.random[0].nextInt(popInds.length);
-                        toAdd.add(popInds[index]);
+                    while (toAdd.size() < archiveGrowth * popInds.size()) {
+                        int index = state.random[0].nextInt(popInds.size());
+                        toAdd.add(popInds.get(index));
                     }
                 } else if (archiveCriteria == ArchiveCriteria.novel) {
-                    Individual[] copy = Arrays.copyOf(popInds, popInds.length);
-                    Arrays.sort(copy, new Comparator<Individual>() {
+                    List<Individual> copy = new ArrayList<>(popInds);
+                    Collections.sort(copy, new Comparator<Individual>() {
                         @Override
                         public int compare(Individual o1, Individual o2) {
                             double nov1 = ((ExpandedFitness) o1.fitness).getScore(scoreName);
@@ -375,9 +375,7 @@ public class NoveltyEvaluation implements PostEvaluator {
                             return Double.compare(nov2, nov1);
                         }
                     });
-                    for (int j = 0; j < archiveGrowth * popInds.length; j++) {
-                        toAdd.add(copy[j]);
-                    }
+                    toAdd.addAll(copy.subList(0, (int) (archiveGrowth * popInds.size())));
                 }
 
                 // open up space for new individuals if needed

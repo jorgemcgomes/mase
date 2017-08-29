@@ -11,10 +11,8 @@ import ec.Subpopulation;
 import ec.simple.SimpleFitness;
 import ec.util.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import mase.evaluation.BehaviourResult;
 import org.apache.commons.lang3.tuple.Pair;
@@ -154,51 +152,49 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         } else {
             mpNew.pop = (Subpopulation) mp2.pop.emptyClone();
         }
-        mpNew.pop.individuals = new Individual[mp1.pop.individuals.length];
-        fillNewPopulation(mpNew, mp1, mp2, state);
+        mpNew.pop.individuals = new ArrayList<>(mp1.pop.individuals.size());
+        fillNewPopulation(mpNew, mp1.pop.individuals.size(), mp1, mp2, state);
         return mpNew;
     }    
 
-    protected void fillNewPopulation(MetaPopulation mpNew, MetaPopulation mp1, MetaPopulation mp2, EvolutionState state) {
+    protected void fillNewPopulation(MetaPopulation mpNew, int num, MetaPopulation mp1, MetaPopulation mp2, EvolutionState state) {
         // The number of individuals to pick from each pop
         int from1 = 0;
         if (mergeProportion == MergeAgentsProportion.equal) {
-            from1 = mpNew.pop.individuals.length / 2;
+            from1 = num / 2;
         } else if (mergeProportion == MergeAgentsProportion.largest) {
-            from1 = mp1.agents.size() >= mp2.agents.size() ? mpNew.pop.individuals.length : 0;
+            from1 = mp1.agents.size() >= mp2.agents.size() ? num : 0;
         } else if (mergeProportion == MergeAgentsProportion.proportionate) {
-            from1 = Math.round((float) mp1.agents.size() / (mp1.agents.size() + mp2.agents.size()) * mpNew.pop.individuals.length);
+            from1 = Math.round((float) mp1.agents.size() / (mp1.agents.size() + mp2.agents.size()) * num);
         }
-        int from2 = mpNew.pop.individuals.length - from1;
+        int from2 = num - from1;
 
-        Individual[] picked1 = selectIndividuals(mp1.pop.individuals, from1, mergeSelection, state);
-        Individual[] picked2 = selectIndividuals(mp2.pop.individuals, from2, mergeSelection, state);
-        System.arraycopy(picked1, 0, mpNew.pop.individuals, 0, picked1.length);
-        System.arraycopy(picked2, 0, mpNew.pop.individuals, picked1.length, picked2.length);
+        List<Individual> picked1 = selectIndividuals(mp1.pop.individuals, from1, mergeSelection, state);
+        List<Individual> picked2 = selectIndividuals(mp2.pop.individuals, from2, mergeSelection, state);
+        mpNew.pop.individuals.addAll(picked1);
+        mpNew.pop.individuals.addAll(picked2);
     }    
     
-    protected Individual[] selectIndividuals(Individual[] pool, int num, MergeSelection mode, EvolutionState state) {
-        Individual[] picked = new Individual[num];
+    protected List<Individual> selectIndividuals(List<Individual> pool, int num, MergeSelection mode, EvolutionState state) {
+        List<Individual> picked = new ArrayList<>(num);
         if (mode == MergeSelection.truncate) {
-            Individual[] sorted = sortedCopy(pool);
-            System.arraycopy(sorted, 0, picked, 0, num);
+            List<Individual> sorted = sortedCopy(pool);
+            picked.addAll(getElitePortion(pool, num));
         } else if (mode == MergeSelection.fitnessproportionate) {
             double total = 0;
-            LinkedList<Individual> poolList = new LinkedList<>();
             for (Individual ind : pool) {
-                poolList.add(ind);
                 total += ((SimpleFitness) ind.fitness).fitness();
             }
-            int index = 0;
-            while (index < num) {
+            List<Individual> copy = new ArrayList<>(pool);
+            while (picked.size() < num) {
                 double accum = 0;
                 double rand = state.random[0].nextDouble() * total;
-                Iterator<Individual> iter = poolList.iterator();
+                Iterator<Individual> iter = copy.iterator();
                 while (iter.hasNext()) {
                     Individual ind = iter.next();
                     accum += ((SimpleFitness) ind.fitness).fitness();
                     if (accum >= rand) {
-                        picked[index++] = ind;
+                        picked.add(ind);
                         iter.remove();
                         total -= ((SimpleFitness) ind.fitness).fitness();
                         break;
@@ -206,12 +202,11 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
                 }
             }
         } else if (mode == MergeSelection.random) {
-            LinkedList<Individual> poolList = new LinkedList<>(Arrays.asList(pool));
-            int index = 0;
-            while (index < num) {
-                int rand = state.random[0].nextInt(poolList.size());
-                picked[index++] = poolList.get(rand);
-                poolList.remove(rand);
+            List<Individual> copy = new ArrayList<>(pool);
+            while (picked.size() < num) {
+                int rand = state.random[0].nextInt(copy.size());
+                picked.add(copy.get(rand));
+                copy.remove(rand);
             }
         } else {
             state.output.fatal("Unknown picking mode: " + mode);
@@ -228,7 +223,7 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
                 behavs[i] = Collections.EMPTY_LIST;
             } else {
                 behavs[i] = new ArrayList<>();
-                Individual[] elite = getElitePortion(mp.pop.individuals, (int) Math.ceil(distanceElite * popSize));
+                List<Individual> elite = getElitePortion(mp.pop.individuals, (int) Math.ceil(distanceElite * popSize));
                 for (Individual ind : elite) {
                     for (Integer a : mp.agents) {
                         behavs[i].add(getAgentBR(ind, a, behaviourIndex));
@@ -302,9 +297,9 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         MetaPopulation child = new MetaPopulation();
         child.agents.addAll(forkAgents);
         child.pop = (Subpopulation) parent.pop.emptyClone();
-        child.pop.individuals = new Individual[parent.pop.individuals.length];
-        for (int k = 0; k < parent.pop.individuals.length; k++) {
-            child.pop.individuals[k] = (Individual) parent.pop.individuals[k].clone();
+        child.pop.individuals = new ArrayList<>(parent.pop.individuals.size());
+        for (int k = 0; k < parent.pop.individuals.size(); k++) {
+            child.pop.individuals.add((Individual) parent.pop.individuals.get(k).clone());
         }
         return child;
     }

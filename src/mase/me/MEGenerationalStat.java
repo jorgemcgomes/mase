@@ -45,7 +45,7 @@ public class MEGenerationalStat extends Statistics {
     @Override
     public void postBreedingStatistics(EvolutionState state) {
         super.postBreedingStatistics(state);
-        MESubpopulation pop = (MESubpopulation) state.population.subpops[0];
+        MESubpopulation pop = (MESubpopulation) state.population.subpops.get(0);
         DescriptiveStatistics fit = new DescriptiveStatistics();
         for (Individual ind : pop.map.values()) {
             fit.addValue(((ExpandedFitness) ind.fitness).getFitnessScore());

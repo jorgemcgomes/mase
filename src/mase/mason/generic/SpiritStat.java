@@ -56,9 +56,9 @@ public class SpiritStat extends Statistics {
             }
         }
 
-        for (int i = 0; i < state.population.subpops.length; i++) {
-            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                Individual ind = state.population.subpops[i].individuals[j];
+        for (int i = 0; i < state.population.subpops.size(); i++) {
+            for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
+                Individual ind = state.population.subpops.get(i).individuals.get(j);
                 ExpandedFitness fit = (ExpandedFitness) ind.fitness;
                 SpiritResult sr = (SpiritResult) fit.getCorrespondingEvaluation(evalIdx);
                 DescriptiveStatistics ds = new DescriptiveStatistics();

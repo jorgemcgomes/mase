@@ -67,8 +67,8 @@ public class NoveltyPopStat extends Statistics {
 
         for (NoveltyEvaluation ne : neList) {
             DescriptiveStatistics ds = new DescriptiveStatistics();        
-            for (int i = 0; i < state.population.subpops.length; i++) {
-                for (Individual individual : state.population.subpops[i].individuals) {
+            for (int i = 0; i < state.population.subpops.size(); i++) {
+                for (Individual individual : state.population.subpops.get(i).individuals) {
                     ExpandedFitness nf = (ExpandedFitness) individual.fitness;
                     ds.addValue(nf.scores().get(ne.scoreName));
                 }

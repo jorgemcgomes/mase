@@ -3,7 +3,6 @@ package mase.vrep;
 import java.util.HashMap;
 import mase.controllers.EncodableAgentController;
 import mase.controllers.FixedValuesController;
-import mase.neat.NEATAgentController;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
@@ -14,7 +13,7 @@ public class ControllerFactory {
 
     static {
         CLASS_MAP.put(0, FixedValuesController.class);
-        CLASS_MAP.put(1, NEATAgentController.class);
+        //CLASS_MAP.put(1, NEATAgentController.class); // TODO: re-add
     }
 
     public static void loadController(int handle, int type, float[] parameters) {

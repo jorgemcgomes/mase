@@ -87,9 +87,9 @@ public class WeightedNovelty extends NoveltyEvaluation {
     public void processPopulation(EvolutionState state) {
         if (weights == null) {
             for (Subpopulation sub : state.population.subpops) {
-                nIndividuals += sub.individuals.length;
+                nIndividuals += sub.individuals.size();
             }
-            int len = ((double[]) ((VectorBehaviourResult) ((ExpandedFitness) state.population.subpops[0].individuals[0].fitness).getCorrespondingEvaluation(behaviourIndex)).value()).length; // TODO: fix should not be static 1
+            int len = ((double[]) ((VectorBehaviourResult) ((ExpandedFitness) state.population.subpops.get(0).individuals.get(0).fitness).getCorrespondingEvaluation(behaviourIndex)).value()).length; // TODO: fix should not be static 1
             weights = new double[len];
             Arrays.fill(weights, 1);
             instantCorrelation = new double[weights.length];
@@ -337,7 +337,7 @@ public class WeightedNovelty extends NoveltyEvaluation {
      First index is the fitness score
      */
     protected List<double[]> getInstances(EvolutionState state) {
-        ArrayList<double[]> list = new ArrayList<>(state.population.subpops[0].individuals.length);
+        ArrayList<double[]> list = new ArrayList<>(state.population.subpops.get(0).individuals.size());
         for (Subpopulation sub : state.population.subpops) {
             for (Individual ind : sub.individuals) {
                 ExpandedFitness nf = (ExpandedFitness) ind.fitness;

@@ -50,24 +50,24 @@ public class NSGA2 implements PostEvaluator {
     @Override
     public void processPopulation(EvolutionState state) {
         Population pop = state.population;
-        indsRank = new ArrayList[pop.subpops.length];
+        indsRank = new ArrayList[pop.subpops.size()];
         
-        for (int i = 0; i < pop.subpops.length; i++) {
-            List<NSGAIndividual> inds = new ArrayList<>(pop.subpops[i].individuals.length);
+        for (int i = 0; i < pop.subpops.size(); i++) {
+            List<NSGAIndividual> inds = new ArrayList<>(pop.subpops.get(i).individuals.size());
 
             float[] maxVals = new float[include.length];
             Arrays.fill(maxVals, Float.NEGATIVE_INFINITY);
             float[] minVals = new float[include.length];
             Arrays.fill(minVals, Float.POSITIVE_INFINITY);
-            for (int k = 0 ; k < pop.subpops[i].individuals.length ; k++) {
-                ExpandedFitness ef = (ExpandedFitness) pop.subpops[i].individuals[k].fitness;
+            for (int k = 0 ; k < pop.subpops.get(i).individuals.size() ; k++) {
+                ExpandedFitness ef = (ExpandedFitness) pop.subpops.get(i).individuals.get(k).fitness;
                 double[] vals = new double[include.length];
                 for(int j = 0 ; j < include.length ; j++) {
                     vals[j] = ef.scores().get(include[j]);
                     maxVals[j] = Math.max((float)vals[j], maxVals[j]);
                     minVals[j] = Math.min((float)vals[j], minVals[j]);
                 }
-                inds.add(new NSGAIndividual(pop.subpops[i].individuals[k], vals));
+                inds.add(new NSGAIndividual(pop.subpops.get(i).individuals.get(k), vals));
             }
             double[] ranges = new double[include.length];
             for(int j = 0 ; j < ranges.length ; j++) {
@@ -85,7 +85,7 @@ public class NSGA2 implements PostEvaluator {
                 crowdingDistanceAssignement(rank, ranges);
             }
 
-            assignFitnessScores(pop.subpops[i], state, ranked);
+            assignFitnessScores(pop.subpops.get(i), state, ranked);
 
             indsRank[i] = new ArrayList<>();
             for (List<NSGAIndividual> rank : ranked) {

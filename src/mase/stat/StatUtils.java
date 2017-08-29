@@ -15,7 +15,7 @@ import mase.evaluation.ExpandedFitness;
  */
 public class StatUtils {
 
-    protected static class IndividualInfo {
+    public static class IndividualInfo {
 
         final Individual ind;
         final int sub;
@@ -35,9 +35,9 @@ public class StatUtils {
         int sub = -1;
         int index = -1;
         double maxFit = Double.NEGATIVE_INFINITY;
-        for (int i = 0; i < state.population.subpops.length; i++) {
-            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                Individual ind = state.population.subpops[i].individuals[j];
+        for (int i = 0; i < state.population.subpops.size(); i++) {
+            for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
+                Individual ind = state.population.subpops.get(i).individuals.get(j);
                 double fit = ((ExpandedFitness) ind.fitness).getFitnessScore();
                 if (fit > maxFit) {
                     maxFit = fit;
@@ -51,14 +51,14 @@ public class StatUtils {
     }
 
     public static IndividualInfo[] getSubpopBests(EvolutionState state) {
-        IndividualInfo[] res = new IndividualInfo[state.population.subpops.length];
-        for (int i = 0; i < state.population.subpops.length; i++) {
+        IndividualInfo[] res = new IndividualInfo[state.population.subpops.size()];
+        for (int i = 0; i < state.population.subpops.size(); i++) {
             Individual best = null;
             int sub = -1;
             int index = -1;
             double maxFit = Double.NEGATIVE_INFINITY;
-            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                Individual ind = state.population.subpops[i].individuals[j];
+            for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
+                Individual ind = state.population.subpops.get(i).individuals.get(j);
                 double fit = ((ExpandedFitness) ind.fitness).getFitnessScore();
                 if (fit > maxFit) {
                     maxFit = fit;

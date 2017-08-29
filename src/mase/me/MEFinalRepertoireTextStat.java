@@ -54,7 +54,7 @@ public class MEFinalRepertoireTextStat extends Statistics {
     private void logRepo(EvolutionState state, boolean print) {
         try {
             int log = state.output.addLog(logFile, true);
-            MESubpopulation sub = (MESubpopulation) state.population.subpops[0];
+            MESubpopulation sub = (MESubpopulation) state.population.subpops.get(0);
             Collection<Entry<Integer, Individual>> entries = sub.map.entries();
 
             boolean headed = false;

@@ -89,19 +89,19 @@ public class NoveltyEvaluation implements PostEvaluator {
     }
 
     protected void setNoveltyScores(EvolutionState state, Population pop) {
-        for (int p = 0; p < pop.subpops.length; p++) {
+        for (int p = 0; p < pop.subpops.size(); p++) {
             List<BehaviourResult> archive = archives.get(p);
             // calculate novelty scores
-            for (int j = 0; j < pop.subpops[p].individuals.length; j++) {
-                Individual ind = pop.subpops[p].individuals[j];
+            for (int j = 0; j < pop.subpops.get(p).individuals.size(); j++) {
+                Individual ind = pop.subpops.get(p).individuals.get(j);
                 NoveltyFitness indFit = (NoveltyFitness) ind.fitness;
 
                 ArrayList<Pair<Float, Boolean>> distances
-                        = new ArrayList<Pair<Float, Boolean>>(archive.size() + pop.subpops[p].individuals.length);
+                        = new ArrayList<Pair<Float, Boolean>>(archive.size() + pop.subpops.get(p).individuals.size());
 
                 // from subpop
                 if (useCurrent) {
-                    for (Individual i : pop.subpops[p].individuals) {
+                    for (Individual i : pop.subpops.get(p).individuals) {
                         if (ind != i) {
                             BehaviourResult er1 = ((NoveltyFitness) i.fitness).getNoveltyBehaviour();
                             BehaviourResult er2 = indFit.getNoveltyBehaviour();
@@ -152,10 +152,10 @@ public class NoveltyEvaluation implements PostEvaluator {
 
     protected void updateArchive(EvolutionState state, Population pop) {
         if (archiveMode != V_NONE) {
-            for (int i = 0; i < pop.subpops.length; i++) {
+            for (int i = 0; i < pop.subpops.size(); i++) {
                 List<BehaviourResult> archive = archives.get(i);
-                for (int j = 0; j < pop.subpops[i].individuals.length; j++) {
-                    Individual ind = pop.subpops[i].individuals[j];
+                for (int j = 0; j < pop.subpops.get(i).individuals.size(); j++) {
+                    Individual ind = pop.subpops.get(i).individuals.get(j);
                     if (state.random[0].nextDouble() < addProb) {
                         BehaviourResult br = (BehaviourResult) ((NoveltyFitness) ind.fitness).getNoveltyBehaviour();
                         if (archive.size() == sizeLimit) {

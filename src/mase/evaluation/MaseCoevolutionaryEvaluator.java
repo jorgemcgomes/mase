@@ -69,7 +69,7 @@ public class MaseCoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator
         super.beforeCoevolutionaryEvaluation(state, population, prob);
         if (state.generation == 0) {
             if (lastChampions > 0 || randomChampions > 0) {
-                hallOfFame = new ArrayList[state.population.subpops.length];
+                hallOfFame = new ArrayList[state.population.subpops.size()];
                 for (int i = 0; i < hallOfFame.length; i++) {
                     hallOfFame[i] = new ArrayList<>();
                 }
@@ -79,18 +79,18 @@ public class MaseCoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator
 
     @Override
     protected void loadElites(final EvolutionState state, int whichSubpop) {
-        Subpopulation subpop = state.population.subpops[whichSubpop];
+        Subpopulation subpop = state.population.subpops.get(whichSubpop);
 
         // Update hall of fame if it exists
         if (hallOfFame != null) {
             int best = 0;
-            Individual[] oldinds = subpop.individuals;
-            for (int x = 1; x < oldinds.length; x++) {
-                if (betterThan(oldinds[x], oldinds[best], eliteScore[0])) {
+            List<Individual> oldinds = subpop.individuals;
+            for (int x = 1; x < oldinds.size(); x++) {
+                if (betterThan(oldinds.get(x), oldinds.get(best), eliteScore[0])) {
                     best = x;
                 }
             }
-            hallOfFame[whichSubpop].add((Individual) subpop.individuals[best].clone());
+            hallOfFame[whichSubpop].add((Individual) subpop.individuals.get(best).clone());
         }
 
         int index = 0;
@@ -159,10 +159,10 @@ public class MaseCoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator
         // no need to do any sorting, since it is going to be the single best
         if (toFill <= eliteScore.length) {
             for (int i = 0; i < toFill && index < numElite; i++) {
-                Individual best = subpop.individuals[0];
-                for (int x = 1; x < subpop.individuals.length; x++) {
-                    if (betterThan(subpop.individuals[x], best, eliteScore[i])) {
-                        best = subpop.individuals[x];
+                Individual best = subpop.individuals.get(0);
+                for (int x = 1; x < subpop.individuals.size(); x++) {
+                    if (betterThan(subpop.individuals.get(x), best, eliteScore[i])) {
+                        best = subpop.individuals.get(x);
                     }
                 }
                 eliteIndividuals[whichSubpop][index++] = (Individual) best.clone();
@@ -172,7 +172,7 @@ public class MaseCoevolutionaryEvaluator extends MultiPopCoevolutionaryEvaluator
             // Sort the individuals according to the multiple objectives
             List<Individual>[] sorted = new List[eliteScore.length];
             for(int i = 0 ; i < eliteScore.length ; i++) {
-                List<Individual> indsList = Arrays.asList(subpop.individuals);
+                List<Individual> indsList = new ArrayList<>(subpop.individuals);
                 final String currentScore = eliteScore[i];
                 Collections.sort(indsList, new Comparator<Individual>() {
                     @Override

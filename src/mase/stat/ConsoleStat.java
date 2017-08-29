@@ -39,9 +39,9 @@ public class ConsoleStat extends Statistics {
         super.postEvaluationStatistics(state);
         // print best fitness and min / 1st quartile / median / 3rd quartile / max per subpop
         double maxGen = Double.NEGATIVE_INFINITY;
-        for (int s = 0; s < state.population.subpops.length; s++) {
-            DescriptiveStatistics ds = new DescriptiveStatistics(state.population.subpops[s].individuals.length);
-            for (Individual ind : state.population.subpops[s].individuals) {
+        for (int s = 0; s < state.population.subpops.size(); s++) {
+            DescriptiveStatistics ds = new DescriptiveStatistics(state.population.subpops.get(s).individuals.size());
+            for (Individual ind : state.population.subpops.get(s).individuals) {
                 //System.out.println(((ExpandedFitness) ind.fitness).getFitnessScore());
                 ds.addValue(((ExpandedFitness) ind.fitness).getFitnessScore());
             }
@@ -64,8 +64,8 @@ public class ConsoleStat extends Statistics {
         String ip = RunStatistics.getComputerName();
         state.output.message("Exp: " + stat.file.getParent() + " Job: " + state.job[0] + " IP: " + ip);
         String status;
-        if(state.evaluator.p_problem instanceof MaseProblem && state.numEvaluations > 0) {
-            int done = ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations();
+        if(state.numEvaluations > 0) {
+            int done = state.evaluations;
             int limit = (int) state.numEvaluations;
             status = "Evals: " + done / 1000 + "/" + limit / 1000+"k";
         } else {

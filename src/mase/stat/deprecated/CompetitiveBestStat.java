@@ -73,12 +73,12 @@ public class CompetitiveBestStat extends FileWriterStat {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postInitializationStatistics(state);
-        for (int i = 0; i < state.population.subpops.length; i++) {
+        for (int i = 0; i < state.population.subpops.size(); i++) {
             Individual best = null;
             int index = -1;
             double bestFitness = Double.NEGATIVE_INFINITY;
-            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                Individual ind = state.population.subpops[i].individuals[j];
+            for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
+                Individual ind = state.population.subpops.get(i).individuals.get(j);
                 double fit = ((ExpandedFitness) ind.fitness).getFitnessScore();
                 if (fit > bestFitness) {
                     bestFitness = fit;
@@ -106,7 +106,7 @@ public class CompetitiveBestStat extends FileWriterStat {
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
         if (compress) {
-            for (int i = 0; i < state.population.subpops.length; i++) {
+            for (int i = 0; i < state.population.subpops.size(); i++) {
                 try {
                     taos[i].close();
                 } catch (IOException ex) {

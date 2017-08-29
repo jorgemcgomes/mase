@@ -35,8 +35,8 @@ public class CyclicPopScoring implements PostEvaluator {
 
     @Override
     public void processPopulation(EvolutionState state) {
-        for (int i = 0; i < state.population.subpops.length; i++) {
-            for (Individual ind : state.population.subpops[i].individuals) {
+        for (int i = 0; i < state.population.subpops.size(); i++) {
+            for (Individual ind : state.population.subpops.get(i).individuals) {
                 ExpandedFitness ef = (ExpandedFitness) ind.fitness;
                 if (i == current) {
                     ef.setFitness(state, ef.getScore(cyclingScore), false);
@@ -46,7 +46,7 @@ public class CyclicPopScoring implements PostEvaluator {
             }
         }
         if ((state.generation + 1) % frequency == 0) {
-            current = (current + 1) % state.population.subpops.length;
+            current = (current + 1) % state.population.subpops.size();
         }
     }
 }

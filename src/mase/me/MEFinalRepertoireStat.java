@@ -18,8 +18,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
-import mase.stat.BestSolutionGenStat;
-import mase.stat.FileWriterStat;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -28,7 +26,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
  *
  * @author Jorge
  */
-public class MEFinalRepertoireStat extends FileWriterStat {
+public class MEFinalRepertoireStat extends Statistics {
 
     public static final String P_FILE = "file";
     private static final long serialVersionUID = 1L;
@@ -39,16 +37,17 @@ public class MEFinalRepertoireStat extends FileWriterStat {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         archiveFile = state.parameters.getFile(base.push(P_FILE), null);
-        archiveFile = new File(archiveFile.getParent(), jobPrefix + archiveFile.getName());
     }
 
     @Override
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
         try {
+            int l = state.output.addLog(archiveFile, false);
             taos = new TarArchiveOutputStream(new GZIPOutputStream(
-                    new BufferedOutputStream(new FileOutputStream(archiveFile))));
-            MESubpopulation sub = (MESubpopulation) state.population.subpops[0];
+                    new BufferedOutputStream(new FileOutputStream(state.output.getLog(l).filename))));
+            
+            MESubpopulation sub = (MESubpopulation) state.population.subpops.get(0);
             Collection<Entry<Integer, Individual>> entries = sub.map.entries();
             for (Entry<Integer, Individual> e : entries) {
                 PersistentSolution p = SolutionPersistence.createPersistentController(state, e.getValue(), 0, e.getKey());

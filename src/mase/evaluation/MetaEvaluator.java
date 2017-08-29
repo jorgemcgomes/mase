@@ -58,7 +58,7 @@ public class MetaEvaluator extends Evaluator {
     }
 
     @Override
-    public boolean runComplete(EvolutionState state) {
+    public String runComplete(EvolutionState state) {
         return baseEvaluator.runComplete(state);
     }
     

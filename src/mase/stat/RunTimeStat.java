@@ -153,7 +153,7 @@ public class RunTimeStat extends Statistics {
     public long eta(EvolutionState state) {
         double completed;
         if(state.evaluator.p_problem instanceof MaseProblem && state.numEvaluations > 0) {
-            completed = (double) ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations() / state.numEvaluations;
+            completed = (double) state.evaluations / state.numEvaluations;
         } else {
             completed = (double) (state.generation + 1) / state.numGenerations;
         }

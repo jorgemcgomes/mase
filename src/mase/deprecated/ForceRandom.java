@@ -35,7 +35,7 @@ public class ForceRandom extends MultiPopCoevolutionaryEvaluator2 {
 
     @Override
     void loadElites(EvolutionState state, int whichSubpop) {
-        Subpopulation subpop = state.population.subpops[whichSubpop];
+        Subpopulation subpop = state.population.subpops.get(whichSubpop);
         if (whichSubpop == subpopIndex) {
             // Update hall of fame
             if (hallOfFame != null) {
@@ -46,7 +46,7 @@ public class ForceRandom extends MultiPopCoevolutionaryEvaluator2 {
                         best = x;
                     }
                 }
-                hallOfFame[whichSubpop].add((Individual) subpop.individuals[best].clone());
+                hallOfFame[whichSubpop].add((Individual) subpop.individuals.get(best).clone());
             }
 
             // Random champions
@@ -64,7 +64,7 @@ public class ForceRandom extends MultiPopCoevolutionaryEvaluator2 {
 
             int toFill = numElite - index;
             if (toFill >= 1) {
-                Individual[] orderedPop = Arrays.copyOf(subpop.individuals, subpop.individuals.length);
+                Individual[] orderedPop = Arrays.copyOf(subpop.individuals, subpop.individuals.size());
                 QuickSort.qsort(orderedPop, new EliteComparator2());
                 for (int j = 0; j < toFill; j++) {
                     eliteIndividuals[whichSubpop][index++] = (Individual) orderedPop[j].clone();

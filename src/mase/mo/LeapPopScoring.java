@@ -41,12 +41,12 @@ public class LeapPopScoring implements PostEvaluator {
         if (change) {
             int previousNovelty = currentLeap;
             do {
-                currentLeap = state.random[0].nextInt(pop.subpops.length);
+                currentLeap = state.random[0].nextInt(pop.subpops.size());
             } while (currentLeap == previousNovelty);
         }
 
-        for (int s = 0; s < pop.subpops.length; s++) {
-            for (Individual ind : pop.subpops[s].individuals) {
+        for (int s = 0; s < pop.subpops.size(); s++) {
+            for (Individual ind : pop.subpops.get(s).individuals) {
                 ExpandedFitness nf = (ExpandedFitness) ind.fitness;
                 if (s == currentLeap) {
                     nf.setFitness(state, nf.getScore(leapScore), false);

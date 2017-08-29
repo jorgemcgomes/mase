@@ -54,7 +54,7 @@ public class EvaluationsStat extends Statistics {
     public void postEvaluationStatistics(EvolutionState state) {
         // header
         if(state.generation == 0) {
-            EvaluationResult[] sample = ((ExpandedFitness) state.population.subpops[0].individuals[0].fitness).getEvaluationResults();
+            EvaluationResult[] sample = ((ExpandedFitness) state.population.subpops.get(0).individuals.get(0).fitness).getEvaluationResults();
             state.output.println(header((MaseProblem) state.evaluator.p_problem, sample, mode.equals(V_BEST_SUB)), log);            
         }
         
@@ -70,9 +70,9 @@ public class EvaluationsStat extends Statistics {
             }
         } else {
             // Generational log
-            for (int i = 0; i < state.population.subpops.length; i++) {
-                for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                    ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;
+            for (int i = 0; i < state.population.subpops.size(); i++) {
+                for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
+                    ExpandedFitness nf = (ExpandedFitness) state.population.subpops.get(i).individuals.get(j).fitness;
                     state.output.println(entry(state.generation, i, j, nf.getEvaluationResults(), false), log);
                 }
             }

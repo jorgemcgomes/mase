@@ -18,6 +18,8 @@ import java.util.LinkedList;
  * Maintains the original functionality, with just one difference: the randomly
  * chosen collaborators from the current or previous population are the same
  * for evaluating all individuals of a given population
+ * 
+ * Requires visibility modifications in attributes and methods of ECJ's MultiPopCoevolutionaryEvaluator
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
@@ -54,8 +56,8 @@ public class MultiPopCoevolutionaryEvaluatorThreaded extends MultiPopCoevolution
 
         // initialization
         int evaluations = 0;
-        inds = new Individual[population.subpops.length];
-        updates = new boolean[population.subpops.length];
+        inds = new Individual[population.subpops.size()];
+        updates = new boolean[population.subpops.size()];
 
         // we start by warming up the selection methods
         if (numCurrent > 0) {
@@ -74,7 +76,7 @@ public class MultiPopCoevolutionaryEvaluatorThreaded extends MultiPopCoevolution
         }
 
         // build subpopulation array to pass in each time
-        int[] subpops = new int[population.subpops.length];
+        int[] subpops = new int[population.subpops.size()];
         for (int j = 0; j < subpops.length; j++) {
             subpops[j] = j;
         }
@@ -85,10 +87,10 @@ public class MultiPopCoevolutionaryEvaluatorThreaded extends MultiPopCoevolution
         if (numShuffled > 0) {
             int[/*numShuffled*/][/*subpop*/][/*shuffledIndividualIndexes*/] ordering;
             // build shuffled orderings
-            ordering = new int[numShuffled][state.population.subpops.length][state.population.subpops[0].individuals.length];
+            ordering = new int[numShuffled][state.population.subpops.size()][state.population.subpops.get(0).individuals.size()];
             for (int c = 0; c < numShuffled; c++) {
-                for (int m = 0; m < state.population.subpops.length; m++) {
-                    for (int i = 0; i < state.population.subpops[0].individuals.length; i++) {
+                for (int m = 0; m < state.population.subpops.size(); m++) {
+                    for (int i = 0; i < state.population.subpops.get(0).individuals.size(); i++) {
                         ordering[c][m][i] = i;
                     }
                     if (m != 0) {
@@ -98,10 +100,10 @@ public class MultiPopCoevolutionaryEvaluatorThreaded extends MultiPopCoevolution
             }
 
             // for each individual
-            for (int i = 0; i < state.population.subpops[0].individuals.length; i++) {
+            for (int i = 0; i < state.population.subpops.get(0).individuals.size(); i++) {
                 for (int k = 0; k < numShuffled; k++) {
                     for (int ind = 0; ind < inds.length; ind++) {
-                        inds[ind] = state.population.subpops[ind].individuals[ordering[k][ind][i]];
+                        inds[ind] = state.population.subpops.get(ind).individuals.get(ordering[k][ind][i]);
                         updates[ind] = true;
                     }
                     evals.add(new ProblemEvaluation(inds, updates, false, subpops));
@@ -121,21 +123,21 @@ public class MultiPopCoevolutionaryEvaluatorThreaded extends MultiPopCoevolution
          * evaluated with a different random choice of collaborators. Here, the same
          * collaborators are used to evaluate every individual of a given population.
          */
-        Individual[][] collaborators = new Individual[state.population.subpops.length][];
-        for (int p = 0; p < population.subpops.length; p++) {
+        Individual[][] collaborators = new Individual[state.population.subpops.size()][];
+        for (int p = 0; p < population.subpops.size(); p++) {
             // includes elites, randoms, and previous
             collaborators[p] = loadCollaborators(state, p);
         }
 
         // for each subpopulation
-        for (int j = 0; j < state.population.subpops.length; j++) {
+        for (int j = 0; j < state.population.subpops.size(); j++) {
             // now do elites and randoms
             if (!shouldEvaluateSubpop(state, j, 0)) {
                 continue;  // don't evaluate this subpopulation
             }
             // for each individual
-            for (int i = 0; i < state.population.subpops[j].individuals.length; i++) {
-                Individual individual = state.population.subpops[j].individuals[i];
+            for (int i = 0; i < state.population.subpops.get(j).individuals.size(); i++) {
+                Individual individual = state.population.subpops.get(j).individuals.get(i);
 
                 // Test against all the collaborators
                 for (int k = 0; k < collaborators[j].length; k++) {

@@ -9,6 +9,7 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Subpopulation;
 import ec.util.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,10 +43,10 @@ public class MESubpopulation extends Subpopulation {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        this.batchSize = super.individuals.length;
+        this.batchSize = super.individuals.size();
 
         int initial = state.parameters.getInt(base.push(P_INITIAL_BATCH), defaultBase().push(P_INITIAL_BATCH));
-        this.individuals = new Individual[initial]; // the super resize method is bugged
+        this.individuals = new ArrayList<>(initial); // the super resize method is bugged
 
         this.behaviourIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), defaultBase().push(P_BEHAVIOUR_INDEX));
         this.resolution = state.parameters.getDouble(base.push(P_RESOLUTION), defaultBase().push(P_RESOLUTION));

@@ -6,6 +6,7 @@
 package mase.stat;
 
 import ec.EvolutionState;
+import ec.Statistics;
 import ec.util.Parameter;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -17,9 +18,9 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author jorge
  */
-public class LastCheckpointStat extends FileWriterStat {
+public class LastCheckpointStat extends Statistics {
 
-    public static final String P_FILE = "file";
+    /*public static final String P_FILE = "file";
     private static final long serialVersionUID = 1L;
     protected File outFile;
 
@@ -46,6 +47,6 @@ public class LastCheckpointStat extends FileWriterStat {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
 }

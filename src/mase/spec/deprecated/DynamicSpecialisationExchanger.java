@@ -72,7 +72,7 @@ public class DynamicSpecialisationExchanger extends SpecialisationExchanger {
 
                     // Create new metapopulation with subpop and the same individuals as the former metapop
                     MetaPopulation mpj = new MetaPopulation();
-                    mpj.individuals = state.population.subpops[exitPop].individuals;
+                    mpj.individuals = state.population.subpops.get(exitPop).individuals;
                     mpj.populations.add(exitPop);
                     created.add(mpj);
                     splits++;

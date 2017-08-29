@@ -42,7 +42,7 @@ public class ScoresStat extends Statistics {
         
         // header
         if(state.generation == 0) {
-            ExpandedFitness sample = (ExpandedFitness) state.population.subpops[0].individuals[0].fitness;
+            ExpandedFitness sample = (ExpandedFitness) state.population.subpops.get(0).individuals.get(0).fitness;
             String header = "Generation Subpop Index";
             for(String s : sample.scores().keySet()) {
                 header += " " + s;
@@ -52,9 +52,9 @@ public class ScoresStat extends Statistics {
         }
 
         // generational log
-        for (int i = 0; i < state.population.subpops.length; i++) {
-            for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {
-                ExpandedFitness nf = (ExpandedFitness) state.population.subpops[i].individuals[j].fitness;
+        for (int i = 0; i < state.population.subpops.size(); i++) {
+            for (int j = 0; j < state.population.subpops.get(i).individuals.size(); j++) {
+                ExpandedFitness nf = (ExpandedFitness) state.population.subpops.get(i).individuals.get(j).fitness;
                 state.output.print(state.generation + " " + i + " " + j, log);
                 for(double score : nf.scores().values()) {
                     state.output.print(String.format(Locale.ENGLISH, " %.5f", score), log);
