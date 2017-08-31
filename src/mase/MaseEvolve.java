@@ -5,207 +5,175 @@
  */
 package mase;
 
+import ec.EvolutionState;
 import ec.Evolve;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import ec.util.Output;
+import ec.util.Parameter;
+import ec.util.ParameterDatabase;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * This is very much based on the original Evolve The most noteworthy changes
+ * being allowing the specification of an output directory, which is added to
+ * the job prefix for logging; and allowing the specification of multiple -file
+ * arguments in the main args
  *
  * @author jorge
  */
 public class MaseEvolve {
 
-    public static final String OUT_DIR_OPTION = "-out";
-    public static final File OUT_DIR_DEFAULT = new File("exps");
-    public static final String DEFAULT_CONFIG = "config.params";
+    public static final String OUT_DIR = "-out";
     public static final String FORCE = "-force";
+    public static final String DEFAULT_CONFIG = "config.params";
 
-    public static void main(String[] args) throws Exception {
-        File outDir = getOutDir(args);
-        boolean force = Arrays.asList(args).contains(FORCE);
-        if (!outDir.exists()) {
-            outDir.mkdirs();
-        } else if (!force) {
-            System.out.println("Folder already exists: " + outDir.getAbsolutePath() + ". Waiting 5 sec.");
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ex) {
+    public static void main(String[] args) throws IOException {
+        EvolutionState state;
+        ParameterDatabase parameters;
+
+        // should we print the help message and quit?
+        Evolve.checkForHelp(args);
+
+        // if we're loading from checkpoint, let's finish out the most recent job
+        state = Evolve.possiblyRestoreFromCheckpoint(args);
+        int currentJob = 0;                             // the next job number (0 by default)
+
+        // this simple job iterator just uses the 'jobs' parameter, iterating from 0 to 'jobs' - 1
+        // inclusive.  The current job number is stored in state.jobs[0], so we'll begin there if
+        // we had loaded from checkpoint.
+        if (state != null) { // loaded from checkpoint
+            // check if the number of generations or evaluations needs to be updated
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].equals(EvolutionState.P_GENERATIONS)) {
+                    int generations = Integer.parseInt(args[++i]);
+                    state.numGenerations = generations;
+                } else if (args[i].equals(EvolutionState.P_EVALUATIONS)) {
+                    long evaluations = Long.parseLong(args[++i]);
+                    state.numEvaluations = evaluations;
+                }
             }
-        }
-        
-        // Get config file
-        Map<String, String> pars = readParams(args);
 
-        // Copy config to outdir
-        try {
-            File rawConfig = writeConfig(args, pars, outDir, false);
-            File destiny = new File(outDir, DEFAULT_CONFIG);
-            destiny.delete();
-            FileUtils.moveFile(rawConfig, new File(outDir, DEFAULT_CONFIG));
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            // extract the next job number from state.job[0]
+            args = state.runtimeArguments;                          // restore runtime arguments from checkpoint
+            currentJob = ((Integer) (state.job[0])).intValue() + 1;  // extract next job number
+
+            state.run(EvolutionState.C_STARTED_FROM_CHECKPOINT);
+            Evolve.cleanup(state);
         }
 
-        // JBOT INTEGRATION: copy jbot config file to the outdir
-        // Does nothing when jbot is not used
-        if (pars.containsKey("problem.jbot-config")) {
-            File jbot = new File(pars.get("problem.jbot-config"));
-            FileUtils.copyFile(jbot, new File(outDir, jbot.getName()));
-        }
-
-        // Write config to system temp file
-        File config = writeConfig(args, pars, outDir, true);
-        // Launch
-        launchExperiment(config);
-    }
-
-    public static File getOutDir(String[] args) {
+        // Get the output directory (-out). Mandatory argument!
         File outDir = null;
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals(OUT_DIR_OPTION)) {
+            if (args[i].equals(OUT_DIR)) {
                 outDir = new File(args[i + 1]);
             }
         }
         if (outDir == null) {
-            System.out.println("-out parameter not found. Going with default: " + OUT_DIR_DEFAULT);
-            outDir = OUT_DIR_DEFAULT;
+            System.out.println("No out dir specified. Use -out");
+            System.exit(1);
         }
-        return outDir;
-    }
-
-    public static Thread launchExperiment(File config) throws IOException {
-        // Call ec.Evolve
-        final String[] args = new String[]{Evolve.A_FILE, config.getAbsolutePath()};
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ec.Evolve.main(args);
+        
+        // Possibly warn that the output directory already exists and give some time to cancel
+        boolean force = Arrays.asList(args).contains(FORCE);
+        if (!outDir.exists()) {
+            outDir.mkdirs();
+        } else if (!force) {
+            System.out.println("Folder already exists: " + outDir.getAbsolutePath() + ". Waiting 3 sec.");
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {
             }
-        });
-        t.start();
-        return t;
-    }
+        }
+        
+        // Load the parameters
+        parameters = loadMultipleParameterDatabase(args);
 
-    public static Map<String, String> readParams(String[] args) throws Exception {
-        // Reads command line parameters to a map
-        // Checks the parent order
-        Map<String, String> argsPars = new LinkedHashMap<>();
-        int parentOrder = 0;
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-p")) {
-                String par = args[i + 1];
-                String[] kv = par.split("=");
-                if (kv[0].startsWith("parent")) { // Parent parameter
-                    if (kv[0].equals("parent")) { // Parent with no number
-                        argsPars.put("parent." + parentOrder, kv[1]);
-                        parentOrder++;
-                    } else { // Numbered parent
-                        String[] split = kv[0].split("\\.");
-                        int num = Integer.parseInt(split[1]);
-                        if (num != parentOrder) {
-                            throw new Exception("Parent out of order: " + par);
-                        }
-                        argsPars.put("parent." + num, kv[1]);
-                        parentOrder++;
-                    }
-                } else { // Not a parent parameter
-                    argsPars.put(kv[0], kv[1]);
+        // Log the parameters in the output directory
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        parameters.list(pw, false);
+        String parlist = sw.toString().replaceAll("(?m)^parent.*", ""); // remove parent.x params
+        pw = new PrintWriter(new File(outDir, DEFAULT_CONFIG));
+        pw.write("# " + StringUtils.join(args, ' ') + "\n" + parlist);
+        pw.close();
+
+        if (currentJob == 0) { // no current job number yet
+            currentJob = parameters.getIntWithDefault(new Parameter("current-job"), null, 0);
+        }
+        if (currentJob < 0) {
+            Output.initialError("The 'current-job' parameter must be >= 0 (or not exist, which defaults to 0)");
+        }
+
+        int numJobs = parameters.getIntWithDefault(new Parameter("jobs"), null, 1);
+        if (numJobs < 1) {
+            Output.initialError("The 'jobs' parameter must be >= 1 (or not exist, which defaults to 1)");
+        }
+
+        // Now we know how many jobs remain.  Let's loop for that many jobs.  Each time we'll
+        // load the parameter database scratch (except the first time where we reuse the one we
+        // just loaded a second ago).  The reason we reload from scratch each time is that the
+        // experimenter is free to scribble all over the parameter database and it'd be nice to
+        // have everything fresh and clean.  It doesn't take long to load the database anyway,
+        // it's usually small.
+        for (int job = currentJob; job < numJobs; job++) {
+            try {
+                // load the parameter database (reusing the very first if it exists)
+                if (parameters == null) {
+                    parameters = loadMultipleParameterDatabase(args);
                 }
-            } else if (args[i].equals("-file")) {
-                argsPars.put("parent.0", args[i + 1]);
+
+                // Initialize the EvolutionState, then set its job variables
+                state = Evolve.initialize(parameters, job);                // pass in job# as the seed increment
+                state.output.systemMessage("Job: " + job);
+                state.job = new Object[1];                                  // make the job argument storage
+                state.job[0] = Integer.valueOf(job);                    // stick the current job in our job storage
+                state.runtimeArguments = args;                              // stick the runtime arguments in our storage
+                // The output directory is appended to the jobprefix
+                String jobFilePrefix = Paths.get(outDir.getAbsolutePath(), "job." + job + ".").toString();
+                state.output.setFilePrefix(jobFilePrefix);     // add a prefix for checkpoint/output files 
+                state.checkpointPrefix = jobFilePrefix + state.checkpointPrefix;  // also set up checkpoint prefix
+
+                state.run(EvolutionState.C_STARTED_FRESH);
+                Evolve.cleanup(state);  // flush and close various streams, print out parameters if necessary
+                parameters = null;  // so we load a fresh database next time around
+            } catch (Throwable e) { // such as an out of memory error caused by this job
+                e.printStackTrace();
+                state = null;
+                System.gc();  // take a shot!
             }
         }
-
-        // Write command line parameters to a temp file -- the root file
-        File tempFile = File.createTempFile("masetemp", ".params", new File("."));        
-        BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
-        for (Entry<String, String> e : argsPars.entrySet()) {
-            bw.write(e.getKey() + " = " + e.getValue());
-            bw.newLine();
-        }
-        bw.close();
-
-        // Load all the parameter files
-        Map<String, String> pars = new LinkedHashMap<>();
-        loadParams(pars, tempFile);
-        tempFile.delete();
-        return pars;
+        System.exit(0);
     }
 
-    private static void loadParams(Map<String, String> pars, File file) throws FileNotFoundException, IOException {
-        // Read the file contents
-        Map<String, String> filePars = new LinkedHashMap<>();
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String line = null;
-        while ((line = br.readLine()) != null) {
-            if (!line.startsWith("#") && !line.trim().isEmpty()) {
-                String[] kv = line.split("=");
-                filePars.put(kv[0].trim(), kv[1].trim());
+    /**
+     * Extends the original functionality by enabling the specification of multiple 
+     * parameter files using multiple -file <filepath> in the arguments
+     * The extra parameter DBs are added as parents of the first database
+     * @param args
+     * @return
+     * @throws IOException 
+     */
+    public static ParameterDatabase loadMultipleParameterDatabase(String[] args) throws IOException {
+        ParameterDatabase db = Evolve.loadParameterDatabase(args); // only loads the first -file
+
+        // load additional -file (if any)
+        boolean first = true;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals(Evolve.A_FILE)) {
+                if (first) {
+                    first = false;
+                } else {
+                    File f = new File(args[++i]);
+                    ParameterDatabase extraParent = new ParameterDatabase(f);
+                    db.addParent(extraParent);
+                }
             }
         }
-        br.close();
-
-        // Read the parents
-        for (int i = 100; i >= 0; i--) {
-            String parentNum = "parent." + i;
-            if (filePars.containsKey(parentNum)) {
-                String path = filePars.get(parentNum);
-                File parent = new File(file.getParentFile(), path);
-                loadParams(pars, parent);
-            }
-        }
-
-        // All the parents have been processed at this point
-        System.out.println("Writting: " + file.getAbsolutePath());
-        for (Entry<String, String> e : filePars.entrySet()) {
-            if (!e.getKey().startsWith("parent")) {
-                pars.put(e.getKey(), e.getValue());
-            }
-        }
-    }
-
-    public static File writeConfig(String[] args, Map<String, String> params, File outDir, boolean replaceDirWildcard) throws IOException {
-        File configFile = File.createTempFile("maseconfig", ".params");
-
-        // Write the parameter map into a new file
-        BufferedWriter bw = new BufferedWriter(new FileWriter(configFile));
-
-        // Write the command line arguments in a comment
-        bw.write("#");
-        for (String arg : args) {
-            bw.write(" " + arg);
-        }
-        bw.newLine();
-
-        // Write the parameters correctly padded
-        int maxLen = -1;
-        for (String str : params.keySet()) {
-            maxLen = Math.max(maxLen, str.length());
-        }
-
-        for (Entry<String, String> e : params.entrySet()) {
-            String value = e.getValue();
-            if (value.contains("$") && replaceDirWildcard) {
-                File f = new File(outDir, value.replace("$", ""));
-                value = f.getAbsolutePath().replace("\\", "/");
-            }
-            bw.write(StringUtils.rightPad(e.getKey(), maxLen) + " = " + value);
-            bw.newLine();
-        }
-        bw.close();
-
-        return configFile;
+        return db;
     }
 }
