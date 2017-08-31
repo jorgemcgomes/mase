@@ -6,6 +6,7 @@
 package mase.novelty;
 
 import ec.EvolutionState;
+import ec.Statistics;
 import ec.util.Parameter;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -17,7 +18,6 @@ import java.util.zip.GZIPOutputStream;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.PostEvaluator;
 import mase.novelty.NoveltyEvaluation.ArchiveEntry;
-import mase.stat.FileWriterStat;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -26,7 +26,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
  *
  * @author Jorge
  */
-public class FinalArchiveStat extends FileWriterStat {
+public class FinalArchiveStat extends Statistics {
 
     public static final String P_FILE = "file";
     private static final long serialVersionUID = 1L;
@@ -37,7 +37,6 @@ public class FinalArchiveStat extends FileWriterStat {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         archiveFile = state.parameters.getFile(base.push(P_FILE), null);
-        archiveFile = new File(archiveFile.getParent(), jobPrefix + archiveFile.getName());
     }
 
     @Override
@@ -53,8 +52,10 @@ public class FinalArchiveStat extends FileWriterStat {
         }
 
         try {
+            int l = state.output.addLog(archiveFile, false);
             taos = new TarArchiveOutputStream(new GZIPOutputStream(
-                    new BufferedOutputStream(new FileOutputStream(archiveFile))));
+                    new BufferedOutputStream(new FileOutputStream(state.output.getLog(l).filename))));
+            
             for (int a = 0; a < ne.archives.length; a++) {
                 for (int x = 0; x < ne.archives[a].size(); x++) {
                     ArchiveEntry e = ne.archives[a].get(x);

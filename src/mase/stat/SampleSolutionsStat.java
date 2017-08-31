@@ -6,6 +6,7 @@ package mase.stat;
 
 import ec.EvolutionState;
 import ec.Individual;
+import ec.Statistics;
 import ec.util.Parameter;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -20,13 +21,11 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class SampleSolutionsStat extends FileWriterStat {
+public class SampleSolutionsStat extends Statistics {
 
     public static final String P_FILE = "file";
     public static final String P_SAMPLE_SIZE = "sample-size";
-    public static final String P_COMPRESS = "compress";
     private static final long serialVersionUID = 1L;
-    protected boolean compress;
     protected int sampleSize;
     protected File outFile;
     protected transient TarArchiveOutputStream taos;
@@ -35,19 +34,14 @@ public class SampleSolutionsStat extends FileWriterStat {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         outFile = state.parameters.getFile(base.push(P_FILE), null);
-        outFile = new File(outFile.getParent(), jobPrefix + outFile.getName());
-        compress = state.parameters.getBoolean(base.push(P_COMPRESS), null, true);
-        if (compress) {
-            try {
-                taos = new TarArchiveOutputStream(
-                        new GZIPOutputStream(
-                                new BufferedOutputStream(new FileOutputStream(outFile))));
-            } catch (IOException ex) {
-                Logger.getLogger(SampleSolutionsStat.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        if (!compress && !outFile.exists()) {
-            outFile.mkdirs();
+        try {
+            int l = state.output.addLog(outFile, false);
+            outFile = state.output.getLog(l).filename;
+            taos = new TarArchiveOutputStream(
+                    new GZIPOutputStream(
+                            new BufferedOutputStream(new FileOutputStream(outFile))));
+        } catch (IOException ex) {
+            Logger.getLogger(SampleSolutionsStat.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         sampleSize = state.parameters.getInt(base.push(P_SAMPLE_SIZE), null);
@@ -56,34 +50,35 @@ public class SampleSolutionsStat extends FileWriterStat {
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
-        if (taos == null && compress) { // can happen in case of resuming from checkpoint
+        if (taos == null) { // can happen in case of resuming from checkpoint
             taos = SolutionPersistence.reopenTar(outFile);
         }
 
         int[] subs = new int[sampleSize];
         int[] inds = new int[sampleSize];
-        for (int i = 0; i < sampleSize;) {
+        int added = 0;
+        while (added < sampleSize) {
             int sub = state.random[0].nextInt(state.population.subpops.length);
             int ind = state.random[0].nextInt(state.population.subpops[sub].individuals.length);
-            for (int j = 0; j < i; j++) { // check if this individual was already picked
+            boolean repeated = false;
+            for (int j = 0; j < added; j++) { // check if this individual was already picked
                 if (subs[j] == sub && inds[j] == ind) {
-                    continue;
+                    repeated = true;
+                    break;
                 }
             }
-            subs[i] = sub;
-            inds[i] = ind;
-            i++;
+            if (!repeated) {
+                subs[added] = sub;
+                inds[added] = ind;
+                added++;
+            }
         }
 
         for (int i = 0; i < sampleSize; i++) {
             Individual ind = state.population.subpops[subs[i]].individuals[inds[i]];
             PersistentSolution c = SolutionPersistence.createPersistentController(state, ind, subs[i], inds[i]);
             try {
-                if (compress) {
-                    SolutionPersistence.writeSolutionToTar(c, taos);
-                } else {
-                    SolutionPersistence.writeSolutionInFolder(c, outFile);
-                }
+                SolutionPersistence.writeSolutionToTar(c, taos);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -93,12 +88,10 @@ public class SampleSolutionsStat extends FileWriterStat {
     @Override
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
-        if (compress) {
-            try {
-                taos.close();
-            } catch (IOException ex) {
-                Logger.getLogger(SampleSolutionsStat.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        try {
+            taos.close();
+        } catch (IOException ex) {
+            Logger.getLogger(SampleSolutionsStat.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

@@ -6,6 +6,7 @@
 package mase.stat;
 
 import ec.EvolutionState;
+import ec.Statistics;
 import ec.util.Parameter;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -17,7 +18,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author jorge
  */
-public class LastCheckpointStat extends FileWriterStat {
+public class LastCheckpointStat extends Statistics {
 
     public static final String P_FILE = "file";
     private static final long serialVersionUID = 1L;
@@ -33,13 +34,11 @@ public class LastCheckpointStat extends FileWriterStat {
     public void postEvaluationStatistics(EvolutionState state) {
         super.postEvaluationStatistics(state);
         if (state.generation == state.numGenerations - 1) {
-            File out = new File(outFile.getParent(), jobPrefix + state.generation + "." + outFile.getName());
             try {
-                ObjectOutputStream s
-                        = new ObjectOutputStream(
-                                new GZIPOutputStream(
-                                        new BufferedOutputStream(
-                                                new FileOutputStream(out))));
+                int l = state.output.addLog(outFile, false);
+                ObjectOutputStream s = new ObjectOutputStream(new GZIPOutputStream(
+                        new BufferedOutputStream(
+                        new FileOutputStream(state.output.getLog(l).filename))));
                 s.writeObject(state);
                 s.close();
             } catch (Exception e) {

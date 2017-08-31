@@ -5,6 +5,7 @@
 package mase.stat;
 
 import ec.EvolutionState;
+import ec.Statistics;
 import ec.util.Parameter;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -21,11 +22,10 @@ import org.apache.commons.io.FilenameUtils;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class BestSolutionGenStat extends FileWriterStat {
+public class BestSolutionGenStat extends Statistics {
 
     public static final String P_FILE = "file";
     public static final String P_KEEP_LAST = "keep-last";
-    public static final String P_COMPRESS = "compress";
     public static final String P_DO_SUBPOPS = "do-subpops";
     public static final String P_FILE_LAST = "file-last";
     private static final long serialVersionUID = 1L;
@@ -33,7 +33,6 @@ public class BestSolutionGenStat extends FileWriterStat {
     protected File lastBaseFile;
     protected File[] lastFile;
     protected transient TarArchiveOutputStream taos;
-    protected boolean compress;
     protected boolean doSubpops;
     protected boolean keepLast;
 
@@ -41,45 +40,48 @@ public class BestSolutionGenStat extends FileWriterStat {
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         archiveFile = state.parameters.getFile(base.push(P_FILE), null);
-        archiveFile = new File(archiveFile.getParent(), jobPrefix + archiveFile.getName());
+        try {
+            int log = state.output.addLog(archiveFile, false);
+            archiveFile = state.output.getLog(log).filename;
+            taos = new TarArchiveOutputStream(
+                    new GZIPOutputStream(
+                            new BufferedOutputStream(new FileOutputStream(archiveFile))));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
         lastBaseFile = state.parameters.getFile(base.push(P_FILE_LAST), null);
-        compress = state.parameters.getBoolean(base.push(P_COMPRESS), null, true);
+        
         doSubpops = state.parameters.getBoolean(base.push(P_DO_SUBPOPS), null, false);
         keepLast = state.parameters.getBoolean(base.push(P_KEEP_LAST), null, true);
-        if (compress) {
-            try {
-                taos = new TarArchiveOutputStream(
-                        new GZIPOutputStream(
-                                new BufferedOutputStream(new FileOutputStream(archiveFile))));
-            } catch (IOException ex) {
-                Logger.getLogger(BestSolutionGenStat.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        if (!compress && !archiveFile.exists()) {
-            archiveFile.mkdirs();
-        }
     }
 
     @Override
     public void postInitializationStatistics(EvolutionState state) {
         super.postInitializationStatistics(state);
+        try {
         if (keepLast) {
             if (doSubpops) {
                 lastFile = new File[state.population.subpops.length];
                 for (int i = 0; i < state.population.subpops.length; i++) {
-                    lastFile[i] = new File(lastBaseFile.getParent(), jobPrefix + FilenameUtils.getBaseName(lastBaseFile.getName())
-                            + "_" + i + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(lastBaseFile.getName()));
+                    File f = new File(FilenameUtils.getBaseName(lastBaseFile.getName()) + "_" + i + FilenameUtils.EXTENSION_SEPARATOR_STR + FilenameUtils.getExtension(lastBaseFile.getName()));
+                    int l = state.output.addLog(f, false);
+                    lastFile[i] = state.output.getLog(l).filename;
                 }
             } else {
-                lastFile = new File[]{new File(lastBaseFile.getParent(), jobPrefix + lastBaseFile.getName())};
+                int l = state.output.addLog(lastBaseFile, false);
+                lastFile = new File[]{state.output.getLog(l).filename};
             }
+        }
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void postEvaluationStatistics(EvolutionState state) {
         super.postInitializationStatistics(state);
-        if (taos == null && compress) { // can happen in case of resuming from checkpoint
+        if (taos == null) { // can happen in case of resuming from checkpoint
             taos = SolutionPersistence.reopenTar(archiveFile);
         }
 
@@ -104,11 +106,7 @@ public class BestSolutionGenStat extends FileWriterStat {
             }
         }
         try {
-            if (compress) {
-                SolutionPersistence.writeSolutionToTar(p, taos);
-            } else {
-                SolutionPersistence.writeSolutionInFolder(p, archiveFile);
-            }
+            SolutionPersistence.writeSolutionToTar(p, taos);
         } catch (IOException ex) {
             Logger.getLogger(BestSolutionGenStat.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -117,12 +115,10 @@ public class BestSolutionGenStat extends FileWriterStat {
     @Override
     public void finalStatistics(EvolutionState state, int result) {
         super.finalStatistics(state, result);
-        if (compress) {
-            try {
-                taos.close();
-            } catch (IOException ex) {
-                Logger.getLogger(BestSolutionGenStat.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        try {
+            taos.close();
+        } catch (IOException ex) {
+            Logger.getLogger(BestSolutionGenStat.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

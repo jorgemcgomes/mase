@@ -8,7 +8,11 @@ import ec.EvolutionState;
 import ec.Individual;
 import ec.Statistics;
 import ec.util.Parameter;
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mase.MaseProblem;
 import mase.evaluation.ExpandedFitness;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -24,7 +28,8 @@ public class ConsoleStat extends Statistics {
     int currentJob;
     DecimalFormat nf;
     double bestFitness = Double.NEGATIVE_INFINITY;
-
+    private File folder;
+    
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
@@ -32,6 +37,15 @@ public class ConsoleStat extends Statistics {
         currentJob = state.job != null ? (Integer) state.job[0] : 0;
         nf = new DecimalFormat("0.0000");
         state.output.setStore(false);
+        try { // all this hacking just to get the output folder!!!!
+            int l = state.output.addLog(new File("dummy"), false);
+            File f = state.output.getLog(l).filename;
+            folder = f.getParentFile();
+            state.output.removeLog(l);
+            f.delete();
+        } catch (IOException ex) {
+            Logger.getLogger(ConsoleStat.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -59,10 +73,8 @@ public class ConsoleStat extends Statistics {
                 bestFitness = ds.getMax();
             }
         }
-        // TODO: so much hacking, just to obtain the output folder :/
-        RunStatistics stat = (RunStatistics) state.statistics.children[7];
         String ip = RunStatistics.getComputerName();
-        state.output.message("Exp: " + stat.file.getParent() + " Job: " + state.job[0] + " IP: " + ip);
+        state.output.message("Exp: " + folder + " Job: " + state.job[0] + " IP: " + ip);
         String status;
         if(state.evaluator.p_problem instanceof MaseProblem && state.numEvaluations > 0) {
             int done = ((MaseProblem) state.evaluator.p_problem).getTotalEvaluations();
