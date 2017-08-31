@@ -30,7 +30,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.SerializationUtils;
 
 /**
  *
@@ -47,9 +46,9 @@ public abstract class SolutionPersistence {
         PersistentSolution pc = new PersistentSolution();
         GroupController gc = ind.fitness.getContext() == null
                 ? sp.getControllerFactory().createController(state, ind)
-                : sp.getControllerFactory().createController(state, ind.fitness.getContext());
+                : sp.getControllerFactory().createController(state, ind.fitness.getContext());        
         pc.setController(gc);
-
+        
         ExpandedFitness fit = (ExpandedFitness) ind.fitness;
         pc.setEvalResults(fit.getEvaluationResults());
         pc.setOrigin(state.generation, sub, index);

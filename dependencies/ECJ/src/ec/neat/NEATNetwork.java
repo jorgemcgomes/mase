@@ -25,9 +25,6 @@ public class NEATNetwork implements Prototype
     /** constant used for the sigmoid function */
     public static final double SIGMOID_SLOPE = 4.924273;
 
-    /** The neat individual we belong to */
-    public NEATIndividual individual;
-
     /** A list of all nodes for this network. */
     public ArrayList<NEATNode> nodes;
 
@@ -36,6 +33,8 @@ public class NEATNetwork implements Prototype
 
     /** A list of output nodes for this network. */
     public ArrayList<NEATNode> outputs; 
+    
+    private int maxNetworkDepth;
 
     public void setup(EvolutionState state, Parameter base)
         {
@@ -57,17 +56,40 @@ public class NEATNetwork implements Prototype
         try
             {
             myobj = (NEATNetwork) (super.clone());
+            myobj.maxNetworkDepth = this.maxNetworkDepth;
+            
             myobj.nodes = new ArrayList<NEATNode>();
-            for(int i = 0; i < nodes.size(); i++)
+            for(int i = 0; i < nodes.size(); i++) {
                 myobj.nodes.add((NEATNode)(nodes.get(i).clone()));
+            }
             myobj.inputs = new ArrayList<NEATNode>();
-            for(int i = 0; i < inputs.size(); i++)
-                myobj.inputs.add((NEATNode)(inputs.get(i).clone()));
             myobj.outputs = new ArrayList<NEATNode>();
-            for(int i = 0; i < outputs.size(); i++)
-                myobj.outputs.add((NEATNode)(outputs.get(i).clone()));
-            } 
-        catch (CloneNotSupportedException e)
+            
+            for(int i = 0 ; i < this.nodes.size() ; i++) {
+                NEATNode mynode = myobj.nodes.get(i);
+                // TODO: copy incoming genes
+                ArrayList<NEATGene> genes = this.nodes.get(i).incomingGenes;
+                mynode.incomingGenes = new ArrayList<>(genes.size());
+                for(NEATGene g : genes) {
+                    NEATGene copy = (NEATGene) g.clone();
+                    if(copy.enable) {
+                        copy.outNode = mynode;
+                        for(NEATNode node : myobj.nodes) {
+                            if(copy.inNodeId == node.nodeId) {
+                                copy.inNode = node;
+                            }
+                        }
+                    }
+                    mynode.incomingGenes.add(copy);
+                }
+                
+                if (mynode.geneticNodeLabel == NodePlace.INPUT || mynode.geneticNodeLabel == NodePlace.BIAS ) {
+                    myobj.inputs.add(mynode);
+                } else if (mynode.geneticNodeLabel == NodePlace.OUTPUT) {
+                    myobj.outputs.add(mynode);
+                }
+            }    
+            } catch (CloneNotSupportedException e)
             {
             throw new InternalError();
             } // never happens
@@ -139,7 +161,7 @@ public class NEATNetwork implements Prototype
             {
             abortCounter++;
            
-            if (abortCounter >= ((NEATSpecies)(individual.species)).maxNetworkDepth)
+            if (abortCounter >= maxNetworkDepth)
                 {
                 state.output.fatal("Inputs disconnected from output!");
                 }
@@ -357,7 +379,7 @@ public class NEATNetwork implements Prototype
      */
     public void buildNetwork(NEATIndividual individual)
         {
-        this.individual = individual;
+        this.maxNetworkDepth = ((NEATSpecies)(individual.species)).maxNetworkDepth;
         
         nodes.addAll(individual.nodes);
 

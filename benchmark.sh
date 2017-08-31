@@ -21,7 +21,7 @@
 
 
 
-#./evolve.sh -out /home/jorge/exps/bench/single_fitness_neat -file build/classes/mase/app/pred/benchmark.params -file build/classes/mase/neat/neat.params -p pop.subpops=1
+./evolve.sh -out /home/jorge/exps/bench/single_fitness_neat -file build/classes/mase/app/pred/benchmark.params -file build/classes/mase/neat.params -p pop.subpops=1
 
-#./evolve.sh -out /home/jorge/exps/bench/ccea_fitness_neat -file build/classes/mase/app/pred/benchmark.params -file build/classes/mase/neat/neat.params -file build/classes/mase/gax.params -p pop.subpops=3
+./evolve.sh -out /home/jorge/exps/bench/ccea_fitness_nn -file build/classes/mase/app/pred/benchmark.params -file build/classes/mase/cooperative.params -file build/classes/mase/neat.params -p pop.subpops=3 -force
 

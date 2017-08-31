@@ -15,8 +15,6 @@ exch.distance.threaded =    true
 exch.initial-allocation =   heterogeneous
 #exch.behaviour-index =      1
 
-breed =                     mase.spec.SkipNewBreeder
-
 neat.shared-database =      true
 
 stat.child.17 =             mase.spec.HybridStat

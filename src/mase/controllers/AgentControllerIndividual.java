@@ -9,8 +9,8 @@ package mase.controllers;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public interface AgentControllerIndividual {
+public interface AgentControllerIndividual<T extends AgentController> {
     
-    public AgentController decodeController();
+    public T decodeController();
     
 }
