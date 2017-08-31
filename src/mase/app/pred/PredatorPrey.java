@@ -11,13 +11,11 @@ import java.util.LinkedList;
 import java.util.List;
 import mase.controllers.AgentController;
 import mase.controllers.GroupController;
-import mase.evaluation.EvaluationFunction;
 import mase.mason.generic.SmartAgentProvider;
 import mase.mason.generic.systematic.EntityGroup;
 import mase.mason.generic.systematic.TaskDescription;
 import mase.mason.generic.systematic.TaskDescriptionProvider;
 import mase.mason.MasonSimState;
-import mase.mason.world.GeomUtils.Multiline;
 import mase.mason.world.MultilineObject;
 import mase.mason.world.SmartAgent;
 import sim.field.continuous.Continuous2D;
@@ -29,11 +27,10 @@ import sim.util.Double2D;
  *
  * @author Jorge Gomes, FC-UL <jorgemcgomes@gmail.com>
  */
-public class PredatorPrey extends MasonSimState implements TaskDescriptionProvider, SmartAgentProvider {
+public class PredatorPrey extends MasonSimState<PredParams> implements TaskDescriptionProvider, SmartAgentProvider {
 
     private static final long serialVersionUID = 1L;
 
-    protected PredParams par;
     protected Continuous2D field;
     protected List<Predator> predators;
     protected List<Prey> preys;
@@ -43,9 +40,8 @@ public class PredatorPrey extends MasonSimState implements TaskDescriptionProvid
     protected TaskDescription td;
     protected double escapeDistance;
 
-    public PredatorPrey(long seed, PredParams params, GroupController gc) {
-        super(gc, seed);
-        this.par = params;
+    public PredatorPrey(long seed) {
+        super(seed);
     }
 
     @Override

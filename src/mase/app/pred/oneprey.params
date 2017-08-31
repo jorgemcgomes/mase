@@ -1,4 +1,7 @@
-eval.base.problem =                mase.app.pred.PredatorPreySimulator
+eval.base.problem =                mase.mason.MasonSimulationProblem
+problem.simstate =                 mase.app.pred.PredatorPrey
+problem.params =                   mase.app.pred.PredParams
+
 problem.trials-merge =             best
 problem.number-evals =             3
 problem.eval.0 =                   mase.app.pred.OnePreyFitness

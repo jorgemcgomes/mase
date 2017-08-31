@@ -1,4 +1,4 @@
-eval.base.problem =                mase.mason.DefaultMasonSimulator
+eval.base.problem =                mase.mason.MasonSimulationProblem
 problem.simstate =                 mase.app.playground.Playground
 problem.params =                   mase.app.playground.PlaygroundParams
 

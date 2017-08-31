@@ -4,6 +4,8 @@
  */
 package mase.mason;
 
+import ec.util.Parameter;
+import ec.util.ParameterDatabase;
 import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.GroupController;
