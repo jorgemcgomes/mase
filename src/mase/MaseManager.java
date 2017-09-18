@@ -686,7 +686,7 @@ public class MaseManager {
             // add conillon config if it doesnt exist
             String newParams = job.params;
             if (!newParams.contains("conillon.params")) {
-                newParams = StringUtils.replaceOnce(newParams, "-p parent", "-p parent=build/classes/mase/conillon/conillon.params -p parent");
+                newParams = StringUtils.replaceOnce(newParams, "-file", "-file build/classes/mase/conillon/conillon.params -file");
             }
             process = Runtime.getRuntime().exec("java -cp build/classes:lib/* mase.MaseEvolve -out " + job.outfolder + " " + newParams);
             in = new BufferedReader(new InputStreamReader(process.getInputStream()));

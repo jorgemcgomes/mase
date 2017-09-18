@@ -40,9 +40,10 @@ public interface Repertoire extends Serializable {
      * Load the repertoire with the given controllers and the given coordinates (optional)
      * @param repo File of the archive containing the PersistentSolutions
      * @param coordinates File with the coordinates. null if the coordinates encoded in the solutions should be used instead
+     * @param ignoreConstant True to ignore the dimensions that are constant (same value) across the entire repertoire
      * @throws java.io.IOException If anything goes wrong with the loading
      */
-    public void load(File repo, File coordinates) throws IOException;
+    public void load(File repo, File coordinates, boolean ignoreConstant) throws IOException;
             
     /**
      * Clones the repertoire, also cloning the controllers contained in it

@@ -5,11 +5,9 @@
  */
 package mase.app.playground;
 
-import mase.controllers.GroupController;
 import mase.mason.world.SmartAgent;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.util.Double2D;
 
 /**
  *
@@ -19,8 +17,8 @@ public class MazePlayground extends Playground {
 
     private static final long serialVersionUID = 1L;
 
-    public MazePlayground(GroupController gc, long seed, PlaygroundParams par) {
-        super(gc, seed, par);
+    public MazePlayground(long seed) {
+        super(seed);
     }
 
     @Override

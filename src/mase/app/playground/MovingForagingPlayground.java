@@ -6,7 +6,6 @@
 package mase.app.playground;
 
 import mase.app.playground.RandomMovingAgentsPlayground.RandomMovingAgent;
-import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
 
 /**
@@ -17,8 +16,8 @@ public class MovingForagingPlayground extends ForagingPlayground {
 
     private static final long serialVersionUID = 1L;
 
-    public MovingForagingPlayground(GroupController gc, long seed, PlaygroundParams par) {
-        super(gc, seed, par);
+    public MovingForagingPlayground(long seed) {
+        super(seed);
     }
 
     @Override

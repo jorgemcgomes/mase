@@ -19,6 +19,8 @@ processRepo("rand", jobs=0:9)
 processRepo("few", jobs=0:9)
 processRepo("noobs", jobs=0:9)
 processRepo("noobj", jobs=0:9)
+processRepo("fixed", jobs=0:9)
+processRepo("none", jobs=0:9)
 
 
 setwd("~/exps/playground/rep11")
@@ -68,32 +70,36 @@ qdscore <- function(data, vars, d=0.5) {
 
 # DATA LOAD ######################
 
+# load files
 setwd("~/exps/playground")
-
 fitraw <- loadData("tasks10/*", "fitness.stat", fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
 fit <- loadData("tasks10/*", "postfitness.stat", fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
 fit <- merge(fit, fitraw[, .(Generation,Job,Setup,RawMin=MinFitness,RawMean=MeanFitness,RawMax=MaxFitness,RawBest=BestSoFar)], by=c("Generation","Job","Setup"), all.x=T)
 rm(fitraw) ; gc()
 
+# fix data
+fit <- fit[Reduction != "nonconstant"]
 fit[, ScaledFitness := (BestSoFar - min(RawMin, na.rm=T)) / (max(BestSoFar)-min(RawMin,na.rm=T)) , by=.(Task)]
 fit[, Task := factor(Task, levels=c("freeforaging","obsforaging","dynforaging","simplephototaxis","phototaxis","exploration","maze","avoidance","predator","dynphototaxis"), labels=c("Foraging","Foraging-O","Foraging-D","Phototaxis","Phototaxis-O","Exploration","Maze","Avoidance","Prey","Tracking"))]
 fit <- fit[Task != "Foraging-D"]
 fit[Reduction=="direct", Reduction := NA]
-fit[, Conf := paste(BC,Repo,Reduction, sep="-")]
 
+# convenience definitions
 vars <- paste0("Behav_", 0:6)
 options(digits = 5, scipen=10)
 
+# repertoire data (already reduced)
 load("finalreps.rdata")
 load("baserep.rdata")
 
+# activation data
 act <- loadData("tasks10/pl_*_sdbc_nsneat_0_direct", "postbest.xml.stat", auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
 act[, Task := factor(Task, levels=c("freeforaging","obsforaging","simplephototaxis","phototaxis","exploration","maze","avoidance","predator","dynphototaxis"), labels=c("Foraging","Foraging-O","Phototaxis","Phototaxis-O","Exploration","Maze","Avoidance","Prey","Tracking"))]
 act <- merge(act, rep[Repo=="nsneat", c("Job","Index",vars,"V1","V2"), with=F], by.x=c("Primitive","RepoJob"), by.y=c("Index","Job"))
 setorder(act, RepoJob, Task, Job, Seed, Time)
 
 
-# Dimensionality reduction (one time only)
+# Repertoire dimensionality reduction (one time only) ################
 
 rep <- loadData("rep10/*", "archive.stat", auto.ids.names=c("NA","Repo"))
 hrep <- loadFile("~/exps/playground/rep10/nsneat/job.0.behaviours.stat", colnames=c("Generation","Subpop","Index",vars,"Fitness"))
@@ -116,14 +122,16 @@ save(hrep, file="baserep.rdata")
 
 # Behaviour space exploration through gens
 hrep.plus <- rbind(hrep, rep[Repo=="nsneat" & Job==0], fill=T)
-gens <- c(0,5,10,25,50,100,250,499)
+hrep.plus[, Generation := Generation + 1]
+gens <- c(1,5,10,25,50,100,250,500)
 
 flist <- lapply(gens, function(g){hrep.plus[Generation<=g]})
 names(flist) <- paste("Gen",gens)
-flist[["Archive"]] <- hrep.plus[is.na(Generation)]
+flist[["Repertoire"]] <- hrep.plus[is.na(Generation)]
 f <- rbindlist(flist, idcol="id")
 f[, id := factor(id, levels=names(flist))]
-plotReduced2D(f) + facet_wrap(~ id)
+ggplot(f, aes(x=V1, y=V2)) + geom_point(shape=20, size=.2) + coord_fixed() + labs(x="PC1", y="PC2") + facet_wrap(~ id) +
+  scale_x_continuous(breaks=seq(0,1,by=0.2)) + scale_y_continuous(breaks=seq(0,1,by=0.2))
 ggsave("~/Dropbox/Work/Papers/17-SWEVO/rep_evolution.png", width=4.7, height=3.2)
 
 
@@ -316,8 +324,8 @@ ggplot(as.data.table(m$conf, keep.rownames=T), aes(D1,D2)) + geom_point() + geom
 
 # Environment #####################
 
-subfit <- fit[is.na(Reduction) & Repo %in% c("nsneat","few","noobj","noobs")]
-subfit[, Repo := factor(Repo, levels=c("nsneat","few","noobj","noobs"), labels=c("Base","Few","No-POIs","No-Obstacles"))]
+subfit <- fit[is.na(Reduction) & Repo %in% c("nsneat","fixed","noobj","noobs","none")]
+subfit[, Repo := factor(Repo, levels=c("nsneat","fixed","noobs","noobj","none"), labels=c("Base","Fixed","No-obstacles","No-POIs","Only-walls"))]
 sum <- lastGen(subfit)[, .(Fitness=mean(ScaledFitness), SE=se(ScaledFitness)), by=.(Task, Repo)]
 sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=se(Fitness)), by=.(Repo)])
 
@@ -331,11 +339,31 @@ ggsave("~/Dropbox/Work/Papers/17-SWEVO/environments.pdf", width=4.7, height=3)
 
 m <- metaAnalysis(lastGen(subfit)[!is.na(Repo)], ScaledFitness ~ Repo, ~Task)
 sapply(m, function(x) x$ttest$kruskal$p.value)
+sapply(m, function(x) x$ttest$holm[1,5]) # base vs fixed
+sapply(m, function(x) x$ttest$holm[1,4]) # base vs no-obstacles
+sapply(m, function(x) x$ttest$holm[1,3]) # base vs no-poi
+sapply(m, function(x) x$ttest$holm[1,2]) # base vs only-walls
+sapply(m, function(x) x$ttest$holm[2,3]) # no-poi vs only-walls
 
 # paired comparison without tabula-rasa
 metaAnalysis(lastGen(subfit)[!is.na(Repo),.(MeanFitness=mean(ScaledFitness)), by=.(Task,Repo)], MeanFitness ~ Repo, paired=T)
 
-metaAnalysis(lastGen(subfit)[,.(MeanFitness=mean(ScaledFitness)), by=.(Task,Repo)], MeanFitness ~ Repo, paired=T)
+
+
+# Ignore constant dimensions ##################
+
+subfit <- fit[(Reduction=="nonconstant" | is.na(Reduction)) & Repo %in% c("noobj","noobs","none") & RepoJob==0]
+sum <- lastGen(subfit)[, .(Fitness=mean(ScaledFitness), SE=se(ScaledFitness)), by=.(Task, Repo, Reduction)]
+sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=se(Fitness)), by=.(Repo, Reduction)])
+
+ggplot(sum, aes(Task, Fitness, fill=Reduction)) + geom_bar(stat="identity", position="dodge") + 
+  geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.5, position=position_dodge(.9), size=.25) +
+  labs(y="Scaled fitness", fill="Repertoire evo. environment") + facet_wrap(~ Repo) +
+  theme(axis.text.x = element_text(angle = 22.5, hjust = 1)) 
+
+m <- metaAnalysis(lastGen(subfit), ScaledFitness ~ Reduction, ~ Task + Repo)
+sapply(m, function(x) x$ttest$holm[1,2])
+
 
 
 # Activation stats ##############
@@ -345,6 +373,10 @@ act.stats <- act[, .(Number=length(unique(Primitive)),
                      MaxDuration=max(rle(Primitive)$lengths),
                      Used=sum(sapply(.SD[, paste0("ArbitratorOut_",0:6), with=F], sd) > 0.10, na.rm=T)),
                  by=.(Seed, Job, Task)]
+
+act.stats[, .(Number=sprintf("& %.2f & (%.1f) &", mean(Number), sd(Number)), Duration=sprintf("%.2f & (%.1f) &", mean(Duration), sd(Duration)), Dimensions=sprintf("%.2f & (%.1f) \\", mean(Used), sd(Used))), by=.(Task)]
+
+metaAnalysis(act.stats, Number ~ Task)
 
 act.sum <- act.stats[, .(Used = mean(Used)), by=.(Task,Job)][, .(Mean=mean(Used),SE=se(Used)), by=.(Task)]
 ggplot(act.sum, aes(Task, Mean)) + geom_bar(stat="identity") +
@@ -475,3 +507,28 @@ ggplot(all[Reduction!="All"], aes(V1, V2)) +
   theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL)
 
 ggsave("~/Dropbox/Work/Papers/17-SWEVO/size_viz.png", width=4, height=4)
+
+
+# Generalisation
+
+basefit <- loadData("tasks10/*", "postfitness.stat", fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
+basefit <- basefit[(is.na(Repo) | (Repo=="nsneat" & Reduction=="direct" & RepoJob==0)) & Task != "dynforaging"]
+v1fit <- loadData("tasks10/*", "var1fitness.stat", fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
+v2fit <- loadData("tasks10/*", "var2fitness.stat", fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
+
+allfits <- rbind(cbind(basefit,Variant="Base"), cbind(v1fit,Variant="Var1"), cbind(v2fit,Variant="Var2"))
+
+
+# Barplots
+sum <- allfits[Generation==249, .(Fitness=mean(BestSoFar),SE=se(BestSoFar)), by=.(Repo,Task,Variant)]
+ggplot(sum[is.na(Repo)], aes(Task, Fitness,fill=Variant)) + geom_bar(stat="identity", position="dodge") + 
+  geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.5, size=.25, position=position_dodge(.9)) +
+  theme(axis.text.x = element_text(angle = 22.5, hjust = 1)) 
+
+ggplot(sum, aes(paste(Task,Variant), Fitness,fill=Repo)) + geom_bar(stat="identity", position="dodge") + 
+  geom_errorbar(aes(ymin=Fitness-SE,ymax=Fitness+SE), width=.5, size=.25, position=position_dodge(.9)) +
+  theme(axis.text.x = element_text(angle = 22.5, hjust = 1)) 
+
+
+
+

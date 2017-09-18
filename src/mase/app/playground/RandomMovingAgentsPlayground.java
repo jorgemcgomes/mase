@@ -6,11 +6,9 @@
 package mase.app.playground;
 
 import java.awt.Color;
-import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
 import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.MultilineObject;
-import mase.mason.world.SmartAgent;
 import sim.engine.SimState;
 import sim.engine.Stoppable;
 
@@ -22,9 +20,10 @@ public class RandomMovingAgentsPlayground extends Playground {
 
     private static final long serialVersionUID = 1L;
 
-    public RandomMovingAgentsPlayground(GroupController gc, long seed, PlaygroundParams par) {
-        super(gc, seed, par);
+    public RandomMovingAgentsPlayground(long seed) {
+        super(seed);
     }
+
 
     @Override
     protected CircularObject createObject() {

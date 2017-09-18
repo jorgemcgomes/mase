@@ -37,11 +37,14 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
     protected List<CircularObject> objects;
     protected AgentController ac;
 
-    public Playground(GroupController gc, long seed, PlaygroundParams par) {
-        super(gc, seed, par);
-        if(gc != null) {
-            this.ac = gc.getAgentControllers(1)[0];
-        }
+    public Playground(long seed) {
+        super(seed);
+    }
+    
+    @Override
+    public void setGroupController(GroupController gc) {
+        super.setGroupController(gc);
+        this.ac = gc.getAgentControllers(1)[0];
     }
 
     @Override
@@ -193,11 +196,6 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
         return Collections.singletonList(agent);
     }
 
-    @Override
-    public void setGroupController(GroupController gc) {
-        super.setGroupController(gc);
-        this.ac = gc.getAgentControllers(1)[0];
-    }
 
     
     

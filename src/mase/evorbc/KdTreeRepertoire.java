@@ -10,10 +10,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +27,7 @@ import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import mase.util.KdTree;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -32,23 +35,26 @@ import org.apache.commons.lang3.tuple.Pair;
  * @author jorge
  */
 public class KdTreeRepertoire implements Repertoire {
+
+    private static final long serialVersionUID = 1L;
+    public static final double FLOAT_DELTA = 0.001;
     
     // Cache to avoid many instances of the same repertoire when de-serializing many controllers using the same repertoire
     // Currently only supports one repo at a time (should be enough for most cases)
     // TODO: there WILL be problems if any controller modifies these structures for some reason
-    private static transient KdTree<Integer> cachedTree;
-    private static transient Map<Integer, AgentController> cachedPrimitives;
-    private static transient long cachedRepHash, cachedCoordsHash;
+    private static transient KdTree<Integer> _cachedTree;
+    private static transient Map<Integer, AgentController> _cachedPrimitives;
+    private static transient long _cachedRepHash, _cachedCoordsHash;
+    private static transient boolean _cachedIgnoreConstant;
 
-    private static final long serialVersionUID = 1L;
     private transient KdTree<Integer> tree;
     private transient Map<Integer, AgentController> primitives;
-    private Pair<Double, Double>[] bounds;
 
+    private Pair<Double, Double>[] bounds;
+    private boolean ignoreConstant;
     private File repFile, coordsFile;
     private long repFileHash, coordsFileHash;
 
-    //coords.get(solutions.get(0).getIndex()).length
     @Override
     public Pair<Integer, AgentController> nearest(double[] coordinates) {
         ArrayList<KdTree.SearchResult<Integer>> nearest = tree.nearestNeighbours(coordinates, 1);
@@ -65,6 +71,7 @@ public class KdTreeRepertoire implements Repertoire {
         newRep.coordsFile = this.coordsFile;
         newRep.repFileHash = this.repFileHash;
         newRep.coordsFileHash = this.coordsFileHash;
+        newRep.ignoreConstant = this.ignoreConstant;
         
         newRep.primitives = new HashMap<>(this.primitives);
         for(Map.Entry<Integer,AgentController> e : newRep.primitives.entrySet()) {
@@ -74,13 +81,14 @@ public class KdTreeRepertoire implements Repertoire {
     }
 
     @Override
-    public void load(File repo, File coordinates) throws IOException {
+    public void load(File repo, File coordinates, boolean ignoreConstant) throws IOException {
         repFile = repo;
         repFileHash = FileUtils.checksumCRC32(repFile);
         if (coordinates != null) {
             coordsFile = coordinates;
             coordsFileHash = FileUtils.checksumCRC32(coordsFile);
         }
+        this.ignoreConstant = ignoreConstant;
 
         List<PersistentSolution> solutions;
         try {
@@ -102,9 +110,40 @@ public class KdTreeRepertoire implements Repertoire {
         } else {
             coords = encodedCoordinates(solutions);
         }
-
+        
         int n = coords.values().iterator().next().length;
 
+        if(true) {
+            // check which features are constant
+            ArrayList<Integer> toRemove = new ArrayList<>();
+            for(int i = 0 ; i < n ; i++) {
+                boolean ignore = true;
+                double v = coords.values().iterator().next()[i];
+                for(double[] coord : coords.values()) {
+                    if(Math.abs(coord[i] - v) > FLOAT_DELTA) {
+                        ignore = false;
+                        break;
+                    }
+                }
+                if(ignore) {
+                    toRemove.add(i);
+                }
+            }
+            
+            // remove constant features from the coordinates
+            if(!toRemove.isEmpty()) {
+                if(toRemove.size() == n) {
+                    throw new IOException("Zero non-constant features");
+                }
+                int[] toRemoveA = ArrayUtils.toPrimitive(toRemove.toArray(new Integer[toRemove.size()]));
+                System.out.println("Removing features: " + Arrays.toString(toRemoveA));
+                for(Entry<Integer,double[]> e : coords.entrySet()) {
+                    e.setValue(ArrayUtils.removeAll(e.getValue(), toRemoveA));
+                }
+                n = n - toRemove.size();
+            }
+        }
+        
         // bounds might already have been computed if the object is being de-serialized
         if(bounds == null) {
             bounds = new Pair[n];
@@ -197,15 +236,16 @@ public class KdTreeRepertoire implements Repertoire {
         }
         
         synchronized(KdTreeRepertoire.class) {
-            if(cachedTree != null && repFileHash == cachedRepHash && coordsFileHash == cachedCoordsHash) {
-                this.tree = cachedTree;
-                this.primitives = cachedPrimitives;
+            if(_cachedTree != null && repFileHash == _cachedRepHash && coordsFileHash == _cachedCoordsHash && ignoreConstant == _cachedIgnoreConstant) {
+                this.tree = _cachedTree;
+                this.primitives = _cachedPrimitives;
             } else {
-                load(repFile, coordsFile);
-                cachedRepHash = repFileHash;
-                cachedCoordsHash = coordsFileHash;
-                cachedTree = this.tree;
-                cachedPrimitives = this.primitives;
+                load(repFile, coordsFile, ignoreConstant);
+                _cachedRepHash = repFileHash;
+                _cachedCoordsHash = coordsFileHash;
+                _cachedTree = this.tree;
+                _cachedPrimitives = this.primitives;
+                _cachedIgnoreConstant = this.ignoreConstant;
             }
         }        
     }

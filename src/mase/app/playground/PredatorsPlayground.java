@@ -20,9 +20,9 @@ import sim.util.Double2D;
 public class PredatorsPlayground extends Playground {
 
     private static final long serialVersionUID = 1L;
-    
-    public PredatorsPlayground(GroupController gc, long seed, PlaygroundParams par) {
-        super(gc, seed, par);
+
+    public PredatorsPlayground(long seed) {
+        super(seed);
     }
 
     @Override

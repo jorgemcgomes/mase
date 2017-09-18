@@ -30,11 +30,12 @@ public class ArbitratorFactory implements ControllerFactory {
     public static final String P_LOCKING = "locking";
     public static final String P_COORDINATES = "coordinates";
     public static final String V_DIRECT = "direct";
+    public static final String V_IGNORE = "nonconstant";
     private static final long serialVersionUID = 1L;
     private Repertoire repo;
     private MappingFunction mapFun;
     private boolean locking;
-
+    
     @Override
     /*
      * TODO: the mappingfunction and repertoire should also be configurable and setupable
@@ -44,7 +45,7 @@ public class ArbitratorFactory implements ControllerFactory {
         File repoFile = new File(state.parameters.getString(base.push(P_REPERTOIRE), DEFAULT_BASE.push(P_REPERTOIRE)));
         File coordsFile = null;
         String fName = state.parameters.getString(base.push(P_COORDINATES), DEFAULT_BASE.push(P_COORDINATES));
-        if (!fName.equalsIgnoreCase(V_DIRECT)) {
+        if (!fName.equalsIgnoreCase(V_DIRECT) && !fName.equalsIgnoreCase(V_IGNORE)) {
             if (!fName.endsWith(".txt")) {
                 fName += ".txt";
             }
@@ -54,10 +55,11 @@ public class ArbitratorFactory implements ControllerFactory {
                         + "The coordinate file should be in the same folder as the repertoire.");
             }
         }
-
+        
+        boolean ignoreConstant = fName.equalsIgnoreCase(V_IGNORE);
         repo = new KdTreeRepertoire();
         try {
-            repo.load(repoFile, coordsFile);
+            repo.load(repoFile, coordsFile, ignoreConstant);
         } catch (IOException ex) {
             state.output.fatal("Error loading repertoire: " + ex.getMessage());
         }

@@ -11,9 +11,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import mase.mason.MasonSimulationProblem;
 import mase.stat.ReevaluationTools;
 import org.apache.commons.io.FileUtils;
@@ -72,17 +69,6 @@ public class BatchEvoRBCReevaluation {
             dirSet.addAll(folders);
         }
 
-        /* Perform evaluation */
- /*ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        for (File f : dirSet) {
-            try {
-                es.submit(new DirReevaluate(f, args, reps, force));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        es.shutdown();
-        es.awaitTermination(1, TimeUnit.DAYS);*/
         for (File dir : dirSet) {
             try {
                 Collection<File> list = FileUtils.listFiles(dir, new String[]{"postbest.xml"}, false);
@@ -107,40 +93,4 @@ public class BatchEvoRBCReevaluation {
         }
 
     }
-
-    /*private static class DirReevaluate implements Runnable {
-
-        private final File dir;
-        private final String[] args;
-        private final int reps;
-        private final boolean force;
-
-        private DirReevaluate(File dir, String[] args, int reps, boolean force) {
-            this.dir = dir;
-            this.args = args;
-            this.reps = reps;
-            this.force = force;
-        }
-
-        @Override
-        public void run() {
-            // Reevaluate this folder if there are any files here
-            Collection<File> list = FileUtils.listFiles(dir, new String[]{"postbest.xml"}, false);
-            if (!list.isEmpty()) {
-                System.out.println(dir.getAbsolutePath());
-                MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, dir);
-                for (File f : list) {
-                    File out = new File(f.getPath() + ".stat");
-                    if (force || !out.exists()) {
-                        try {
-                            EvoRBCReevaluation.logController(f, simulator, reps, out);
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                    System.out.print(".");
-                }
-            }
-        }
-    }*/
 }

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import mase.app.playground.RandomMovingAgentsPlayground.RandomMovingAgent;
-import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -23,8 +22,8 @@ public class ForagingPlayground extends Playground {
     private static final long serialVersionUID = 1L;
     protected ItemRemover itemRemover;
 
-    public ForagingPlayground(GroupController gc, long seed, PlaygroundParams par) {
-        super(gc, seed, par);
+    public ForagingPlayground(long seed) {
+        super(seed);
     }
 
     @Override
