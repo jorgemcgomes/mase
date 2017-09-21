@@ -105,7 +105,7 @@ public class HybridStat extends Statistics {
         }*/
     }
 
-    private void printMatrix(double[][] m, EvolutionState state) {
+    public static void printMatrix(double[][] m, EvolutionState state) {
         DecimalFormat df = new DecimalFormat("000.000");
         try {
             StringBuilder sb = new StringBuilder();

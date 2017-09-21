@@ -25,6 +25,10 @@ public class HeterogeneousGroupController implements GroupController {
         }
         return out;
     }
+    
+    public AgentController[] getAllControllers() {
+        return controllers;
+    }
 
     @Override
     public String toString() {

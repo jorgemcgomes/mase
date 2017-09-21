@@ -1,6 +1,6 @@
 ### Base ######
 
-setwd("~/exps/allocationx_fix")
+setwd("/media/jorge/Orico/allocationx_fix")
 hyb.cols <- c("Generation","Evaluations","NumPops",NA,NA,NA,"MeanAge","MaxAge","Merges","Splits","TotalMerges","TotalSplits",NA,"MeanDist",NA)
 ut_labeller <- labeller(UniqueTargets=function(v) {paste("Unique targets:",v)})
 pops_scale <- scale_y_continuous(breaks=seq(1,10),minor_breaks=NULL,limits=c(1,10))
@@ -20,7 +20,7 @@ pops_scale <- scale_y_continuous(breaks=seq(1,10),minor_breaks=NULL,limits=c(1,1
 comp <- loadData("comparison_*", "fitness.stat", fun=loadFitness, auto.ids.names=c("Experiment","Method","UniqueTargets"),  filter=bestSoFarEvaluations, filter.par=list(step=1000))
 comp[, Method := factor(Method,labels=c("CCEA-H","CCEA-PH","Hyb-CCEA","R-Exch","C-Exch"))]
 comp[, Method := relevel(Method, "Hyb-CCEA")]
-comp <- comp[Method != "R-Exch"]
+comp <- comp[Method != "R-Exch" & Method != "C-Exch"]
 
 # highest fitnesses
 metaAnalysis(lastGen(comp), BestSoFar~Method, ~UniqueTargets)
@@ -39,7 +39,7 @@ ggsave("~/Dropbox/Work/Papers/TEC/fig3/comparison_fitness.pdf", width=3.5, heigh
 ggplot(levels, aes(UniqueTargets,Evaluations/1000, colour=Method)) + 
   geom_boxplot(size=.3,outlier.size=.4) + scale_color_brewer(palette="Set1") + theme(panel.grid.major.x = element_blank()) +
   labs(y="Evaluations (x1000) to solution", x="Number of unique targets",color=NULL) + ylim(0,NA) + geom_vline(xintercept=c(1.5,2.5,3.5),size=.3,colour="darkgrey")
-ggsave("~/Dropbox/Work/Papers/TEC/fig3/comparison_evaluations.pdf", width=3.5, height=2)
+ggsave("~/Dropbox/Work/Papers/17-TEC/fig/comparison_evaluations2.pdf", width=3.5, height=2)
 
 m <- merge(levels[Method=="Hyb-CCEA"],levels[Method=="CCEA-PH"], by=c("Job","UniqueTargets","Threshold"))
 cor(m$Evaluations.x,m$Evaluations.y)
@@ -49,6 +49,15 @@ cor(m$Evaluations.x,m$Evaluations.y)
 dims <- loadData("dimensions_*", "fitness.stat", fun=loadFitness, auto.ids.names=c("Experiment","UniqueTargets","Dimensions"),  filter=bestSoFarEvaluations, filter.par=list(step=1000))
 
 metaAnalysis(lastGen(dims), BestSoFar~UniqueTargets, ~Dimensions)
+metaAnalysis(lastGen(dims), BestSoFar~Dimensions, ~UniqueTargets)
+lastGen(dims)[,.(cor(BestSoFar,factorNum(Dimensions),method="s")), by=.(UniqueTargets)]
+lastGen(dims)[,.(cor2(BestSoFar,factorNum(Dimensions),method="s")), by=.(UniqueTargets)]
+
+cor2 <- function(x , y, ...) {
+  ct <- cor.test(x, y, ...)
+  print(ct)
+  return(ct$estimate)
+}
 
 ggplot(lastGen(dims), aes(Dimensions,BestSoFar,colour=UniqueTargets)) + 
   stat_summary(fun.y=median, geom="line", aes(group=UniqueTargets,linetype=UniqueTargets), size=.3) + scale_linetype_manual(values=c("solid","dashed","dotted","twodash")) +
@@ -100,7 +109,7 @@ aghyb <- loadData("agents_*","hybrid.stat", auto.ids.names=c("Experiment","Uniqu
 stat <- aghyb[, .(NumPops = mean(NumPops)), by=.(Job,UniqueTargets,Agents)]
 #stat[, Ratio := NumPops / factorNum(UniqueTargets)]
 #stat[, Difference := NumPops - factorNum(UniqueTargets)]
-stat[,.(cor(NumPops,factorNum(UniqueTargets),method="p"))]
+stat[,.(cor2(NumPops,factorNum(UniqueTargets),method="p"))]
 metaAnalysis(stat, NumPops~Agents+UniqueTargets)
 
 ggplot(stat[,.(NumPops=mean(NumPops),SE=se(NumPops)), by=.(UniqueTargets,Agents)], aes(UniqueTargets,NumPops,group=Agents,colour=Agents)) + 
@@ -160,7 +169,7 @@ metaAnalysis(stat, NumPops~InitialPops, ~UniqueTargets)
 
 ### Merge threshold X Maturation X Unique targets ##############
 
-setwd("~/exps/allocationx_par")
+setwd("/media/jorge/Orico/allocationx_par")
 
 grid <- loadData("*","fitness.stat", auto.ids.names=c("Experiment","UniqueTargets","MergeThreshold","Maturation"),fun=loadFitness, filter=bestSoFarEvaluations, filter.par=list(step=1000))
 #ggplot(lastGen(grid), aes(MergeThreshold,Maturation)) + geom_tile(aes(fill=BestSoFar)) + facet_wrap(~ UniqueTargets)
@@ -188,13 +197,14 @@ c <- l[UniqueTargets=="10", .(cor(Evaluations,factorNum(MergeThreshold),method="
 c[,.(mean(V1,na.rm=T),sd(V1,na.rm=T))]
 c <- l[UniqueTargets!="10" & UniqueTargets!="1", .(cor(Evaluations,factorNum(MergeThreshold),method="spearman")), by=.(Maturation,UniqueTargets)]
 c[,.(mean(V1),sd(V1))]
+c <- l[UniqueTargets!="1", .(cor(Evaluations,factorNum(MergeThreshold),method="spearman")), by=.(Maturation,UniqueTargets)]
+c[,.(mean(V1,na.rm=T),sd(V1))]
 
-l <- levels[, if(sum(is.finite(Evaluations)) >= 15) .SD, by=.(MergeThreshold,Maturation,UniqueTargets)]
+l <- levels[, if(sum(is.finite(Evaluations)) >= 20) .SD, by=.(MergeThreshold,Maturation,UniqueTargets)]
 metaAnalysis(l[factorNum(MergeThreshold) >= 0.2 & factorNum(MergeThreshold) <= 0.50 & factorNum(Maturation) >= 20 & factorNum(Maturation) <= 50], Evaluations ~ MergeThreshold + Maturation)
 
 
-#ggplot(levels[,if(.N>=15).SD, by=.(MergeThreshold,Maturation,UniqueTargets)], aes(MergeThreshold,Maturation)) + geom_tile(aes(fill=Evaluations/1000)) +facet_wrap(~ UniqueTargets)
-#ggplot(levels[,.(Evaluations=mean(Evaluations,na.rm=T)),by=.(MergeThreshold,Maturation)], aes(MergeThreshold,Maturation)) + geom_tile(aes(fill=Evaluations/1000))
+
 
 mean.pops <- function(dt) {dt[, .(NumPops=mean(NumPops))]}
 gridhyb <- loadData("*","hybrid.stat", auto.ids.names=c("Experiment","UniqueTargets","MergeThreshold","Maturation"),fun=loadFile, colnames=hyb.cols, filter=mean.pops)
@@ -218,7 +228,7 @@ c[,.(mean(V1),sd(V1))]
 
 ### Multirover task ##############
 
-setwd("~/exps/multirover_fix")
+setwd("/media/jorge/Archive/hybccea_tec/multirover_fix")
 fixPostFitness(".")
 
 mrfit <- loadData("*","postfitness.stat",fun=loadFitness, filter=bestSoFarEvaluations, auto.ids.names=c("Exp","Agents","Method","Task"), filter.par=list(step=1000))
@@ -250,6 +260,10 @@ ggplot(smoothed, aes(Evaluations/1000, NumPops,group=Method)) +
 ggsave("~/Dropbox/Work/Papers/TEC/fig3/mr_pops.pdf", width=3.5, height=2, scale=1) 
 
 metaAnalysis(mrhyb[,.(NumPops=mean(NumPops)),by=.(Task,Method,Job)], NumPops ~ Method, ~ Task)
+
+
+ggplot(lastGen(mrhyb[Method=="Hyb-CCEA-GC"]), aes(Task, TotalMerges)) + geom_boxplot()
+
 
 ### Soccer task ###############
 
@@ -288,6 +302,282 @@ ggplot(smoothed, aes(Evaluations/1000, NumPops,group=Method)) +
 ggsave("~/Dropbox/Work/Papers/TEC/fig3/soc_pops.pdf", width=3.5, height=2, scale=1) 
 
 metaAnalysis(sochyb[,.(NumPops=mean(NumPops)),by=.(Task,Method,Job)], NumPops ~ Method, ~ Task)
+
+
+### Heterogeneity analysis
+
+longify <- function(data) {
+  popids <- sapply(data, function(x){length(unique(x))==1 & is.integer(x)})
+  n <- max(data[, popids, with=F])+1
+  starts <- which(popids & data[1]==0)
+  print(starts)
+  nb1 <- (starts[2] - starts[1]) / n - 1
+  nb2 <- ((ncol(data)+1) - starts[2]) / n - 1
+  cat(n, nb1, nb2)
+  new <- data[, transformEntry(.SD, n, nb1, nb2), by=1:nrow(data)][,-1]
+  return(new)
+}
+
+transformEntry <- function(line, n, nb1, nb2) {
+  prelude <- line[,1:4]
+  behav <- line[,5:length(line)]
+  offset <- n * (nb1 + 1)
+  index <- 1
+  result <- list()
+  for(i in 0:(n-1)) {
+    aux <- c(behav[,(2+i*(nb1+1)):(nb1+1+i*(nb1+1))], behav[,(2+offset+i*(nb2+1)):(nb2+1+offset+i*(nb2+1))])
+    result[[length(result)+1]] <- aux
+  }
+  df <- cbind(prelude,rbindlist(result))
+  colnames(df) <- c(names(prelude),paste0("TS",1:nb1),paste0("AS",1:nb2))
+  df[, Agent := 0:(n-1)]
+  return(df)
+}
+
+clusterExport(cl, list("longify","transformEntry"))
+
+setwd("/media/jorge/Orico/multirover_fix/")
+b0 <- loadData("*_0","postbehaviours.stat",fun=loadBehaviours, auto.ids.names=c("Exp","Agents","Method","Task"), filter=longify, parallel=T)
+b1 <- loadData("*_1","postbehaviours.stat",fun=loadBehaviours, auto.ids.names=c("Exp","Agents","Method","Task"), filter=longify, parallel=T)
+mrb <- rbind(b0, b1, use.names=T, fill=T)
+
+# best solutions in each run
+sample <- mrb[Method != "hybtshomo" & Job %in% (0:4), .SD[which.max(Fitness):(which.max(Fitness)+9)] , by=.(Method,Job,Task)]
+rmr <- reduceData(sample, vars=paste0("AS",1:16), method="tsne")
+ggplot(red, aes(x=V1, y=V2)) + geom_point(aes(colour=Job,shape=Job), size=2) + 
+  coord_fixed() + facet_grid(Task ~ Method)
+
+# best-of-generation solutions
+sample <- mrb[Generation %% 20 == 0 & Method != "hybtshomo" & Job %in% (0:4)]
+red <- reduceData(sample, vars=paste0("AS",1:16), method="Rtsne")
+ggplot(red[Task=="0"], aes(x=V1, y=V2)) + geom_point(aes(colour=factor(Agent)),shape=4, size=1.5) + 
+  coord_fixed() + facet_grid(Method ~ Job)
+ggplot(red[Task=="1"], aes(x=V1, y=V2)) + geom_point(aes(colour=factor(Agent)),shape=4, size=1.5) + 
+  coord_fixed() + facet_grid(Method ~ Job)
+
+# task-specific behaviour analysis
+sample <- mrb[, .SD[which.max(Fitness):(which.max(Fitness)+9)] , by=.(Method,Job,Task)]
+comp0 <- sample[Task=="0", .(R1=sum(TS1>0.67), R2=sum(TS2>0.67), NR=sum(TS1<=0.67 & TS2<=0.67), Fitness=Fitness[1]) , by=.(Method,Job)]
+comp1 <- sample[Task=="1", .(R1=sum(TS1>1.66), R2=sum(TS2>1.66), R3=sum(TS3>1.66), R4=sum(TS4>1.66), R5=sum(TS5>1.66), NR=sum(TS1<=1.66 & TS2<=1.66 & TS3<=1.66 & TS4<=1.66 & TS5<=1.66), Fitness=Fitness[1]) , by=.(Method,Job)]
+setorder(comp0, Method,-Fitness)
+setorder(comp1, Method,-Fitness)
+write.table(comp0, file="~/Dropbox/Work/Papers/17-TEC/revision/mr2_composition.csv", row.names=F)
+write.table(comp1, file="~/Dropbox/Work/Papers/17-TEC/revision/mr5_composition.csv", row.names=F)
+
+# same as in barplots (not very good)
+sub <- comp0[, .SD[1:5, -"Fitness"][,Job := 1:5], by=.(Method)]
+m <- melt(sub, id.vars=c("Method","Job"),variable.name="Specialisation")
+ggplot(m, aes(Job,value)) + geom_bar(aes(fill=Specialisation), stat="identity", position="dodge") + facet_wrap(~ Method)
+sub <- comp1[, .SD[1:5, -"Fitness"][,Job := 1:5], by=.(Method)]
+m <- melt(sub, id.vars=c("Method","Job"),variable.name="Specialisation")
+ggplot(m, aes(Job,value)) + geom_bar(aes(fill=Specialisation), stat="identity", position="dodge") + facet_wrap(~ Method)
+
+
+
+# knn distances
+kdiv <- function(d) {
+  k <- knn.dist(d, k=9)
+  return(data.table(k=1:9,dist=colMeans(k)))
+}
+
+sample <- mrb[Method != "hybtshomo"]
+vars <- paste0("AS",1:16)
+kdists <- sample[, kdiv(.SD[,vars,with=F]), by=.(Method,Job,Task,Generation)]
+
+ggplot(kdists[,.(MeanDist=mean(dist)),by=.(Method,Task,k)], aes(k,MeanDist,colour=Method)) + geom_line(aes(group=Method)) + geom_point() + facet_wrap(~ Task)
+
+
+#Low-res detector: A rover that activates its red rock detection sensors at low-res for a period of simulation time greater than any other action.
+#Med-res detector: A rover that activates its red rock detection sensors at med-res for a period of simulation time greater than any other action.
+#Hi-res detector: A rover that activates its red rock detection sensors at hi-res for a period of simulation time greater than any other action.
+#Spec threshold = 0.5. > half the time in the same action
+
+
+setwd("/media/jorge/Orico/soccer_fix/")
+socb <- loadData("*","postbehaviours.stat",fun=loadBehaviours, auto.ids.names=c("Task","Agents","Method"), filter=longify, parallel=T)
+
+# best-of-generation solutions
+sample <- socb[Job %in% (0:4) & Generation %% 20 == 0 & Method != "hybtshomo"]
+rsoc <- reduceData(sample, vars=paste0("AS",1:18), method="Rtsne")
+ggplot(rsoc[Task=="easy"], aes(x=V1, y=V2)) + geom_point(aes(colour=factor(Agent)),shape=4, size=1.5) + 
+  coord_fixed() + facet_grid(Method ~ Job)
+ggplot(rsoc[Task=="wins"], aes(x=V1, y=V2)) + geom_point(aes(colour=factor(Agent)),shape=4, size=1.5) + 
+  coord_fixed() + facet_grid(Method ~ Job)
+ggplot(rsoc[Method=="hybashomo"], aes(x=V1, y=V2)) + geom_point(aes(colour=factor(Agent)),shape=4, size=1.5) + 
+  coord_fixed() + facet_grid(Task ~ Job)
+
+
+# best solutions in each run
+sample <- socb[Method != "hybtshomo" & Job %in% (0:4), .SD[which.max(Fitness):(which.max(Fitness)+4)] , by=.(Method,Job,Task)]
+rsoc <- reduceData(sample, vars=paste0("AS",1:18), method="tsne")
+ggplot(rsoc, aes(x=V1, y=V2)) + geom_point(aes(colour=Job,shape=Job), size=2) + 
+  coord_fixed() + facet_grid(Task ~ Method)
+
+# task-specific behaviour analysis
+sample <- socb[, .SD[which.max(Fitness):(which.max(Fitness)+4)] , by=.(Method,Job,Task)]
+# scored in at least 10% of the matches
+comp <- sample[, .(Defender=sum(TS1>0.5 & TS3 < 0.1), Attacker=sum(TS1<0.5 & TS3<0.1), Scorer=sum(TS3>=0.1), Fitness=Fitness[1]) , by=.(Task,Method,Job)]
+
+setorder(comp, Task,Method,-Fitness)
+
+write.table(comp, file="~/Dropbox/Work/Papers/17-TEC/revision/soccer_composition.csv", row.names=F)
+
+# same as in barplots (not very good)
+sub <- comp[, .SD[1:5, -"Fitness"][,Job := 1:5], by=.(Task,Method)]
+m <- melt(sub, id.vars=c("Task","Method","Job"),variable.name="Specialisation")
+ggplot(m, aes(Job,value)) + geom_bar(aes(fill=Specialisation), stat="identity", position="dodge") + facet_grid(Task ~ Method)
+
+
+
+
+# metapop analysis
+
+dprox <- function(row, threshold=c(-1,0.2), pops=10) {
+  bds <- as.numeric(row[paste0("BD",0:(pops-1))])
+  gds <- as.numeric(row[paste0("GD",0:(pops-1))])
+  target <- gds[!is.na(bds)& bds > threshold[1] & bds <= threshold[2]]
+  meantarget <- ifelse(length(target)>0, mean(target, na.rm=T), NA)
+  return(meantarget)
+}
+
+dcount <- function(row, threshold=c(-1,0.2), pops=10) {
+  bds <- as.numeric(row[paste0("BD",0:(pops-1))])
+  return(sum(!is.na(bds) & bds > threshold[1] & bds <= threshold[2]))
+}
+
+meancor <- function(data, pops=10) {
+  aux <- function(x) {cor(data[[paste0("GD",x)]], data[[paste0("BD",x)]], method="spearman", use="pairwise.complete.obs")}
+  return(mean(sapply(0:(pops-1), aux), na.rm=T))
+}
+meancorr <- function(data, pops=10) {
+  aux <- function(x) {cor(data[[paste0("GD",x)]]/data[["SelfG"]], data[[paste0("BD",x)]], method="spearman", use="pairwise.complete.obs")}
+  return(mean(sapply(0:(pops-1), aux), na.rm=T))
+}
+
+setwd("/media/jorge/Orico/multirover_extra")
+f <- loadData("*", filename="metapop.stat", colnames=c("Generation","Evaluations","Subpop","Origin","Agents","Age","Lockdown",paste0("BD",0:9),paste0("GD",0:9)), auto.ids.names=c("Exp","Agents","Method","Task"))
+f[, Task := factor(Task,labels=c("Multirover 2 item types","Multirover 5 item types"))]
+f[, Method := factor(Method,levels=c("hybashomo","hybtshomo","ccea"), labels=c("Hyb-CCEA-GC","Hyb-CCEA-TS","CCEA"))]
+
+# copy the self distance to other variable
+f[, SelfG := get(paste0("GD",.BY[[1]])), by=Subpop] 
+# mean to all other genetic
+f[, OtherG := rowMeans(.SD[, setdiff(paste0("GD",0:9), paste0("GD",.BY[[1]])), with=F], na.rm=T), by=Subpop]
+# mean to close
+f[, CloseG := apply(.SD, 1, dprox, c(-Inf,0.2))]
+# mean to distant
+f[, DistantG := apply(.SD, 1, dprox, c(0.2,Inf))]
+# mean to all other behavior
+#f[, OtherB := rowMeans(.SD[, paste0("BD",0:9), with=F], na.rm=T), by=Subpop]
+# how many other populations in the behaviour distance interval
+#f[, CountB := apply(.SD, 1, dcount, c(-Inf,0.2))]
+
+f[, OtherRel := OtherG / SelfG]
+f[, CloseRel := CloseG / SelfG]
+f[, DistantRel := DistantG / SelfG]
+
+mrdists <- f[, lapply(.SD, mean, na.rm=T), by=.(Task,Method,Job), .SDcols=c("SelfG","OtherG","CloseG", "DistantG","OtherRel","CloseRel","DistantRel")] 
+mrcors <- f[, .(Cor=meancorr(.SD)), by=.(Task, Method, Job)]
+
+save(mrdists, file="~/Dropbox/Work/Papers/17-TEC/revision/mrdists.rdata")
+save(mrcors, file="~/Dropbox/Work/Papers/17-TEC/revision/mrcors.rdata")
+
+ggplot(mrcors, aes(Task,Cor,fill=Method)) + geom_boxplot()
+
+
+setwd("/media/jorge/Orico/soccer_extra")
+f <- loadData("*", filename="metapop.stat", colnames=c("Generation","Evaluations","Subpop","Origin","Agents","Age","Lockdown",paste0("BD",0:4),paste0("GD",0:4)), auto.ids.names=c("Task","Agents","Method"))
+f[, Task := factor(Task, labels=c("Soccer-80%","Soccer-100%"))]
+f[, Method := factor(Method,levels=c("hybashomo","hybtshomo","ccea"), labels=c("Hyb-CCEA-GC","Hyb-CCEA-TS","CCEA"))]
+
+# copy the self distance to other variable
+f[, SelfG := get(paste0("GD",.BY[[1]])), by=Subpop] 
+# mean to all other genetic
+f[, OtherG := rowMeans(.SD[, setdiff(paste0("GD",0:4), paste0("GD",.BY[[1]])), with=F], na.rm=T), by=Subpop]
+# mean to close
+f[, CloseG := apply(.SD, 1, dprox, threshold=c(-Inf,0.2), pops=5)]
+# mean to distant
+f[, DistantG := apply(.SD, 1, dprox, threshold=c(0.2,Inf), pops=5)]
+# mean to all other behavior
+#f[, OtherB := rowMeans(.SD[, paste0("BD",0:4), with=F], na.rm=T), by=Subpop]
+# how many other populations in the behaviour distance interval
+#f[, CountB := apply(.SD, 1, dcount, threshold=c(-Inf,0.2), pops=5)]
+
+f[, OtherRel := OtherG / SelfG]
+f[, CloseRel := CloseG / SelfG]
+f[, DistantRel := DistantG / SelfG]
+
+socdists <- f[, lapply(.SD, mean, na.rm=T), by=.(Task,Method,Job), .SDcols=c("SelfG","OtherG","CloseG", "DistantG","OtherRel","CloseRel","DistantRel")] 
+soccors <- f[, .(Cor=meancorr(.SD, pops=5)), by=.(Task, Method, Job)]
+
+save(socdists, file="~/Dropbox/Work/Papers/17-TEC/revision/socdists.rdata")
+save(soccors, file="~/Dropbox/Work/Papers/17-TEC/revision/soccors.rdata")
+
+ggplot(soccors, aes(Task,Cor,fill=Method)) + geom_boxplot()
+
+load("~/Dropbox/Work/Papers/17-TEC/revision/soccors.rdata")
+load("~/Dropbox/Work/Papers/17-TEC/revision/mrcors.rdata")
+cors <- rbind(mrcors, soccors)
+tab <- cors[, .(Correlation=mean(Cor)), by=.(Task,Method)]
+setorder(tab, Task, Method)
+View(tab)
+
+# merges / splits analysis
+
+setwd("/media/jorge/Orico/multirover_extra")
+f <- loadData("*", filename="metapop.stat", colnames=c("Generation","Evaluations","Subpop","Origin","Agents","Age","Lockdown",paste0("BD",0:9),paste0("GD",0:9)), auto.ids.names=c("Exp","Agents","Method","Task"))
+f[, Task := factor(Task,labels=c("Multirover 2 item types","Multirover 5 item types"))]
+f[, Method := factor(Method,levels=c("hybashomo","hybtshomo","ccea"), labels=c("Hyb-CCEA-GC","Hyb-CCEA-TS","CCEA"))]
+
+setwd("/media/jorge/Orico/soccer_extra")
+f2 <- loadData("*", filename="metapop.stat", colnames=c("Generation","Evaluations","Subpop","Origin","Agents","Age","Lockdown",paste0("BD",0:4),paste0("GD",0:4)), auto.ids.names=c("Task","Agents","Method"))
+f2[, Task := factor(Task, labels=c("Soccer-80%","Soccer-100%"))]
+f2[, Method := factor(Method,levels=c("hybashomo","hybtshomo","ccea"), labels=c("Hyb-CCEA-GC","Hyb-CCEA-TS","CCEA"))]
+
+data <- rbind(f, f2, fill=T)
+
+# lasting change:
+# true merge between 2 separate pops
+# lasting split
+# split that results in further split
+
+shiftsize <- function(d) {
+  comp <- unique(d[, .(Generation,N)], by="Generation")
+  comp[, NextSize := c(N[-1],NA)]
+  merged <- merge(d, comp[,.(Generation,NextSize)], by="Generation")
+  return(merged$NextSize)
+}
+
+data[, N := .N, by=.(Task,Method,Job,Generation)]
+data[, NextSize := shiftsize(.SD), by=.(Task,Method,Job)]
+
+sum <- data[Method!="CCEA", .(NewMerges=sum(Origin=="M" & Age==0), 
+                           NewSplits=sum(Origin=="S" & Age == Lockdown + 1) + sum(!is.na(NextSize) & Origin=="S" & Age==Lockdown-1 & NextSize==N+1) / 2, 
+                           SplitRemerges=sum(Origin=="R" & Age==0)), by=.(Task, Method, Job)]
+
+sum[, .(NewMerges=mean(NewMerges),NewMerges.SD=sd(NewMerges),NewSplits=mean(NewSplits),NewSplits.SD=sd(NewSplits),SplitRemerges=mean(SplitRemerges),SplitRemerges.SD=sd(SplitRemerges)), by=.(Task,Method)]
+ggplot(melt(sum, measure.vars=c("NewMerges","NewSplits","SplitRemerges")), aes(Method, value)) + geom_boxplot(aes(fill=variable)) + facet_wrap(~ Task)
+
+metaAnalysis(sum, NewMerges ~ Method, ~ Task)
+metaAnalysis(sum, NewSplits ~ Method, ~ Task)
+metaAnalysis(sum, SplitRemerges ~ Method, ~ Task)
+
+
+# sum[, TotalOps := NewMerges + NewSplits + SplitRemerges]
+# sum[, NewMerges := NewMerges / TotalOps]
+# sum[, NewSplits := NewSplits / TotalOps]
+# sum[, SplitRemerges := SplitRemerges / TotalOps]
+# m <- melt(sum, measure.vars=c("NewMerges","NewSplits","SplitRemerges"))
+# ggplot(m, aes(Method, value)) + geom_boxplot(aes(fill=variable)) + facet_wrap(~ Task)
+
+
+
+
+
+
+
+
+
 
 
 

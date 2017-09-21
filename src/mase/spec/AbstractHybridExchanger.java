@@ -169,6 +169,7 @@ public class AbstractHybridExchanger extends Exchanger {
         for (int i = 0; i < state.population.subpops.length; i++) {
             MetaPopulation mp = new MetaPopulation();
             mp.age = 0;
+            mp.origin = MetaPopulation.INIT_ORIGIN;
             for (int j = 0; j < allocations.length; j++) {
                 if (allocations[j] == i) {
                     mp.agents.add(j);
@@ -191,12 +192,15 @@ public class AbstractHybridExchanger extends Exchanger {
 
     protected static class MetaPopulation implements Serializable {
 
+        public static final char MERGE_ORIGIN = 'M', SPLIT_ORIGIN = 'S', INIT_ORIGIN = 'I', REMERGE_ORIGIN = 'R';
         private static final long serialVersionUID = 1L;
 
         List<Integer> agents;
         Subpopulation pop;
         int age;
         int lockDown;
+        char origin;
+        MetaPopulation splitFrom;
 
         MetaPopulation() {
             this.agents = new ArrayList<>();

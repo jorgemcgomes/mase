@@ -108,6 +108,14 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
             state.output.message("*** Merging " + nextMerge.getLeft() + " with " + nextMerge.getRight() + " ***");
             MetaPopulation mpNew = mergePopulations(nextMerge.getLeft(), nextMerge.getRight(), state);
             mpNew.lockDown = calculateLockDown(mpNew, state);
+            
+            if(nextMerge.getLeft().splitFrom == nextMerge.getRight() && nextMerge.getRight().splitFrom == nextMerge.getLeft() && nextMerge.getLeft().lockDown == nextMerge.getRight().lockDown) {
+                mpNew.origin = MetaPopulation.REMERGE_ORIGIN;
+            } else {
+                mpNew.origin = MetaPopulation.MERGE_ORIGIN;
+            }
+            mpNew.splitFrom = null;
+            
             metaPops.remove(nextMerge.getLeft());
             metaPops.remove(nextMerge.getRight());
             metaPops.add(mpNew);
@@ -224,9 +232,9 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         List<BehaviourResult>[] behavs = new List[metaPops.size()];
         for (int i = 0; i < metaPops.size(); i++) {
             MetaPopulation mp = metaPops.get(i);
-            if (mp.age < mp.lockDown) {
+            /*if (mp.age < mp.lockDown) {  // REMOVED FOR STATS PURPOSE
                 behavs[i] = Collections.EMPTY_LIST;
-            } else {
+            } else {*/
                 behavs[i] = new ArrayList<>();
                 Individual[] elite = getElitePortion(mp.pop.individuals, (int) Math.ceil(distanceElite * popSize));
                 for (Individual ind : elite) {
@@ -234,7 +242,7 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
                         behavs[i].add(getAgentBR(ind, a, behaviourIndex));
                     }
                 }                
-            }
+            //}
         }
         return distCalculator.computeDistances(behavs, state);
     }
@@ -252,6 +260,11 @@ public class StochasticHybridExchanger extends AbstractHybridExchanger {
         // Create new metapop
         if (parent != null) {
             MetaPopulation child = fork(parent, state);
+            child.splitFrom = parent;
+            child.origin = MetaPopulation.SPLIT_ORIGIN;
+            parent.splitFrom = child;
+            parent.origin = MetaPopulation.SPLIT_ORIGIN;
+            
             metaPops.add(child);
             parent.lockDown = calculateLockDown(parent, state);
             child.lockDown = parent.lockDown; // same lockdown to give them a chance to remerge before any further splits

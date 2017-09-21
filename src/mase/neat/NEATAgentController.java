@@ -67,8 +67,7 @@ public class NEATAgentController implements AgentController {
             }
         }
         return "Neurons:" + network.neurons().length + " Con:" + network.connections().length
-                + " Self-rec:" + selfRecurr + " Rec:" + recurr + "\n\n"
-                + NEATSerializer.serializeToString(network);
+                + " Self-rec:" + selfRecurr + " Rec:" + recurr;
     }
 
 }

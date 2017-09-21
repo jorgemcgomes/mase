@@ -1,4 +1,4 @@
-#install.packages(c("ggplot2","scales","reshape","kohonen","parallel","doParallel","pbapply","data.table","plyr","doBy","pdist","RColorBrewer","formula.tools"))
+#install.packages(c("ggplot2","kohonen","doParallel","pbapply","data.table","plyr","doBy","pdist","RColorBrewer","formula.tools","arules"))
 library(ggplot2)
 library(scales)
 library(reshape)
@@ -16,8 +16,9 @@ library(arules)
 
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
-theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", legend.margin=margin(-10,0,0,0,unit="pt"),
+theme_update(plot.margin=unit(c(0.5,0.5,0.5,0.5),"mm"), legend.position="bottom", 
              plot.title=element_text(size=rel(1)), legend.key.height=unit(0.75,"line"),
+             legend.margin=margin(t=-7, unit="pt"),
              axis.title.x=element_text(size=rel(.9)), axis.title.y=element_text(size=rel(.9)), legend.title=element_text(size=rel(.9)),
              strip.background=element_blank(), strip.text=element_text(size=rel(.9)))
 
@@ -128,7 +129,7 @@ loadFile <- function(file, separator=" ",colnames=NULL, exclude.na=T) {
   frame <- fread(file, header=F, sep=separator, stringsAsFactors=F)
   if(!is.null(colnames)) {
     setnames(frame,colnames)
-    if(exclude.na) {
+    if(exclude.na & sum(is.na(colnames)) > 0) {
       set(frame, j=which(is.na(colnames)), value=NULL)
     }
   }
@@ -152,7 +153,9 @@ loadBehaviours <- function(file, sample=1, vars=NULL, bestsOnly=F) {
   }
   vars <- c(fixedvars,vars)
   # remove columns with NA in vars
-  set(frame, j=which(is.na(vars)), value=NULL)
+  if(sum(is.na(vars)) > 0) {
+    set(frame, j=which(is.na(vars)), value=NULL)
+  }
   setnames(frame, vars[!is.na(vars)])
 
   frame <- frame[,which(unlist(lapply(frame, function(x)!all(is.na(x))))),with=F] # remove columns with NA only
@@ -325,6 +328,56 @@ quickReport <- function(folders, filename="postfitness.stat", ttests=T, snapshot
 #### Behavioural analysis #################################################################
 
 euclideanDist <- function(x1, x2) {sqrt(sum((x1 - x2) ^ 2))} 
+
+# Reduces the dimensionality of the given variables to k dimensions
+# data: the frame that contains the data to be reduced
+# vars: the vars to be reduced or NULL if all
+# method: dimensionality reduction method. currently supports sammon, tsne, Rtsne (fast Barnes-Hut tsne)
+# ...: to be passed to reduction method
+# returns data with extra columns for the reduced data
+reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon"), k=2, normalise=T, ...) {
+  d <- data
+  if(!is.null(vars)) {
+    d <- data[, vars, with=F]
+  }
+  if(method[1]=="sammon") {
+    require(MASS)
+    dists <- dist(d)
+    sam <- sammon(dists, k=k, ...)
+    d <- sam$points
+  } else if(method[1]=="tsne") {
+    require(tsne)
+    dists <- dist(d)
+    d <- tsne(dists, k=k, ...)
+  } else if(method[1]=="Rtsne") {
+    require(Rtsne)
+    ts <- Rtsne(d, dims=k, ...)
+    d <- ts$Y
+  } else {
+    stop("unknown method:", method[1])
+  }
+  if(normalise) {
+    d <- scaleData(d)
+  }
+  d <- as.data.table(d)
+  colnames(d) <- paste0("V",1:ncol(d))
+  return(cbind(data,d))
+}
+
+# to [0,1]
+scaleData <- function(d) {
+  (d - min(d)) / (max(d) - min(d))
+}
+
+# Plots the sammon mapping in 2D
+# reduced: frame with the reduction done (sammonReduce)
+# color.var: optional. numeric variable to be used to color the dots
+plotReduced2D <- function(reduced, color.var=NULL) {
+  g <- ggplot(reduced, aes(x=V1, y=V2)) + geom_point(aes_string(colour=color.var), shape=4, size=1.5) + 
+    coord_fixed() + theme(legend.position="right")
+  return(g)
+}
+
 
 # calculate the mean pairwise distance without using the dist function, to avoid using too much memory
 meanDist <- function(data) {
