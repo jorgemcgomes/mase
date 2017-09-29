@@ -5,6 +5,8 @@
  */
 package mase.evorbc;
 
+import ec.EvolutionState;
+import ec.util.Parameter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,6 +25,7 @@ import mase.controllers.AgentController;
 import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
+import static mase.evorbc.ArbitratorFactory.DEFAULT_BASE;
 import mase.stat.PersistentSolution;
 import mase.stat.SolutionPersistence;
 import mase.util.KdTree;
@@ -38,70 +41,105 @@ public class KdTreeRepertoire implements Repertoire {
 
     private static final long serialVersionUID = 1L;
     public static final double FLOAT_DELTA = 0.001;
-    
+
+    public static final String P_REPERTOIRE = "repertoire";
+    public static final String P_COORDINATES = "coordinates";
+    public static final String V_DIRECT = "direct";
+    public static final String V_IGNORE = "nonconstant";
+
     // Cache to avoid many instances of the same repertoire when de-serializing many controllers using the same repertoire
     // Currently only supports one repo at a time (should be enough for most cases)
     // TODO: there WILL be problems if any controller modifies these structures for some reason
     private static transient KdTree<Integer> _cachedTree;
-    private static transient Map<Integer, AgentController> _cachedPrimitives;
+    private static transient Map<Integer, Primitive> _cachedPrimitives;
     private static transient long _cachedRepHash, _cachedCoordsHash;
     private static transient boolean _cachedIgnoreConstant;
 
+    // This is transient to avoid huge serialized objects
+    // The de-serialization process is overriden so that these structures are filled again when the object is read
+    // This means that the repertoire and coordinates files cannot be lost though
+    // File hashes ensure that the repertoire and coord files are the same as when the object was serialized
     private transient KdTree<Integer> tree;
-    private transient Map<Integer, AgentController> primitives;
+    private transient Map<Integer, Primitive> primitives;
 
-    private Pair<Double, Double>[] bounds;
+    private Pair<Double, Double>[] bounds; // Only here for retro-compatibility with serialized objects. No longer used for anything
     private boolean ignoreConstant;
     private File repFile, coordsFile;
     private long repFileHash, coordsFileHash;
 
     @Override
-    public Pair<Integer, AgentController> nearest(double[] coordinates) {
-        ArrayList<KdTree.SearchResult<Integer>> nearest = tree.nearestNeighbours(coordinates, 1);
-        int id = nearest.get(0).payload;
-        return Pair.of(id, primitives.get(id));
+    public void setup(EvolutionState state, Parameter base) {
+        repFile = new File(state.parameters.getString(base.push(P_REPERTOIRE), DEFAULT_BASE.push(P_REPERTOIRE)));
+        coordsFile = null;
+        String fName = state.parameters.getString(base.push(P_COORDINATES), DEFAULT_BASE.push(P_COORDINATES));
+        if (!fName.equalsIgnoreCase(V_DIRECT) && !fName.equalsIgnoreCase(V_IGNORE)) {
+            if (!fName.endsWith(".txt")) {
+                fName += ".txt";
+            }
+            coordsFile = new File(repFile.getParentFile(), repFile.getName().replace(".tar.gz", "_") + fName);
+            if (!coordsFile.exists()) {
+                state.output.fatal("Given coordinate file does not exist: " + coordsFile.getAbsolutePath() + ".txt.\n"
+                        + "The coordinate file should be in the same folder as the repertoire.");
+            }
+        }
+        ignoreConstant = fName.equalsIgnoreCase(V_IGNORE);
+        try {
+            load();
+        } catch (IOException ex) {
+            state.output.fatal("Error loading repertoire: " + ex.getMessage());
+        }
+        state.output.message("Loaded repertoire with " + primitives.size()+ " controllers");
+        //state.output.message("Coordinate bounds: " + boundsToString(coordinateBounds()));
+
     }
 
+    @Override
+    public Primitive nearest(double[] coordinates) {
+        ArrayList<KdTree.SearchResult<Integer>> nearest = tree.nearestNeighbours(coordinates, 1);
+        int id = nearest.get(0).payload;
+        return primitives.get(id);
+    }
+
+   @Override
+    public Collection<Primitive> allPrimitives() {
+        return primitives.values();
+    }    
+    
     @Override
     public Repertoire deepCopy() {
         KdTreeRepertoire newRep = new KdTreeRepertoire();
         newRep.tree = this.tree;
-        newRep.bounds = this.bounds;
         newRep.repFile = this.repFile;
         newRep.coordsFile = this.coordsFile;
         newRep.repFileHash = this.repFileHash;
         newRep.coordsFileHash = this.coordsFileHash;
         newRep.ignoreConstant = this.ignoreConstant;
-        
+
         newRep.primitives = new HashMap<>(this.primitives);
-        for(Map.Entry<Integer,AgentController> e : newRep.primitives.entrySet()) {
+        for (Map.Entry<Integer, Primitive> e : newRep.primitives.entrySet()) {
             e.setValue(e.getValue().clone());
         }
         return newRep;
     }
 
-    @Override
-    public void load(File repo, File coordinates, boolean ignoreConstant) throws IOException {
-        repFile = repo;
+    public void load() throws IOException {
         repFileHash = FileUtils.checksumCRC32(repFile);
-        if (coordinates != null) {
-            coordsFile = coordinates;
+        if (coordsFile != null) {
             coordsFileHash = FileUtils.checksumCRC32(coordsFile);
         }
-        this.ignoreConstant = ignoreConstant;
 
         List<PersistentSolution> solutions;
         try {
-            solutions = SolutionPersistence.readSolutionsFromTar(repo);
+            solutions = SolutionPersistence.readSolutionsFromTar(repFile);
         } catch (Exception ex) {
             Logger.getLogger(ArbitratorFactory.class.getName()).log(Level.SEVERE, null, ex);
             return;
         }
 
         Map<Integer, double[]> coords;
-        if (coordinates != null) {
-            coords = fileCoordinates(coordinates);
-            if(coords == null || coords.isEmpty()) {
+        if (coordsFile != null) {
+            coords = fileCoordinates(coordsFile);
+            if (coords == null || coords.isEmpty()) {
                 throw new IOException("Empty or invalid coordinate file");
             }
             if (coords.size() > solutions.size()) {
@@ -110,54 +148,39 @@ public class KdTreeRepertoire implements Repertoire {
         } else {
             coords = encodedCoordinates(solutions);
         }
-        
+
         int n = coords.values().iterator().next().length;
 
-        if(true) {
+        if (ignoreConstant) {
             // check which features are constant
             ArrayList<Integer> toRemove = new ArrayList<>();
-            for(int i = 0 ; i < n ; i++) {
+            for (int i = 0; i < n; i++) {
                 boolean ignore = true;
                 double v = coords.values().iterator().next()[i];
-                for(double[] coord : coords.values()) {
-                    if(Math.abs(coord[i] - v) > FLOAT_DELTA) {
+                for (double[] coord : coords.values()) {
+                    if (Math.abs(coord[i] - v) > FLOAT_DELTA) {
                         ignore = false;
                         break;
                     }
                 }
-                if(ignore) {
+                if (ignore) {
                     toRemove.add(i);
                 }
             }
-            
+
             // remove constant features from the coordinates
-            if(!toRemove.isEmpty()) {
-                if(toRemove.size() == n) {
+            if (!toRemove.isEmpty()) {
+                if (toRemove.size() == n) {
                     throw new IOException("Zero non-constant features");
                 }
                 int[] toRemoveA = ArrayUtils.toPrimitive(toRemove.toArray(new Integer[toRemove.size()]));
                 System.out.println("Removing features: " + Arrays.toString(toRemoveA));
-                for(Entry<Integer,double[]> e : coords.entrySet()) {
+                for (Entry<Integer, double[]> e : coords.entrySet()) {
                     e.setValue(ArrayUtils.removeAll(e.getValue(), toRemoveA));
                 }
                 n = n - toRemove.size();
             }
         }
-        
-        // bounds might already have been computed if the object is being de-serialized
-        if(bounds == null) {
-            bounds = new Pair[n];
-            for (int i = 0; i < n; i++) {
-                double min = Double.POSITIVE_INFINITY;
-                double max = Double.NEGATIVE_INFINITY;
-                for (double[] c : coords.values()) {
-                    min = Math.min(min, c[i]);
-                    max = Math.max(max, c[i]);
-                }
-                bounds[i] = Pair.of(min, max);
-            }            
-        }
-
 
         tree = new KdTree.Euclidean<>(n);
         primitives = new HashMap<>();
@@ -167,7 +190,7 @@ public class KdTreeRepertoire implements Repertoire {
             double[] c = coords.get(sol.getIndex());
             if (c != null) {
                 tree.addPoint(c, sol.getIndex());
-                primitives.put(sol.getIndex(), ac);
+                primitives.put(sol.getIndex(), new Primitive(ac, sol.getIndex(), c));
             }
         }
         if (tree.size() != coords.size()) {
@@ -198,28 +221,18 @@ public class KdTreeRepertoire implements Repertoire {
 
     private Map<Integer, double[]> fileCoordinates(File file) throws FileNotFoundException {
         Map<Integer, double[]> res = new HashMap<>();
-            Scanner sc = new Scanner(file);
-            while (sc.hasNext()) {
-                String line = sc.nextLine();
-                String[] split = line.trim().split(" ");
-                int index = Integer.parseInt(split[0]);
-                double[] coords = new double[split.length - 1];
-                for (int i = 0; i < coords.length; i++) {
-                    coords[i] = Double.parseDouble(split[i + 1]);
-                }
-                res.put(index, coords);
+        Scanner sc = new Scanner(file);
+        while (sc.hasNext()) {
+            String line = sc.nextLine();
+            String[] split = line.trim().split(" ");
+            int index = Integer.parseInt(split[0]);
+            double[] coords = new double[split.length - 1];
+            for (int i = 0; i < coords.length; i++) {
+                coords[i] = Double.parseDouble(split[i + 1]);
             }
-            return res;
-    }
-
-    @Override
-    public Pair<Double, Double>[] coordinateBounds() {
-        return bounds;
-    }
-
-    @Override
-    public int size() {
-        return tree.size();
+            res.put(index, coords);
+        }
+        return res;
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -234,19 +247,21 @@ public class KdTreeRepertoire implements Repertoire {
                 throw new IOException("Coordinates file does not match the expected file");
             }
         }
-        
-        synchronized(KdTreeRepertoire.class) {
-            if(_cachedTree != null && repFileHash == _cachedRepHash && coordsFileHash == _cachedCoordsHash && ignoreConstant == _cachedIgnoreConstant) {
+
+        synchronized (KdTreeRepertoire.class) {
+            if (_cachedTree != null && repFileHash == _cachedRepHash && coordsFileHash == _cachedCoordsHash && ignoreConstant == _cachedIgnoreConstant) {
                 this.tree = _cachedTree;
                 this.primitives = _cachedPrimitives;
             } else {
-                load(repFile, coordsFile, ignoreConstant);
+                load();
                 _cachedRepHash = repFileHash;
                 _cachedCoordsHash = coordsFileHash;
                 _cachedTree = this.tree;
                 _cachedPrimitives = this.primitives;
                 _cachedIgnoreConstant = this.ignoreConstant;
             }
-        }        
+        }
     }
+
+ 
 }

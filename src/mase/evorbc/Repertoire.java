@@ -5,50 +5,55 @@
  */
 package mase.evorbc;
 
-import java.io.File;
-import java.io.IOException;
+import ec.Setup;
 import java.io.Serializable;
+import java.util.Collection;
 import mase.controllers.AgentController;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
  * @author jorge
  */
-public interface Repertoire extends Serializable {
+public interface Repertoire extends Setup {
     
     /**
      * AgentController nearest to the given coordinates
      * @param coordinates
-     * @return 
+     * @return the Id of the AgentController and the AgentController itself
      */
-    public Pair<Integer, AgentController> nearest(double[] coordinates);
+    public Primitive nearest(double[] coordinates);
     
     /**
-     * The min and max values of the coordinates in the repertoire
+     * A collection with the complete repertoire
      * @return 
      */
-    public Pair<Double,Double>[] coordinateBounds();
-
-    /**
-     * Number of controllers in the repo
-     * @return
-     */
-    public int size();
+    public Collection<Primitive> allPrimitives();
     
-    /**
-     * Load the repertoire with the given controllers and the given coordinates (optional)
-     * @param repo File of the archive containing the PersistentSolutions
-     * @param coordinates File with the coordinates. null if the coordinates encoded in the solutions should be used instead
-     * @param ignoreConstant True to ignore the dimensions that are constant (same value) across the entire repertoire
-     * @throws java.io.IOException If anything goes wrong with the loading
-     */
-    public void load(File repo, File coordinates, boolean ignoreConstant) throws IOException;
-            
     /**
      * Clones the repertoire, also cloning the controllers contained in it
      * @return 
      */
     public Repertoire deepCopy();
     
+    
+    public static class Primitive implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+        
+        public final AgentController ac;
+        public final int id;
+        public final double[] coordinates;
+
+        public Primitive(AgentController ac, int id, double[] coordinates) {
+            this.ac = ac;
+            this.id = id;
+            this.coordinates = coordinates;
+        }
+        
+        public Primitive clone() {
+            return new Primitive(ac.clone(), id, coordinates);
+        }
+        
+    }
+        
 }

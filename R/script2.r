@@ -78,7 +78,7 @@ fit <- merge(fit, fitraw[, .(Generation,Job,Setup,RawMin=MinFitness,RawMean=Mean
 rm(fitraw) ; gc()
 
 # fix data
-fit <- fit[Reduction != "nonconstant"]
+fit <- fit[is.na(Reduction) | Reduction != "nonconstant"]
 fit[, ScaledFitness := (BestSoFar - min(RawMin, na.rm=T)) / (max(BestSoFar)-min(RawMin,na.rm=T)) , by=.(Task)]
 fit[, Task := factor(Task, levels=c("freeforaging","obsforaging","dynforaging","simplephototaxis","phototaxis","exploration","maze","avoidance","predator","dynphototaxis"), labels=c("Foraging","Foraging-O","Foraging-D","Phototaxis","Phototaxis-O","Exploration","Maze","Avoidance","Prey","Tracking"))]
 fit <- fit[Task != "Foraging-D"]
@@ -96,7 +96,13 @@ load("baserep.rdata")
 act <- loadData("tasks10/pl_*_sdbc_nsneat_0_direct", "postbest.xml.stat", auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
 act[, Task := factor(Task, levels=c("freeforaging","obsforaging","simplephototaxis","phototaxis","exploration","maze","avoidance","predator","dynphototaxis"), labels=c("Foraging","Foraging-O","Phototaxis","Phototaxis-O","Exploration","Maze","Avoidance","Prey","Tracking"))]
 act <- merge(act, rep[Repo=="nsneat", c("Job","Index",vars,"V1","V2"), with=F], by.x=c("Primitive","RepoJob"), by.y=c("Index","Job"))
-setorder(act, RepoJob, Task, Job, Seed, Time)
+
+ract <- loadData("tasks10/pl_*_sdbc_rand_0_direct", "postbest.xml.stat", auto.ids.sep="_", auto.ids.names=c("Domain","Task","BC","Repo","RepoJob","Reduction"))
+ract[, Task := factor(Task, levels=c("freeforaging","obsforaging","simplephototaxis","phototaxis","exploration","maze","avoidance","predator","dynphototaxis"), labels=c("Foraging","Foraging-O","Phototaxis","Phototaxis-O","Exploration","Maze","Avoidance","Prey","Tracking"))]
+ract <- merge(ract, rep[Repo=="rand", c("Job","Index",vars,"V1","V2"), with=F], by.x=c("Primitive","RepoJob"), by.y=c("Index","Job"))
+
+act <- rbind(act,ract) ; rm(ract)
+setorder(act, Repo, RepoJob, Task, Job, Seed, Time)
 
 
 # Repertoire dimensionality reduction (one time only) ################
@@ -180,7 +186,7 @@ ggsave("~/Dropbox/Work/Papers/17-SWEVO/rep_codes_index.pdf", width=4, height=2.5
 # Base comparison ##################
 
 subfit <- fit[Repo %in% c("nsneat","rand",NA) & is.na(Reduction)]
-subfit[, Repo := factor(Repo, levels=c("nsneat","rand"), labels=c("EvoRBC","EvoRBC(R)"))]
+subfit[, Repo := factor(Repo, levels=c("nsneat","rand","randmlp"), labels=c("EvoRBC","EvoRBC(R)"))]
 subfit[is.na(Repo), Repo := "Tabula-rasa"]
 sum <- lastGen(subfit)[, .(Fitness=mean(ScaledFitness), SE=se(ScaledFitness)), by=.(Task, Repo)]
 sum <- rbind(sum, sum[, .(Task="Average",Fitness=mean(Fitness),SE=se(Fitness)), by=.(Repo)])
@@ -257,18 +263,27 @@ ggplot(lastGen(fit[(Repo=="nsneat" | is.na(Repo)) & is.na(Reduction)])[, .(Fitne
 # Usage of the repertoire visualization ################
 
 #https://stackoverflow.com/questions/21193138/transparency-and-alpha-levels-for-ggplot2-stat-density2d-with-maps-and-layers-in
-ggplot(act[RepoJob==0], aes(V1,V2,colour=Job)) + coord_fixed() +
+ggplot(act[RepoJob==0 & Repo=="nsneat"], aes(V1,V2,colour=Job)) + coord_fixed() +
   geom_point(data=rep[Repo=="nsneat" & Job==0], colour="lightgray", shape=16, size=.5) +
   geom_density2d(h=0.2,bins=5) + facet_wrap(~ Task, ncol=3) +
   theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL)
 
-ggplot(act[RepoJob==0], aes(V1,V2)) + coord_fixed() +
+ggplot(act[RepoJob==0 & Repo=="nsneat"], aes(V1,V2)) + coord_fixed() +
   geom_point(data=rep[Repo=="nsneat" & Job==0], colour="lightgray", shape=16, size=.5) +
   stat_density2d(geom="polygon", h=0.2,bins=10, aes(fill=..level..), alpha=.6) + facet_wrap(~ Task, ncol=3) +
   scale_fill_distiller(palette="Spectral") + xlim(range(act$V1)+c(-0.05,0.05)) + ylim(range(act$V2)+c(-0.05,0.05)) +
   theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL, fill="Density")
 
 ggsave("~/Dropbox/Work/Papers/17-SWEVO/rep_usage.png", width=4.7, height=4)
+
+ggplot(act[RepoJob==0 & Repo=="rand"], aes(V1,V2)) + coord_fixed() +
+  geom_point(data=rep[Repo=="rand" & Job==0], colour="lightgray", shape=16, size=.5) +
+  stat_density2d(geom="polygon", h=0.2,bins=10, aes(fill=..level..), alpha=.6) + facet_wrap(~ Task, ncol=3) +
+  scale_fill_distiller(palette="Spectral") + xlim(range(act$V1)+c(-0.05,0.05)) + ylim(range(act$V2)+c(-0.05,0.05)) +
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL, fill="Density")
+
+ggsave("~/Dropbox/Work/Papers/17-SWEVO/rep_usage_rand.png", width=4.7, height=4)
+
 
 ggplot(act[RepoJob==0], aes(V1,V2)) + coord_fixed() +
   geom_point(data=rep[Repo=="nsneat" & Job==0], colour="lightgray", shape=16, size=.5) +
@@ -281,7 +296,7 @@ ggsave("~/Dropbox/Work/Papers/17-SWEVO/rep_usage_all.png", width=3.5, height=2.5
 
 # Usage of the repertoire stats ############
 
-aggregated <- act[, .N, by=c("Task","Job",vars)]
+aggregated <- act[Repo=="nsneat", .N, by=c("Task","Job",vars)]
 d <- function(a, b) {
     dists <- pdist(a[,-"N"], b[,-"N"])@dist
     w <- rep(a$N, each=nrow(b)) * rep(b$N, nrow(a))
@@ -368,7 +383,7 @@ sapply(m, function(x) x$ttest$holm[1,2])
 
 # Activation stats ##############
 
-act.stats <- act[, .(Number=length(unique(Primitive)), 
+act.stats <- act[Repo=="nsneat", .(Number=length(unique(Primitive)), 
                      Duration=mean(rle(Primitive)$lengths), 
                      MaxDuration=max(rle(Primitive)$lengths),
                      Used=sum(sapply(.SD[, paste0("ArbitratorOut_",0:6), with=F], sd) > 0.10, na.rm=T)),

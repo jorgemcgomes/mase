@@ -7,7 +7,7 @@ package mase.evorbc;
 
 import java.util.Arrays;
 import mase.controllers.AgentController;
-import org.apache.commons.lang3.tuple.Pair;
+import mase.evorbc.Repertoire.Primitive;
 
 /**
  *
@@ -67,11 +67,11 @@ public class ArbitratorController implements AgentController {
         if (!locked) {
             lastRepertoireCoords = mapFun.outputToCoordinates(output);
 
-            Pair<Integer, AgentController> primitive = repo.nearest(lastRepertoireCoords);
-            lastPrimitiveId = primitive.getLeft();
+            Primitive primitive = repo.nearest(lastRepertoireCoords);
+            lastPrimitiveId = primitive.id;
             if (lastPrimitive == null || primitive != lastPrimitive) {
-                primitive.getRight().reset();
-                lastPrimitive = primitive.getRight();
+                primitive.ac.reset();
+                lastPrimitive = primitive.ac;
             }
         }
 

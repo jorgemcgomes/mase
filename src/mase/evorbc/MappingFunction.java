@@ -5,13 +5,16 @@
  */
 package mase.evorbc;
 
-import java.io.Serializable;
+import ec.EvolutionState;
+import ec.Setup;
 
 /**
  *
  * @author jorge
  */
-public interface MappingFunction extends Serializable {
+public interface MappingFunction extends Setup {
+    
+    public void additionalSetup(EvolutionState state, Repertoire rep);
     
     public double[] outputToCoordinates(double[] arbOutput);
     

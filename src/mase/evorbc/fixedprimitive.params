@@ -1,0 +1,37 @@
+parent.0=../base.params
+
+problem.controller-factory = mase.evorbc.FixedPrimitiveFactory
+# evorbc.repertoire=<repertoire path>
+evorbc.repertoire-impl = mase.evorbc.KdTreeRepertoire
+evorbc.mapping-fun = mase.evorbc.CartesianMappingFunction
+evorbc.coordinates = direct
+
+# Populations configuration
+pop.subpops =                           1
+pop.subpop.0 =                          ec.Subpopulation
+pop.default-subpop = 			0
+ec.subpop.duplicate-retries =           10
+ec.subpop.size = 			200
+
+# Individual representation
+ec.subpop.species = 			ec.vector.FloatVectorSpecies
+vector.species.min-gene =               0
+vector.species.max-gene =               1
+vector.species.ind =                    ec.vector.DoubleVectorIndividual
+vector.species.genome-size =            10
+
+# Elitism configuration (pre-breeding)
+breed.elite.0 =                           5
+breed.reevaluate-elites.0 =               true
+
+# Breeding
+vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline
+vector.mutate.source.0 =                ec.select.TournamentSelection
+vector.species.mutation-type =          gauss
+vector.species.mutation-stdev =         0.25
+vector.species.mutation-prob =          0.2
+vector.species.mutation-bounded =       TRUE
+select.tournament.size =                2
+
+
+

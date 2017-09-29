@@ -5,6 +5,9 @@
  */
 package mase.evorbc;
 
+import ec.EvolutionState;
+import ec.util.Parameter;
+import mase.evorbc.Repertoire.Primitive;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -14,27 +17,40 @@ import org.apache.commons.lang3.tuple.Pair;
 public class CartesianMappingFunction implements MappingFunction {
 
     private static final long serialVersionUID = 1L;
-    private final double[] min, range;
-    
-    public CartesianMappingFunction(Pair<Double,Double>[] bounds) {
-        this.min = new double[bounds.length];
-        this.range = new double[bounds.length];
-        for(int i = 0 ; i < bounds.length ; i++) {
-            min[i] = bounds[i].getLeft();
-            range[i] = bounds[i].getRight() - bounds[i].getLeft();
-        }
+    private double[] min, range;
+
+    @Override
+    public void setup(EvolutionState state, Parameter base) {
     }
-    
+
+    @Override
+    public void additionalSetup(EvolutionState state, Repertoire rep) {
+        int n = rep.allPrimitives().iterator().next().coordinates.length;
+        this.min = new double[n];
+        this.range = new double[n];
+        for (int i = 0; i < n; i++) {
+            double mi = Double.POSITIVE_INFINITY;
+            double ma = Double.NEGATIVE_INFINITY;
+            for (Primitive p : rep.allPrimitives()) {
+                double[] c = p.coordinates;
+                mi = Math.min(mi, c[i]);
+                ma = Math.max(ma, c[i]);
+            }
+            min[i] = mi;
+            range[i] = ma - mi;
+        }       
+    }
+
     @Override
     /**
      * Assumes that arbitratorOutput is in the range [0,1]
      */
     public double[] outputToCoordinates(double[] arbOutput) {
         double[] t = new double[arbOutput.length];
-        for(int i = 0 ; i < arbOutput.length ; i++) {
+        for (int i = 0; i < arbOutput.length; i++) {
             t[i] = arbOutput[i] * range[i] + min[i];
         }
         return t;
     }
-    
+
 }
