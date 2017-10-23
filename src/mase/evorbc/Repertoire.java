@@ -8,6 +8,7 @@ package mase.evorbc;
 import ec.Setup;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import mase.controllers.AgentController;
 
 /**

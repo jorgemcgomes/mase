@@ -8,15 +8,12 @@ import ec.EvolutionState;
 import ec.util.Parameter;
 import ec.vector.DoubleVectorIndividual;
 import ec.vector.FloatVectorSpecies;
-import java.util.List;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.MLMethod;
-import org.encog.neural.flat.FlatLayer;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
-import org.encog.neural.networks.layers.Layer;
 import org.encog.neural.pattern.FeedForwardPattern;
 import org.encog.neural.pattern.JordanPattern;
 import org.encog.neural.pattern.NeuralNetworkPattern;
@@ -74,7 +71,7 @@ public class NeuralControllerIndividual extends DoubleVectorIndividual implement
         return new NeuralAgentController(network.getFlat());
     }
 
-    protected static NeuralNetworkPattern createNetworkPattern(String structure, int in, int hidden, int out, boolean tanh) {
+    public static NeuralNetworkPattern createNetworkPattern(String structure, int in, int hidden, int out, boolean tanh) {
         ActivationFunction act = tanh ? new ActivationTANH() : new ActivationSigmoid();
         NeuralNetworkPattern pattern = null;
         if (structure.equalsIgnoreCase(ELMAN)) {

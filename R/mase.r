@@ -345,6 +345,14 @@ quickReport <- function(folders, filename="postfitness.stat", ttests=T, snapshot
   }
 }
 
+common.start <- function(x) {
+  x<-sort(x) # sort the vector
+  d_x<-strsplit(x[c(1,length(x))],"") # split the first and last element by character
+  der_com<-match(FALSE,do.call("==",d_x))-1 # search for the first not common element and so, get the last matching one
+  # if there is no matching element, return an empty vector, else return the common part
+  ifelse(der_com==0,return(character(0)),return(substr(x[1],1,der_com)))
+}
+
 #### Behavioural analysis #################################################################
 
 euclideanDist <- function(x1, x2) {sqrt(sum((x1 - x2) ^ 2))} 

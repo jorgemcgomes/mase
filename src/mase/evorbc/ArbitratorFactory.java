@@ -46,5 +46,12 @@ public abstract class ArbitratorFactory implements ControllerFactory {
         mapFun.additionalSetup(state, repo);
     }
 
+    public Repertoire getRepertoire() {
+        return repo;
+    }
+
+    public MappingFunction getMappingFunction() {
+        return mapFun;
+    }
 
 }

@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import mase.evaluation.MetaEvaluator;
 import mase.evaluation.PostEvaluator;
-import mase.evaluation.VectorBehaviourResult;
 import mase.novelty.NoveltyEvaluation.ArchiveEntry;
 
 /**

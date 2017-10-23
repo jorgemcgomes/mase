@@ -52,5 +52,12 @@ public class CartesianMappingFunction implements MappingFunction {
         }
         return t;
     }
+    
+    /**
+     * @return Minimum values for each dimension, and range for each dimension
+     */
+    public Pair<double[],double[]> getRange() {
+        return Pair.of(min, range);
+    }
 
 }

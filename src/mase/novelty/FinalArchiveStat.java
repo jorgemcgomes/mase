@@ -31,7 +31,6 @@ public class FinalArchiveStat extends Statistics {
     public static final String P_FILE = "file";
     private static final long serialVersionUID = 1L;
     protected File archiveFile;
-    protected transient TarArchiveOutputStream taos;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -53,7 +52,7 @@ public class FinalArchiveStat extends Statistics {
 
         try {
             int l = state.output.addLog(archiveFile, false);
-            taos = new TarArchiveOutputStream(new GZIPOutputStream(
+            TarArchiveOutputStream taos = new TarArchiveOutputStream(new GZIPOutputStream(
                     new BufferedOutputStream(new FileOutputStream(state.output.getLog(l).filename))));
             
             for (int a = 0; a < ne.archives.length; a++) {

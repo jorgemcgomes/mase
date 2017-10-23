@@ -22,8 +22,10 @@ import mase.evaluation.EvaluationResult;
 import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.evaluation.CompoundEvaluationResult;
+import mase.evaluation.FitnessResult;
 import mase.mason.MasonSimulationProblem;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  *
@@ -159,7 +161,9 @@ public class ReevaluationTools {
 
         @Override
         public String toString() {
-            String res = "Mean fitness: " + meanFitness + " +- " + sdFitness + " [" + minFitness + "," + maxFitness + "]\n\n";
+            double ci = 1.645 * (sdFitness / FastMath.sqrt(allResults.size()));
+            String res = "Mean fitness: " + meanFitness + " (" + sdFitness + ") " + 
+                    "[" + minFitness + "," + maxFitness + "] CI-90%: [" + (meanFitness-ci) +"," + (meanFitness+ci) + "]\n";
             for (int i = 0; i < mergedResults.length; i++) {
                 res += "Evaluation " + i + ":\n" + mergedResults[i].toString() + "\n\n";
             }
@@ -168,9 +172,6 @@ public class ReevaluationTools {
 
     }
 
-    /*
-     * WARNING: assumes that fitness is always the first evaluation result
-     */
     public static Reevaluation reevaluate(PersistentSolution gc, MaseProblem sim, int reps) {
         return reevaluate(gc.getController(), gc.getSubpop(), sim, reps);
     }
@@ -198,23 +199,27 @@ public class ReevaluationTools {
 
         DescriptiveStatistics ds = new DescriptiveStatistics(results.size());
         for (EvaluationResult[] rs : results) {
-            double fit;
+            EvaluationResult fr = null;
             if (rs[0] instanceof CompoundEvaluationResult) {
                 CompoundEvaluationResult ser = (CompoundEvaluationResult) rs[0];
-                fit = (Double) ser.getEvaluation(subpop).value();
+                fr = ser.getEvaluation(subpop);
             } else {
-                fit = (Double) rs[0].value();
+                fr = rs[0];
+            }            
+            if(fr != null && fr instanceof FitnessResult) {
+                ds.addValue(((FitnessResult) fr).value());
             }
-            ds.addValue(fit);
         }
 
         Reevaluation res = new Reevaluation();
         res.allResults = results;
         res.mergedResults = merged;
-        res.meanFitness = ds.getMean();
-        res.sdFitness = ds.getStandardDeviation();
-        res.minFitness = ds.getMin();
-        res.maxFitness = ds.getMax();
+        if(ds.getN() > 0) {
+            res.meanFitness = ds.getMean();
+            res.sdFitness = ds.getStandardDeviation();
+            res.minFitness = ds.getMin();
+            res.maxFitness = ds.getMax();
+        }
         return res;
     }
 }

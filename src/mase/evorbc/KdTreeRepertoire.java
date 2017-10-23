@@ -105,6 +105,10 @@ public class KdTreeRepertoire implements Repertoire {
         return primitives.values();
     }    
     
+    public Primitive getPrimitiveById(int id) {
+        return primitives.get(id);
+    }
+    
     @Override
     public Repertoire deepCopy() {
         KdTreeRepertoire newRep = new KdTreeRepertoire();
