@@ -5,7 +5,8 @@
  */
 package mase.app.maze;
 
-import mase.mason.ParamUtils.Param;
+import java.io.Serializable;
+import mase.mason.ParamUtils.IgnoreParam;
 import mase.mason.world.GeomUtils.Multiline;
 import sim.util.Double2D;
 
@@ -13,25 +14,32 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class MazeParams {
+public class MazeParams implements Serializable {
 
-    protected Multiline maze;
-    protected Double2D startPos;
-    protected Double2D targetPos;
+    private static final long serialVersionUID = 1L;
 
-    @Param(name = "maze")
-    public String mazeFile;
-    @Param(name = "linear-speed")
+    @IgnoreParam
+    protected Multiline maze[];
+    
+    public Double2D startPos[] = null;
+    public Double2D targetPos[] = null;
+    public double startOrientation[] = null;
+    public double xRandom = 0;
+    public double yRandom = 0;
+
+    public Double2D[] zonesLowerCorner;
+    public Double2D[] zonesUpperCorner;
+    public double[] zonesMaxSpeed;
+    public int maxSpeedingSteps;
+    public double maxSpeedingAccum;
+    
+    public boolean instaKill = false;
+    
+    public String mazeFile[];
     public double linearSpeed;
-    @Param(name = "turn-speed")
     public double turnSpeed;
-    @Param(name = "agent-radius")
     public double agentRadius;
-    @Param(name = "start-orientation")
-    public double startOrientation;
-    @Param(name = "target-radius")
     public double targetRadius;
-    @Param(name = "sensor-range")
     public double sensorRange;
 
 }

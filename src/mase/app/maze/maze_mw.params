@@ -1,0 +1,19 @@
+parent.0 = maze.params
+
+problem.simstate =                 mase.app.maze.MultiWheelMazeTask
+problem.params =                   mase.app.maze.MultiWheelMazeParams
+
+neat.OUTPUT.NODES = 5 
+
+problem.wheels = true,true,true,true
+    
+problem.slipAngleLimit = 45
+# 0.2 is a reasonable value for friction
+problem.friction = 0.2
+problem.parallelAngle = 2.5
+    
+problem.turnLimit = 45
+problem.turnAcceleration = 5 
+
+problem.linearSpeed = 1    
+problem.linearAcceleration = 0.1

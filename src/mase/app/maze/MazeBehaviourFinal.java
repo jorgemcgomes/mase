@@ -17,6 +17,8 @@ import sim.util.Double2D;
  */
 public class MazeBehaviourFinal extends MasonEvaluation {
 
+    private static final long serialVersionUID = 1L;
+
     private VectorBehaviourResult vbr;
 
     @Override

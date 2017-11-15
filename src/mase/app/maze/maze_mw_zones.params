@@ -1,0 +1,13 @@
+parent.0 = maze_mw.params
+
+problem.zonesLowerCorner = 100:0,266:0
+problem.zonesUpperCorner = 150:999,300:999
+problem.zonesMaxSpeed = 0.5,0.25
+problem.maxSpeedingSteps = 20
+
+neat.INPUT.NODES = 11
+
+gp.fs.0.func.16 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.16.nc = sensorterminal
+gp.fs.0.func.16.sensor-index = 10
+gp.fs.0.func.16.sensor-name = Z

@@ -6,47 +6,41 @@
 package mase.app.maze;
 
 import mase.evaluation.EvaluationResult;
-import mase.evaluation.FitnessResult;
+import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
+import sim.util.Double2D;
 
 /**
  *
  * @author jorge
  */
-public class MazeFitnessExt extends MasonEvaluation {
-
+public class Displacement extends MasonEvaluation {
+    
     private static final long serialVersionUID = 1L;
-
-    private FitnessResult res;
-    private double initDist;
+    private VectorBehaviourResult vbr;
+    private Double2D initial;
 
     @Override
     public EvaluationResult getResult() {
-        return res;
+        return vbr;
     }
 
     @Override
     protected void preSimulation(MasonSimState sim) {
-        super.preSimulation(sim);
+        super.preSimulation(sim); 
         MazeTask mt = (MazeTask) sim;
-        initDist = mt.agent.distanceTo(mt.target);
+        initial = mt.agent.getLocation();
     }
-
+    
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(null);
         MazeTask mt = (MazeTask) sim;
-        double finalDist = mt.agent.distanceTo(mt.target);
-        
-        // Objective reached -- add time
-        if (finalDist <= 0.001) {
-            double t = (super.maxSteps - mt.schedule.getSteps()) / (double) maxSteps;
-            res = new FitnessResult(1 + t);
-        } else {
-            double norm = (initDist - finalDist) / initDist;
-            res = new FitnessResult( Math.min(Math.max(norm, 0), 1));
-        }
+        Double2D loc = mt.agent.getLocation();
+        Double2D disp = loc.subtract(initial);
+        vbr = new VectorBehaviourResult( disp.x,  disp.y);
     }
 
+    
 }

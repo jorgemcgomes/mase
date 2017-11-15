@@ -23,13 +23,19 @@ public class MazeAgent extends SmartAgent {
 
     public static final Color COLOR = Color.BLUE;
     private static final long serialVersionUID = 1L;
+    private boolean instaKill = false;
 
     public MazeAgent(MazeTask sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, COLOR, ac);
+        ac.reset();
         this.enableBoundedArena(false);
         this.enableCollisionRebound(false);
+        this.enableRotationWithCollisions(true);
         this.setCollidableTypes(MultilineObject.class);
-        
+        this.instaKill = sim.par.instaKill;
+    }
+    
+    protected void setupSensors(MazeTask sim) {
         DistanceSensorArcs arcSensor = new DistanceSensorArcs(sim, field, this);
         super.addSensor(arcSensor);
         arcSensor.setRange(Double.POSITIVE_INFINITY);
@@ -39,16 +45,23 @@ public class MazeAgent extends SmartAgent {
         
         RaySensor raySensor = new RaySensor(sim, field, this);
         super.addSensor(raySensor);
+        raySensor.setObjects(Collections.singleton(sim.maze));
         raySensor.setBinary(false);
         raySensor.setRays(sim.par.sensorRange, -Math.PI/2, -Math.PI / 4, 0, Math.PI / 4, Math.PI / 2, Math.PI);
         
-
+        if(sim.par.zonesMaxSpeed != null) {
+            ZoneSensor zs = new ZoneSensor(sim, field, this);
+            super.addSensor(zs);
+        }
+    }
+    
+    protected void setupActuators(MazeTask sim) {
         DashMovementEffector dm = new DashMovementEffector(sim, field, this);
         super.addEffector(dm);
         dm.allowBackwardMove(true);
-        dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);
+        dm.setSpeeds(sim.par.linearSpeed, sim.par.turnSpeed);        
     }
-
+    
     @Override
     public void action(double[] output) {
         super.action(output);
@@ -57,6 +70,10 @@ public class MazeAgent extends SmartAgent {
         // target reached
         if(this.distanceTo(mt.target) <= 0) {
             mt.kill(); // done
+        }
+        // hit wall
+        if(instaKill && getCollisionStatus()) {
+            mt.kill(); // stop
         }
     }
 }

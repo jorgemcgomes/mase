@@ -6,7 +6,6 @@
 
 package mase.app.maze;
 
-import com.kitfox.svg.Path;
 import com.kitfox.svg.SVGDiagram;
 import com.kitfox.svg.SVGElement;
 import com.kitfox.svg.SVGException;

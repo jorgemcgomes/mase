@@ -1,33 +1,32 @@
-# remove sample stats
-stat.child.5 = ec.Statistics
-
 eval.base.problem =                mase.app.maze.MazeSimulator
+problem.simstate =                 mase.app.maze.MazeTask
+problem.params =                   mase.app.maze.MazeParams
 problem.number-evals =             2
 problem.trials-merge =             best
 problem.eval.0 =                   mase.app.maze.MazeFitnessExt
 problem.eval.0.update-freq =       0
 problem.eval.1 =                   mase.app.maze.MazeBehaviourFinal
 problem.eval.1.update-freq =       0
-problem.eval.2 =                   mase.app.maze.MazeBehaviourExt
-problem.eval.2.update-freq =       50
 
 fitness.fitness-index =            0
 fitness.novelty-index =            1
 
 # general params
-problem.repetitions =              1
-problem.same-seed =                true
-problem.max-steps =                500
+problem.repetitions =              5
+problem.seed =                     random
+problem.max-steps =                1500
 
 # agent params
-problem.linear-speed = 2
-problem.turn-speed = 0.39
-problem.agent-radius = 4
-problem.sensor-range = 50
+problem.linearSpeed = 1
+problem.turnSpeed = 0.39
+problem.agentRadius = 4
+problem.sensorRange = 50
 
 # maze params
-problem.target-radius = 1
-problem.maze = hard.svg
+problem.targetRadius = 1
+problem.mazeFile = mazes/zigzag1.svg,mazes/zigzag2.svg,mazes/zigzag3.svg,mazes/zigzag4.svg,mazes/zigzag5.svg
+problem.xRandom = 0
+problem.yRandom = 0
 
 vector.species.genome-size =       80
 neural.input =                     10
