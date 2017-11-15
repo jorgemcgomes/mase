@@ -11,6 +11,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import mase.stat.PersistentSolution;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  *
@@ -49,11 +50,11 @@ public class SolutionsList extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Generation", "Subpop", "Index", "Fitness", "User data"
+                "Generation", "Subpop", "Index", "Fitness"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -166,10 +167,29 @@ public class SolutionsList extends javax.swing.JFrame {
     public void populateTable(final List<PersistentSolution> solutions) {
         this.solutions = solutions;
         DefaultTableModel mod = (DefaultTableModel) table.getModel();
+        
+        // create columns and headers
+        PersistentSolution sample = solutions.get(0);
+        if(sample.getUserData() instanceof double[]) {
+            double[] d = (double[]) sample.getUserData();
+            for(int i = 0 ; i < d.length ; i++) {
+                mod.addColumn("B"+i);
+            }
+        } else if(sample.getUserData() != null) {
+            mod.addColumn("UserData");
+        }
+        
+        // populate table
         for (PersistentSolution s : solutions) {
+            Object[] ids = new Object[]{s.getGeneration(), s.getSubpop(), s.getIndex(), s.getFitness()};
             Object ud = s.getUserData();
-            String udStr = ud == null ? "NA" : (ud instanceof double[] ? Arrays.toString((double[]) ud) : ud.toString());
-            mod.addRow(new Object[]{s.getGeneration(), s.getSubpop(), s.getIndex(), s.getFitness(), udStr});
+            if(ud instanceof double[]) {
+                mod.addRow(ArrayUtils.addAll(ids, (Object[]) ArrayUtils.toObject((double[]) ud)));
+            } else if(ud != null) {
+                mod.addRow(ArrayUtils.add(ids, ud.toString()));
+            } else {
+                mod.addRow(ids);
+            }            
         }
 
         // Update text pane on row selection

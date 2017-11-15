@@ -9,8 +9,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import mase.controllers.AgentController;
+import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
+import sim.portrayal.Inspector;
+import sim.portrayal.LocationWrapper;
+import sim.portrayal.inspector.TabbedInspector;
+import sim.util.Double2D;
 
 /**
  *
@@ -71,12 +76,14 @@ public class SmartAgent extends EmboddiedAgent {
         if (ac != null) {
             lastNormSensors = readNormalisedSensors();
             lastActionOutput = ac.processInputs(lastNormSensors);
-            for (int i = 0; i < lastActionOutput.length; i++) {
-                if (Double.isNaN(lastActionOutput[i]) || Double.isInfinite(lastActionOutput[i])) {
-                    lastActionOutput[i] = 0.5;
+            if(lastActionOutput != null) { // if output is null, do nothing
+                for (int i = 0; i < lastActionOutput.length; i++) {
+                    if (Double.isNaN(lastActionOutput[i]) || Double.isInfinite(lastActionOutput[i])) {
+                        lastActionOutput[i] = 0.5;
+                    }
                 }
+                action(lastActionOutput);
             }
-            action(lastActionOutput);
         }
     }
 
@@ -173,4 +180,27 @@ public class SmartAgent extends EmboddiedAgent {
         return effectors;
     }
 
+    @Override
+    public void setLocation(Double2D loc) {
+        super.setLocation(loc); 
+        for(Sensor s : sensors) {
+            field.setObjectLocation(s, loc);
+        }
+        for(Effector e : effectors) {
+            field.setObjectLocation(e, loc);
+        }
+    }    
+
+    @Override
+    public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
+        Inspector defaultInspector = super.getInspector(wrapper, state);
+        defaultInspector.setTitle("Agent Properties");
+        Inspector controllerInspector = Inspector.getInspector(ac, state, "Agent Controller");
+        controllerInspector.setTitle("Agent Controller");
+        
+        TabbedInspector tab = new TabbedInspector("Agent Inspector");
+        tab.addInspector(defaultInspector);
+        tab.addInspector(controllerInspector);
+        return tab;
+    }
 }

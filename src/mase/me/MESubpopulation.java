@@ -97,7 +97,7 @@ public class MESubpopulation extends Subpopulation {
     protected int[] discretise(double[] v) {
         int[] r = new int[v.length];
         for (int i = 0; i < v.length; i++) {
-            r[i] = (int) Math.floor(v[i] / resolution);
+            r[i] = (int) Math.round(v[i] / resolution);
         }
         return r;
     }

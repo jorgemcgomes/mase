@@ -7,6 +7,7 @@ package mase.mason.world;
 
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import net.jafama.FastMath;
 import org.apache.commons.lang3.tuple.Pair;
@@ -35,6 +36,10 @@ public class GeomUtils {
     // Is p left of the line vw?
     public static boolean isLeftOf(Double2D p, Double2D v, Double2D w) {
         return (p.y - v.y) * (w.x - v.x) > (p.x - v.x) * (w.y - v.y);
+    }
+    
+    public static Double2D pointInLine(Double2D lineStart, Double2D lineEnd, double distance) {
+        return (((lineEnd.subtract(lineStart)).resize(distance)).add(lineStart));
     }
 
     // Return minimum distance between line segment vw and point p
@@ -142,7 +147,9 @@ public class GeomUtils {
         return new Multiline(segments);
     }
 
-    public static class Multiline {
+    public static class Multiline implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         public final Segment[] segments;
         public final Double2D[] points;
@@ -312,7 +319,9 @@ public class GeomUtils {
      *
      * @author jorge
      */
-    public static class Segment {
+    public static class Segment implements Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         public final Double2D start;
         public final Double2D end;
@@ -329,5 +338,72 @@ public class GeomUtils {
             this.end = new Double2D(endX, endY);
         }
     }
+    
+    public static class Line implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        public final Double2D p1; // one point belonging to the line
+        public final Double2D p2; // other point belonging to the line
+
+        /**
+         * @param p One point belonging to the line
+         * @param angle The angle of the line
+         */
+        public Line(Double2D p, double angle) {
+            this.p1 = p;
+            this.p2 = new Double2D(p.x + FastMath.cos(angle), p.y + FastMath.sin(angle));
+        }
+
+        /**
+         * @param p1 One point belonging to the line
+         * @param p2 Another point belonging to the line
+         */
+        public Line(Double2D p1, Double2D p2) {
+            this.p1 = p1;
+            this.p2 = p2;
+        }
+
+        /**
+         * Returns the intersection point of two lines, or null if they are parallel
+         * @param other
+         * @return 
+         */
+        public Double2D intersect(Line other) {
+            double x1 = this.p1.x;
+            double x2 = this.p2.x;
+            double y1 = this.p1.y;
+            double y2 = this.p2.y;
+            double x3 = other.p1.x;
+            double x4 = other.p2.x;
+            double y3 = other.p1.y;
+            double y4 = other.p2.y;
+
+            double d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+            if (d > 0.001 && d < 0.001) {
+                return null;
+            }
+            double xi = ((x3 - x4) * (x1 * y2 - y1 * x2) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d;
+            double yi = ((y3 - y4) * (x1 * y2 - y1 * x2) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d;
+            return new Double2D(xi, yi);
+        }
+
+        /**
+         * Smaller angle between two lines
+         * @param other
+         * @return 
+         */
+        public double angle(Line other) {
+            Double2D a = this.p1.subtract(this.p2);
+            Double2D b = other.p1.subtract(other.p2);
+            double angle = FastMath.atan2(a.x * b.y - a.y * b.x, a.x * b.x + a.y * b.y);
+            angle = Math.abs(angle);
+            if (angle > Math.PI / 2) {
+                angle = Math.PI - angle;
+            }
+            return angle;
+        }
+    }
+    
 
 }

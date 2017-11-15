@@ -7,9 +7,11 @@ package mase.evorbc;
 
 import ec.Setup;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import mase.controllers.AgentController;
+import mase.util.FormatUtils;
 
 /**
  *
@@ -54,6 +56,13 @@ public interface Repertoire extends Setup {
         public Primitive clone() {
             return new Primitive(ac.clone(), id, coordinates);
         }
+
+        @Override
+        public String toString() {
+            return id + " @ " + FormatUtils.toString(coordinates) + " " + ac.getClass().getSimpleName() + ac;
+        }
+        
+        
         
     }
         

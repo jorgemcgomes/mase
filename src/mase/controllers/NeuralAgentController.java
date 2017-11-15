@@ -5,6 +5,7 @@
  */
 package mase.controllers;
 
+import java.util.Arrays;
 import org.encog.neural.flat.FlatNetwork;
 
 /**
@@ -34,7 +35,7 @@ public class NeuralAgentController implements AgentController {
 
     @Override
     public String toString() {
-        return network.getInputCount() + " --> " + network.getOutputCount();
+        return Arrays.toString(network.getLayerCounts());
     }
     
     public FlatNetwork getNetwork() {

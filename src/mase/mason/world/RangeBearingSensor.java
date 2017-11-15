@@ -8,6 +8,7 @@ package mase.mason.world;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import org.apache.commons.math3.util.MathUtils;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 
@@ -94,7 +95,7 @@ public class RangeBearingSensor extends AbstractSensor {
                 double angle = ag.angleTo(o.getLocation());
                 if (orientationNoise > 0) {
                     angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                    angle = EmboddiedAgent.normalizeAngle(angle);
+                    angle = MathUtils.normalizeAngle(angle, 0);
                 }
                 distanceReadings[index] = dist;
                 angleReadings[index] = angle;

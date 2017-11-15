@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import mase.mason.generic.systematic.Entity;
 import net.jafama.FastMath;
+import org.apache.commons.math3.util.MathUtils;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.engine.Stoppable;
@@ -32,6 +33,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     private Stoppable stopper;
     private boolean boundedArena;
     private boolean collisionRebound;
+    private boolean rotateWithCollision;
     private Class<? extends WorldObject>[] collidableTypes;
     private double collisionSpeedDecay = 0.5;
     private double collisionReboundDirection = Math.PI / 2;
@@ -59,6 +61,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         this.turningSpeed = 0;
         this.boundedArena = false;
         this.collisionRebound = true;
+        this.rotateWithCollision = true;
         this.isAlive = true;
     }
 
@@ -81,6 +84,10 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     public final void enableRotation(boolean r) {
         this.rotate = r;
         orientedPortrayal.setOrientationShowing(r);
+    }
+    
+    public void enableRotationWithCollisions(boolean r) {
+        this.rotateWithCollision = r;
     }
 
     public void setCollidableTypes(Class<? extends WorldObject>... types) {
@@ -172,40 +179,50 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     public final void enableCollisionRebound(boolean enable) {
         this.collisionRebound = enable;
     }
-
-    protected boolean move(double orientation, double speed) {        
-        if (rotate) {
-            this.turningSpeed = orientation - this.orientation;
-            this.orientation = normalizeAngle(orientation);
+    
+    /**
+     * Move to the newPosition, and get the newOrientation
+     * @param newOrientation
+     * @param newPosition
+     * @return 
+     */
+    protected boolean move(double newOrientation, Double2D newPosition) {
+        double oldOrientation = this.orientation;
+        Double2D moveVec = newPosition.subtract(this.getLocation());
+        boolean success = this.move(moveVec.angle(), moveVec.length());
+        if(rotate && (rotateWithCollision || success)) {
+            this.turningSpeed = newOrientation - oldOrientation;
+            this.orientation = MathUtils.normalizeAngle(newOrientation, 0);            
+        } else {
+            this.turningSpeed = 0;
         }
-        
-        boolean tryMove = attemptMove(orientation, speed);
-        if (!tryMove && collisionRebound) { // cannot move, rebound if allowed
+        return success;
+    }
+
+    /**
+     * Try to move in the direction of the newOrientation, and get that orientation
+     * @param newOrientation
+     * @param speed
+     * @return 
+     */
+    protected boolean move(double newOrientation, double speed) {        
+        boolean success = attemptMove(newOrientation, speed);
+        if (!success && collisionRebound) { // cannot move, rebound if allowed
             // try to escape to both sides with a random order
             double angle = sim.random.nextBoolean() ? collisionReboundDirection : -collisionReboundDirection;
-            if (!attemptMove(normalizeAngle(orientation + angle), speed * collisionSpeedDecay)
-                    && !attemptMove(normalizeAngle(orientation - angle), speed * collisionSpeedDecay)) {
-                // could not rebound as well
-                return false;
-            }
+            success = attemptMove(MathUtils.normalizeAngle(newOrientation + angle, 0), speed * collisionSpeedDecay) ||
+                    attemptMove(MathUtils.normalizeAngle(newOrientation - angle, 0), speed * collisionSpeedDecay);
         }
-        return tryMove;
+        
+        if (rotate && (rotateWithCollision || success)) {
+            this.turningSpeed = newOrientation - this.orientation;
+            this.orientation = MathUtils.normalizeAngle(newOrientation, 0);
+        } else {
+            this.turningSpeed = 0;
+        }
+        return success;
     }
-
-    // from anything to [-PI,PI]
-    public static double normalizeAngle(double ang) {
-        if (ang > Math.PI * 2) {
-            ang = ang % (Math.PI * 2);
-        } else if (ang < -Math.PI * 2) {
-            ang = -(Math.abs(ang) % (Math.PI * 2));
-        }
-        if (ang > Math.PI) {
-            ang = ang - Math.PI * 2;
-        } else if (ang < -Math.PI) {
-            ang = ang + Math.PI * 2;
-        }
-        return ang;
-    }
+    
 
     private boolean attemptMove(double ori, double speed) {
         Double2D displacement = new Double2D(speed * FastMath.cos(ori), speed * FastMath.sin(ori));
@@ -221,7 +238,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
             return false;
         }
     }
-
+    
     /**
      * Warning: assumes that all agents have the same size
      *
@@ -249,6 +266,10 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     public double orientation2D() {
         return orientation;
     }
+    
+    public double getOrientationInDegrees() {
+        return Math.toDegrees(orientation);
+    }
 
     public void setOrientation(double angle) {
         this.orientation = angle;
@@ -273,7 +294,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     public void setTurningSpeed(double turnSpeed) {
         this.turningSpeed = turnSpeed;
     }
-
+    
     /**
      * @param point
      * @return From -PI to PI.

@@ -24,14 +24,14 @@ breed =                                 mase.me.MEBreeder
 vector.species.pipe =                   ec.vector.breed.VectorMutationPipeline
 vector.mutate.source.0 =                mase.me.MEBreedingSource
 vector.species.mutation-type =          gauss
-vector.species.mutation-stdev =         0.50
-vector.species.mutation-prob =          0.1
+vector.species.mutation-stdev =         0.1
+vector.species.mutation-prob =          0.25
 vector.species.mutation-bounded =       TRUE
 
 # Statistics
 # instead of FitnessStat
 stat.child.1 =                         mase.me.MEGenerationalStat
-stat.child.1.file =                    $repertoire.stat
+stat.child.1.file =                    $me.stat
 # Remove BestEverSolutionStat
 stat.child.2 =                         ec.Statistics
 # instead of BestSolutionGenStat

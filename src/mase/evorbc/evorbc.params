@@ -1,8 +1,7 @@
-problem.controller-factory = mase.evorbc.NeuralArbitratorFactory
+# problem.controller-factory = <some class extending ArbitratorFactory>
 
 # evorbc.repertoire=<repertoire path>
 evorbc.repertoire-impl = mase.evorbc.KdTreeRepertoire
 evorbc.mapping-fun = mase.evorbc.CartesianMappingFunction
 evorbc.coordinates = direct
-evorbc.locking = false
 

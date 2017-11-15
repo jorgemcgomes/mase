@@ -4,8 +4,6 @@
  */
 package mase.mason;
 
-import ec.util.Parameter;
-import ec.util.ParameterDatabase;
 import java.util.ArrayList;
 import java.util.List;
 import mase.controllers.GroupController;
@@ -28,8 +26,9 @@ public abstract class MasonSimState<T> extends SimState {
     protected GroupController gc;
     protected EvaluationFunction[] evalPrototypes = new EvaluationFunction[0];
     protected int maxSteps = 0;
-    public MasonEvaluation[] currentEvals;
+    protected MasonEvaluation[] currentEvals;
     protected List<Steppable> loggers;
+    protected int repetitionNumber = -1;
     public T par;
 
     public MasonSimState(long seed) {
@@ -57,23 +56,40 @@ public abstract class MasonSimState<T> extends SimState {
     public int getMaxSteps() {
         return maxSteps;
     }
+    
+    public int getRepetitionNumber() {
+        return repetitionNumber;
+    }
 
-    public void setEvalFunctions(EvaluationFunction[] evalPrototypes) {
+    public void setEvalFunctionsPrototypes(EvaluationFunction[] evalPrototypes) {
         this.evalPrototypes = evalPrototypes;
+    }
+    
+    public EvaluationFunction[] getCurrentEvalFunctions() {
+        return currentEvals;
     }
     
     public void setLoggers(List<Steppable> loggers) {
         this.loggers = loggers;
     }
     
+    public List<Steppable> getLoggers() {
+        return loggers;
+    }
+    
     public void setGroupController(GroupController gc) {
         this.gc = gc;
+    }
+    
+    public GroupController getGroupController() {
+        return gc;
     }
 
     @Override
     public void start() {
         super.start();
-
+        repetitionNumber++;
+        
         // Init eval functions and schedule them
         currentEvals = new MasonEvaluation[evalPrototypes.length];
         for (int i = 0; i < evalPrototypes.length; i++) {

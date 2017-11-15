@@ -23,14 +23,10 @@ public class NeuralArbitratorFactory extends ArbitratorFactory {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String P_LOCKING = "locking";
-    private boolean locking;
-
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        locking = state.parameters.getBoolean(base.push(P_LOCKING), DEFAULT_BASE.push(P_LOCKING), false);
-        int outputs = repo.allPrimitives().iterator().next().coordinates.length + (locking ? 1 : 0);
+        int outputs = repo.allPrimitives().iterator().next().coordinates.length;
         Parameter pOut = new Parameter(NEATSubpop.P_NEAT_BASE).push("OUTPUT.NODES");
         state.output.message("Forcing " + pOut + " to: " + outputs);
         state.parameters.set(pOut, outputs + "");
@@ -51,7 +47,7 @@ public class NeuralArbitratorFactory extends ArbitratorFactory {
         AgentControllerIndividual aci = (AgentControllerIndividual) inds[0];
         AgentController arbitrator = aci.decodeController();
 
-        ArbitratorController ac = new ArbitratorController(arbitrator, clonedRepo, mapFun, locking);
+        NeuralArbitratorController ac = new NeuralArbitratorController(arbitrator, clonedRepo, mapFun);
         return new HomogeneousGroupController(ac);
     }
 

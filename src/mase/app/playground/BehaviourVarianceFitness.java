@@ -38,7 +38,7 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
-        EvaluationResult er = sim.currentEvals[behavIndex].getResult();
+        EvaluationResult er = sim.getCurrentEvalFunctions()[behavIndex].getResult();
         if(er instanceof CompoundEvaluationResult) { // only supports single agent
             fr = new BehaviourVarianceFitnessResult((BehaviourResult) ((CompoundEvaluationResult) er).getEvaluation(0));
         } else {

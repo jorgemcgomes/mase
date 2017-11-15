@@ -46,15 +46,19 @@ public class MasonPlayer {
             });
 
             GUIState gui = sim.getSimStateUI(state);
-            Controller contr = gui.createController();
+            if(gui.controller == null) {
+                gui.createController();
+            }
             frame.setVisible(true);
-            contr.registerFrame(frame);
+            gui.controller.registerFrame(frame);
         } else {
             // One solution
             GroupController controller = ReevaluationTools.createController(args);
             MasonSimState state = sim.getSimState(controller, startSeed);
             GUIState gui = sim.getSimStateUI(state);
-            gui.createController();
+            if(gui.controller == null) {
+                gui.createController();
+            }
         }
     }
 }

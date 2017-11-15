@@ -62,7 +62,7 @@ public class KdTreeRepertoire implements Repertoire {
     private transient KdTree<Integer> tree;
     private transient Map<Integer, Primitive> primitives;
 
-    private Pair<Double, Double>[] bounds; // Only here for retro-compatibility with serialized objects. No longer used for anything
+    //private Pair<Double, Double>[] bounds; // Only here for retro-compatibility with serialized objects. No longer used for anything
     private boolean ignoreConstant;
     private File repFile, coordsFile;
     private long repFileHash, coordsFileHash;
@@ -266,6 +266,13 @@ public class KdTreeRepertoire implements Repertoire {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "Size: " + tree.size() + " Dims: " + primitives.values().iterator().next().coordinates.length + " @ " + repFile; 
+    }
+    
+    
 
  
 }

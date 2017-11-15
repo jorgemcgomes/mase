@@ -38,7 +38,7 @@ public class EvoRBCReevaluation {
         simulator.loggers().clear();
         try {
             GroupController controller = SolutionPersistence.readSolutionFromFile(gc).getController();
-            if (controller.getAgentControllers(1)[0] instanceof ArbitratorController) {
+            if (controller.getAgentControllers(1)[0] instanceof NeuralArbitratorController) {
                 FileWriter w = new FileWriter(out);
                 EvoRBCLogger log = new EvoRBCLogger(w);
                 simulator.loggers().add(log);
@@ -74,7 +74,7 @@ public class EvoRBCReevaluation {
                 List<? extends SmartAgent> agents = sp.getSmartAgents();
                 for (int i = 0; i < agents.size(); i++) {
                     SmartAgent ag = agents.get(i);
-                    ArbitratorController ac = (ArbitratorController) ag.getAgentController();
+                    NeuralArbitratorController ac = (NeuralArbitratorController) ag.getAgentController();
 
                     if (!inited) {
                         writer.write("Seed Time Agent");
@@ -84,7 +84,6 @@ public class EvoRBCReevaluation {
                         for (int j = 0; j < ac.lastArbitratorOutput.length; j++) {
                             writer.write(" ArbitratorOut_" + j);
                         }
-                        writer.write(" Locked");
                         for (int j = 0; j < ac.lastRepertoireCoords.length; j++) {
                             writer.write(" Coord_" + j);
                         }
@@ -99,9 +98,8 @@ public class EvoRBCReevaluation {
                     writer.write(state.seed() + " " + state.schedule.getTime() + " " + i);
                     writeVec(ag.lastNormalisedInputs());
                     writeVec(ac.lastArbitratorOutput);
-                    writer.write(" " + (ac.locked ? 1 : 0));
                     writeVec(ac.lastRepertoireCoords);
-                    writer.write(" " + ac.lastPrimitiveId);
+                    writer.write(" " + ac.lastPrimitive.id);
                     writeVec(ag.lastNormalisedOutputs());
                     writer.write("\n");
                 }

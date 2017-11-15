@@ -23,7 +23,6 @@ import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.FitnessResult;
-import mase.mason.MasonSimulationProblem;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
@@ -53,9 +52,6 @@ public class ReevaluationTools {
         Parameter def = new Parameter(EvolutionState.P_EVALUATOR).push(MetaEvaluator.P_BASE_EVAL).push(Evaluator.P_PROBLEM);
         MaseProblem sim = (MaseProblem) db.getInstanceForParameter(base, def, MaseProblem.class);
         sim.setup(state, base);
-        if(sim instanceof MasonSimulationProblem) {
-            ((MasonSimulationProblem) sim).setRepetitions(1);
-        }      
         return sim;
     }    
     

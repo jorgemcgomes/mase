@@ -35,8 +35,8 @@ public class MasonSimulationProblem<T extends MasonSimState> extends MaseProblem
     public static final String P_PARAMS = "params";
     protected int maxSteps;
     protected int repetitions;
-    private Class<MasonSimState> simClass;
-    private Object params;
+    protected Class<MasonSimState> simClass;
+    protected Object params;
     protected List<Steppable> loggers;
 
     @Override
@@ -69,13 +69,16 @@ public class MasonSimulationProblem<T extends MasonSimState> extends MaseProblem
 
         loggers = new ArrayList<>();
     }
-    
+
     public Object setupParams(EvolutionState state, Parameter base) {
         if (state.parameters.exists(base.push(P_PARAMS), defaultBase().push(P_PARAMS))) {
             Object parObject = state.parameters.getInstanceForParameter(base.push(P_PARAMS), defaultBase().push(P_PARAMS), Object.class);
             ParamUtils.autoSetParameters(parObject, state, base, defaultBase(), true);
             return parObject;
-        }     
+        } else {
+            state.output.warning("Parameter class not specified. Not doing the auto-load and setup of parameters. "
+                    + "The implementing problem must take care of that if needed.", base.push(P_PARAMS), defaultBase().push(P_PARAMS));
+        }
         return null;
     }
 
@@ -108,7 +111,7 @@ public class MasonSimulationProblem<T extends MasonSimState> extends MaseProblem
     public T getSimState(GroupController gc, long seed) {
         T s = createSimState(gc, seed);
         s.setMaxSteps(maxSteps);
-        s.setEvalFunctions(evalFunctions);
+        s.setEvalFunctionsPrototypes(evalFunctions);
         s.setLoggers(loggers);
         return s;
     }

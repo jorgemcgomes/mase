@@ -11,7 +11,7 @@ import mase.evaluation.FitnessResult;
  * Returns a random fitness score. Useful for testing and debugging purposes.
  * @author jorge
  */
-public class FixedFitnessEvaluation extends MasonEvaluation<FitnessResult> {
+public class FixedFitness extends MasonEvaluation<FitnessResult> {
 
     private static final long serialVersionUID = 1L;
 

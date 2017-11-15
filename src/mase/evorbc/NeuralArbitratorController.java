@@ -5,7 +5,6 @@
  */
 package mase.evorbc;
 
-import java.util.Arrays;
 import mase.controllers.AgentController;
 import mase.evorbc.Repertoire.Primitive;
 
@@ -13,29 +12,25 @@ import mase.evorbc.Repertoire.Primitive;
  *
  * @author jorge
  */
-public class ArbitratorController implements AgentController {
+public class NeuralArbitratorController implements AgentController {
 
     private static final long serialVersionUID = 1L;
 
     private AgentController arbitrator;
     private Repertoire repo;
     private MappingFunction mapFun;
-    private final boolean locking;
-    public transient AgentController lastPrimitive = null;
-    public transient int lastPrimitiveId;
+    public transient Primitive lastPrimitive;
     public transient double[] lastArbitratorOutput;
     public transient double[] lastRepertoireCoords;
-    public transient boolean locked;
 
-    public ArbitratorController() {
-        this(null, null, null, false);
+    public NeuralArbitratorController() {
+        this(null, null, null);
     }
 
-    public ArbitratorController(AgentController arbitrator, Repertoire repo, MappingFunction fun, boolean locking) {
+    public NeuralArbitratorController(AgentController arbitrator, Repertoire repo, MappingFunction fun) {
         this.arbitrator = arbitrator;
         this.repo = repo;
         this.mapFun = fun;
-        this.locking = locking;
     }
 
     /**
@@ -58,24 +53,17 @@ public class ArbitratorController implements AgentController {
     @Override
     public double[] processInputs(double[] input) {        
         lastArbitratorOutput = arbitrator.processInputs(input);
-        double[] output = lastArbitratorOutput;
-        locked = false;
-        if (locking) {
-            locked = output[0] < 0.5 && lastPrimitive != null;
-            output = Arrays.copyOfRange(output, 1, output.length);
-        }        
-        if (!locked) {
+        double[] output = lastArbitratorOutput;      
             lastRepertoireCoords = mapFun.outputToCoordinates(output);
 
             Primitive primitive = repo.nearest(lastRepertoireCoords);
-            lastPrimitiveId = primitive.id;
             if (lastPrimitive == null || primitive != lastPrimitive) {
                 primitive.ac.reset();
-                lastPrimitive = primitive.ac;
-            }
+                lastPrimitive = primitive;
+                //System.out.println(primitive.id);
         }
 
-        double[] out = lastPrimitive.processInputs(input);
+        double[] out = lastPrimitive.ac.processInputs(input);
 
         return out;
     }
@@ -88,6 +76,13 @@ public class ArbitratorController implements AgentController {
 
     @Override
     public AgentController clone() {
-        return new ArbitratorController(arbitrator.clone(), repo.deepCopy(), mapFun, locking);
+        return new NeuralArbitratorController(arbitrator.clone(), repo.deepCopy(), mapFun);
     }
+
+    @Override
+    public String toString() {
+        return arbitrator.toString() + "\n" + repo.toString() + "\n" + mapFun.toString();
+    }
+    
+    
 }

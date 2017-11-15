@@ -71,9 +71,9 @@ public class NEATAgentController implements EncodableAgentController {
                 recurr++;
             }
         }
-        return "Neurons:" + network.neurons().length + " Con:" + network.connections().length
-                + " Self-rec:" + selfRecurr + " Rec:" + recurr + "\n\n"
-                + NEATSerializer.serializeToString(network);
+        return "{Neurons:" + network.neurons().length + " Links:" + network.connections().length
+                + " SelfRec:" + selfRecurr + " Rec:" + recurr + "}";/* + "\n\n"
+                + NEATSerializer.serializeToString(network)*/
     }
 
     @Override

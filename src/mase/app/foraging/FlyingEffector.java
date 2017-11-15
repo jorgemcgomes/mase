@@ -12,6 +12,7 @@ import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.Sensor;
 import mase.mason.world.SmartAgent;
 import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math3.util.MathUtils;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.simple.OvalPortrayal2D;
@@ -123,7 +124,7 @@ public class FlyingEffector extends AbstractEffector {
             double rDrag = /*FastMath.pow2*/ (rVelocity) * rotationDragCoeff;
             double rAcc = rThrust - rDrag;
             rVelocity = rVelocity + rAcc;
-            ag.setOrientation(EmboddiedAgent.normalizeAngle(ag.orientation2D() + rVelocity));
+            ag.setOrientation(MathUtils.normalizeAngle(ag.orientation2D() + rVelocity, 0));
 
         } else {
             xVelocity = 0;

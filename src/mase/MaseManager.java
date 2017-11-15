@@ -295,9 +295,15 @@ public class MaseManager {
             if (check.exists() && checkRepetitions) {
                 try {
                     ReversedLinesFileReader rl = new ReversedLinesFileReader(check);
-                    String last = rl.readLine();
+                    String line;
+                    boolean ended = false;
+                    while((line = rl.readLine()) != null && !ended) {
+                        if(line.contains("# Not-gotten")) {
+                            ended = true;
+                        }
+                    }
                     rl.close();
-                    if (last.startsWith("# Generation")) {
+                    if (ended) {
                         listener.message("Job already completed, not adding: " + out + " (" + j + ")");
                         continue;
                     } else {

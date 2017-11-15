@@ -10,7 +10,6 @@ import ec.Statistics;
 import ec.eval.MasterProblem;
 import ec.util.Parameter;
 import mase.MaseProblem;
-import mase.mason.MasonSimulationProblem;
 
 /**
  *
@@ -41,9 +40,6 @@ public class FinalPostEvaluationStat extends Statistics {
         MaseProblem prob = (MaseProblem) (state.evaluator.p_problem instanceof MasterProblem ? 
                 ((MasterProblem) state.evaluator.p_problem).problem.clone() : 
                 state.evaluator.p_problem.clone());
-        if(prob instanceof MasonSimulationProblem) {
-            ((MasonSimulationProblem) prob).setRepetitions(1);
-        }
         BatchReevaluate reav = new BatchReevaluate(repetitions, allSubs, true, prefix);
 
         BestSolutionGenStat best = null;

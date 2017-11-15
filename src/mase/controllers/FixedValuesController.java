@@ -5,6 +5,9 @@
  */
 package mase.controllers;
 
+import java.util.Arrays;
+import mase.util.FormatUtils;
+
 /**
  *
  * @author jorge
@@ -56,4 +59,8 @@ public class FixedValuesController implements EncodableAgentController {
         this.setValues(params);
     }
 
+    @Override
+    public String toString() {
+        return FormatUtils.toString(values);
+    }
 }

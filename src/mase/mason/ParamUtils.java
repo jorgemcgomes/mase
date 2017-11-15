@@ -1,4 +1,4 @@
-    /*
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -77,28 +77,28 @@ public class ParamUtils {
      * @param useAll If true, the attributes dont need to have the annotation
      */
     public static void autoSetParameters(Object params, EvolutionState state, Parameter base, Parameter defaultBase, boolean useAll) {
-        Field[] fields = params.getClass().getDeclaredFields();
+        Field[] fields = params.getClass().getFields();
         for (Field field : fields) {
             try {
                 // Check for attribute visibility and skip if its private
                 if (Modifier.isPrivate(field.getModifiers())) {
-                    System.out.println("- " + field.getName() + ": IGNORED (PRIVATE)");
+                    state.output.message("- " + field.getName() + ": IGNORED (PRIVATE)");
                     continue;
                 }
                 field.setAccessible(true);
-                
+
                 // Ignore attribute it is static
                 if (Modifier.isStatic(field.getModifiers())) {
-                    System.out.println("- " + field.getName() + ": IGNORED (STATIC). Using default: " + field.get(params));
+                    state.output.message("- " + field.getName() + ": IGNORED (STATIC). Using default: " + smartPrint(field.get(params)));
                     continue;
                 }
-                
+
                 // Ignore attribute if it has the @IgnoreParam annotation
                 if (field.isAnnotationPresent(IgnoreParam.class)) {
-                    System.out.println("- " + field.getName() + ": IGNORED (ANNOTATION). Using default: " + field.get(params));
+                    state.output.message("- " + field.getName() + ": IGNORED (ANNOTATION). Using default: " + smartPrint(field.get(params)));
                     continue;
                 }
-                
+
                 // It is a composite param, having the @MultiParam annotation
                 if (field.isAnnotationPresent(MultiParam.class)) {
                     MultiParam annotation = field.getAnnotation(MultiParam.class);
@@ -106,13 +106,13 @@ public class ParamUtils {
                     if (type.isArray()) {
                         String name = annotation.name().equals("") ? field.getName() : annotation.name();
                         Parameter defaultRobot = base.push(annotation.base()).push(name);
-                        if(!state.parameters.exists(defaultRobot, null)) {
+                        if (!state.parameters.exists(defaultRobot, null)) {
                             defaultRobot = defaultBase.push(annotation.base()).push(name);
                         }
                         Object array = Array.newInstance(type.getComponentType(), MAX_COUNT);
                         for (int i = 0; i < (annotation.count() != 0 ? annotation.count() : MAX_COUNT); i++) {
                             Parameter paramRobot = base.push(annotation.base()).push(i + "").push(name);
-                            if(!state.parameters.exists(paramRobot, null)) {
+                            if (!state.parameters.exists(paramRobot, null)) {
                                 paramRobot = defaultBase.push(annotation.base()).push(i + "").push(name);
                             }
                             if (state.parameters.exists(paramRobot, defaultRobot)) {
@@ -121,9 +121,9 @@ public class ParamUtils {
                             }
                         }
                         field.set(params, array);
-                        System.out.println("V " + field.getName() + ": SET RobotParam: " + Arrays.toString((Object[]) array));
+                        state.output.message("V " + field.getName() + ": SET RobotParam: " + smartPrint(array));
                     } else {
-                        System.out.println("X " + field.getName() + ": Field is not an array");
+                        state.output.message("X " + field.getName() + ": Field is not an array");
                     }
                 } else if (field.isAnnotationPresent(Param.class) || useAll) { // It is a simple attribute
                     Param annotation = field.getAnnotation(Param.class);
@@ -131,14 +131,34 @@ public class ParamUtils {
                     if (state.parameters.exists(base.push(name), defaultBase.push(name))) {
                         Object value = getValue(field.getType(), state, base.push(name), defaultBase.push(name));
                         field.set(params, value);
-                        System.out.println("V " + field.getName() + ": SET Param: " + value);
+                        state.output.message("V " + field.getName() + ": SET Param: " + smartPrint(value));
                     } else {
-                        System.out.println("X " + field.getName() + ": Parameter not found (" + base.push(name) + " OR " + defaultBase.push(name) + "). Using default: " + field.get(params));
+                        state.output.message("X " + field.getName() + ": Parameter not found (" + base.push(name) + " OR " + defaultBase.push(name) + "). "
+                                + "Using default: " + smartPrint(field.get(params)));
                     }
                 }
             } catch (Exception ex) {
-                System.out.println("X " + field.getName() + ": FATAL EXCEPTION: " + ex.getMessage());
+                state.output.warning("X " + field.getName() + ": FATAL EXCEPTION: " + ex.getMessage());
             }
+        }
+    }
+
+    public static String smartPrint(Object o) {
+        if(o == null) {
+            return "NULL";
+        } else if (o.getClass().isArray()) {
+            if (o instanceof Object[]) {
+                return Arrays.deepToString((Object[]) o);
+            } else {
+                int length = Array.getLength(o);
+                Object[] objArr = new Object[length];
+                for (int i = 0; i < length; i++) {
+                    objArr[i] = Array.get(o, i);
+                }
+                return Arrays.toString(objArr);
+            }
+        } else {
+            return o.toString();
         }
     }
 
@@ -206,7 +226,7 @@ public class ParamUtils {
         }
     }
 
-     public static Color parseColor(String str) {
+    public static Color parseColor(String str) {
         String[] split = str.split("-|\\.|,|;");
         if (split.length == 1) {
             try {
@@ -222,5 +242,5 @@ public class ParamUtils {
         }
         return null;
     }
-    
+
 }

@@ -5,17 +5,21 @@
  */
 package mase.mason.world;
 
-import java.util.ArrayList;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.util.MathUtils;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
+import sim.portrayal.DrawInfo2D;
 import sim.util.Bag;
+import sim.util.Double2D;
 
 /**
  *
@@ -49,6 +53,7 @@ public class DistanceSensorArcs extends AbstractSensor {
         this.arcStart = arcStart;
         this.arcEnd = arcEnd;
         this.closestObjects = new WorldObject[valueCount()];
+        this.lastDistances = new double[valueCount()];
     }
 
     public void setArcs(int numArcs) {
@@ -120,7 +125,6 @@ public class DistanceSensorArcs extends AbstractSensor {
      */
     @Override
     public double[] readValues() {
-        lastDistances = new double[valueCount()];
         Arrays.fill(lastDistances, Double.POSITIVE_INFINITY);
         Arrays.fill(closestObjects, null);
         if (range < 0.001) {
@@ -168,7 +172,7 @@ public class DistanceSensorArcs extends AbstractSensor {
             double angle = ag.angleTo(e.getRight().getLocation());
             if (orientationNoise > 0) {
                 angle += orientationNoise * (noiseType == UNIFORM ? state.random.nextDouble() * 2 - 1 : state.random.nextGaussian());
-                angle = EmboddiedAgent.normalizeAngle(angle);
+                angle = MathUtils.normalizeAngle(angle, 0);
             }
             for (int a = 0; a < arcStart.length; a++) {
                 if (Double.isInfinite(lastDistances[a]) && ((angle >= arcStart[a] && angle <= arcEnd[a])
@@ -228,4 +232,39 @@ public class DistanceSensorArcs extends AbstractSensor {
         }
         return norm;
     }
+
+    @Override
+    public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
+        Rectangle2D.Double draw = info.draw;
+        Double2D baseStart = new Double2D(centerToCenter ? 0.001 : ag.getRadius(), 0);
+        Double2D baseEnd = new Double2D((centerToCenter ? 0 : ag.getRadius()) + (Double.isInfinite(range) ? fieldDiagonal : range), 0);
+        for (int i = 0; i < arcStart.length; i++) {
+            Double2D leftRayStart = baseStart.rotate(ag.orientation2D() + arcStart[i]);
+            Double2D leftRayEnd = baseEnd.rotate(ag.orientation2D() + arcStart[i]);
+            Double2D rightRayStart = baseStart.rotate(ag.orientation2D() + arcEnd[i]);
+            Double2D rightRayEnd = baseEnd.rotate(ag.orientation2D() + arcEnd[i]);
+            drawRay(leftRayStart, leftRayEnd, graphics, draw);
+            drawRay(rightRayStart, rightRayEnd, graphics, draw);
+            if (!Double.isInfinite(lastDistances[i])) {
+                double d = centerToCenter ? lastDistances[i] : lastDistances[i] + ag.getRadius();
+                Arc2D arc = new Arc2D.Double(draw.x - d * draw.width, draw.y - d * draw.height,
+                        d * 2 * draw.width, d * 2 * draw.height,
+                        Math.toDegrees((Math.PI * 2 - MathUtils.normalizeAngle(ag.orientation2D() + (arcEnd[i] > arcStart[i] ? arcEnd[i] : arcStart[i]), Math.PI)) ),
+                        Math.toDegrees(arcEnd[i] > arcStart[i] ? arcEnd[i] - arcStart[i] : Math.PI - arcStart[i] + arcEnd[i]), Arc2D.PIE);
+                graphics.setPaint(new Color(255, 255, 0, 50));
+                graphics.fill(arc);
+            }
+        }
+    }
+
+    private void drawRay(Double2D rs, Double2D re, Graphics2D graphics, Rectangle2D.Double draw) {
+        int x1 = (int) (rs.x * draw.width + draw.x);
+        int y1 = (int) (rs.y * draw.height + draw.y);
+        int x2 = (int) (re.x * draw.width + draw.x);
+        int y2 = (int) (re.y * draw.height + draw.y);
+        graphics.setPaint(Color.YELLOW);
+        graphics.setStroke(new BasicStroke(1));
+        graphics.drawLine(x1, y1, x2, y2);
+    }
+
 }

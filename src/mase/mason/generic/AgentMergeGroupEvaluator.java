@@ -33,7 +33,7 @@ public class AgentMergeGroupEvaluator extends MasonEvaluation {
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
         // Get result from the other
-        CompoundEvaluationResult ser = (CompoundEvaluationResult) sim.currentEvals[agEvalIndex].getResult();
+        CompoundEvaluationResult ser = (CompoundEvaluationResult) sim.getCurrentEvalFunctions()[agEvalIndex].getResult();
         // merge
         EvaluationResult any = (EvaluationResult) ser.value().iterator().next();
         res = any.mergeEvaluations(ser.value());

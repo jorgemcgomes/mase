@@ -1,0 +1,5 @@
+parent.0 = evorbc.params
+parent.1 = ../neat/neat.params
+
+problem.controller-factory = mase.evorbc.NeuralArbitratorFactory
+evorbc.locking = false
