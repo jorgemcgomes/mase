@@ -573,3 +573,255 @@ ggplot(sum, aes(paste(Task,Variant), Fitness,fill=Repo)) + geom_bar(stat="identi
 
 
 
+setwd("~/exps/mazemw/")
+fixPostFitness("~/exps/mazemw")
+
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Method","MaxSize","LogicalLowerP","PrimitiveIfP","SelectorTerminalNonP"))
+data[, LogicalLowerP := factor(LogicalLowerP, labels=c("0.2-0.6","0.1-0.8","0.05-0.9"))]
+data[, PrimitiveIfP := factor(PrimitiveIfP, labels=c("0.5-0.5","0.25-0.75","0.75-0.25"))]
+data[, SelectorTerminalNonP := factor(SelectorTerminalNonP, labels=c("0.5-0.5","0.25-0.75","0.75-0.25"))]
+data[, Setup := paste0("S",MaxSize,"/L",LogicalLowerP,"/P",PrimitiveIfP,"/T",SelectorTerminalNonP)]
+
+bests <- lastGen(data)[,.(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,MaxSize,LogicalLowerP,PrimitiveIfP,SelectorTerminalNonP)]
+
+ggplot(bests[SelectorTerminalNonP=="0.5-0.5" & MaxSize=="25"], aes(LogicalLowerP,PrimitiveIfP)) + geom_tile(aes(fill=Mean))
+ggplot(bests[LogicalLowerP=="0.2-0.6" & PrimitiveIfP=="0.25-0.75"], aes(MaxSize,SelectorTerminalNonP)) + geom_tile(aes(fill=Mean))
+
+
+fitnessBoxplots(data)
+bestSoFarFitnessEvals(data)
+rankByFitness(data)
+
+koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","MaxSize","LogicalLowerP","PrimitiveIfP","SelectorTerminalNonP"))
+koza[, LogicalLowerP := factor(LogicalLowerP, labels=c("0.2-0.6","0.1-0.8","0.05-0.9"))]
+koza[, PrimitiveIfP := factor(PrimitiveIfP, labels=c("0.5-0.5","0.25-0.75","0.75-0.25"))]
+koza[, SelectorTerminalNonP := factor(SelectorTerminalNonP, labels=c("0.5-0.5","0.25-0.75","0.75-0.25"))]
+koza[, Setup := paste0("S",MaxSize,"/L",LogicalLowerP,"/P",PrimitiveIfP,"/T",SelectorTerminalNonP)]
+
+avgsizes <- lastGen(koza)[,.(Mean=mean(V3),SE=se(V3)), by=.(Setup,MaxSize,LogicalLowerP,PrimitiveIfP,SelectorTerminalNonP)]
+ggplot(avgsizes,aes(Setup,Mean)) + geom_bar(stat="identity")
+
+#ggplot(koza, aes(V1,V7,group=Setup,colour=Setup)) + stat_summary(fun.y="mean", geom="line") + ggtitle("Average size in gen")
+#ggplot(koza, aes(V1,V8,group=Setup,colour=Setup)) + stat_summary(fun.y="mean", geom="line") + ggtitle("Average size so far")
+#ggplot(koza, aes(V1,V9,group=Setup,colour=Setup)) + stat_summary(fun.y="mean", geom="line") + ggtitle("Size of best in gen")
+#ggplot(koza, aes(V1,V10,group=Setup,colour=Setup)) + stat_summary(fun.y="mean", geom="line") + ggtitle("Size of best so far")
+
+
+#ggplot(koza[, .(Size=mean(V5)), by=.(V1,Setup)], aes(V1,Size,group=Setup,colour=Setup)) + geom_line()
+
+
+
+setwd("~/exps/mazemw3/")
+#fixPostFitness("~/labmag/exps/mazemw/")
+setwd("~/Dropbox/gpresults")
+load("fitness_data.rdata")
+load("koza.rdata")
+
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Method","MaxDepth","MaxSize","Parsimony","Selector"))
+data[, Parsimony := factor(Parsimony, labels=c("Yes","No"))]
+data[, Selector := factor(Selector, labels=c("0.5","0.25","0.75"))] # prob. of selecting terminal
+data[, Selector := relevel(Selector, "0.25")]
+data[, Setup := paste0("D",MaxDepth,"/S",MaxSize,"/P",Parsimony,"/T",Selector)]
+save(data, file="~/Dropbox/gpresults/fitness_data.rdata")
+
+bests <- lastGen(data)[,.(Mean=mean(BestSoFar)), by=.(Setup,MaxDepth,MaxSize,Parsimony,Selector)]
+ggplot(bests, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Mean)) + facet_grid(Parsimony ~ Selector) + scale_fill_distiller(palette="Spectral")
+ggsave("fitness.svg")
+
+fitnessBoxplots(data)
+bestSoFarFitnessEvals(data)
+rankByFitness(data)
+
+koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","MaxDepth","MaxSize","Parsimony","Selector"))
+koza[, Parsimony := factor(Parsimony, labels=c("Yes","No"))]
+koza[, Selector := factor(Selector, labels=c("0.5","0.25","0.75"))] # prob. of selecting terminal
+koza[, Selector := relevel(Selector, "0.25")]
+koza[, Setup := paste0("D",MaxDepth,"/S",MaxSize,"/P",Parsimony,"/T",Selector)]
+save(koza, file="~/Dropbox/gpresults/koza.rdata")
+
+kozastats <- lastGen(koza)[,.(AverageSize=mean(V41),BestSize=mean(V43)), by=.(Setup,MaxDepth,MaxSize,Parsimony,Selector)]
+ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=AverageSize)) + facet_grid(Parsimony ~ Selector) + scale_fill_distiller(palette="Spectral")
+ggsave("avg_size.svg")
+ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=BestSize)) + facet_grid(Parsimony ~ Selector) + scale_fill_distiller(palette="Spectral")
+ggsave("best_size.svg")
+
+kozastats2 <- koza[,.(Depth=mean(V5),PrimitivesT=mean(V39),Ifs=mean(V25)), by=.(Setup,MaxDepth,MaxSize,Parsimony,Selector)]
+ggplot(kozastats2, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Depth)) + facet_grid(Parsimony ~ Selector) + scale_fill_distiller(palette="Spectral")
+ggsave("avg_depth.svg")
+ggplot(kozastats2, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=PrimitivesT)) + facet_grid(Parsimony ~ Selector) + scale_fill_distiller(palette="Spectral")
+ggsave("primitive_terminals.svg")
+
+nodenames <- as.character(koza[1, seq(10,38,2), with=F])
+setnames(koza, seq(11,39,2), nodenames)
+beststats <- koza[Setup=="D10/S10/PYes/T0.75", c("Job","V1",nodenames), with=F]
+m <- melt(beststats, id.vars=c("Job","V1"), variable.name="Function",value.name="Count")
+means <- m[, .(Count=mean(Count)), by=.(Job,Function)][, .(MeanCount=mean(Count),SE=se(Count)), by=.(Function)]
+
+
+#, lapply(.SD, mean) , by=.(Job), .SDcols=paste0("V",seq(11,39,2))]
+setwd("~/exps/mazemw3/")
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness)
+fitnessBoxplots(data)
+bestSoFarFitness(data)
+rankByFitness(data)
+
+
+setwd("~/exps/mazemw4/")
+#fixPostFitness("~/exps/mazemw")
+
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.sep="_", auto.ids.names=c("Task","FS","BuildSize","MaxDepth","MaxSize"))
+data[, MaxDepth := factor(MaxDepth, labels=c("5","10","17"))]
+data[, MaxSize := factor(MaxSize, labels=c("25","50","100","250"))]
+data[, Setup := paste0(FS,"/B",BuildSize,"/D",MaxDepth,"/S",MaxSize)]
+
+rankByFitness(data)
+
+bests <- lastGen(data)[,.(Mean=mean(BestSoFar)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)]
+ggplot(bests, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Mean)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Mean,2)), size=3) + ggtitle("Best fitness")
+ggsave("~/Dropbox/gpresults/mw4_fitness.svg")
+
+koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Task","FS","BuildSize","MaxDepth","MaxSize"))
+koza[, MaxDepth := factor(MaxDepth, labels=c("5","10","17"))]
+koza[, MaxSize := factor(MaxSize, labels=c("25","50","100","250"))]
+koza[, Setup := paste0(FS,"/B",BuildSize,"/D",MaxDepth,"/S",MaxSize)]
+
+kozastats <- koza[,.(Depth=mean(V5),Size=mean(V8)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)]
+ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Depth)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Depth,1)), size=3) + ggtitle("Average depth")
+ggsave("~/Dropbox/gpresults/mw4_avgdepth.svg")
+ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Size)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Size,1)), size=3) + ggtitle("Average size")
+ggsave("~/Dropbox/gpresults/mw4_avgsize.svg")
+
+
+kozastats2 <- rbind(lastGen(koza)[FS=="gp",.(BestSize=mean(V43)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)],
+                   lastGen(koza)[FS=="gptrees",.(BestSize=mean(V37)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)])
+ggplot(kozastats2, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=BestSize)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(BestSize,1)), size=3) + ggtitle("Best size")
+ggsave("~/Dropbox/gpresults/mw4_bestsize.svg")
+
+
+
+
+
+setwd("~/exps/mazemw9/")
+fixPostFitness("~/exps/mazemw9")
+
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method"))
+data[!is.na(Repo), Job := paste0(Repo,".",Job)]
+data[, Setup := Method]
+
+fitnessBoxplots(data)
+rankByFitness(data)
+bestSoFarFitnessEvals(data)
+
+
+koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method"))
+ggplot(koza, aes(Generation,MeanSize)) + stat_summary(fun.y=mean, geom="line")
+
+m <- melt(koza[, c("Job","Generation", colnames(koza)[grep("f\\..*", colnames(koza))]), with=F], id.vars=c("Job","Generation") )
+ggplot(m, aes(Generation,value, colour=variable)) + stat_summary(fun.y=mean, geom="line")
+
+
+koza[!is.na(Repo), Job := paste0(Repo,".",Job)]
+koza[, Setup := Method]
+
+kozastats <- koza[,.(Depth=mean(MeanDepth),Size=mean(MeanSize)), by=.(Method)]
+
+setwd("~/exps/mazemw10/")
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","ERCMut","PrimitiveSD"))
+rankByFitness(data)
+bests <- lastGen(data)[,.(Mean=mean(BestSoFar)), by=.(ERCMut,PrimitiveSD)]
+ggplot(bests, aes(ERCMut,PrimitiveSD)) + geom_tile(aes(fill=Mean)) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Mean,2)), size=3) + ggtitle("Best fitness")
+
+
+
+
+
+setwd("~/labmag/exps/mazemw6/")
+
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","PrimitiveSD","ConstantSD"))
+bests <- lastGen(data)[,.(Mean=mean(BestSoFar)), by=.(Setup,PrimitiveSD,ConstantSD)]
+ggplot(bests, aes(PrimitiveSD,ConstantSD)) + geom_tile(aes(fill=Mean)) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Mean,2)), size=3) + ggtitle("Best fitness")
+
+rankByFitness(data)
+
+
+
+bests <- lastGen(data)[,.(Mean=mean(BestSoFar)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)]
+ggplot(bests, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Mean)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Mean,2)), size=3) + ggtitle("Best fitness")
+ggsave("~/Dropbox/gpresults/mw4_fitness.svg")
+
+koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Task","FS","BuildSize","MaxDepth","MaxSize"))
+koza[, MaxDepth := factor(MaxDepth, labels=c("5","10","17"))]
+koza[, MaxSize := factor(MaxSize, labels=c("25","50","100","250"))]
+koza[, Setup := paste0(FS,"/B",BuildSize,"/D",MaxDepth,"/S",MaxSize)]
+
+kozastats <- koza[,.(Depth=mean(V5),Size=mean(V8)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)]
+ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Depth)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Depth,1)), size=3) + ggtitle("Average depth")
+ggsave("~/Dropbox/gpresults/mw4_avgdepth.svg")
+ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Size)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Size,1)), size=3) + ggtitle("Average size")
+ggsave("~/Dropbox/gpresults/mw4_avgsize.svg")
+
+
+kozastats2 <- rbind(lastGen(koza)[FS=="gp",.(BestSize=mean(V43)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)],
+                    lastGen(koza)[FS=="gptrees",.(BestSize=mean(V37)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)])
+ggplot(kozastats2, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=BestSize)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(BestSize,1)), size=3) + ggtitle("Best size")
+ggsave("~/Dropbox/gpresults/mw4_bestsize.svg")
+
+
+
+
+##############################
+
+setwd("~/exps/mazemw12/")
+fixPostFitness("~/exps/mazemw12")
+
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Mut"))
+rankByFitness(data)
+
+
+setwd("~/exps/mazemw11/")
+fixPostFitness("~/exps/mazemw11")
+
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Repo"))
+
+fitnessBoxplots(data, xvar="Method")
+fitnessViolins(data, xvar="Method")
+bestSoFarFitnessEvals(data, xvar="Method")
+rankByFitness(data, xvar="Method")
+
+koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo"))
+
+ggplot(koza, aes(Generation,MeanSize, group=Method, colour=Method)) + stat_summary(fun.y=mean, geom="line")
+ggplot(koza, aes(Generation,BestSizeGen, group=Method, colour=Method)) + stat_summary(fun.y=mean, geom="line")
+ggplot(koza, aes(Generation,MeanDepth, group=Method, colour=Method)) + stat_summary(fun.y=mean, geom="line") 
+
+m <- melt(koza[, c("Generation", colnames(koza)[grep("f\\..*", colnames(koza))]), with=F], id.vars=c("Generation") )
+ggplot(m, aes(Generation,value, colour=variable)) + stat_summary(fun.y=mean, geom="line")
+ggplot(m, aes(variable,value)) + stat_summary(fun.y=mean, geom="bar") + ylab("Mean number of nodes") + xlab("Node type")
+
+
+
+kozastats <- koza[,.(Depth=mean(V5),Size=mean(V8)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)]
+ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Depth)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Depth,1)), size=3) + ggtitle("Average depth")
+ggsave("~/Dropbox/gpresults/mw4_avgdepth.svg")
+ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Size)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Size,1)), size=3) + ggtitle("Average size")
+ggsave("~/Dropbox/gpresults/mw4_avgsize.svg")
+
+
+kozastats2 <- rbind(lastGen(koza)[FS=="gp",.(BestSize=mean(V43)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)],
+                    lastGen(koza)[FS=="gptrees",.(BestSize=mean(V37)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)])
+ggplot(kozastats2, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=BestSize)) + facet_grid(FS ~ BuildSize) + 
+  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(BestSize,1)), size=3) + ggtitle("Best size")
+ggsave("~/Dropbox/gpresults/mw4_bestsize.svg")
+

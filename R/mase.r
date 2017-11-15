@@ -246,19 +246,19 @@ lastGen <- function(data) {
 }
 
 # Fix postfitness stats by getting the Evaluations from fitness stat
-
+# Only supports postfitness files with a single population
 fixPostFitness <- function(folder, postname="postfitness.stat") {
   postfiles <- list.files(folder, pattern=postname, recursive=T, full.names=T)
   regfiles <- gsub(postname, "fitness.stat", postfiles)
   fixed <- 0; skipped <- 0 ; error <- 0
   for(i in 1:length(postfiles)) {
     cat("Fixing",postfiles[i],"\n")
-    post <- fread(postfiles[i])
-    if(max(post[,2,with=F])==0) {
-      reg <- fread(regfiles[i])
-      if(nrow(post) == nrow(reg)) {
-        post[, 2 := reg[,2,with=F], with=F]
-        write.table(post, file=postfiles[i], quote=F, sep=" ", row.names=F, col.names=F)
+    postfit <- fread(postfiles[i])
+    if(tail(postfit, 1)[["Evaluations"]]==0) {
+      evofit <- fread(regfiles[i])[is.na(Subpop)]
+      if(nrow(postfit) == nrow(evofit)) {
+        postfit[, Evaluations := evofit[,.(Evaluations)]]
+        write.table(postfit, file=postfiles[i], quote=F, sep=" ", row.names=F, col.names=T)
         fixed <- fixed + 1
         cat("Fixed\n")
       } else {
@@ -275,50 +275,41 @@ fixPostFitness <- function(folder, postname="postfitness.stat") {
 
 #### Fitness plotting functions #####################################################################
 
-bestSoFarFitness <- function(data, showSE=T) {
-  agg <- data[is.na(Subpop), .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Setup,Generation)]
-  g <- ggplot(agg, aes(Generation,Mean,group=Setup)) + geom_line(aes(colour=Setup)) + ylab("Fitness")
-  if(showSE) {
-    g <- g + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=Setup), alpha = 0.1)
-  }
+bestSoFarFitness <- function(data, showSE=T, xvar="Setup") {
+  agg <- data[is.na(Subpop), .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=c(xvar,"Generation")]
+  g <- ggplot(agg, aes_string("Generation","Mean",group=xvar,fill=xvar)) + geom_line(aes_string(colour=xvar)) + ylab("Fitness")
+  if(showSE) {g <- g + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE), alpha = 0.1)}
   return(g)
 }
 
-bestSoFarEvaluations <- function(dt, step=10000) {
-  dt[, Evaluations := floor(Evaluations / step) * step]
-  return(dt[, .(BestSoFar=max(BestSoFar)), by=.(Evaluations)])
+bestSoFarFitnessEvals <- function(data, showSE=T, xvar="Setup") {
+  agg <- data[is.na(Subpop), .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=c(xvar,"Evaluations")]
+  g <- ggplot(agg, aes_string("Evaluations","Mean",group=xvar,fill=xvar)) + geom_line(aes_string(colour=xvar)) + ylab("Fitness")
+  if(showSE) {g <- g + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE), alpha = 0.1)}
+  return(g)
 }
 
-# data: fitness data
-# thresholds: numeric vector with the fitness thresholds to be calculated
-fitnessLevels <- function(data, thresholds, return.failed=F) {
-  aux <- function(t) {
-    w <- which(data[,BestSoFar] > t)
-    return(if(length(w) > 0) data$Evaluations[min(w)] else Inf)
-  }
-  evals <- sapply(thresholds, aux)
-  res <- data.table(Threshold=thresholds,Evaluations=evals)
-  if(!return.failed) {
-    res <- res[!is.infinite(Evaluations)]
-  }
-  return(res)
-}
-
-
-fitnessBoxplots <- function(data, generation=NULL, ttests=T) {
+fitnessBoxplots <- function(data, generation=NULL, ttests=T, xvar="Setup") {
   data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
-  g <- ggplot(data, aes(x=Setup, y=BestSoFar,fill=Setup)) + geom_boxplot() +
+  g <- ggplot(data[is.na(Subpop)], aes_string(x=xvar, y="BestSoFar",fill=xvar)) + geom_boxplot() +
     geom_point(position=position_jitterdodge(jitter.width=0.3, jitter.height=0), colour="gray") 
   if(ttests) print(fitnessTtests(data,generation=generation))
   return(g)
 }
 
-rankByFitness <- function(data, generation=NULL, ttests=T) {
-  data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
-  agg <- summaryBy(BestSoFar ~ Setup, subset(data,is.na(Subpop)), FUN=c(mean,se))
-  agg <- transform(agg, Setup = reorder(Setup, BestSoFar.mean))
-  g <- ggplot(agg, aes(x=Setup, y=BestSoFar.mean, fill=Setup)) + 
-    geom_bar(stat="identity") + geom_errorbar(aes(ymin=BestSoFar.mean-BestSoFar.se, ymax=BestSoFar.mean+BestSoFar.se),width=0.5) +
+fitnessViolins <- function(data, generation=NULL, ttests=T, xvar="Setup") {
+  data <- if(is.null(generation)) lastGen(data) else data[Generation==generation]
+  g <- ggplot(data[is.na(Subpop)], aes_string(x=xvar, y="BestSoFar",fill=xvar)) + geom_violin(size=.3, draw_quantiles=c(0.25,0.5,0.75), adjust=0.5)
+  if(ttests) print(fitnessTtests(data,generation=generation))  
+  return(g)
+}
+
+rankByFitness <- function(data, generation=NULL, ttests=T, xvar="Setup") {
+  data <- if(is.null(generation)) lastGen(data) else data[Generation==generation]
+  agg <- data[is.na(Subpop), .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=xvar]
+  agg[, (xvar) := reorder(agg[[xvar]], Mean)]
+  g <- ggplot(agg, aes_string(x=xvar, y="Mean", fill=xvar)) + 
+    geom_bar(stat="identity") + geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE),width=0.5) +
     theme(legend.position="none", axis.text.x = element_text(angle = 45, hjust = 1))
   if(ttests) print(fitnessTtests(data,generation=generation))
   return(g)
@@ -345,6 +336,8 @@ quickReport <- function(folders, filename="postfitness.stat", ttests=T, snapshot
   }
 }
 
+#### Fitness utility functions ################
+
 common.start <- function(x) {
   x<-sort(x) # sort the vector
   d_x<-strsplit(x[c(1,length(x))],"") # split the first and last element by character
@@ -352,6 +345,28 @@ common.start <- function(x) {
   # if there is no matching element, return an empty vector, else return the common part
   ifelse(der_com==0,return(character(0)),return(substr(x[1],1,der_com)))
 }
+
+bestSoFarEvaluations <- function(dt, step=10000) {
+  dt[, Evaluations := floor(Evaluations / step) * step]
+  return(dt[, .(BestSoFar=max(BestSoFar)), by=.(Evaluations)])
+}
+
+
+# data: fitness data
+# thresholds: numeric vector with the fitness thresholds to be calculated
+fitnessLevels <- function(data, thresholds, return.failed=F) {
+  aux <- function(t) {
+    w <- which(data[,BestSoFar] > t)
+    return(if(length(w) > 0) data$Evaluations[min(w)] else Inf)
+  }
+  evals <- sapply(thresholds, aux)
+  res <- data.table(Threshold=thresholds,Evaluations=evals)
+  if(!return.failed) {
+    res <- res[!is.infinite(Evaluations)]
+  }
+  return(res)
+}
+
 
 #### Behavioural analysis #################################################################
 

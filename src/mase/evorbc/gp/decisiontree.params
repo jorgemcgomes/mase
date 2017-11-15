@@ -1,0 +1,30 @@
+parent.0 = decisiongraph.params
+
+# Node Constraints
+gp.nc.size = 9
+
+# sensor lower
+gp.nc.8 = ec.gp.GPNodeConstraints
+gp.nc.8.name = split
+gp.nc.8.returns = primitive
+gp.nc.8.size = 3
+gp.nc.8.child.0 = constant
+gp.nc.8.child.1 = primitive
+gp.nc.8.child.2 = primitive
+
+# Our Function Set
+gp.fs.0.size = 2
+
+gp.fs.0.func.0 = mase.evorbc.gp.RepoPrimitive
+gp.fs.0.func.0.nc = primitiveterminal
+gp.fs.0.func.0.mutation-sd = 0.2
+
+gp.fs.0.func.1 = mase.evorbc.gp.SensorConstant
+gp.fs.0.func.1.nc = constantterminal
+gp.fs.0.func.1.mutation-sd = 0.2
+
+# TODO: for each sensor
+#gp.fs.0.func.3 = mase.evorbc.gp.SensorLower
+#gp.fs.0.func.3.nc = split
+#gp.fs.0.func.3.sensor-index = 0
+#gp.fs.0.func.3.sensor-name = LW

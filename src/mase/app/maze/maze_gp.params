@@ -1,0 +1,53 @@
+parent.0 = ../../evorbc/gp/decisiongraph.params
+
+gp.fs.0.size = 17
+
+gp.fs.0.func.7 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.7.nc = sensorterminal
+gp.fs.0.func.7.sensor-index = 0
+gp.fs.0.func.7.sensor-name = GF
+
+gp.fs.0.func.8 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.8.nc = sensorterminal
+gp.fs.0.func.8.sensor-index = 1
+gp.fs.0.func.8.sensor-name = GR
+
+gp.fs.0.func.9 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.9.nc = sensorterminal
+gp.fs.0.func.9.sensor-index = 2
+gp.fs.0.func.9.sensor-name = GB
+
+gp.fs.0.func.10 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.10.nc = sensorterminal
+gp.fs.0.func.10.sensor-index = 3
+gp.fs.0.func.10.sensor-name = GL
+
+gp.fs.0.func.11 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.11.nc = sensorterminal
+gp.fs.0.func.11.sensor-index = 4
+gp.fs.0.func.11.sensor-name = OL
+
+gp.fs.0.func.12 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.12.nc = sensorterminal
+gp.fs.0.func.12.sensor-index = 5
+gp.fs.0.func.12.sensor-name = OLF
+
+gp.fs.0.func.13 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.13.nc = sensorterminal
+gp.fs.0.func.13.sensor-index = 6
+gp.fs.0.func.13.sensor-name = OF
+
+gp.fs.0.func.14 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.14.nc = sensorterminal
+gp.fs.0.func.14.sensor-index = 7
+gp.fs.0.func.14.sensor-name = ORF
+
+gp.fs.0.func.15 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.15.nc = sensorterminal
+gp.fs.0.func.15.sensor-index = 8
+gp.fs.0.func.15.sensor-name = OR
+
+gp.fs.0.func.16 = mase.evorbc.gp.SensorValue
+gp.fs.0.func.16.nc = sensorterminal
+gp.fs.0.func.16.sensor-index = 9
+gp.fs.0.func.16.sensor-name = OB
