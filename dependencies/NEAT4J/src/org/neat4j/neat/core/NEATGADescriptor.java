@@ -49,6 +49,7 @@ public class NEATGADescriptor implements GADescriptor {
 	private double maxPerturb;
 	private double maxBiasPerturb;
         private boolean copyBest;
+        private double pFeatureReplaced;
 
 	/**
 	 * @return Returns the survivalThreshold.
@@ -423,5 +424,13 @@ public class NEATGADescriptor implements GADescriptor {
         
         public void setCopyBest(boolean b) {
             this.copyBest = b;
+        }
+        
+        public double getPFeatureReplaced() {
+            return pFeatureReplaced;
+        }
+    
+        public void setPFeatureReplaced(double p) {
+            this.pFeatureReplaced = p;
         }
 }

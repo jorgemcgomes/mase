@@ -141,7 +141,7 @@ public class NEATGATrainingManager {
 		double maxPerturb = Double.parseDouble(config.configElement("MAX.PERTURB"));
 		double maxBiasPerturb = Double.parseDouble(config.configElement("MAX.BIAS.PERTURB"));
                 boolean copyBest = Boolean.valueOf(config.configElement("COPY.BEST"));
-
+                double pFeatureReplaced = Double.parseDouble(config.configElement("PROBABILITY.FEATURE.REPLACED"));
 		
 		NEATGADescriptor descriptor = new NEATGADescriptor();
 		descriptor.setPAddLink(pAddLink);
@@ -178,6 +178,7 @@ public class NEATGATrainingManager {
 		descriptor.setMaxPerturb(maxPerturb);
 		descriptor.setMaxBiasPerturb(maxBiasPerturb);
 		descriptor.setCopyBest(copyBest);
+                descriptor.setPFeatureReplaced(pFeatureReplaced);
                 
 		return (descriptor);
 	}

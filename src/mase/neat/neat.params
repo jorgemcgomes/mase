@@ -27,7 +27,8 @@ neat.PROBABILITY.ADDLINK =              0.05
 neat.PROBABILITY.ADDNODE =              0.03
 neat.PROBABILITY.MUTATEBIAS =           0.3
 neat.PROBABILITY.TOGGLELINK =           0.0
-neat.PROBABILITY.WEIGHT.REPLACED=       0.0
+neat.PROBABILITY.WEIGHT.REPLACED =      0.0
+neat.PROBABILITY.FEATURE.REPLACED =     0.0
 
 # NEAT specific
 neat.EXCESS.COEFFICIENT =               1

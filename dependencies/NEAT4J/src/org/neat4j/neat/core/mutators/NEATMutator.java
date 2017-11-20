@@ -32,6 +32,7 @@ public class NEATMutator implements Mutator {
     private double pPerturb;
     private double pToggle;
     private double pWeightReplaced;
+    private double pFeatureReplaced;
     private double pMutateBias;
     private boolean featureSelection = false;
     private boolean recurrencyAllowed = true;
@@ -67,6 +68,10 @@ public class NEATMutator implements Mutator {
 
     public void setPWeightReplaced(double pWR) {
         this.pWeightReplaced = pWR;
+    }
+    
+    public void setPFeatureReplaced(double pFR) {
+        this.pFeatureReplaced = pFR;
     }
 
     /**
@@ -106,7 +111,13 @@ public class NEATMutator implements Mutator {
         double perturbRandVal = perturbRand.nextDouble();
         Gene mutated = mutatee;
         if (perturbRandVal < this.pPerturb) {
-            mutated = new NEATFeatureGene(mutatee.getInnovationNumber(), mutatee.geneAsNumber().doubleValue() + MathUtils.nextClampedDouble(-perturb, perturb));
+            double newVal;
+            if(this.pFeatureReplaced > perturbRand.nextDouble()) {
+                newVal = MathUtils.nextDouble();
+            } else {
+                newVal = mutatee.geneAsNumber().doubleValue() + MathUtils.nextClampedDouble(-perturb, perturb);
+            }
+            mutated = new NEATFeatureGene(mutatee.getInnovationNumber(), newVal);
         }
 
         return (mutated);
