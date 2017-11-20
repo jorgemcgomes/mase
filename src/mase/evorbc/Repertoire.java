@@ -7,9 +7,7 @@ package mase.evorbc;
 
 import ec.Setup;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import mase.controllers.AgentController;
 import mase.util.FormatUtils;
 
@@ -39,7 +37,7 @@ public interface Repertoire extends Setup {
     public Repertoire deepCopy();
     
     
-    public static class Primitive implements Serializable {
+    public static class Primitive implements Serializable, Cloneable, Comparable {
 
         private static final long serialVersionUID = 1L;
         
@@ -53,6 +51,7 @@ public interface Repertoire extends Setup {
             this.coordinates = coordinates;
         }
         
+        @Override
         public Primitive clone() {
             return new Primitive(ac.clone(), id, coordinates);
         }
@@ -61,9 +60,11 @@ public interface Repertoire extends Setup {
         public String toString() {
             return id + " @ " + FormatUtils.toString(coordinates) + " " + ac.getClass().getSimpleName() + ac;
         }
-        
-        
-        
+
+        @Override
+        public int compareTo(Object o) {
+            return Integer.compare(this.id, ((Primitive) o).id);
+        }
     }
         
 }

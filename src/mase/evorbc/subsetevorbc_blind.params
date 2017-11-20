@@ -1,0 +1,4 @@
+parent.0 = subsetevorbc.params
+
+evorbc.ignore-coordinates = true
+neat.PROBABILITY.FEATURE.REPLACED = 1

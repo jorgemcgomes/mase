@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mase.controllers.AgentController;
@@ -31,7 +33,6 @@ import mase.stat.SolutionPersistence;
 import mase.util.KdTree;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
@@ -51,7 +52,7 @@ public class KdTreeRepertoire implements Repertoire {
     // Currently only supports one repo at a time (should be enough for most cases)
     // TODO: there WILL be problems if any controller modifies these structures for some reason
     private static transient KdTree<Integer> _cachedTree;
-    private static transient Map<Integer, Primitive> _cachedPrimitives;
+    private static transient SortedMap<Integer, Primitive> _cachedPrimitives;
     private static transient long _cachedRepHash, _cachedCoordsHash;
     private static transient boolean _cachedIgnoreConstant;
 
@@ -60,7 +61,7 @@ public class KdTreeRepertoire implements Repertoire {
     // This means that the repertoire and coordinates files cannot be lost though
     // File hashes ensure that the repertoire and coord files are the same as when the object was serialized
     private transient KdTree<Integer> tree;
-    private transient Map<Integer, Primitive> primitives;
+    private transient SortedMap<Integer, Primitive> primitives;
 
     //private Pair<Double, Double>[] bounds; // Only here for retro-compatibility with serialized objects. No longer used for anything
     private boolean ignoreConstant;
@@ -100,7 +101,10 @@ public class KdTreeRepertoire implements Repertoire {
         return primitives.get(id);
     }
 
-   @Override
+    @Override
+   /**
+    * Sorted according to index
+    */
     public Collection<Primitive> allPrimitives() {
         return primitives.values();
     }    
@@ -119,7 +123,7 @@ public class KdTreeRepertoire implements Repertoire {
         newRep.coordsFileHash = this.coordsFileHash;
         newRep.ignoreConstant = this.ignoreConstant;
 
-        newRep.primitives = new HashMap<>(this.primitives);
+        newRep.primitives = new TreeMap<>(this.primitives);
         for (Map.Entry<Integer, Primitive> e : newRep.primitives.entrySet()) {
             e.setValue(e.getValue().clone());
         }
@@ -187,7 +191,7 @@ public class KdTreeRepertoire implements Repertoire {
         }
 
         tree = new KdTree.Euclidean<>(n);
-        primitives = new HashMap<>();
+        primitives = new TreeMap<>();
         for (int i = 0; i < solutions.size(); i++) {
             PersistentSolution sol = solutions.get(i);
             AgentController ac = sol.getController().getAgentControllers(1)[0];
