@@ -69,7 +69,7 @@ public class SubsetNeuralArbitratorController implements AgentController {
     }    
     
     public String getActivationsReport() {
-        return FormatUtils.toString(arbitratorOut);
+        return FormatUtils.toStringRounded(arbitratorOut);
     }
     
     public String getActivationsPlot() {
@@ -89,8 +89,16 @@ public class SubsetNeuralArbitratorController implements AgentController {
         return plot + "\n";
     }
     
+    public double[] getLastArbitratorActivations() {
+        return arbitratorOut;
+    }
+    
     public Primitive getLastPrimitive() {
         return lastPrimitive;
+    }
+    
+    public Primitive[] getPrimitiveSubset() {
+        return primitives;
     }
     
 }

@@ -153,7 +153,7 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
 
 # loads any file given the column names
 loadFile <- function(file, separator=" ",colnames=NULL, exclude.na=T) {
-  frame <- fread(file, sep=separator, stringsAsFactors=F)
+  frame <- fread(file, sep=separator, stringsAsFactors=F, fill=T)
   if(!is.null(colnames)) {
     setnames(frame,colnames)
     if(exclude.na) {
@@ -161,11 +161,6 @@ loadFile <- function(file, separator=" ",colnames=NULL, exclude.na=T) {
     }
   }
   return(frame)
-}
-
-loadWideFile <- function(file, separator=" ", pre=c(), repeating=c(), post=c(), key=head(pre,1)) {
-  # TODO -- see loadFitnessFile
-  
 }
 
 # sample: [0,1] percentage of behaviours to retain
@@ -253,6 +248,7 @@ fixPostFitness <- function(folder, postname="postfitness.stat") {
   fixed <- 0; skipped <- 0 ; error <- 0
   for(i in 1:length(postfiles)) {
     cat("Fixing",postfiles[i],"\n")
+    tryCatch({
     postfit <- fread(postfiles[i])
     if(tail(postfit, 1)[["Evaluations"]]==0) {
       evofit <- fread(regfiles[i])[is.na(Subpop)]
@@ -269,22 +265,38 @@ fixPostFitness <- function(folder, postname="postfitness.stat") {
       skipped <- skipped + 1
       cat("Already fixed\n")
     }
+    }, error = function(e) {
+      message(e)
+    })
   }
   cat("Fixed:",fixed,"Skipped:",skipped,"Error:",error,"\n")
+}
+
+# get the common start (longest common prefix) of the given array of strings
+common.start <- function(x) {
+  x<-sort(x) # sort the vector
+  d_x<-strsplit(x[c(1,length(x))],"") # split the first and last element by character
+  der_com<-match(FALSE,do.call("==",d_x))-1 # search for the first not common element and so, get the last matching one
+  # if there is no matching element, return an empty vector, else return the common part
+  ifelse(der_com==0,return(character(0)),return(substr(x[1],1,der_com)))
 }
 
 #### Fitness plotting functions #####################################################################
 
 bestSoFarFitness <- function(data, showSE=T, xvar="Setup") {
   agg <- data[is.na(Subpop), .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=c(xvar,"Generation")]
-  g <- ggplot(agg, aes_string("Generation","Mean",group=xvar,fill=xvar)) + geom_line(aes_string(colour=xvar)) + ylab("Fitness")
+  points <- agg[, .SD[seq(from=1,to=.N,length.out=10)], by=xvar]
+  g <- ggplot(agg, aes_string("Generation","Mean",group=xvar,fill=xvar)) + geom_line(aes_string(colour=xvar)) + ylab("Fitness") +
+    geom_point(data=points, aes_string(shape=xvar,colour=xvar),size=2) + scale_shape_manual(values=0:14)
   if(showSE) {g <- g + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE), alpha = 0.1)}
   return(g)
 }
 
 bestSoFarFitnessEvals <- function(data, showSE=T, xvar="Setup") {
   agg <- data[is.na(Subpop), .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=c(xvar,"Evaluations")]
-  g <- ggplot(agg, aes_string("Evaluations","Mean",group=xvar,fill=xvar)) + geom_line(aes_string(colour=xvar)) + ylab("Fitness")
+  points <- agg[, .SD[seq(from=1,to=.N,length.out=10)], by=xvar]
+  g <- ggplot(agg, aes_string("Evaluations","Mean",group=xvar,fill=xvar)) + geom_line(aes_string(colour=xvar)) + ylab("Fitness") +
+    geom_point(data=points, aes_string(shape=xvar,colour=xvar),size=2)
   if(showSE) {g <- g + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE), alpha = 0.1)}
   return(g)
 }
@@ -292,15 +304,15 @@ bestSoFarFitnessEvals <- function(data, showSE=T, xvar="Setup") {
 fitnessBoxplots <- function(data, generation=NULL, ttests=T, xvar="Setup") {
   data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
   g <- ggplot(data[is.na(Subpop)], aes_string(x=xvar, y="BestSoFar",fill=xvar)) + geom_boxplot() +
-    geom_point(position=position_jitterdodge(jitter.width=0.3, jitter.height=0), colour="gray") 
-  if(ttests) print(fitnessTtests(data,generation=generation))
+    geom_point(position=position_jitterdodge(jitter.width=0.3, jitter.height=0), size=1, colour="gray") 
+  if(ttests) print(fitnessTtests(data,generation=generation, splitvar=xvar))
   return(g)
 }
 
 fitnessViolins <- function(data, generation=NULL, ttests=T, xvar="Setup") {
   data <- if(is.null(generation)) lastGen(data) else data[Generation==generation]
   g <- ggplot(data[is.na(Subpop)], aes_string(x=xvar, y="BestSoFar",fill=xvar)) + geom_violin(size=.3, draw_quantiles=c(0.25,0.5,0.75), adjust=0.5)
-  if(ttests) print(fitnessTtests(data,generation=generation))  
+  if(ttests) print(fitnessTtests(data,generation=generation, splitvar=xvar))  
   return(g)
 }
 
@@ -311,14 +323,14 @@ rankByFitness <- function(data, generation=NULL, ttests=T, xvar="Setup") {
   g <- ggplot(agg, aes_string(x=xvar, y="Mean", fill=xvar)) + 
     geom_bar(stat="identity") + geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE),width=0.5) +
     theme(legend.position="none", axis.text.x = element_text(angle = 45, hjust = 1))
-  if(ttests) print(fitnessTtests(data,generation=generation))
+  if(ttests) print(fitnessTtests(data,generation=generation, splitvar=xvar))
   return(g)
 }
 
-fitnessTtests <- function(data, generation=NULL) {
+fitnessTtests <- function(data, generation=NULL, splitvar="Setup") {
   data <- if(is.null(generation)) lastGen(data) else subset(data,Generation==generation)
-  data <- subset(data, is.na(Subpop), select=c("Setup","BestSoFar"))
-  d <- split(data, data$Setup)
+  data <- subset(data, is.na(Subpop), select=c(splitvar,"BestSoFar"))
+  d <- split(data, data[[splitvar]])
   setlist <- lapply(d, function(x){x$BestSoFar})
   return(batch.ttest(setlist))
 }
@@ -337,14 +349,6 @@ quickReport <- function(folders, filename="postfitness.stat", ttests=T, snapshot
 }
 
 #### Fitness utility functions ################
-
-common.start <- function(x) {
-  x<-sort(x) # sort the vector
-  d_x<-strsplit(x[c(1,length(x))],"") # split the first and last element by character
-  der_com<-match(FALSE,do.call("==",d_x))-1 # search for the first not common element and so, get the last matching one
-  # if there is no matching element, return an empty vector, else return the common part
-  ifelse(der_com==0,return(character(0)),return(substr(x[1],1,der_com)))
-}
 
 bestSoFarEvaluations <- function(dt, step=10000) {
   dt[, Evaluations := floor(Evaluations / step) * step]

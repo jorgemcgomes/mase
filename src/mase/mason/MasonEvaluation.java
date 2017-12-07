@@ -20,10 +20,10 @@ public abstract class MasonEvaluation<T extends EvaluationResult> implements Eva
     public static final String P_DEFAULT = "mason-eval";
     public static final String P_FREQUENCY = "update-freq";
     private static final long serialVersionUID = 1L;
-    protected int currentEvaluationStep;
-    protected int maxEvaluationSteps;
-    protected int updateFrequency;
-    protected int maxSteps;
+    protected int currentEvaluationStep = 0;
+    protected int maxEvaluationSteps = -1;
+    protected int updateFrequency = 1;
+    protected int maxSteps = -1;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {

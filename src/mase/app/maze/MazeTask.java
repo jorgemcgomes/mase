@@ -7,10 +7,15 @@ package mase.app.maze;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.util.Collections;
+import java.util.List;
 import mase.controllers.AgentController;
+import mase.controllers.GroupController;
 import mase.mason.MasonSimState;
+import mase.mason.generic.SmartAgentProvider;
 import mase.mason.world.CircularObject;
 import mase.mason.world.MultilineObject;
+import mase.mason.world.SmartAgent;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.continuous.Continuous2D;
@@ -21,7 +26,7 @@ import sim.util.Double2D;
  *
  * @author jorge
  */
-public class MazeTask extends MasonSimState<MazeParams> {
+public class MazeTask extends MasonSimState<MazeParams> implements SmartAgentProvider {
 
     private static final long serialVersionUID = 1L;
 
@@ -30,9 +35,16 @@ public class MazeTask extends MasonSimState<MazeParams> {
     protected CircularObject target;
     protected MultilineObject maze;
     protected SpeedingMonitor speedingMonitor;
+    protected AgentController ac;
 
     public MazeTask(long seed) {
         super(seed);
+    }
+
+    @Override
+    public void setGroupController(GroupController gc) {
+        super.setGroupController(gc);
+        this.ac = gc.getAgentControllers(1)[0];
     }
 
     @Override
@@ -75,7 +87,7 @@ public class MazeTask extends MasonSimState<MazeParams> {
     }
 
     protected MazeAgent createAgent() {
-        AgentController ac = gc.getAgentControllers(1)[0];
+        ac.reset();
         MazeAgent ag = new MazeAgent(this, field, ac);
         ag.setupSensors(this);
         ag.setupActuators(this);
@@ -85,6 +97,11 @@ public class MazeTask extends MasonSimState<MazeParams> {
     @Override
     public void setupPortrayal(FieldPortrayal2D port) {
         port.setField(field);
+    }
+
+    @Override
+    public List<? extends SmartAgent> getSmartAgents() {
+        return Collections.singletonList(agent);
     }
 
     protected class SpeedingMonitor implements Steppable {

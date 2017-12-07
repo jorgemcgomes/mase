@@ -58,7 +58,7 @@ public interface Repertoire extends Setup {
 
         @Override
         public String toString() {
-            return id + " @ " + FormatUtils.toString(coordinates) + " " + ac.getClass().getSimpleName() + ac;
+            return id + " @ " + FormatUtils.toStringRounded(coordinates) + " " + ac.getClass().getSimpleName() + ac;
         }
 
         @Override

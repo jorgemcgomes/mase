@@ -26,7 +26,7 @@ problem.sensorRange = 50
 problem.targetRadius = 1
 problem.mazeFile = mazes/zigzag1.svg,mazes/zigzag2.svg,mazes/zigzag3.svg,mazes/zigzag4.svg,mazes/zigzag5.svg
 problem.xRandom = 0
-problem.yRandom = 0
+problem.yRandom = 60
 
 vector.species.genome-size =       80
 neural.input =                     10

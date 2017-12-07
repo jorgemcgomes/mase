@@ -13,6 +13,18 @@ processRepo <- function(setup, jobs=0:4, nvars=7, red=NULL, k=3, bc="sdbc", srcd
   }
 }
 
+generateRandomCoords <- function(folder, jobs=0:9, k=3, srcdir="/home/jorge/Dropbox/mase/src/mase/app/maze/repf/", builddir="/home/jorge/Dropbox/mase/build/classes/mase/app/maze/repf/") {
+  for(j in jobs) {
+    d <- fread(paste0(folder,"/job.",j,".finalrep.stat"))
+    rand <- data.table(Index=d$Hash)
+    for(n in 1:k) {
+      rand[[paste0("V",n)]] <- runif(nrow(rand))
+    }
+    write.table(rand, file=paste0(srcdir,"job.",j,".finalrep_k",k,".txt"), row.names=F, col.names=F, sep=" ")
+    write.table(rand, file=paste0(builddir,"job.",j,".finalrep_k",k,".txt"), row.names=F, col.names=F, sep=" ")
+  }
+}
+
 setwd("~/exps/playground/rep10")
 processRepo("base", jobs=0:9)
 processRepo("rand", jobs=0:9)
@@ -784,8 +796,22 @@ ggsave("~/Dropbox/gpresults/mw4_bestsize.svg")
 setwd("~/exps/mazemw12/")
 fixPostFitness("~/exps/mazemw12")
 
-data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Mut"))
-rankByFitness(data)
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Setting","Mut"))
+rankByFitness(data[Method=="gpg" & Setting=="ercmut"])
+rankByFitness(data[Method=="gpt" & Setting=="ercmut"])
+rankByFitness(data[Method=="gpg" & Setting=="sd"])
+rankByFitness(data[Method=="gpt" & Setting=="sd"])
+
+data <- loadData("**", "fitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Setting","Mut"))
+data[, Gap := MaxFitness - MeanFitness]
+ggplot(data, aes(Generation,Gap, group=Mut, colour=Mut)) + stat_summary(fun.y=mean, geom="line") + facet_grid(Setting ~ Method)
+
+
+
+setwd("~/exps/mazemw11/")
+data <- loadData("gp*", "fitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Repo"))
+data[, Gap := MaxFitness - MeanFitness]
+ggplot(data, aes(Generation,Gap, group=Method, colour=Method)) + stat_summary(fun.y=mean, geom="line")
 
 
 setwd("~/exps/mazemw11/")
@@ -804,24 +830,148 @@ ggplot(koza, aes(Generation,MeanSize, group=Method, colour=Method)) + stat_summa
 ggplot(koza, aes(Generation,BestSizeGen, group=Method, colour=Method)) + stat_summary(fun.y=mean, geom="line")
 ggplot(koza, aes(Generation,MeanDepth, group=Method, colour=Method)) + stat_summary(fun.y=mean, geom="line") 
 
-m <- melt(koza[, c("Generation", colnames(koza)[grep("f\\..*", colnames(koza))]), with=F], id.vars=c("Generation") )
-ggplot(m, aes(Generation,value, colour=variable)) + stat_summary(fun.y=mean, geom="line")
-ggplot(m, aes(variable,value)) + stat_summary(fun.y=mean, geom="bar") + ylab("Mean number of nodes") + xlab("Node type")
+m <- melt(koza[, c("Generation","Method", colnames(koza)[grep("f\\..*", colnames(koza))]), with=F], id.vars=c("Generation","Method") )
+ggplot(m, aes(Generation,value, colour=variable)) + stat_summary(fun.y=mean, geom="line") + facet_wrap(~ Method)
+ggplot(m, aes(variable,value)) + stat_summary(fun.y=mean, geom="bar") + ylab("Mean number of nodes") + xlab("Node type") + facet_wrap(~ Method)
+
+setwd("~/exps/mazemw13/")
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Mut"))
+rankByFitness(data)
+
+setwd("~/exps/mazemw14/")
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","CrossoverP","SelectorTP","IfElseP"))
+data[, CrossoverP := factor(CrossoverP, levels=c("3","2","0","1"), labels=c("0.1","0.3","0.5","0.7"))]
+data[, SelectorTP := factor(SelectorTP, levels=c("1","0","2"), labels=c("0.25","0.5","0.75"))]
+data[, Conf := paste0(Method,"/C",CrossoverP,"/ST",SelectorTP)]
+rankByFitness(data, xvar="Conf")
+
+means <- lastGen(data)[, .(Fitness=mean(BestSoFar),SE=se(BestSoFar)), by=.(Method,CrossoverP,SelectorTP)]
+ggplot(means, aes(CrossoverP,Fitness,colour=SelectorTP,group=SelectorTP)) + geom_point() + geom_line() +
+  geom_errorbar(aes(ymin=Fitness-SE, ymax=Fitness+SE), width=.25) + facet_wrap(~ Method)
+
+metaAnalysis(lastGen(data), BestSoFar ~ CrossoverP, ~ Method)
+metaAnalysis(lastGen(data), BestSoFar ~ SelectorTP, ~ Method)
+
+setwd("~/exps/mazesub/")
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","NumPrimitives"))
+fitnessBoxplots(data)
 
 
 
-kozastats <- koza[,.(Depth=mean(V5),Size=mean(V8)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)]
-ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Depth)) + facet_grid(FS ~ BuildSize) + 
-  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Depth,1)), size=3) + ggtitle("Average depth")
-ggsave("~/Dropbox/gpresults/mw4_avgdepth.svg")
-ggplot(kozastats, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=Size)) + facet_grid(FS ~ BuildSize) + 
-  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(Size,1)), size=3) + ggtitle("Average size")
-ggsave("~/Dropbox/gpresults/mw4_avgsize.svg")
 
 
-kozastats2 <- rbind(lastGen(koza)[FS=="gp",.(BestSize=mean(V43)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)],
-                    lastGen(koza)[FS=="gptrees",.(BestSize=mean(V37)), by=.(Setup,FS,BuildSize,MaxDepth,MaxSize)])
-ggplot(kozastats2, aes(MaxDepth,MaxSize)) + geom_tile(aes(fill=BestSize)) + facet_grid(FS ~ BuildSize) + 
-  scale_fill_distiller(palette="Spectral") + geom_label(aes(label=round(BestSize,1)), size=3) + ggtitle("Best size")
-ggsave("~/Dropbox/gpresults/mw4_bestsize.svg")
+########## MAZE FINAL ##############################
 
+setwd("~/exps/mazefinal")
+fixPostFitness("~/exps/mazefinal")
+data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Repo","Param"))
+data[, Param := factor(formatC(as.numeric(as.character(Param)), width=2, flag="0"))]
+data[, Blind := grepl("blind", Method)]
+data[, Method := sub("blind", "", Method)]
+data[, Method := factor(Method, levels=c("tr","rbcneat","rbcsub","rbcselected","gptreeslopr"), labels=c("TR","NEAT-Vanilla","NEAT-Sub","NEAT-SubSel","GP-DT"))]
+data[, Config := paste(Method,Blind,Param,sep="-")]
+data[, Config := sub("-NA","",sub("TRUE","B",sub("-FALSE","",Config)))]
+#gsub("NA, ","",dff$string)
+
+
+fit_scale <- scale_y_continuous(limits=c(0,1.25),breaks=seq(0,1.25,0.25))
+
+# NEAT-Sub
+fitnessBoxplots(data[Blind==F & Method=="NEAT-Sub"], xvar="Param") + labs(x="Number of primitives") + guides(fill=F) + ylab("Best fitness") + 
+  ggtitle("Performance of NEAT-Sub for different number of primitives allowed") + fit_scale
+metaAnalysis(lastGen(data)[Blind==F & Method=="NEAT-Sub"], BestSoFar ~ Param)
+bestSoFarFitnessEvals(data[Blind==F & Method=="NEAT-Sub"], xvar="Param") + labs(colour="Number of primitives", fill="Number of primitives") +
+  ggtitle("Performance of NEAT-Sub for different number of primitives allowed") + fit_scale
+
+# All comparison
+fitnessBoxplots(data[Blind==F & (Method!="NEAT-Sub" | Param=="15")], xvar="Config") + ylab("Best fitness") + fit_scale
+metaAnalysis(lastGen(data)[Blind==F & (Method!="NEAT-Sub" | Param=="15")], BestSoFar ~ Config)
+bestSoFarFitnessEvals(data[Blind==F & (Method!="NEAT-Sub" | Param=="15")], xvar="Config") + fit_scale
+
+# Blind Vanilla
+fitnessBoxplots(data[Blind==T & Method=="NEAT-Vanilla"], xvar="Param") + labs(x="Number of dimensions") + guides(fill=F) + ylab("Best fitness") + 
+  ggtitle("Performance of NEAT-Vanilla according to the dimensionality of the random BC") + fit_scale
+metaAnalysis(lastGen(data)[Blind==T & Method=="NEAT-Vanilla"], BestSoFar ~ Param)
+
+# Blind subset
+fitnessBoxplots(data[Blind==T & Method=="NEAT-Sub"], xvar="Param") + labs(x="Number of primitives") + guides(fill=F) + ylab("Best fitness") + 
+  ggtitle("Performance of NEAT-Sub (BLIND) for different number of primitives allowed")
+metaAnalysis(lastGen(data)[Blind==T & Method=="NEAT-Sub"], BestSoFar ~ Param)
+
+# Blind comparison
+subset <- data[(Method=="NEAT-Vanilla" & (Param=="03" | Param=="NA")) | (Method=="NEAT-Sub" & Param=="15") | !(Method %in% c("NEAT-Vanilla","NEAT-Sub"))]
+ggplot(lastGen(subset), aes(Method,BestSoFar,fill=Blind)) + geom_boxplot() + 
+  geom_point(position=position_jitterdodge(jitter.width=0.15, jitter.height=0), size=.5, colour="gray") +
+  ylab("Best fitness") + ggtitle("Performance of the methods when using or not the BC") + fit_scale
+
+m <- metaAnalysis(lastGen(subset[Method!="TR"]), BestSoFar ~ Blind, ~ Method) # performance degradation
+sapply(m, function(x){as.numeric(x$ttest$holm[1,2])})
+
+metaAnalysis(lastGen(subset[Blind==T | Method=="TR"]), BestSoFar ~ Method) # best blind
+
+# Repo variability
+d <- data[Blind==FALSE & Method != "TR" & (Method!="NEAT-Sub" | Param=="15")]
+fitnessBoxplots(d, xvar="Repo") + facet_wrap(~ Config) + guides(fill=F) + fit_scale
+
+# for each method, does the repertoire have a significant impact?
+m <- metaAnalysis(lastGen(d),  BestSoFar ~ Repo, ~ Config)
+sapply(m, function(x){x$ttest$kruskal$p.value})
+
+# does any repertoire yield consistently superior results accross all methods?
+means <- lastGen(d)[, .(Mean=mean(BestSoFar)), by=.(Repo,Config)]
+friedman.test(Mean ~ Repo | Config, data=means)
+
+
+# best solutions from each method
+d <- lastGen(data)[Repo=="0" & Blind==F, .(Setup,Config,Job,BestSoFar)] # use only repo 0 and not blind
+setorder(d, Config, -BestSoFar)
+View(d)
+
+# GP analysis
+koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo","Param"))
+koza[, Blind := grepl("blind", Method)]
+koza[, Method := sub("blind", "", Method)]
+koza[, Method := factor(Method, levels=c("gptreeslo","gpgraphlo","gptreeslopr","gpgraphlopr"), labels=c("GP-DT","GP-DG","GP-DT(P)","GP-DG(P)"))]
+koza[, Config := paste(Method,Blind,sep="-")]
+koza[, Config := sub("TRUE","B",sub("-FALSE","",Config))]
+
+ggplot(koza[Blind==F], aes(Generation,MeanSize, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line") + ggtitle("Size")
+ggplot(koza[Blind==F], aes(Generation,BestSizeGen, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line")
+ggplot(koza[Blind==F], aes(Generation,MeanDepth, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line") + ggtitle("Depth")
+
+m <- melt(koza[Blind==F, c("Generation","Config", colnames(koza)[grep("f\\..*", colnames(koza))]), with=F], id.vars=c("Generation","Config") )
+#ggplot(m, aes(Generation,value, colour=variable)) + stat_summary(fun.y=mean, geom="line") + facet_wrap(~ Config)
+ggplot(m, aes(variable,value)) + stat_summary(fun.y=mean, geom="bar") + ylab("Mean number of nodes") + xlab("Node type") + 
+  facet_wrap(~ Config, scales="free_x", ncol=1) + ggtitle("Node types")
+
+
+# search for the smallest best
+k <- lastGen(koza[Blind==F & Repo=="0", .(Setup,Config,Job,BestSizeSoFar,BestFitnessSoFar)])
+setorder(k, Config, BestSizeSoFar)
+View(k)
+
+
+repo <- loadFile("~/exps/mazefinal/rep/job.0.finalrep.stat")
+beststats <- loadData("**", "postbest.xml.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo","Param"))
+beststats[, Param := factor(formatC(as.numeric(as.character(Param)), width=2, flag="0"))]
+beststats[, Blind := grepl("blind", Method)]
+beststats[, Method := sub("blind", "", Method)]
+beststats[, Method := factor(Method, levels=c("tr","rbcneat","rbcsub","gptreeslopr"), labels=c("TR","NEAT-Vanilla","NEAT-Sub","GP-DT"))]
+beststats[, Config := paste(Method,Blind,Param,sep="-")]
+beststats[, Config := sub("-NA","",sub("TRUE","B",sub("-FALSE","",Config)))]
+
+beststats <- merge(beststats, repo[,.(Hash,Bin_0,Bin_1)], by.x="Primitive",by.y="Hash")
+setorder(beststats, Config, Job, Seed, Repetition, Time)
+set(beststats, j=c(grep("ArbitratorOut_|SensorInput_|ActuatorOut_",colnames(beststats))), value=NULL )
+
+act.stats <- beststats[, .(Number=length(unique(Primitive)), Duration=mean(rle(Primitive)$lengths)), by=.(Config,Job,Repetition)]
+act.sum <- act.stats[, .(Number = mean(Number), Duration=mean(Duration)), by=.(Config,Job)][, .(NumberMean=mean(Number),NumberSE=se(Number),DurationMean=mean(Duration),DurationSE=se(Duration)), by=.(Config)]
+
+ggplot(beststats[Blind==FALSE & (Method!="NEAT-Sub" | Param=="15"),.N,.(Bin_0,Bin_1,Config)]) + geom_tile(aes(Bin_0, Bin_1,fill=N)) + facet_wrap(~ Config) + coord_fixed()
+ggplot(beststats[Blind==FALSE & (Method!="NEAT-Sub" | Param=="15"),.N,.(Bin_0,Bin_1,Config,Job)]) + geom_tile(aes(Bin_0, Bin_1,fill=N)) + facet_grid(Config ~ Job) + coord_fixed()
+
+# most used by NEAT-Vanilla
+most.used <- beststats[Config=="NEAT-Vanilla", .N, by=.(Primitive,Bin_0,Bin_1)]
+setorder(most.used, -N)
+View(most.used)
+paste(most.used$N[1:30],collapse=",")

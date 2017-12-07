@@ -6,6 +6,7 @@
 package mase.evorbc.gp;
 
 import ec.gp.GPData;
+import ec.gp.GPNode;
 import mase.controllers.AgentController;
 
 /**
@@ -21,6 +22,7 @@ public class Data extends GPData {
     protected int primitive = Integer.MAX_VALUE;
     protected double[] sensorValues = null;  // the current sensor values
     protected AgentController ac = null; // the current agent controller
+    protected GPNode selected = null; // the node that was evaluated
 
     @Override
     public void copyTo(GPData gpd) {
@@ -31,6 +33,7 @@ public class Data extends GPData {
         d.sensorValues = sensorValues; // it's read-only, so it's safe
         d.primitive = primitive;
         d.ac = ac;
+        d.selected = selected;
     }
     
     

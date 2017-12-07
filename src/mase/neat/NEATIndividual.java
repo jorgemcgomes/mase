@@ -50,16 +50,6 @@ public class NEATIndividual extends Individual implements AgentControllerIndivid
     public NEATNeuralNet getNeuralNet() {
         return network;
     }
-    
-    public Collection<Double> getExtraFeatures() {
-        Collection<Double> features = new ArrayList<>();
-        for(Gene g : genome.genes()) {
-            if(g instanceof NEATFeatureGene) {
-                features.add(g.geneAsNumber().doubleValue());
-            }
-        }
-        return features;
-    }
 
     @Override
     public boolean equals(Object ind) {

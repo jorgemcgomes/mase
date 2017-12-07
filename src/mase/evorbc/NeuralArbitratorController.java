@@ -84,5 +84,9 @@ public class NeuralArbitratorController implements AgentController {
         return arbitrator.toString() + "\n" + repo.toString() + "\n" + mapFun.toString();
     }
     
+    public Primitive getLastPrimitive() {
+        return lastPrimitive;
+    }
+    
     
 }

@@ -61,6 +61,6 @@ public class FixedValuesController implements EncodableAgentController {
 
     @Override
     public String toString() {
-        return FormatUtils.toString(values);
+        return FormatUtils.toStringRounded(values);
     }
 }

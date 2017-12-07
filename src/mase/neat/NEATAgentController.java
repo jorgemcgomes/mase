@@ -4,13 +4,20 @@
  */
 package mase.neat;
 
+import java.util.Arrays;
 import mase.controllers.AgentController;
 import mase.controllers.EncodableAgentController;
+import mase.util.FormatUtils;
+import org.neat4j.neat.core.NEATFeatureGene;
+import org.neat4j.neat.core.NEATNetDescriptor;
 import org.neat4j.neat.core.NEATNeuralNet;
 import org.neat4j.neat.core.NEATNeuron;
+import org.neat4j.neat.core.NEATNodeGene;
 import org.neat4j.neat.data.core.NetworkInput;
 import org.neat4j.neat.data.core.NetworkOutputSet;
 import org.neat4j.neat.data.csv.CSVInput;
+import org.neat4j.neat.ga.core.Chromosome;
+import org.neat4j.neat.ga.core.Gene;
 import org.neat4j.neat.nn.core.Synapse;
 
 /**
@@ -21,6 +28,7 @@ public class NEATAgentController implements EncodableAgentController {
 
     private static final long serialVersionUID = 1;
     private NEATNeuralNet network;
+    private double[] extraGenes;
     
     public NEATAgentController() {
         this.network = null;
@@ -28,10 +36,15 @@ public class NEATAgentController implements EncodableAgentController {
 
     public NEATAgentController(NEATNeuralNet network) {
         this.network = network;
+        this.extraGenes = extractExtraGenes(network);
     }
-
+    
     public NEATNeuralNet getNetwork() {
         return network;
+    }
+    
+    public double[] getExtraGenes() {
+        return extraGenes;
     }
 
     @Override
@@ -71,8 +84,16 @@ public class NEATAgentController implements EncodableAgentController {
                 recurr++;
             }
         }
-        return "{Neurons:" + network.neurons().length + " Links:" + network.connections().length
-                + " SelfRec:" + selfRecurr + " Rec:" + recurr + "}";/* + "\n\n"
+        int in = 0, out = 0;
+        for (NEATNeuron n : network.neurons()) {
+            if(n.neuronType() == NEATNodeGene.INPUT) {
+                in++;
+            } else if(n.neuronType() == NEATNodeGene.OUTPUT) {
+                out++;
+            }
+        }
+        return "{In:"+in + " Out:"+out + " Neurons:" + network.neurons().length + " Links:" + network.connections().length
+                + " SelfRec:" + selfRecurr + " Rec:" + recurr + " Extra:" + extraGenes.length + "}";/* + "\n\n"
                 + NEATSerializer.serializeToString(network)*/
     }
 
@@ -85,6 +106,19 @@ public class NEATAgentController implements EncodableAgentController {
     public void decode(double[] params) {
         NEATNeuralNet net = NEATSerializer.deserialize(params);
         this.network = net;
+        this.extraGenes = extractExtraGenes(net);
+    }
+    
+    private static double[] extractExtraGenes(NEATNeuralNet net) {
+        Chromosome chromo = ((NEATNetDescriptor) net.netDescriptor()).neatStructure();
+        double[] extraFeatures = new double[chromo.genes().length];
+        int index = 0;
+        for(Gene g : chromo.genes()) {
+            if(g instanceof NEATFeatureGene) {
+                extraFeatures[index++] = g.geneAsNumber().doubleValue();
+            }            
+        }
+        return Arrays.copyOf(extraFeatures, index);
     }
 
 }

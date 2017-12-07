@@ -66,13 +66,14 @@ public class RepoPrimitive extends ERC {
     }
     
     @Override
-    public void mutateERC(EvolutionState state, int thread) {        
+    public void mutateERC(EvolutionState state, int thread) {      
         if (Double.isNaN(sd)) {
             this.resetNode(state, thread);
         } else {
             MaseProblem p = (MaseProblem) state.evaluator.p_problem;
             KdTreeRepertoire repo = (KdTreeRepertoire) ((ArbitratorFactory) p.getControllerFactory()).getRepertoire();
-            CartesianMappingFunction map = (CartesianMappingFunction) ((ArbitratorFactory) p.getControllerFactory()).getMappingFunction();            
+            CartesianMappingFunction map = (CartesianMappingFunction) ((ArbitratorFactory) p.getControllerFactory()).getMappingFunction();     
+            //System.out.println("< " + repo.getPrimitiveById(primitive));
             Pair<double[], double[]> range = map.getRange();
             double[] coords = repo.getPrimitiveById(primitive).coordinates;
             double[] newCoords = new double[coords.length];
@@ -83,6 +84,7 @@ public class RepoPrimitive extends ERC {
                 } while (newCoords[i] < range.getLeft()[i] || newCoords[i] > range.getLeft()[i] + range.getRight()[i]);
             }
             this.primitive = repo.nearest(newCoords).id;
+            //System.out.println("> " + repo.getPrimitiveById(primitive));
         }        
     }
     
@@ -110,6 +112,7 @@ public class RepoPrimitive extends ERC {
     public void eval(EvolutionState state, int thread, GPData input, ADFStack stack, GPIndividual individual, Problem problem) {
         Data d = (Data) input;
         d.primitive = primitive;
+        d.selected = this;
     }
     
 }

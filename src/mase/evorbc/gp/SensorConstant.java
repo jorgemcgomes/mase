@@ -49,11 +49,13 @@ public class SensorConstant extends ERC {
         if (Double.isNaN(sd)) {
             this.resetNode(state, thread);
         } else {
+            //System.out.println("< " + value);
             double v;
             do {
                 v = value + state.random[thread].nextGaussian() * sd;
             } while (v < MIN_VALUE || v > MAX_VALUE);
             value = v;
+            //System.out.println("> " + value);
         }
     }
 

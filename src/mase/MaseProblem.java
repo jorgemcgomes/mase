@@ -179,6 +179,10 @@ public abstract class MaseProblem extends Problem implements GroupedProblemForm,
     public EvaluationFunction[] getEvalFunctions() {
         return evalFunctions;
     }
+    
+    public void setEvalFunctions(EvaluationFunction[] evals) {
+        this.evalFunctions = evals;
+    }
 
     public ControllerFactory getControllerFactory() {
         return controllerFactory;

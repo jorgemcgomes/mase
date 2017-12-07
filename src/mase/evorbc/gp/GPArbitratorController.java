@@ -5,6 +5,7 @@
  */
 package mase.evorbc.gp;
 
+import ec.gp.GPNode;
 import ec.gp.GPTree;
 import mase.controllers.AgentController;
 import mase.evorbc.KdTreeRepertoire;
@@ -21,6 +22,7 @@ public class GPArbitratorController implements AgentController {
     private final GPTree tree;
     private final Repertoire repo;
     private transient Primitive lastPrimitive;
+    private transient GPNode lastSelectedNode;
     
     
     public GPArbitratorController(GPTree tree, Repertoire repo) {
@@ -39,6 +41,7 @@ public class GPArbitratorController implements AgentController {
         d.sensorValues = input;
         d.ac = this;
         tree.child.eval(null, 0, d, null, null, null);
+        lastSelectedNode = d.selected;
         if(lastPrimitive == null || lastPrimitive.id != d.primitive) {
             KdTreeRepertoire kdrep = (KdTreeRepertoire) repo; 
             Primitive p = kdrep.getPrimitiveById(d.primitive); // grab the primitive from the given repo (cloned)
@@ -64,12 +67,27 @@ public class GPArbitratorController implements AgentController {
 
     @Override
     public AgentController clone() {
-        return new GPArbitratorController((GPTree) tree.clone(), repo.deepCopy());
+        return new GPArbitratorController(tree/*(GPTree) tree.clone()*/, repo.deepCopy());
+    }
+    
+    public GPTree getProgramTree() {
+        return tree;
+    }
+
+    public GPNode getLastSelectedNode() {
+        return lastSelectedNode;
+    }
+    
+    public Repertoire getRepertoire() {
+        return repo;
     }
 
     @Override
     public String toString() {
-        return tree.child.makeCTree(true, true, true) + "\n" + repo.toString();
+        //return tree.child.makeCTree(true, true, true) + "\n" + repo.toString();
+        //return tree.child.makeGraphvizTree() + "\nSize: " + tree.child.numNodes(GPNode.NODESEARCH_ALL) +" Depth: " + tree.child.depth() + "\n" + repo.toString();
+        return tree.child.makeCTree(true, true, true) + "\nSize: " + tree.child.numNodes(GPNode.NODESEARCH_ALL) +" Depth: " + tree.child.depth() + "\n" + repo.toString();
+
     }
     
 }

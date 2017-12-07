@@ -65,7 +65,7 @@ pop.subpop.0.species.ind.tree.0.tc = tc0
 # Pipeline
 pop.subpop.0.species.pipe = ec.breed.MultiBreedingPipeline
 pop.subpop.0.species.pipe.generate-max = false
-pop.subpop.0.species.pipe.num-sources = 6
+pop.subpop.0.species.pipe.num-sources = 4
 pop.subpop.0.species.pipe.source.0 = ec.gp.koza.CrossoverPipeline
 pop.subpop.0.species.pipe.source.0.prob = 0.5
 pop.subpop.0.species.pipe.source.1 = ec.gp.koza.MutationPipeline
@@ -73,11 +73,11 @@ pop.subpop.0.species.pipe.source.1.prob = 0.1
 pop.subpop.0.species.pipe.source.2 = ec.gp.breed.MutatePromotePipeline
 pop.subpop.0.species.pipe.source.2.prob = 0.1
 pop.subpop.0.species.pipe.source.3 = ec.gp.breed.MutateERCPipeline
-pop.subpop.0.species.pipe.source.3.prob = 0.1
-pop.subpop.0.species.pipe.source.4 = ec.gp.breed.MutateOneNodePipeline
-pop.subpop.0.species.pipe.source.4.prob = 0.1
-pop.subpop.0.species.pipe.source.5 = ec.gp.breed.MutateAllNodesPipeline
-pop.subpop.0.species.pipe.source.5.prob = 0.1
+pop.subpop.0.species.pipe.source.3.prob = 0.3
+#pop.subpop.0.species.pipe.source.4 = ec.gp.breed.MutateOneNodePipeline
+#pop.subpop.0.species.pipe.source.4.prob = 0.1
+#pop.subpop.0.species.pipe.source.5 = ec.gp.breed.MutateAllNodesPipeline
+#pop.subpop.0.species.pipe.source.5.prob = 0.1
 
 
 # Crossover
@@ -99,6 +99,14 @@ gp.koza.mutate.build.0 = ec.gp.build.PTC2
 gp.koza.mutate.tries = 10
 gp.koza.mutate.equal = false
 
+# ERC Mutation
+gp.breed.mutate-erc.source.0 = ec.parsimony.RatioBucketTournamentSelection
+gp.breed.mutate-erc.ns.0 = ec.gp.koza.KozaNodeSelector
+
+# Mutate promote
+gp.breed.mutate-promote.source.0 = ec.parsimony.RatioBucketTournamentSelection
+gp.breed.mutate-promote.tries = 10
+
 # Mutate one node
 gp.breed.mutate-one-node.source.0 = ec.parsimony.RatioBucketTournamentSelection
 gp.breed.mutate-one-node.ns.0 = ec.gp.koza.KozaNodeSelector
@@ -107,14 +115,6 @@ gp.breed.mutate-one-node.tree.0 = 0
 # Mutate all nodes
 gp.breed.mutate-all-nodes.source.0 = ec.parsimony.RatioBucketTournamentSelection
 gp.breed.mutate-all-nodes.ns.0 = ec.gp.koza.KozaNodeSelector
-
-# ERC Mutation
-gp.breed.mutate-erc.source.0 = ec.parsimony.RatioBucketTournamentSelection
-gp.breed.mutate-erc.ns.0 = ec.gp.koza.KozaNodeSelector
-
-# Mutate promote
-gp.breed.mutate-promote.source.0 = ec.parsimony.RatioBucketTournamentSelection
-gp.breed.mutate-promote.tries = 10
 
 
 select.ratio-bucket-tournament.size = 7
@@ -141,7 +141,7 @@ gp.nc.0.returns = bool
 gp.nc.0.size = 2
 gp.nc.0.child.0 = bool
 gp.nc.0.child.1 = bool
-gp.nc.0.prob = 0.2
+gp.nc.0.prob = 0.166667
 
 # not
 gp.nc.1 = ec.gp.GPNodeConstraints
@@ -149,7 +149,7 @@ gp.nc.1.name = unarylogical
 gp.nc.1.returns = bool
 gp.nc.1.size = 1
 gp.nc.1.child.0 = bool
-gp.nc.1.prob = 0.2
+gp.nc.1.prob = 0.166667
 
 # sensor comparison
 gp.nc.2 = ec.gp.GPNodeConstraints
@@ -158,7 +158,7 @@ gp.nc.2.returns = bool
 gp.nc.2.size = 2
 gp.nc.2.child.0 = sensor
 gp.nc.2.child.1 = sensor-or-constant
-gp.nc.2.prob = 0.6 
+gp.nc.2.prob = 0.5
 
 # sensorvalue terminal (x10), sensorvalue erc
 gp.nc.3 = ec.gp.GPNodeConstraints
@@ -174,7 +174,7 @@ gp.nc.4.returns = sensor
 gp.nc.4.size = 2
 gp.nc.4.child.0 = sensor
 gp.nc.4.child.1 = sensor
-gp.nc.4.prob = 0.1
+gp.nc.4.prob = 1
 
 # constant terminal
 gp.nc.5 = ec.gp.GPNodeConstraints
@@ -188,7 +188,7 @@ gp.nc.6 = ec.gp.GPNodeConstraints
 gp.nc.6.name = primitiveterminal
 gp.nc.6.returns = primitive
 gp.nc.6.size = 0
-gp.nc.6.prob = 0.75
+gp.nc.6.prob = 1
 
 # ifelse
 gp.nc.7 = ec.gp.GPNodeConstraints
@@ -198,7 +198,7 @@ gp.nc.7.size = 3
 gp.nc.7.child.0 = bool
 gp.nc.7.child.1 = primitive
 gp.nc.7.child.2 = primitive
-gp.nc.7.prob = 0.25
+gp.nc.7.prob = 1
 
 
 # Our Function Set
@@ -215,7 +215,7 @@ gp.fs.0.func.3.nc = comparator
 
 gp.fs.0.func.4 = mase.evorbc.gp.RepoPrimitive
 gp.fs.0.func.4.nc = primitiveterminal
-gp.fs.0.func.4.mutation-sd = 0.2
+gp.fs.0.func.4.mutation-sd = 0.1
 
 gp.fs.0.func.5 = mase.evorbc.gp.SensorConstant
 gp.fs.0.func.5.nc = constantterminal

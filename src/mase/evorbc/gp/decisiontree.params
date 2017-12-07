@@ -17,7 +17,7 @@ gp.fs.0.size = 2
 
 gp.fs.0.func.0 = mase.evorbc.gp.RepoPrimitive
 gp.fs.0.func.0.nc = primitiveterminal
-gp.fs.0.func.0.mutation-sd = 0.2
+gp.fs.0.func.0.mutation-sd = 0.1
 
 gp.fs.0.func.1 = mase.evorbc.gp.SensorConstant
 gp.fs.0.func.1.nc = constantterminal

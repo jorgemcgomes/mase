@@ -14,7 +14,7 @@ import mase.evaluation.EvaluationResult;
  *
  * @author jorge
  */
-public class PersistentSolution implements Serializable, Comparable<PersistentSolution> {
+public class PersistentSolution implements Serializable, Comparable<PersistentSolution>, Cloneable {
     
     private static final long serialVersionUID = 1;
     
@@ -105,5 +105,18 @@ public class PersistentSolution implements Serializable, Comparable<PersistentSo
             str += "User data:\n" + userData;
         }
         return str + "\n";
+    }
+    
+    @Override
+    public PersistentSolution clone() {
+        PersistentSolution cloned = new PersistentSolution();
+        cloned.controller = controller;
+        cloned.evalResults = evalResults;
+        cloned.fitness = fitness;
+        cloned.generation = generation;
+        cloned.index = index;
+        cloned.subpop = subpop;
+        cloned.userData = userData;
+        return cloned;
     }
 }

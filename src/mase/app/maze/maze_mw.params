@@ -9,10 +9,10 @@ problem.wheels = true,true,true,true
     
 problem.slipAngleLimit = 45
 # 0.2 is a reasonable value for friction
-problem.friction = 0.2
+problem.friction = 0.15
 problem.parallelAngle = 2.5
     
-problem.turnLimit = 45
+problem.turnLimit = 50
 problem.turnAcceleration = 5 
 
 problem.linearSpeed = 1    

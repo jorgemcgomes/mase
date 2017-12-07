@@ -5,7 +5,6 @@
  */
 package mase.app.maze;
 
-import mase.controllers.AgentController;
 import mase.mason.world.MultipleWheelAxesActuator;
 
 /**
@@ -22,7 +21,7 @@ public class MultiWheelMazeTask extends MazeTask {
 
     @Override
     protected MazeAgent createAgent() {
-        AgentController ac = gc.getAgentControllers(1)[0];
+        ac.reset();
         MazeAgent ag = new MazeAgent(this, field, ac);
         ag.setupSensors(this);
         
