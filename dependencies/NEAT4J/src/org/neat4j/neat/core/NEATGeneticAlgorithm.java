@@ -345,6 +345,7 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
         this.mut.setBiasPerturb(this.descriptor.getMaxBiasPerturb());
         this.mut.setPerturb(this.descriptor.getMaxPerturb());
         this.mut.setPFeatureReplaced(this.descriptor.getPFeatureReplaced());
+        this.mut.setFeaturePerturb(this.descriptor.getFeaturePerturb());
         this.mut.setInnovationDatabase(innov);
     }
 

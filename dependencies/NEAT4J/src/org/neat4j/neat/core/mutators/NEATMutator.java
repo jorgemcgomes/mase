@@ -38,6 +38,7 @@ public class NEATMutator implements Mutator {
     private boolean recurrencyAllowed = true;
     private double perturb = 5;
     private double biasPerturb = 0.1;
+    private double featurePerturb = 0.1;
     private InnovationDatabase db;
     private static final int MAX_LINK_ATTEMPTS = 5;
     private final Random linkRand = new Random();
@@ -72,6 +73,10 @@ public class NEATMutator implements Mutator {
     
     public void setPFeatureReplaced(double pFR) {
         this.pFeatureReplaced = pFR;
+    }
+    
+    public void setFeaturePerturb(double fp) {
+        this.featurePerturb = fp;
     }
 
     /**
@@ -113,9 +118,9 @@ public class NEATMutator implements Mutator {
         if (perturbRandVal < this.pPerturb) {
             double newVal;
             if(this.pFeatureReplaced > perturbRand.nextDouble()) {
-                newVal = MathUtils.nextDouble();
+                newVal = perturbRand.nextDouble();
             } else {
-                newVal = mutatee.geneAsNumber().doubleValue() + MathUtils.nextClampedDouble(-perturb, perturb);
+                newVal = Math.min(1, Math.max(0, mutatee.geneAsNumber().doubleValue() + perturbRand.nextGaussian() * featurePerturb));
             }
             mutated = new NEATFeatureGene(mutatee.getInnovationNumber(), newVal);
         }
