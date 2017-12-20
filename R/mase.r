@@ -152,12 +152,16 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
 }
 
 # loads any file given the column names
-loadFile <- function(file, separator=" ",colnames=NULL, exclude.na=T) {
+loadFile <- function(file, separator=" ",colnames=NULL, exclude.cols=F, ignore.na.cols=F) {
   frame <- fread(file, sep=separator, stringsAsFactors=F, fill=T)
   if(!is.null(colnames)) {
-    setnames(frame,colnames)
-    if(exclude.na) {
-      set(frame, j=which(is.na(colnames)), value=NULL)
+    if(exclude.cols) {
+      set(frame, j=which(!(colnames(frame) %in% colnames)), value=NULL)
+    } else {
+      setnames(frame,colnames)
+      if(ignore.na.cols) {
+        set(frame, j=which(is.na(colnames)), value=NULL)
+      }
     }
   }
   return(frame)

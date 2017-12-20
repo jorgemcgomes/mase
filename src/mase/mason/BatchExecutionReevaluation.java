@@ -74,25 +74,25 @@ public class BatchExecutionReevaluation {
         }
 
         for (File dir : dirSet) {
-            try {
-                Collection<File> list = FileUtils.listFiles(dir, extensions, false);
-                if (!list.isEmpty()) {
-                    System.out.println(dir.getAbsolutePath());
-                    MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, dir);
-                    for (File f : list) {
-                        File out = new File(f.getPath() + ".stat");
-                        if (force || !out.exists()) {
-                            try {
-                                ExecutionReevaluation.logController(f, simulator, reps, out);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
+            Collection<File> list = FileUtils.listFiles(dir, extensions, false);
+            if (!list.isEmpty()) {
+                System.out.println(dir.getAbsolutePath());
+                MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, dir);
+                for (File f : list) {
+                    File out = new File(f.getPath() + ".stat");
+                    if (force || !out.exists()) {
+                        try {
+                            System.out.println("Going for " + f);
+                            ExecutionReevaluation.logController(f, simulator, reps, out);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            System.out.println("Problem with " + f);
+                            out.delete();
                         }
-                        System.out.print(".");
+                    } else {
+                        System.out.println("Skipping " + f);
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
 

@@ -6,6 +6,7 @@
 package mase;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -102,7 +103,7 @@ public class MaseManagerTerminal implements StatusListener {
                     case "remove":
                         while (sc.hasNext()) {
                             mng.removeFromWaiting(sc.next());
-                        }                        
+                        }
                         break;
                     case "killrunner":
                         while (sc.hasNextInt()) {
@@ -148,17 +149,17 @@ public class MaseManagerTerminal implements StatusListener {
                         while (sc.hasNext()) {
                             String t = sc.next();
                             if (t.equals("failed")) {
-                                for(int i = mng.failed.size() - 1 ; i >= 0 ; i--) {
+                                for (int i = mng.failed.size() - 1; i >= 0; i--) {
                                     Job j = mng.failed.get(i);
                                     System.out.println(df.format(j.submitted) + " " + j);
                                 }
                             } else if (t.equals("completed")) {
-                                for(int i = mng.completed.size() - 1 ; i >= 0 ; i--) {
+                                for (int i = mng.completed.size() - 1; i >= 0; i--) {
                                     Job j = mng.completed.get(i);
                                     System.out.println(df.format(j.submitted) + " " + j);
                                 }
                             } else if (t.equals("waiting")) {
-                                for(int i = mng.waitingList.size() - 1 ; i >= 0 ; i--) {
+                                for (int i = mng.waitingList.size() - 1; i >= 0; i--) {
                                     Job j = mng.waitingList.get(i);
                                     System.out.println(df.format(j.submitted) + " " + j);
                                 }
@@ -251,6 +252,27 @@ public class MaseManagerTerminal implements StatusListener {
                     case "unmute":
                         this.mute = false;
                         break;
+                    case "export":
+                        String list = sc.next();
+                        File f = new File(sc.next());
+                        List<Job> jobList = null;
+                        if (list.equals("failed")) {
+                            jobList = mng.failed;
+                        } else if (list.equals("completed")) {
+                            jobList = mng.completed;
+                        } else if (list.equals("waiting")) {
+                            jobList = mng.waitingList;
+                        } else {
+                            error("Unknown list: " + list);
+                            break;
+                        }
+                        FileWriter fw = new FileWriter(f);
+                        for(Job j : jobList) {
+                            fw.write("-out " + j.outfolder + " " + j.params + "\n\n");
+                        }
+                        fw.close();
+                        System.out.println("Exported " + jobList.size() + " jobs to " + f.getAbsolutePath());
+                        break;
                     case "help":
                         System.out.println("Available commands:\n"
                                 + "-- addrunner      runner_type [config]\n"
@@ -274,7 +296,8 @@ public class MaseManagerTerminal implements StatusListener {
                                 + "-- start          \n"
                                 + "-- mute|unmute    \n"
                                 + "-- exit           \n"
-                                + "-- set            lines|tries value"
+                                + "-- set            lines|tries value\n"
+                                + "-- export         [waiting|completed|failed] [filename]"
                         );
                         break;
                     default:

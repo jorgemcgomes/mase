@@ -84,5 +84,9 @@ public class SensorConstant extends ERC {
         Data d = (Data) input;
         d.doubleValue = value;
     }
+    
+    public double getValue() {
+        return value;
+    }
 
 }

@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
+import mase.MaseProblem;
+import mase.evaluation.EvaluationResult;
 import mase.evaluation.ExpandedFitness;
 import org.apache.commons.lang3.StringUtils;
 
@@ -65,6 +67,7 @@ public class MEFinalRepertoireTextStat extends Statistics {
                 double[] behav = sub.getBehaviourVector(state, e.getValue());
                 int[] bin = sub.binFromHash(e.getKey());
                 double[] genome = ((DoubleVectorIndividual) e.getValue()).genome;
+                EvaluationResult[] res = ef.getEvaluationResults();
 
                 if (!headed) { // add file header
                     twoDimensional = bin.length == 2;
@@ -74,6 +77,12 @@ public class MEFinalRepertoireTextStat extends Statistics {
                     }
                     for (int i = 0; i < behav.length; i++) {
                         state.output.print(" Behav_" + i, log);
+                    }
+                    for (int i = 0; i < res.length; i++) {
+                        String evalName = ((MaseProblem) state.evaluator.p_problem).getEvalFunctions()[i].getClass().getSimpleName();
+                        for (int j = 0; j < res[i].toString().split(" ").length; j++) {
+                            state.output.print(" " + evalName + "." + i + "_" + j, log);
+                        }
                     }
                     for (int i = 0; i < genome.length; i++) {
                         state.output.print(" Genome_" + i, log);
@@ -88,6 +97,9 @@ public class MEFinalRepertoireTextStat extends Statistics {
                 }
                 for (double v : behav) {
                     state.output.print(" " + v, log);
+                }
+                for(EvaluationResult er : res) {
+                    state.output.print(" " + er, log);
                 }
                 for (double g : genome) {
                     state.output.print(" " + g, log);

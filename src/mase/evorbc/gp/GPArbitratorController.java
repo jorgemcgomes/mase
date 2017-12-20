@@ -86,7 +86,7 @@ public class GPArbitratorController implements AgentController {
     public String toString() {
         //return tree.child.makeCTree(true, true, true) + "\n" + repo.toString();
         //return tree.child.makeGraphvizTree() + "\nSize: " + tree.child.numNodes(GPNode.NODESEARCH_ALL) +" Depth: " + tree.child.depth() + "\n" + repo.toString();
-        return tree.child.makeCTree(true, true, true) + "\nSize: " + tree.child.numNodes(GPNode.NODESEARCH_ALL) +" Depth: " + tree.child.depth() + "\n" + repo.toString();
+        return tree.child.makeGraphvizTree() + "\n\n" + tree.child.makeCTree(true, true, true) + "\nSize: " + tree.child.numNodes(GPNode.NODESEARCH_ALL) +" Depth: " + tree.child.depth() + "\n" + repo.toString();
 
     }
     

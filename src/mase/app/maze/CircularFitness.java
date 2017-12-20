@@ -20,8 +20,14 @@ import sim.util.Double2D;
 public class CircularFitness extends MasonEvaluation {
 
     private static final long serialVersionUID = 1L;
-    private double initialOri;
-    private Double2D initialPos;
+    protected double initialOri;
+    protected Double2D initialPos;
+    protected double finalOri;
+    protected double oriDelta;
+    protected Double2D finalPos;
+    protected Double2D displacement;
+    protected double targetOrientation;
+    protected double oriError;
     private FitnessResult fr;
 
     @Override
@@ -36,19 +42,31 @@ public class CircularFitness extends MasonEvaluation {
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
         MazeTask mt = (MazeTask) sim;
-        double oriDelta = MathUtils.normalizeAngle(initialOri - mt.agent.orientation2D(), 0);
-        Double2D displacement = mt.agent.getLocation().subtract(initialPos);
-        double fit = calculateOrientationFitness(displacement, oriDelta);
+        oriDelta = MathUtils.normalizeAngle(mt.agent.orientation2D() - initialOri, 0);
+        displacement = mt.agent.getLocation().subtract(initialPos).rotate(initialOri);
+        
+        targetOrientation = getTargetOrientation(displacement);
+        oriError = getOrientationError(oriDelta, targetOrientation);
+        double fit = getOrientationErrorFitness(oriError);
         this.fr = new FitnessResult(fit);
     }
 
     public static double calculateOrientationFitness(Double2D pos, double orientation) {
-        double diff = MathUtils.normalizeAngle(getTargetOrientation(pos) - orientation, 0);
-        return 1 - Math.abs(diff) / Math.PI;
+        double t = getTargetOrientation(pos);
+        double e = getOrientationError(orientation, t);
+        return getOrientationErrorFitness(e);
+    }
+    
+    private static double getOrientationErrorFitness(double error) {
+        return 1- Math.abs(error) / Math.PI;
+    }
+    
+    private static double getOrientationError(double orientation, double targetOrientation) {
+        return MathUtils.normalizeAngle(targetOrientation - orientation, 0);
     }
 
     // [-PI, PI]
-    public static double getTargetOrientation(Double2D pos) {
+    private static double getTargetOrientation(Double2D pos) {
         double b = Math.sqrt((pos.x / 2.0) * (pos.x / 2.0) + (pos.y / 2.0) * (pos.y / 2.0));
         double alpha = FastMath.atan2(pos.y, pos.x);
         double a = b / FastMath.cos(alpha);

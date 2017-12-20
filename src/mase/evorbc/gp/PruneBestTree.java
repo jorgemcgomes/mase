@@ -7,6 +7,7 @@ package mase.evorbc.gp;
 
 import ec.EvolutionState;
 import ec.Statistics;
+import ec.gp.GPNode;
 import ec.util.Parameter;
 import java.io.File;
 import mase.controllers.GroupController;
@@ -59,7 +60,7 @@ public class PruneBestTree extends Statistics {
 
             // Prune the controller
             GPArbitratorController c = (GPArbitratorController) bestSol.getController().getAgentControllers(1)[0];
-            pruneController(c, prob, repetitions);
+            pruneController(c, prob, repetitions, false);
 
             // Write the new pruned controller
             log = state.output.addLog(new File(prunedFile), false);
@@ -85,18 +86,18 @@ public class PruneBestTree extends Statistics {
         System.out.println("----------- ORIGINAL ------------");
         System.out.println(c);
 
-        pruneController(c, simulator, reps);
+        pruneController(c, simulator, reps, true);
 
         System.out.println("----------- PRUNED ------------");
         System.out.println(c);
         
-        File out = new File(gc.getAbsolutePath().replace("postbest", "prunedbest"));
+        File out = new File(gc.getAbsolutePath().replace(".xml", "_pruned.xml"));
         PersistentSolution newP = sol.clone();
         newP.setController(new HomogeneousGroupController(c));
         SolutionPersistence.writeSolution(newP, out);
     }
 
-    public static void pruneController(GPArbitratorController c, MasonSimulationProblem simulator, int reps) {
+    public static void pruneController(GPArbitratorController c, MasonSimulationProblem simulator, int reps, boolean debug) {
         try {
             // add the node logger
             UsedNodesEvaluation e = new UsedNodesEvaluation();
@@ -105,6 +106,17 @@ public class PruneBestTree extends Statistics {
             simulator.setRepetitions(reps);
             EvaluationResult[] res = simulator.evaluateSolution(new HomogeneousGroupController(c), 0);
             NodeSetResult ue = (NodeSetResult) res[evalIndex];
+            
+            // Debug
+            if(debug) {
+                System.out.println("----------- DEBUG ------------");
+                System.out.println("Number of used nodes: " + ue.value().size());
+                for(GPNode n : ue.value()) {
+                    RepoPrimitive rp = (RepoPrimitive) n;
+                    System.out.println(rp.getPrimitive() + " Parent: " + ((GPNode) n.parent).toStringForHumans() + " ArgPos: " + n.argposition);
+                }
+            }
+            
             CleanupCodePostEvaluator.prune(c.getProgramTree().child, ue.value());
         } catch (Exception e) {
             e.printStackTrace();

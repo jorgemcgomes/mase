@@ -17,12 +17,10 @@ import ec.util.Parameter;
  *
  * @author jorge
  */
-public class SensorLower extends GPNode {
+public class SensorBinary extends GPNode {
 
     public static final String P_INDEX = "sensor-index";
     public static final String P_NAME = "sensor-name";
-    public static final double MIN_VALUE = -1;
-    public static final double MAX_VALUE = 1;
     private static final long serialVersionUID = 1L;
     private int index;
     private String name = null;
@@ -43,20 +41,17 @@ public class SensorLower extends GPNode {
 
     @Override
     public void eval(EvolutionState state, int thread, GPData input, ADFStack stack, GPIndividual individual, Problem problem) {
-        Data d = (Data) input;      
-        children[0].eval(state, thread, input, stack, individual, problem);
-        if(d.sensorValues[index] < d.doubleValue) {
-            children[1].eval(state, thread, input, stack, individual, problem);
+        Data d = (Data) input;
+        if (d.sensorValues[index] > 0) {
+            children[0].eval(state, thread, input, stack, individual, problem);
         } else {
-            children[2].eval(state, thread, input, stack, individual, problem);
-        }        
+            children[1].eval(state, thread, input, stack, individual, problem);
+        }
     }
 
     @Override
     public int expectedChildren() {
-        return 3;
+        return 2;
     }
-    
-    
 
 }

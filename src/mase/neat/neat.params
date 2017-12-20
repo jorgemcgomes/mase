@@ -58,6 +58,8 @@ neat.MAX.PERTURB =                      0.5
 neat.MAX.BIAS.PERTURB =                 0.1
 neat.FEATURE.SELECTION =                false
 neat.RECURRENCY.ALLOWED =               true
+neat.FEATURE.PERTURB =                  0.1
+
 #neat.INPUT.NODES =                      2
 #neat.OUTPUT.NODES =                     1
 

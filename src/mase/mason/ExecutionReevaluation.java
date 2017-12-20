@@ -30,45 +30,45 @@ import sim.engine.Steppable;
  */
 public class ExecutionReevaluation {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         int reps = ReevaluationTools.getRepetitions(args);
         File gc = ReevaluationTools.findControllerFile(args);
         MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, gc.getParentFile());
 
         File out = new File(gc.getAbsolutePath() + ".stat");
-        logController(gc, simulator, reps, out);
-    }
-
-    public static void logController(File gc, MasonSimulationProblem simulator, int reps, File out) {
-        simulator.loggers().clear();
         try {
-            GroupController controller = SolutionPersistence.readSolutionFromFile(gc).getController();
-            // Assumes that all the controllers have the same type
-            AgentController ac = controller.getAgentControllers(1)[0];
-
-            // Create the logger
-            FileWriter w = new FileWriter(out);
-            Steppable log = null;
-            if (ac instanceof NeuralArbitratorController) {
-                log = new NeuralEvoRBCLogger(w);
-            } else if (ac instanceof GPArbitratorController) {
-                log = new GPEvoRBCLogger(w);
-            } else if (ac instanceof SubsetNeuralArbitratorController) {
-                log = new SubsetEvoRBCLogger(w);
-            } else {
-                log = new AgentLogger(w);
-            }
-
-            // Log
-            simulator.loggers().add(log);
-            for (int i = 0; i < reps; i++) {
-                simulator.evaluateSolution(controller, i);
-            }
-            w.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            logController(gc, simulator, reps, out);
+        } catch (Exception ex) {
+            ex.printStackTrace();
             out.delete();
         }
+    }
+
+    public static void logController(File gc, MasonSimulationProblem simulator, int reps, File out) throws Exception {
+        simulator.loggers().clear();
+        GroupController controller = SolutionPersistence.readSolutionFromFile(gc).getController();
+        // Assumes that all the controllers have the same type
+        AgentController ac = controller.getAgentControllers(1)[0];
+
+        // Create the logger
+        FileWriter w = new FileWriter(out);
+        Steppable log = null;
+        if (ac instanceof NeuralArbitratorController) {
+            log = new NeuralEvoRBCLogger(w);
+        } else if (ac instanceof GPArbitratorController) {
+            log = new GPEvoRBCLogger(w);
+        } else if (ac instanceof SubsetNeuralArbitratorController) {
+            log = new SubsetEvoRBCLogger(w);
+        } else {
+            log = new AgentLogger(w);
+        }
+
+        // Log
+        simulator.loggers().add(log);
+        for (int i = 0; i < reps; i++) {
+            simulator.evaluateSolution(controller, i);
+        }
+        w.close();
     }
 
     public static class AgentLogger implements Steppable {
@@ -148,7 +148,7 @@ public class ExecutionReevaluation {
                     + " " + nac.lastPrimitive.id;
         }
     }
-    
+
     public static class GPEvoRBCLogger extends AgentLogger {
 
         public GPEvoRBCLogger(Writer writer) {
@@ -165,9 +165,8 @@ public class ExecutionReevaluation {
             GPArbitratorController nac = (GPArbitratorController) ac;
             return " " + nac.getLastPrimitive().id;
         }
-    }    
+    }
 
-    
     public static class SubsetEvoRBCLogger extends AgentLogger {
 
         public SubsetEvoRBCLogger(Writer writer) {
@@ -178,10 +177,10 @@ public class ExecutionReevaluation {
         protected String extraHeader(AgentController ac) {
             String h = "";
             SubsetNeuralArbitratorController nac = (SubsetNeuralArbitratorController) ac;
-            for(int i = 0 ; i < nac.getPrimitiveSubset().length ; i++) {
+            for (int i = 0; i < nac.getPrimitiveSubset().length; i++) {
                 h += " Primitive_" + i;
             }
-            for(int i = 0 ; i < nac.getLastArbitratorActivations().length ; i++) {
+            for (int i = 0; i < nac.getLastArbitratorActivations().length; i++) {
                 h += " ArbitratorOut_" + i;
             }
             return h + " Primitive";
@@ -191,13 +190,13 @@ public class ExecutionReevaluation {
         protected String extraLog(AgentController ac) {
             SubsetNeuralArbitratorController nac = (SubsetNeuralArbitratorController) ac;
             String l = "";
-            for(Primitive p : nac.getPrimitiveSubset()) {
+            for (Primitive p : nac.getPrimitiveSubset()) {
                 l += " " + p.id;
             }
             l += " " + FormatUtils.toStringSpaceSeparated(nac.getLastArbitratorActivations());
             l += " " + nac.getLastPrimitive().id;
             return l;
         }
-    } 
+    }
 
 }

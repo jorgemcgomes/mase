@@ -60,21 +60,31 @@ public class CleanupCodePostEvaluator implements PostEvaluator {
             }
         }
     }
-
+    
     public static void prune(GPNode node, Set<GPNode> used) {
-        if (node instanceof IfElse || node instanceof SensorLower) {
-            prune(node.children[1], used);
-            prune(node.children[2], used);
-            if (node.children[1] instanceof RepoPrimitive && !used.contains(node.children[1])) {
+        int currentSize;
+        do {
+            currentSize = node.numNodes(GPNode.NODESEARCH_ALL);
+            pruneAux(node, used);
+        } while(currentSize != node.numNodes(GPNode.NODESEARCH_ALL));
+    }
+
+    private static void pruneAux(GPNode node, Set<GPNode> used) {
+        if (node instanceof IfElse || node instanceof SensorLower || node instanceof SensorBinary) {
+            GPNode child1 = node instanceof SensorBinary ? node.children[0] : node.children[1];
+            GPNode child2 = node instanceof SensorBinary ? node.children[1] : node.children[2];
+            pruneAux(child1, used);
+            pruneAux(child2, used);
+            if (child1 instanceof RepoPrimitive && !used.contains(child1)) {
                 // first primitive never used, replace with second
-                replaceWith(node, node.children[2]);
-            } else if (node.children[2] instanceof RepoPrimitive && !used.contains(node.children[2])) {
+                replaceWith(node, child2);
+            } else if (child2 instanceof RepoPrimitive && !used.contains(child2)) {
                 // second primitive never used, replace with first
-                replaceWith(node, node.children[1]);
-            } else if (node.children[1] instanceof RepoPrimitive && node.children[2] instanceof RepoPrimitive) {
+                replaceWith(node, child1);
+            } else if (child1 instanceof RepoPrimitive && child2 instanceof RepoPrimitive) {
                 // both are the same, replace with one
-                if (node.children[1].nodeEquals(node.children[2])) {
-                    replaceWith(node, node.children[1]);
+                if (child1.nodeEquals(child2)) {
+                    replaceWith(node, child1);
                 }
             }
         }

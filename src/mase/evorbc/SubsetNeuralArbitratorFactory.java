@@ -86,23 +86,14 @@ public class SubsetNeuralArbitratorFactory extends ArbitratorFactory {
 
         if (primitives == null) {
             double[] genes = arbitrator.getExtraGenes();
-
-            // Clamp features to [0,1] range
-            // Features are initialized to [0,1] and then suffer from uniform mutation with range [-0.5,0.5]
-            double[] scaled = new double[genes.length];
-            for (int i = 0; i < genes.length; i++) {
-                scaled[i] = Math.max(Math.min(genes[i], 1), 0);
-            }
-
             Primitive[] prims = new Primitive[numPrimitives];
-
             for (int i = 0; i < prims.length; i++) {
                 if (ignoreCoordinates) {
-                    int index = (int) (scaled[i] * (repo.allPrimitives().size() - 1));
+                    int index = (int) (genes[i] * (repo.allPrimitives().size() - 1));
                     prims[i] = IteratorUtils.get(repo.allPrimitives().iterator(), index);
                 } else {
                     double[] subArray = new double[dimensions];
-                    System.arraycopy(scaled, i * dimensions, subArray, 0, dimensions);
+                    System.arraycopy(genes, i * dimensions, subArray, 0, dimensions);
                     double[] coords = mapFun.outputToCoordinates(subArray);
                     prims[i] = repo.nearest(coords).clone();
                 }

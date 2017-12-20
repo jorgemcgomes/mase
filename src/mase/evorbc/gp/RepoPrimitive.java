@@ -92,7 +92,12 @@ public class RepoPrimitive extends ERC {
     public boolean nodeEquals(GPNode node) {
         return node instanceof RepoPrimitive && primitive == ((RepoPrimitive) node).primitive;
     }
-    
+
+    @Override
+    public int nodeHashCode() {
+        return super.nodeHashCode() + primitive;
+    }
+        
     @Override
     public String toString() {
         return "#" + primitive;
@@ -102,7 +107,7 @@ public class RepoPrimitive extends ERC {
     public String encode() {
         return toString();
     }
-    
+        
     @Override
     public String name() {
         return "P";
@@ -113,6 +118,10 @@ public class RepoPrimitive extends ERC {
         Data d = (Data) input;
         d.primitive = primitive;
         d.selected = this;
+    }
+    
+    public int getPrimitive() {
+        return primitive;
     }
     
 }
