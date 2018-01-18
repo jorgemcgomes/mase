@@ -38,7 +38,7 @@ public class TransformedPortrayal2D extends SimplePortrayal2D
         {
         final double theta = ((Oriented2D)object).orientation2D();
         transform.setToRotation(theta);
-                
+
         AffineTransform old = graphics.getTransform();
         AffineTransform translationTransform = new AffineTransform();
         translationTransform.setToTranslation(info.draw.x,info.draw.y);
@@ -51,8 +51,8 @@ public class TransformedPortrayal2D extends SimplePortrayal2D
         
     public boolean hitObject(Object object, DrawInfo2D range)
         {
-        /* To-do */
-        return false;
+        /* To-do -- only works for rotation transforms */
+        return child.hitObject(object, range);
         }
 
     public boolean setSelected(LocationWrapper wrapper, boolean selected)
