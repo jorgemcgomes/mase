@@ -14,6 +14,7 @@ import mase.mason.world.RaySensor;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.MultilineObject;
 import sim.field.continuous.Continuous2D;
+import sim.portrayal.simple.RectanglePortrayal2D;
 
 /**
  *
@@ -33,6 +34,8 @@ public class MazeAgent extends SmartAgent {
         this.enableRotationWithCollisions(true);
         this.setCollidableTypes(MultilineObject.class);
         this.instaKill = sim.par.instaKill;
+        this.setLabel("Agent");
+        this.replaceAgentPortrayal(new RectanglePortrayal2D());
     }
     
     protected void setupSensors(MazeTask sim) {
@@ -76,4 +79,6 @@ public class MazeAgent extends SmartAgent {
             mt.kill(); // stop
         }
     }
+    
+    
 }

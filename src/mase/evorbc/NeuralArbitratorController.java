@@ -5,14 +5,18 @@
  */
 package mase.evorbc;
 
+import java.awt.Graphics;
 import mase.controllers.AgentController;
 import mase.evorbc.Repertoire.Primitive;
+import sim.display.GUIState;
+import sim.portrayal.Inspector;
+import sim.portrayal.inspector.ProvidesInspector;
 
 /**
  *
  * @author jorge
  */
-public class NeuralArbitratorController implements AgentController {
+public class NeuralArbitratorController implements AgentController, ProvidesInspector {
 
     private static final long serialVersionUID = 1L;
 
@@ -42,6 +46,10 @@ public class NeuralArbitratorController implements AgentController {
         this.repo = repo;
     }
 
+    public Repertoire getRepertoire() {
+        return repo;
+    }
+
     public void setArbitrator(AgentController arbitrator) {
         this.arbitrator = arbitrator;
     }
@@ -49,18 +57,18 @@ public class NeuralArbitratorController implements AgentController {
     public void setMappingFunction(MappingFunction mapFun) {
         this.mapFun = mapFun;
     }
-    
-    @Override
-    public double[] processInputs(double[] input) {        
-        lastArbitratorOutput = arbitrator.processInputs(input);
-        double[] output = lastArbitratorOutput;      
-            lastRepertoireCoords = mapFun.outputToCoordinates(output);
 
-            Primitive primitive = repo.nearest(lastRepertoireCoords);
-            if (lastPrimitive == null || primitive != lastPrimitive) {
-                primitive.ac.reset();
-                lastPrimitive = primitive;
-                //System.out.println(primitive.id);
+    @Override
+    public double[] processInputs(double[] input) {
+        lastArbitratorOutput = arbitrator.processInputs(input);
+        double[] output = lastArbitratorOutput;
+        lastRepertoireCoords = mapFun.outputToCoordinates(output);
+
+        Primitive primitive = repo.nearest(lastRepertoireCoords);
+        if (lastPrimitive == null || primitive != lastPrimitive) {
+            primitive.ac.reset();
+            lastPrimitive = primitive;
+            //System.out.println(primitive.id);
         }
 
         double[] out = lastPrimitive.ac.processInputs(input);
@@ -83,10 +91,27 @@ public class NeuralArbitratorController implements AgentController {
     public String toString() {
         return arbitrator.toString() + "\n" + repo.toString() + "\n" + mapFun.toString();
     }
-    
+
     public Primitive getLastPrimitive() {
         return lastPrimitive;
     }
-    
-    
+
+    @Override
+    public Inspector provideInspector(GUIState state, String name) {
+        RepertoireInspector insp = new RepertoireInspector(400, 7) {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                drawAxis(g);
+                drawPrimitives(repo.allPrimitives(), g);
+                if(lastPrimitive != null) {
+                    highlightPrimitive(lastPrimitive, g);
+                    markSpot(lastRepertoireCoords[0], lastRepertoireCoords[1], g);
+                }
+            }
+        };
+        insp.setBounds(repo.allPrimitives());
+        return insp;
+    }
+
 }

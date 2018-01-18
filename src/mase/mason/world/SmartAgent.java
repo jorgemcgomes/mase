@@ -147,6 +147,9 @@ public class SmartAgent extends EmboddiedAgent {
     }
 
     private String formatSensors(double[] values) {
+        if(values == null) {
+            return "NOT STARTED";
+        }
         int index = 0;
         StringBuilder sb = new StringBuilder();
         for (Sensor s : sensors) {
@@ -160,6 +163,9 @@ public class SmartAgent extends EmboddiedAgent {
     }
 
     public String getRawActionsReport() {
+        if(lastActionOutput == null) {
+            return "NOT STARTED";
+        }
         int index = 0;
         StringBuilder sb = new StringBuilder();
         for (Effector e : effectors) {

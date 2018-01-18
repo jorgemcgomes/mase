@@ -75,7 +75,10 @@ public class NEATAgentController implements EncodableAgentController {
     public String toString() {
         int selfRecurr = 0;
         int recurr = 0;
-        network.updateNetStructure();
+        //network.updateNetStructure();
+        if(network.connections() == null) {
+            return "Network not created";
+        }
         for (Synapse s : network.connections()) {
             if (((NEATNeuron) s.getFrom()).id() == ((NEATNeuron) s.getTo()).id()) {
                 selfRecurr++;

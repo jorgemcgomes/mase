@@ -23,7 +23,7 @@ import sim.util.Double2D;
 public class CircularObject extends CircledPortrayal2D implements Fixed2D, WorldObject {
 
     public static final Color DEFAULT_COLOR = Color.RED;
-    
+
     private static final long serialVersionUID = 1L;
     protected Continuous2D field;
     protected Double2D pos;
@@ -37,15 +37,14 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
     protected MovablePortrayal2D movablePortrayal;
     protected SimplePortrayal2D woChild;
 
-
     public CircularObject(SimState sim, Continuous2D field, double radius) {
         this(DEFAULT_COLOR, sim, field, radius);
     }
-    
+
     public CircularObject(Color color, SimState sim, Continuous2D field, double radius) {
         this(new OvalPortrayal2D(color, radius * 2, true), sim, field, radius);
-    }    
-    
+    }
+
     public CircularObject(SimplePortrayal2D child, SimState sim, Continuous2D field, double radius) {
         super(new LabelledPortrayal2D(new MovablePortrayal2D(child), ""));
 
@@ -53,7 +52,7 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
         this.sim = sim;
         this.field = field;
         this.radius = radius;
-        
+
         this.circledPortrayal = this;
         this.circledPortrayal.setOnlyCircleWhenSelected(true);
         this.circledPortrayal.scale = radius * 2 + field.width / 50;
@@ -65,7 +64,7 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
 
         this.movablePortrayal = (MovablePortrayal2D) labelPortrayal.child;
         movablePortrayal.setSelectsWhenMoved(true);
-        
+
         this.hash = System.identityHashCode(this);
     }
 
@@ -87,12 +86,11 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
         this.paint = c;
         this.circledPortrayal.paint = c;
         this.labelPortrayal.paint = Color.BLACK;
-        if(woChild instanceof OvalPortrayal2D) {
+        if (woChild instanceof OvalPortrayal2D) {
             ((OvalPortrayal2D) woChild).paint = c;
         }
     }
 
-    
     public void setLabel(String lab) {
         this.label = lab;
         labelPortrayal.label = lab;
@@ -102,7 +100,7 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
     public String toString() {
         return label != null ? label : super.toString();
     }
-    
+
     @Override
     public boolean maySetLocation(Object field, Object newObjectLocation) {
         this.setLocation((Double2D) newObjectLocation);
@@ -117,7 +115,7 @@ public class CircularObject extends CircledPortrayal2D implements Fixed2D, World
     @Override
     public Double2D getLocation() {
         return pos;
-    }    
+    }
 
     @Override
     public boolean isInside(Double2D p) {

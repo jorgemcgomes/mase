@@ -60,6 +60,7 @@ public class MazeTask extends MasonSimState<MazeParams> implements SmartAgentPro
 
         target = new CircularObject(Color.RED, this, field, par.targetRadius);
         target.setLocation(par.targetPos[mid]);
+        target.setLabel("Target");
 
         Double2D startPos = null;
         if (par.xRandom > 0 || par.yRandom > 0) {

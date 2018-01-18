@@ -46,8 +46,8 @@ public class DecisionTreeViz {
         // Linear mode
         // TODO: this can very easily be made generic for any number of dimensions
         for(Primitive p : repo.allPrimitives()) {
-            String t1 = slider(p.coordinates[1], bounds.getLeft()[1], bounds.getRight()[1], 8);
-            String t2 = slider(p.coordinates[0], bounds.getLeft()[0], bounds.getRight()[0], 8);
+            String t1 = slider(p.coordinates[1], bounds.getLeft()[1], bounds.getRight()[1], 6);
+            String t2 = slider(p.coordinates[0], bounds.getLeft()[0], bounds.getRight()[0], 6);
             PRIMITIVE_STRINGS.put(p.id, "L/R " + t1 + "\\nB/F " + t2);
         }
         

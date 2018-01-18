@@ -5,6 +5,7 @@
 package mase.mason.world;
 
 import java.awt.Color;
+import java.awt.geom.AffineTransform;
 import java.util.Arrays;
 import mase.mason.generic.systematic.Entity;
 import net.jafama.FastMath;
@@ -14,8 +15,10 @@ import sim.engine.Steppable;
 import sim.engine.Stoppable;
 import sim.field.continuous.Continuous2D;
 import sim.portrayal.Oriented2D;
+import sim.portrayal.simple.AbstractShapePortrayal2D;
 import sim.portrayal.simple.OrientedPortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
+import sim.portrayal.simple.TransformedPortrayal2D;
 import sim.util.Double2D;
 
 /**
@@ -40,19 +43,21 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     private boolean isAlive;
     private boolean rotate = true;
 
-    protected OvalPortrayal2D ovalPortrayal;
+    protected AbstractShapePortrayal2D agentPortrayal;
     protected OrientedPortrayal2D orientedPortrayal;
+    protected TransformedPortrayal2D transformPortrayal;
 
     public EmboddiedAgent(SimState sim, Continuous2D field, double radius, Color c) {
-        super(new OrientedPortrayal2D(new OvalPortrayal2D()), sim, field, radius);
+        super(new OrientedPortrayal2D(new TransformedPortrayal2D(new OvalPortrayal2D(), new AffineTransform())), sim, field, radius);
 
         this.orientedPortrayal = (OrientedPortrayal2D) this.woChild;
         this.orientedPortrayal.offset = 0;
         this.orientedPortrayal.scale = radius;
 
-        this.ovalPortrayal = (OvalPortrayal2D) orientedPortrayal.child;
-        this.ovalPortrayal.scale = radius * 2;
-        this.ovalPortrayal.filled = true;
+        this.transformPortrayal = (TransformedPortrayal2D) orientedPortrayal.child;
+        this.agentPortrayal = (AbstractShapePortrayal2D) transformPortrayal.child;
+        this.agentPortrayal.scale = radius * 2;
+        this.agentPortrayal.filled = true;
 
         this.setColor(c);
 
@@ -63,6 +68,14 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         this.collisionRebound = true;
         this.rotateWithCollision = true;
         this.isAlive = true;
+        
+    }
+    
+    public void replaceAgentPortrayal(AbstractShapePortrayal2D port) {
+        port.scale = radius * 2;
+        port.filled = true;
+        port.paint = this.paint;
+        this.transformPortrayal.child = port;
     }
 
     public boolean isAlive() {
@@ -72,8 +85,8 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     @Override
     public void setColor(Color c) {
         super.setColor(c);
-        this.ovalPortrayal.paint = c;
-        this.orientedPortrayal.paint = new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue());
+        this.agentPortrayal.paint = c;
+        this.orientedPortrayal.paint = new Color(255 - c.getRed(), 255 - c.getGreen(), 255 - c.getBlue(), c.getAlpha());
     }
 
     @Override
@@ -321,4 +334,6 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     public double distanceTo(WorldObject so) {
         return Math.max(0, so.distanceTo(this.getLocation()) - this.getRadius());
     }
+    
+    
 }

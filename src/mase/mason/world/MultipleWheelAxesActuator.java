@@ -275,6 +275,6 @@ public class MultipleWheelAxesActuator extends AbstractEffector implements Provi
 
     @Override
     public Inspector provideInspector(GUIState state, String name) {
-        return new MultiWheeledInspector(this, 250);
+        return new MultiWheeledInspector(this, 350);
     }
 }

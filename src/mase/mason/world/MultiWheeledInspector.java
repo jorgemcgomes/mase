@@ -45,7 +45,6 @@ public class MultiWheeledInspector extends Inspector {
         int size = (int) (act.ag.getRadius() * 2 * scale);
         g2.drawRect(center.x - size / 2, center.y - size / 2, size, size);
         double[] r = act.getCurrentRotations();
-        double s = act.getCurrentSpeed();
         for (int i = 0; i < act.wheelPos.length; i++) {
             int d = (int) (act.maxSpeed * 2 * F * scale);
             g2.setStroke(new BasicStroke(1));
@@ -58,14 +57,24 @@ public class MultiWheeledInspector extends Inspector {
             g2.drawString(i + "", tx(act.wheelPos[i].x), ty(act.wheelPos[i].y));
             g2.setColor(Color.RED);
             g2.setStroke(new BasicStroke(2));
-            drawLine(g2, act.wheelPos[i], s * F, r[i]);
+            drawLine(g2, act.wheelPos[i], act.maxSpeed * F, r[i]);
         }
-        if (act.getLastMove() != null) {
-            Double2D m = act.getLastMove().multiply(F);
-            g2.setStroke(new BasicStroke(2));
-            g2.setColor(Color.BLUE);
-            g2.drawLine(tx(0), ty(0), tx(m.x), ty(m.y));
+        
+        // draw speed
+        double s = act.getCurrentSpeed();
+        g2.setStroke(new BasicStroke(1));
+        g2.setColor(Color.GRAY);
+        int SW = 20;
+        g2.drawRect(drawSize, drawSize / 4, SW, drawSize / 2); // box
+        g2.drawLine(drawSize, drawSize / 2, drawSize + SW, drawSize / 2); // half line
+        g2.setColor(Color.RED);
+        if(s > 0) { // Positive speed, paint upwards
+            int f = (int) ((s / act.maxSpeed) * (drawSize / 4));
+            g2.fillRect(drawSize, drawSize / 2 - f, SW, f);
+        } else if(s < 0) { // Positive speed, paint downwards
+            g2.fillRect(drawSize, drawSize / 2 + 1, SW, drawSize / 2 + (int) ((Math.abs(s) / act.maxSpeed) * (drawSize / 4)));
         }
+        
     }
 
     private int tx(double x) {

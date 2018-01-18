@@ -34,9 +34,14 @@ public class RaySensor extends AbstractSensor {
     private WorldObject[] objects;
     private double[] lastDistances;
     private Class<? extends WorldObject>[] types = new Class[]{WorldObject.class};
+    private Color drawColor = Color.BLACK;
 
     public RaySensor(SimState state, Continuous2D field, EmboddiedAgent ag) {
         super(state, field, ag);
+    }
+    
+    public void setDrawColor(Color c) {
+        this.drawColor = c;
     }
 
     public void setRays(double range, int numRays, boolean frontAligned) {
@@ -173,13 +178,13 @@ public class RaySensor extends AbstractSensor {
             int y1 = (int) (rs.y * draw.height + draw.y);
             int x2 = (int) (re.x * draw.width + draw.x);
             int y2 = (int) (re.y * draw.height + draw.y);
-            graphics.setPaint(Color.BLACK);
+            graphics.setPaint(drawColor);
             graphics.setStroke(new BasicStroke(1));
             graphics.drawLine(x1, y1, x2, y2);
             if (!Double.isInfinite(lastDistances[i])) {
                 Double2D hit = GeomUtils.pointInLine(rs, re, lastDistances[i]);
                 graphics.setPaint(Color.RED);
-                graphics.fillRect((int) (hit.x * draw.width + draw.x) - 2, (int) (hit.y * draw.height + draw.y) - 2, 4, 4);
+                graphics.fillOval((int) (hit.x * draw.width + draw.x) - 2, (int) (hit.y * draw.height + draw.y) - 2, 4, 4);
             }
         }
     }

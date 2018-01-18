@@ -41,6 +41,8 @@ public class DistanceSensorArcs extends AbstractSensor {
     private double orientationNoise = 0;
     private double rangeNoise = 0;
     private int noiseType;
+    
+    private Color drawColor = Color.YELLOW;
 
     public DistanceSensorArcs(SimState state, Continuous2D field, EmboddiedAgent ag) {
         super(state, field, ag);
@@ -70,6 +72,10 @@ public class DistanceSensorArcs extends AbstractSensor {
             }
         }
         this.setArcs(start, end);
+    }
+    
+    public void setDrawColor(Color c) {
+        this.drawColor = c;
     }
 
     public void setRange(double range) {
@@ -251,7 +257,7 @@ public class DistanceSensorArcs extends AbstractSensor {
                         d * 2 * draw.width, d * 2 * draw.height,
                         Math.toDegrees((Math.PI * 2 - MathUtils.normalizeAngle(ag.orientation2D() + (arcEnd[i] > arcStart[i] ? arcEnd[i] : arcStart[i]), Math.PI)) ),
                         Math.toDegrees(arcEnd[i] > arcStart[i] ? arcEnd[i] - arcStart[i] : Math.PI - arcStart[i] + arcEnd[i]), Arc2D.PIE);
-                graphics.setPaint(new Color(255, 255, 0, 50));
+                graphics.setPaint(new Color(drawColor.getRed(), drawColor.getGreen(), drawColor.getBlue(), 30));
                 graphics.fill(arc);
             }
         }
@@ -262,7 +268,7 @@ public class DistanceSensorArcs extends AbstractSensor {
         int y1 = (int) (rs.y * draw.height + draw.y);
         int x2 = (int) (re.x * draw.width + draw.x);
         int y2 = (int) (re.y * draw.height + draw.y);
-        graphics.setPaint(Color.YELLOW);
+        graphics.setPaint(drawColor);
         graphics.setStroke(new BasicStroke(1));
         graphics.drawLine(x1, y1, x2, y2);
     }

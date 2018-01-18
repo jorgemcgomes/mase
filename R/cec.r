@@ -1,100 +1,175 @@
+load("~/Dropbox/Work/Papers/18-CEC/expdatalong.rdata")
+fit_scale <- scale_y_continuous(limits=c(0,1.2),breaks=seq(0,2,0.2))
+
+# DATA LOADING (only if rdata is not available) #################
+
+# Correctly adds the meta-data to the experiments
+beautify <- function(data) {
+  data[Method=="rbcselected", Param := factor(Param, labels=c("3","5","10","25","50","100"))]
+  data[, Param := factor(Param, ordered=T)]
+  data[, Blind := grepl("blind", Method)]
+  data[, Method := sub("blind", "", Method)]
+  data[, Method := factor(Method, levels=c("tr","rbcneat","rbcsub","rbcselected","gptrees","gptreespars"), labels=c("NEAT-TR","NEAT-EvoRBC","NEAT-Subset","NEAT-Selected","GP-DT","GP-DT(P)"))]
+  data[, Config := paste(Method,Blind,Param,sep="-")]
+  data[, Config := factor(sub("-NA","",sub("TRUE","B",sub("-FALSE","",Config))))]
+}
+
 setwd("~/exps/mazefinal")
 fixPostFitness("~/exps/mazefinal")
 
-
-# Repertoire analysis
 repos <- loadData("rep", "finalrep.stat")
+
+evofitness <- loadData("**", "fitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Repo","Param"))
+beautify(evofitness)
+
+fitness <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Repo","Param"))
+beautify(fitness)
+
+koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo","Param"))
+beautify(koza)
+
+trees <- loadData("**", "postbest.xml.gp.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo","Param"))
+beautify(trees)
+
+beststats <- loadData("**", "postbest.xml.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo","Param"), exclude.cols=T, colnames=c("Seed","Repetition","Time","Primitive"))
+beautify(beststats)
+
+neat <- loadData("**", "neat.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo","Param"))
+beautify(neat)
+
+save(repos, evofitness, fitness, koza, beststats, trees, neat, file="~/Dropbox/Work/Papers/18-CEC/expdatalong.rdata")
+
+
+# Repertoire analysis ##################################
+
+# Compare all repos
 ggplot(repos, aes(Behav_0,Behav_1,colour=Fitness)) + geom_point(size=.5) + facet_wrap(~ Job) + coord_fixed() +
   geom_spoke(aes(angle=CircularFitnessLog.2_0), radius=1)
+repo.stats <- repos[, .(.N, MeanFitness=mean(Fitness)), by=.(Job)]
+repo.stats[, .(N=mean(N),Nmin=min(N),Nmax=max(N),Fit=mean(MeanFitness))]
 
-distanceToNN <- function(rep) {
-  # find the value columns that are actually used
-  allv <- colnames(rep)[grep("Behav_\\d+",colnames(rep))]
-  cols <- allv[!is.na(rep[1,allv,with=F])]
-  
-  aux <- function(row) {
-    x <- as.numeric(row["Bin_0"])
-    y <- as.numeric(row["Bin_1"])
-    neighbours <- rep[(Bin_0 != x | Bin_1 != y) & abs(Bin_0-x) <= 1 & abs(Bin_1-y) <= 1]
-    v <- as.numeric(row[cols])
-    nv <- neighbours[, cols, with=F]
-    dists <- apply(nv, 1, euclideanDist, v)
-    return(mean(dists))
-  }
-  return(apply(rep,1,aux))
-}
-
-d <- repos[, .(Bin_0,Bin_1,Distance=distanceToNN(.SD)), by=.(Job)]
-ggplot(d, aes(Bin_0,Bin_1)) + geom_tile(aes(fill=Distance)) + facet_wrap(~ Job) +
-  scale_fill_distiller(type="seq", palette="Spectral", na.value="white") + coord_fixed() +
-  scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0))
+# Plot the selected repo
+ggplot(repos[Job==0], aes(Behav_0,Behav_1)) + geom_point(size=1) + coord_fixed() +
+  geom_spoke(aes(angle=CircularFitnessLog.2_0), radius=1) +
+  scale_x_continuous(breaks=seq(-21,21,2), minor_breaks=NULL) + scale_y_continuous(breaks=seq(-21,21,2), minor_breaks=NULL) +
+  labs(x="x displacement (cm)",y="y displacement (cm)") + geom_rect(xmin=-4,xmax=4,ymin=-4,ymax=4,color="Blue",alpha=0) +
+  geom_polygon(data=data.table(X=c(-1.5,2.5,-1.5),Y=c(-2,0,2)), aes(x=X,y=Y), alpha=0,color="Blue")
+ggsave("~/Dropbox/Work/Papers/18-CEC/repo.pdf", width=3.5, height=2.5)
 
 
-data <- loadData("**", "postfitness.stat" ,fun=loadFitness, auto.ids.names=c("Method","Repo","Param"))
-data[Method=="rbcselected", Param := factor(Param, labels=c("3","5","10","25","50","100"))]
-data[, Param := factor(Param, ordered=T)]
-data[, Blind := grepl("blind", Method)]
-data[, Method := sub("blind", "", Method)]
-data[, Method := factor(Method, levels=c("tr","rbcneat","rbcsub","rbcselected","gptrees","gptreespars"), labels=c("TR","NEAT-Coords","NEAT-Subset","NEAT-Selected","GP-DT","GP-DT(P)"))]
-data[, Config := paste(Method,Blind,Param,sep="-")]
-data[, Config := sub("-NA","",sub("TRUE","B",sub("-FALSE","",Config)))]
-#gsub("NA, ","",dff$string)
 
-fit_scale <- scale_y_continuous(limits=c(0,1),breaks=seq(0,1.25,0.25))
+# Base maze fitness comparison ############################
+d <- fitness[Blind==F & ((Method=="NEAT-Subset" & Param=="25") | Method %in% c("NEAT-TR","NEAT-EvoRBC","GP-DT"))]
 
-# All comparison
-d <- data[Blind==F & (Method!="NEAT-Subset" | Param=="25") & Method != "NEAT-Selected"]
-fitnessBoxplots(d, xvar="Config") + ylab("Best fitness") + fit_scale
-bestSoFarFitnessEvals(d, xvar="Config") + fit_scale
+ggplot(lastGen(d), aes(x=Method, y=BestSoFar, fill=Method)) + geom_boxplot(outlier.size=.5, size=.25) + 
+  fit_scale + labs(y="Highest fitness achieved") + guides(fill=FALSE) + coord_flip()
+ggsave("~/Dropbox/Work/Papers/18-CEC/comparison_box.pdf", width=3.5, height=1)
+metaAnalysis(lastGen(d), BestSoFar ~ Config)
 
-# Rate of fitness increase
-lags <- rbind(d[grepl("GP",Method), .(Evaluations=tail(Evaluations,n=-5), D=diff(BestSoFar,lag=5)), by=.(Method,Repo,Job)],
-              d[!grepl("GP",Method), .(Evaluations=tail(Evaluations,n=-100), D=diff(BestSoFar,lag=100)), by=.(Method,Repo,Job)])
-lags <- lags[, .(MeanD=mean(D)), by=.(Method,Evaluations)]
-ggplot(lags, aes(Evaluations,MeanD,group=Method)) + geom_line(aes(colour=Method)) + 
-  ylab("Average fitness increase in the last 20k evaluations (sqrt)") + 
-  scale_y_sqrt(breaks=seq(0,1,0.1), minor_breaks=seq(0,1,0.025), limits=c(0,NA)) 
+agg <- d[, mean(BestSoFar), by=.(Method,Evaluations)]
+ggplot(agg, aes(Evaluations/1000,V1,group=Method,colour=Method)) + geom_line() + labs(y="Fitness",x="Evaluations (x1000)") +
+  geom_point(data=agg[, .SD[seq(from=1,to=.N,length.out=10)], by=Method], aes(shape=Method),size=1) + ylim(0,NA) +
+  theme(legend.position="bottom", legend.margin=margin(t=-10,l=-10))
+ggsave("~/Dropbox/Work/Papers/18-CEC/comparison_time.pdf", width=3.5, height=2)
 
-# NEAT-Subset number of primitives
-d <- data[Blind==F & Method=="NEAT-Subset"]
-fitnessBoxplots(d, xvar="Param") + labs(x="Number of primitives") + guides(fill=F) + ylab("Best fitness") + 
-  ggtitle("Performance of NEAT-Sub for different number of primitives allowed") + fit_scale
+# best solutions evolved by each method
+bests <- lastGen(d)
+setorder(bests, Config, -BestSoFar)
+View(bests)
+
+# NEAT-Subset investigation ##################################
+d <- fitness[Blind==F & Method=="NEAT-Subset"]
+
+ggplot(lastGen(d), aes(x=Param, y=BestSoFar, fill=Param)) + geom_boxplot(outlier.size=.5, size=.25) + 
+  labs(y="Highest fitness achieved") + guides(fill=FALSE) + labs(x="Size of the subset") + scale_y_continuous(breaks=seq(0,1,0.1))
+ggsave("~/Dropbox/Work/Papers/18-CEC/neatsubset_box.pdf", width=3.5, height=1.25)
+metaAnalysis(lastGen(d)[Param!="3"], BestSoFar ~ Param)
 metaAnalysis(lastGen(d), BestSoFar ~ Param)
-bestSoFarFitnessEvals(d, xvar="Param") +
-  ggtitle("Performance of NEAT-Sub for different number of primitives allowed") + fit_scale
 
-# NEAT-Subset vs NEAT-Selected
-d <- data[Blind==F & Method %in% c("NEAT-Subset","NEAT-Selected")]
-ggplot(lastGen(d), aes(Param,BestSoFar,fill=Method)) + geom_boxplot() + 
-  geom_point(position=position_jitterdodge(jitter.width=0.15, jitter.height=0), size=.5, colour="gray") + xlab("Number of primitives") +
-  ylab("Best fitness") + ggtitle("Evolved (NEAT-Subset) vs previously selected (NEAT-Selected) set of primitives") + fit_scale
-metaAnalysis(lastGen(d), BestSoFar ~ Method, ~ Param)
-ggplot(d[, .(Mean=mean(BestSoFar),SE=se(BestSoFar)), by=.(Method,Param,Generation)], aes(Generation,Mean,group=Method)) + 
-  geom_line(aes(colour=Method)) + ylab("Fitness") + geom_ribbon(aes(ymax=Mean+SE, ymin=Mean-SE, fill=Method), alpha = 0.1) + facet_wrap(~ Param)
+agg <- d[, mean(BestSoFar), by=.(Param,Evaluations)]
+ggplot(agg, aes(Evaluations/1000,V1,group=Param,colour=Param)) + geom_line() + labs(y="Fitness",x="Evaluations (x1000)") +
+  geom_point(data=agg[, .SD[seq(from=1,to=.N,length.out=10)], by=Param], aes(shape=Param),size=1) + ylim(0,NA) + theme(legend.position="right")
+ggsave("~/Dropbox/Work/Papers/18-CEC/neatsubset_bestsofar.pdf", width=3.5, height=3.5)
 
-# Blind comparison
-d <- data[(Method=="NEAT-Coords" & (Param=="3" | is.na(Param))) | (Method=="NEAT-Subset" & Param=="25") | Method %in% c("GP-DT","TR","GP-DT(P)")]
-ggplot(lastGen(d), aes(Method,BestSoFar,fill=Blind)) + geom_boxplot() + 
-  geom_point(position=position_jitterdodge(jitter.width=0.15, jitter.height=0), size=.5, colour="gray") +
-  ylab("Best fitness") + ggtitle("Performance of the methods when using or not the BC") + fit_scale
+# NEAT-Subset vs NEAT-Selected 
+d <- fitness[Blind==F & Method %in% c("NEAT-Subset","NEAT-Selected")]
+ggplot(lastGen(d), aes(Param,BestSoFar,fill=Method)) + geom_boxplot(outlier.size=.5, size=.25) + 
+  labs(x="Size of the subset",y="Highest fitness achieved") + fit_scale
+ggsave("~/Dropbox/Work/Papers/18-CEC/subset_selected.pdf", width=3.5, height=3)
+sapply(metaAnalysis(lastGen(d), BestSoFar ~ Method, ~ Param), function(x){as.numeric(x$ttest$holm[1,2])})
 
-m <- metaAnalysis(lastGen(d[Method!="TR"]), BestSoFar ~ Blind, ~ Method) # performance degradation
-sapply(m, function(x){as.numeric(x$ttest$holm[1,2])})
-metaAnalysis(lastGen(d[Blind==T | Method=="TR"]), BestSoFar ~ Method) # best blind
+# Arbitrator stats #################################
 
-# Blind Vanilla
-fitnessBoxplots(data[Blind==T & Method=="NEAT-Coords"], xvar="Param") + labs(x="Number of dimensions") + guides(fill=F) + ylab("Best fitness") + 
-  ggtitle("Performance of NEAT-Vanilla according to the dimensionality of the random BC") + fit_scale
-metaAnalysis(lastGen(data)[Blind==T & Method=="NEAT-Vanilla"], BestSoFar ~ Param)
+d <- beststats[Blind==F & Method %in% c("NEAT-EvoRBC","NEAT-Subset","GP-DT")]
+d <- merge(d, repos[,.(Job,Hash,Bin_0,Bin_1,Behav_0,Behav_1)], by.x=c("Primitive","Repo"),by.y=c("Hash","Job"))
+setorder(d, Config, Repo, Job, Repetition, Time)
+auxdiff <- function(df) {c(NA, sqrt(rowSums(as.data.table(lapply(df, function(x){diff(x, lag=1) ^ 2})))))}
+d[, Jump := auxdiff(.SD), by=.(Config,Method,Param,Repo,Job,Repetition), .SDcols=c("Behav_0","Behav_1")]
 
-# Blind subset
-fitnessBoxplots(data[Blind==T & Method=="NEAT-Sub"], xvar="Param") + labs(x="Number of primitives") + guides(fill=F) + ylab("Best fitness") + 
-  ggtitle("Performance of NEAT-Sub (BLIND) for different number of primitives allowed")
-metaAnalysis(lastGen(data)[Blind==T & Method=="NEAT-Sub"], BestSoFar ~ Param)
+sim.stats <- d[, .(Number=length(unique(Primitive)), Duration=mean(rle(Primitive)$lengths), Switches=length(rle(Primitive)$values), JumpSize=mean(Jump[Jump!=0], na.rm=T)), by=.(Config,Method,Param,Repo,Job,Repetition)]
+solution.stats <- sim.stats[, lapply(.SD, mean, na.rm=T), by=.(Config,Method,Param,Repo,Job)]
+method.stats <- solution.stats[, c(lapply(.SD, mean, na.rm=T), lapply(.SD, sd)), by=.(Config,Method,Param), .SDcols=sapply(solution.stats, is.numeric)]
+View(method.stats)
 
 
-# Repo variability
-d <- data[Blind==FALSE & Method != "TR"]
+# Tree stats #######################################
+
+t <- trees[Blind==F & Method=="GP-DT"]
+nodes.melt <- melt(t[, c("Job", colnames(t)[grep("f\\..*", colnames(t))]), with=F], id.vars=c("Job") )
+nodes.melt[, variable := sub("f\\.","",variable)]
+nodes.melt[is.na(value), value := 0]
+nodes.melt[variable=="C", variable := "Constant"]
+nodes.melt[variable=="P", variable := "Primitive"]
+
+ggplot(nodes.melt[, .(Mean=mean(value),SE=se(value)), by=.(variable)], aes(variable,Mean)) + 
+  geom_bar(stat="identity", position="dodge") + geom_errorbar(aes(ymin=Mean-SE,ymax=Mean+SE), width=.5, size=.25, position=position_dodge(.9)) +
+  labs(y="Mean number of nodes in tree", x="Node type") + scale_y_continuous(breaks=seq(0,100,5), minor_breaks=seq(0,100,1)) + coord_flip()
+ggsave("~/Dropbox/Work/Papers/18-CEC/gp_best_functions.pdf", width=3.5, height=1.5)
+
+ggplot(t, aes(Size,Fitness)) + geom_point(size=.5) + labs(x="Size", y="Fitness") +
+  geom_text(aes(label=paste0(Repo,"/",Job)),vjust="bottom", nudge_y=0.005,alpha=.5,size=2)
+ggsave("~/Dropbox/Work/Papers/18-CEC/gp_bests.pdf", width=3.5, height=2)
+
+# Best trees stats
+t[, .(Size=mean(Size),SizeSD=sd(Size),SizeMin=min(Size),SizeMax=max(Size),Depth=mean(Depth),DepthSD=sd(Depth))]
+cor(t$Fitness, t$Size, method="pearson")
+cor(t$Fitness, t$Depth, method="pearson")
+cor(t$Fitness, t$f.P, method="pearson")
+
+
+# Blind comparison #################################
+
+d <- fitness[(Method=="NEAT-EvoRBC" & (Param=="3" | is.na(Param))) | (Method=="NEAT-Subset" & Param=="25") | Method %in% c("GP-DT","NEAT-TR")]
+d[, PlotNames := Method]
+d[Blind==T, PlotNames := paste0(PlotNames,"-B")]
+d[, PlotNames := factor(PlotNames,levels=c("NEAT-TR","NEAT-EvoRBC","NEAT-EvoRBC-B","NEAT-Subset","NEAT-Subset-B","GP-DT","GP-DT-B"))]
+ggplot(lastGen(d), aes(PlotNames, BestSoFar,fill=Blind)) + 
+  geom_boxplot(outlier.size=.5, size=.25) + ylab("Best fitness") + fit_scale + guides(fill=F) +
+  theme(axis.text.x=element_text(angle=22.5,hjust=1)) + labs(x="Method", y="Highest fitness achieved")
+ggsave("~/Dropbox/Work/Papers/18-CEC/blind_box.pdf", width=3.5, height=2)
+
+# performance degradation
+sapply(metaAnalysis(lastGen(d[Method!="NEAT-TR"]), BestSoFar ~ Blind, ~ Method), function(x){as.numeric(x$ttest$holm[1,2])})
+# best blind
+metaAnalysis(lastGen(d[Blind==T | Method=="NEAT-TR"]), BestSoFar ~ Method)
+
+# Blind NEAT-Coords
+fitnessBoxplots(fitness[Blind==T & Method=="NEAT-EvoRBC"], xvar="Param") + labs(x="Number of dimensions") + guides(fill=F) + 
+  ylab("Best fitness") + fit_scale
+metaAnalysis(lastGen(fitness)[Blind==T & Method=="NEAT-EvoRBC"], BestSoFar ~ Param)
+
+
+
+
+
+
+
+
+
+# Deprecated ######################################################################################
+
+# Repo variability #################################
+d <- fitness[Blind==FALSE & Method != "TR"]
 fitnessBoxplots(d, xvar="Repo") + facet_wrap(~ Config) + guides(fill=F) + fit_scale
 
 # for each method, does the repertoire have a significant impact?
@@ -105,66 +180,46 @@ sapply(m, function(x){x$ttest$kruskal$p.value})
 means <- lastGen(d)[, .(Mean=mean(BestSoFar)), by=.(Repo,Config)]
 metaAnalysis(means, Mean ~ Repo, paired=T)
 
-# best solutions from each method
-d <- lastGen(data)[Blind==F, .(Setup,Config,Repo,Job,BestSoFar)] # use only repo 0 and not blind
-setorder(d, Config, -BestSoFar)
-View(d)
 
-# GP analysis
-koza <- loadData("**", "koza.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo","Param"))
-koza[, Blind := grepl("blind", Method)]
-koza[, Method := sub("blind", "", Method)]
-koza[, Method := factor(Method, levels=c("gptrees","gptreespars"), labels=c("GP-DT","GP-DT(P)"))]
-koza[, Config := paste(Method,Blind,sep="-")]
-koza[, Config := sub("TRUE","B",sub("-FALSE","",Config))]
+# GP analysis ########################################
+d <- koza[Method=="GP-DT"] # do not use the parsimony variant
 
-ggplot(koza[Blind==F], aes(Generation,MeanSize, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line") + ggtitle("Size")
-ggplot(koza[Blind==F], aes(Generation,MeanDepth, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line") + ggtitle("Depth")
-ggplot(koza[Blind==F], aes(Generation,BestSizeGen, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line")
+# Tree statistics over time
+ggplot(d[Blind==F], aes(Generation,MeanSize, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line") + ggtitle("Size")
+ggplot(d[Blind==F], aes(Generation,MeanDepth, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line") + ggtitle("Depth")
+ggplot(d[Blind==F], aes(Generation,BestSizeSoFar, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line") + ggtitle("Size of best so far")
+ggplot(d[Blind==F], aes(Generation,BestSizeGen, group=Config, colour=Config)) + stat_summary(fun.y=mean, geom="line") + ggtitle("Size of the best in generation")
 
-m <- melt(koza[Blind==F, c("Generation","Config", colnames(koza)[grep("f\\..*", colnames(koza))]), with=F], id.vars=c("Generation","Config") )
-#ggplot(m, aes(Generation,value, colour=variable)) + stat_summary(fun.y=mean, geom="line") + facet_wrap(~ Config)
-ggplot(m, aes(variable,value)) + stat_summary(fun.y=mean, geom="bar") + ylab("Mean number of nodes") + xlab("Node type") + 
-  facet_wrap(~ Config, scales="free_x", ncol=1) + ggtitle("Node types")
+# frequency of usage
+freq <- beststats[Method != "NEAT-Subset" | Param=="25", .N, by=.(Bin_0,Bin_1,Config,Repo,Job,Repetition)]
+freq.stats <- freq[, .(Count=sum(N)), by=.(Bin_0,Bin_1,Config)]
+freq.stats[, Frequency := Count * 100 / sum(Count), by=.(Config)]
+ggplot(freq.stats, aes(Bin_0,Bin_1)) + geom_tile(aes(fill=Frequency)) + facet_wrap(~ Config) + theme(legend.position="right") +
+  coord_fixed() + scale_fill_distiller(palette="Spectral") + labs(x="X (Back/Front)", y="Y (Left/Right)", fill="Frequency (%)")
+ggsave("~/Dropbox/Work/Papers/18-CEC/gp_bests_frequency.pdf", width=7, height=1.85)
 
-# search for the smallest best
-m <- merge(koza[Blind==F, .(Config,Repo,Job,Generation,BestSizeGen)], data[, .(Config,Repo,Job,Generation,MaxFitness)], by=c("Config","Repo","Job","Generation"))
-# all best-of-gens
-ggplot(m, aes(BestSizeGen,MaxFitness,colour=Config)) + geom_point(shape=4)
-# all best-of-runs
-bestof <- m[, .SD[which.max(MaxFitness)] , by=.(Config,Repo,Job)]
-ggplot(bestof, aes(BestSizeGen,MaxFitness,colour=Config)) + geom_point() + geom_text(aes(label=paste0(Repo,"/",Job)),vjust="bottom")
+# alternative: occurrences
+freq.stats <- freq[,.(Counts=sum(N)), by=.(Bin_0,Bin_1,Config,Repo,Job)]
+freq.stats <- freq.stats[, .N, by=.(Config,Bin_0,Bin_1)]
+ggplot(freq.stats, aes(Bin_0,Bin_1)) + geom_tile(aes(fill=N)) + facet_wrap(~ Config) + theme(legend.position="right") +
+  coord_fixed() + scale_fill_distiller(palette="Spectral") + labs(x="X (Back/Front)", y="Y (Left/Right)", fill="Frequency (%)")
+ggsave("~/Dropbox/Work/Papers/18-CEC/gp_bests_occurrences.pdf", width=7, height=1.85)
 
-setorder(k, Config, BestSizeSoFar)
-View(k)
-# correlation of fitness and size
-lapply(split(k,by="Config"), function(x){cor(x$BestSizeSoFar,x$BestSoFar)})
+# 3D plots for repertoire usage
+x <- seq(from=min(freq$Bin_0), to=max(freq$Bin_0))
+y <- seq(from=min(freq$Bin_1), to=max(freq$Bin_1))
+g <- expand.grid(Bin_0=x, Bin_1=y)
 
+gm <- as.data.table(merge(g, freq.stats[Config=="NEAT-Coords"], all.x=T))
+coords.mat <- matrix(gm$Frequency, nrow=length(x), ncol=length(y), byrow=T)
+gm <- as.data.table(merge(g, freq.stats[Config=="NEAT-Subset-25"], all.x=T))
+subset.mat <- matrix(gm$Frequency, nrow=length(x), ncol=length(y), byrow=T)
+gm <- as.data.table(merge(g, freq.stats[Config=="GP-DT"], all.x=T))
+gp.mat <- matrix(gm$Frequency, nrow=length(x), ncol=length(y), byrow=T)
 
-
-
-# the bests of each
-repo <- loadData("rep", "finalrep.stat")
-beststats <- loadData("**", "postbest.xml.stat" ,fun=loadFile, auto.ids.sep="_", auto.ids.names=c("Method","Repo","Param"), exclude.cols=T, colnames=c("Seed","Repetition","Time","Primitive"))
-beststats[Method=="rbcselected", Param := factor(Param, labels=c("3","5","10","25","50","100"))]
-beststats[, Param := factor(Param, ordered=T)]
-beststats[, Blind := grepl("blind", Method)]
-beststats[, Method := sub("blind", "", Method)]
-beststats[, Method := factor(Method, levels=c("tr","rbcneat","rbcsub","rbcselected","gptrees","gptreespars"), labels=c("TR","NEAT-Coords","NEAT-Subset","NEAT-Selected","GP-DT","GP-DT(P)"))]
-beststats[, Config := paste(Method,Blind,Param,sep="-")]
-beststats[, Config := sub("-NA","",sub("TRUE","B",sub("-FALSE","",Config)))]
-
-beststats <- merge(beststats, repo[,.(Job,Hash,Bin_0,Bin_1)], by.x=c("Primitive","Repo"),by.y=c("Hash","Job"))
-setorder(beststats, Config, Job, Repetition, Time)
-
-act.stats <- beststats[, .(Number=length(unique(Primitive)), Duration=mean(rle(Primitive)$lengths)), by=.(Config,Job,Repo,Repetition)]
-act.sum <- act.stats[, .(Number = mean(Number), Duration=mean(Duration)), by=.(Config,Job,Repo)][, .(NumberMean=mean(Number),NumberSE=se(Number),DurationMean=mean(Duration),DurationSE=se(Duration)), by=.(Config)]
-
-ggplot(beststats[Blind==FALSE, .N,.(Bin_0,Bin_1,Config)]) + geom_tile(aes(Bin_0, Bin_1,fill=N)) + facet_wrap(~ Config) + coord_fixed() + scale_fill_distiller(palette="Spectral")
-ggplot(beststats[Blind==FALSE, .N,.(Bin_0,Bin_1,Config,Job)]) + geom_tile(aes(Bin_0, Bin_1,fill=N)) + facet_grid(Config ~ Job) + coord_fixed() + scale_fill_distiller(palette="spectral")
-
-
-
+hist3D(x, y, coords.mat, ticktype="detailed", main="NEAT-Coords", bty="b2", colkey=list(side=1, length=.5), border="black", clim=c(0,60))
+hist3D(x, y, subset.mat, ticktype="detailed", main="NEAT-Subset", bty="b2", colkey=list(side=1, length=.5), border="black", clim=c(0,60))
+hist3D(x, y, gp.mat, ticktype="detailed", main="GP-DT", bty="b2", colkey=list(side=1, length=.5), border="black", clim=c(0,60))
 
 # most used by NEAT-Vanilla
 most.used <- beststats[Config=="NEAT-Coords", .N, by=.(Repo,Primitive, Bin_0, Bin_1)]
@@ -188,3 +243,25 @@ generateRandomCoords <- function(repfolder, srcdir="/home/jorge/Dropbox/mase/src
 generateRandomCoords("rep","/home/jorge/Dropbox/mase/src/mase/app/maze/rep2/", k=2)
 generateRandomCoords("rep","/home/jorge/Dropbox/mase/src/mase/app/maze/rep2/", k=3)
 generateRandomCoords("rep","/home/jorge/Dropbox/mase/src/mase/app/maze/rep2/", k=5)
+
+# View distance in the genome space to the nearest neighbours in the behaviour space
+distanceToNN <- function(rep) {
+  # find the value columns that are actually used
+  allv <- colnames(rep)[grep("Behav_\\d+",colnames(rep))]
+  cols <- allv[!is.na(rep[1,allv,with=F])]
+  aux <- function(row) {
+    x <- as.numeric(row["Bin_0"])
+    y <- as.numeric(row["Bin_1"])
+    neighbours <- rep[(Bin_0 != x | Bin_1 != y) & abs(Bin_0-x) <= 1 & abs(Bin_1-y) <= 1]
+    v <- as.numeric(row[cols])
+    nv <- neighbours[, cols, with=F]
+    dists <- apply(nv, 1, euclideanDist, v)
+    return(mean(dists))
+  }
+  return(apply(rep,1,aux))
+}
+d <- repos[, .(Bin_0,Bin_1,Distance=distanceToNN(.SD)), by=.(Job)]
+ggplot(d, aes(Bin_0,Bin_1)) + geom_tile(aes(fill=Distance)) + facet_wrap(~ Job) +
+  scale_fill_distiller(type="seq", palette="Spectral", na.value="white") + coord_fixed() +
+  scale_x_discrete(expand = c(0, 0)) + scale_y_discrete(expand = c(0, 0))
+
