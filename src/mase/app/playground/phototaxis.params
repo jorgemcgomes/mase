@@ -1,23 +1,4 @@
-parent.0 = playground.params
-
-problem.number-evals =             1
-problem.eval.0 =                   mase.app.playground.PhototaxisFitness
-problem.eval.0.update-freq =       1
-
-fitness.fitness-index =            0
-
-problem.seed =                     random
-problem.repetitions =              10
-problem.max-steps =                500
-
-problem.minObjects = 1
-problem.maxObjects = 1
-problem.objectRadius = 2
-problem.minObjectDistance = 75
+parent.0 = obsphototaxis.params
     
-problem.minObstacles = 5
-problem.maxObstacles = 10
-problem.minObstacleSize = 20
-problem.maxObstacleSize = 30
-
-generations = 250
+problem.minObstacles = 0
+problem.maxObstacles = 0

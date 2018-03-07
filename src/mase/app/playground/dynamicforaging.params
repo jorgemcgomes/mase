@@ -1,0 +1,4 @@
+parent.0 = foraging.params
+
+problem.eval.0 = mase.app.playground.SlowForagingFitness
+problem.eval.0.speed-limit = 0.5

@@ -9,6 +9,7 @@ import java.awt.Color;
 import mase.controllers.GroupController;
 import mase.mason.world.CircularObject;
 import mase.mason.world.EmboddiedAgent;
+import mase.mason.world.MultilineObject;
 import mase.mason.world.WorldObject;
 import sim.engine.SimState;
 import sim.util.Double2D;
@@ -45,7 +46,7 @@ public class PredatorsPlayground extends Playground {
             super(pl, pl.field, pl.par.objectRadius, Color.BLUE);
             this.enableBoundedArena(true);
             this.enableCollisionRebound(true);
-            this.setCollidableTypes(WorldObject.class);
+            this.setCollidableTypes(MultilineObject.class);
             this.setCollisionSpeedDecay(1); // no decay
         }
 

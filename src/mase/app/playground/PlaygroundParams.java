@@ -15,29 +15,30 @@ public class PlaygroundParams implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    int arenaSize;
+    public int arenaSize;
     
-    int minObjects;
-    int maxObjects;
-    double objectRadius;
-    double minObjectDistance;
-    double objectSpeed;
+    public int minObjects;
+    public int maxObjects;
+    public double objectRadius;
+    public double minObjectDistance;
+    public double objectSpeed;
     
-    int minObstacles;
-    int maxObstacles;
-    double minObstacleSize;
-    double maxObstacleSize;
+    public int minObstacles;
+    public int maxObstacles;
+    public double minObstacleSize;
+    public double maxObstacleSize;
     
-    boolean randomPosition;
-    double radius;
-    double linearSpeed;
-    double linearAcc;
-    boolean backMove;
-    double turnSpeed;
-    double turnAcc;
-    int numCones;
-    double coneRange;
-    double whiskerRange;
-    boolean differentialDrive;
+    public boolean randomPosition;
+    public boolean randomOrientation;
+    public double radius;
+    public double linearSpeed;
+    public double linearAcc;
+    public boolean backMove;
+    public double turnSpeed;
+    public double turnAcc;
+    public int numCones;
+    public double coneRange;
+    public double whiskerRange;
+    public boolean differentialDrive;
     
 }

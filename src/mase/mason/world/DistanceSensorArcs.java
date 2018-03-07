@@ -242,7 +242,7 @@ public class DistanceSensorArcs extends AbstractSensor {
     @Override
     public void draw(Object object, Graphics2D graphics, DrawInfo2D info) {
         Rectangle2D.Double draw = info.draw;
-        Double2D baseStart = new Double2D(centerToCenter ? 0.001 : ag.getRadius(), 0);
+        Double2D baseStart = new Double2D(centerToCenter ? 0 : ag.getRadius(), 0);
         Double2D baseEnd = new Double2D((centerToCenter ? 0 : ag.getRadius()) + (Double.isInfinite(range) ? fieldDiagonal : range), 0);
         for (int i = 0; i < arcStart.length; i++) {
             Double2D leftRayStart = baseStart.rotate(ag.orientation2D() + arcStart[i]);
@@ -251,12 +251,13 @@ public class DistanceSensorArcs extends AbstractSensor {
             Double2D rightRayEnd = baseEnd.rotate(ag.orientation2D() + arcEnd[i]);
             drawRay(leftRayStart, leftRayEnd, graphics, draw);
             drawRay(rightRayStart, rightRayEnd, graphics, draw);
+            // Draw cone
             if (!Double.isInfinite(lastDistances[i])) {
                 double d = centerToCenter ? lastDistances[i] : lastDistances[i] + ag.getRadius();
                 Arc2D arc = new Arc2D.Double(draw.x - d * draw.width, draw.y - d * draw.height,
                         d * 2 * draw.width, d * 2 * draw.height,
-                        Math.toDegrees((Math.PI * 2 - MathUtils.normalizeAngle(ag.orientation2D() + (arcEnd[i] > arcStart[i] ? arcEnd[i] : arcStart[i]), Math.PI)) ),
-                        Math.toDegrees(arcEnd[i] > arcStart[i] ? arcEnd[i] - arcStart[i] : Math.PI - arcStart[i] + arcEnd[i]), Arc2D.PIE);
+                        Math.toDegrees((Math.PI * 2 - MathUtils.normalizeAngle(ag.orientation2D() + arcEnd[i], Math.PI)) ),
+                        Math.toDegrees(arcEnd[i] > arcStart[i] ? arcEnd[i] - arcStart[i] : Math.PI * 2 - arcStart[i] + arcEnd[i]), Arc2D.PIE);
                 graphics.setPaint(new Color(drawColor.getRed(), drawColor.getGreen(), drawColor.getBlue(), 30));
                 graphics.fill(arc);
             }

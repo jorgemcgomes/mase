@@ -1,9 +1,7 @@
 parent.0 = playground.params
 
-problem.simstate =                 mase.app.playground.PredatorsPlayground
-
 problem.number-evals =             1
-problem.eval.0 =                   mase.app.playground.DistanceFitness
+problem.eval.0 =                   mase.app.playground.PhototaxisFitness
 problem.eval.0.update-freq =       1
 
 fitness.fitness-index =            0
@@ -16,9 +14,10 @@ problem.minObjects = 1
 problem.maxObjects = 1
 problem.objectRadius = 2
 problem.minObjectDistance = 75
-problem.objectSpeed = 0.5
     
-problem.minObstacles = 1
+problem.minObstacles = 5
 problem.maxObstacles = 5
+problem.minObstacleSize = 15
+problem.maxObstacleSize = 30
 
 generations = 250

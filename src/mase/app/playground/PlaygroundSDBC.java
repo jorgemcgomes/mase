@@ -7,6 +7,7 @@ package mase.app.playground;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +18,7 @@ import mase.mason.MasonSimState;
 import mase.mason.world.CircularObject;
 import mase.mason.world.MultilineObject;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  *
@@ -31,24 +33,35 @@ public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
     private double[] sMeans;
     private double[] sSDs;
     public static final String P_AGGREGATION = "aggregation";
+    public static final String P_SD = "sd";
+    public static final String P_STD = "standardization";
+    private File standardizationFile;
     private LocationEstimator agg;
+    private boolean sd = false;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         agg = VectorBehaviourResult.LocationEstimator.valueOf(state.parameters.getString(base.push(P_AGGREGATION), null));
-        if(!PlaygroundSDBCStandardizer.STORE_FILE.exists()) {
-            state.output.warning("Standardization file not found! " + PlaygroundSDBCStandardizer.STORE_FILE.getAbsolutePath());
+        sd = state.parameters.getBoolean(base.push(P_SD), null, false);
+        standardizationFile = state.parameters.getFile(base.push(P_STD), null);
+
+        if(standardizationFile == null) {
+            state.output.warning("Standardization file not specified!", base.push(P_STD));
+            return;
+        }
+        if(!standardizationFile.exists()) {
+            state.output.warning("Standardization file not found! " + standardizationFile.getAbsolutePath());
             return;
         }
         try {
-            Pair<double[], double[]> s = PlaygroundSDBCStandardizer.readStandardization(PlaygroundSDBCStandardizer.STORE_FILE);
-            state.output.warning("Successfully parsed standardization values: " + PlaygroundSDBCStandardizer.STORE_FILE.getAbsolutePath());
+            Pair<double[], double[]> s = PlaygroundSDBCStandardizer.readStandardization(standardizationFile);
+            state.output.warning("Successfully parsed standardization values: " + standardizationFile.getAbsolutePath());
             sMeans = s.getLeft();
             sSDs = s.getRight();
         } catch (Exception ex) {
             ex.printStackTrace();
-            state.output.fatal("Error parsing standardization file! " + PlaygroundSDBCStandardizer.STORE_FILE.getAbsolutePath());
+            state.output.fatal("Error parsing standardization file! " + standardizationFile.getAbsolutePath());
         }
     }
 
@@ -110,28 +123,36 @@ public class PlaygroundSDBC extends MasonEvaluation<VectorBehaviourResult> {
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
-        double[] sum = new double[states.get(0).length];
-        int[] count = new int[sum.length];
-        for(double[] state : states) {
-            for(int i = 0 ; i < state.length ; i++) {
-                if(!Double.isNaN(state[i])) {
-                    sum[i] += state[i];
-                    count[i]++;
+        DescriptiveStatistics[] ds = new DescriptiveStatistics[states.get(0).length];
+        for(int i = 0 ; i < ds.length ; i++) {
+            ds[i] = new DescriptiveStatistics();
+        }
+        for (double[] state : states) {
+            for (int i = 0; i < state.length; i++) {
+                if (!Double.isNaN(state[i])) {
+                    ds[i].addValue(state[i]);
                 }
-                
             }
         }
-        
-        double[] mean = new double[sum.length];
-        for(int i = 0 ; i < mean.length; i++) {
-            if(sSDs[i] == 0 || count[i] == 0) { // division by zero not cool
-                mean[i] = 0;
+
+        double[] bc = new double[sd ? ds.length * 2 : ds.length];
+        for (int i = 0; i < ds.length; i++) {
+            if (sSDs[i] == 0 || ds[i].getN() == 0) { // division by zero not cool
+                bc[i] = 0;
             } else {
-                mean[i] = Math.max(-BOUND, Math.min(BOUND, ((sum[i] / count[i]) - sMeans[i]) / sSDs[i]));
+                bc[i] = Math.max(-BOUND, Math.min(BOUND, (ds[i].getMean() - sMeans[i]) / sSDs[i]));
             }
         }
-        
-        vbr = new VectorBehaviourResult(mean);
+        if(sd) {
+            for (int i = 0; i < ds.length; i++) {
+                if (sSDs[i] == 0 || ds[i].getN() == 0) { // nothing to see here
+                    bc[ds.length + i] = 0;
+                } else {
+                    bc[ds.length + i] = Math.max(-BOUND, Math.min(BOUND, (ds[i].getStandardDeviation() / sSDs[i]) * 2 - 1));
+                }
+            }
+        }
+        vbr = new VectorBehaviourResult(bc);
         vbr.setDistance(VectorBehaviourResult.Distance.euclidean);
         vbr.setLocationEstimator(agg);
     }

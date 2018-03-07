@@ -50,7 +50,7 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
     @Override
     public void start() {
         super.start();
-
+        
         field = new Continuous2D(par.coneRange, par.arenaSize, par.arenaSize);
         placeWalls();
 
@@ -87,11 +87,11 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
             Double2D pos = new Double2D(par.radius * 2 + (random.nextDouble() * (par.arenaSize - par.radius * 4)),
                     par.radius * 2 + (random.nextDouble() * (par.arenaSize - par.radius * 4)));
             ag.setLocation(pos);
-            ag.setOrientation(-Math.PI + random.nextDouble() * Math.PI * 2);
+            ag.setOrientation(par.randomOrientation ? -Math.PI + random.nextDouble() * Math.PI * 2 : 0);
         } else {
             // start in the middle
             ag.setLocation(new Double2D(par.arenaSize / 2, par.arenaSize / 2));
-            ag.setOrientation(-Math.PI + random.nextDouble() * Math.PI * 2);
+            ag.setOrientation(par.randomOrientation ? -Math.PI + random.nextDouble() * Math.PI * 2 : 0);
         }
     }
 
@@ -182,7 +182,9 @@ public class Playground extends MasonSimState<PlaygroundParams> implements Smart
     }
 
     protected SmartAgent createAgent() {
-        ac.reset();
+        if(ac != null) {
+            ac.reset();
+        }
         return new PlaygroundAgent(this, ac);
     }
 

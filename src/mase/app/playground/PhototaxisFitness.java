@@ -24,7 +24,7 @@ public class PhototaxisFitness extends MasonEvaluation<FitnessResult> {
     protected void evaluate(MasonSimState sim) {
         super.evaluate(sim); 
         Playground pl = (Playground) sim;
-        if(pl.agent.distanceTo(pl.objects.get(0).getLocation()) == 0) {
+        if(pl.agent.distanceTo(pl.objects.get(0).getLocation()) <= 1) {
             pl.kill();
         }
     }

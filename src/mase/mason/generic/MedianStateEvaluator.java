@@ -65,7 +65,6 @@ public class MedianStateEvaluator extends MasonEvaluation {
         // needs to truncate arrays
         if (currentEvaluationStep < maxEvaluationSteps) {
             for (double[][] agentState : states) {
-                System.out.println("truncating: " + currentEvaluationStep + " / " + maxEvaluationSteps);
                 for (int v = 0; v < agentState.length; v++) {
                     agentState[v] = Arrays.copyOf(agentState[v], currentEvaluationStep);
                 }

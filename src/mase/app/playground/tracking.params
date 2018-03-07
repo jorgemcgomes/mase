@@ -1,4 +1,4 @@
-parent.0 = phototaxis.params
+parent.0 = obsphototaxis.params
 
 problem.simstate =                 mase.app.playground.RandomMovingAgentsPlayground
 

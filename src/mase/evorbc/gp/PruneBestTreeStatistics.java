@@ -17,27 +17,28 @@ import mase.mason.MasonSimulationProblem;
 import mase.stat.PersistentSolution;
 import mase.stat.ReevaluationTools;
 import mase.stat.SolutionPersistence;
+import mase.util.CommandLineUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
  *
  * @author jorge
  */
-public class PruneBestTree extends Statistics {
+public class PruneBestTreeStatistics extends Statistics {
 
     public static final String P_REPETITIONS = "repetitions";
-    public static final String P_PRUNED_FILE = "prunedbest.xml";
+    public static final String P_PRUNED_SUFFIX = "pruned";
 
     private static final long serialVersionUID = 1L;
 
     private int repetitions;
-    private String prunedFile;
+    private String prunedSuffix;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
         this.repetitions = state.parameters.getInt(base.push(P_REPETITIONS), null);
-        this.prunedFile = state.parameters.getString(base.push(P_PRUNED_FILE), null);
+        this.prunedSuffix = state.parameters.getString(base.push(P_PRUNED_SUFFIX), null);
     }
 
     @Override
@@ -45,6 +46,7 @@ public class PruneBestTree extends Statistics {
         super.finalStatistics(state, result);
         MasonSimulationProblem prob = (MasonSimulationProblem) state.evaluator.p_problem.clone();
         try {
+            // Prune the postbest if found, or the best otherwise
             int log = state.output.addLog(new File("postbest.xml"), false);
             File bestFile = state.output.getLog(log).filename;
             if(!bestFile.exists()) {
@@ -63,8 +65,7 @@ public class PruneBestTree extends Statistics {
             pruneController(c, prob, repetitions, false);
 
             // Write the new pruned controller
-            log = state.output.addLog(new File(prunedFile), false);
-            File out = state.output.getLog(log).filename;
+            File out = new File(bestFile.getParentFile(), bestFile.getName().replace(".xml", "") + prunedSuffix + ".xml");
 
             PersistentSolution newP = bestSol.clone();
             newP.setController(new HomogeneousGroupController(c));
@@ -75,29 +76,7 @@ public class PruneBestTree extends Statistics {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        int reps = ReevaluationTools.getRepetitions(args);
-        File gc = ReevaluationTools.findControllerFile(args);
-        PersistentSolution sol = SolutionPersistence.readSolutionFromFile(gc);
-        GroupController controller = sol.getController();
-        MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, gc.getParentFile());
-
-        GPArbitratorController c = (GPArbitratorController) controller.getAgentControllers(1)[0];
-        System.out.println("----------- ORIGINAL ------------");
-        System.out.println(c);
-
-        pruneController(c, simulator, reps, true);
-
-        System.out.println("----------- PRUNED ------------");
-        System.out.println(c);
-        
-        File out = new File(gc.getAbsolutePath().replace(".xml", "_pruned.xml"));
-        PersistentSolution newP = sol.clone();
-        newP.setController(new HomogeneousGroupController(c));
-        SolutionPersistence.writeSolution(newP, out);
-    }
-
-    public static void pruneController(GPArbitratorController c, MasonSimulationProblem simulator, int reps, boolean debug) {
+    private static void pruneController(GPArbitratorController c, MasonSimulationProblem simulator, int reps, boolean debug) {
         try {
             // add the node logger
             UsedNodesEvaluation e = new UsedNodesEvaluation();
@@ -122,4 +101,27 @@ public class PruneBestTree extends Statistics {
             e.printStackTrace();
         }
     }
+    
+    public static void main(String[] args) throws Exception {
+        int reps = CommandLineUtils.getIntFromArgs(args, ReevaluationTools.P_NREPS);
+        File gc = CommandLineUtils.getFileFromArgs(args, ReevaluationTools.P_CONTROLLER, true);
+        
+        PersistentSolution sol = SolutionPersistence.readSolutionFromFile(gc);
+        GroupController controller = sol.getController();
+        MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, gc.getParentFile());
+
+        GPArbitratorController c = (GPArbitratorController) controller.getAgentControllers(1)[0];
+        System.out.println("----------- ORIGINAL ------------");
+        System.out.println(c);
+
+        pruneController(c, simulator, reps, true);
+
+        System.out.println("----------- PRUNED ------------");
+        System.out.println(c);
+        
+        File out = new File(gc.getAbsolutePath().replace(".xml", "_pruned.xml"));
+        PersistentSolution newP = sol.clone();
+        newP.setController(new HomogeneousGroupController(c));
+        SolutionPersistence.writeSolution(newP, out);
+    }    
 }

@@ -7,6 +7,7 @@ pop.default-subpop = 			0
 ec.subpop.duplicate-retries =           10
 ec.subpop.initial-batch =               10000
 ec.subpop.size = 			1000
+fitness.fitness-index =                 0
 ec.subpop.behaviour-index =             1
 ec.subpop.resolution =                  0.05
 

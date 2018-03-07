@@ -38,10 +38,12 @@ public class ForagingPlayground extends Playground {
         private static final long serialVersionUID = 1L;
         protected List<CircularObject> aliveObjects;
         protected Playground pl;
+        protected List<ForagingHook> hooks;
 
         protected ItemRemover(Playground pl) {
             this.pl = pl;
             aliveObjects = new ArrayList<>(pl.objects);
+            hooks = new ArrayList<>();
         }
 
         @Override
@@ -55,12 +57,23 @@ public class ForagingPlayground extends Playground {
                     if(next instanceof RandomMovingAgent) {
                         ((RandomMovingAgent) next).stop.stop();
                     }
+                    for(ForagingHook h : hooks) {
+                        h.foraged((ForagingPlayground) state, (PlaygroundAgent) pl.agent, next);
+                    }
                 }
             }
             if(aliveObjects.isEmpty()) {
                 pl.kill();
             }
         }
+        
+        protected void addForagingHook(ForagingHook hook) {
+            hooks.add(hook);
+        }
+        
+        protected static interface ForagingHook {
+            public void foraged(ForagingPlayground sim, PlaygroundAgent ag, CircularObject foraged);
+        }
     }
-    
+        
 }

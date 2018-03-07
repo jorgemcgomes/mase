@@ -19,7 +19,7 @@ problem.minObjects = 15
 problem.maxObjects = 15
 problem.objectRadius = 2
 problem.minObjectDistance = 0
-problem.objectSpeed = 0.5
+problem.objectSpeed = 0.25
     
 problem.minObstacles = 0
 problem.maxObstacles = 0

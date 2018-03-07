@@ -16,17 +16,18 @@ problem.minObstacleSize = 10
 problem.maxObstacleSize = 30
     
 problem.randomPosition = true
+problem.randomOrientation = true
 problem.radius = 4
 problem.linearSpeed = 1
 problem.linearAcc = 0.1
 problem.backMove = true
 problem.turnSpeed = 0.392
 problem.turnAcc = 0.04
-problem.numCones = 4
+problem.numCones = 8
 problem.coneRange = 100
 problem.whiskerRange = 25
-problem.differentialDrive = false
+problem.differentialDrive = true
 
 # used for the arbitrator
-neat.INPUT.NODES = 7
+neat.INPUT.NODES = 14
 neat.OUTPUT.NODES = 2

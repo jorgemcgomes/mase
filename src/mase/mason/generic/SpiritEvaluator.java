@@ -46,8 +46,8 @@ public class SpiritEvaluator extends MasonEvaluation<CompoundEvaluationResult<Sp
         this.sensorBins = state.parameters.getInt(base.push(P_SENSOR_BINS), null);
         this.actionBins = state.parameters.getInt(base.push(P_ACTION_BINS), null);
         this.filter = state.parameters.getDouble(base.push(P_FILTER), null);
-        this.sensorPows = new int[10];
-        this.actionPows = new int[10];
+        this.sensorPows = new int[15];
+        this.actionPows = new int[15];
         for(int i = 0 ; i < 10 ; i++) {
             sensorPows[i] = ArithmeticUtils.pow(sensorBins, i);
             actionPows[i] = ArithmeticUtils.pow(actionBins, i);

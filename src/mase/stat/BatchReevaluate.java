@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 import mase.MaseProblem;
 import mase.evaluation.EvaluationResult;
 import mase.stat.ReevaluationTools.Reevaluation;
+import mase.util.CommandLineUtils;
 
 /**
  *
@@ -34,32 +35,14 @@ public class BatchReevaluate {
     public static final String DEFAULT_PREFIX = "post";
 
     public static void main(String[] args) throws Exception {
-        /* Parse command line arguments */
-        List<File> folders = new ArrayList<>();
-        int reps = 0;
-        boolean recursive = false;
-        boolean force = false;
-        boolean allSubpops = false;
-        String prefix = DEFAULT_PREFIX;
-        for (int x = 0; x < args.length; x++) {
-            if (args[x].equalsIgnoreCase(FOLDER)) {
-                File folder = new File(args[1 + x++]);
-                if (!folder.exists()) {
-                    throw new Exception("Folder does not exist: " + folder.getAbsolutePath());
-                }
-                folders.add(folder);
-            } else if (args[x].equalsIgnoreCase(ReevaluationTools.P_NREPS)) {
-                reps = Integer.parseInt(args[1 + x++]);
-            } else if (args[x].equalsIgnoreCase(FORCE)) {
-                force = true;
-            } else if (args[x].equalsIgnoreCase(RECURSIVE)) {
-                recursive = true;
-            } else if (args[x].equalsIgnoreCase(PREFIX)) {
-                prefix = args[1 + x++];
-            } else if (args[x].equalsIgnoreCase(ALL_SUBPOPS)) {
-                allSubpops = true;
-            }
-        }
+        // Parse command line arguments
+        int reps = CommandLineUtils.getIntFromArgs(args, ReevaluationTools.P_NREPS);
+        boolean recursive = CommandLineUtils.isFlagPresent(args, RECURSIVE);
+        boolean force = CommandLineUtils.isFlagPresent(args, FORCE);
+        boolean allSubpops = CommandLineUtils.isFlagPresent(args, ALL_SUBPOPS);
+        String prefix = CommandLineUtils.getValueFromArgsWithDefault(args, PREFIX, DEFAULT_PREFIX);
+        List<File> folders = CommandLineUtils.getFilesFromArgs(args, FOLDER, true);
+        
         if (reps <= 0) {
             System.out.println("Invalid number of repetitions: " + reps);
             return;
@@ -101,7 +84,7 @@ public class BatchReevaluate {
         });
         if (!recursive || list.length > 0) {
             MaseProblem sim = ReevaluationTools.createSimulator(args, f);
-            mt.reevaluateFolder(f, sim);
+            mt.reevaluateFolder(f, sim, "bests.tar.gz");
         }
 
         // Recursive step
@@ -132,19 +115,14 @@ public class BatchReevaluate {
         this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
-    public void reevaluateFolder(File folder, MaseProblem sim) throws Exception {
+    public void reevaluateFolder(File folder, MaseProblem sim, String archiveName) throws Exception {
         System.out.println(folder.getAbsolutePath());
         // Find all the relevant tars under the given folders
         List<File> tars = new ArrayList<>();
         for (int job = 0; job < 100; job++) {
-            File b0 = new File(folder, "job." + job + ".bests.tar.gz");
+            File b0 = new File(folder, "job." + job + "." + archiveName);
             if (b0.exists()) {
-                File re = new File(folder, "job." + job + "." + prefix + "fitness.stat");
-                if (re.exists() && !force) {
-                    System.out.println("Skipping " + b0.getAbsolutePath());
-                } else {
-                    tars.add(b0);
-                }
+                tars.add(b0);
             }
         }
         for (File tar : tars) {
@@ -155,9 +133,14 @@ public class BatchReevaluate {
     protected void reevaluateTar(File tar, MaseProblem sim) throws Exception {
         System.out.println("\n" + tar.getAbsolutePath());
         // Output files
-        File fitnessLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "fitness.stat"));
-        File behavLog = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "behaviours.stat"));
-        File bestFile = new File(tar.getParent(), tar.getName().replace("bests.tar.gz", prefix + "best.xml"));
+        String baseName = tar.getName().replaceAll("job\\.\\d+\\.", "");
+        File fitnessLog = new File(tar.getParent(), tar.getName().replace(baseName, prefix + "fitness.stat"));
+        File behavLog = new File(tar.getParent(), tar.getName().replace(baseName, prefix + "behaviours.stat"));
+        File bestFile = new File(tar.getParent(), tar.getName().replace(baseName, prefix + "best.xml"));
+        if (!force && bestFile.exists()) {
+            System.out.println("Already done. Skipping. Use -force to override.");
+            return;
+        }
 
         BufferedWriter fitWriter = new BufferedWriter(new FileWriter(fitnessLog));
         fitWriter.write("Generation Evaluations Subpop Individuals MinFitness MeanFitness MaxFitness BestSoFar");
@@ -198,7 +181,7 @@ public class BatchReevaluate {
                 }
 
                 // Log behaviours
-                behavWriter.write(EvaluationsStat.entry(sols.get(i).getGeneration(), 
+                behavWriter.write(EvaluationsStat.entry(sols.get(i).getGeneration(),
                         sols.get(i).getSubpop(), sols.get(i).getIndex(), reev.mergedResults, allSubpops));
                 behavWriter.newLine();
             }

@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.app.maze;
+package mase.evorbc.metrics;
 
+import mase.app.maze.MazeTask;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
+import mase.mason.generic.SmartAgentProvider;
 import net.jafama.FastMath;
 import org.apache.commons.math3.util.MathUtils;
 import sim.util.Double2D;
@@ -33,17 +35,17 @@ public class CircularFitness extends MasonEvaluation {
     @Override
     protected void preSimulation(MasonSimState sim) {
         super.preSimulation(sim);
-        MazeTask mt = (MazeTask) sim;
-        initialOri = mt.agent.orientation2D();
-        initialPos = mt.agent.getLocation();
+        SmartAgentProvider smp = (SmartAgentProvider) sim;
+        initialOri = smp.getSmartAgents().get(0).orientation2D();
+        initialPos = smp.getSmartAgents().get(0).getLocation();
     }
 
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
-        MazeTask mt = (MazeTask) sim;
-        oriDelta = MathUtils.normalizeAngle(mt.agent.orientation2D() - initialOri, 0);
-        displacement = mt.agent.getLocation().subtract(initialPos).rotate(initialOri);
+        SmartAgentProvider smp = (SmartAgentProvider) sim;
+        oriDelta = MathUtils.normalizeAngle(smp.getSmartAgents().get(0).orientation2D() - initialOri, 0);
+        displacement = smp.getSmartAgents().get(0).getLocation().subtract(initialPos).rotate(initialOri);
         
         targetOrientation = getTargetOrientation(displacement);
         oriError = getOrientationError(oriDelta, targetOrientation);

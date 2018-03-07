@@ -17,6 +17,7 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
@@ -74,23 +75,29 @@ public class BatchExecutionReevaluation {
         }
 
         for (File dir : dirSet) {
-            Collection<File> list = FileUtils.listFiles(dir, extensions, false);
-            if (!list.isEmpty()) {
+            Collection<File> dirFiles = FileUtils.listFiles(dir, extensions, false);
+            if (!dirFiles.isEmpty()) {
                 System.out.println(dir.getAbsolutePath());
-                MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, dir);
-                for (File f : list) {
+                List<Pair<File, File>> toGo = new ArrayList<>();
+                for (File f : dirFiles) {
                     File out = new File(f.getPath() + ".stat");
                     if (force || !out.exists()) {
-                        try {
-                            System.out.println("Going for " + f);
-                            ExecutionReevaluation.logController(f, simulator, reps, out);
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            System.out.println("Problem with " + f);
-                            out.delete();
-                        }
+                        toGo.add(Pair.of(f, out));
                     } else {
                         System.out.println("Skipping " + f);
+                    }
+                }
+                if (!toGo.isEmpty()) {
+                    MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, dir);
+                    for (Pair<File, File> inOut : toGo) {
+                        try {
+                            System.out.println("Going for " + inOut.getLeft());
+                            ExecutionReevaluation.logController(inOut.getLeft(), simulator, reps, inOut.getRight());
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            System.out.println("Problem with " + inOut.getLeft());
+                            inOut.getRight().delete();
+                        }
                     }
                 }
             }

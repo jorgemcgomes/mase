@@ -59,7 +59,6 @@ public class GPArbitratorController implements AgentController, ProvidesInspecto
                 lastPrimitive = p;
                 lastPrimitive.ac.reset();
             } // else, primitive not found, stay with the same as before
-            //System.out.println(lastPrimitive.id);
         }
 
         // 2. execute the primitive
@@ -125,7 +124,7 @@ public class GPArbitratorController implements AgentController, ProvidesInspecto
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 drawAxis(g);
-                drawPrimitives(nonused, g);
+                drawPrimitives(nonused, Color.GRAY, g);
                 drawPrimitives(treePrimitives, Color.GREEN, g);
                 if (lastPrimitive != null) {
                     highlightPrimitive(lastPrimitive, g);

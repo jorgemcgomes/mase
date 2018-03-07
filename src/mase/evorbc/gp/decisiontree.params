@@ -1,6 +1,9 @@
 parent.0 = ../../base.params
 parent.1 = ../evorbc.params
 
+eval.num-post = 1
+eval.post.0 = mase.evorbc.gp.CleanupCodePostEvaluator
+
 problem.controller-factory = mase.evorbc.gp.GPArbitratorFactory
 
 # there is some bug with multithreading and mutation
@@ -40,18 +43,17 @@ gp.build.ptc2.max-size = 10
 init = ec.gp.GPInitializer
 
 pop.subpops = 1
-pop.subpop.0 = ec.Subpopulation
 pop.default-subpop = 0
-pop.subpop.0.size = 1000
-breed.elite.0 = 0
+pop.subpop.0 = ec.Subpopulation
+pop.subpop.0.size = 2000
 pop.subpop.0.duplicate-retries = 100
-
 pop.subpop.0.species = ec.gp.GPSpecies
 pop.subpop.0.species.fitness = mase.evaluation.ExpandedFitness
 pop.subpop.0.species.ind = ec.gp.GPIndividual
 pop.subpop.0.species.ind.numtrees = 1
 pop.subpop.0.species.ind.tree.0 = ec.gp.GPTree
 pop.subpop.0.species.ind.tree.0.tc = tc0
+breed.elite.0 = 0
 
 # Pipeline
 pop.subpop.0.species.pipe = ec.breed.MultiBreedingPipeline
@@ -67,7 +69,8 @@ pop.subpop.0.species.pipe.source.3 = ec.gp.breed.MutateERCPipeline
 pop.subpop.0.species.pipe.source.3.prob = 0.3
 
 # Crossover
-gp.koza.xover.source.0 = ec.parsimony.RatioBucketTournamentSelection
+#gp.koza.xover.source.0 = ec.parsimony.RatioBucketTournamentSelection
+gp.koza.xover.source.0 = ec.select.TournamentSelection
 gp.koza.xover.source.1 = same
 gp.koza.xover.ns.0 = ec.gp.koza.KozaNodeSelector
 gp.koza.xover.ns.1 = same
@@ -76,7 +79,8 @@ gp.koza.xover.maxsize = 500
 gp.koza.xover.tries = 10
 
 # Mutation
-gp.koza.mutate.source.0 = ec.parsimony.RatioBucketTournamentSelection
+#gp.koza.mutate.source.0 = ec.parsimony.RatioBucketTournamentSelection
+gp.koza.mutate.source.0 = ec.select.TournamentSelection
 gp.koza.mutate.ns.0 = ec.gp.koza.KozaNodeSelector
 gp.koza.mutate.maxdepth = 17
 gp.koza.mutate.maxsize = 500
@@ -86,16 +90,19 @@ gp.koza.mutate.tries = 10
 gp.koza.mutate.equal = false
 
 # ERC Mutation
-gp.breed.mutate-erc.source.0 = ec.parsimony.RatioBucketTournamentSelection
+#gp.breed.mutate-erc.source.0 = ec.parsimony.RatioBucketTournamentSelection
+gp.breed.mutate-erc.source.0 = ec.select.TournamentSelection
 gp.breed.mutate-erc.ns.0 = ec.gp.koza.KozaNodeSelector
 
 # Mutate promote
-gp.breed.mutate-promote.source.0 = ec.parsimony.RatioBucketTournamentSelection
+#gp.breed.mutate-promote.source.0 = ec.parsimony.RatioBucketTournamentSelection
+gp.breed.mutate-promote.source.0 = ec.select.TournamentSelection
 gp.breed.mutate-promote.tries = 10
 
-select.ratio-bucket-tournament.size = 7
-select.ratio-bucket-tournament.ratio = 2
-select.ratio-bucket-tournament.pick-worst = false
+#select.ratio-bucket-tournament.size = 7
+#select.ratio-bucket-tournament.ratio = 2
+#select.ratio-bucket-tournament.pick-worst = false
+select.tournament.size=7
 
 # Node Selectors
 gp.koza.ns.terminals = 0.5

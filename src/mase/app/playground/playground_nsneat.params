@@ -4,12 +4,14 @@ parent.2 = ../../neat/neat.params
 
 problem.seed =                     0
 problem.repetitions =              100
-problem.max-steps =                500
+problem.max-steps =                200
 
 problem.number-evals =             1
 problem.eval.0 =                   mase.app.playground.PlaygroundSDBC
 problem.eval.0.update-freq =       1
 problem.eval.0.aggregation =       geometricMedian
+problem.eval.0.sd =                false
+problem.eval.0.standardization =   sdbcstandardization.txt
 
 neat.size = 500
 neat.SPECIE.COUNT = 10
@@ -17,8 +19,10 @@ neat.RECURRENCY.ALLOWED = false
 generations = 500
 
 novelty.behaviour-index = 0
-novelty.archive-growth = 0.1
-novelty.archive-size = 5000
+novelty.archive-growth = 0.05
+novelty.archive-size = 1000
+novelty.archive-criteria = novel
+novelty.removal-criteria = novel
 
 # do not want fitness
 stat.child.1 = ec.Statistics

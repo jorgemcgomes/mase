@@ -23,6 +23,7 @@ import mase.controllers.GroupController;
 import mase.controllers.HeterogeneousGroupController;
 import mase.evaluation.CompoundEvaluationResult;
 import mase.evaluation.FitnessResult;
+import mase.util.CommandLineUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
 
@@ -37,8 +38,13 @@ public class ReevaluationTools {
     public static final String P_NREPS = "-r";
 
     public static void main(String[] args) throws Exception {
-        int reps = getRepetitions(args);
-        File gc = findControllerFile(args);
+        int reps = CommandLineUtils.getIntFromArgs(args, P_NREPS);
+        // In case there is no GroupController, but multiple AgentControllers, 
+        // the file of the first AC is returned
+        File gc = CommandLineUtils.getFileFromArgs(args, P_CONTROLLER, true);
+        if(gc == null) {
+            gc = CommandLineUtils.getFileFromArgs(args, P_AGENT_CONTROLLER, true);
+        }
         MaseProblem simulator = createSimulator(args, gc.getParentFile());
         GroupController controller = createController(args);
         Reevaluation res = reevaluate(controller, simulator, reps);
@@ -76,38 +82,11 @@ public class ReevaluationTools {
         }
         return createSimulator(args);
     }
-    
-    /**
-     * In case there is no GroupController, but multiple AgentControllers, the file of the first AC is returned
-     * @param args
-     * @return 
-     */
-    public static File findControllerFile(String[] args) {
-        File gc = null;
-        for(int i = 0 ; i < args.length - 1 ; i++) {
-            if(args[i].equalsIgnoreCase(P_CONTROLLER) || args[i].equalsIgnoreCase(P_AGENT_CONTROLLER)) {
-                gc = new File(args[i+1]);
-                break;
-            }
-        }
-        if(gc != null) {
-            return gc;
-        }
-        return null;
-    }
 
     public static GroupController createController(String[] args) throws Exception {
         // Parameter loading
-        File gc = null;
-        ArrayList<File> controllers = new ArrayList<>();
-        int x;
-        for (x = 0; x < args.length; x++) {
-            if (args[x].equals(P_CONTROLLER)) {
-                gc = new File(args[1 + x++]);
-            } else if (args[x].equals(P_AGENT_CONTROLLER)) {
-                controllers.add(new File(args[1 + x++]));
-            }
-        }
+        File gc = CommandLineUtils.getFileFromArgs(args, P_CONTROLLER, true);
+        List<File> controllers = CommandLineUtils.getFilesFromArgs(args, P_AGENT_CONTROLLER, true);
         if (gc == null && controllers.isEmpty()) {
             System.out.println("No controllers to run.");
             return null;
@@ -135,15 +114,6 @@ public class ReevaluationTools {
             controller = new HeterogeneousGroupController(acs);
         }
         return controller;
-    }
-
-    public static int getRepetitions(String[] args) {
-        for (int x = 0; x < args.length; x++) {
-            if (args[x].equals(P_NREPS)) {
-                return Integer.parseInt(args[x + 1]);
-            }
-        }
-        return -1;
     }
     
     public static class Reevaluation {

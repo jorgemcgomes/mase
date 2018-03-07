@@ -4,12 +4,15 @@ parent.2 = ../../neat/neat.params
 
 problem.seed =                     0
 problem.repetitions =              100
-problem.max-steps =                500
+problem.max-steps =                200
 
 problem.number-evals =             2
 problem.eval.0 =                   mase.app.playground.PlaygroundSDBC
 problem.eval.0.update-freq =       1
 problem.eval.0.aggregation =       geometricMedian
+problem.eval.0.sd =                false
+problem.eval.0.standardization =   sdbcstandardization.txt
+
 problem.eval.1 =                   mase.app.playground.BehaviourVarianceFitness
 problem.eval.1.behaviour-index =   0
 
