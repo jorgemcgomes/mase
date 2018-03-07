@@ -14,16 +14,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import mase.controllers.AgentController;
 import mase.controllers.GroupController;
+import mase.evorbc.gp.GPArbitratorController;
 import mase.mason.SolutionsList.SolutionSelectionHandler;
 import mase.mason.world.CircularObject;
 import mase.mason.world.EmboddiedAgent;
 import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.MultilineObject;
 import mase.mason.world.PointObject;
+import mase.mason.world.SmartAgent;
 import mase.stat.PersistentSolution;
 import mase.stat.ReevaluationTools;
 import mase.stat.SolutionPersistence;
+import mase.util.CommandLineUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
@@ -74,7 +78,7 @@ public class MasonTracer {
             }
         }
 
-        File gc = ReevaluationTools.findControllerFile(args);
+        File gc = CommandLineUtils.getFileFromArgs(args, ReevaluationTools.P_CONTROLLER, true);
         if (gc == null) {
             System.err.println("Controller(s) not found! Use -gc");
             System.exit(1);
@@ -139,15 +143,6 @@ public class MasonTracer {
             GroupController controller = ReevaluationTools.createController(args);
             MasonSimState simState = sim.getSimState(controller, seed);
             tracer.trace(simState, out);
-        }
-
-    }
-
-    private static class TracerHandler implements SolutionSelectionHandler {
-
-        @Override
-        public void solutionSelected(PersistentSolution sol) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
     }
@@ -222,17 +217,34 @@ public class MasonTracer {
             }
         }
 
-        // record paths
+        // run simulation and record paths
         boolean keepGoing = true;
         HashMap<CircularObject, List<Int2D>> points = new HashMap<>();
+        HashMap<CircularObject, Integer> lastPrimitive = new HashMap<>(); // only used for primitive-based controller logging
         while (keepGoing) {
             for (CircularObject ag : tracked) {
+                // Log position
                 if (!points.containsKey(ag)) { // init
                     points.put(ag, new ArrayList<Int2D>());
                 }
                 if (field.exists(ag)) {
                     points.get(ag).add(new Int2D((int) Math.round(ag.getLocation().x * scale),
                             (int) Math.round(ag.getLocation().y * scale)));
+                }
+                // Log primitive change events
+                if(ag instanceof SmartAgent) {
+                    AgentController ac = ((SmartAgent) ag).getAgentController();
+                    if(ac instanceof GPArbitratorController && ((GPArbitratorController) ac).getLastPrimitive() != null) {
+                        int newP = ((GPArbitratorController) ac).getLastPrimitive().id;
+                        if(lastPrimitive.containsKey(ag) && newP != lastPrimitive.get(ag)) {
+                            int x = (int) Math.round((ag.getLocation().x - ag.getRadius() / 4) * scale);
+                            int y = (int) Math.round((ag.getLocation().y - ag.getRadius() / 4) * scale);
+                            int s = (int) Math.round(ag.getRadius() / 2 * scale);
+                            gr.setPaint(ag.paint);
+                            gr.drawOval(x, y, s, s);
+                        }
+                        lastPrimitive.put(ag, newP);
+                    }
                 }
             }
             keepGoing = simState.schedule.step(simState);
@@ -289,7 +301,7 @@ public class MasonTracer {
                     int cy = (int) Math.round(ag.getLocation().y * scale);
                     int ox = (int) Math.round(Math.cos(ori) * ag.getRadius() * scale);
                     int oy = (int) Math.round(Math.sin(ori) * ag.getRadius() * scale);
-                    gr.drawLine(cx, cy, cx - ox, cy - oy);
+                    gr.drawLine(cx, cy, cx + ox, cy + oy);
                 }
             }
         }

@@ -1,0 +1,7 @@
+parent.0 = obsforaging.params
+
+problem.eval.0 = mase.app.playground.SelectiveForagingFitness
+problem.eval.0.distance = 10
+problem.eval.0.over = true
+problem.minObjects = 30
+problem.maxObjects = 30

@@ -7,6 +7,7 @@ package mase.evorbc;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import mase.controllers.AgentController;
@@ -139,21 +140,23 @@ public class SubsetNeuralArbitratorController implements AgentController, Provid
                         float f = 0.8f - (float) (double) e.getValue() * 0.8f;
                         Color c = new Color(f, f, f);
                         String act = String.format("%.3f", e.getValue());
-                        g.setColor(Color.BLACK);
                         Primitive p = pKey.get(e.getKey());
-                        g.drawChars(act.toCharArray(), 0, act.length(), tx(p.coordinates[0]) + 5, ty(p.coordinates[1]));
-                        drawPrimitive(p, c, g);
-                    }
 
-                    for (int i = 0; i < primitives.length; i++) {
-
+                        g.setColor(Color.BLACK);
+                        if(p.coordinates.length == 2) {
+                            g.drawChars(act.toCharArray(), 0, act.length(), tx(p.coordinates[0]) + 5, ty(p.coordinates[1]));
+                            drawPrimitive(p, c, g);
+                        } else {
+                            int last = p.coordinates.length - 1;
+                            g.drawChars(act.toCharArray(), 0, act.length(), pca(last) + 5, pcv(p.coordinates[last], last));
+                        }
                     }
                     highlightPrimitive(lastPrimitive, g);
                 }
             }
         };
-        insp.setRepertoireBounds(-20d, 20d, -14d, 14d);
-        //insp.setBounds(Arrays.asList(primitives));
+        //insp.setRepertoireBounds(-20d, 20d, -14d, 14d);
+        insp.setBounds(Arrays.asList(primitives));
         return insp;
     }
 

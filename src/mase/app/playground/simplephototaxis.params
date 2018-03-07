@@ -1,4 +1,0 @@
-parent.0 = phototaxis.params
-    
-problem.minObstacles = 0
-problem.maxObstacles = 0

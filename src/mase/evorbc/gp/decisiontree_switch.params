@@ -1,0 +1,11 @@
+parent.0 = decisiontree.params
+
+problem.number-evals =      2 
+problem.eval.1 =            mase.evorbc.SwitchesFitness 
+problem.eval.1.frequency =  1 
+
+eval.num-post =             1
+eval.post.0 =               mase.mo.LinearScalarization
+eval.post.0.scores =        fitness,eval.1
+eval.post.0.weights =       0.9,0.1
+eval.post.0.normalise =     true

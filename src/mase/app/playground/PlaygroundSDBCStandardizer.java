@@ -16,6 +16,9 @@ import mase.controllers.HomogeneousGroupController;
 import mase.evaluation.EvaluationFunction;
 import mase.mason.MasonSimulationProblem;
 import mase.stat.ReevaluationTools;
+import mase.util.CommandLineUtils;
+import mase.util.FormatUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -26,9 +29,12 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class PlaygroundSDBCStandardizer {
     
-    public static final File STORE_FILE = new File("build/classes/mase/app/playground/sdbcstandardization.txt");
+    public static final String STORE = "-store";
+    public static final File STORE_BASE = new File("build/classes/mase/app/playground");
+    public static final File SRC_BASE = new File("src/mase/app/playground");
     
     public static void main(String[] args) throws IOException {
+        String storeFile = CommandLineUtils.getValueFromArgs(args, STORE);
         MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args);
         PlaygroundSDBC fun = null;
         for (EvaluationFunction ef : sim.getEvalFunctions()) {
@@ -62,7 +68,9 @@ public class PlaygroundSDBCStandardizer {
             }            
         }
         
-        FileWriter fw = new FileWriter(STORE_FILE);
+        File out = new File(STORE_BASE, storeFile);
+        FileWriter fw = new FileWriter(out);
+        System.out.println("Writing to " + out.getAbsolutePath());
         
         for(int i = 0 ; i < ds.length - 2 ; i++) { // the last two are the linear and turning speed
             System.out.println("Feature " + i + ": Mean: " + ds[i].getMean() + " SD: " + ds[i].getStandardDeviation() + " Min: " + ds[i].getMin() + " Max: " + ds[i].getMax());
@@ -78,6 +86,10 @@ public class PlaygroundSDBCStandardizer {
         fw.write(ds.length - 1 + " " + 0.0 + " " + pl.par.turnSpeed);
 
         fw.close();
+        
+        File copy = new File(SRC_BASE, storeFile);
+        System.out.println("Writing to " + copy.getAbsolutePath());
+        FileUtils.copyFile(out, copy);
     }
     
     public static Pair<double[], double[]> readStandardization(File f) throws FileNotFoundException {

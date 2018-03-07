@@ -37,7 +37,7 @@ public class GeomUtils {
     public static boolean isLeftOf(Double2D p, Double2D v, Double2D w) {
         return (p.y - v.y) * (w.x - v.x) > (p.x - v.x) * (w.y - v.y);
     }
-    
+
     public static Double2D pointInLine(Double2D lineStart, Double2D lineEnd, double distance) {
         return (((lineEnd.subtract(lineStart)).resize(distance)).add(lineStart));
     }
@@ -263,8 +263,8 @@ public class GeomUtils {
         }
 
         public boolean isInsideBB(Double2D point) {
-            return point.x > boundingBox.getLeft().x && point.x < boundingBox.getRight().x &&
-                    point.y > boundingBox.getLeft().y && point.y < boundingBox.getRight().y;
+            return point.x > boundingBox.getLeft().x && point.x < boundingBox.getRight().x
+                    && point.y > boundingBox.getLeft().y && point.y < boundingBox.getRight().y;
         }
 
         public boolean intersects(Multiline other) {
@@ -282,12 +282,10 @@ public class GeomUtils {
         }
 
         public boolean boundingBoxOverlap(Multiline other) {
-            for (Double2D p : points) {
-                if (other.isInsideBB(p)) {
-                    return true;
-                }
-            }
-            return false;
+            return !(this.boundingBox.getLeft().x > other.boundingBox.getRight().x ||
+                    this.boundingBox.getRight().x < other.boundingBox.getLeft().x ||
+                    this.boundingBox.getLeft().y > other.boundingBox.getRight().y ||
+                    this.boundingBox.getRight().y < other.boundingBox.getLeft().y);
         }
 
         public Multiline add(Double2D pos) {
@@ -338,7 +336,7 @@ public class GeomUtils {
             this.end = new Double2D(endX, endY);
         }
     }
-    
+
     public static class Line implements Serializable {
 
         private static final long serialVersionUID = 1L;
@@ -365,9 +363,11 @@ public class GeomUtils {
         }
 
         /**
-         * Returns the intersection point of two lines, or null if they are parallel
+         * Returns the intersection point of two lines, or null if they are
+         * parallel
+         *
          * @param other
-         * @return 
+         * @return
          */
         public Double2D intersect(Line other) {
             double x1 = this.p1.x;
@@ -390,8 +390,9 @@ public class GeomUtils {
 
         /**
          * Smaller angle between two lines
+         *
          * @param other
-         * @return 
+         * @return
          */
         public double angle(Line other) {
             Double2D a = this.p1.subtract(this.p2);
@@ -404,6 +405,5 @@ public class GeomUtils {
             return angle;
         }
     }
-    
 
 }

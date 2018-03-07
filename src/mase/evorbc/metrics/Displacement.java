@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.app.maze;
+package mase.evorbc.metrics;
 
+import mase.app.maze.MazeTask;
 import mase.evaluation.EvaluationResult;
 import mase.evaluation.VectorBehaviourResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
+import mase.mason.generic.SmartAgentProvider;
 import sim.util.Double2D;
 
 /**
@@ -29,15 +31,15 @@ public class Displacement extends MasonEvaluation {
     @Override
     protected void preSimulation(MasonSimState sim) {
         super.preSimulation(sim); 
-        MazeTask mt = (MazeTask) sim;
-        initial = mt.agent.getLocation();
+        SmartAgentProvider smp = (SmartAgentProvider) sim;
+        initial = smp.getSmartAgents().get(0).getLocation();
     }
     
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(null);
-        MazeTask mt = (MazeTask) sim;
-        Double2D loc = mt.agent.getLocation();
+        SmartAgentProvider smp = (SmartAgentProvider) sim;
+        Double2D loc = smp.getSmartAgents().get(0).getLocation();
         Double2D disp = loc.subtract(initial);
         vbr = new VectorBehaviourResult( disp.x,  disp.y);
     }

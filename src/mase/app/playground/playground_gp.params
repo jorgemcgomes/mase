@@ -1,30 +1,88 @@
-parent.0 = ../../evorbc/gp/decisiongraph.params
+parent.0 = ../../evorbc/gp/decisiontree.params
 
-gp.fs.0.func.6 = mase.evorbc.gp.SensorValue
-gp.fs.0.func.6.nc = sensorterminal
-gp.fs.0.func.6.sensor-index = 0
-gp.fs.0.func.6.sensor-name = LW
-gp.fs.0.func.7 = mase.evorbc.gp.SensorValue
-gp.fs.0.func.7.nc = sensorterminal
-gp.fs.0.func.7.sensor-index = 1
-gp.fs.0.func.7.sensor-name = FW
-gp.fs.0.func.8 = mase.evorbc.gp.SensorValue
-gp.fs.0.func.8.nc = sensorterminal
-gp.fs.0.func.8.sensor-index = 2
-gp.fs.0.func.8.sensor-name = RW
-gp.fs.0.func.9 = mase.evorbc.gp.SensorValue
-gp.fs.0.func.9.nc = sensorterminal
-gp.fs.0.func.9.sensor-index = 3
-gp.fs.0.func.9.sensor-name = FC
-gp.fs.0.func.10 = mase.evorbc.gp.SensorValue
-gp.fs.0.func.10.nc = sensorterminal
-gp.fs.0.func.10.sensor-index = 4
-gp.fs.0.func.10.sensor-name = RC
-gp.fs.0.func.11 = mase.evorbc.gp.SensorValue
-gp.fs.0.func.11.nc = sensorterminal
-gp.fs.0.func.11.sensor-index = 5
-gp.fs.0.func.11.sensor-name = BC
-gp.fs.0.func.12 = mase.evorbc.gp.SensorValue
-gp.fs.0.func.12.nc = sensorterminal
-gp.fs.0.func.12.sensor-index = 6
-gp.fs.0.func.12.sensor-name = LC
+pop.subpop.0.size = 2000
+generations = 100
+
+pop.subpop.0.species.pipe = ec.breed.MultiBreedingPipeline
+pop.subpop.0.species.pipe.generate-max = false
+pop.subpop.0.species.pipe.num-sources = 3
+pop.subpop.0.species.pipe.source.0 = ec.gp.koza.CrossoverPipeline
+pop.subpop.0.species.pipe.source.0.prob = 0.5
+pop.subpop.0.species.pipe.source.1 = ec.gp.koza.MutationPipeline
+pop.subpop.0.species.pipe.source.1.prob = 0.2
+pop.subpop.0.species.pipe.source.2 = ec.gp.breed.MutateERCPipeline
+pop.subpop.0.species.pipe.source.2.prob = 0.3
+
+gp.fs.0.size = 16
+
+gp.fs.0.func.2 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.2.nc = split
+gp.fs.0.func.2.sensor-index = 0
+gp.fs.0.func.2.sensor-name = OL
+
+gp.fs.0.func.3 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.3.nc = split
+gp.fs.0.func.3.sensor-index = 1
+gp.fs.0.func.3.sensor-name = OLF
+
+gp.fs.0.func.4 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.4.nc = split
+gp.fs.0.func.4.sensor-index = 2
+gp.fs.0.func.4.sensor-name = OF
+
+gp.fs.0.func.5 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.5.nc = split
+gp.fs.0.func.5.sensor-index = 3
+gp.fs.0.func.5.sensor-name = ORF
+
+gp.fs.0.func.6 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.6.nc = split
+gp.fs.0.func.6.sensor-index = 4
+gp.fs.0.func.6.sensor-name = OR
+
+gp.fs.0.func.7 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.7.nc = split
+gp.fs.0.func.7.sensor-index = 5
+gp.fs.0.func.7.sensor-name = OB
+
+
+gp.fs.0.func.8 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.8.nc = split
+gp.fs.0.func.8.sensor-index = 6
+gp.fs.0.func.8.sensor-name = PF
+
+gp.fs.0.func.9 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.9.nc = split
+gp.fs.0.func.9.sensor-index = 7
+gp.fs.0.func.9.sensor-name = PRF
+
+gp.fs.0.func.10 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.10.nc = split
+gp.fs.0.func.10.sensor-index = 8
+gp.fs.0.func.10.sensor-name = PR
+
+gp.fs.0.func.11 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.11.nc = split
+gp.fs.0.func.11.sensor-index = 9
+gp.fs.0.func.11.sensor-name = PRB
+
+gp.fs.0.func.12 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.12.nc = split
+gp.fs.0.func.12.sensor-index = 10
+gp.fs.0.func.12.sensor-name = PB
+
+gp.fs.0.func.13 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.13.nc = split
+gp.fs.0.func.13.sensor-index = 11
+gp.fs.0.func.13.sensor-name = PLB
+
+gp.fs.0.func.14 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.14.nc = split
+gp.fs.0.func.14.sensor-index = 12
+gp.fs.0.func.14.sensor-name = PL
+
+gp.fs.0.func.15 = mase.evorbc.gp.SensorLower
+gp.fs.0.func.15.nc = split
+gp.fs.0.func.15.sensor-index = 13
+gp.fs.0.func.15.sensor-name = PLF
+

@@ -380,13 +380,15 @@ public class NoveltyEvaluation implements PostEvaluator {
                     }
                 }
 
-                // open up space for new individuals if needed
-                removeN(state, archive, archive.size() - sizeLimit + toAdd.size());
-
                 // add new individuals to the archive
                 for (Individual ind : toAdd) {
                     ArchiveEntry ar = new ArchiveEntry(state, ind);
                     archive.add(ar);
+                }
+                
+                // remove excess if needed
+                while(archive.size() > sizeLimit) {
+                    removeN(state, archive, 1);
                 }
             }
         }
@@ -413,20 +415,31 @@ public class NoveltyEvaluation implements PostEvaluator {
                 ArchiveEntry e = archive.get(i);
                 e.novelty = scores.get(i);
             }
+            
+            if(n > 1) {
+                // sort archive according to novelty
+                Collections.sort(archive, new Comparator<ArchiveEntry>() {
+                    @Override
+                    public int compare(ArchiveEntry o1, ArchiveEntry o2) {
+                        return Double.compare(o1.novelty, o2.novelty);
+                    }
+                });
 
-            // sort archive according to novelty
-            Collections.sort(archive, new Comparator<ArchiveEntry>() {
-                @Override
-                public int compare(ArchiveEntry o1, ArchiveEntry o2) {
-                    return Double.compare(o1.novelty, o2.novelty);
+                // remove least novel
+                Iterator<ArchiveEntry> iter = archive.iterator();
+                for (int i = 0; i < n; i++) {
+                    iter.next();
+                    iter.remove();
+                }                
+            } else {
+                // find the least novel and remove it
+                ArchiveEntry leastNovel = null;
+                for(ArchiveEntry e : archive) {
+                    if(leastNovel == null || e.novelty < leastNovel.novelty) {
+                        leastNovel = e;
+                    }
                 }
-            });
-
-            // remove least novel
-            Iterator<ArchiveEntry> iter = archive.iterator();
-            for (int i = 0; i < n; i++) {
-                iter.next();
-                iter.remove();
+                archive.remove(leastNovel);
             }
         }
     }

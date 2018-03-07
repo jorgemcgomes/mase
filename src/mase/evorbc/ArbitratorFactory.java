@@ -17,7 +17,7 @@ public abstract class ArbitratorFactory implements ControllerFactory {
 
     public static final Parameter DEFAULT_BASE = new Parameter("evorbc");
     public static final String P_REPERTOIRE_IMPL = "repertoire-impl";
-    public static final String P_MAPPING_FUNCTION = "mapping-fun";
+    public static final String P_MAPPING_FUNCTION = "mapping-fun";    
     private static final long serialVersionUID = 1L;
     protected Repertoire repo;
     protected MappingFunction mapFun;

@@ -1,7 +1,7 @@
-parent.0 = freeforaging.params
+parent.0 = foraging.params
 
 problem.minObstacles = 5
-problem.maxObstacles = 10
+problem.maxObstacles = 5
 problem.minObstacleSize = 15
 problem.maxObstacleSize = 30
 

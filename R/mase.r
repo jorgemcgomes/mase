@@ -152,17 +152,16 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
 }
 
 # loads any file given the column names
-loadFile <- function(file, separator=" ",colnames=NULL, exclude.cols=F, ignore.na.cols=F) {
+loadFile <- function(file, separator=" ", colnames=NULL, keep.cols=NULL, ignore.na.cols=F) {
   frame <- fread(file, sep=separator, stringsAsFactors=F, fill=T)
   if(!is.null(colnames)) {
-    if(exclude.cols) {
-      set(frame, j=which(!(colnames(frame) %in% colnames)), value=NULL)
-    } else {
-      setnames(frame,colnames)
-      if(ignore.na.cols) {
-        set(frame, j=which(is.na(colnames)), value=NULL)
-      }
+    setnames(frame,colnames)
+    if(ignore.na.cols) {
+      set(frame, j=which(is.na(colnames)), value=NULL)
     }
+  }
+  if(!is.null(keep.cols)) {
+    set(frame, j=which(!(colnames(frame) %in% keep.cols)), value=NULL)
   }
   return(frame)
 }
@@ -172,19 +171,16 @@ loadFile <- function(file, separator=" ",colnames=NULL, exclude.cols=F, ignore.n
 # columns with NA will be excluded
 # bestsOnly: keep only the best (highest fitness) individual of each generation and subpop. sample is ignored
 loadBehaviours <- function(file, sample=1, vars=NULL) {
-  frame <- fread(file, header=F, sep=" ", stringsAsFactors=F)
-  fixedvars <- c("Generation","Subpop","Index","Fitness")
-  if(is.null(vars)) {
-    vars <- paste0("B",1:(ncol(frame)-length(fixedvars)))
+  frame <- fread(file, header=T, sep=" ", stringsAsFactors=F)
+  fixedvars <- c("Generation","Subpop","Index")
+  if(!is.null(vars)) {
+    v <- c("Generation","Subpop","Index",vars)
+    ex <- colnames(frame)[!(colnames(frame) %in% v)]
+    set(frame, j=ex, value=NULL)
   }
-  vars <- c(fixedvars,vars)
-  # remove columns with NA in vars
-  set(frame, j=which(is.na(vars)), value=NULL)
-  setnames(frame, vars[!is.na(vars)])
-
   frame <- frame[,which(unlist(lapply(frame, function(x)!all(is.na(x))))),with=F] # remove columns with NA only
   frame <- na.omit(frame) # remove rows with NAs
-  frame$Subpop <- factor(frame$Subpop)
+  frame[, Subpop := factor(Subpop)]
   
   if(sample < 1) {
     frame <- frame[order(sample(nrow(frame)), nrow(frame) * sample),]
@@ -614,7 +610,7 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
     newCoords <- pc@scores
   } else if(method[1]=="mds") {
     require(smacof)
-    dists <- parDist(oldCoords)
+    dists <- parDist(as.matrix(oldCoords))
     md <- mds(dists, ndim=k, verbose=T, ...)
     newCoords <- md$conf
   } else {
@@ -626,7 +622,7 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
   newCoords <- as.data.table(newCoords)
   colnames(newCoords) <- paste0("V",1:k)
   
-  return(merge(data, cbind(oldCoords,newCoords), by=vars))
+  return(merge(data, cbind(oldCoords,newCoords), by=vars, sort=F))
 }
 
 # to [0,1]
@@ -663,6 +659,18 @@ parallelCoordinates <- function(data, vars=NULL, color.var=NULL, points=T, lines
     g <- g + geom_point(aes_string(colour=color.var), alpha=alpha)
   }
   return(g)
+}
+
+full.circle <- function(center=c(0,0), r=1, npoints=100){
+  tt <- seq(0,2*pi,length.out = npoints)
+  return(data.frame(x = center[1] + r * cos(tt), y = center[2] + r * sin(tt)))
+}
+
+circle.sector <- function(center=c(0,0), r=1, fromangle=0, toangle=0, npoints=50) {
+  tt <- seq(fromangle,toangle,length.out = npoints)
+  curve <- data.frame(x = center[1] + r * cos(tt), y = center[2] + r * sin(tt))
+  curve <- rbind(center, curve, center)
+  return(curve)
 }
 
 #### General purpose statistics ###########################################################

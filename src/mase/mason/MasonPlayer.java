@@ -10,7 +10,7 @@ import mase.controllers.GroupController;
 import mase.stat.PersistentSolution;
 import mase.stat.ReevaluationTools;
 import mase.stat.SolutionPersistence;
-import sim.display.Controller;
+import mase.util.CommandLineUtils;
 import sim.display.GUIState;
 
 /**
@@ -20,18 +20,17 @@ import sim.display.GUIState;
 public class MasonPlayer {
 
     public static void main(String[] args) throws Exception {
-        File tar = ReevaluationTools.findControllerFile(args);
-        if (tar == null) {
+        File cFile = CommandLineUtils.getFileFromArgs(args, ReevaluationTools.P_CONTROLLER, true);
+        if (cFile == null) {
             System.err.println("Controller(s) not found! Use -gc");
             System.exit(1);
         }
         long startSeed = 0;
-        File parent = ReevaluationTools.findControllerFile(args).getParentFile();
-        MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, parent);
+        MasonSimulationProblem sim = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, cFile.getParentFile());
 
-        if (tar.getName().endsWith(".tar.gz")) {
+        if (cFile.getName().endsWith(".tar.gz")) {
             // Collection of solutions
-            final List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(tar);
+            final List<PersistentSolution> sols = SolutionPersistence.readSolutionsFromTar(cFile);
             System.out.println("Solutions found in tar: " + sols.size());
 
             final MasonSimState state = sim.getSimState(sols.get(0).getController(), startSeed);

@@ -20,6 +20,7 @@ import mase.mason.generic.SmartAgentProvider;
 import mase.mason.world.SmartAgent;
 import mase.stat.ReevaluationTools;
 import mase.stat.SolutionPersistence;
+import mase.util.CommandLineUtils;
 import mase.util.FormatUtils;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -31,8 +32,8 @@ import sim.engine.Steppable;
 public class ExecutionReevaluation {
 
     public static void main(String[] args) {
-        int reps = ReevaluationTools.getRepetitions(args);
-        File gc = ReevaluationTools.findControllerFile(args);
+        int reps = CommandLineUtils.getIntFromArgs(args, ReevaluationTools.P_NREPS);
+        File gc = CommandLineUtils.getFileFromArgs(args, ReevaluationTools.P_CONTROLLER, true);
         MasonSimulationProblem simulator = (MasonSimulationProblem) ReevaluationTools.createSimulator(args, gc.getParentFile());
 
         File out = new File(gc.getAbsolutePath() + ".stat");

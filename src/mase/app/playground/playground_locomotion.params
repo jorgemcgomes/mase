@@ -1,0 +1,26 @@
+parent.0 = playground.params
+parent.1 = ../../me/me.params
+
+generations=500
+
+problem.number-evals=3
+problem.eval.0=mase.evorbc.metrics.CircularFitness
+problem.eval.1=mase.evorbc.metrics.Displacement
+problem.eval.2=mase.evorbc.metrics.CircularFitnessLog
+
+fitness.fitness-index=0
+ec.subpop.behaviour-index = 1
+ec.subpop.resolution=1
+vector.species.genome-size=2
+vector.species.mutation-prob=0.5
+
+# configure an empty environment
+problem.max-steps=20
+problem.repetitions=1
+problem.seed=0 
+problem.minObstacles=0
+problem.maxObstacles=0
+problem.minObjects=0
+problem.maxObjects=0
+problem.randomPosition=false
+problem.randomOrientation=false

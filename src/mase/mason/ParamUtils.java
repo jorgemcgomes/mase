@@ -15,6 +15,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import org.apache.commons.lang3.ArrayUtils;
 import sim.util.Double2D;
 import sim.util.Int2D;
 
@@ -78,6 +79,16 @@ public class ParamUtils {
      */
     public static void autoSetParameters(Object params, EvolutionState state, Parameter base, Parameter defaultBase, boolean useAll) {
         Field[] fields = params.getClass().getFields();
+        Field[] fieldsDeclared = params.getClass().getDeclaredFields();
+        for(Field f : fieldsDeclared) {
+            if(!ArrayUtils.contains(fields, f)) {
+                fields = ArrayUtils.add(fields, f);
+                state.output.warning("Field declared but not accessible, considering it anyway: " + f + " (" + params.getClass() +")");
+            }
+        }
+        if(fields.length == 0) {
+            state.output.fatal("No fields found or accessible for class: " + params.getClass());
+        }
         for (Field field : fields) {
             try {
                 // Check for attribute visibility and skip if its private

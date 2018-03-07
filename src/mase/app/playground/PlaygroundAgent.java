@@ -14,7 +14,6 @@ import mase.mason.world.DistanceSensorArcs;
 import mase.mason.world.MultilineObject;
 import mase.mason.world.RaySensor;
 import mase.mason.world.SmartAgent;
-import net.jafama.FastMath;
 
 /**
  *
@@ -27,14 +26,9 @@ public class PlaygroundAgent extends SmartAgent {
     public PlaygroundAgent(Playground sim, AgentController ac) {
         super(sim, sim.field, sim.par.radius, Color.RED, ac);
         
-        this.circledPortrayal.setOnlyCircleWhenSelected(false);
-        this.circledPortrayal.setCircleShowing(true);
-        //this.circledPortrayal.paint = Color.BLUE;
-        this.circledPortrayal.scale = sim.par.coneRange * 2;     
-        
-        // Obstacle whisker sensor
+        // Obstacle whisker sensors
         RaySensor dw = new RaySensor(sim, field, this);
-        dw.setRays(sim.par.whiskerRange, -FastMath.toRadians(45), 0, FastMath.toRadians(45)); // left, front, right
+        dw.setRays(sim.par.whiskerRange, -Math.PI/2, -Math.PI / 4, 0, Math.PI / 4, Math.PI / 2, Math.PI);
         dw.setObjectTypes(MultilineObject.class);
         dw.setBinary(false);
         this.addSensor(dw);
@@ -47,7 +41,7 @@ public class PlaygroundAgent extends SmartAgent {
         dsr.centerToCenter(false);
         dsr.setBinary(false);
         this.addSensor(dsr);
-
+        
         // Effector
         if(sim.par.differentialDrive) {
             DifferentialDriveEffector dd = new DifferentialDriveEffector(sim, field, this);
@@ -62,13 +56,9 @@ public class PlaygroundAgent extends SmartAgent {
             dm.allowBackwardMove(sim.par.backMove);
             this.addEffector(dm);                 
         }
-   
 
         this.enableBoundedArena(true);
         this.enableCollisionRebound(false);
         this.setCollidableTypes(MultilineObject.class);
     }
-    
-    
-    
 }

@@ -16,10 +16,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import mase.MaseProblem;
 import mase.controllers.AgentController;
 import mase.stat.PersistentSolution;
-import mase.stat.ReevaluationTools;
 import mase.stat.SolutionPersistence;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -77,11 +75,13 @@ public class BestTreeStatistics {
                 System.out.println(dir.getAbsolutePath());
                 for (File f : list) {
                     File out = new File(f.getPath() + ".gp.stat");
-                    try {
-                        logSolution(f, out);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        out.delete();
+                    if(!out.exists()) {
+                        try {
+                            logSolution(f, out);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            out.delete();
+                        }
                     }
                 }
             }

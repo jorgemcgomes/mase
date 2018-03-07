@@ -22,7 +22,9 @@ import mase.neat.NEATSubpop;
 public class NeuralArbitratorFactory extends ArbitratorFactory {
 
     private static final long serialVersionUID = 1L;
-
+    public static final String P_ARB_FREQUENCY = "arbitrator-frequency";
+    private int frequency;
+    
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
@@ -30,10 +32,11 @@ public class NeuralArbitratorFactory extends ArbitratorFactory {
         Parameter pOut = new Parameter(NEATSubpop.P_NEAT_BASE).push("OUTPUT.NODES");
         state.output.message("Forcing " + pOut + " to: " + outputs);
         state.parameters.set(pOut, outputs + "");
-
         Parameter nOut = new Parameter(NeuralControllerIndividual.DEFAULT_BASE).push("output");
         state.parameters.set(nOut, outputs + "");
         state.output.message("Forcing " + nOut + " to: " + outputs);
+        
+        frequency = state.parameters.getInt(base.push(P_ARB_FREQUENCY), DEFAULT_BASE.push(P_ARB_FREQUENCY));
     }
 
     @Override
@@ -48,6 +51,7 @@ public class NeuralArbitratorFactory extends ArbitratorFactory {
         AgentController arbitrator = aci.decodeController();
 
         NeuralArbitratorController ac = new NeuralArbitratorController(arbitrator, clonedRepo, mapFun);
+        ac.setFrequency(frequency);
         return new HomogeneousGroupController(ac);
     }
 

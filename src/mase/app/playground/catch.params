@@ -1,0 +1,8 @@
+parent.0 = foraging.params
+
+problem.simstate =                 mase.app.playground.MovingForagingPlayground
+
+problem.minObjects = 5
+problem.maxObjects = 5
+problem.minObjectDistance = 25
+problem.objectSpeed = 0.75
