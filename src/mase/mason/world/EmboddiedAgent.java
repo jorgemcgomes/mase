@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.util.Arrays;
 import mase.mason.generic.systematic.Entity;
 import net.jafama.FastMath;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.MathUtils;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -32,7 +33,8 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
     private double orientation;
     private double speed;
     private double turningSpeed;
-    private boolean collisionStatus;
+    private boolean isColliding;
+    private WorldObject collisionWith;
     private Stoppable stopper;
     private boolean boundedArena;
     private boolean collisionRebound;
@@ -61,7 +63,8 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
 
         this.setColor(c);
 
-        this.collisionStatus = false;
+        this.isColliding = false;
+        this.collisionWith = null;
         this.speed = 0;
         this.turningSpeed = 0;
         this.boundedArena = false;
@@ -115,19 +118,19 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         this.collisionReboundDirection = collisionReboundDirection;
     }
 
-    private boolean collisionFree(Double2D target) {
+    private WorldObject checkCollisions(Double2D target) {
         if (collidableTypes == null || collidableTypes.length == 0) {
-            return true;
+            return null;
         }
-        // TODO: this should use nearest neighbours
+        // TODO: this should probably use nearest neighbours
         WorldObject[] possible = candidateCollisions();
         for (WorldObject so : possible) {
             double d = so.distanceTo(target);
             if (d <= getRadius()) {
-                return false;
+                return so;
             }
         }
-        return true;
+        return null;
     }
 
     private WorldObject[] cache;
@@ -219,47 +222,64 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
      * @return 
      */
     protected boolean move(double newOrientation, double speed) {        
-        boolean success = attemptMove(newOrientation, speed);
-        if (!success && collisionRebound) { // cannot move, rebound if allowed
+        boolean successMoving = attemptMove(newOrientation, speed);
+        if (!successMoving && collisionRebound) { // cannot move, rebound if allowed
             // try to escape to both sides with a random order
             double angle = sim.random.nextBoolean() ? collisionReboundDirection : -collisionReboundDirection;
-            success = attemptMove(MathUtils.normalizeAngle(newOrientation + angle, 0), speed * collisionSpeedDecay) ||
-                    attemptMove(MathUtils.normalizeAngle(newOrientation - angle, 0), speed * collisionSpeedDecay);
+            successMoving = reboundAttempt(MathUtils.normalizeAngle(newOrientation + angle, 0), speed * collisionSpeedDecay) ||
+                    reboundAttempt(MathUtils.normalizeAngle(newOrientation - angle, 0), speed * collisionSpeedDecay);
         }
-        
-        if (rotate && (rotateWithCollision || success)) {
+        if (rotate && (rotateWithCollision || successMoving)) {
             this.turningSpeed = newOrientation - this.orientation;
             this.orientation = MathUtils.normalizeAngle(newOrientation, 0);
         } else {
             this.turningSpeed = 0;
         }
-        return success;
+        return successMoving;
     }
     
 
     private boolean attemptMove(double ori, double speed) {
         Double2D displacement = new Double2D(speed * FastMath.cos(ori), speed * FastMath.sin(ori));
         Double2D newPos = getLocation().add(displacement);
-        if (isValidMove(newPos)) {
-            this.collisionStatus = false;
+        Pair<Boolean, WorldObject> tryMove = isValidMove(newPos);
+        this.collisionWith = tryMove.getRight();
+        this.isColliding = tryMove.getLeft();
+        if (tryMove.getLeft()) {
             this.speed = speed;
             setLocation(newPos);
             return true;
         } else {
-            this.collisionStatus = true;
             this.speed = 0;
             return false;
         }
     }
     
+    private boolean reboundAttempt(double ori, double speed) {
+        Double2D displacement = new Double2D(speed * FastMath.cos(ori), speed * FastMath.sin(ori));
+        Double2D newPos = getLocation().add(displacement);
+        if (isValidMove(newPos).getLeft()) {
+            this.speed = speed;
+            setLocation(newPos);
+            return true;
+        }
+        return false;
+    }
+    
     /**
      * Warning: assumes that all agents have the same size
      *
-     * @param target
-     * @return
+     * @param target the position to check
+     * @return A pair with true/false saying whether the move is valid or not, 
+     * and a WorldObject that might be the culprit of the non-validity
      */
-    protected boolean isValidMove(Double2D target) {
-        return (!boundedArena || checkInsideArena(target)) && collisionFree(target);
+    protected Pair<Boolean,WorldObject> isValidMove(Double2D target) {
+        if(boundedArena && !checkInsideArena(target)) {
+            return Pair.of(false, null);
+        } else {
+            WorldObject wo = checkCollisions(target);
+            return Pair.of(wo == null, wo);
+        }
     }
 
     protected boolean checkInsideArena(Double2D target) {
@@ -288,8 +308,12 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         this.orientation = angle;
     }
 
-    public boolean getCollisionStatus() {
-        return collisionStatus;
+    public boolean isInCollision() {
+        return isColliding;
+    }
+    
+    public WorldObject getCollidingObject() {
+        return collisionWith;
     }
 
     public double getSpeed() {

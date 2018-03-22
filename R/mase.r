@@ -145,9 +145,10 @@ loadData <- function(folders, filename, names=NULL, ids=list(), auto.ids=T, auto
   }
   result <- llply(allfiles, aux, ..., .progress="text", .parallel=parallel, .paropts=list(.errorhandling="remove"))
   result <- rbindlist(result, fill=TRUE)
-
-  cols <- c("Job",names(ids))
-  result[,(cols) := lapply(.SD, factorReorder), .SDcols=cols]
+  if(nrow(result) > 0) {
+    cols <- c("Job",names(ids))
+    result[,(cols) := lapply(.SD, factorReorder), .SDcols=cols]    
+  }
   return(result)
 }
 
@@ -603,7 +604,7 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
     newCoords <- pc$x
   } else if(method[1]=="rpca") {
     require(rrcov)
-    pc <- PcaHubert(oldCoords, k=k, scale=F, ...)
+    pc <- PcaHubert(oldCoords, k=k, scale=F, kmax=99, ...)
     print(summary(pc))
     s <- cumsum(pc@eigenvalues / sum(pc@eigenvalues))
     print(ggplot(data.table(PC=1:pc@k,CummulativeVariance=s), aes(PC,CummulativeVariance)) + geom_bar(stat="identity"))
@@ -620,7 +621,7 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
     newCoords <- scaleData(newCoords)
   }
   newCoords <- as.data.table(newCoords)
-  colnames(newCoords) <- paste0("V",1:k)
+  colnames(newCoords) <- paste0("V",1:ncol(newCoords))
   
   return(merge(data, cbind(oldCoords,newCoords), by=vars, sort=F))
 }
@@ -635,7 +636,8 @@ scaleData <- function(d) {
 # color.var: optional. numeric variable to be used to color the dots
 plotReduced2D <- function(reduced, color.var=NULL) {
   g <- ggplot(reduced, aes(x=V1, y=V2)) + geom_point(aes_string(colour=color.var), shape=20, size=.5) + 
-    coord_fixed() + theme(legend.position="right", axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + labs(x=NULL, y=NULL)
+    coord_fixed() + theme(legend.position="right", axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks=element_blank()) + 
+    labs(x=NULL, y=NULL) + scale_color_distiller(palette="Spectral")
   return(g)
 }
 

@@ -39,7 +39,7 @@ public class SpiritResult implements BehaviourResult<float[][]> {
     protected float[/*index matching visited sorted*/][/*action index*/] frequency;
 
     // Logging stuff
-    protected boolean logging = false;
+    protected boolean logging = true;
     protected int[] totalsBeforeFilter;
     protected int grandTotalBeforeFilter;
     protected int visitedBeforeFilter, visitedAfterFilter;
@@ -180,6 +180,9 @@ public class SpiritResult implements BehaviourResult<float[][]> {
 
     @Override
     public String toString() {
+        return grandTotalBeforeFilter + " " + visitedBeforeFilter + " " + visitedAfterFilter;
+        /*
+        // very long string representation with all the probabilities
         StringBuilder sb = new StringBuilder();
         String uniformFreq = String.format(Locale.ENGLISH, "%.5f", 1d / nActions);
         int sIdx = 0;
@@ -195,7 +198,7 @@ public class SpiritResult implements BehaviourResult<float[][]> {
                 }
             }
         }
-        return sb.toString().trim();
+        return sb.toString().trim();*/
     }
 
 }

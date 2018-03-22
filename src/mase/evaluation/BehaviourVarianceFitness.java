@@ -3,21 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mase.app.playground;
+package mase.evaluation;
 
 import ec.EvolutionState;
 import ec.util.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import mase.evaluation.BehaviourResult;
-import mase.evaluation.CompoundEvaluationResult;
-import mase.evaluation.EvaluationResult;
-import mase.evaluation.FitnessResult;
 import mase.mason.MasonEvaluation;
 import mase.mason.MasonSimState;
+import mase.novelty.NoveltyEvaluation;
 
 /**
+ * This must always come after the behaviour evaluation function
  *
  * @author jorge
  */
@@ -32,14 +30,15 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
     @Override
     public void setup(EvolutionState state, Parameter base) {
         super.setup(state, base);
-        behavIndex = state.parameters.getInt(base.push(P_BEHAVIOUR_INDEX), null);
+        behavIndex = state.parameters.getInt(base.push(NoveltyEvaluation.P_BEHAVIOUR_INDEX),
+                NoveltyEvaluation.DEFAULT_BASE.push(NoveltyEvaluation.P_BEHAVIOUR_INDEX));
     }
 
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
         EvaluationResult er = sim.getCurrentEvalFunctions()[behavIndex].getResult();
-        if(er instanceof CompoundEvaluationResult) { // only supports single agent
+        if (er instanceof CompoundEvaluationResult) { // does not really support compountevaluationresults
             fr = new BehaviourVarianceFitnessResult((BehaviourResult) ((CompoundEvaluationResult) er).getEvaluation(0));
         } else {
             fr = new BehaviourVarianceFitnessResult((BehaviourResult) er);
@@ -56,7 +55,7 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
         private static final long serialVersionUID = 1L;
 
         private final BehaviourResult reference;
-        public static final double MAX = 10;
+        public static final double MAX = 100;
 
         public BehaviourVarianceFitnessResult(BehaviourResult reference) {
             super(0);
@@ -66,13 +65,14 @@ public class BehaviourVarianceFitness extends MasonEvaluation {
         @Override
         public FitnessResult mergeEvaluations(Collection results) {
             List<BehaviourResult> brs = new ArrayList<>(results.size());
-            for(Object o : results) {
+            for (Object o : results) {
                 brs.add(((BehaviourVarianceFitnessResult) o).reference);
             }
             BehaviourResult merged = (BehaviourResult) brs.get(0).mergeEvaluations(brs);
             double sum = 0;
             for (BehaviourResult b : brs) {
-                sum += merged.distanceTo(b);
+                double d = merged.distanceTo(b);
+                sum += d * d;
             }
             // ensure that the fitness value is positive
             // minimise sum of squared errors

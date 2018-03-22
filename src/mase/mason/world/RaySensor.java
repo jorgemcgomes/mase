@@ -179,7 +179,7 @@ public class RaySensor extends AbstractSensor {
             int x2 = (int) (re.x * draw.width + draw.x);
             int y2 = (int) (re.y * draw.height + draw.y);
             graphics.setPaint(drawColor);
-            graphics.setStroke(new BasicStroke(2));
+            graphics.setStroke(new BasicStroke(1));
             graphics.drawLine(x1, y1, x2, y2);
             if (!Double.isInfinite(lastDistances[i])) {
                 Double2D hit = GeomUtils.pointInLine(rs, re, lastDistances[i]);

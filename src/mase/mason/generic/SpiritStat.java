@@ -24,6 +24,7 @@ public class SpiritStat extends Statistics {
     public static final String P_LOG_FILE = "file";
     private static final long serialVersionUID = 1L;
     private int log;
+    private int evalIdx;
 
     @Override
     public void setup(EvolutionState state, Parameter base) {
@@ -37,24 +38,23 @@ public class SpiritStat extends Statistics {
     }
 
     @Override
-    public void preInitializationStatistics(EvolutionState state) {
+    public void postInitializationStatistics(EvolutionState state) {
         super.preInitializationStatistics(state);
         state.output.println("Generation Subpop Index VisitedPreFilter VisitedPostFilter GrandTotal P05 P10 P25 P50 P75 P90 P95 Max", log);
-    }
-    
-    
-
-    @Override
-    public void postEvaluationStatistics(EvolutionState state) {
-        super.postEvaluationStatistics(state);
-        int evalIdx = -1;
+        evalIdx = -1;
         MaseProblem mp = (MaseProblem) state.evaluator.p_problem;
         for (int i = 0; i < mp.getEvalFunctions().length; i++) {
             if (mp.getEvalFunctions()[i] instanceof SpiritEvaluator) {
                 evalIdx = i;
                 break;
             }
-        }
+        }        
+    }    
+
+    @Override
+    public void postEvaluationStatistics(EvolutionState state) {
+        super.postEvaluationStatistics(state);
+
 
         for (int i = 0; i < state.population.subpops.length; i++) {
             for (int j = 0; j < state.population.subpops[i].individuals.length; j++) {

@@ -141,12 +141,25 @@ merged <- merge(base, repos[Repo=="base"], by=c("Index","Job"))
 merged[, Bin1 := round(V1*20)/20]
 merged[, Bin2 := round(V2*20)/20]
 sum <- merged[, .(Fitness=mean(MaxFitness)), by=.(Task,Bin1,Bin2)]
+#sumaux <- rbind(sum,fit[Method=="direct", .(Fitness=max(BestSoFar)), by=.(Task)],fill=T)
+#sumaux[, ScaledFitness := (Fitness - min(Fitness)) / (max(Fitness)-min(Fitness)), by=.(Task)]
+#sum <- sumaux[!is.na(Bin1)]
 sum[, ScaledFitness := (Fitness - min(Fitness)) / (max(Fitness)-min(Fitness)), by=.(Task)]
 
 ggplot(sum, aes(Bin1,Bin2,fill=ScaledFitness)) + 
   scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) + labs(x="PC1", y="PC2", fill="Fitness in task (scaled)") +
   geom_tile() + facet_wrap(~ Task) + scale_fill_distiller(palette="Spectral") + coord_fixed()
 ggsave("~/Dropbox/Work/Papers/17-SWEVO/repo_usefulness.pdf", width=4.7, height=4.2)
+
+# Alternative version of the same plot above, with one color scale for each task
+plotaux <- function(df) {
+  return(ggplot(df, aes(Bin1,Bin2,fill=Fitness)) + 
+    scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) + labs(x=NULL, y=NULL, fill="Fitness", title=as.character(df$Task[1])) +
+    geom_tile() + scale_fill_distiller(palette="Spectral") + coord_fixed())
+}
+plots <- lapply(split(sum, by="Task"), plotaux)
+plot_grid(plotlist=plots,ncol=3)
+ggsave("~/Dropbox/Work/Papers/17-SWEVO/repo_usefulness2.pdf", width=4.7, height=5)
 
 # Generation environment
 bests <- repofit[Repo %in% c("few","fixed","none","noobj","noobs","base"), .(BestFitness=max(BestSoFar), MeanFitness=mean(BestSoFar)), by=.(Task,Repo,Job)]
@@ -245,6 +258,26 @@ setorder(selected, Task,Size)
 # ./run.sh mase.evorbc.gp.DecisionTreeViz ~/exps/playground2/tasks/gp_obsphototaxis_base_5/job.2.postbest.xml
 # ./run.sh mase.evorbc.gp.DecisionTreeViz ~/exps/playground2/tasks/gp_prey_base_7/job.6.postbest.xml
 # ./run.sh mase.evorbc.gp.DecisionTreeViz ~/exps/playground2/tasks/gp_foraging_base_4/job.0.postbest.xml
+
+# Position of the primitives used by the selected in the behaviour space
+# must run part of the code from the previous plot of the region codes
+traced <-  c("#371"="0-371","#614"="5-614","#291"="5-291","#303"="5-303","#993"="7-993","#574"="4-574","#101"="4-101","#553"="4-553","#274"="4-274")
+traced.f <- repos[Repo=="base" & paste0(Job,"-",Index) %in% traced]
+traced.f[, Label := names(sort(traced))]
+
+# finally, we have everything needed for the plot
+ggplot(polydata, aes(x, y)) + 
+  geom_point(data=selected, aes(V1,V2), colour="gray90", shape=16, size=.5) +
+  geom_polygon(aes(fill=variable,group=paste(Index,variable))) +
+  geom_path(data=circlescale(centers, r=0.05), aes(group=Index), size=.2) +
+  geom_path(data=circlescale(centers, r=0.025), aes(group=Index), size=.2) +
+  geom_spoke(data=m, aes(V1,V2,angle=angle+pi/length(vars), radius=0.05), size=.2) +
+  geom_text(data=traced.f, aes(x=V1,y=V2,label=Label), colour="black", fontface="bold") + # hjust="right", nudge_x=-0.01
+  guides(fill=guide_legend(nrow=3)) + coord_fixed() + labs(x="PC1",y="PC2",fill="Feature") +
+  theme(legend.position="right") + guides(fill=guide_legend(ncol=1))
+ggsave("~/Dropbox/Work/Papers/17-SWEVO/rep_traced_arbitrators.png", width=4.7, height=2.4)
+
+
 
 # locomotion repertoire
 locorep <- fread("~/exps/playground2/rep/loco/job.1.finalrep.stat")

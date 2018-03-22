@@ -75,7 +75,7 @@ public class MazeAgent extends SmartAgent {
             mt.kill(); // done
         }
         // hit wall
-        if(instaKill && getCollisionStatus()) {
+        if(instaKill && isInCollision()) {
             mt.kill(); // stop
         }
     }

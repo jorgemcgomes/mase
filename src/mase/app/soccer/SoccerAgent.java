@@ -13,6 +13,8 @@ import mase.mason.world.GeomUtils.Segment;
 import mase.mason.world.SmartAgent;
 import mase.mason.world.MultilineObject;
 import mase.mason.world.PointObject;
+import mase.mason.world.WorldObject;
+import org.apache.commons.lang3.tuple.Pair;
 import sim.engine.SimState;
 import sim.util.Double2D;
 
@@ -97,10 +99,15 @@ public class SoccerAgent extends SmartAgent {
     }
 
     @Override
-    protected boolean isValidMove(Double2D target) {
+    protected Pair<Boolean,WorldObject> isValidMove(Double2D target) {
         Soccer soc = (Soccer) sim;
         // do not allow to move through the goals
-        return super.isValidMove(target) && target.x > 0 && target.x < soc.par.fieldLength;
+        Pair<Boolean, WorldObject> validation = super.isValidMove(target);
+        if(validation.getLeft()) {
+            return Pair.of(target.x > 0 && target.x < soc.par.fieldLength, null);
+        } else {
+            return validation;
+        }
     }
     
     

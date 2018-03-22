@@ -27,6 +27,8 @@ import sim.util.Double2D;
  */
 public class DistanceSensorArcs extends AbstractSensor {
 
+    private static final long serialVersionUID = 1L;
+
     private double[] arcStart;
     private double[] arcEnd;
     private double range = Double.POSITIVE_INFINITY;
@@ -43,6 +45,7 @@ public class DistanceSensorArcs extends AbstractSensor {
     private int noiseType;
     
     private Color drawColor = Color.YELLOW;
+    private boolean drawArcs = false;
 
     public DistanceSensorArcs(SimState state, Continuous2D field, EmboddiedAgent ag) {
         super(state, field, ag);
@@ -76,6 +79,10 @@ public class DistanceSensorArcs extends AbstractSensor {
     
     public void setDrawColor(Color c) {
         this.drawColor = c;
+    }
+    
+    public void enableDrawArcs(boolean enable) {
+        this.drawArcs = enable;
     }
 
     public void setRange(double range) {
@@ -245,12 +252,15 @@ public class DistanceSensorArcs extends AbstractSensor {
         Double2D baseStart = new Double2D(centerToCenter ? 0 : ag.getRadius(), 0);
         Double2D baseEnd = new Double2D((centerToCenter ? 0 : ag.getRadius()) + (Double.isInfinite(range) ? fieldDiagonal : range), 0);
         for (int i = 0; i < arcStart.length; i++) {
-            Double2D leftRayStart = baseStart.rotate(ag.orientation2D() + arcStart[i]);
-            Double2D leftRayEnd = baseEnd.rotate(ag.orientation2D() + arcStart[i]);
-            Double2D rightRayStart = baseStart.rotate(ag.orientation2D() + arcEnd[i]);
-            Double2D rightRayEnd = baseEnd.rotate(ag.orientation2D() + arcEnd[i]);
-            drawRay(leftRayStart, leftRayEnd, graphics, draw);
-            drawRay(rightRayStart, rightRayEnd, graphics, draw);
+            // Draw args
+            if(drawArcs) {
+                Double2D leftRayStart = baseStart.rotate(ag.orientation2D() + arcStart[i]);
+                Double2D leftRayEnd = baseEnd.rotate(ag.orientation2D() + arcStart[i]);
+                Double2D rightRayStart = baseStart.rotate(ag.orientation2D() + arcEnd[i]);
+                Double2D rightRayEnd = baseEnd.rotate(ag.orientation2D() + arcEnd[i]);
+                drawRay(leftRayStart, leftRayEnd, graphics, draw);
+                drawRay(rightRayStart, rightRayEnd, graphics, draw);
+            }
             // Draw cone
             if (!Double.isInfinite(lastDistances[i])) {
                 double d = centerToCenter ? lastDistances[i] : lastDistances[i] + ag.getRadius();

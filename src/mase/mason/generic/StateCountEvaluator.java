@@ -22,8 +22,10 @@ import mase.mason.world.SmartAgent;
  */
 public class StateCountEvaluator extends MasonEvaluation<CompoundEvaluationResult<StateCountResult>> {
 
+    // number of bins to discretise the sensor values. 3 is a nice value (low/mid/high)
     public static final String P_DISCRETIZATION = "discretisation";
-    public static final String P_FILTER = "filter";
+    // from 0 (no filter) to 1 (nothing passes). 0.01 (1%) is a nice value
+    public static final String P_FILTER = "filter"; 
     private static final long serialVersionUID = 1L;
     private int bins;
     private double filter;

@@ -42,7 +42,7 @@ public class MazePlayground extends Playground {
             public void step(SimState state) {
                 if (agent.getLocation().x > par.arenaSize || agent.getLocation().x < 0
                         || agent.getLocation().y > par.arenaSize || agent.getLocation().y < 0
-                        || agent.getCollisionStatus()) {
+                        || agent.isInCollision()) {
                     state.kill();
                 }
             }
