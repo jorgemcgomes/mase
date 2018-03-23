@@ -57,7 +57,7 @@ public class PlaygroundAgent extends SmartAgent {
             this.addEffector(dm);                 
         }
 
-        this.enableBoundedArena(true);
+        this.virtuallyBoundedArena(true);
         this.enableCollisionRebound(false);
         this.setCollidableTypes(MultilineObject.class);
     }

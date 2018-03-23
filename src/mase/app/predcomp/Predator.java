@@ -29,7 +29,7 @@ public class Predator extends SmartAgent {
 
     public Predator(Predcomp sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.RED, ac);
-        this.enableBoundedArena(true);
+        this.virtuallyBoundedArena(true);
 
         // Vision sensor aux variables
         visionArcStart = new double[sim.par.visionNeurons];

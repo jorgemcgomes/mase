@@ -188,7 +188,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         return candidates;
     }
 
-    public final void enableBoundedArena(boolean enable) {
+    public final void virtuallyBoundedArena(boolean enable) {
         this.boundedArena = enable;
     }
 
@@ -244,7 +244,7 @@ public abstract class EmboddiedAgent extends CircularObject implements Steppable
         Double2D newPos = getLocation().add(displacement);
         Pair<Boolean, WorldObject> tryMove = isValidMove(newPos);
         this.collisionWith = tryMove.getRight();
-        this.isColliding = tryMove.getLeft();
+        this.isColliding = !tryMove.getLeft();
         if (tryMove.getLeft()) {
             this.speed = speed;
             setLocation(newPos);

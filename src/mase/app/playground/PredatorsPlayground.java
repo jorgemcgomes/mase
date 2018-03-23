@@ -44,7 +44,7 @@ public class PredatorsPlayground extends Playground {
         
         public PredatorAgent(Playground pl) {
             super(pl, pl.field, pl.par.objectRadius, Color.BLUE);
-            this.enableBoundedArena(true);
+            this.virtuallyBoundedArena(true);
             this.enableCollisionRebound(true);
             this.setCollidableTypes(MultilineObject.class);
             this.setCollisionSpeedDecay(1); // no decay

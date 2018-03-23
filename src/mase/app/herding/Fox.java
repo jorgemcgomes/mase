@@ -22,7 +22,7 @@ public class Fox extends EmboddiedAgent {
 
     public Fox(Herding sim, Continuous2D field) {
         super(sim, field, sim.par.agentRadius, Color.RED);
-        this.enableBoundedArena(true);
+        this.virtuallyBoundedArena(true);
         this.setCollidableTypes(EmboddiedAgent.class);
     }
 

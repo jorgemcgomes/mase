@@ -24,7 +24,7 @@ public class MazePlayground extends Playground {
     @Override
     protected void placeAgent(SmartAgent ag) {
         super.placeAgent(ag);
-        ag.enableBoundedArena(false);
+        ag.virtuallyBoundedArena(false);
         ag.enableCollisionRebound(false);
     }
 

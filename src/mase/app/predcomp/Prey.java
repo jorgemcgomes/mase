@@ -26,7 +26,7 @@ public class Prey extends SmartAgent {
 
     public Prey(Predcomp sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.BLUE, ac);
-        this.enableBoundedArena(true);
+        this.virtuallyBoundedArena(true);
         
         // Aux variables for proximity sensors -- sensor rays
         rayStarts = new Double2D[sim.par.proximitySensors];

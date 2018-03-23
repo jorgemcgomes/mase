@@ -33,7 +33,7 @@ public class LandRobot extends SmartAgent {
         if(sim.par.flyingStartHeight < 5) {
             this.setCollidableTypes(EmboddiedAgent.class);
         }
-        this.enableBoundedArena(false);
+        this.virtuallyBoundedArena(false);
         //this.setOrientationShowing(false);
 
         // movement effector

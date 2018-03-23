@@ -48,7 +48,7 @@ public class RandomMovingAgentsPlayground extends Playground {
 
         public RandomMovingAgent(Playground pl) {
             super(pl, pl.field, pl.par.objectRadius, Color.BLUE);
-            this.enableBoundedArena(true);
+            this.virtuallyBoundedArena(true);
             this.setCollidableTypes(MultilineObject.class);
             this.enableCollisionRebound(false); // the rebound is handled special
         }

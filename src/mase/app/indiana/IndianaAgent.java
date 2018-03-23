@@ -33,7 +33,7 @@ public class IndianaAgent extends SmartAgent {
     public IndianaAgent(Indiana sim, Continuous2D field, AgentController ac) {
         super(sim, field, RADIUS, Color.BLUE, ac);
         this.setCollidableTypes(EmboddiedAgent.class);
-        this.enableBoundedArena(true);
+        this.virtuallyBoundedArena(true);
 
         // aux variables for agent sensors
         even = sim.par.agentSensorArcs % 2 == 0;

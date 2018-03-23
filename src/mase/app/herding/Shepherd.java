@@ -26,7 +26,7 @@ public class Shepherd extends SmartAgent {
     public Shepherd(Herding sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, Color.BLUE, ac);
         this.setCollidableTypes(EmboddiedAgent.class);
-        this.enableBoundedArena(true);
+        this.virtuallyBoundedArena(true);
         
         DistanceSensorArcs ds = new DistanceSensorArcs(sim, field, this);
         ds.setArcs(4);

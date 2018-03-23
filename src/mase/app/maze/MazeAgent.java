@@ -29,7 +29,7 @@ public class MazeAgent extends SmartAgent {
     public MazeAgent(MazeTask sim, Continuous2D field, AgentController ac) {
         super(sim, field, sim.par.agentRadius, COLOR, ac);
         ac.reset();
-        this.enableBoundedArena(false);
+        this.virtuallyBoundedArena(false);
         this.enableCollisionRebound(false);
         this.enableRotationWithCollisions(true);
         this.setCollidableTypes(MultilineObject.class);

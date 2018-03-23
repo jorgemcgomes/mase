@@ -27,7 +27,7 @@ public class RSAgent extends SmartAgent {
         super(sim, field, sim.par.agentRadius, Color.BLUE, ac);
 
         this.setCollidableTypes(RSAgent.class);
-        this.enableBoundedArena(false);
+        this.virtuallyBoundedArena(false);
 
         // aux variables for agent sensors
         this.even = sim.par.agentSensorArcs % 2 == 0;

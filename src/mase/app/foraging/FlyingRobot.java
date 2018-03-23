@@ -36,7 +36,7 @@ public class FlyingRobot extends SmartAgent {
         if(sim.par.flyingStartHeight < 5) {
             this.setCollidableTypes(EmboddiedAgent.class);
         }
-        this.enableBoundedArena(false);
+        this.virtuallyBoundedArena(false);
 
         effector = new FlyingEffector(sim, field, this);
         super.addEffector(effector);
