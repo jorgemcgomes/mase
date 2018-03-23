@@ -1,0 +1,34 @@
+eval.base.problem =                mase.mason.MasonSimulationProblem
+problem.simstate =                 mase.app.swarm.SwarmPlayground
+problem.params =                   mase.app.swarm.SwarmParams
+
+problem.arenaSize = 200
+problem.safetyDistance = 5
+
+problem.minSwarmSize = 5
+problem.maxSwarmSize = 10
+    
+problem.minObjects = 1
+problem.maxObjects = 1
+problem.objectRadius = 1
+problem.objectSpeed = 0
+    
+problem.minObstacles = 0
+problem.maxObstacles = 0
+problem.minObstacleSize = 10
+problem.maxObstacleSize = 30
+    
+problem.radius = 2.5
+problem.wheelSpeed = 1
+problem.wheelAcc = 0.1
+problem.backMove = true
+problem.numCones = 8
+problem.coneRange = 50
+problem.poiNumCones = 4
+problem.poiConeRange = 100
+problem.whiskerRange = 15
+problem.differentialDrive = true
+
+neat.RECURRENCY.ALLOWED = true
+neat.INPUT.NODES = 17
+neat.OUTPUT.NODES = 2

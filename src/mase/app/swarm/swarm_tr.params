@@ -1,0 +1,14 @@
+parent.0 = swarm.params
+parent.1 = ../../neat/neat.params
+
+generations = 250
+
+problem.seed = random
+problem.repetitions = 10
+problem.max-steps = 500
+
+problem.number-evals = 1
+#problem.eval.0 = ...
+
+fitness.fitness-index=0
+
