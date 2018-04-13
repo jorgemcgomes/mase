@@ -21,13 +21,13 @@ stat.child.10 =                          mase.neat.NEATStatistics
 stat.child.10.file =                     $neat.stat
 
 # NEAT Probabilites
-neat.PROBABILITY.MUTATION =             0.25
-neat.PROBABILITY.CROSSOVER =            1
-neat.PROBABILITY.ADDLINK =              0.05
+neat.PROBABILITY.MUTATION =             0.80
+neat.PROBABILITY.CROSSOVER =            0.75
+neat.PROBABILITY.ADDLINK =              0.1
 neat.PROBABILITY.ADDNODE =              0.03
 neat.PROBABILITY.MUTATEBIAS =           0.3
 neat.PROBABILITY.TOGGLELINK =           0.0
-neat.PROBABILITY.WEIGHT.REPLACED =      0.0
+neat.PROBABILITY.WEIGHT.REPLACED =      0.1
 neat.PROBABILITY.FEATURE.REPLACED =     0.0
 
 # NEAT specific
@@ -40,8 +40,8 @@ neat.COMPATABILITY.THRESHOLD =          0.5
 neat.COMPATABILITY.CHANGE =             0.05
 neat.SPECIE.COUNT =                     5
 neat.SURVIVAL.THRESHOLD =               0.2
-neat.SPECIE.AGE.THRESHOLD =             80
-neat.SPECIE.YOUTH.THRESHOLD =           10
+neat.SPECIE.AGE.THRESHOLD =             30
+neat.SPECIE.YOUTH.THRESHOLD =           5
 neat.SPECIE.OLD.PENALTY =               0.7
 neat.SPECIE.YOUTH.BOOST =               1.2
 neat.SPECIE.FITNESS.MAX =               15

@@ -63,15 +63,15 @@ public class NEATSubpop extends Subpopulation {
 
         NEATInitializer init = (NEATInitializer) state.initializer;
         if (init.innovDB == null) {
-            neat = new NEATGeneticAlgorithm((NEATGADescriptor) gam.createDescriptor(config));
+            neat = new NEATGeneticAlgorithm((NEATGADescriptor) gam.createDescriptor(config), state.random[0].nextLong());
         } else {
             neat = new NEATGeneticAlgorithm((NEATGADescriptor) gam.createDescriptor(config), init.innovDB);
         }
 
         neat.pluginFitnessFunction(new PreEvaluatedFitnessFunction(Collections.EMPTY_MAP));
-        neat.pluginCrossOver(new NEATCrossover());
-        neat.pluginMutator(new NEATMutator());
-        neat.pluginParentSelector(new TournamentSelector());
+        neat.pluginCrossOver(new NEATCrossover(state.random[0].nextLong()));
+        neat.pluginMutator(new NEATMutator(state.random[0].nextLong()));
+        neat.pluginParentSelector(new TournamentSelector(state.random[0].nextLong()));
     }
     
 

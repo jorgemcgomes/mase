@@ -15,6 +15,7 @@ import org.neat4j.neat.core.NEATChromosome;
 import org.neat4j.neat.core.NEATFeatureGene;
 import org.neat4j.neat.core.NEATNetDescriptor;
 import org.neat4j.neat.core.NEATNeuralNet;
+import org.neat4j.neat.core.NEATNodeGene;
 import org.neat4j.neat.ga.core.Gene;
 
 /**
@@ -36,7 +37,13 @@ public class NEATIndividual extends Individual implements AgentControllerIndivid
 
     public void setChromosome(NEATChromosome genome) {
         this.genome = genome;
-        NEATNetDescriptor descr = new NEATNetDescriptor(0, null);
+        int inputCount = 0;
+        for(Gene g : genome.genes()) {
+            if(g instanceof NEATNodeGene && ((NEATNodeGene) g).getType() == NEATNodeGene.INPUT) {
+                inputCount++;
+            }
+        }
+        NEATNetDescriptor descr = new NEATNetDescriptor(inputCount, null);
         descr.updateStructure(this.genome);
         this.network = new NEATNeuralNet();
         this.network.createNetStructure(descr);

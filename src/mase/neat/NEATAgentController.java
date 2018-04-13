@@ -50,6 +50,10 @@ public class NEATAgentController implements EncodableAgentController {
     @Override
     public double[] processInputs(double[] input) {
         NetworkInput in = new CSVInput(input);
+        if(input.length != network.netDescriptor().numInputs()) {
+            throw new RuntimeException("Expecting " + network.netDescriptor().numInputs() + 
+                    " inputs. Got: " + input.length + " " + Arrays.toString(input));
+        }
         NetworkOutputSet output = network.execute(in);
         return output.nextOutput().values();
     }

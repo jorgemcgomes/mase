@@ -56,6 +56,7 @@ public class NEATSerializer {
 
     public static NEATNeuralNet deserialize(double[] weights) {
         ArrayList<Gene> genes = new ArrayList<>();
+        int inputCount = 0;
         for (int i = 0; i < weights.length; ) {
             double type = weights[i++];
             if (type == NODE) {
@@ -64,6 +65,9 @@ public class NEATSerializer {
                 int t = (int) (double) weights[i++];
                 double bias = weights[i++];
                 genes.add(new NEATNodeGene(0, id, sigF, t, bias));
+                if(t == NEATNodeGene.INPUT) {
+                    inputCount++;
+                }
             } else if (type == LINK) {
                 boolean enabled = weights[i++] == 1d;
                 int from = (int) (double) weights[i++];
@@ -78,7 +82,7 @@ public class NEATSerializer {
         Gene[] geneArray = new Gene[genes.size()];
         genes.toArray(geneArray);
         NEATChromosome chromo = new NEATChromosome(geneArray);
-        NEATNetDescriptor descr = new NEATNetDescriptor(0, null);
+        NEATNetDescriptor descr = new NEATNetDescriptor(inputCount, null);
         descr.updateStructure(chromo);
         NEATNeuralNet network = new NEATNeuralNet();
         network.createNetStructure(descr);

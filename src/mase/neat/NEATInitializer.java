@@ -31,7 +31,7 @@ public class NEATInitializer extends SimpleInitializer {
     @Override
     public Population setupPopulation(EvolutionState state, int thread) {
         if (shareDB) {
-            innovDB = new InnovationDatabase();
+            innovDB = new InnovationDatabase(state.random[0].nextLong());
         }
         return super.setupPopulation(state, thread);
     }
