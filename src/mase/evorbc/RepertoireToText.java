@@ -33,9 +33,9 @@ public class RepertoireToText {
         }
 
         for (File f : folders) {
-            Collection<File> files = FileUtils.listFiles(f, new String[]{"finalarchive.tar.gz"}, false);
+            Collection<File> files = FileUtils.listFiles(f, new String[]{"collection.tar.gz"}, false);
             for (File file : files) {
-                File out = new File(file.getAbsolutePath().replace("finalarchive.tar.gz", "archive.stat"));
+                File out = new File(file.getAbsolutePath().replace("collection.tar.gz", "collection.stat"));
                 System.out.println(file + " --> " + out);
                 toText(file, out);
             }
@@ -58,7 +58,7 @@ public class RepertoireToText {
             }
 
             if (!headed) { // add file header
-                fw.write("Archive Index Fitness");
+                fw.write("Index OriginGeneration Fitness");
                 for (int i = 0; i < behav.split(" ").length; i++) {
                     fw.write(" Behav_" + i);
                 }
@@ -66,7 +66,7 @@ public class RepertoireToText {
                 headed = true;
             }
 
-            fw.write(sol.getSubpop() + " " + sol.getIndex() + " " + sol.getFitness() + " " + behav + "\n");
+            fw.write(sol.getIndex() + " " + sol.getGeneration() + " " + sol.getFitness() + " " + behav + "\n");
         }
         fw.close();
     }

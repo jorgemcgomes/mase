@@ -66,7 +66,7 @@ public class RandomRepertoireGenerator {
         Random rand = new Random();
         for (int j = 0; j < jobs; j++) {
             System.out.println("\n---------- Job " + j + " ----------\n");
-            File f = new File(out, "job." + j + ".finalarchive.tar.gz");
+            File f = new File(out, "job." + j + ".collection.tar.gz");
             if (!f.exists() || force) {
                 TarArchiveOutputStream taos = new TarArchiveOutputStream(new GZIPOutputStream(
                         new BufferedOutputStream(new FileOutputStream(f))));
@@ -100,7 +100,7 @@ public class RandomRepertoireGenerator {
                 taos.close();
 
                 // Generate text
-                File s = new File(out, "job." + j + ".archive.stat");
+                File s = new File(out, "job." + j + ".collection.stat");
                 try {
                     RepertoireToText.toText(f, s);
                 } catch (Exception ex) {

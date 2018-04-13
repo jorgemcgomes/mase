@@ -2,6 +2,7 @@ package mase.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import net.jafama.FastMath;
 
 public abstract class KdTree<T> {
 
@@ -74,8 +75,19 @@ public abstract class KdTree<T> {
 
         return root.entries;
     }
-
-    public ArrayList<SearchResult<T>> nearestNeighbours(double[] searchLocation, int K) {
+    
+    public interface SearchFilter<T> {
+        public boolean accepts(T element);
+    }
+    
+    public static SearchFilter ALL = new SearchFilter() {
+        @Override
+        public boolean accepts(Object element) {
+            return true;
+        }
+    };
+    
+    public ArrayList<SearchResult<T>> nearestNeighbours(double[] searchLocation, int K, SearchFilter<T> filter) {
         IntStack stack = new IntStack();
         PrioQueue<T> results = new PrioQueue<T>(K, true);
 
@@ -87,10 +99,10 @@ public abstract class KdTree<T> {
             int nodeIndex = stack.pop();
             if (added < K || results.peekPrio() > pointRectDist(nodeIndex, searchLocation)) {
                 Node node = nodeList.get(nodeIndex);
-                if (node.pointLocations == null) {
+                if (node.pointLocations == null) { // not leaf
                     node.search(searchLocation, stack);
-                } else {
-                    added += node.search(searchLocation, results);
+                } else { // leaf, add elements
+                    added += node.search(searchLocation, results, filter);
                 }
             }
         }
@@ -103,6 +115,10 @@ public abstract class KdTree<T> {
             returnResults.add(s);
         }
         return returnResults;
+    }
+
+    public ArrayList<SearchResult<T>> nearestNeighbours(double[] searchLocation, int K) {
+        return nearestNeighbours(searchLocation, K, ALL);
     }
 
     public ArrayList<T> ballSearch(double[] searchLocation, double radius) {
@@ -213,7 +229,7 @@ public abstract class KdTree<T> {
             for (int i = super._dimensions; i-- > 0;) {
                 distance += sqr(arr[--offset] - location[i]);
             }
-            return distance;
+            return FastMath.sqrtQuick(distance);
         }
 
     }
@@ -411,13 +427,15 @@ public abstract class KdTree<T> {
         }
 
         //returns number of points added to results
-        int search(double[] searchLocation, PrioQueue<T> results) {
+        int search(double[] searchLocation, PrioQueue<T> results, SearchFilter<T> filter) {
             int updated = 0;
             for (int j = entries; j-- > 0;) {
-                double distance = pointDist(pointLocations.array, searchLocation, j);
-                if (results.peekPrio() > distance) {
-                    updated++;
-                    results.addNoGrow(pointPayloads.get(j), distance);
+                if(filter.accepts(pointPayloads.get(j))) {
+                    double distance = pointDist(pointLocations.array, searchLocation, j);
+                    if (results.peekPrio() > distance) {
+                        updated++;
+                        results.addNoGrow(pointPayloads.get(j), distance);
+                    }
                 }
             }
             return updated;
