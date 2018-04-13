@@ -106,15 +106,20 @@ public class SmartAgent extends EmboddiedAgent {
     }
 
     public void action(double[] output) {
+        int index = 0;        
         if (effectors.size() == 1) {
-            effectors.get(0).action(output);
+            Effector e = effectors.get(0);
+            e.action(output);
+            index += e.valueCount();
         } else {
-            int index = 0;
             for (Effector e : effectors) {
                 double[] o = Arrays.copyOfRange(output, index, index + e.valueCount());
                 index += e.valueCount();
                 e.action(o);
             }
+        }
+        if(index != output.length) {
+            throw new RuntimeException("Expecting " + index + " outputs. Got: " + output.length + " " + Arrays.toString(output));
         }
     }
 

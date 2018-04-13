@@ -6,7 +6,6 @@
 package mase.mason;
 
 import mase.evaluation.FitnessResult;
-import net.jafama.FastMath;
 
 /**
  * Returns a random fitness score. Useful for testing and debugging purposes.
@@ -21,7 +20,7 @@ public class RandomFitnessEvaluation extends MasonEvaluation<FitnessResult> {
     @Override
     protected void postSimulation(MasonSimState sim) {
         super.postSimulation(sim);
-        fr = new FitnessResult(FastMath.random());
+        fr = new FitnessResult(sim.random.nextDouble());
     }
     
     @Override
