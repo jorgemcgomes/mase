@@ -41,15 +41,14 @@ public class NEATMutator implements Mutator {
     private double featurePerturb = 0.1;
     private InnovationDatabase db;
     private static final int MAX_LINK_ATTEMPTS = 5;
-    private final Random linkRand = new Random();
-    private final Random nodeRand = new Random(linkRand.nextLong());
-    private final Random perturbRand = new Random(linkRand.nextLong());
-    private final Random disableRand = new Random(linkRand.nextLong());
+    private final Random rand;
 
-    public NEATMutator() {
+    public NEATMutator(long seed) {
+        this.rand = new Random(seed);
     }
 
-    public NEATMutator(double pAddNode, double pAddLink, double pDisable) {
+    public NEATMutator(long seed, double pAddNode, double pAddLink, double pDisable) {
+        this(seed);
         this.pAddNode = pAddNode;
         this.pAddLink = pAddLink;
         this.pToggle = pDisable;
@@ -113,14 +112,14 @@ public class NEATMutator implements Mutator {
     }
 
     private Gene mutateFeature(NEATFeatureGene mutatee) {
-        double perturbRandVal = perturbRand.nextDouble();
+        double perturbRandVal = rand.nextDouble();
         Gene mutated = mutatee;
         if (perturbRandVal < this.pPerturb) {
             double newVal;
-            if(this.pFeatureReplaced > perturbRand.nextDouble()) {
-                newVal = perturbRand.nextDouble();
+            if(this.pFeatureReplaced > rand.nextDouble()) {
+                newVal = rand.nextDouble();
             } else {
-                newVal = Math.min(1, Math.max(0, mutatee.geneAsNumber().doubleValue() + perturbRand.nextGaussian() * featurePerturb));
+                newVal = Math.min(1, Math.max(0, mutatee.geneAsNumber().doubleValue() + rand.nextGaussian() * featurePerturb));
             }
             mutated = new NEATFeatureGene(mutatee.getInnovationNumber(), newVal);
         }
@@ -129,16 +128,16 @@ public class NEATMutator implements Mutator {
     }
 
     private Gene mutateLink(NEATLinkGene mutatee) {
-        double perturbRandVal = perturbRand.nextDouble();
-        double disableRandVal = disableRand.nextDouble();
+        double perturbRandVal = rand.nextDouble();
+        double disableRandVal = rand.nextDouble();
         double newWeight;
         NEATLinkGene mutated = mutatee;
 
         if (perturbRandVal < this.pPerturb) {
-            if (this.pWeightReplaced > perturbRand.nextDouble()) {
-                newWeight = MathUtils.nextPlusMinusOne();
+            if (this.pWeightReplaced > rand.nextDouble()) {
+                newWeight = MathUtils.nextPlusMinusOne(rand);
             } else {
-                newWeight = mutatee.getWeight() + MathUtils.nextClampedDouble(-perturb, perturb);
+                newWeight = mutatee.getWeight() + MathUtils.nextClampedDouble(rand, -perturb, perturb);
             }
 //			newWeight = mutatee.getWeight() + MathUtils.nextClampedDouble(-PERTURB, PERTURB);				
             mutated = new NEATLinkGene(mutatee.getInnovationNumber(),
@@ -158,19 +157,19 @@ public class NEATMutator implements Mutator {
     }
 
     private Gene mutateNode(NEATNodeGene mutatee) {
-        double perturbRandVal = perturbRand.nextDouble();
-        double mutateBias = perturbRand.nextDouble();
+        double perturbRandVal = rand.nextDouble();
+        double mutateBias = rand.nextDouble();
         NEATNodeGene mutated = mutatee;
         double newSF = mutatee.sigmoidFactor();
         double newBias = mutatee.bias();
 
         if (perturbRandVal < this.pPerturb) {
-            newSF = mutatee.sigmoidFactor() + MathUtils.nextClampedDouble(-perturb, perturb);
+            newSF = mutatee.sigmoidFactor() + MathUtils.nextClampedDouble(rand, -perturb, perturb);
             mutated = new NEATNodeGene(mutated.getInnovationNumber(), mutated.id(), newSF, mutated.getType(), mutated.bias());
         }
 
         if (mutateBias < this.pMutateBias) {
-            newBias += MathUtils.nextClampedDouble(-biasPerturb, biasPerturb);
+            newBias += MathUtils.nextClampedDouble(rand, -biasPerturb, biasPerturb);
             mutated = new NEATNodeGene(mutated.getInnovationNumber(), mutated.id(), mutated.sigmoidFactor(), mutated.getType(), newBias);
         }
 
@@ -199,7 +198,7 @@ public class NEATMutator implements Mutator {
     }
 
     private void mutateAddLink(Chromosome mutatee) {
-        double linkRandVal = linkRand.nextDouble();
+        double linkRandVal = rand.nextDouble();
         NEATNodeGene from;
         NEATNodeGene to;
         int rIdx;
@@ -215,14 +214,14 @@ public class NEATMutator implements Mutator {
             links = this.candidateLinks(mutatee.genes(), false);
             // find a new available link
             while (newLink == null && i < MAX_LINK_ATTEMPTS) {
-                rIdx = linkRand.nextInt(nodes.size());
+                rIdx = rand.nextInt(nodes.size());
                 from = ((NEATNodeGene) nodes.get(rIdx));
-                rIdx = linkRand.nextInt(nodes.size());
+                rIdx = rand.nextInt(nodes.size());
                 to = ((NEATNodeGene) nodes.get(rIdx));
                 if (!this.linkIllegal(from, to, links)) {
                     // set it to a random value
                     newLink = db.submitLinkInnovation(from.id(), to.id());
-                    ((NEATLinkGene) newLink).setWeight(MathUtils.nextPlusMinusOne());
+                    ((NEATLinkGene) newLink).setWeight(MathUtils.nextPlusMinusOne(rand));
                     // add link between 2 unconnected nodes
                     genes[genes.length - 1] = newLink;
                     mutatee.updateChromosome(genes);
@@ -233,7 +232,7 @@ public class NEATMutator implements Mutator {
     }
 
     private void mutateAddNode(Chromosome mutatee) {
-        double nodeRandVal = nodeRand.nextDouble();
+        double nodeRandVal = rand.nextDouble();
         ArrayList nodeLinks;
         //ArrayList nodes;
         NEATLinkGene chosen;
@@ -252,7 +251,7 @@ public class NEATMutator implements Mutator {
             nodeLinks = this.candidateLinks(mutatee.genes(), true);
             if (nodeLinks.size() > 0) {
                 // ensure there is a link to split
-                linkIdx = nodeRand.nextInt(nodeLinks.size());
+                linkIdx = rand.nextInt(nodeLinks.size());
                 chosen = (NEATLinkGene) nodeLinks.get(linkIdx);
                 // disable old link
                 chosen.setEnabled(false);

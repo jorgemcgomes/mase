@@ -18,7 +18,11 @@ import org.neat4j.neat.ga.core.Specie;
 public class TournamentSelector implements ParentSelector {
 	private int numElitist;
 	private boolean naturalOrder = false;
-	private Random rand = new Random();
+	private Random rand;
+        
+        public TournamentSelector(long seed) {
+            this.rand = new Random(seed);
+        }
 	
 	/**
 	 * @see org.neat4j.ailibrary.ga.core.ParentSelector#setElitismStrategy(int)

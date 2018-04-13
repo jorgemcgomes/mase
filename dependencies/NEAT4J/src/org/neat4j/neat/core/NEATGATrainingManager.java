@@ -33,14 +33,14 @@ import org.neat4j.neat.nn.core.NeuralNet;
 public class NEATGATrainingManager {
 	private GeneticAlgorithm ga;
 	private AIConfig config;
-	
+        
 	public GeneticAlgorithm ga() {
 		return (this.ga);
 	}
 	/**
 	 * @see org.neat4j.ailibrary.core.AIController#initialise(org.neat4j.ailibrary.AIConfig)
 	 */
-	public void initialise(AIConfig config) throws InitialisationFailedException {
+	/*public void initialise(AIConfig config) throws InitialisationFailedException {
 		GADescriptor gaDescriptor = this.createDescriptor(config);
 		this.assigGA(this.createGeneticAlgorithm(gaDescriptor));
 		try {
@@ -61,7 +61,7 @@ public class NEATGATrainingManager {
 		} catch (Exception e) {
 			throw new InitialisationFailedException(e.getMessage());
 		}
-	}
+	}*/
 
 	public void assigGA(GeneticAlgorithm ga) {
 		this.ga = ga;
@@ -191,8 +191,8 @@ public class NEATGATrainingManager {
 	 * @param gaDescriptor
 	 * @return created GA
 	 */
-	public GeneticAlgorithm createGeneticAlgorithm(GADescriptor gaDescriptor) {
-		GeneticAlgorithm ga = new NEATGeneticAlgorithm((NEATGADescriptor)gaDescriptor);		
+	public GeneticAlgorithm createGeneticAlgorithm(GADescriptor gaDescriptor, long seed) {
+		GeneticAlgorithm ga = new NEATGeneticAlgorithm((NEATGADescriptor)gaDescriptor, seed);		
 		return (ga);
 	}
 
@@ -369,7 +369,7 @@ public class NEATGATrainingManager {
 		return (saveOk);
 	}
 
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		NEATGATrainingManager gam = new NEATGATrainingManager();
 		try {
 			if (args.length != 1) {
@@ -383,5 +383,5 @@ public class NEATGATrainingManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}*/
 }

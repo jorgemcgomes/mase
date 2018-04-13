@@ -51,8 +51,8 @@ public class NEATGeneticAlgorithm implements GeneticAlgorithm {
      *
      * @param descriptor
      */
-    public NEATGeneticAlgorithm(NEATGADescriptor descriptor) {
-        this(descriptor, new InnovationDatabase());
+    public NEATGeneticAlgorithm(NEATGADescriptor descriptor, long seed) {
+        this(descriptor, new InnovationDatabase(seed));
     }
 
     public NEATGeneticAlgorithm(NEATGADescriptor descriptor, InnovationDatabase db) {

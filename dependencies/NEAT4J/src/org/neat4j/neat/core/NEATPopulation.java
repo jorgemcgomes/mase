@@ -72,13 +72,13 @@ public class NEATPopulation implements Population {
 		for (i = 0; i < templateGenes.length; i++) {
 			if (templateGenes[i] instanceof NEATNodeGene) {
 				nodeGene = (NEATNodeGene)templateGenes[i];
-				individualGenes[i] = new NEATNodeGene(nodeGene.getInnovationNumber(), nodeGene.id(), MathUtils.nextPlusMinusOne(), nodeGene.getType(), MathUtils.nextDouble());				
+				individualGenes[i] = new NEATNodeGene(nodeGene.getInnovationNumber(), nodeGene.id(), MathUtils.nextPlusMinusOne(db.random), nodeGene.getType(), db.random.nextDouble());				
 			} else if (templateGenes[i] instanceof NEATLinkGene) {
 				linkGene = (NEATLinkGene)templateGenes[i];
-				individualGenes[i] = new NEATLinkGene(linkGene.getInnovationNumber(), true, linkGene.getFromId(), linkGene.getToId(), MathUtils.nextPlusMinusOne());
+				individualGenes[i] = new NEATLinkGene(linkGene.getInnovationNumber(), true, linkGene.getFromId(), linkGene.getToId(), MathUtils.nextPlusMinusOne(db.random));
 			} else if (templateGenes[i] instanceof NEATFeatureGene) {
 				featureGene = (NEATFeatureGene)templateGenes[i];
-				individualGenes[i] = new NEATFeatureGene(featureGene.getInnovationNumber(), MathUtils.nextDouble());
+				individualGenes[i] = new NEATFeatureGene(featureGene.getInnovationNumber(), db.random.nextDouble());
 			}
 		}
 

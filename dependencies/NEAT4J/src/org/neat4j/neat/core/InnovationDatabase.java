@@ -27,14 +27,15 @@ import org.neat4j.neat.utils.MathUtils;
 public class InnovationDatabase implements Serializable {
 
     private static final long serialVersionUID = -1L;
-    private Random ran = new Random();
+    protected Random random;
     private HashMap innovations;
     private int innovationId = 1;
     private int neuronId = 1;
     public int hits = 0;
     public int misses = 0;
 
-    public InnovationDatabase() {
+    public InnovationDatabase(long seed) {
+        this.random = new Random(seed);
         this.innovations = new HashMap();
     }
 
@@ -115,8 +116,8 @@ public class InnovationDatabase implements Serializable {
                 // start with one link to each output, allows feature selection
                 links = new NEATLinkGene[outputs];
                 for (i = 0; i < outputs; i++) {
-                    links[i] = this.submitLinkInnovation(nodes[this.ran.nextInt(inputs)].id(), nodes[inputs + i].id());
-                    links[i].setWeight(MathUtils.nextPlusMinusOne());
+                    links[i] = this.submitLinkInnovation(nodes[this.random.nextInt(inputs)].id(), nodes[inputs + i].id());
+                    links[i].setWeight(MathUtils.nextPlusMinusOne(random));
                 }
             } else {
                 // start with each input to each output, doesn't allow feature selection
@@ -124,7 +125,7 @@ public class InnovationDatabase implements Serializable {
                 for (i = 0; i < outputs; i++) {
                     for (j = 0; j < inputs; j++) {
                         links[(i * inputs) + j] = this.submitLinkInnovation(nodes[j].id(), nodes[inputs + i].id());
-                        links[(i * inputs) + j].setWeight(MathUtils.nextPlusMinusOne());
+                        links[(i * inputs) + j].setWeight(MathUtils.nextPlusMinusOne(random));
                     }
                 }
             }
@@ -156,7 +157,7 @@ public class InnovationDatabase implements Serializable {
         databaseEntry.setInnovationId(innovationNumber);
         this.innovations.put(new Integer(innovationNumber), databaseEntry);
 
-        return (new NEATFeatureGene(innovationNumber, MathUtils.nextDouble()));
+        return (new NEATFeatureGene(innovationNumber, random.nextDouble()));
     }
 
     private NEATNodeGene createNewNodeGene(int type) {
@@ -165,7 +166,7 @@ public class InnovationDatabase implements Serializable {
         databaseEntry.setInnovationId(innovationNumber);
         ((NEATNodeInnovation) databaseEntry).setNodeId(this.nextNodeNumber());
         this.innovations.put(new Integer(innovationNumber), databaseEntry);
-        NEATNodeGene nodeGene = new NEATNodeGene(innovationNumber, ((NEATNodeInnovation) databaseEntry).getNodeId(), MathUtils.nextDouble(), type, MathUtils.nextPlusMinusOne());
+        NEATNodeGene nodeGene = new NEATNodeGene(innovationNumber, ((NEATNodeInnovation) databaseEntry).getNodeId(), random.nextDouble(), type, MathUtils.nextPlusMinusOne(random));
 
         return (nodeGene);
     }
@@ -219,7 +220,7 @@ public class InnovationDatabase implements Serializable {
             hits++;
         }
 
-        gene = new NEATNodeGene(databaseEntry.innovationId(), ((NEATNodeInnovation) databaseEntry).getNodeId(), MathUtils.nextDouble(), NEATNodeGene.HIDDEN, MathUtils.nextPlusMinusOne());
+        gene = new NEATNodeGene(databaseEntry.innovationId(), ((NEATNodeInnovation) databaseEntry).getNodeId(), random.nextDouble(), NEATNodeGene.HIDDEN, MathUtils.nextPlusMinusOne(random));
 
         return (gene);
     }

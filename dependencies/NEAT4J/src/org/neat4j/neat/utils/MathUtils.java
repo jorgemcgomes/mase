@@ -15,21 +15,16 @@ import java.util.Random;
  */
 public class MathUtils
 {
-	private static final Random rand = new Random();
     private MathUtils() {
     }
     
     // clamped to +plus/-minus
-    public static double nextClampedDouble(double minus, double plus) {
+    public static double nextClampedDouble(Random rand, double minus, double plus) {
     	return ((rand.nextDouble() - 0.5) * (plus - minus)); 	
     }
     
-    public static double nextDouble() {
-    	return (rand.nextDouble()); 	
-    }
-
-    public static double nextPlusMinusOne() {
-    	return (nextClampedDouble(-1, 1));
+    public static double nextPlusMinusOne(Random rand) {
+    	return (nextClampedDouble(rand, -1, 1));
     }
     
     public static double euclideanDist(double[] ePointOne, double[] ePoint2) {
