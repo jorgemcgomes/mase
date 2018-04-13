@@ -18,12 +18,12 @@ problem.eval.1 =                    mase.evaluation.BehaviourVarianceFitness
 problem.eval.2 =                    mase.app.swarm.CollisionsFitness
 
 novelty.behaviour-index =           0
-fitness.fitness-index =             1
+fitness.fitness-index =             2
 
 neat.size =                         500
 neat.SPECIE.COUNT =                 10
 neat.RECURRENCY.ALLOWED =           true
-generations =                       500
+generations =                       1000
 
 novelty.archive-growth =            0.05
 novelty.archive-size =              2000
@@ -39,9 +39,11 @@ stat.child.4 =                      ec.Statistics
 # no need for post-evaluation
 stat.child.8 =                      ec.Statistics
 
-stat.child.22 = mase.novelty.Collector
+stat.child.22 = mase.evorbc.KdTreeCollector
 stat.child.22.stat-file = $collector.stat
 stat.child.22.history-file = $collectorhist.stat
 stat.child.22.text-file = $collection.stat
 stat.child.22.tar-file = $collection.tar.gz
 stat.child.22.threshold = 1
+stat.child.22.domination = fitness
+stat.child.22.epsilon = 0.75

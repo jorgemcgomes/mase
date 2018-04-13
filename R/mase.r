@@ -25,7 +25,7 @@ library(parallelDist)
 #theme_set(theme_bw())
 theme_set(theme_bw(base_size = 8)) # 9?
 
-theme_update(plot.margin=unit(c(0,0,0,0),"mm"), 
+theme_update(plot.margin=unit(c(1,1,1,1),"mm"), 
              legend.position="bottom", 
              plot.title=element_text(size=rel(1)), 
              strip.background=element_blank(), 
@@ -581,7 +581,7 @@ reduceData <- function(data, vars=NULL, method=c("Rtsne","tsne","sammon","pca","
   newCoords <- NULL
   if(method[1]=="sammon") {
     require(MASS)
-    dists <- parDist(oldCoords)
+    dists <- parDist(as.matrix(oldCoords))
     sam <- sammon(dists, k=k, ...)
     newCoords <- sam$points
   } else if(method[1]=="tsne") {

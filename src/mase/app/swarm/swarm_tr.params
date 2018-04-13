@@ -1,7 +1,7 @@
 parent.0 = swarm.params
 parent.1 = ../../neat/neat.params
 
-generations = 250
+generations = 500
 
 problem.seed = random
 problem.repetitions = 10
@@ -12,3 +12,5 @@ problem.number-evals = 1
 
 fitness.fitness-index=0
 
+problem.eval.0.count-collisions = all
+problem.eval.0.max-collisions = 0.1

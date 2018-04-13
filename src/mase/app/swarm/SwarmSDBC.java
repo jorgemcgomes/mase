@@ -26,6 +26,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  */
 public class SwarmSDBC extends MasonEvaluation<VectorBehaviourResult> {
 
+    public static final String BUILD_PATH = "build/classes/mase/app/swarm/";
     private static final long serialVersionUID = 1L;
     private static final double BOUND = 3;
     private VectorBehaviourResult vbr;
@@ -51,8 +52,13 @@ public class SwarmSDBC extends MasonEvaluation<VectorBehaviourResult> {
             return;
         }
         if(!standardizationFile.exists()) {
-            state.output.warning("Standardization file not found! " + standardizationFile.getAbsolutePath());
-            return;
+            state.output.warning("Given standardization file not found! " + standardizationFile + " ("+standardizationFile.getAbsolutePath()+")");
+            standardizationFile =  new File(BUILD_PATH, standardizationFile.getName());
+            if(standardizationFile.exists()) {
+                state.output.warning("Going with alternative: " + standardizationFile);
+            } else {
+                return;
+            }
         }
         try {
             Pair<double[], double[]> s = SwarmSDBCStandardizer.readStandardization(standardizationFile);

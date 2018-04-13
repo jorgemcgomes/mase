@@ -30,5 +30,5 @@ problem.whiskerRange = 15
 problem.differentialDrive = true
 
 neat.RECURRENCY.ALLOWED = true
-neat.INPUT.NODES = 17
+neat.INPUT.NODES = 18
 neat.OUTPUT.NODES = 2

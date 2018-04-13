@@ -107,6 +107,7 @@ public class SwarmPlayground extends MasonSimState<SwarmParams> implements Smart
 
             if (candidatePositionValid(candidate)) {
                 POI co = createPOI();
+                co.setLabel("P"+objects.size());
                 co.setLocation(candidate);
                 objects.add(co);
                 co.stop = schedule.scheduleRepeating(co);
@@ -116,7 +117,6 @@ public class SwarmPlayground extends MasonSimState<SwarmParams> implements Smart
 
     protected POI createPOI() {
         POI co = new POI(Color.BLUE, this, field, par.objectRadius, par.objectSpeed);
-        co.setLabel("");
         return co;
     }
 
